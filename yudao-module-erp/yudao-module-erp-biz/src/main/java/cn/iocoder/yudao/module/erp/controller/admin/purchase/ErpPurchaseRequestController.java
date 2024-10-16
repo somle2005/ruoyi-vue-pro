@@ -93,6 +93,8 @@ public class ErpPurchaseRequestController {
     public CommonResult<ErpPurchaseRequestRespVO> getPurchaseRequest(@RequestParam("id") Long id) {
         ErpPurchaseRequestDO purchaseRequest = erpPurchaseRequestService.getPurchaseRequest(id);
         if (purchaseRequest == null) {
+
+
             return success(null);
         }
         List<ErpPurchaseRequestItemsDO> purchaseRequestItemsList = erpPurchaseRequestService.getPurchaseRequestItemListByOrderId(id);
