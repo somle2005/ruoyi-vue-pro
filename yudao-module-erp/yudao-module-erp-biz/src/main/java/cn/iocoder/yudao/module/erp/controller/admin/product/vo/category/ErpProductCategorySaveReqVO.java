@@ -5,6 +5,9 @@ import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+/**
+ * @author Administrator
+ */
 @Schema(description = "管理后台 - ERP 产品分类新增/修改 Request VO")
 @Data
 public class ErpProductCategorySaveReqVO {

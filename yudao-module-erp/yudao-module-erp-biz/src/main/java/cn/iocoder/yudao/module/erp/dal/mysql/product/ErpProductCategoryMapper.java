@@ -31,4 +31,26 @@ public interface ErpProductCategoryMapper extends BaseMapperX<ErpProductCategory
         return selectCount(ErpProductCategoryDO::getParentId, parentId);
     }
 
+    /**
+    * @Author Wqh
+    * @Description 获取该父id下的所有子分类
+    * @Date 16:32 2024/10/17
+    * @Param [id]
+    * @return java.util.List<cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO>
+    **/
+    default List<ErpProductCategoryDO> selectChildrenList(Long parentId){
+        return selectList(new LambdaQueryWrapperX<ErpProductCategoryDO>()
+                .eq(ErpProductCategoryDO::getParentId, parentId));
+    }
+
+    /**
+    * @Author Wqh
+    * @Description 获取父分类的状态
+    * @Date 16:44 2024/10/17
+    * @Param [parentId]
+    * @return java.lang.Integer
+    **/
+    default Integer selectParentStatus(Long parentId){
+        return selectOne(ErpProductCategoryDO::getId, parentId).getStatus();
+    }
 }

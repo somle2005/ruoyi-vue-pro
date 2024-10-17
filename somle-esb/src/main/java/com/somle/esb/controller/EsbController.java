@@ -1,16 +1,19 @@
 package com.somle.esb.controller;
 
-import com.somle.esb.model.Domain;
 import com.somle.esb.service.EsbService;
-import org.junit.jupiter.api.Test;
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
+import org.springframework.data.redis.connection.stream.RecordId;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StreamOperations;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/esb")
@@ -18,8 +21,6 @@ public class EsbController {
 
     @Autowired
     private EsbService service;
-
-
 
     @PostMapping("/getBeans")
     public void printAllBeans() {

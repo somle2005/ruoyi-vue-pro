@@ -45,7 +45,7 @@ public class ErpProductCategoryDO extends BaseDO {
      */
     private Integer sort;
     /**
-     * 开启状态
+     * 开启状态（0开启，1禁用）
      *
      * 枚举 {@link cn.iocoder.yudao.framework.common.enums.CommonStatusEnum}
      */

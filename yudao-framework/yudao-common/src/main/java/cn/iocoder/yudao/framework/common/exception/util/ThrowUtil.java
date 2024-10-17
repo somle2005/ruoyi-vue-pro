@@ -54,6 +54,12 @@ public class ThrowUtil {
             throw exception(message);
         }
     }
+    //sql操作行数
+    public static void ifSqlThrow(int count, ErrorCode message) {
+        if (count <= 0) {
+            throw exception(message);
+        }
+    }
 
 
     /*public static void ifNullThrow(Object data, String code) {

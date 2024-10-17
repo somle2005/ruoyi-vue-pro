@@ -154,6 +154,8 @@ public interface ErrorCodeConstants {
     ErrorCode PRODUCT_CATEGORY_NAME_DUPLICATE = new ErrorCode(1_030_501_004, "已经存在该分类名称的产品分类");
     ErrorCode PRODUCT_CATEGORY_PARENT_IS_CHILD = new ErrorCode(1_030_501_005, "不能设置自己的子分类为父分类");
     ErrorCode PRODUCT_CATEGORY_EXITS_PRODUCT = new ErrorCode(1_030_502_002, "存在产品使用该分类，无法删除");
+    ErrorCode PRODUCT_CATEGORY_PARENT_DISABLE = new ErrorCode(1_030_502_003, "所选择的父分类被禁用，创建失败");
+    ErrorCode PRODUCT_CATEGORY_DISABLE = new ErrorCode(1_030_502_004, "所选择的父分类被禁用，修改失败");
 
     // ========== ERP 产品单位 1-030-502-000 ==========
     ErrorCode PRODUCT_UNIT_NOT_EXISTS = new ErrorCode(1_030_502_000, "产品单位不存在");

@@ -158,8 +158,10 @@ public interface ErrorCodeConstants {
     ErrorCode NOTIFY_TEMPLATE_CODE_DUPLICATE = new ErrorCode(1_002_026_001, "已经存在编码为【{}】的站内信模板");
 
     // ========== 站内信模版 1-002-027-000 ==========
-
     // ========== 站内信发送 1-002-028-000 ==========
     ErrorCode NOTIFY_SEND_TEMPLATE_PARAM_MISS = new ErrorCode(1_002_028_000, "模板参数({})缺失");
+
+    // ========== 字段属性 1-002-029-000 ==========
+    ErrorCode DATA_TYPE_NOT_EXISTS = new ErrorCode(1_002_029_000, "字段属性不存在");
 
 }
