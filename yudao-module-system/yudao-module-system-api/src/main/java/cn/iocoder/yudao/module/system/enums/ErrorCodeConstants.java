@@ -162,6 +162,10 @@ public interface ErrorCodeConstants {
     ErrorCode NOTIFY_SEND_TEMPLATE_PARAM_MISS = new ErrorCode(1_002_028_000, "模板参数({})缺失");
 
     // ========== 字段属性 1-002-029-000 ==========
-    ErrorCode DATA_TYPE_NOT_EXISTS = new ErrorCode(1_002_029_000, "字段属性不存在");
+    ErrorCode FIELD_NOT_EXISTS = new ErrorCode(1_002_029_000, "字段属性不存在");
+    //字段属性或键重复，操作失败
+    ErrorCode FIELD_DUPLICATE = new ErrorCode(1_002_029_001, "字段属性或键重复，操作失败");
+    //字段存在关联，无法删除
+    ErrorCode FIELD_RELATED = new ErrorCode(1_002_029_002, "字段存在关联，无法删除");
 
 }

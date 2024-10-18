@@ -1,9 +1,13 @@
 package cn.iocoder.yudao.module.erp.controller.admin.product.vo.category;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import org.springframework.validation.annotation.Validated;
+
+import java.util.List;
 
 /**
  * @author Administrator
@@ -34,5 +38,8 @@ public class ErpProductCategorySaveReqVO {
     @Schema(description = "开启状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "开启状态不能为空")
     private Integer status;
+
+    @Schema(description = "字段集合")
+    private List<@Valid ErpProductCategoryFieldSaveReqVO> fields;
 
 }

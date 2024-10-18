@@ -1,9 +1,11 @@
 package cn.iocoder.yudao.framework.common.exception.util;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.exception.ErrorCode;
 
+import java.util.Collection;
 import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -43,6 +45,12 @@ public class ThrowUtil {
         }
     }
 
+    public static void ifNotEmptyThrow(Object data, ErrorCode message) {
+        if (ObjectUtil.isNotEmpty(data)){
+            throw exception(message);
+        }
+    }
+
     public static void ifBlankThrow(String s, ErrorCode message) {
         if (CharSequenceUtil.isBlank(s)){
             throw exception(message);
@@ -60,6 +68,19 @@ public class ThrowUtil {
             throw exception(message);
         }
     }
+    //集合为空或为null的操作
+    public static void ifCollectionEmptyThrow(Collection<?> data, ErrorCode message) {
+        if (CollUtil.isEmpty(data)){
+            throw exception(message);
+        }
+    }
+
+    public static void ifCollectionNotEmptyThrow(Collection<?> data, ErrorCode message) {
+        if (CollUtil.isNotEmpty(data)){
+            throw exception(message);
+        }
+    }
+
 
 
     /*public static void ifNullThrow(Object data, String code) {

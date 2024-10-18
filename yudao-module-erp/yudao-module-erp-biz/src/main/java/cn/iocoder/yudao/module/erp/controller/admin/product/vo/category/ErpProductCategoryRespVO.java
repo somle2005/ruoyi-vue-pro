@@ -9,7 +9,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
+/**
+ * @author Administrator
+ */
 @Schema(description = "管理后台 - ERP 产品分类 Response VO")
 @Data
 @ExcelIgnoreUnannotated
@@ -43,5 +47,8 @@ public class ErpProductCategoryRespVO {
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
+
+    @Schema(description = "字段详情")
+    private List<ErpProductCategoryFieldRespVO> fields;
 
 }

@@ -1,13 +1,11 @@
 package cn.iocoder.yudao.module.erp.service.purchase;
 
 import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
-import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.order.ErpPurchaseOrderSaveReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.purchase.ErpPurchaseOrderDO;
+import cn.iocoder.yudao.module.erp.service.purchase.order.ErpPurchaseOrderService;
+import cn.iocoder.yudao.module.erp.service.purchase.order.ErpPurchaseOrderServiceImpl;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @Import(ErpPurchaseOrderServiceImpl.class)
 class ErpPurchaseOrderServiceImplTest extends BaseDbUnitTest {

@@ -13,7 +13,7 @@ import cn.iocoder.yudao.module.erp.controller.admin.stock.vo.stock.ErpStockPageR
 import cn.iocoder.yudao.module.erp.controller.admin.stock.vo.stock.ErpStockRespVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.stock.ErpStockDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.stock.ErpWarehouseDO;
-import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
+import cn.iocoder.yudao.module.erp.service.product.product.ErpProductService;
 import cn.iocoder.yudao.module.erp.service.stock.ErpStockService;
 import cn.iocoder.yudao.module.erp.service.stock.ErpWarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
