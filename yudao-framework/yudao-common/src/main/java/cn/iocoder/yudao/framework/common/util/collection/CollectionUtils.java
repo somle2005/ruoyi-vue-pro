@@ -322,4 +322,15 @@ public class CollectionUtils {
         return list.stream().flatMap(Collection::stream).collect(Collectors.toList());
     }
 
+    /**
+    * @Author Wqh
+    * @Description 比较两个集合的内容是否相同
+    * @Date 15:08 2024/10/21
+    * @Param [c1, c2]
+    * @return boolean
+    **/
+    public static <T> boolean compare(Collection<T> c1 , Collection<T> c2){
+        return c1.containsAll(c2) && c2.containsAll(c1);
+    }
+
 }

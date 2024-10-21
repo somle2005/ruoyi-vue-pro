@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategoryFieldSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategoryListReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategoryRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategorySaveReqVO;
 import cn.iocoder.yudao.module.erp.convert.product.category.CategoryFieldConvert;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
@@ -22,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
@@ -46,6 +48,7 @@ public class ErpProductCategoryServiceImpl implements ErpProductCategoryService 
 
     @Resource
     private ErpProductCategoryFieldMapper erpProductCategoryFieldMapper;
+
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -116,6 +119,8 @@ public class ErpProductCategoryServiceImpl implements ErpProductCategoryService 
 
     @Override
     public void deleteProductCategory(Long id) {
+        //TODO 删除产分类的时候需要判断是否存在关联
+
         // 1.1 校验存在
         validateProductCategoryExists(id);
         // 1.2 校验是否有子产品分类
@@ -127,12 +132,37 @@ public class ErpProductCategoryServiceImpl implements ErpProductCategoryService 
         //3.删除中间表的数据
         List<ErpProductCategoryFieldDO> erpProductCategoryFieldDos = erpProductCategoryFieldMapper.selectListByCategoryId(id);
         if (CollUtil.isNotEmpty(erpProductCategoryFieldDos)){
-            //出去所有的id
+            //除去所有的id
             List<Long> ids = convertList(erpProductCategoryFieldDos, ErpProductCategoryFieldDO::getId);
             //批量删除
             ThrowUtil.ifSqlThrow(erpProductCategoryFieldMapper.deleteByIds(ids),DB_DELETE_ERROR);
         }
     }
+
+    @Override
+    public ErpProductCategoryRespVO getProductCategory(Long id) {
+        //根据id查询分类信息
+        ErpProductCategoryDO erpProductCategoryDO = erpProductCategoryMapper.selectById(id);
+        ErpProductCategoryRespVO categoryRespVO = BeanUtils.toBean(erpProductCategoryDO, ErpProductCategoryRespVO.class);
+        //根据分类id查询出字段信息
+        List<ErpProductCategoryFieldDO> erpProductCategoryFieldDos = erpProductCategoryFieldMapper.selectListByCategoryId(id);
+        categoryRespVO.setFields(CategoryFieldConvert.INSTANCE.convertList1(erpProductCategoryFieldDos));
+        return categoryRespVO;
+    }
+
+    @Override
+    public List<ErpProductCategoryDO> getProductCategoryList(ErpProductCategoryListReqVO listReqVO) {
+        return erpProductCategoryMapper.selectList(listReqVO);
+    }
+
+    @Override
+    public List<ErpProductCategoryDO> getProductCategoryList(Collection<Long> ids) {
+        return erpProductCategoryMapper.selectBatchIds(ids);
+    }
+
+
+
+
 
     private ErpProductCategoryDO validateProductCategoryExists(Long id) {
         ErpProductCategoryDO erpProductCategoryDO = erpProductCategoryMapper.selectById(id);
@@ -181,20 +211,7 @@ public class ErpProductCategoryServiceImpl implements ErpProductCategoryService 
         ThrowUtil.ifThrow(!Objects.equals(productCategory.getId(), id),PRODUCT_CATEGORY_NAME_DUPLICATE);
     }
 
-    @Override
-    public ErpProductCategoryDO getProductCategory(Long id) {
-        return erpProductCategoryMapper.selectById(id);
-    }
 
-    @Override
-    public List<ErpProductCategoryDO> getProductCategoryList(ErpProductCategoryListReqVO listReqVO) {
-        return erpProductCategoryMapper.selectList(listReqVO);
-    }
-
-    @Override
-    public List<ErpProductCategoryDO> getProductCategoryList(Collection<Long> ids) {
-        return erpProductCategoryMapper.selectBatchIds(ids);
-    }
     /**
      * @Author Wqh
      * @Description 递归查询出该id的所有子孙分类

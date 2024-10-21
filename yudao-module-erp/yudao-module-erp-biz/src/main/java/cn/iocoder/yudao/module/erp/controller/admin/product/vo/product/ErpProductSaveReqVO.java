@@ -1,132 +1,105 @@
 package cn.iocoder.yudao.module.erp.controller.admin.product.vo.product;
 
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
-import cn.iocoder.yudao.module.system.api.value.dto.SystemValueDTO;
-import com.fhs.core.trans.anno.Trans;
-import com.fhs.core.trans.constant.TransType;
-import com.fhs.core.trans.vo.VO;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.GuidePriceJson;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.ImageUrlJson;
+import cn.iocoder.yudao.module.system.api.value.vo.SystemValueSaveReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import lombok.*;
 import java.util.*;
+import jakarta.validation.constraints.*;
+import org.springframework.validation.annotation.Validated;
+
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import com.alibaba.excel.annotation.*;
 
 /**
  * @author Administrator
  */
-@Schema(description = "管理后台 - ERP 产品 Response VO")
+@Schema(description = "管理后台 - ERP 产品新增/修改 Request VO")
 @Data
-@ExcelIgnoreUnannotated
-public class ErpProductRespVO implements VO {
+public class ErpProductSaveReqVO {
 
     @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "19197")
-    @ExcelProperty("产品编号")
     private Long id;
 
     @Schema(description = "产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "李四")
-    @ExcelProperty("产品名称")
+    @NotEmpty(message = "产品名称不能为空")
     private String name;
 
     @Schema(description = "产品分类编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "13429")
-    @ExcelProperty("产品分类编号")
-    @Trans(type = TransType.SIMPLE, target = ErpProductCategoryDO.class,fields = "name",ref = "categoryName")
+    @NotNull(message = "产品分类编号不能为空")
     private Long categoryId;
 
-    @Schema(description = "产品分类名称")
-    private String categoryName;
-
     @Schema(description = "单位编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1509")
-    @ExcelProperty("单位编号")
-    @Trans(type = TransType.SIMPLE, target = ErpProductUnitDO.class,fields = "name",ref = "unitName")
+    @NotNull(message = "单位编号不能为空")
     private Long unitId;
 
-    @Schema(description = "单位名称")
-    @ExcelProperty("单位名称")
-    private String unitName;
-
     @Schema(description = "产品备注", example = "你说的对")
-    @ExcelProperty("产品备注")
     private String remark;
 
-    @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("创建时间")
-    private LocalDateTime createTime;
-
     @Schema(description = "产品编码(SKU)", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("产品编码(SKU)")
+    @NotEmpty(message = "产品编码(SKU)不能为空")
     private String barCode;
 
     @Schema(description = "材料（中文）", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("材料（中文）")
+    @NotEmpty(message = "材料（中文）不能为空")
     private String material;
 
     @Schema(description = "产品状态（1启用，0禁用）", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @ExcelProperty("产品状态（1启用，0禁用）")
     private Boolean status;
 
     @Schema(description = "基础重量（kg）", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("基础重量（kg）")
+    @NotNull(message = "基础重量（kg）不能为空")
     private BigDecimal weight;
 
     @Schema(description = "系列")
-    @ExcelProperty("系列")
     private String series;
 
     @Schema(description = "型号")
-    @ExcelProperty("型号")
     private String model;
 
     @Schema(description = "流水号")
-    @ExcelProperty("流水号")
     private Integer serial;
 
     @Schema(description = "生产编号")
-    @ExcelProperty("生产编号")
     private String productionNo;
 
     @Schema(description = "基础宽度（mm）", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("基础宽度（mm）")
+    @NotNull(message = "基础宽度（mm）不能为空")
     private BigDecimal width;
 
     @Schema(description = "基础长度（mm）", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("基础长度（mm）")
+    @NotNull(message = "基础长度（mm）不能为空")
     private BigDecimal length;
 
     @Schema(description = "基础高度（mm）", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("基础高度（mm）")
+    @NotNull(message = "基础高度（mm）不能为空")
     private BigDecimal height;
 
     @Schema(description = "图片URL，json格式", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.iocoder.cn")
-    @ExcelProperty("图片URL，json格式")
-    private String imageUrl;
+    @NotEmpty(message = "图片不能为空")
+    private List<@Valid ImageUrlJson> imageUrl;
 
     @Schema(description = "指导价，json格式", requiredMode = Schema.RequiredMode.REQUIRED, example = "16486")
-    @ExcelProperty("指导价，json格式")
-    private String guidePrice;
+    @NotEmpty(message = "指导价不能为空")
+    private List<@Valid GuidePriceJson> guidePrice;
 
     @Schema(description = "专利")
-    @ExcelProperty("专利")
     private String patent;
 
     @Schema(description = "PO产品经理id", example = "29334")
-    @ExcelProperty("PO产品经理id")
     private Long poId;
 
     @Schema(description = "ID工业设计id", example = "14664")
-    @ExcelProperty("ID工业设计id")
     private Long idId;
 
     @Schema(description = "RD研发工程师id", example = "25601")
-    @ExcelProperty("RD研发工程师id")
     private Long rdId;
 
     @Schema(description = "维护工程师id", example = "15554")
-    @ExcelProperty("维护工程师id")
     private Long meId;
 
-    @Schema(description = "字段值列表")
-    private List<SystemValueDTO> values;
+    @Schema(description = "自定义字段值集合")
+    private List<SystemValueSaveReqVO> values;
 
 }

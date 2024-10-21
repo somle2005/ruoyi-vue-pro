@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.erp.convert.product.category;
 
 
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductCategoryFieldDTO;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategoryFieldRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategoryFieldSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryFieldDO;
 import org.mapstruct.Mapper;
@@ -25,5 +26,7 @@ public interface CategoryFieldConvert {
     List<ErpProductCategoryFieldDO> convertList(List<ErpProductCategoryFieldSaveReqVO> reqVos);
 
 
-    List<ErpProductCategoryFieldDTO> convertList0(List<ErpProductCategoryFieldDO> reqVos);
+    List<ErpProductCategoryFieldDTO> convertList0(List<ErpProductCategoryFieldDO> categoryFieldDo);
+
+    List<ErpProductCategoryFieldRespVO> convertList1(List<ErpProductCategoryFieldDO> categoryFieldDo);
 }

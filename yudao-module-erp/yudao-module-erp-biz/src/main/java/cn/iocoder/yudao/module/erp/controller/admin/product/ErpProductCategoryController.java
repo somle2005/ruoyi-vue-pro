@@ -68,8 +68,7 @@ public class ErpProductCategoryController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('erp:product-category:query')")
     public CommonResult<ErpProductCategoryRespVO> getProductCategory(@RequestParam("id") Long id) {
-        ErpProductCategoryDO category = productCategoryService.getProductCategory(id);
-        return success(BeanUtils.toBean(category, ErpProductCategoryRespVO.class));
+        return success(productCategoryService.getProductCategory(id));
     }
 
     @GetMapping("/list")

@@ -1,8 +1,10 @@
 package cn.iocoder.yudao.module.erp.controller.admin.product.vo.product;
 
 import lombok.*;
+import java.util.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
+import java.math.BigDecimal;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 
@@ -17,15 +19,71 @@ public class ErpProductPageReqVO extends PageParam {
     @Schema(description = "产品名称", example = "李四")
     private String name;
 
-    @Schema(description = "产品编码", example = "SKU")
-    private Long code;
-
-    @Schema(description = "产品分类编号", example = "11161")
+    @Schema(description = "产品分类编号", example = "13429")
     private Long categoryId;
 
+    @Schema(description = "单位编号", example = "1509")
+    private Long unitId;
+
+    @Schema(description = "产品备注", example = "你说的对")
+    private String remark;
 
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;
+
+    @Schema(description = "产品编码(SKU)")
+    private String barCode;
+
+    @Schema(description = "材料（中文）")
+    private String material;
+
+    @Schema(description = "产品状态（1启用，0禁用）", example = "1")
+    private Boolean status;
+
+    @Schema(description = "基础重量（kg）")
+    private BigDecimal weight;
+
+    @Schema(description = "系列")
+    private String series;
+
+    @Schema(description = "型号")
+    private String model;
+
+    @Schema(description = "流水号")
+    private Integer serial;
+
+    @Schema(description = "生产编号")
+    private String productionNo;
+
+    @Schema(description = "基础宽度（mm）")
+    private BigDecimal width;
+
+    @Schema(description = "基础长度（mm）")
+    private BigDecimal length;
+
+    @Schema(description = "基础高度（mm）")
+    private BigDecimal height;
+
+    @Schema(description = "图片URL，json格式", example = "https://www.iocoder.cn")
+    private String imageUrl;
+
+    @Schema(description = "指导价，json格式", example = "16486")
+    private String guidePrice;
+
+    @Schema(description = "专利")
+    private String patent;
+
+    @Schema(description = "PO产品经理id", example = "29334")
+    private Long poId;
+
+    @Schema(description = "ID工业设计id", example = "14664")
+    private Long idId;
+
+    @Schema(description = "RD研发工程师id", example = "25601")
+    private Long rdId;
+
+    @Schema(description = "维护工程师id", example = "15554")
+    private Long meId;
 
 }

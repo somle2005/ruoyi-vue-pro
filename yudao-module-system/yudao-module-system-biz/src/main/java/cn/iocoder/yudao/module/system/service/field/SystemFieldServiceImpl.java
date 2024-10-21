@@ -10,6 +10,7 @@ import cn.iocoder.yudao.module.system.controller.admin.field.vo.SystemFieldPageR
 import cn.iocoder.yudao.module.system.controller.admin.field.vo.SystemFieldSaveReqVO;
 import cn.iocoder.yudao.module.system.dal.dataobject.field.SystemFieldDO;
 import cn.iocoder.yudao.module.system.dal.mysql.field.SystemFieldMapper;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Transactional;
@@ -33,6 +34,7 @@ public class SystemFieldServiceImpl implements SystemFieldService {
 
     @Resource
     private SystemFieldMapper fieldMapper;
+    @Lazy
     @Resource
     private ProductCategoryFieldApi productCategoryFieldApi;
 

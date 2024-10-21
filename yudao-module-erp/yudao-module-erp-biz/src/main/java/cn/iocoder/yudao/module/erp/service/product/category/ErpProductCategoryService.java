@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.service.product.category;
 
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategoryListReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategoryRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategorySaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import jakarta.validation.Valid;
@@ -46,7 +47,7 @@ public interface ErpProductCategoryService {
      * @param id 编号
      * @return 产品分类
      */
-    ErpProductCategoryDO getProductCategory(Long id);
+    ErpProductCategoryRespVO getProductCategory(Long id);
 
     /**
      * 获得产品分类列表

@@ -145,6 +145,15 @@ public interface ErrorCodeConstants {
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(1_030_500_000, "产品不存在");
     ErrorCode PRODUCT_NOT_ENABLE = new ErrorCode(1_030_500_001, "产品({})未启用");
     ErrorCode PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_500_002, "产品编码已存在");
+    //自定义属性不能为空
+    ErrorCode PRODUCT_VALUE_NOT_NULL = new ErrorCode(1_030_500_003, "自定义属性不能为空");
+    //传入属性中存在确实字段
+    ErrorCode PRODUCT_VALUE_NOT_EXISTS = new ErrorCode(1_030_500_004, "传入属性中存在不存在的字段");
+    ErrorCode PRODUCT_VALUE_NOT_NULL2 = new ErrorCode(1_030_500_005, "({})不能为空");
+    //数据类型错误
+    ErrorCode PRODUCT_VALUE_TYPE_ERROR = new ErrorCode(1_030_500_006, "({})数据类型错误");
+    //传入的部分字段值id不存在
+    ErrorCode PRODUCT_VALUE_ID_NOT_EXISTS = new ErrorCode(1_030_500_007, "传入的部分字段值id不存在");
 
     // ========== ERP 产品分类 1-030-501-000 ==========
     ErrorCode PRODUCT_CATEGORY_NOT_EXISTS = new ErrorCode(1_030_501_000, "产品分类不存在");

@@ -4,7 +4,6 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -40,6 +39,21 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
 
     default List<ErpProductDO> selectListByStatus(Integer status) {
         return selectList(ErpProductDO::getStatus, status);
+    }
+
+    /**
+    * @Author Wqh
+    * @Description 根据编码查询出最大的流水号
+    * @Date 13:36 2024/10/21
+    * @Param [barCode]
+    * @return java.lang.Integer
+    **/
+    default Integer selectMaxSerialByBarCode(String barCode) {
+        return selectOne(new LambdaQueryWrapperX<ErpProductDO>()
+                .select(ErpProductDO::getSerial)
+                .eq(ErpProductDO::getBarCode, barCode)
+                .orderByDesc(ErpProductDO::getSerial)
+                .last("limit 1")).getSerial();
     }
 
 }
