@@ -2,13 +2,10 @@ package cn.iocoder.yudao.module.erp.service.product.product;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
-import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.json.JSONUtil;
-import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.category.ErpProductCategoryFieldRespVO;
@@ -20,6 +17,7 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
+import cn.iocoder.yudao.module.erp.enums.DateType;
 import cn.iocoder.yudao.module.erp.service.product.unit.ErpProductUnitService;
 import cn.iocoder.yudao.module.erp.service.product.category.ErpProductCategoryService;
 import cn.iocoder.yudao.module.system.api.value.SystemValueApi;
@@ -29,15 +27,12 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
-
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
-import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
 
@@ -145,17 +140,20 @@ public class ErpProductServiceImpl implements ErpProductService {
         Map<Long, ErpProductDO> productMap = convertMap(list, ErpProductDO::getId);
         for (Long id : ids) {
             ErpProductDO product = productMap.get(id);
-            if (productMap.get(id) == null) {
-                throw exception(PRODUCT_NOT_EXISTS);
-
-            }
-            /*if (CommonStatusEnum.isDisable(product.getStatus())) {
-                throw exception(PRODUCT_NOT_ENABLE, product.getName());
-            }*/
+            //产品不存在
+            ThrowUtil.ifEmptyThrow(productMap.get(id),PRODUCT_NOT_EXISTS);
+            //该产品是否被禁用
+            ThrowUtil.ifThrow(!product.getStatus(), PRODUCT_NOT_ENABLE,product.getName());
         }
         return list;
     }
 
+    /**
+    * @Author Wqh
+    * @Description 校验字段是否必填以及分类中的字段和所传入的字段相同
+    * @Date 10:07 2024/10/22
+    * @Param [categoryId, values]
+    **/
     private void validateFieldAndValue(Long categoryId, List<SystemValueSaveReqVO> values) {
         //获取分类中的自定义字段信息
         ErpProductCategoryRespVO productCategory = productCategoryService.getProductCategory(categoryId);
@@ -182,15 +180,29 @@ public class ErpProductServiceImpl implements ErpProductService {
         }
     }
 
+    /**
+    * @Author Wqh
+    * @Description 校验数据类型是否正确
+    * @Date 10:05 2024/10/22
+    * @Param [type, value]
+    * @return boolean
+    **/
     private boolean isTypeValid(Integer type, Object value) {
-        return switch (type) {
-            case 3 -> value instanceof String;
-            case 1 -> value instanceof Integer;
-            case 5 -> isDateTimeValid((String) value);
-            case 4 -> isDecimalValid((String) value);
-            default -> false;
+        return switch (DateType.of(type)) {
+            case DATE_TIME -> isDateTimeValid((String) value);
+            case DECIMAL -> isDecimalValid((String) value);
+            case TEXT -> value instanceof String;
+            case INT -> value instanceof Integer;
         };
     }
+
+    /**
+    * @Author Wqh
+    * @Description 校验时间格式是否正确
+    * @Date 10:06 2024/10/22
+    * @Param [value]
+    * @return boolean
+    **/
     private boolean isDateTimeValid(String value) {
         try {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DatePattern.NORM_DATE_PATTERN);
@@ -201,6 +213,13 @@ public class ErpProductServiceImpl implements ErpProductService {
         }
     }
 
+    /**
+    * @Author Wqh
+    * @Description 校验decimal 类型是否正确
+    * @Date   2024/10/22
+    * @Param [value]
+    * @return boolean
+    **/
     private boolean isDecimalValid(String value) {
         try {
             new BigDecimal(value);
@@ -210,8 +229,14 @@ public class ErpProductServiceImpl implements ErpProductService {
         }
     }
 
+    /**
+    * @Author Wqh
+    * @Description 根据编码查询出最大的流水号
+    * @Date 10:06 2024/10/22
+    * @Param [barCode]
+    * @return java.lang.Integer
+    **/
     private Integer increaseSerial(String barCode) {
-        //根据编码查询出最大的流水号
         Integer serial = productMapper.selectMaxSerialByBarCode(barCode);
         return ++serial;
     }
@@ -219,9 +244,7 @@ public class ErpProductServiceImpl implements ErpProductService {
 
 
     private void validateProductExists(Long id) {
-        if (productMapper.selectById(id) == null) {
-            throw exception(PRODUCT_NOT_EXISTS);
-        }
+        ThrowUtil.ifEmptyThrow(productMapper.selectById(id),PRODUCT_NOT_EXISTS);
     }
 
     private Boolean validateProductCodeUnique(Long id, String code) {

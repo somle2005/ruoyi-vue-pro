@@ -2,7 +2,6 @@ package cn.iocoder.yudao.module.system.api.value;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
-import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.system.api.value.dto.SystemValueDTO;
 import cn.iocoder.yudao.module.system.api.value.vo.SystemValueSaveReqVO;
 import cn.iocoder.yudao.module.system.convert.value.ValueConvert;
@@ -24,6 +23,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SystemValueImpl implements SystemValueApi{
     private final SystemValueMapper systemValueMapper;
+    private final ValueConvert valueConvert;
     @Override
     public Boolean createValue(List<SystemValueSaveReqVO> createReqVO,Long classId,String tableName) {
         List<SystemValueDO> systemValueDO = getSystemValueDos(createReqVO, classId, tableName);
@@ -63,16 +63,15 @@ public class SystemValueImpl implements SystemValueApi{
     @Override
     public List<SystemValueDTO> selectValueByClassIdAndTableName(Long classId, String tableName) {
         List<SystemValueDO> systemValueDos = systemValueMapper.selectValueIdsByClassIdAndTableName(classId, tableName);
-        return ValueConvert.INSTANCE.convertList0(systemValueDos);
+        return valueConvert.convertList0(systemValueDos);
     }
 
-    private static List<SystemValueDO> getSystemValueDos(List<SystemValueSaveReqVO> reqVos, Long classId, String tableName) {
-        /*List<SystemValueDO> systemValueDos = ValueConvert.INSTANCE.convertList(reqVos);
+    private List<SystemValueDO> getSystemValueDos(List<SystemValueSaveReqVO> reqVos, Long classId, String tableName) {
+        List<SystemValueDO> systemValueDos = valueConvert.convertList(reqVos);
         for (SystemValueDO systemValueDO : systemValueDos){
             systemValueDO.setClassId(classId);
             systemValueDO.setTable(tableName);
         }
-        return systemValueDos;*/
-        return null;
+        return systemValueDos;
     }
 }

@@ -4,7 +4,9 @@ import cn.iocoder.yudao.module.system.api.value.dto.SystemValueDTO;
 import cn.iocoder.yudao.module.system.api.value.vo.SystemValueSaveReqVO;
 import cn.iocoder.yudao.module.system.dal.dataobject.value.SystemValueDO;
 import org.mapstruct.Mapper;
-import org.mapstruct.ReportingPolicy;
+import org.mapstruct.Mapping;
+import org.mapstruct.MappingConstants;
+import org.mapstruct.Named;
 
 import java.util.List;
 
@@ -15,11 +17,22 @@ import java.util.List;
  * @Version: 1.0
  * @description:
  */
-@Mapper(componentModel = "spring", typeConversionPolicy = ReportingPolicy.ERROR)
+@Mapper(componentModel = MappingConstants.ComponentModel.SPRING)
 public interface ValueConvert {
-    ValueConvert INSTANCE = org.mapstruct.factory.Mappers.getMapper(ValueConvert.class);
 
-    //List<SystemValueDO> convertList(List<SystemValueSaveReqVO> reqVos);
+    @Mapping(target = "table", ignore = true)
+    @Mapping(target = "classId", ignore = true)
+    @Mapping(target = "value",source = "value", qualifiedByName = "objectToString")
+    SystemValueDO reqVoToDO(SystemValueSaveReqVO reqVos);
+
+    List<SystemValueDO> convertList(List<SystemValueSaveReqVO> reqVos);
 
     List<SystemValueDTO> convertList0(List<SystemValueDO> systemValueDos);
+
+
+    @Named("objectToString")
+    default String objectToString(Object value) {
+        return value != null ? String.valueOf(value) : "";
+    }
+
 }
