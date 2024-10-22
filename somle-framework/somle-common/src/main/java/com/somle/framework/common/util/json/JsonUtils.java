@@ -28,6 +28,8 @@ public class JsonUtils {
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false); //忽略未列出的property
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL); // 忽略 null 值 (不然VO的序列化很麻烦）
+        // 开启强制转换，支持空字符串转 null
+        objectMapper.configure(DeserializationFeature.ACCEPT_EMPTY_STRING_AS_NULL_OBJECT, true);
         objectMapper.registerModules(new JavaTimeModule()); // 解决 LocalDateTime 的序列化
         objectMapper.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     }

@@ -31,6 +31,8 @@ public interface GlobalErrorCodeConstants {
     ErrorCode INTERNAL_SERVER_ERROR = new ErrorCode(500, "系统异常");
     ErrorCode NOT_IMPLEMENTED = new ErrorCode(501, "功能未实现/未开启");
     ErrorCode ERROR_CONFIGURATION = new ErrorCode(502, "错误的配置项");
+    //资源锁竞争失败
+    ErrorCode LOCK_ERROR = new ErrorCode(503, "资源锁竞争失败");
 
     // ========== 自定义错误段 ==========
     ErrorCode REPEATED_REQUESTS = new ErrorCode(900, "重复请求，请稍后重试"); // 重复请求

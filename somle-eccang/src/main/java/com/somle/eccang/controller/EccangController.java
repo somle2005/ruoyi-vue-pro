@@ -1,5 +1,7 @@
 package com.somle.eccang.controller;
 
+import cn.hutool.core.thread.ThreadUtil;
+import cn.hutool.core.util.ObjUtil;
 import com.somle.eccang.model.EccangOrderVO;
 import com.somle.eccang.model.EccangResponse.BizContent;
 import com.somle.eccang.model.EccangProduct;
@@ -9,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/eccang")
@@ -46,9 +49,13 @@ public class EccangController {
     }
 
     @GetMapping("/getProducts")
-    public List<EccangProduct> getProducts(
-    ) {
-        return eccangService.getProducts().toList();
+    public Object getProducts() {
+        Stream<EccangProduct> products = eccangService.getProducts();
+        System.err.println(products);
+        if (ObjUtil.isEmpty(products)){
+            return "暂无数据";
+        }
+        return products.toList();
     }
 
 

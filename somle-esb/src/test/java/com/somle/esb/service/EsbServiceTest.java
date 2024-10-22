@@ -25,13 +25,16 @@ import com.somle.esb.converter.DingTalkToErpConverter;
 import com.somle.esb.converter.EccangToErpConverter;
 import com.somle.esb.converter.ErpToEccangConverter;
 import com.somle.esb.converter.ErpToKingdeeConverter;
+import com.somle.esb.job.EccangProductJob;
 import com.somle.framework.test.core.ut.BaseSpringTest;
 import com.somle.kingdee.service.KingdeeService;
 import com.somle.matomo.service.MatomoService;
 import jakarta.annotation.Resource;
+import org.checkerframework.checker.units.qual.A;
 import org.junit.jupiter.api.Test;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
 import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
@@ -73,6 +76,7 @@ import org.springframework.context.ApplicationContext;
     YudaoMybatisAutoConfiguration.class, //Enable DefaultDBFieldHandler
     MybatisPlusAutoConfiguration.class, // MyBatis 的自动配置类
     MybatisPlusJoinAutoConfiguration.class, // MyBatis 的Join配置类
+        EccangProductJob.class
 })
 //@MapperScan("cn.iocoder.yudao.module.system.dal.mysql.dept")
 class EsbServiceTest extends BaseSpringTest {
@@ -122,9 +126,17 @@ class EsbServiceTest extends BaseSpringTest {
     @MockBean
     private ConfigApi configApi;
 
+    @Resource
+    private EccangProductJob eccangProductJob;
+
 
     @Autowired
     private ApplicationContext applicationContext;
+
+    @Test
+    public void test() throws Exception {
+        System.out.println(eccangProductJob.execute("2024-10-22"));
+    }
 
     @Test
     public void printAllBeans() {

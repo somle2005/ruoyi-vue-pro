@@ -109,8 +109,6 @@ public class EsbService {
         }
     }
 
-
-
     public void send(OssData data) {
         dataChannel.send(MessageBuilder.withPayload(data).build());
     }

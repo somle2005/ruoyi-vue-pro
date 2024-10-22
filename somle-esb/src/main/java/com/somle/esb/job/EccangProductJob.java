@@ -4,21 +4,22 @@ import com.somle.esb.model.OssData;
 import org.springframework.stereotype.Component;
 
 /**
- * @author Administrator
+ * @className: EccangProductJob
+ * @author: Wqh
+ * @date: 2024/10/22 11:27
+ * @Version: 1.0
  */
 @Component
-public class EccangStockDataJob extends EccangDataJob{
-
-
+public class EccangProductJob extends EccangDataJob{
     @Override
     public String execute(String param) throws Exception {
         setDate(param);
 
-        eccangService.getInventory()
+        eccangService.getProducts()
                 .forEach(page -> {
                     OssData data = OssData.builder()
                             .database(DATABASE)
-                            .tableName("stock")
+                            .tableName("product")
                             .syncType("full")
                             .requestTimestamp(System.currentTimeMillis())
                             .folderDate(today)
@@ -27,7 +28,7 @@ public class EccangStockDataJob extends EccangDataJob{
                             .build();
                     service.send(data);
                 });
-        
+
         return "data upload success";
     }
 }

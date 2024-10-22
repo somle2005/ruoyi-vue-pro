@@ -32,6 +32,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.ReentrantLock;
+
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
@@ -57,6 +60,7 @@ public class ErpProductServiceImpl implements ErpProductService {
     private SystemValueApi systemValueApi;
 
     private static final String TABLE_NAME = "erp_product";
+    private static final ReentrantLock LOCK = new ReentrantLock();
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -237,8 +241,13 @@ public class ErpProductServiceImpl implements ErpProductService {
     * @return java.lang.Integer
     **/
     private Integer increaseSerial(String barCode) {
-        Integer serial = productMapper.selectMaxSerialByBarCode(barCode);
-        return ++serial;
+        try {
+            LOCK.lock();
+            Integer serial = productMapper.selectMaxSerialByBarCode(barCode);
+            return ++serial;
+        } finally {
+            LOCK.unlock();
+        }
     }
 
 
