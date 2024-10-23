@@ -167,4 +167,9 @@ public class KingdeeController {
     // ) {
     //     return kingdeeClient.addProduct();
     // }
+    //获取采购申请单列表
+    @GetMapping("/getPurchaseRequestList")
+    public Object getPurchaseRequestList(){
+        return kingdeeClient.getPurchaseRequestList();
+    }
 }

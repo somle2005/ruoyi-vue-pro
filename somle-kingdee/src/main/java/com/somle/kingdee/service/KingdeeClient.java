@@ -541,4 +541,11 @@ public class KingdeeClient {
         return fetchResponse("POST", endUrl, params, payload);
     }
 
+    public Object getPurchaseRequestList() {
+        String endUrl = "/jdy/v2/scm/pur_request";
+        /*TreeMap<String, String>  params = new TreeMap<>();
+        params.put("number", number);*/
+
+        return getResponse(endUrl, new TreeMap<>());
+    }
 }
