@@ -1,7 +1,6 @@
 package com.somle.eccang.controller;
 
-import cn.hutool.core.thread.ThreadUtil;
-import cn.hutool.core.util.ObjUtil;
+import com.somle.eccang.model.EccangOrder;
 import com.somle.eccang.model.EccangOrderVO;
 import com.somle.eccang.model.EccangResponse.BizContent;
 import com.somle.eccang.model.EccangProduct;
@@ -11,7 +10,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/eccang")
@@ -33,13 +31,13 @@ public class EccangController {
         return eccangService.getInventoryBatchLog(LocalDateTime.parse(startTime), LocalDateTime.parse(endTime)).toList();
     }
 
-//    @GetMapping("/getOrderShip")
-//    public List<BizContent> getOrderShip(
-//            @RequestParam String startTime,
-//            @RequestParam String endTime
-//    ) {
-//        return eccangService.getOrderShipPage(LocalDateTime.parse(startTime), LocalDateTime.parse(endTime)).toList();
-//    }
+    @GetMapping("/getOrderShip")
+    public List<EccangOrder> getOrderShip(
+            @RequestParam String startTime,
+            @RequestParam String endTime
+    ) {
+        return eccangService.getOrderShip(LocalDateTime.parse(startTime), LocalDateTime.parse(endTime)).toList();
+    }
 
     @GetMapping("/getOrder")
     public List<BizContent> getOrder(
@@ -49,13 +47,9 @@ public class EccangController {
     }
 
     @GetMapping("/getProducts")
-    public Object getProducts() {
-        Stream<EccangProduct> products = eccangService.getProducts();
-        System.err.println(products);
-        if (ObjUtil.isEmpty(products)){
-            return "暂无数据";
-        }
-        return products.toList();
+    public List<EccangProduct> getProducts(
+    ) {
+        return eccangService.getProducts().toList();
     }
 
 
