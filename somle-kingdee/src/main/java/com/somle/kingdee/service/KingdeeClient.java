@@ -161,14 +161,10 @@ public class KingdeeClient {
         // String ctime = "1719213104265";
         String endUrl = "/jdyconnector/app_management/kingdee_auth_token";
         String fullUrl = baseHost + endUrl;
-
         TreeMap<String, String> params = new TreeMap<>();
         params.put("app_key", appKey);
         params.put("app_signature", appSignature);
-
         String apiSignature = getApiSignature(reqMtd, endUrl, params, ctime);
-
-        
         // HttpUrl.Builder urlBuilder = HttpUrl.parse(fullUrl).newBuilder();
         // urlBuilder.addQueryParameter("app_key", appKey);
         // urlBuilder.addQueryParameter("app_signature", appSignature);
@@ -191,8 +187,6 @@ public class KingdeeClient {
         // } catch (Exception e) {
         //     throw new RuntimeException(e);
         // }
-
-
         Map<String, String> headers = Map.of(
             "Content-Type", "application/json",
             "X-Api-Auth-Version", "2.0",
@@ -202,10 +196,8 @@ public class KingdeeClient {
             "X-Api-Signature", apiSignature,
             "X-Api-TimeStamp", ctime
         );
-
         KingdeeResponse response = WebUtils.getRequest(fullUrl, params, headers, KingdeeResponse.class);
         return response.getData().getString("app-token");
-
     }
 
     public KingdeeToken pushAuth(KingdeeToken token) {

@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.TreeMap;
 
 import com.somle.framework.test.core.ut.BaseSpringTest;
+import com.somle.kingdee.model.KingdeeToken;
 import jakarta.annotation.Resource;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
@@ -88,5 +89,12 @@ public class KingdeeServiceTest extends BaseSpringTest {
     @Test
     void refreshAuth() {
         service.refreshAuths();
+    }
+
+    @Test
+    void getToken(){
+        KingdeeClient kingdeeClient = service.getClientList().get(0);
+        String appToken = kingdeeClient.getAppToken(kingdeeClient.getToken());
+        System.err.println(appToken);
     }
 }
