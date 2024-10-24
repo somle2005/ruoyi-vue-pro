@@ -75,10 +75,11 @@ public class KingdeeClient {
         String ctime = String.valueOf(System.currentTimeMillis());
         String endUrl = "/jdyconnector/app_management/kingdee_auth_token";
         String fullUrl = BASE_HOST + endUrl;
-        Map<String, String> params = new HashMap<>();
+        Map<String, String> params = new TreeMap<>();
         params.put("app_key", appKey);
         params.put("app_signature", appSignature);
         String apiSignature = getApiSignature(reqMtd, endUrl, params, ctime);
+        System.err.println(apiSignature);
         //KingdeeResponse response = WebUtils.getRequest(fullUrl, params,  getAuthHeaders(ctime,apiSignature), KingdeeResponse.class);
         //return response.getData().getString("app-token");
         //封装请求头

@@ -47,17 +47,19 @@ public class SignatureUtils {
         return URLEncoder.encode(str, StandardCharsets.UTF_8);
     }
 
+//    请求方式（POST、GET、DELETE等均为大写）
+//    请求地址的path部分（示例：https://api.kingdee.com/jdyconnector/app_management/kingdee_auth_token，取红色部分，进行url编码）
+//    params请求参数（进行两次url编码（编码后字母应是大写，下同），加密时按参数名ASCII码升序顺序进行排序，实际请求参数顺序必须一致）
+//    headers请求参数（只需要x-api-nonce、x-api-timestamp参与加密，必须小写）
+//    拼接得到签名原文，每段签名字符拼接均需要换行符（x-api-timestamp时间戳后需要换行符）
     public static String getApiString(String reqMtd, String urlPath, Map<String, String> params, String nonce,
                                       String timestamp) {
         String paramsStr = params.entrySet()
                 .stream()
                 .map(entry -> entry.getKey() + "=" + urlEncode(urlEncode(entry.getValue())))
                 .collect(Collectors.joining("&"));
-        String urlPathStr;
-        urlPathStr = URLEncoder.encode(urlPath, StandardCharsets.UTF_8);
-
         return String.format("%s\n%s\n%s\nx-api-nonce:%s\nx-api-timestamp:%s\n",
-                reqMtd, urlPathStr, paramsStr, nonce, timestamp);
+                reqMtd, urlEncode(urlPath), paramsStr, nonce, timestamp);
     }
 
     public static String getApiSignature(String reqMtd, String urlPath, Map<String, String> params, String timestamp) {
@@ -67,6 +69,7 @@ public class SignatureUtils {
     public static String getApiSignature(String reqMtd, String urlPath, Map<String, String> params, String nonce,
                                          String timestamp) {
         String apiString = getApiString(reqMtd, urlPath, params, nonce, timestamp);
+        System.err.println(apiString);
         String apiStringToHmac256EnHex = Hex.encodeHexString(hmac256(CLIENT_SECRET, apiString));
         return Base64.encodeBase64String(apiStringToHmac256EnHex.getBytes());
     }
