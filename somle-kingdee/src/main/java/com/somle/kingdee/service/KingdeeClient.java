@@ -10,14 +10,8 @@ import com.somle.kingdee.model.KingdeeResponse;
 import com.somle.kingdee.model.KingdeeToken;
 import com.somle.kingdee.model.KingdeeUnit;
 import com.somle.framework.common.util.web.WebUtils;
-import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpMethod;
-import org.springframework.util.MultiValueMap;
-import org.springframework.web.client.RestTemplate;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
@@ -66,26 +60,6 @@ public class KingdeeClient {
         return response.getData().getString("app-token");
     }
 
-    public Object getAppToken1(KingdeeToken token) {
-        RestTemplate restTemplate = new RestTemplate();
-        log.info("preparing app token");
-        String appKey = token.getAppKey();
-        String appSignature = token.getAppSignature();
-        String reqMtd = "GET";
-        String ctime = String.valueOf(System.currentTimeMillis());
-        String endUrl = "/jdyconnector/app_management/kingdee_auth_token";
-        String fullUrl = BASE_HOST + endUrl;
-        Map<String, String> params = new TreeMap<>();
-        params.put("app_key", appKey);
-        params.put("app_signature", appSignature);
-        String apiSignature = getApiSignature(reqMtd, endUrl, params, ctime);
-        System.err.println(apiSignature);
-        //KingdeeResponse response = WebUtils.getRequest(fullUrl, params,  getAuthHeaders(ctime,apiSignature), KingdeeResponse.class);
-        //return response.getData().getString("app-token");
-        //封装请求头
-        HttpEntity<MultiValueMap<String, Object>> formEntity = new HttpEntity<>(getAuthHeaders1(ctime, apiSignature));
-        return restTemplate.exchange(fullUrl, HttpMethod.GET, formEntity,Map.class,params);
-    }
 
     public KingdeeToken pushAuth(KingdeeToken token) {
         String outerInstanceId = token.getOuterInstanceId();

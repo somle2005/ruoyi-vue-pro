@@ -14,10 +14,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 
 //import org.mockito.MockitoAnnotations;
-@Import(KingdeeService.class)
+@Import({KingdeeService.class})
 public class KingdeeServiceTest extends BaseSpringTest {
     @Resource
     KingdeeService service;
+
+
 
 
 
@@ -90,4 +92,17 @@ public class KingdeeServiceTest extends BaseSpringTest {
     void refreshAuth() {
         service.refreshAuths();
     }
+
+    @Test
+    void getToken(){
+        KingdeeClient kingdeeClient = service.getClientList().get(0);
+        System.err.println(kingdeeClient.getAppToken(kingdeeClient.getToken()));
+    }
+
+
+ /*   @Test
+    void test(){
+        kingDeeDataService.getPurchaseApplyList();
+    }*/
+
 }

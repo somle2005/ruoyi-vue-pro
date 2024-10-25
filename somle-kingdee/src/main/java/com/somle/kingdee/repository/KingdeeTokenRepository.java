@@ -7,4 +7,5 @@ import com.somle.kingdee.model.KingdeeToken;
 public interface KingdeeTokenRepository extends JpaRepository<KingdeeToken, Long> {
     public KingdeeToken findByAccountName(String name);
     public KingdeeToken findByOuterInstanceId(String outerInstanceId);
+
 }

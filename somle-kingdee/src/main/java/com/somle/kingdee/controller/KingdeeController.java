@@ -2,26 +2,36 @@ package com.somle.kingdee.controller;
 
 
 import com.somle.framework.common.util.json.JSONObject;
+import com.somle.framework.common.util.web.WebUtils;
 import com.somle.kingdee.model.KingdeeCustomField;
 import com.somle.kingdee.model.KingdeeResponse;
 import com.somle.kingdee.model.KingdeeToken;
+import com.somle.kingdee.service.KingDeeDataService;
 import com.somle.kingdee.service.KingdeeClient;
 import com.somle.kingdee.service.KingdeeService;
 
+import jakarta.annotation.Resource;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import jakarta.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+
+import static com.somle.kingdee.util.SignatureUtils.*;
 
 @Slf4j
 @RestController
@@ -46,10 +56,37 @@ public class KingdeeController {
         private long timestamp;
         private List<KingdeeToken> data;
     }
-
+    @Resource
+    private RestTemplate restTemplate;
     @GetMapping("/getAppToken")
     public Object getAppToken() {
-        return kingdeeClient.getAppToken1(kingdeeClient.getToken());
+        log.info("preparing app token");
+        String appKey = kingdeeClient.getToken().getAppKey();
+        String appSignature = kingdeeClient.getToken().getAppSignature();
+        String reqMtd = "GET";
+        String ctime = String.valueOf(System.currentTimeMillis());
+        String endUrl = "/jdyconnector/app_management/kingdee_auth_token";
+        String fullUrl = BASE_HOST + endUrl;
+        TreeMap<String, String> params = new TreeMap<>();
+        params.put("app_key", appKey);
+        params.put("app_signature", appSignature);
+        String apiSignature = getApiSignature(reqMtd, endUrl, params, ctime);
+        //封装请求头
+        HttpEntity<MultiValueMap<String, Object>> formEntity = new HttpEntity<>(null,getAuthRestHeaders(ctime,apiSignature));
+        ResponseEntity<Map> response = restTemplate.exchange(fullUrl + "?app_key=" + appKey + "&app_signature=" + appSignature, HttpMethod.GET, formEntity, Map.class);
+        if (response.getStatusCode().is2xxSuccessful()){
+            System.err.println(response.getBody());
+            return response.getBody();
+        }else {
+            throw new RuntimeException("Failed to get app token: " + response.getStatusCode());
+        }
+    }
+
+    @Resource
+    private KingDeeDataService kingDeeDataService;
+    @GetMapping("/test")
+    public Object test() {
+        return kingDeeDataService.getPurchaseApplyList();
     }
 
 
@@ -64,7 +101,8 @@ public class KingdeeController {
 
 
 
-    @PostMapping("/refreshAuth")
+
+    @GetMapping("/refreshAuth")
     @ResponseBody
     public void refreshAuth(
     ) {

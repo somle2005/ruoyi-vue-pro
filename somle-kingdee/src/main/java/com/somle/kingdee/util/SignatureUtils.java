@@ -23,10 +23,19 @@ import java.util.stream.Collectors;
  */
 public class SignatureUtils {
     private SignatureUtils(){}
+    public static final String GET = "GET";
+    public static final String POST = "POST";
     private final static String HMACSHA256 = "HmacSHA256";
     private static final String CLIENT_SECRET = "b5639a677545e611a297d6537f2b444c";
     public static final String CLIENT_ID = "240474";
     public static final String BASE_HOST = "https://api.kingdee.com";
+    public static final String PUR_REQUEST = "/jdy/v2/scm/pur_request";
+
+
+
+
+
+
 
     public static byte[] hmac256(String secret, String data) {
         try {
@@ -69,7 +78,6 @@ public class SignatureUtils {
     public static String getApiSignature(String reqMtd, String urlPath, Map<String, String> params, String nonce,
                                          String timestamp) {
         String apiString = getApiString(reqMtd, urlPath, params, nonce, timestamp);
-        System.err.println(apiString);
         String apiStringToHmac256EnHex = Hex.encodeHexString(hmac256(CLIENT_SECRET, apiString));
         return Base64.encodeBase64String(apiStringToHmac256EnHex.getBytes());
     }
@@ -107,15 +115,30 @@ public class SignatureUtils {
         );
     }
 
-    public static HttpHeaders getAuthHeaders1(String ctime, String apiSignature) {
+    public static HttpHeaders getAuthRestHeaders(String ctime,String apiSignature) {
         HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Type", "application/json");
-        headers.add("X-Api-Auth-Version", "2.0");
-        headers.add("X-Api-ClientID", CLIENT_ID);
-        headers.add("X-Api-Nonce", ctime);
-        headers.add("X-Api-SignHeaders", "X-Api-TimeStamp,X-Api-Nonce");
-        headers.add("X-Api-Signature", apiSignature);
-        headers.add("X-Api-TimeStamp", ctime);
+        headers.set("Content-Type", "application/json");
+        headers.set("X-Api-Auth-Version", "2.0");
+        headers.set("X-Api-ClientID", CLIENT_ID);
+        headers.set("X-Api-Nonce", ctime);
+        headers.set("X-Api-SignHeaders", "X-Api-TimeStamp,X-Api-Nonce");
+        headers.set("X-Api-Signature", apiSignature);
+        headers.set("X-Api-TimeStamp", ctime);
+        return headers;
+    }
+
+
+    public static HttpHeaders getApiRestHeaders(String ctime,String signature,String appToken) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Content-Type", "application/json");
+        headers.set("X-Api-ClientID", CLIENT_ID);
+        headers.set("X-Api-Auth-Version", "2.0");
+        headers.set("X-Api-TimeStamp", ctime);
+        headers.set("X-Api-SignHeaders", "X-Api-TimeStamp,X-Api-Nonce");
+        headers.set("X-Api-Nonce", ctime);
+        headers.set("X-Api-Signature", signature);
+        headers.set("app-token", appToken);
+        headers.set("X-GW-Router-Addr", "https://tf.jdy.com");
         return headers;
     }
 
