@@ -16,9 +16,7 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
  * @description: 条件异常工具类
  */
 public class ThrowUtil {
-    private ThrowUtil() {
-
-    }
+    private ThrowUtil() {}
 
     public static void ifThrow(boolean condition, ErrorCode message) {
         if (condition) {
@@ -55,12 +53,14 @@ public class ThrowUtil {
         }
     }
 
-
-    /*public static void ifNullThrow(Object data, String code) {
-        if (Objects.isNull(data)) {
-            throw ExceptionUtil.exception(code);
+    public static void ifSqlThrow(int i, ErrorCode message) {
+        if (i <= 0) {
+            throw exception(message);
         }
     }
+
+
+    /*
 
     public static void ifNotNullThrow(Object data, String code) {
         if (Objects.nonNull(data)) {

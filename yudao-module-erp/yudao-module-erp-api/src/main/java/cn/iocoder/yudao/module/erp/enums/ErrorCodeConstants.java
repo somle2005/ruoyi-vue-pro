@@ -96,6 +96,18 @@ public interface ErrorCodeConstants {
     ErrorCode SALE_RETURN_FAIL_REFUND_PRICE_EXCEED = new ErrorCode(1_020_203_007, "退款金额({})超过销售退货单总金额({})");
     ErrorCode SALE_RETURN_PROCESS_FAIL_EXISTS_REFUND = new ErrorCode(1_020_203_008, "反审核失败，已存在对应的退款单");
     ErrorCode SALE_RETURN_NO_OUT_OF_BOUNDS = new ErrorCode(1_020_203_009, "销售退货单号编码大于999999,生成失败");
+    // ========== ERP 销售渠道 （1-030-204-000） ==========
+    ErrorCode CHANNEL_NOT_EXISTS = new ErrorCode(1_020_204_000, "该渠道不存在");
+    ErrorCode CHANNEL_EXISTS = new ErrorCode(1_020_204_001, "渠道名或编码不能重复");
+    ErrorCode CHANNEL_NOT_SELF_PARENT = new ErrorCode(1_020_204_002, "不能设置自己为父渠道");
+    ErrorCode CHANNEL_PARENT_NOT_EXISTS = new ErrorCode(1_020_204_003, "父渠道不存在");
+    ErrorCode CHANNEL_PARENT_IS_SELF_CHILD = new ErrorCode(1_020_204_004, "不能设置自己的子渠道为父渠道");
+    ErrorCode CHANNEL_EXISTS_CHILD = new ErrorCode(1_020_204_005, "该渠道存在子渠道，不允许删除");
+    ErrorCode CHANNEL_PARENT_STATUS_NOT_ENABLE = new ErrorCode(1_020_204_006, "该渠道的父渠道为关闭状态，无法变更子渠道状态");
+    ErrorCode CHANNEL_EXISTS_PRODUCT = new ErrorCode(1_020_204_007, "该渠道已被平台产品引用，无法删除");
+
+    // ========== ERP 渠道平台产品 （1-030-205-000） ==========
+    ErrorCode CHANNEL_PRODUCT_NOT_EXISTS = new ErrorCode(1_020_205_000, "渠道平台产品不存在");
 
     // ========== ERP 仓库 1-030-400-000 ==========
     ErrorCode WAREHOUSE_NOT_EXISTS = new ErrorCode(1_030_400_000, "仓库不存在");

@@ -194,7 +194,8 @@ public class DeptServiceImpl implements DeptService {
         List<DeptDO> children = new LinkedList<>();
         // 遍历每一层
         Collection<Long> parentIds = Collections.singleton(id);
-        for (int i = 0; i < Short.MAX_VALUE; i++) { // 使用 Short.MAX_VALUE 避免 bug 场景下，存在死循环
+        // 使用 Short.MAX_VALUE 避免 bug 场景下，存在死循环
+        for (int i = 0; i < Short.MAX_VALUE; i++) {
             // 查询当前层，所有的子部门
             List<DeptDO> depts = deptMapper.selectListByParentId(parentIds);
             // 1. 如果没有子部门，则结束遍历
