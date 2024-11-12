@@ -122,12 +122,12 @@ public class ErpProductServiceImpl implements ErpProductService {
         if (ObjUtil.isEmpty(product)){
             return;
         }
-        // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
+        // 如果 id 为空，说明不用比较是否为相同 id
         if (id == null){
             throw exception(PRODUCT_CODE_DUPLICATE);
         }
         if (!product.getId().equals(id)) {
-            throw exception(PRODUCT_UNIT_NAME_DUPLICATE);
+            throw exception(PRODUCT_CODE_DUPLICATE);
         }
     }
 

@@ -38,4 +38,7 @@ public interface ErpSupplierProductMapper extends BaseMapperX<ErpSupplierProduct
     }
 
 
+    default List<ErpSupplierProductDO> selectBySupplierId(Long id) {
+        return selectList(ErpSupplierProductDO::getSupplierId, id);
+    }
 }

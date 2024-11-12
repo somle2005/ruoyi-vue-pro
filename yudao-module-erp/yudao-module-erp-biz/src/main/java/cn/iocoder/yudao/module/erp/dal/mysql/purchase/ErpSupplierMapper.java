@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.supplier.ErpSupplierPageReqVO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.purchase.ErpSupplierDO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -29,4 +30,11 @@ public interface ErpSupplierMapper extends BaseMapperX<ErpSupplierDO> {
         return selectList(ErpSupplierDO::getStatus, status);
     }
 
+    default ErpSupplierDO selectByName(String name) {
+        return selectOne(ErpSupplierDO::getName, name);
+    }
+
+    default List<ErpSupplierDO> selectByPaymentTermsId(Long paymentTermsId) {
+        return selectList(ErpSupplierDO::getPaymentTermsId, paymentTermsId);
+    }
 }

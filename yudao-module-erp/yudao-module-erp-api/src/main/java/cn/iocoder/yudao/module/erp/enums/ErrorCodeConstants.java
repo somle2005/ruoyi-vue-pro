@@ -16,6 +16,8 @@ public interface ErrorCodeConstants {
     ErrorCode SUPPLIER_NOT_ENABLE = new ErrorCode(1_030_100_000, "供应商({})未启用");
     ErrorCode SUPPLIER_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_100_000, "供应商产品不存在");
     ErrorCode SUPPLIER_PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_500_000, "供应商产品编码已存在");
+    ErrorCode SUPPLIER_NAME_DUPLICATE = new ErrorCode(1_030_100_001, "供应商名称已存在");
+    ErrorCode SUPPLIER_DELETE_FAIL_EXISTS_RELATION = new ErrorCode(1_030_100_002, "该供应商已存在关联，无法删除");
 
     // ========== ERP 采购订单（1-030-101-000） ==========
     ErrorCode PURCHASE_ORDER_NOT_EXISTS = new ErrorCode(1_030_101_000, "采购订单不存在");
@@ -56,6 +58,8 @@ public interface ErrorCodeConstants {
     ErrorCode PURCHASE_RETURN_NO_OUT_OF_BOUNDS = new ErrorCode(1_030_103_009, "采购退货单号编码大于999999,生成失败");
     // ========== ERP 付款条款（1-030-104-000） ==========
     ErrorCode PAYMENT_TERMS_NOT_EXISTS = new ErrorCode(1_030_104_000, "付款条款管理不存在");
+    ErrorCode PAYMENT_TERMS_DELETE_FAIL_EXISTS_RELATION = new ErrorCode(1_030_104_001, "该付款条款已关联了供应商，无法删除");
+
 
     // ========== ERP 客户（1-030-200-000）==========
     ErrorCode CUSTOMER_NOT_EXISTS = new ErrorCode(1_020_200_000, "客户不存在");
