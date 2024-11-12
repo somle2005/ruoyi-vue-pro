@@ -1,5 +1,7 @@
 package cn.iocoder.yudao.module.erp.controller.admin.purchase;
 
+import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsSaveReqVO;
@@ -16,9 +18,16 @@ import jakarta.validation.*;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+
+import java.util.List;
+
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
 
 
+/**
+ * @author Administrator
+ */
 @Tag(name = "管理后台 - 付款条款管理")
 @RestController
 @RequestMapping("/erp/payment-terms")
@@ -67,6 +76,13 @@ public class ErpPaymentTermsController {
     public CommonResult<PageResult<ErpPaymentTermsRespVO>> getPaymentTermsPage(@Valid ErpPaymentTermsPageReqVO pageReqVO) {
         PageResult<ErpPaymentTermsDO> pageResult = paymentTermsService.getPaymentTermsPage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, ErpPaymentTermsRespVO.class));
+    }
+
+    @GetMapping("/simple-list")
+    @Operation(summary = "获得产品精简列表", description = "只包含被开启的产品，主要用于前端的下拉选项")
+    public CommonResult<List<ErpPaymentTermsRespVO>> getPaymentTermsSimpleList() {
+        List<ErpPaymentTermsRespVO> list = paymentTermsService.getPaymentTermsVOListByStatus();
+        return success(list);
     }
 
 }

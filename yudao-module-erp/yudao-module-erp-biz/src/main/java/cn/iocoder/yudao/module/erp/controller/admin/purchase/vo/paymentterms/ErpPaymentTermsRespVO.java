@@ -7,6 +7,9 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import com.alibaba.excel.annotation.*;
 
+/**
+ * @author Administrator
+ */
 @Schema(description = "管理后台 - 付款条款管理 Response VO")
 @Data
 @ExcelIgnoreUnannotated

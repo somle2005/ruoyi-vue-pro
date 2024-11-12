@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.service.purchase;
 
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsPageReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.purchase.ErpPaymentTermsDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.purchase.ErpPaymentTermsMapper;
@@ -9,6 +10,9 @@ import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+
+import java.util.List;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.PAYMENT_TERMS_NOT_EXISTS;
 
@@ -64,6 +68,11 @@ public class ErpPaymentTermsServiceImpl implements ErpPaymentTermsService {
     @Override
     public PageResult<ErpPaymentTermsDO> getPaymentTermsPage(ErpPaymentTermsPageReqVO pageReqVO) {
         return paymentTermsMapper.selectPage(pageReqVO);
+    }
+
+    @Override
+    public List<ErpPaymentTermsRespVO> getPaymentTermsVOListByStatus() {
+        return BeanUtils.toBean(paymentTermsMapper.selectList(), ErpPaymentTermsRespVO.class);
     }
 
 }

@@ -2,10 +2,13 @@ package cn.iocoder.yudao.module.erp.service.purchase;
 
 
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsPageReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.purchase.ErpPaymentTermsDO;
 import jakarta.validation.*;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+
+import java.util.List;
 
 
 /**
@@ -53,4 +56,11 @@ public interface ErpPaymentTermsService {
      */
     PageResult<ErpPaymentTermsDO> getPaymentTermsPage(ErpPaymentTermsPageReqVO pageReqVO);
 
+    /**
+    * @Author Wqh
+    * @Description 获得产品精简列表
+    * @Date 11:07 2024/11/12
+    * @return java.util.List<cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.paymentterms.ErpPaymentTermsRespVO>
+    **/
+    List<ErpPaymentTermsRespVO> getPaymentTermsVOListByStatus();
 }
