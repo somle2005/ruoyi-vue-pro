@@ -58,8 +58,6 @@ public class ErpSupplierDO extends BaseDO {
     private String remark;
     /**
      * 开启状态
-     *
-     * 枚举 {@link cn.iocoder.yudao.framework.common.enums.CommonStatusEnum}
      */
     private Integer status;
     /**
@@ -86,5 +84,17 @@ public class ErpSupplierDO extends BaseDO {
      * 开户地址
      */
     private String bankAddress;
+    /**
+     * 付款条款id
+     */
+    private Long paymentTermsId;
+    /**
+     * 公司地址
+     */
+    private String companyAddress;
+    /**
+     * 文件送达地址
+     */
+    private String serviceAddress;
 
 }

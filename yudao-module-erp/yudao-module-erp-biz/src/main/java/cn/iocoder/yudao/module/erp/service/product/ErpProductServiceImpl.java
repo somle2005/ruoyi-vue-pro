@@ -15,13 +15,10 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-
 import java.util.*;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
@@ -70,7 +67,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         List<Integer> levels = Arrays.asList(2, 3);
         //获取部门等级
         Integer level = deptApi.getDeptLevel(deptId);
-        //判断登记是否符合要求
+        //判断等级是否符合要求
         ThrowUtil.ifThrow(!levels.contains(level), DEPT_LEVEL_NOT_MATCH);
     }
 
