@@ -14,6 +14,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Configuration;
 
 import java.io.IOException;
 import java.lang.reflect.Array;
@@ -74,7 +75,11 @@ public class JsonUtils {
     //convert json node to pojo
     @SneakyThrows
     public static <T> T parseObject(JsonNode node, Class<T> clazz) {
-        return objectMapper.treeToValue(node, clazz);
+        if (clazz == JSONObject.class) {
+            return parseObject(node.toString(), clazz);
+        } else {
+            return objectMapper.treeToValue(node, clazz);
+        }
     }
 
     //convert json to pojo
@@ -100,7 +105,12 @@ public class JsonUtils {
 
     @SneakyThrows
     public static <T> List<T> parseArray(JsonNode node, Class<T> clazz) {
-        return  objectMapper.readerForListOf(clazz).readValue(node);
+        if (clazz == JSONArray.class) {
+            return parseArray(node.toString(), clazz);
+        } else {
+            return  objectMapper.readerForListOf(clazz).readValue(node);
+        }
+
     }
 
     @SneakyThrows
@@ -109,19 +119,12 @@ public class JsonUtils {
     }
 
 
-
-
-
+    @SneakyThrows
     public static <T> List<T> parseArray(String text, Class<T> clazz) {
         if (StrUtil.isEmpty(text)) {
             return new ArrayList<>();
         }
-        try {
-            return objectMapper.readValue(text, objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
-        } catch (IOException e) {
-            log.error("json parse err,json:{}", text, e);
-            throw new RuntimeException(e);
-        }
+        return objectMapper.readValue(text, objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
     }
 
 //    /**

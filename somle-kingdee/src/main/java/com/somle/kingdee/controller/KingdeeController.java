@@ -47,6 +47,8 @@ public class KingdeeController {
         private List<KingdeeToken> data;
     }
 
+
+
     @PostMapping("/refreshAuth")
     @ResponseBody
     public void refreshAuth(
@@ -54,45 +56,13 @@ public class KingdeeController {
         kingdeeService.refreshAuths();
     }
 
-    // @PostMapping("/updateToken")
-    // @ResponseBody
-    // public JSONObject updateToken(
-    //     @RequestBody KingdeeRequest body
-    // ) {  
-    //     log.debug(body.toString());
-    //     String message = "Failed";
-    //     String errorCode = "1";
-    //     JSONObject response = JsonUtils.newObject();
-        
-    //     Map<String, String> data = new HashMap<>();
-        
-    //     if (kingdeeClient.saveAppTokenList(body.data)) {
-    //         message = "Succeed";
-    //         errorCode = "0";
-    //     }
 
-    //     response.put("errcode", errorCode);
-    //     response.put("description", message);
-
-    //     data.put("status", errorCode);
-    //     data.put("msg", message);
-    //     data.put("type", "app_authorize");
-        
-    //     response.put("data", data);
-        
-    //     return response;
-    // }
 
     @PostMapping("/broadcast")
     @ResponseBody
     public void broadcast(
         @RequestBody KingdeeRequest body
-    ) {  
-
-        // OkHttpClient client = new OkHttpClient();
-        // RequestBody requestBody = RequestBody.create(MediaType.parse("application/json"), JSON.toJSONString(body));
-        // client.newCall(new Request.Builder().post(body));
-
+    ) {
 
         RestTemplate restTemplate = new RestTemplate();
         String[] urlList = {
@@ -110,66 +80,4 @@ public class KingdeeController {
         }
     }
 
-
-    @GetMapping("/getSupplier")
-    @ResponseBody
-    public KingdeeResponse getSupplier(
-    ) {
-        return kingdeeClient.getSupplier();
-    }
-
-    @GetMapping("/getVoucher")
-    @ResponseBody
-    public KingdeeResponse getVoucher(
-        @RequestParam String date
-    ) {
-        return kingdeeClient.getVoucher(LocalDate.parse(date));
-    }
-
-    @GetMapping("/getVoucherDetail")
-    @ResponseBody
-    public KingdeeResponse getVoucherDetail(
-        @RequestParam String id
-    ) {
-        return kingdeeClient.getVoucherDetail(id);
-    }
-
-    @GetMapping("/getCustomField")
-    @ResponseBody
-    public Stream<KingdeeCustomField> getCustomField(
-        @RequestParam String entity_number
-    ) {
-        return kingdeeClient.getCustomField(entity_number);
-    }
-
-    @GetMapping("/list")
-    @ResponseBody
-    public List<KingdeeResponse> list(
-        @RequestParam String endpoint
-    ) {
-        return kingdeeClient.list(endpoint).toList();
-    }
-
-    @PostMapping("/post")
-    @ResponseBody
-    public KingdeeResponse post(
-        @RequestParam String endpoint,
-        @RequestBody JSONObject payload
-    ) {
-        log.debug("delegate to service");
-        return kingdeeClient.post(endpoint, payload);
-    }
-
-    // @PostMapping("/addProduct")
-    // @ResponseBody
-    // public JSONObject addProduct(
-    //     // JSONObject product
-    // ) {
-    //     return kingdeeClient.addProduct();
-    // }
-    //获取采购申请单列表
-    @GetMapping("/getPurchaseRequestList")
-    public Object getPurchaseRequestList(){
-        return kingdeeClient.getPurchaseRequestList();
-    }
 }

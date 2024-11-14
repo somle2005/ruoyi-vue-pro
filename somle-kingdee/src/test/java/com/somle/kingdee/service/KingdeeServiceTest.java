@@ -5,15 +5,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.TreeMap;
 
 import com.somle.framework.test.core.ut.BaseSpringTest;
-import com.somle.kingdee.model.KingdeeToken;
+import com.somle.kingdee.model.KingdeePurRequestReqVO;
+import com.somle.kingdee.util.SignatureUtils;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 
-//import org.mockito.MockitoAnnotations;
+@Slf4j
 @Import(KingdeeService.class)
 public class KingdeeServiceTest extends BaseSpringTest {
     @Resource
@@ -43,7 +45,7 @@ public class KingdeeServiceTest extends BaseSpringTest {
             "x-api-timestamp:1670305063559\n";
 
         // Act
-        String actualOutput = KingdeeClient.getApiString(reqMtd, endUrl, params, nonce, timestamp);
+        String actualOutput = SignatureUtils.getApiString(reqMtd, endUrl, params, nonce, timestamp);
 
         // Assert
         assertEquals(expectedOutput, actualOutput);
@@ -62,7 +64,7 @@ public class KingdeeServiceTest extends BaseSpringTest {
         String expectedOutput2 = "OTFiZTliNDFiMjNkYTI3YzVhNzg4MDI4ZGU3MWY1ZTA5ZTk1NjVlNGM1YTI1ZjIxY2Y5YTA3ZGY2OGI1MGQ1MQ==";
 
         // Act
-        String actualOutput1 = Hex.encodeHexString(KingdeeClient.hmac256(clientSecret, apiString));
+        String actualOutput1 = Hex.encodeHexString(SignatureUtils.hmac256(clientSecret, apiString));
         String actualOutput2 = Base64.encodeBase64String(actualOutput1.getBytes());
 
         // Assert
@@ -92,9 +94,30 @@ public class KingdeeServiceTest extends BaseSpringTest {
     }
 
     @Test
-    void getToken(){
-        KingdeeClient kingdeeClient = service.getClientList().get(0);
-        String appToken = kingdeeClient.getAppToken(kingdeeClient.getToken());
-        System.err.println(appToken);
+    public void testGetAuxInfoType() {
+        var client = service.getClientList().get(0);
+        var vo = new KingdeePurRequestReqVO();
+        log.info(client.getAuxInfoTypeByNumber("BM").toString());
+    }
+
+
+
+    @Test
+    public void testGetPurRequest() {
+        var client = service.getClientList().get(0);
+        var vo = new KingdeePurRequestReqVO();
+        log.info(client.getPurRequest(vo).toList().toString());
+    }
+
+    @Test
+    public void testGetCustomField() {
+        var client = service.getClientList().get(0);
+        log.info(client.getCustomField("bd_material").toString());
+    }
+
+    @Test
+    public void testGetCustomFieldByDisplayName() {
+        var client = service.getClientList().get(0);
+        log.info(client.getCustomFieldByDisplayName("bd_material", "部门").toString());
     }
 }

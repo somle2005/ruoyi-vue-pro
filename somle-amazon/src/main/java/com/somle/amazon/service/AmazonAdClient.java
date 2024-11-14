@@ -24,6 +24,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 
@@ -56,18 +57,21 @@ public class AmazonAdClient {
     }
 
     public Stream<JSONArray> getAllAdReport(LocalDate dataDate) {
-        return getShops().map(shop->getAdReport(shop, dataDate));
-//        return WebUtils.parallelRun(12, ()->
-//            getShops().parallel().map(shop->getAdReport(shop, dataDate))
-//        );
+        var reportIdMap = getShops().collect(Collectors.toMap(
+                shop->shop,
+                shop->createAdReport(shop, dataDate)
+        ));
+        // usually take more than 5 mins
+        CoreUtils.sleep(300000);
+        return reportIdMap.entrySet().stream().map(entry->getReport(entry.getKey(), entry.getValue()));
     }
 
-    public JSONArray getAdReport(String countryCode, LocalDate dataDate) {
-        return getAdReport(getShop(countryCode), dataDate);
-    }
 
 
-    public JSONArray getAdReport(AmazonShop shop, LocalDate dataDate) {
+
+
+
+    public String createAdReport(AmazonShop shop, LocalDate dataDate) {
         List<String> baseMetric = new ArrayList<>(Arrays.asList(
             "addToCart", "addToCartClicks", "addToCartRate", "adGroupId", "adGroupName", "adId",
             "brandedSearches", "brandedSearchesClicks", "campaignBudgetAmount", "campaignBudgetCurrencyCode",
@@ -100,12 +104,19 @@ public class AmazonAdClient {
 
         params.put("configuration", configuration);
 
-        return getReport(shop, params, dataDate);
+        return createReport(shop, params, dataDate);
     }
 
 
     @Transactional(readOnly = true)
     public JSONArray getReport(AmazonShop shop, JSONObject payload, LocalDate dataDate) {
+        var reportId = createReport(shop, payload, dataDate);
+        return getReport(shop, reportId);
+    }
+
+    @SneakyThrows
+    @Transactional(readOnly = true)
+    public String createReport(AmazonShop shop, JSONObject payload, LocalDate dataDate) {
         JSONObject updateDict = JsonUtils.newObject();
         updateDict.put("startDate", dataDate.toString());
         updateDict.put("endDate", dataDate.toString());
@@ -131,19 +142,29 @@ public class AmazonAdClient {
                     CoreUtils.sleep(3000);
                     continue;
                 default:
-                    throw new RuntimeException("Unknown response code in creating report: " + response.code());
+                    throw new RuntimeException("Unknown response code in creating report: " + response.body().string());
             }
             var responseBody = WebUtils.parseResponse(response, JSONObject.class);
             reportId = responseBody.getString("reportId");
         }
-        log.info("Got report ID");
+        log.info("Got report ID for shop: " + shop.getCountry().getCode());
+        return reportId;
+    }
+
+    @Transactional(readOnly = true)
+    public JSONArray getReport(AmazonShop shop, String reportId) {
+
+        String partialUrl = "/reporting/reports";
+        String endpoint = shop.getSeller().getRegion().getAdEndPoint();
+        String fullUrl = endpoint + partialUrl;
+
 
         // Check report status and get document id
         String status = null;
         String docUrl = null;
         // ResponseEntity<JSONObject> response = null;
         while (!"COMPLETED".equals(status)) {
-            CoreUtils.sleep(1000);
+            CoreUtils.sleep(5000);
             String reportStatusUrl = endpoint + "/reporting/reports/" + reportId;
             log.info("Checking report status...");
             var tokenExpireTime = shop.getSeller().getAdExpireTime();
@@ -152,10 +173,10 @@ public class AmazonAdClient {
                 case 200:
                     break;
                 case 401:
-                    throw new RuntimeException("Unauthorized error, token expired at " +  tokenExpireTime);
+                    throw new RuntimeException("Failed for shop " + shop.getCountry() + " Unauthorized error, token expired at " +  tokenExpireTime);
                 case 429:
                     log.info("Received 429 Too Many Requests. Retrying...");
-                    CoreUtils.sleep(3000);
+                    CoreUtils.sleep(10000);
                     continue;
                 default:
                     throw new RuntimeException("Http error code: " + response + response.body());
@@ -181,9 +202,9 @@ public class AmazonAdClient {
         }
         log.info("Got doc url {}", docUrl);
 
-        JSONArray contentDict = WebUtils.urlToDict(docUrl, "gzip", JSONArray.class);
+        var contentString = WebUtils.urlToString(docUrl, "gzip");
 
-        return contentDict;
+        return JsonUtils.parseObject(contentString, JSONArray.class);
     }
 
 

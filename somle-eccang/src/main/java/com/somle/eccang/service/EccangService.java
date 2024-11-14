@@ -1,35 +1,46 @@
 package com.somle.eccang.service;
 
+import java.net.SocketTimeoutException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Year;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.IntStream;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import cn.hutool.core.collection.BoundedPriorityQueue;
+import cn.hutool.core.collection.CollUtil;
 import com.somle.eccang.model.*;
-import com.somle.framework.common.util.general.CoreUtils;
 import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.common.util.json.JSONObject;
 
+import lombok.SneakyThrows;
 import com.somle.framework.common.util.object.ObjectUtils;
+import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.retry.annotation.Retryable;
+import org.springframework.retry.backoff.ExponentialBackOffPolicy;
+import org.springframework.retry.policy.ExceptionClassifierRetryPolicy;
+import org.springframework.retry.policy.SimpleRetryPolicy;
+import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import com.somle.eccang.model.EccangResponse.BizContent;
+import com.somle.eccang.model.EccangResponse.EccangPage;
 import com.somle.eccang.repository.EccangTokenRepository;
 import com.somle.framework.common.util.general.Limiter;
 import com.somle.framework.common.util.web.WebUtils;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.client.HttpClientErrorException;
 
 @Slf4j
 @Service
@@ -103,60 +114,86 @@ public class EccangService {
     }
 
     // core network io
-    @Retryable(value = RuntimeException.class)
+    @SneakyThrows
     private EccangResponse getResponse(Object payload, String endpoint){
+        var retryPolicy = new ExceptionClassifierRetryPolicy();
+        retryPolicy.setPolicyMap(Map.of(
+            HttpClientErrorException.class, new SimpleRetryPolicy(10),
+            SocketTimeoutException.class, new SimpleRetryPolicy(10)
+        ));
+
+        var exponentialBackOffPolicy = new ExponentialBackOffPolicy();
+        exponentialBackOffPolicy.setInitialInterval(2000);
+        exponentialBackOffPolicy.setMultiplier(2);
+        exponentialBackOffPolicy.setMaxInterval(180000);
+
+        var retryTemplate = new RetryTemplate();
+        retryTemplate.setRetryPolicy(retryPolicy);
+        retryTemplate.setBackOffPolicy(exponentialBackOffPolicy);
+
         String url = "http://openapi-web.eccang.com/openApi/api/unity";
 
-        EccangResponse responseFinal = CoreUtils.retry(ctx -> {
-            // 限流器限制在生成签名前，防止签名过期
-            JSONObject requestBody = limiter.executeWithLimiter(()->requestBody(payload, endpoint));
+
+        EccangResponse responseFinal = retryTemplate.execute(ctx -> {
+            var requestBody = requestBody(payload, endpoint);
             var response = WebUtils.postRequest(url, Map.of(), Map.of(), requestBody);
             switch (response.code()) {
                 case 200:
-                    log.info(response.toString());
-                    return WebUtils.parseResponse(response, EccangResponse.class);
+                    var responseBody = response.body().string();
+                    var responseOriginal = JsonUtils.parseObject(responseBody, EccangResponse.class);
+                    validateResponse(responseOriginal);
+                    return responseOriginal;
+                case 429:
+                    throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests, please try again later.");
                 default:
-                    throw new RuntimeException("Unknown response code " + response.toString());
+                    throw new RuntimeException("Unknown response code " + response);
             }
         });
-
         return responseFinal;
-
-
     }
 
-    private BizContent getBiz(Object payload, String endpoint) {
-        EccangResponse response = getResponse(payload, endpoint);
-        switch (response.getCode()) {
+    private void validateResponse(EccangResponse response ) {
+        //判断resp的code是否为null，为null则返回message直接作为异常信息
+        String code = response.getCode();
+        if (code == null){
+            throw new RuntimeException(response.getMessage());
+        }
+        switch (code) {
             case "200":
-                return response.getBizContent();
+                return;
+            // 请检查requestBody生成时间和实际请求发送时间是否相隔太久
             case "saas.api.error.code.0049":
                 throw new RuntimeException("签名过期：时间戳必须在一分钟以内，超出1分钟则过期失效，且只能用一次。 时间戳重新生成后，需要重新生成签名");
             case "saas.api.error.code.0082":
                 throw new RuntimeException("Eccang error, full response: " + response);
             case "common.error.code.9999":
-                throw new RuntimeException("Eccang return invalid response: " + response.getErrors().toString());
+                throw new RuntimeException("Eccang return invalid response: " + response.getBizContent(EccangResponse.EccangError.class));
             case "300":
-                throw new RuntimeException("Error message from eccang: " + response.getErrors().toString());
+                throw new RuntimeException("Error message from eccang: " + response.getBizContentList(EccangResponse.EccangError.class));
             case "429":
-                throw new RuntimeException("Too many requests");
+                throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests, please try again later.");
             default:
-                throw new RuntimeException("Unknown eccang-specific response code: " + response.getCode() + " " + response);
+                throw new RuntimeException("Unknown eccang-specific response code: " + response.getCode() + " " + "message: " + response.getMessage());
         }
+    }
+
+    private EccangPage getPage(Object payload, String endpoint) {
+        EccangResponse response = getResponse(payload, endpoint);
+        return response.getBizContent(EccangPage.class);
     }
 
 
 
-    private Stream<BizContent> getAllBiz(JSONObject payload, String endpoint) {
+    private Stream<EccangPage> getAllPage(JSONObject payload, String endpoint) {
         payload.put("page", 1);
         payload.put("page_size", pageSize);
         return Stream.iterate(
-            getBiz(payload, endpoint),
+            getPage(payload, endpoint),
             bizContent -> {
                 if (bizContent.hasNext()) {
                     log.debug("have next");
                     payload.put("page", bizContent.getPage() + 1);
-                    return getBiz(payload, endpoint);
+                    return getPage(payload, endpoint);
                 } else {
                     log.debug("no next page");
                     return null;
@@ -174,10 +211,10 @@ public class EccangService {
     //     return getAllBiz(payload, endpoint);
     // }
 
-    public BizContent list (String endpoint) {
+    public EccangPage list (String endpoint) {
 
         var payload = JsonUtils.newObject();
-        return getBiz(payload, endpoint);
+        return getPage(payload, endpoint);
     }
 
     public <T> Stream<T> list (String endpoint, Class<T> objectClass) {
@@ -186,17 +223,18 @@ public class EccangService {
         // log.debug(payload.toString());
         // getAllBiz(payload, endpoint);
         // return Stream.of();
-        return getAllBiz(payload, endpoint).flatMap(n->n.getData(objectClass).stream());
+        return getAllPage(payload, endpoint).flatMap(n->n.getData(objectClass).stream());
     }
 
 
 
-    public BizContent post(String endpoint, Object payload) {
-        return getBiz(payload, endpoint);
+    public EccangPage post(String endpoint, Object payload) {
+        return getPage(payload, endpoint);
     }
+
 
     public <T> List<T> post(String endpoint, Object payload, Class<T> objectClass) {
-        return getBiz(payload, endpoint).getData(objectClass);
+        return getPage(payload, endpoint).getData(objectClass);
     }
 
     public List<String> getPlatforms() {
@@ -220,76 +258,88 @@ public class EccangService {
     public List<EccangWarehouse> getWarehouseList () {
 
         JSONObject params = JsonUtils.newObject();
-        return getBiz(params, "getWarehouseList").getData(EccangWarehouse.class);
+        return getPage(params, "getWarehouseList").getData(EccangWarehouse.class);
     }
 
     @Scheduled(cron = "0 0 * * * *") // Executes every hour
     // @Scheduled(fixedDelay = 999999999, initialDelay = 1000)
-    public void uploadOrderShip() {
+    public void uploadRealtimeOrder() {
         LocalDateTime endTime = LocalDateTime.now();
-        LocalDateTime starTime = endTime.minusHours(3);
-        getOrderShip(starTime, endTime)
+        LocalDateTime startTime = endTime.minusHours(3);
+        var vo = EccangOrderVO.builder()
+            .platformShipDateStart(startTime)
+            .platformShipDateEnd(endTime)
+            .build();
+        getOrderUnarchive(vo)
             .forEach(order->{
                 saleChannel.send(MessageBuilder.withPayload(order).build());
             });
     }
 
-    public Stream<EccangOrder> getOrderShip(LocalDateTime startTime, LocalDateTime endTime) {
-        return getOrderPlatformShipPage(startTime, endTime)
-            .map(n->n.getData(EccangOrder.class))
-            .flatMap(n->n.stream());
+    public Stream<EccangOrder> getOrderUnarchive(EccangOrderVO vo) {
+        return getOrderUnarchivePages(vo)
+                .map(n->n.getData(EccangOrder.class))
+                .flatMap(n->n.stream());
     }
 
-    public Stream<BizContent> getOrderPlatformShipPage(LocalDateTime startTime, LocalDateTime endTime) {
-        var query = EccangOrderVO.builder()
-            .platformShipDateStart(startTime)
-            .platformShipDateEnd(endTime)
-            .build();
-        return getOrderPages(query);
+    public Stream<EccangOrder> getOrderPlusArchiveSince(EccangOrderVO vo, Integer startYear) {
+        int currentYear = Year.now().getValue();
+
+        return IntStream.rangeClosed(startYear, currentYear).boxed()
+            .flatMap(year->
+                getOrderPlusArchivePages(vo, year)
+                    .map(n->n.getData(EccangOrder.class))
+                    .flatMap(n->n.stream())
+            );
     }
 
-    public Stream<BizContent> getOrderPlusArchivePages(EccangOrderVO orderParams, String year) {
-        return Stream.concat(getOrderPages(orderParams), getOrderArchivePages(orderParams, year));
+    public Stream<EccangPage> getOrderPlusArchivePages(EccangOrderVO orderParams, Integer year) {
+        return Stream.concat(getOrderUnarchivePages(orderParams), getOrderArchivePages(orderParams, year));
     }
 
 
-    public Stream<BizContent> getOrderArchivePages(EccangOrderVO orderParams, String year) {
+    public Stream<EccangPage> getOrderArchivePages(EccangOrderVO orderParams, Integer year) {
         JSONObject params = JsonUtils.newObject();
         params.put("get_detail", "1");
         params.put("get_address", "1");
         params.put("year", year);
 
         params.put("condition", orderParams);
-        return getAllBiz(params, "getOrderList");
+        return getAllPage(params, "getOrderList");
     }
 
 
-    public Stream<BizContent> getOrderPages(EccangOrderVO orderParams) {
+    public Stream<EccangPage> getOrderUnarchivePages(EccangOrderVO orderParams) {
         JSONObject params = JsonUtils.newObject();
         params.put("get_detail", "1");
         params.put("get_address", "1");
 
         params.put("condition", orderParams);
-        return getAllBiz(params, "getOrderList");
+        return getAllPage(params, "getOrderList");
     }
 
     public EccangProduct getProduct(String sku) {
+        //需要返回箱规信息
         EccangProduct product = EccangProduct.builder()
-            .productSku(sku)
+            .productSku(sku).getProductBox(1)
             .build();
         // String response = post("getWmsProductList", product, String.class).get(0);
         // log.debug(response);
         // return JsonUtils.parseObject(response, EccangProduct.class);
-        return post("getWmsProductList", product, EccangProduct.class).get(0);
+        List<EccangProduct> getWmsProductList = post("getWmsProductList", product, EccangProduct.class);
+        if (CollUtil.isNotEmpty(getWmsProductList)){
+            return getWmsProductList.get(0);
+        }
+        return null;
     }
 
-    public Stream<BizContent> getInventory() {
+    public Stream<EccangPage> getInventory() {
         var payload = JsonUtils.newObject();
-        return getAllBiz(payload, "getProductInventory");
+        return getAllPage(payload, "getProductInventory");
     }
 
 
-    public Stream<BizContent> getInventoryBatchLog(LocalDateTime startTime, LocalDateTime endTime) {
+    public Stream<EccangPage> getInventoryBatchLog(LocalDateTime startTime, LocalDateTime endTime) {
         final DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
         final String START_TIME_ALIAS = "date_from";
         final String END_TIME_ALIAS = "date_to";
@@ -303,26 +353,46 @@ public class EccangService {
         log.info(code);
         var codeList = warehouseList.stream().map(EccangWarehouse::getWarehouseCode).toList();
         payload.put("warehouse_code", warehouseList);
-        return getAllBiz(payload, "getInventoryBatchLog");
+        return getAllPage(payload, "getInventoryBatchLog");
     }
 
 
 
 
 
-    public BizContent addDepartment(EccangCategory department) {
-        log.info("adding department: " + department.toString());
-        var result = post("editCategory", department);
-        log.debug(result.toString());
-        return result;
+    public EccangPage addDepartment(EccangCategory department) {
+        try {
+            log.info("adding department: " + department.toString());
+            var result = post("editCategory", department);
+            log.debug(result.toString());
+            return result;
+        } catch (Exception e) {
+            throw new RuntimeException("同步" + department.getPcName() + "时出现异常：" + e.getMessage());
+        }
     }
 
-    public BizContent addProduct(EccangProduct product) {
+    public EccangPage addProduct(EccangProduct product) {
         return post("syncProduct", product);
+    }
+
+    public EccangPage addProductBoxes(EccangProductBoxes boxes) {
+        return post("syncProductBoxes", boxes);
+    }
+
+    public void addBatchProduct(List<EccangProduct> products) {
+        EccangResponse syncBatchProduct = getResponse(products, "syncBatchProduct");
+        String code = syncBatchProduct.getCode();
+        if (!Objects.equals(code,"200")){
+            throw new RuntimeException("批量添加商品失败,原因："+ syncBatchProduct.getBizContentString());
+        }
     }
 
     public Stream<EccangCategory> getCategories() {
         return list("categotyList", EccangCategory.class);
+    }
+
+    public EccangCategory getCategoryByName(String name) {
+        return getCategories().filter(n->n.getPcName().equals(name)).findFirst().get();
     }
 
     public EccangCategory getCategoryByNameEn(String nameEn) {
@@ -335,7 +405,11 @@ public class EccangService {
 
     public EccangOrganization getOrganizationByNameEn(String nameEn) {
         log.debug("searching organization with name_en " + nameEn);
-        return getOrganizations().filter(n->n.getNameEn().equals(nameEn)).findFirst().get();
+        Optional<EccangOrganization> first = getOrganizations().filter(n -> n.getName().equals(nameEn)).findFirst();
+        if (first.isPresent()){
+            return first.get();
+        }
+        throw new RuntimeException("您传入的部门信息不存在于eccang信息库中");
     }
 
     public Stream<EccangProduct> getProducts() {

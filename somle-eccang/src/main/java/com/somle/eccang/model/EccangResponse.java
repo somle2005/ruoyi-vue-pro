@@ -1,20 +1,17 @@
 package com.somle.eccang.model;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.somle.framework.common.util.json.JSONArray;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.somle.framework.common.util.json.JsonUtils;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.List;
 import java.util.Objects;
 
 
-@Data
+@Getter
+@Setter
 @AllArgsConstructor
 @NoArgsConstructor
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
@@ -31,24 +28,21 @@ public class EccangResponse {
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class EccangError {
         private String errorMsg;
         private String errorCode;
     }
 
-    public BizContent getBizContent() {
-        return JsonUtils.parseObject(bizContent, BizContent.class);
-    }
-
-    public List<EccangError> getErrors() {
-        return JsonUtils.parseArray(bizContent, EccangError.class);
+    public String getBizContentString() {
+        return bizContent;
     }
 
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-    public static class BizContent {
+    public static class EccangPage {
         private Integer total;
         private Integer totalCount;
         private JsonNode data;
@@ -84,5 +78,14 @@ public class EccangResponse {
         
         //custom
         // private JSONObject headers;
+    }
+
+
+    public <T> T getBizContent(Class<T> objectClass) {
+        return JsonUtils.parseObject(bizContent, objectClass);
+    }
+
+    public <T> List<T> getBizContentList(Class<T> objectClass) {
+        return JsonUtils.parseArray(bizContent, objectClass);
     }
 }

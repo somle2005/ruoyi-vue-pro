@@ -1,19 +1,9 @@
 package com.somle.esb.controller;
 
 import com.somle.esb.service.EsbService;
-import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.connection.stream.RecordId;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StreamOperations;
-import org.springframework.data.redis.core.StringRedisTemplate;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/esb")
@@ -27,6 +17,8 @@ public class EsbController {
         service.printAllBeans();
     }
 
+
+
 //    @PostMapping("/dataCollect")
 //    public String dataCollect(LocalDate scheduleDate, String database) {
 //        if (database == null) {
@@ -37,15 +29,13 @@ public class EsbController {
 //        return "success";
 //    }
 
-    @PostMapping("/syncDepartments")
-    public String syncDepartments() {
-        service.syncDepartments();
-        return "success";
-    }
+
 
     @PostMapping("/syncUsers")
     public String syncUsers() {
-        service.syncUsers();
+        /*ErpProductDTO a = new ErpProductDTO();
+        a.setProductDeptId(50007L);
+        service.handleProductsToKingdee(MessageBuilder.withPayload(List.of(a)).build());*/
         return "success";
     }
 

@@ -16,7 +16,7 @@
         <module>yudao-module-system</module>
         <module>yudao-module-infra</module>
 <!--        <module>yudao-module-member</module>-->
-        <module>yudao-module-bpm</module>
+<!--        <module>yudao-module-bpm</module>-->
 <!--        <module>yudao-module-report</module>-->
 <!--        <module>yudao-module-mp</module>-->
 <!--        <module>yudao-module-pay</module>-->
@@ -39,6 +39,9 @@
         <module>somle-ai</module>
         <module>somle-matomo</module>
         <module>somle-microsoft</module>
+        <module>somle-wangdian</module>
+        <module>somle-shopify</module>
+        <module>somle-wayfair</module>
 
     </modules>
 

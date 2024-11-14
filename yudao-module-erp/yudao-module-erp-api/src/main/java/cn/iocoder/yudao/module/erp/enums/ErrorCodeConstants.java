@@ -9,7 +9,7 @@ import cn.iocoder.yudao.framework.common.exception.ErrorCode;
  * @author Administrator
  */
 public interface ErrorCodeConstants {
-    ErrorCode CUSTOM_RULE_NOT_EXISTS = new ErrorCode(99999, "ERP 海关规则不存在");
+    ErrorCode AOP_ENHANCED_EXCEPTION = new ErrorCode(100001, "AOP增强异常");
 
     // ========== ERP 供应商（1-030-100-000） ==========
     ErrorCode SUPPLIER_NOT_EXISTS = new ErrorCode(1_030_100_000, "供应商不存在");
@@ -145,6 +145,7 @@ public interface ErrorCodeConstants {
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(1_030_500_000, "产品不存在");
     ErrorCode PRODUCT_NOT_ENABLE = new ErrorCode(1_030_500_001, "产品({})未启用");
     ErrorCode PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_500_002, "产品编码已存在");
+    ErrorCode DEPT_LEVEL_NOT_MATCH = new ErrorCode(1_030_500_003, "部门等级不符合要求");
     //自定义属性不能为空
     ErrorCode PRODUCT_VALUE_NOT_NULL = new ErrorCode(1_030_500_003, "自定义属性不能为空");
     //传入属性中存在确实字段
@@ -202,4 +203,8 @@ public interface ErrorCodeConstants {
     ErrorCode PURCHASE_REQUEST_NO_EXISTS = new ErrorCode(1_030_101_004, "生成采购申请单号失败，请重新提交");
     ErrorCode PURCHASE_REQUEST_PROCESS_FAIL = new ErrorCode(1_030_101_005, "反审核失败，只有已审核的采购申请单才能反审核");
     ErrorCode PURCHASE_REQUEST_APPROVE_FAIL = new ErrorCode(1_030_101_006, "审核失败，只有未审核的采购申请单才能审核");
+
+    // ========== ERP 海关规则 1-030-604-000 ==========
+    ErrorCode CUSTOM_RULE_NOT_EXISTS = new ErrorCode(1_030_604_000, "ERP 海关规则不存在");
+    ErrorCode CUSTOM_RULE_PART_NULL = new ErrorCode(1_030_604_001, "集合中存在部分集合产品名称或供应商产品编码为空");
 }

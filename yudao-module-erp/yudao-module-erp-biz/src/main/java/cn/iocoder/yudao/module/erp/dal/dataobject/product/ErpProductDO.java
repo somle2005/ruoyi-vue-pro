@@ -1,5 +1,9 @@
 package cn.iocoder.yudao.module.erp.dal.dataobject.product;
 
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 import java.util.*;
 import java.time.LocalDateTime;
@@ -35,6 +39,15 @@ public class ErpProductDO extends BaseDO {
      * 产品名称
      */
     private String name;
+    /**
+     * 部门id
+     */
+    private Long deptId;
+    /**
+     * 图片URL
+     */
+    private String imageUrl;
+
     /**
      * 产品分类编号
      */

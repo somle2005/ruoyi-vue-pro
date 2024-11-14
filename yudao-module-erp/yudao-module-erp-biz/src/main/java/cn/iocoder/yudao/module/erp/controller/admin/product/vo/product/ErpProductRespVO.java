@@ -29,9 +29,18 @@ public class ErpProductRespVO implements VO {
     @ExcelProperty("产品名称")
     private String name;
 
-    @Schema(description = "产品分类编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "13429")
-    @ExcelProperty("产品分类编号")
-    @Trans(type = TransType.SIMPLE, target = ErpProductCategoryDO.class,fields = "name",ref = "categoryName")
+    @Schema(description = "图片URL", example = "https://www.iocoder.cn")
+    @ExcelProperty("图片URL")
+    private String imageUrl;
+
+    @Schema(description = "部门id", example = "23043")
+    @Trans(type = TransType.SIMPLE, targetClassName = "cn.iocoder.yudao.module.system.dal.dataobject.dept.DeptDO", fields = "name", ref = "deptName")
+    private Long deptId;
+
+    @Schema(description = "部门名称", example = "李四")
+    private String deptName;
+
+    @Schema(description = "产品分类编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "11161")
     private Long categoryId;
 
     @Schema(description = "产品分类名称")
@@ -98,35 +107,8 @@ public class ErpProductRespVO implements VO {
     @ExcelProperty("基础高度（mm）")
     private BigDecimal height;
 
-    @Schema(description = "图片URL，json格式", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.iocoder.cn")
-    @ExcelProperty("图片URL，json格式")
-    private String imageUrl;
-
-    @Schema(description = "指导价，json格式", requiredMode = Schema.RequiredMode.REQUIRED, example = "16486")
-    @ExcelProperty("指导价，json格式")
-    private String guidePrice;
-
-    @Schema(description = "专利")
-    @ExcelProperty("专利")
-    private String patent;
-
-    @Schema(description = "PO产品经理id", example = "29334")
-    @ExcelProperty("PO产品经理id")
-    private Long poId;
-
-    @Schema(description = "ID工业设计id", example = "14664")
-    @ExcelProperty("ID工业设计id")
-    private Long idId;
-
-    @Schema(description = "RD研发工程师id", example = "25601")
-    @ExcelProperty("RD研发工程师id")
-    private Long rdId;
-
-    @Schema(description = "维护工程师id", example = "15554")
-    @ExcelProperty("维护工程师id")
-    private Long meId;
-
-    @Schema(description = "字段值列表")
-    private List<SystemValueDTO> values;
+    @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("创建时间")
+    private LocalDateTime createTime;
 
 }
