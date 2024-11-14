@@ -22,6 +22,8 @@ public class ErpProductSaveReqVO {
     @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "19197")
     private Long id;
 
+    private Long deptId;
+
     @Schema(description = "产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "李四")
     @NotEmpty(message = "产品名称不能为空")
     private String name;

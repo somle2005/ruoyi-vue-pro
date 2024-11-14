@@ -276,7 +276,8 @@ public class ErpProductServiceImpl implements ErpProductService {
         //拷贝
         ErpProductRespVO erpProductRespVO = BeanUtils.toBean(erpProductDO, ErpProductRespVO.class);
         //封装属性值
-        erpProductRespVO.setValues(systemValueDtos);
+        //TODO erp自定义字段与原main冲突
+        //erpProductRespVO.setValues(systemValueDtos);
         return erpProductRespVO;
     }
 

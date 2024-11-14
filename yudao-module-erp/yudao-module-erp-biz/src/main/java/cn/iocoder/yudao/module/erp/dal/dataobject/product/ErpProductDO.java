@@ -43,10 +43,6 @@ public class ErpProductDO extends BaseDO {
      * 部门id
      */
     private Long deptId;
-    /**
-     * 图片URL
-     */
-    private String imageUrl;
 
     /**
      * 产品分类编号

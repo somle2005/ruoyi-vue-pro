@@ -48,7 +48,8 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
                 .selectAs(ErpProductDO::getHeight, ErpCustomRuleDTO::getProductHeight)
                 .selectAs(ErpProductDO::getMaterial, ErpCustomRuleDTO::getProductMaterial)
                 .selectAs(ErpProductDO::getCreator, ErpCustomRuleDTO::getProductCreatorId)
-                .selectAs(ErpProductDO::getPurchasePrice,ErpCustomRuleDTO::getProductPurchaseValue)
+                //TODO erp自定义字段与原main冲突
+                //.selectAs(ErpProductDO::getPurchasePrice,ErpCustomRuleDTO::getProductPurchaseValue)
                 .select(ErpProductDO::getBarCode)
                 .selectAs(ErpProductDO::getDeptId, ErpCustomRuleDTO::getProductDeptId);
     }

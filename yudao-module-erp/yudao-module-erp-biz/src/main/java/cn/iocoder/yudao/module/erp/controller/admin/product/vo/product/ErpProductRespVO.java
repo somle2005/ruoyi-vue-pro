@@ -107,8 +107,4 @@ public class ErpProductRespVO implements VO {
     @ExcelProperty("基础高度（mm）")
     private BigDecimal height;
 
-    @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("创建时间")
-    private LocalDateTime createTime;
-
 }
