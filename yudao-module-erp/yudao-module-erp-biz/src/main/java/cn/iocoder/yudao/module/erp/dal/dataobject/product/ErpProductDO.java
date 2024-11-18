@@ -120,6 +120,10 @@ public class ErpProductDO extends BaseDO {
      * 备注
      */
     private String remark;
+    /**
+     * 颜色
+     */
+    private String color;
 
 
 }

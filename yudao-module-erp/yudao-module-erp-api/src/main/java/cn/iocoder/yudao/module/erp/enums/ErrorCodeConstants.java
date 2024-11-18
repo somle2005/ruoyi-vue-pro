@@ -144,7 +144,7 @@ public interface ErrorCodeConstants {
     // ========== ERP 产品 1-030-500-000 ==========
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(1_030_500_000, "产品不存在");
     ErrorCode PRODUCT_NOT_ENABLE = new ErrorCode(1_030_500_001, "产品({})未启用");
-    ErrorCode PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_500_002, "产品编码已存在");
+    ErrorCode PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_500_002, "产品SKU（编码）已存在");
     ErrorCode DEPT_LEVEL_NOT_MATCH = new ErrorCode(1_030_500_003, "部门等级不符合要求");
     ErrorCode AUX_INFO_ID_NOT_EXISTS = new ErrorCode(1_030_500_004, "辅助字段id不存在");
     ErrorCode AUX_INFO_LENGTH_NOT_MATCH = new ErrorCode(1_030_500_005, "产品辅助字段条数长度异常");

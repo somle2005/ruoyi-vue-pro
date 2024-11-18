@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.product.vo.product;
 
 import lombok.*;
-import java.util.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import java.math.BigDecimal;
@@ -49,6 +48,9 @@ public class ErpProductPageReqVO extends PageParam {
 
     @Schema(description = "系列")
     private String series;
+
+    @Schema(description = "颜色")
+    private String color;
 
     @Schema(description = "型号")
     private String model;

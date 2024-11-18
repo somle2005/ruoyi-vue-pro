@@ -1,11 +1,9 @@
 package cn.iocoder.yudao.module.erp.controller.admin.product.vo.product;
 
-import com.fhs.core.trans.vo.VO;
+
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import java.util.*;
 import java.math.BigDecimal;
-import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import com.alibaba.excel.annotation.*;
 
@@ -15,7 +13,7 @@ import com.alibaba.excel.annotation.*;
 @Schema(description = "管理后台 - ERP 产品 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class ErpProductRespVO implements VO {
+public class ErpProductRespVO {
 
     @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "731")
     @ExcelProperty("产品编号")
@@ -28,10 +26,9 @@ public class ErpProductRespVO implements VO {
     @Schema(description = "产品分类编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "30796")
     @ExcelProperty("产品分类编号")
     private Long categoryId;
-
-    @Schema(description = "采购价格，单位：元", example = "29130")
-    @ExcelProperty("采购价格，单位：元")
-    private BigDecimal purchasePrice;
+    @Schema(description = "产品分类", requiredMode = Schema.RequiredMode.REQUIRED, example = "水果")
+    @ExcelProperty("产品分类")
+    private String categoryName;
 
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("创建时间")
@@ -40,6 +37,9 @@ public class ErpProductRespVO implements VO {
     @Schema(description = "部门id", requiredMode = Schema.RequiredMode.REQUIRED, example = "3419")
     @ExcelProperty("部门id")
     private Long deptId;
+    @Schema(description = "部门名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "研发部")
+    @ExcelProperty("部门名称")
+    private String deptName;
 
     @Schema(description = "SKU（编码）")
     @ExcelProperty("SKU（编码）")
@@ -48,6 +48,10 @@ public class ErpProductRespVO implements VO {
     @Schema(description = "单位编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "9042")
     @ExcelProperty("单位编号")
     private Long unitId;
+    @Schema(description = "单位", requiredMode = Schema.RequiredMode.REQUIRED, example = "个")
+    @ExcelProperty("单位")
+    private String unitName;
+
 
     @Schema(description = "材料（中文）", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("材料（中文）")
@@ -104,23 +108,38 @@ public class ErpProductRespVO implements VO {
     @Schema(description = "PO产品经理id", example = "18303")
     @ExcelProperty("PO产品经理id")
     private Long poId;
+    @Schema(description = "PO产品经理名称", example = "王五")
+    @ExcelProperty("PO产品经理名称")
+    private String poName;
 
     @Schema(description = "ID工业设计id", example = "14564")
     @ExcelProperty("ID工业设计id")
     private Long idId;
+    @Schema(description = "ID工业设计名称", example = "王五")
+    @ExcelProperty("ID工业设计名称")
+    private String idName;
 
     @Schema(description = "RD研发工程师id", example = "13409")
     @ExcelProperty("RD研发工程师id")
     private Long rdId;
+    @Schema(description = "RD研发工程师名称", example = "王五")
+    @ExcelProperty("RD研发工程师名称")
+    private String rdName;
 
     @Schema(description = "维护工程师id", example = "11519")
     @ExcelProperty("维护工程师id")
     private Long meId;
+    @Schema(description = "维护工程师名称", example = "王五")
+    @ExcelProperty("维护工程师名称")
+    private String meName;
 
     @Schema(description = "备注", example = "随便")
     @ExcelProperty("备注")
     private String remark;
 
+    @Schema(description = "颜色", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("颜色")
+    private String color;
 
     @Schema(description = "辅助字段")
     private Object additional;

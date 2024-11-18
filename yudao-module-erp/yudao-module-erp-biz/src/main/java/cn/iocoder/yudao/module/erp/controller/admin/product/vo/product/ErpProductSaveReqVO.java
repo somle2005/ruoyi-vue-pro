@@ -73,11 +73,11 @@ public class ErpProductSaveReqVO {
     private BigDecimal height;
 
     @Schema(description = "图片URL，json格式", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.iocoder.cn")
-    @NotEmpty(message = "图片不能为空")
+    //@NotEmpty(message = "图片不能为空")
     private List<@Valid ImageUrlJson> imageUrl;
 
     @Schema(description = "指导价，json格式", requiredMode = Schema.RequiredMode.REQUIRED, example = "16486")
-    @NotEmpty(message = "指导价不能为空")
+    //@NotEmpty(message = "指导价不能为空")
     private List<@Valid GuidePriceJson> guidePrice;
 
     @Schema(description = "专利")
@@ -97,6 +97,10 @@ public class ErpProductSaveReqVO {
 
     @Schema(description = "备注", example = "随便")
     private String remark;
+
+    @Schema(description = "颜色", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotEmpty(message = "颜色不能为空")
+    private String color;
 
     @Schema(description = "额外字段")
     private Map<String,Object> additionalMap;

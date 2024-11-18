@@ -20,7 +20,9 @@ import cn.iocoder.yudao.module.erp.dal.mysql.logistic.customrule.ErpCustomRuleMa
 import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
 import cn.iocoder.yudao.module.erp.service.supporting.MyBatisDOService;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
+import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
@@ -70,14 +72,13 @@ public class ErpProductServiceImpl implements ErpProductService {
     @Transactional(rollbackFor = Exception.class)
     public Long createProduct(ErpProductSaveReqVO createReqVO) {
         //TODO 暂时编号不是系统自动生成，后续添加生成规则，流水号的递增由编号来判断，编号相同流水号便自增
-        //获取编码
-        String barCode = createReqVO.getBarCode();
         //校验是否存在相同的产品编码
-        Boolean codeUnique = validateProductCodeUnique(null, barCode);
-        //如果产品的编码已经存在
-        if (codeUnique){
+        validateProductCodeUnique(null, createReqVO.getBarCode());
+        //校验颜色，型号，系列是否已经有存在相同的产品
+        boolean b = validateProductColorAndSeriesAndModel(createReqVO.getColor(), createReqVO.getModel(), createReqVO.getSeries());
+        if (b){
             //获取递增后流水号
-            Integer serial = increaseSerial(barCode);
+            Integer serial = increaseSerial(createReqVO.getColor(), createReqVO.getModel(), createReqVO.getSeries());
             createReqVO.setSerial(serial);
         }
         //校验部门id的合法性
@@ -108,7 +109,10 @@ public class ErpProductServiceImpl implements ErpProductService {
         return productId;
     }
 
-
+    private boolean validateProductColorAndSeriesAndModel(String color, String model, String series) {
+        List<ErpProductDO> products = productMapper.selectByColorAndSeriesAndModel(color,model,series);
+        return CollUtil.isNotEmpty(products);
+    }
 
 
     @Override
@@ -117,13 +121,13 @@ public class ErpProductServiceImpl implements ErpProductService {
         Long id = updateReqVO.getId();
         // 校验存在
         validateProductExists(id);
-        String barCode = updateReqVO.getBarCode();
         //校验不同的id下是否存在相同的产品编码
-        Boolean codeUnique = validateProductCodeUnique(updateReqVO.getId(), updateReqVO.getBarCode());
-        //如果产品的编码已经存在
-        if (codeUnique){
+        validateProductCodeUnique(updateReqVO.getId(), updateReqVO.getBarCode());
+        //校验颜色，型号，系列是否已经有存在相同的产品
+        boolean b = validateProductColorAndSeriesAndModel(updateReqVO.getColor(), updateReqVO.getModel(), updateReqVO.getSeries());
+        if (b){
             //获取递增后流水号
-            Integer serial = increaseSerial(barCode);
+            Integer serial = increaseSerial(updateReqVO.getColor(), updateReqVO.getModel(), updateReqVO.getSeries());
             updateReqVO.setSerial(serial);
         }
         //校验部门有效性
@@ -259,16 +263,14 @@ public class ErpProductServiceImpl implements ErpProductService {
         return erpProductDO;
     }
 
-    private Boolean validateProductCodeUnique(Long id, String code) {
-        List<ErpProductDO> products = productMapper.selectByCode(code);
-        if (CollUtil.isEmpty(products)){
-            return false;
+    private void validateProductCodeUnique(Long id, String code) {
+        ErpProductDO product = productMapper.selectByCode(code);
+        if (ObjUtil.isEmpty(product)){
+            return;
         }
         // 如果 id 为空，说明不用比较是否为相同 id 的产品
-        if (id == null){
-            return true;
-        }
-        return !products.stream().map(ErpProductDO::getId).toList().contains(id);
+        ThrowUtil.ifEmptyThrow(id,PRODUCT_CODE_DUPLICATE);
+        ThrowUtil.ifThrow(!Objects.equals(product.getId(),id),PRODUCT_CODE_DUPLICATE);
     }
 
     private List<ErpProductRespVO> buildProductVOList(List<ErpProductDO> list) {
@@ -279,11 +281,26 @@ public class ErpProductServiceImpl implements ErpProductService {
                 convertSet(list, ErpProductDO::getCategoryId));
         Map<Long, ErpProductUnitDO> unitMap = productUnitService.getProductUnitMap(
                 convertSet(list, ErpProductDO::getUnitId));
+        Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(convertSet(list, ErpProductDO::getDeptId));
+        Map<Long, AdminUserRespDTO> poUserMap = userApi.getUserMap(convertSet(list, ErpProductDO::getPoId));
+        Map<Long, AdminUserRespDTO> idUserMap = userApi.getUserMap(convertSet(list, ErpProductDO::getIdId));
+        Map<Long, AdminUserRespDTO> rdUserMap = userApi.getUserMap(convertSet(list, ErpProductDO::getRdId));
+        Map<Long, AdminUserRespDTO> meUserMap = userApi.getUserMap(convertSet(list, ErpProductDO::getMeId));
         return BeanUtils.toBean(list, ErpProductRespVO.class, product -> {
             MapUtils.findAndThen(categoryMap, product.getCategoryId(),
                     category -> product.setCategoryName(category.getName()));
             MapUtils.findAndThen(unitMap, product.getUnitId(),
                     unit -> product.setUnitName(unit.getName()));
+            MapUtils.findAndThen(deptMap, product.getDeptId(),
+                    dept -> product.setDeptName(dept.getName()));
+            MapUtils.findAndThen(poUserMap, product.getPoId(),
+                    user -> product.setPoName(user.getNickname()));
+            MapUtils.findAndThen(idUserMap, product.getIdId(),
+                    user -> product.setIdName(user.getNickname()));
+            MapUtils.findAndThen(rdUserMap, product.getRdId(),
+                    user -> product.setRdName(user.getNickname()));
+            MapUtils.findAndThen(meUserMap, product.getMeId(),
+                    user -> product.setMeName(user.getNickname()));
         });
     }
 
@@ -303,11 +320,16 @@ public class ErpProductServiceImpl implements ErpProductService {
      * @Param [barCode]
      * @return java.lang.Integer
      **/
-    private Integer increaseSerial(String barCode) {
+    private Integer increaseSerial(String color, String model, String series) {
         try {
             LOCK.lock();
-            Integer serial = productMapper.selectMaxSerialByBarCode(barCode);
-            return ++serial;
+            ErpProductDO erpProductDO = productMapper.selectMaxSerialByColorAndModelAndSeries(color, model, series);
+            if (ObjUtil.isNotEmpty(erpProductDO)){
+                Integer serial = erpProductDO.getSerial();
+                return ++serial;
+            }else {
+                return 0;
+            }
         } finally {
             LOCK.unlock();
         }
