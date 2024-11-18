@@ -154,7 +154,7 @@ public class ErpProductServiceImpl implements ErpProductService {
             myBatisDOService.updateAdditionalData(additionalDO);
         }
         //同步数据
-        var dtos = customRuleMapper.selectProductAllInfoListByCustomRuleId(id);
+        var dtos = customRuleMapper.selectProductAllInfoListById(id);
         erpProductChannel.send(MessageBuilder.withPayload(dtos).build());
     }
 
@@ -237,10 +237,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         if (additionalMap == null) {
             return null;
         }
-
-        // map中获取表名
-        String tableName = TableAssociationInitialization.getTableMap().get(categoryId);
-        Class<?> additionalType = myBatisDOService.getEntityClassByTableName(tableName);
+        Class<?> additionalType = myBatisDOService.getEntityClassByMapper(TableAssociationInitialization.getTableMap().get(categoryId));
         // 拷贝属性
         Object additionalDO = BeanUtil.copyProperties(additionalMap, additionalType);
         // 校验实体是否符合

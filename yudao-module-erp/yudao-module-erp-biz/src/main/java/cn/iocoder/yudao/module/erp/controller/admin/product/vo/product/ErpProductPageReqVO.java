@@ -25,9 +25,6 @@ public class ErpProductPageReqVO extends PageParam {
     @Schema(description = "产品分类编号", example = "30796")
     private Long categoryId;
 
-    @Schema(description = "采购价格，单位：元", example = "29130")
-    private BigDecimal purchasePrice;
-
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;

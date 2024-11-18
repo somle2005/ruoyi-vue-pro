@@ -37,10 +37,6 @@ public class ErpProductDO extends BaseDO {
      */
     private Long categoryId;
     /**
-     * 采购价格，单位：元
-     */
-    private BigDecimal purchasePrice;
-    /**
      * 部门id
      */
     private Long deptId;

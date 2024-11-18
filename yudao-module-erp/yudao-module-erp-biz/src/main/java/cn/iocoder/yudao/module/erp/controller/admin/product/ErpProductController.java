@@ -5,12 +5,10 @@ import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -86,8 +84,7 @@ public class ErpProductController {
         return success(convertList(list, product -> new ErpProductRespVO().setId(product.getId())
                 .setName(product.getName()).setBarCode(product.getBarCode())
                 .setCategoryId(product.getCategoryId()).setCategoryName(product.getCategoryName())
-                .setUnitId(product.getUnitId()).setUnitName(product.getUnitName())
-                .setPurchasePrice(product.getPurchasePrice())));
+                .setUnitId(product.getUnitId()).setUnitName(product.getUnitName())));
     }
 
     @GetMapping("/export-excel")

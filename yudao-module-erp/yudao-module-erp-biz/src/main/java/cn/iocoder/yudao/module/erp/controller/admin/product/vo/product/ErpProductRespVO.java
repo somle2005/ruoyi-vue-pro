@@ -31,10 +31,6 @@ public class ErpProductRespVO {
     @ExcelProperty("产品分类")
     private String categoryName;
 
-    @Schema(description = "采购价格，单位：元", example = "29130")
-    @ExcelProperty("采购价格，单位：元")
-    private BigDecimal purchasePrice;
-
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;

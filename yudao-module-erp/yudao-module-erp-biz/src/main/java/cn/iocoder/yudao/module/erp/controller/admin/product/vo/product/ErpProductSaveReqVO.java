@@ -24,9 +24,6 @@ public class ErpProductSaveReqVO {
     @NotNull(message = "产品分类编号不能为空")
     private Long categoryId;
 
-    @Schema(description = "采购价格，单位：元", example = "29130")
-    private BigDecimal purchasePrice;
-
     @Schema(description = "部门id", requiredMode = Schema.RequiredMode.REQUIRED, example = "3419")
     @NotNull(message = "部门id不能为空")
     private Long deptId;
