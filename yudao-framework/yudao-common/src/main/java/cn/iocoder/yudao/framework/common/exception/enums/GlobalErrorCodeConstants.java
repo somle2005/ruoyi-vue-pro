@@ -31,9 +31,9 @@ public interface GlobalErrorCodeConstants {
     ErrorCode INTERNAL_SERVER_ERROR = new ErrorCode(500, "系统异常");
     ErrorCode NOT_IMPLEMENTED = new ErrorCode(501, "功能未实现/未开启");
     ErrorCode ERROR_CONFIGURATION = new ErrorCode(502, "错误的配置项");
-    ErrorCode NOT_FOUND_TABLE_NAME_BEAN = new ErrorCode(503, "未找到({})的bean");
+    ErrorCode NOT_FOUND_TABLE_NAME_BEAN = new ErrorCode(503, "未找到({})对应的泛型实体");
     ErrorCode BAD_PARAMETER = new ErrorCode(504, "校验异常：{}");
-    ErrorCode THE_BEAN_EXCEPTION  = new ErrorCode(505, "获取到的bean存在异常，非指定子类");
+    ErrorCode NOT_FOUND_MAPPER_BEAN = new ErrorCode(505, "未找到({})对应的mapper");
 
     // ========== 自定义错误段 ==========
     ErrorCode REPEATED_REQUESTS = new ErrorCode(900, "重复请求，请稍后重试"); // 重复请求

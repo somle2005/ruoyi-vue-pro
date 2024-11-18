@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.product.vo.product;
 
+import com.fhs.core.trans.vo.VO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import java.util.*;
@@ -14,7 +15,7 @@ import com.alibaba.excel.annotation.*;
 @Schema(description = "管理后台 - ERP 产品 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class ErpProductRespVO {
+public class ErpProductRespVO implements VO {
 
     @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "731")
     @ExcelProperty("产品编号")
@@ -27,9 +28,10 @@ public class ErpProductRespVO {
     @Schema(description = "产品分类编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "30796")
     @ExcelProperty("产品分类编号")
     private Long categoryId;
-    @Schema(description = "产品分类", requiredMode = Schema.RequiredMode.REQUIRED, example = "水果")
-    @ExcelProperty("产品分类")
-    private String categoryName;
+
+    @Schema(description = "采购价格，单位：元", example = "29130")
+    @ExcelProperty("采购价格，单位：元")
+    private BigDecimal purchasePrice;
 
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("创建时间")
@@ -46,10 +48,6 @@ public class ErpProductRespVO {
     @Schema(description = "单位编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "9042")
     @ExcelProperty("单位编号")
     private Long unitId;
-    @Schema(description = "单位", requiredMode = Schema.RequiredMode.REQUIRED, example = "个")
-    @ExcelProperty("单位")
-    private String unitName;
-
 
     @Schema(description = "材料（中文）", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("材料（中文）")
@@ -122,6 +120,7 @@ public class ErpProductRespVO {
     @Schema(description = "备注", example = "随便")
     @ExcelProperty("备注")
     private String remark;
+
 
     @Schema(description = "辅助字段")
     private Object additional;

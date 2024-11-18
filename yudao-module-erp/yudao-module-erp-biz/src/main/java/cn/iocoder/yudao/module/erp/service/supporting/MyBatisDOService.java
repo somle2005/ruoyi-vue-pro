@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.service.supporting;
 
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
+import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.module.erp.dal.supporting.TableAssociationInitialization;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import jakarta.annotation.Nonnull;
@@ -43,12 +44,19 @@ public class MyBatisDOService implements ApplicationContextAware {
     * @return java.lang.Class<?>
     **/
     public Class<?> getEntityClassByMapper(Class<?> mapperClass) {
+        // 获取映射类的泛型接口
         Type[] genericInterfaces = mapperClass.getGenericInterfaces();
+        // 遍历每个泛型接口
         for (Type genericInterface : genericInterfaces) {
+            // 检查泛型接口是否为参数化类型
             if (genericInterface instanceof ParameterizedType parameterizedType) {
-                if (parameterizedType.getRawType() == BaseMapper.class) {
+                // 检查参数化类型的原始类型是否为BaseMapper
+                if (parameterizedType.getRawType() == BaseMapperX.class) {
+                    // 获取参数化类型的实际类型参数
                     Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                    // 检查实际类型参数是否存在且为Class类型
                     if (actualTypeArguments.length > 0 && actualTypeArguments[0] instanceof Class) {
+                        // 返回第一个实际类型参数
                         return (Class<?>) actualTypeArguments[0];
                     }
                 }
@@ -70,7 +78,7 @@ public class MyBatisDOService implements ApplicationContextAware {
             Object mapper = applicationContext.getBean(mapperClass);
             return (BaseMapper<?>) mapper;
         } catch (BeansException e) {
-            throw exception(NOT_FOUND_TABLE_NAME_BEAN, mapperClass.getName());
+            throw exception(NOT_FOUND_MAPPER_BEAN, mapperClass.getName());
         }
     }
 
@@ -80,9 +88,9 @@ public class MyBatisDOService implements ApplicationContextAware {
     * @Date 11:34 2024/11/18
     * @Param [additionalDO]
     **/
-    public void insertAdditionalData(Object additionalDO) {
-        Class<?> additionalType = additionalDO.getClass();
-        BaseMapper<?> mapper = getMapper(additionalType);
+    public void insertAdditionalData(Long categoryId,Object additionalDO) {
+        // map中获取mapper
+        BaseMapper<?> mapper = getMapper(TableAssociationInitialization.getTableMap().get(categoryId));
         ThrowUtil.ifSqlThrow(((BaseMapper<Object>) mapper).insert(additionalDO), DB_INSERT_ERROR);
     }
 
@@ -93,9 +101,9 @@ public class MyBatisDOService implements ApplicationContextAware {
     * @Date 11:34 2024/11/18
     * @Param [additionalDO]
     **/
-    public void updateAdditionalData(Object additionalDO) {
-        Class<?> additionalType = additionalDO.getClass();
-        BaseMapper<?> mapper = getMapper(additionalType);
+    public void updateAdditionalData(Long categoryId,Object additionalDO) {
+        // map中获取mapper
+        BaseMapper<?> mapper = getMapper(TableAssociationInitialization.getTableMap().get(categoryId));
         ThrowUtil.ifSqlThrow(((BaseMapper<Object>) mapper).updateById(additionalDO), DB_UPDATE_ERROR);
     }
 

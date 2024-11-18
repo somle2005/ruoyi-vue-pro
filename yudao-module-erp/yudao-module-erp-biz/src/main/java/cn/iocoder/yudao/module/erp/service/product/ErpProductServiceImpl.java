@@ -102,7 +102,7 @@ public class ErpProductServiceImpl implements ErpProductService {
             // 利用反射将productId设置到additionalDO中
             setProductIdInAdditionalDO(additionalDO, productId);
             // 插入额外的数据
-            myBatisDOService.insertAdditionalData(additionalDO);
+            myBatisDOService.insertAdditionalData(categoryId,additionalDO);
         }
         // 返回
         return productId;
@@ -151,7 +151,7 @@ public class ErpProductServiceImpl implements ErpProductService {
             // 利用反射将productId设置到additionalDO中
             setProductIdInAdditionalDO(additionalDO, id);
             // 更新额外的数据
-            myBatisDOService.updateAdditionalData(additionalDO);
+            myBatisDOService.updateAdditionalData(categoryId,additionalDO);
         }
         //同步数据
         var dtos = customRuleMapper.selectProductAllInfoListById(id);
