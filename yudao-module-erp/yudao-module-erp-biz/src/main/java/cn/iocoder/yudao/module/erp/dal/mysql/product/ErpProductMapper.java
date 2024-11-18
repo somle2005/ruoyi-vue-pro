@@ -33,12 +33,26 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
         return selectCount(ErpProductDO::getUnitId, unitId);
     }
 
-    default ErpProductDO selectByCode(String code) {
-        return selectOne(ErpProductDO::getBarCode, code);
+    default List<ErpProductDO> selectByCode(String code) {
+        return selectList(ErpProductDO::getBarCode, code);
     }
 
     default List<ErpProductDO> selectListByStatus(Integer status) {
         return selectList(ErpProductDO::getStatus, status);
     }
 
+    /**
+     * @Author Wqh
+     * @Description 根据编码查询出最大的流水号
+     * @Date 13:36 2024/10/21
+     * @Param [barCode]
+     * @return java.lang.Integer
+     **/
+    default Integer selectMaxSerialByBarCode(String barCode) {
+        return selectOne(new LambdaQueryWrapperX<ErpProductDO>()
+                .select(ErpProductDO::getSerial)
+                .eq(ErpProductDO::getBarCode, barCode)
+                .orderByDesc(ErpProductDO::getSerial)
+                .last("limit 1")).getSerial();
+    }
 }
