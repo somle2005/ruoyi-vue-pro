@@ -29,6 +29,7 @@ import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
@@ -55,7 +56,7 @@ import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.USER_NOT_E
 @RequiredArgsConstructor
 public class ErpProductServiceImpl implements ErpProductService {
     @Resource
-    MessageChannel erpProductChannel;
+    private MessageChannel erpProductChannel;
     private final ErpProductMapper productMapper;
     private final ErpProductCategoryService productCategoryService;
     private final ErpProductUnitService productUnitService;
@@ -238,7 +239,7 @@ public class ErpProductServiceImpl implements ErpProductService {
     private Object handleAdditionalFields(ErpProductSaveReqVO reqVO, Long categoryId) {
         // 获取额外的字段
         Map<String, Object> additionalMap = reqVO.getAdditionalMap();
-        if (additionalMap == null) {
+        if (CollUtil.isEmpty(additionalMap)) {
             return null;
         }
         Class<?> additionalType = myBatisDOService.getEntityClassByMapper(TableAssociationInitialization.getTableMap().get(categoryId));
@@ -326,6 +327,8 @@ public class ErpProductServiceImpl implements ErpProductService {
             ErpProductDO erpProductDO = productMapper.selectMaxSerialByColorAndModelAndSeries(color, model, series);
             if (ObjUtil.isNotEmpty(erpProductDO)){
                 Integer serial = erpProductDO.getSerial();
+                //判断序列号是否已超过99，超过则抛出异常
+                ThrowUtil.ifThrow(serial >= 99,PRODUCT_SERIAL_OVER_LIMIT);
                 return ++serial;
             }else {
                 return 0;

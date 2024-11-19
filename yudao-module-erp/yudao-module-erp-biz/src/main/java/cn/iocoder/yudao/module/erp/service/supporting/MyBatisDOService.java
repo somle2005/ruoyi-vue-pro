@@ -132,8 +132,14 @@ public class MyBatisDOService implements ApplicationContextAware {
         BaseMapper<?> mapper = getMapper(TableAssociationInitialization.getTableMap().get(categoryId));
         // 根据产品id查询额外的数据
         List<?> objects = mapper.selectByMap(new HashMap<>() {{ put(PRODUCT_ID_TABLE_FIELD, productId); }});
-        // 获取到的list size一定是1个，因为产品和辅助字段是一对一的，如果超过两个则抛出异常
-        ThrowUtil.ifThrow(objects.size() != 1, AUX_INFO_LENGTH_NOT_MATCH);
-        return objects.get(0);
+        // 获取到的list size一定是1个或者没有，因为产品和辅助字段是一对一的，如果超过两个则抛出异常
+        if (objects.isEmpty()){
+            return null;
+        }else {
+            if (objects.size() == 1){
+                return objects.get(0);
+            }
+        }
+        throw exception(AUX_INFO_LENGTH_NOT_MATCH);
     }
 }

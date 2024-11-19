@@ -54,7 +54,6 @@ public class ErpProductSaveReqVO {
     private String model;
 
     @Schema(description = "流水号", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "流水号不能为空")
     private Integer serial;
 
     @Schema(description = "生产编号")
@@ -73,11 +72,11 @@ public class ErpProductSaveReqVO {
     private BigDecimal height;
 
     @Schema(description = "图片URL，json格式", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.iocoder.cn")
-    //@NotEmpty(message = "图片不能为空")
+    @NotEmpty(message = "图片不能为空")
     private List<@Valid ImageUrlJson> imageUrl;
 
     @Schema(description = "指导价，json格式", requiredMode = Schema.RequiredMode.REQUIRED, example = "16486")
-    //@NotEmpty(message = "指导价不能为空")
+    @NotEmpty(message = "指导价不能为空")
     private List<@Valid GuidePriceJson> guidePrice;
 
     @Schema(description = "专利")
