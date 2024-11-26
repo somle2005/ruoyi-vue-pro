@@ -9,8 +9,8 @@ import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProduc
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.GuidePriceJson;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.ImageUrlJson;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.tvstand.ErpProductTvStandSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
-import cn.iocoder.yudao.module.erp.service.supporting.MyBatisDOService;
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import cn.iocoder.yudao.module.infra.api.config.ConfigApiImpl;
 import cn.iocoder.yudao.module.infra.api.file.FileApi;
@@ -36,7 +36,6 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.math.BigDecimal;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 
 /**
@@ -54,7 +53,6 @@ import java.util.List;
         DeptApiImpl.class,
         AdminUserApiImpl.class,
         AdminUserServiceImpl.class,
-        MyBatisDOService.class,
         MessageChannel.class,
         ApplicationContext.class,
         ErpIntegrationConfig.class,
@@ -130,7 +128,11 @@ public class ErpProductServiceImplTest extends BaseDbUnitTest {
         mock.setMeId(50004L); // 维护工程师id
         mock.setRemark("随便"); // 备注
         mock.setColor("红色"); // 颜色
-        mock.setAdditionalMap(new HashMap<>()); // 额外字段
+
+        var details = ErpProductTvStandSaveReqVO.builder()
+            .shelfLoadCapacity("50")
+            .build();
+        mock.setAdditionalMap(details); // 额外字段
         return mock;
     }
 

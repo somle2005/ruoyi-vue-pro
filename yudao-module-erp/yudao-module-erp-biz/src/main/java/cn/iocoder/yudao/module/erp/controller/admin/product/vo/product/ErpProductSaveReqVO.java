@@ -102,6 +102,6 @@ public class ErpProductSaveReqVO {
     private String color;
 
     @Schema(description = "额外字段")
-    private Map<String,Object> additionalMap;
+    private Object additionalMap;
 
 }

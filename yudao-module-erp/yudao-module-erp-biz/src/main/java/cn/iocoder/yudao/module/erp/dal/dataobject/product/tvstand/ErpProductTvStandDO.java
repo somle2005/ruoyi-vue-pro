@@ -13,7 +13,6 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
  * @author 王奇辉
  */
 @TableName("erp_product_tv_stand")
-@KeySequence("erp_product_tv_stand_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -27,10 +26,10 @@ public class ErpProductTvStandDO extends BaseDO {
      */
     @TableId
     private Long id;
-    /**
-     * 产品主表id
-     */
-    private Long productId;
+//    /**
+//     * 产品主表id
+//     */
+//    private Long productId;
     /**
      * 层板承重
      */

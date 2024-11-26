@@ -8,14 +8,15 @@ import java.math.BigDecimal;
 
 @Schema(description = "管理后台 - ERP 电视机架产品新增/修改 Request VO")
 @Data
+@Builder
 public class ErpProductTvStandSaveReqVO {
 
-    @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "20264")
-    private Long id;
-
-    @Schema(description = "产品主表id", requiredMode = Schema.RequiredMode.REQUIRED, example = "12330")
-    @NotNull(message = "产品主表id不能为空")
-    private Long productId;
+//    @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "20264")
+//    private Long id;
+//
+//    @Schema(description = "产品主表id", requiredMode = Schema.RequiredMode.REQUIRED, example = "12330")
+//    @NotNull(message = "产品主表id不能为空")
+//    private Long productId;
 
     @Schema(description = "层板承重")
     private String shelfLoadCapacity;

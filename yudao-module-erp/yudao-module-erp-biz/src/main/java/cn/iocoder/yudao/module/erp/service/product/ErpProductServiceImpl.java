@@ -3,47 +3,51 @@ package cn.iocoder.yudao.module.erp.service.product;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.ReflectUtil;
 import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
-import cn.iocoder.yudao.module.erp.dal.supporting.TableAssociationInitialization;
+import cn.iocoder.yudao.module.erp.dal.mysql.product.tvstand.ErpProductTvStandMapper;
+import cn.iocoder.yudao.module.erp.dal.mysql.product.xxxx.ErpProductXxxxMapper;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.customrule.ErpCustomRuleMapper;
 import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
-import cn.iocoder.yudao.module.erp.service.supporting.MyBatisDOService;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
 import jakarta.validation.ValidatorFactory;
 import lombok.RequiredArgsConstructor;
-import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import java.lang.reflect.Field;
+
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
-import static cn.iocoder.yudao.module.erp.service.supporting.MyBatisDOService.PRODUCT_ADDITIONAL_ID;
-import static cn.iocoder.yudao.module.erp.service.supporting.MyBatisDOService.PRODUCT_ID;
 import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.USER_NOT_EXISTS;
 
 /**
@@ -55,6 +59,8 @@ import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.USER_NOT_E
 @Validated
 @RequiredArgsConstructor
 public class ErpProductServiceImpl implements ErpProductService {
+    @Autowired
+    private ApplicationContext applicationContext;
     @Resource
     private MessageChannel erpProductChannel;
     private final ErpProductMapper productMapper;
@@ -63,8 +69,12 @@ public class ErpProductServiceImpl implements ErpProductService {
     private final DeptApi deptApi;
     private final ErpCustomRuleMapper customRuleMapper;
     private static final ReentrantLock LOCK = new ReentrantLock();
-    private final MyBatisDOService myBatisDOService;
     private final AdminUserApi userApi;
+
+    private static final Map<Long, Class<? extends BaseMapperX<? extends BaseDO>>> TABLE_MAP = Map.of(
+        87L, ErpProductXxxxMapper.class,
+        88L, ErpProductTvStandMapper.class
+    );
 
 
 
@@ -91,23 +101,19 @@ public class ErpProductServiceImpl implements ErpProductService {
         //校验人员id是否存在
         validatePerson(createReqVO.getPoId(), createReqVO.getIdId(), createReqVO.getRdId(), createReqVO.getMeId());
         // 处理额外字段
-        Object additionalDO = handleAdditionalFields(createReqVO, categoryId);
+        Class<?> productDetailDOClass = getEntityClass(categoryId);
+        Object additionalDO = BeanUtil.copyProperties(createReqVO, productDetailDOClass);
+        BeanUtil.copyProperties(createReqVO.getAdditionalMap(), additionalDO);
+        validateDO(additionalDO);
         // 插入产品
         ErpProductDO product = BeanUtils.toBean(createReqVO, ErpProductDO.class);
         //将图片的实体和指导价的实体转为json字符串
         product.setImageUrl(JSONUtil.toJsonStr(createReqVO.getImageUrl()));
         product.setGuidePrice(JSONUtil.toJsonStr(createReqVO.getGuidePrice()));
         ThrowUtil.ifSqlThrow(productMapper.insert(product),DB_INSERT_ERROR);
-        //获取产品id
-        Long productId = product.getId();
-        if (additionalDO != null){
-            // 利用反射将productId设置到additionalDO中
-            setProductIdInAdditionalDO(additionalDO, productId);
-            // 插入额外的数据
-            myBatisDOService.insertAdditionalData(categoryId,additionalDO);
-        }
+        insertAdditionalData(categoryId,additionalDO);
         // 返回
-        return productId;
+        return product.getId();
     }
 
     private boolean validateProductColorAndSeriesAndModel(String color, String model, String series) {
@@ -141,23 +147,17 @@ public class ErpProductServiceImpl implements ErpProductService {
         //校验人员id是否存在
         validatePerson(updateReqVO.getPoId(), updateReqVO.getIdId(), updateReqVO.getRdId(), updateReqVO.getMeId());
         // 处理额外字段
-        Object additionalDO = handleAdditionalFields(updateReqVO, categoryId);
+        Class<?> productDetailDOClass = getEntityClass(categoryId);
+        Object additionalDO = BeanUtil.copyProperties(updateReqVO, productDetailDOClass);
+        BeanUtil.copyProperties(updateReqVO.getAdditionalMap(), additionalDO);
+        validateDO(additionalDO);
         // 更新
         ErpProductDO updateObj = BeanUtils.toBean(updateReqVO, ErpProductDO.class);
         //将图片的实体和指导价的实体转为json字符串
         updateObj.setImageUrl(JSONUtil.toJsonStr(updateReqVO.getImageUrl()));
         updateObj.setGuidePrice(JSONUtil.toJsonStr(updateReqVO.getGuidePrice()));
         ThrowUtil.ifSqlThrow(productMapper.updateById(updateObj),DB_UPDATE_ERROR);
-        if (additionalDO != null) {
-            // 利用反射获取additionalDO的id
-            Long additionalId = getAdditionalId(additionalDO);
-            // 校验additionalId的存在
-            ThrowUtil.ifEmptyThrow(additionalId, AUX_INFO_ID_NOT_EXISTS);
-            // 利用反射将productId设置到additionalDO中
-            setProductIdInAdditionalDO(additionalDO, id);
-            // 更新额外的数据
-            myBatisDOService.updateAdditionalData(categoryId,additionalDO);
-        }
+        updateAdditionalData(categoryId,additionalDO);
         //同步数据
         var dtos = customRuleMapper.selectProductAllInfoListById(id);
         erpProductChannel.send(MessageBuilder.withPayload(dtos).build());
@@ -171,7 +171,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         // 获取分类ID
         Long categoryId = erpProductDO.getCategoryId();
         // 删除额外数据
-        myBatisDOService.deleteAdditionalData(categoryId, id);
+        deleteAdditionalData(categoryId, id);
         // 删除产品
         productMapper.deleteById(id);
     }
@@ -184,7 +184,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         // 获取分类ID
         Long categoryId = erpProductDO.getCategoryId();
         // 获取额外数据
-        Object additionalData = myBatisDOService.getAdditionalData(categoryId, id);
+        Object additionalData = getAdditionalData(categoryId, id);
         // 构建响应对象
         ErpProductRespVO productRespVO = BeanUtils.toBean(erpProductDO, ErpProductRespVO.class);
         productRespVO.setAdditional(additionalData);
@@ -230,32 +230,8 @@ public class ErpProductServiceImpl implements ErpProductService {
         }
         return list;
     }
-    private Long getAdditionalId(Object additionalDO) {
-        Class<?> additionalType = additionalDO.getClass();
-        Field additionalIdField = ReflectUtil.getField(additionalType, PRODUCT_ADDITIONAL_ID);
-        return (Long) ReflectUtil.getFieldValue(additionalDO, additionalIdField);
-    }
 
-    private Object handleAdditionalFields(ErpProductSaveReqVO reqVO, Long categoryId) {
-        // 获取额外的字段
-        Map<String, Object> additionalMap = reqVO.getAdditionalMap();
-        if (CollUtil.isEmpty(additionalMap)) {
-            return null;
-        }
-        Class<?> additionalType = myBatisDOService.getEntityClassByMapper(TableAssociationInitialization.getTableMap().get(categoryId));
-        // 拷贝属性
-        Object additionalDO = BeanUtil.copyProperties(additionalMap, additionalType);
-        // 校验实体是否符合
-        validateDO(additionalDO);
 
-        return additionalDO;
-    }
-
-    private void setProductIdInAdditionalDO(Object additionalDO, Long productId) {
-        Class<?> additionalType = additionalDO.getClass();
-        Field productIdField = ReflectUtil.getField(additionalType, PRODUCT_ID);
-        ReflectUtil.setFieldValue(additionalDO, productIdField, productId);
-    }
 
 
     private ErpProductDO validateProductExists(Long id) {
@@ -393,5 +369,90 @@ public class ErpProductServiceImpl implements ErpProductService {
                 .filter(Objects::nonNull)
                 .anyMatch(userId -> ObjUtil
                         .isEmpty(userApi.getUser(userId))), USER_NOT_EXISTS);
+    }
+
+    /**
+     * @Author Wqh
+     * @Description 通过mapper获取实体类
+     * @Date 16:20 2024/11/15
+     * @Param [tableName]
+     * @return java.lang.Class<?>
+     **/
+    public Class<?> getEntityClassByMapper(Class<?> mapperClass) {
+        // 获取映射类的泛型接口
+        Type[] genericInterfaces = mapperClass.getGenericInterfaces();
+        // 遍历每个泛型接口
+        for (Type genericInterface : genericInterfaces) {
+            // 检查泛型接口是否为参数化类型
+            if (genericInterface instanceof ParameterizedType parameterizedType) {
+                // 检查参数化类型的原始类型是否为BaseMapper
+                if (parameterizedType.getRawType() == BaseMapperX.class) {
+                    // 获取参数化类型的实际类型参数
+                    Type[] actualTypeArguments = parameterizedType.getActualTypeArguments();
+                    // 检查实际类型参数是否存在且为Class类型
+                    if (actualTypeArguments.length > 0 && actualTypeArguments[0] instanceof Class) {
+                        // 返回第一个实际类型参数
+                        return (Class<?>) actualTypeArguments[0];
+                    }
+                }
+            }
+        }
+        throw exception(NOT_FOUND_TABLE_NAME_BEAN, mapperClass.getName());
+    }
+
+    private Class<?> getEntityClass(Long categoryId) {
+        return getEntityClassByMapper(TABLE_MAP.get(categoryId));
+    }
+
+    /**
+     * @Author Wqh
+     * @Description 新增产品额外信息
+     * @Date 11:34 2024/11/18
+     * @Param [additionalDO]
+     **/
+    public void insertAdditionalData(Long categoryId,Object additionalDO) {
+        // map中获取mapper
+        BaseMapper<?> mapper = applicationContext.getBean(TABLE_MAP.get(categoryId));
+        ThrowUtil.ifSqlThrow(((BaseMapper<Object>) mapper).insert(additionalDO), DB_INSERT_ERROR);
+    }
+
+
+    /**
+     * @Author Wqh
+     * @Description 修改产品额外信息
+     * @Date 11:34 2024/11/18
+     * @Param [additionalDO]
+     **/
+    public void updateAdditionalData(Long categoryId,Object additionalDO) {
+        // map中获取mapper
+        BaseMapper<?> mapper = applicationContext.getBean(TABLE_MAP.get(categoryId));
+        ThrowUtil.ifSqlThrow(((BaseMapper<Object>) mapper).updateById(additionalDO), DB_UPDATE_ERROR);
+    }
+
+    /**
+     * @Author Wqh
+     * @Description 删除产品额外信息
+     * @Date 11:34 2024/11/18
+     * @Param [categoryId, productId]
+     **/
+    public void deleteAdditionalData(Long categoryId, Long productId) {
+        // map中获取mapper
+        BaseMapper<?> mapper = applicationContext.getBean(TABLE_MAP.get(categoryId));
+        // 删除表中product_id是产品id的值
+        mapper.deleteById(productId);
+    }
+
+    /**
+     * @Author Wqh
+     * @Description 获取产品额外信息
+     * @Date 11:34 2024/11/18
+     * @Param [categoryId, productId]
+     * @return java.lang.Object
+     **/
+    public Object getAdditionalData(Long categoryId, Long productId) {
+        // map中获取mapper
+        BaseMapper<?> mapper = applicationContext.getBean(TABLE_MAP.get(categoryId));
+        // 根据产品id查询额外的数据
+        return mapper.selectById(productId);
     }
 }
