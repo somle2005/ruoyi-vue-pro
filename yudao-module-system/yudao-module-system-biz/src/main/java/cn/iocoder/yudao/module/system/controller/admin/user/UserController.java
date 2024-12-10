@@ -91,16 +91,7 @@ public class UserController {
     @Operation(summary = "获得用户分页列表")
     @PreAuthorize("@ss.hasPermission('system:user:list')")
     public CommonResult<PageResult<UserRespVO>> getUserPage(@Valid UserPageReqVO pageReqVO) {
-        // 获得用户分页列表
-        PageResult<AdminUserDO> pageResult = userService.getUserPage(pageReqVO);
-        if (CollUtil.isEmpty(pageResult.getList())) {
-            return success(new PageResult<>(pageResult.getTotal()));
-        }
-        // 拼接数据
-        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
-                convertList(pageResult.getList(), AdminUserDO::getDeptId));
-        return success(new PageResult<>(UserConvert.INSTANCE.convertList(pageResult.getList(), deptMap),
-                pageResult.getTotal()));
+        return success(userService.getUserPage(pageReqVO));
     }
 
     @GetMapping({"/list-all-simple", "/simple-list"})
@@ -134,12 +125,9 @@ public class UserController {
     public void exportUserList(@Validated UserPageReqVO exportReqVO,
                                HttpServletResponse response) throws IOException {
         exportReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<AdminUserDO> list = userService.getUserPage(exportReqVO).getList();
+        List<UserRespVO> list = userService.getUserPage(exportReqVO).getList();
         // 输出 Excel
-        Map<Long, DeptDO> deptMap = deptService.getDeptMap(
-                convertList(list, AdminUserDO::getDeptId));
-        ExcelUtils.write(response, "用户数据.xls", "数据", UserRespVO.class,
-                UserConvert.INSTANCE.convertList(list, deptMap));
+        ExcelUtils.write(response, "用户数据.xls", "数据", UserRespVO.class, list);
     }
 
     @GetMapping("/get-import-template")

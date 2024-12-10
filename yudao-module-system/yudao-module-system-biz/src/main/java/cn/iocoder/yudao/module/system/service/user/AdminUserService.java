@@ -111,7 +111,7 @@ public interface AdminUserService {
      * @param reqVO 分页条件
      * @return 分页列表
      */
-    PageResult<AdminUserDO> getUserPage(UserPageReqVO reqVO);
+    PageResult<UserRespVO> getUserPage(UserPageReqVO reqVO);
 
     /**
      * 通过用户 ID 查询用户
@@ -201,4 +201,12 @@ public interface AdminUserService {
      */
     boolean isPasswordMatch(String rawPassword, String encodedPassword);
 
+    /**
+     * @Author Wqh
+     * @Description 获取以相同用户名开头的用户数量
+     * @Date 14:52 2024/11/4
+     * @Param [username]
+     * @return java.lang.Integer
+     **/
+    Integer getUsernameIndex(String username);
 }

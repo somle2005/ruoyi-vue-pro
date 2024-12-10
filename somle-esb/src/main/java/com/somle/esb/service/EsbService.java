@@ -1,6 +1,7 @@
 package com.somle.esb.service;
 
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.supplier.dto.ErpSupplierDTO;
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
@@ -22,6 +23,7 @@ import com.somle.esb.converter.EccangToErpConverter;
 import com.somle.esb.converter.ErpToEccangConverter;
 import com.somle.esb.converter.ErpToKingdeeConverter;
 import com.somle.esb.model.OssData;
+import com.somle.esb.util.PinyinConverter;
 import com.somle.kingdee.model.KingdeeAuxInfoDetail;
 import com.somle.kingdee.model.KingdeeProduct;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
@@ -118,6 +120,8 @@ public class EsbService {
 
     @Autowired
     private ApplicationContext applicationContext;
+    private static final String CHINESE_CHAR_PATTERN = "[\\u4E00-\\u9FA5]+";
+    private static final String ENGLISH_CHAR_PATTERN = "^[a-zA-Z\\s]+$";
 
     @PostConstruct
     private void init() {
@@ -302,12 +306,16 @@ public class EsbService {
             log.info("begin syncing: " + dingTalkUser.toString());
             AdminUserReqDTO erpUser = dingTalkToErpConverter.toErp(dingTalkUser);
             log.info("user to add " + erpUser);
+            //获取钉钉中的昵称
+            String nickname = erpUser.getNickname();
+            //根据昵称自动生成用户名
+            erpUser.setUsername(generateUserName(nickname));
             if (erpUser.getId() != null) {
                 adminUserApi.updateUser(erpUser);
             } else {
-                erpUser.setUsername("temp");
+                erpUser.setNo("temp");
                 Long userId = adminUserApi.createUser(erpUser);
-                erpUser.setId(userId).setUsername("SM" + String.format("%06d", userId));
+                erpUser.setId(userId).setNo("SM" + String.format("%06d", userId));
                 adminUserApi.updateUser(erpUser);
                 var mapping = mappingService.toMapping(dingTalkUser);
                 mapping
@@ -315,6 +323,35 @@ public class EsbService {
                 mappingService.save(mapping);
             }
         });
+    }
+
+    /**
+    * @Author Wqh
+    * @Description 自动生成用户名
+     * 当前仅支持中文名的昵称生成用户名，并且默认昵称是大于2个字符的，
+     * 第一个字符为姓，其余的字符为名{wang.qihui}，重复出现则.1/.2
+    * @Date 13:09 2024/12/9
+    * @Param [name]
+    * @return java.lang.String
+    **/
+    private String generateUserName(String nickname) {
+        if (StrUtil.isBlank(nickname) || nickname.length() < 2){
+            //抛出异常
+            throw new RuntimeException("昵称不能为空，且长度不能小于2");
+        }
+        String initUsername;
+        //判断是否都为中文字符
+        if(nickname.matches(CHINESE_CHAR_PATTERN)){
+            //将昵称根据一定格式转化为username
+            initUsername = PinyinConverter.convertToPinyin(nickname);
+        }else {
+            //包含非中文字符，一律去除空格换成点
+            initUsername = nickname.toLowerCase().replaceAll("\\s+", ".");
+        }
+        //获取以相同用户名开头的用户数量
+        Integer usernameIndex = adminUserApi.getUsernameIndex(nickname);
+        //自动生成用户账户
+        return usernameIndex == 0 ? initUsername : initUsername + "." + usernameIndex;
     }
 
 }

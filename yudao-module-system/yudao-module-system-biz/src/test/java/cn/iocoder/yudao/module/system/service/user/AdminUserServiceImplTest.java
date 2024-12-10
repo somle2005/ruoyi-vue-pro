@@ -359,7 +359,7 @@ public class AdminUserServiceImplTest extends BaseDbUnitTest {
         when(deptService.getChildDeptList(eq(reqVO.getDeptId()))).thenReturn(deptList);
 
         // 调用
-        PageResult<AdminUserDO> pageResult = userService.getUserPage(reqVO);
+        PageResult<UserRespVO> pageResult = userService.getUserPage(reqVO);
         // 断言
         assertEquals(1, pageResult.getTotal());
         assertEquals(1, pageResult.getList().size());

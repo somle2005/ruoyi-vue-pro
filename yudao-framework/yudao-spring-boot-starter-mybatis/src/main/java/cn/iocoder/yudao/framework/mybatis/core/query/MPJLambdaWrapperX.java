@@ -3,7 +3,11 @@ package cn.iocoder.yudao.framework.mybatis.core.query;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.util.collection.ArrayUtils;
+import cn.iocoder.yudao.framework.mybatis.core.enums.DefaultFuncEnumX;
+import cn.iocoder.yudao.framework.mybatis.core.enums.SqlKeywordX;
+import com.baomidou.mybatisplus.core.enums.SqlKeyword;
 import com.baomidou.mybatisplus.core.toolkit.support.SFunction;
+import com.github.yulichang.toolkit.LambdaUtils;
 import com.github.yulichang.toolkit.MPJWrappers;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.springframework.util.StringUtils;
@@ -307,6 +311,31 @@ public class MPJLambdaWrapperX<T> extends MPJLambdaWrapper<T> {
     @Override
     public <S, X> MPJLambdaWrapperX<T> selectLen(SFunction<S, ?> column, SFunction<X, ?> alias) {
         super.selectLen(column, alias);
+        return this;
+    }
+
+    @Override
+    public <S, X> MPJLambdaWrapperX<T> leftJoin(Class<S> clazz, SFunction<S, ?> left, SFunction<X, ?> right) {
+        super.leftJoin(clazz, left, right);
+        return this;
+    }
+
+    @Override
+    public <S, X> MPJLambdaWrapperX<T> leftJoin(Class<S> clazz, String alias, SFunction<S, ?> left, SFunction<X, ?> right) {
+        super.leftJoin(clazz, alias, left, right);
+        return this;
+    }
+
+    public <S, X> MPJLambdaWrapperX<T> selectGroupConcat(SFunction<S, ?> column, SFunction<X, ?> alias) {
+        super.selectFunc(DefaultFuncEnumX.GROUP_CONCAT, column, alias);
+        return this;
+    }
+
+    public <S> MPJLambdaWrapper<T> havingFindInSet(boolean condition, Object params,SFunction<S, ?> column) {
+        super.maybeDo(condition, () -> {
+            super.appendSqlSegments(SqlKeyword.HAVING, () ->
+                    super.formatSqlMaybeWithParam(SqlKeywordX.FIND_IN_SET.getSqlSegment().formatted(LambdaUtils.getName(column)), null, params));
+        });
         return this;
     }
 
