@@ -1,7 +1,7 @@
 package com.somle.esb.service;
 
 import cn.hutool.core.util.ObjUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.extra.pinyin.PinyinUtil;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.supplier.dto.ErpSupplierDTO;
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
@@ -23,7 +23,6 @@ import com.somle.esb.converter.EccangToErpConverter;
 import com.somle.esb.converter.ErpToEccangConverter;
 import com.somle.esb.converter.ErpToKingdeeConverter;
 import com.somle.esb.model.OssData;
-import com.somle.esb.util.PinyinConverter;
 import com.somle.kingdee.model.KingdeeAuxInfoDetail;
 import com.somle.kingdee.model.KingdeeProduct;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
@@ -328,25 +327,25 @@ public class EsbService {
     /**
     * @Author Wqh
     * @Description 自动生成用户名
-     * 当前仅支持中文名的昵称生成用户名，并且默认昵称是大于2个字符的，
-     * 第一个字符为姓，其余的字符为名{wang.qihui}，重复出现则.1/.2
+     * 中文名直接转为拼音
+     * 英文名出去空格变为小写
+     * 非法字符直接抛出异常（数字，中英结合，符号等）
     * @Date 13:09 2024/12/9
     * @Param [name]
     * @return java.lang.String
     **/
-    private String generateUserName(String nickname) {
-        if (StrUtil.isBlank(nickname) || nickname.length() < 2){
-            //抛出异常
-            throw new RuntimeException("昵称不能为空，且长度不能小于2");
-        }
+    public String generateUserName(String nickname) {
         String initUsername;
         //判断是否都为中文字符
         if(nickname.matches(CHINESE_CHAR_PATTERN)){
-            //将昵称根据一定格式转化为username
-            initUsername = PinyinConverter.convertToPinyin(nickname);
+            //将昵称转化为拼音获取username
+            initUsername = PinyinUtil.getPinyin(nickname).replaceAll("\\s+", "");
+        }else if (nickname.matches(ENGLISH_CHAR_PATTERN)){
+            //英文字符一律去掉空格，一律变小写
+            initUsername = nickname.toLowerCase().replaceAll("\\s+", "");
         }else {
-            //包含非中文字符，一律去除空格换成点
-            initUsername = nickname.toLowerCase().replaceAll("\\s+", ".");
+            //存在特殊字符则抛出异常
+            throw new RuntimeException("昵称\""+nickname+"\"不规范，请联系管理员");
         }
         //获取以相同用户名开头的用户数量
         Integer usernameIndex = adminUserApi.getUsernameIndex(nickname);
