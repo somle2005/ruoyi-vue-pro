@@ -29,7 +29,7 @@ public class Home24InvoicesReq {
     private String shopId;
 
     // 最大数量（查询结果的最大数量，默认20）
-    private Integer max = 100;
+    private Integer max;
 
     // 偏移量（分页查询的起始位置）
     private Integer offset;

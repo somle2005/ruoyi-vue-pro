@@ -56,7 +56,7 @@ public class Home24OrderReq {
     private String shopId;
 
     // 最大数量（查询结果的最大数量）
-    private Integer max = 100;
+    private Integer max ;
 
     // 偏移量（用于分页查询，指定从哪个位置开始查询）
     private Integer offset;
