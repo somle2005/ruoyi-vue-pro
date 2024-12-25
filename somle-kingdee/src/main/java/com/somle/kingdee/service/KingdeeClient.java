@@ -278,18 +278,14 @@ public class KingdeeClient {
         log.debug("fetching purchase request");
         String endUrl = "/jdy/v2/scm/pur_request";
         KingdeeResponse response = getResponse(endUrl, vo);
-        List<KingdeePurRequest> kingdeePurRequests = response.getData(KingdeePage.class).getRowsList(KingdeePurRequest.class).stream().toList();
-        kingdeePurRequests.forEach(n -> n.setPurRequestDetail(getPurRequestDetail(n.getBillNo())));
-        return kingdeePurRequests;
+        return response.getData(KingdeePage.class).getRowsList(KingdeePurRequest.class).stream().toList();
     }
 
     public List<KingdeePurOrder> getPurOrder(KingdeePurOrderReqVO vo) {
         log.debug("fetching purchase order");
         String endUrl = "/jdy/v2/scm/pur_order";
         KingdeeResponse response = getResponse(endUrl, vo);
-        List<KingdeePurOrder> purOrders = response.getData(KingdeePage.class).getRowsList(KingdeePurOrder.class).stream().toList();
-        purOrders.forEach(n -> n.setPurOrderDetail(getPurOrderDetail(n.getBillNo())));
-        return purOrders;
+        return response.getData(KingdeePage.class).getRowsList(KingdeePurOrder.class).stream().toList();
     }
 
     public KingdeePurOrderDetail getPurOrderDetail(String purOrderNumber) {

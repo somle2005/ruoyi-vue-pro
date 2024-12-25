@@ -81,9 +81,4 @@ public class KingdeePurOrder {
      * 供应商编码 (Supplier code)
      */
     private String supplierNumber;
-
-    /**
-     * 订单详情
-     */
-    private KingdeePurOrderDetail purOrderDetail;
 }

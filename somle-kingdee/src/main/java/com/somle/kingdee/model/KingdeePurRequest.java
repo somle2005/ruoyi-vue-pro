@@ -22,8 +22,4 @@ public class KingdeePurRequest {
     private String wholeSupplierId;
     private String wholeSupplierName;
     private String wholeSupplierNumber;
-    /**
-     * 订单详情
-     **/
-    private KingdeePurRequestDetail purRequestDetail;
 }
