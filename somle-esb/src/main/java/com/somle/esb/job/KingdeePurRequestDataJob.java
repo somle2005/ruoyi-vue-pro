@@ -1,11 +1,12 @@
 package com.somle.esb.job;
 
-import cn.hutool.core.lang.Pair;
 import com.somle.esb.model.OssData;
 import com.somle.framework.common.util.date.LocalDateTimeUtils;
-import com.somle.kingdee.model.*;
+import com.somle.kingdee.model.KingdeePurRequest;
+import com.somle.kingdee.model.KingdeePurRequestReqVO;
+import com.somle.kingdee.service.KingdeeClient;
 import org.springframework.stereotype.Component;
-import java.util.ArrayList;
+
 import java.util.List;
 
 /**
@@ -22,36 +23,28 @@ public class KingdeePurRequestDataJob extends KingdeeDataJob {
             .createEndTime(LocalDateTimeUtils.toTimestamp(yesterdayLastSecond))
             .build();
 
-        kingdeeService.getClientList().stream()
-            .map(client -> {
-                // 获取采购订单列表
-                List<KingdeePurRequest> purRequests = client.getPurRequest(vo);
-                // 提取订单号列表
-                List<String> billNos = purRequests.stream()
-                    .map(KingdeePurRequest::getBillNo)
-                    .toList();
+        // 获取所有 Kingdee 客户端列表
+        for (KingdeeClient client : kingdeeService.getClientList()) {
+            // 获取当前客户端的采购请求列表
+            List<KingdeePurRequest> purRequests = client.getPurRequest(vo);
+            // 获取当前时间戳，用于记录请求时间
+            long currentTimeMillis = System.currentTimeMillis();
+            // 发送采购请求数据到 OSS
+            service.send(
+                OssData.builder()
+                    .database(DATABASE)
+                    .tableName("pur_request")
+                    .syncType("inc")
+                    .requestTimestamp(currentTimeMillis)
+                    .folderDate(yesterday)
+                    .content(purRequests)
+                    .headers(null)
+                    .build()
+            );
 
-                // 获取每个订单的详细信息
-                List<KingdeePurRequestDetail> purRequestDetails = new ArrayList<>();
-                billNos.forEach(billNo -> purRequestDetails.add(client.getPurRequestDetail(billNo)));
-
-                // 返回一个包含订单列表和订单详细信息的 Pair
-                return new Pair<>(purRequests, purRequestDetails);
-            })
-            .forEach(pair -> {
-                long currentTimeMillis = System.currentTimeMillis();
-                service.send(
-                    OssData.builder()
-                        .database(DATABASE)
-                        .tableName("pur_request")
-                        .syncType("inc")
-                        .requestTimestamp(currentTimeMillis)
-                        .folderDate(yesterday)
-                        .content(pair.getKey())
-                        .headers(null)
-                        .build()
-                );
-
+            // 遍历每个采购请求，获取并发送详细信息
+            purRequests.forEach(purRequest -> {
+                // 发送采购请求详细信息到 OSS
                 service.send(
                     OssData.builder()
                         .database(DATABASE)
@@ -59,11 +52,12 @@ public class KingdeePurRequestDataJob extends KingdeeDataJob {
                         .syncType("inc")
                         .requestTimestamp(currentTimeMillis)
                         .folderDate(yesterday)
-                        .content(pair.getValue())
+                        .content(client.getPurRequestDetail(purRequest.getBillNo()))
                         .headers(null)
                         .build()
                 );
             });
+        }
 
         return "data upload success";
     }
