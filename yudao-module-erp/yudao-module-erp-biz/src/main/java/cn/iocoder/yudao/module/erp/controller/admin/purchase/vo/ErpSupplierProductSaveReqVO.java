@@ -13,6 +13,7 @@ public class ErpSupplierProductSaveReqVO {
     private Long id;
 
     @Schema(description = "供应商产品编码")
+    @Pattern(regexp = "^[a-zA-Z0-9-]+$", message = "SKU（编码）只能包含字母、数字、中划线")
     private String code;
 
     @Schema(description = "供应商编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "29689")
