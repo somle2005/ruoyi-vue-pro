@@ -57,10 +57,9 @@ public class ErpSyncDataTest extends BaseDbUnitTest {
         erpCustomRuleSaveReqVO.setDeclaredTypeEn("Electronic Component");
         erpCustomRuleSaveReqVO.setDeclaredType("电子元件");
         erpCustomRuleSaveReqVO.setDeclaredValue(150.75);
-        erpCustomRuleSaveReqVO.setDeclaredValueCurrencyCode("USD");
+        erpCustomRuleSaveReqVO.setDeclaredValueCurrencyCode(1);
         erpCustomRuleSaveReqVO.setTaxRate(new BigDecimal("0.18"));
         erpCustomRuleSaveReqVO.setHscode("85423190");
-        erpCustomRuleSaveReqVO.setLogisticAttribute("Fragile");
 
 
         // 调用

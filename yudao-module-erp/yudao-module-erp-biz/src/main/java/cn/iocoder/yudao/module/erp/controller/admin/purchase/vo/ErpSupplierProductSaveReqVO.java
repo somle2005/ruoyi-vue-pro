@@ -43,6 +43,7 @@ public class ErpSupplierProductSaveReqVO {
     private Double purchasePrice;
 
     @Schema(description = "采购货币代码")
-    private String purchasePriceCurrencyCode;
+    @NotNull(message = "采购货币代码不能为空")
+    private Integer purchasePriceCurrencyCode;
 
 }

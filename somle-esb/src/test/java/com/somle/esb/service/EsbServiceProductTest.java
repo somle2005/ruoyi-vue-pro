@@ -159,11 +159,11 @@ class EsbServiceProductTest extends BaseSpringIntegrationTest {
         product.setProductWidth(11.0f);
         product.setProductHeight(6.0f);
         product.setProductMaterial("Plastic and Metal");
-        product.setPurchasePriceCurrencyCode("USD");
-        product.setLogisticAttribute("Fragile");
+        product.setPurchasePriceCurrencyCode(1);
+        product.setLogisticAttribute(1);
         product.setHscode("85076000");
         product.setDeclaredValue(50.0f);
-        product.setDeclaredValueCurrencyCode("USD");
+        product.setDeclaredValueCurrencyCode(1);
         product.setDeclaredType("无线耳机");
         product.setDeclaredTypeEn("Wireless Headphones");
         product.setTaxRate(0.12f);
@@ -192,10 +192,9 @@ class EsbServiceProductTest extends BaseSpringIntegrationTest {
         erpCustomRuleSaveReqVO.setDeclaredTypeEn("Electronic Component");
         erpCustomRuleSaveReqVO.setDeclaredType("电子元件");
         erpCustomRuleSaveReqVO.setDeclaredValue(150.75);
-        erpCustomRuleSaveReqVO.setDeclaredValueCurrencyCode("USD");
+        erpCustomRuleSaveReqVO.setDeclaredValueCurrencyCode(1);
         erpCustomRuleSaveReqVO.setTaxRate(new BigDecimal("0.18"));
         erpCustomRuleSaveReqVO.setHscode("85423190");
-        erpCustomRuleSaveReqVO.setLogisticAttribute("Fragile");
 
 //        ErpCustomRuleDO customRule = BeanUtils.toBean(erpCustomRuleSaveReqVO, ErpCustomRuleDO.class);
         log.info(erpCustomRuleMapper.selectList().toString());

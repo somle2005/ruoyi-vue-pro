@@ -29,6 +29,7 @@ public class ErpCustomRuleSaveReqVO {
     private Long supplierProductId;
 
     @Schema(description = "申报品名（英文）")
+    @NotEmpty(message = "申报品名（英文）不能为空")
     private String declaredTypeEn;
 
     @Schema(description = "申报品名")
@@ -39,8 +40,8 @@ public class ErpCustomRuleSaveReqVO {
     private Double declaredValue;
 
     @Schema(description = "申报金额币种")
-    @NotEmpty(message = "申报金额币种不能为空")
-    private String declaredValueCurrencyCode;
+    @NotNull(message = "申报金额币种不能为空")
+    private Integer declaredValueCurrencyCode;
 
     @Schema(description = "税率")
     private BigDecimal taxRate;
@@ -49,6 +50,6 @@ public class ErpCustomRuleSaveReqVO {
     private String hscode;
 
     @Schema(description = "物流属性")
-    private String logisticAttribute;
+    private Integer logisticAttribute;
 
 }

@@ -36,7 +36,7 @@ public class ErpCustomRulePageReqVO extends PageParam {
     private Double declaredValue;
 
     @Schema(description = "申报金额币种")
-    private String declaredValueCurrencyCode;
+    private Integer declaredValueCurrencyCode;
 
     @Schema(description = "税率")
     private BigDecimal taxRate;
@@ -45,7 +45,7 @@ public class ErpCustomRulePageReqVO extends PageParam {
     private String hscode;
 
     @Schema(description = "物流属性")
-    private String logisticAttribute;
+    private Integer logisticAttribute;
 
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
