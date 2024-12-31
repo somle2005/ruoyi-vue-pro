@@ -7,7 +7,7 @@ package cn.iocoder.yudao.framework.common.enums.enums;
  */
 public interface DictTypeConstants {
     // 货币代码
-    String ERP_PURCHASE_PRICE_CURRENCY_CODE = "erp_purchase_price_currency_code";
+    String CURRENCY_CODE = "currency_code";
     //国家代码
     String COUNTRY_CODE = "country_code";
 

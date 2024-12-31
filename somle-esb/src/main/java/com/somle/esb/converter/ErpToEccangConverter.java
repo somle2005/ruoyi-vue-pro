@@ -158,11 +158,11 @@ public class ErpToEccangConverter {
             Integer declaredValueCurrencyCode = product.getDeclaredValueCurrencyCode();
             Integer purchasePriceCurrencyCode = product.getPurchasePriceCurrencyCode();
             if (ObjUtil.isNotEmpty(declaredValueCurrencyCode)){
-                DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.ERP_PURCHASE_PRICE_CURRENCY_CODE, String.valueOf(declaredValueCurrencyCode));
+                DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.CURRENCY_CODE, String.valueOf(declaredValueCurrencyCode));
                 eccangProduct.setPdDeclareCurrencyCode(dictData.getLabel());
             }
             if (ObjUtil.isNotEmpty(purchasePriceCurrencyCode)){
-                DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.ERP_PURCHASE_PRICE_CURRENCY_CODE, String.valueOf(purchasePriceCurrencyCode));
+                DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.CURRENCY_CODE, String.valueOf(purchasePriceCurrencyCode));
                 eccangProduct.setCurrencyCode(dictData.getLabel());
             }
             eccangProduct.setProductPurchaseValue(product.getProductPurchaseValue());
