@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.erp.api.enums;
+package cn.iocoder.yudao.framework.common.enums.enums;
 
 /**
  * System 字典类型的枚举类
