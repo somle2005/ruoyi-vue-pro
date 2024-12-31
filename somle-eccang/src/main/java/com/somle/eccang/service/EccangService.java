@@ -47,7 +47,6 @@ public class EccangService {
 
     private EccangToken token;
     private final int  pageSize = 100;
-    private final Limiter limiter = new Limiter(20);
 
     private final EccangTokenRepository tokenRepo;
     private final MessageChannel dataChannel;
@@ -586,6 +585,10 @@ public class EccangService {
             eScLog.setStatus(status);
             eScLog.setErrorMessage(errorMessage);
             eScLog.setTotalItems(totalItems);
+            //如果当前页面*pageSize > totalItems 那么就算完成了
+            if (currentPage * pageSize > totalItems){
+                eScLog.setIsCompleted(true);
+            }
             // 保存更新后的日志记录
             syncLogRepository.save(eScLog);
         } else {
