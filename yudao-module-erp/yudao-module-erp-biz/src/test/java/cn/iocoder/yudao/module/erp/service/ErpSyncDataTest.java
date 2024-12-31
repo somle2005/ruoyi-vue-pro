@@ -51,7 +51,7 @@ public class ErpSyncDataTest extends BaseDbUnitTest {
         // mock 数据
         ErpCustomRuleSaveReqVO erpCustomRuleSaveReqVO = new ErpCustomRuleSaveReqVO();
         erpCustomRuleSaveReqVO.setId(15675L);
-        erpCustomRuleSaveReqVO.setCountryCode("US");
+        erpCustomRuleSaveReqVO.setCountryCode(1);
         erpCustomRuleSaveReqVO.setType("报关");
         erpCustomRuleSaveReqVO.setSupplierProductId(67890L);
         erpCustomRuleSaveReqVO.setDeclaredTypeEn("Electronic Component");

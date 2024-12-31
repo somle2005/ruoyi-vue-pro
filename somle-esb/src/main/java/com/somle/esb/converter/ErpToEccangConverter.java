@@ -138,7 +138,7 @@ public class ErpToEccangConverter {
             Integer countryCode = product.getCountryCode();
             if (ObjUtil.isNotEmpty(countryCode)){
                 //将字典value转换为label
-                DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.ERP_PURCHASE_PRICE_CURRENCY_CODE, String.valueOf(countryCode));
+                DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
                 if (StrUtil.isNotBlank(product.getSupplierProductCode())){
                     eccangProduct.setProductTitleEn(product.getSupplierProductCode() + "-" + getProductStatus(dictData.getLabel()));
                     eccangProduct.setProductSku(product.getSupplierProductCode() + "-" + getProductStatus(dictData.getLabel()));

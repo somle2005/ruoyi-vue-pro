@@ -147,7 +147,7 @@ class EsbServiceProductTest extends BaseSpringIntegrationTest {
         ErpCustomRuleDTO product = new ErpCustomRuleDTO();
         product.setId("R12345");
         product.setProductName("Wireless Headphones");
-        product.setCountryCode("XXX");
+        product.setCountryCode(1);
 //        product.setImageUrl("https://example.com/images/product1.jpg");
 
         product.setPackageWeight(1.2f);
@@ -186,7 +186,7 @@ class EsbServiceProductTest extends BaseSpringIntegrationTest {
     public void aopTest() {
         printAllBeans();
         ErpCustomRuleSaveReqVO erpCustomRuleSaveReqVO = new ErpCustomRuleSaveReqVO();
-        erpCustomRuleSaveReqVO.setCountryCode("YY");
+        erpCustomRuleSaveReqVO.setCountryCode(1);
         erpCustomRuleSaveReqVO.setType("import");
         erpCustomRuleSaveReqVO.setSupplierProductId(1L);
         erpCustomRuleSaveReqVO.setDeclaredTypeEn("Electronic Component");
