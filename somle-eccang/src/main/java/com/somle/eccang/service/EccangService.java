@@ -7,7 +7,6 @@ import com.somle.eccang.model.SyncLog.EccangInventorySyncLog;
 import com.somle.eccang.repository.EccangInventorySyncLogRepository;
 import com.somle.eccang.repository.EccangProductSkuRepository;
 import com.somle.eccang.repository.EccangTokenRepository;
-import com.somle.framework.common.util.general.Limiter;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.common.util.web.RequestX;
@@ -35,7 +34,6 @@ import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.*;
-import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -467,13 +465,13 @@ public class EccangService {
                 if (lastLog.getTotalItems() != null && lastLog.getTotalItems() < lastLog.getCurrentPage() * pageSize) {
                     lastLog.setIsCompleted(true);
                     syncLogRepository.save(lastLog);
-                    saveNewSyncLog(endpoint, 1, LocalDateTime.now(), false); // 重置为1页
+                    saveNewSyncLog(endpoint, 1); // 重置为1页
                     return 1;
                 }
                 return page;
             })
             .orElseGet(() -> {
-                saveNewSyncLog(endpoint, 1, LocalDateTime.now(), false); // 如果没有找到日志，默认从第1页开始
+                saveNewSyncLog(endpoint, 1); // 如果没有找到日志，默认从第1页开始
                 return 1;
             });
 
@@ -496,12 +494,10 @@ public class EccangService {
 
     //保存新的日志记录
     @Transactional(rollbackFor = Exception.class)
-    protected void saveNewSyncLog(String endpoint, int currentPage, LocalDateTime requestTime, boolean status) {
+    protected void saveNewSyncLog(String endpoint, int currentPage) {
         EccangInventorySyncLog syncLog = EccangInventorySyncLog.builder()
             .endPoint(endpoint)
             .currentPage(currentPage)
-            .requestTime(requestTime)
-            .status(status)
             .isCompleted(false)
             .build();
         syncLogRepository.save(syncLog);
@@ -533,19 +529,19 @@ public class EccangService {
             // 检查重复的ID并处理
             List<EccangProductSku> uniqueSkus = productSkuList.stream()
                 .filter(sku -> !ecProductSkuRepository.existsById(sku.getId()))
-                .collect(Collectors.toList());
+                .toList();
 
             if (uniqueSkus.size() != productSkuList.size()) {
                 // 记录重复的ID
                 List<String> duplicateIds = productSkuList.stream()
                     .map(EccangProductSku::getId)
                     .filter(ecProductSkuRepository::existsById)
-                    .collect(Collectors.toList());
-                log.warn("Duplicate IDs found: {}", duplicateIds);
+                    .toList();
+//                log.warn("Duplicate IDs found: {}", duplicateIds);
             }
 
-            // 仅保存未重复的记录
-            ecProductSkuRepository.saveAll(uniqueSkus);
+            // 覆盖记录
+            ecProductSkuRepository.saveAll(productSkuList);
 
             // 记录请求日志
             logSyncResult(endpoint, payload.getInteger("page"), true, null, page.getTotal());
@@ -593,7 +589,7 @@ public class EccangService {
             syncLogRepository.save(eScLog);
         } else {
             // 如果没有找到现有日志记录，创建一条新的日志记录
-            saveNewSyncLog(endpoint, currentPage, LocalDateTime.now(), status);
+            saveNewSyncLog(endpoint, currentPage);
         }
     }
 }
