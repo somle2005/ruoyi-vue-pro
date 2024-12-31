@@ -18,7 +18,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 public class ErpCustomRulePageReqVO extends PageParam {
 
     @Schema(description = "国家编码")
-    private String countryCode;
+    private Integer countryCode;
 
     @Schema(description = "类型", example = "报关")
     private String type;

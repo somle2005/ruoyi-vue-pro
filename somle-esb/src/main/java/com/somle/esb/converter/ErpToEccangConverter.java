@@ -134,9 +134,15 @@ public class ErpToEccangConverter {
             eccangProduct.setPdDeclarationStatement(product.getId());
             eccangProduct.setProductTitle(product.getProductName());
             //如果有供应商产品编码和国家代码都不为空的时候才去设置SKU
-            if (StrUtil.isNotBlank(product.getSupplierProductCode()) && StrUtil.isNotBlank(product.getCountryCode())) {
-                eccangProduct.setProductTitleEn(product.getSupplierProductCode() + "-" + getProductStatus(product.getCountryCode()));
-                eccangProduct.setProductSku(product.getSupplierProductCode() + "-" + getProductStatus(product.getCountryCode()));
+            //获取国家代码字典value
+            Integer countryCode = product.getCountryCode();
+            if (ObjUtil.isNotEmpty(countryCode)){
+                //将字典value转换为label
+                DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.ERP_PURCHASE_PRICE_CURRENCY_CODE, String.valueOf(countryCode));
+                if (StrUtil.isNotBlank(product.getSupplierProductCode())){
+                    eccangProduct.setProductTitleEn(product.getSupplierProductCode() + "-" + getProductStatus(dictData.getLabel()));
+                    eccangProduct.setProductSku(product.getSupplierProductCode() + "-" + getProductStatus(dictData.getLabel()));
+                }
             }
             eccangProduct.setProductWeight(product.getPackageWeight());
             eccangProduct.setProductWidth(product.getPackageWidth());

@@ -16,9 +16,8 @@ public class ErpCustomRuleSaveReqVO {
     private Long id;
 
     @Schema(description = "国家编码", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "国家编码不能为空")
-    @Length(max = 2)
-    private String countryCode;
+    @NotNull(message = "国家编码不能为空")
+    private Integer countryCode;
 
     @Schema(description = "类型", requiredMode = Schema.RequiredMode.REQUIRED, example = "报关")
     @NotEmpty(message = "类型不能为空")

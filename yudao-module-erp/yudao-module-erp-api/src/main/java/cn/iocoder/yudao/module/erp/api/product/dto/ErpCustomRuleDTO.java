@@ -29,7 +29,7 @@ public class ErpCustomRuleDTO {
     /**
      * 国家编码
      */
-    private String countryCode;
+    private Integer countryCode;
 
     /**
      * 图片地址（当前只有一张）
