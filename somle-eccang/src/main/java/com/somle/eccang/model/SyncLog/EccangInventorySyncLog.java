@@ -36,6 +36,12 @@ public class EccangInventorySyncLog {
     // 发起请求时间
     private LocalDateTime requestTime;
 
+    @PrePersist
+    public void generateRequestTime() {
+        requestTime = LocalDateTime.now();
+        status = false;
+    }
+
     // 可选的：endpoint请求对应的返回数据总量
     private Integer totalItems;
 

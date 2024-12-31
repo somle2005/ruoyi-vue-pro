@@ -73,10 +73,6 @@
             <appender-ref ref="GRPC"/>
         </root>
     </springProfile>
-    <!-- Quartz Logger Configuration -->
-    <logger name="org.quartz" level="DEBUG">
-        <appender-ref ref="STDOUT"/>
-        <appender-ref ref="ASYNC"/>
-    </logger>
+
 
 </configuration>
