@@ -28,7 +28,7 @@ public class IntegrationConfig {
     public MessageChannel dataChannel() {
         return new PublishSubscribeChannel();
     }
-    
+
     @Bean
     public MessageChannel saleChannel() {
         return new PublishSubscribeChannel();
@@ -36,6 +36,11 @@ public class IntegrationConfig {
 
     @Bean
     public MessageChannel productChannel() {
+        return new PublishSubscribeChannel(new SimpleAsyncTaskExecutor());
+    }
+
+    @Bean
+    public MessageChannel simpleProductChannel() {
         return new PublishSubscribeChannel(new SimpleAsyncTaskExecutor());
     }
 
@@ -50,5 +55,12 @@ public class IntegrationConfig {
                 .from("erpProductChannel") // Incoming messages from erpProductChannel
                 .channel(productChannel()) // Route to productChannel
                 .get();
+    }
+    @Bean
+    public IntegrationFlow simpleErpRouter() {
+        return IntegrationFlow
+            .from("erpSimpleProductChannel") // Incoming messages from simpleErpProductChannel
+            .channel(simpleProductChannel()) // Route to simpleProductChannel
+            .get();
     }
 }

@@ -8,10 +8,13 @@ import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.GuidePriceJson;
+import cn.iocoder.yudao.module.erp.convert.ProductConvert;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
@@ -48,6 +51,8 @@ public class ErpProductServiceImpl implements ErpProductService {
 
     @Resource
     MessageChannel erpProductChannel;
+    @Resource
+    MessageChannel erpSimpleProductChannel;
     @Resource
     protected ErpProductMapper productMapper;
     @Resource
@@ -115,6 +120,12 @@ public class ErpProductServiceImpl implements ErpProductService {
             product.setPatentCountryCodes(JSONUtil.toJsonStr(createReqVO.getPatentCountryCodeList()));
         }
         ThrowUtil.ifSqlThrow(productMapper.insert(product),DB_INSERT_ERROR);
+        ErpCustomRuleDTO erpCustomRuleDTO = ProductConvert.INSTANCE.convert(product);
+        //获取创建人id
+        Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
+        erpCustomRuleDTO.setProductCreatorId(String.valueOf(loginUserId));
+        //同步数据
+        erpSimpleProductChannel.send(MessageBuilder.withPayload(List.of(erpCustomRuleDTO)).build());
         // 返回
         return product.getId();
     }
@@ -169,6 +180,13 @@ public class ErpProductServiceImpl implements ErpProductService {
         //同步数据
         var dtos = customRuleMapper.selectProductAllInfoListById(id);
         erpProductChannel.send(MessageBuilder.withPayload(dtos).build());
+
+        ErpCustomRuleDTO erpCustomRuleDTO = ProductConvert.INSTANCE.convert(updateObj);
+        //获取创建人id
+        Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
+        erpCustomRuleDTO.setProductCreatorId(String.valueOf(loginUserId));
+        //同步数据
+        erpSimpleProductChannel.send(MessageBuilder.withPayload(List.of(erpCustomRuleDTO)).build());
     }
 
     @Override
@@ -209,7 +227,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         }
         // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
         if (id == null){
-            throw exception(PRODUCT_CODE_DUPLICATE);
+            throw exception(PRODUCT_NAME_DUPLICATE);
         }
         if (!product.getId().equals(id)) {
             throw exception(PRODUCT_UNIT_NAME_DUPLICATE);
