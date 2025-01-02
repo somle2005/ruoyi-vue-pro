@@ -23,7 +23,7 @@ public final class ConstantConvertUtils {
             case "CN" -> "CHN";
             case "US" -> "USA";
             case "IN" -> "IND";
-            case "GB" -> "EU";
+            case "GB" -> "UK";
             case "SA" -> "KSA";
             default -> s;
         };

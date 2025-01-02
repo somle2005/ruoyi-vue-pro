@@ -50,9 +50,9 @@ import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.USER_NOT_E
 public class ErpProductServiceImpl implements ErpProductService {
 
     @Resource
-    MessageChannel erpProductChannel;
+    MessageChannel erpCustomRuleChannel;
     @Resource
-    MessageChannel erpSimpleProductChannel;
+    MessageChannel erpProductChannel;
     @Resource
     protected ErpProductMapper productMapper;
     @Resource
@@ -125,7 +125,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
         erpCustomRuleDTO.setProductCreatorId(String.valueOf(loginUserId));
         //同步数据
-        erpSimpleProductChannel.send(MessageBuilder.withPayload(List.of(erpCustomRuleDTO)).build());
+        erpProductChannel.send(MessageBuilder.withPayload(List.of(erpCustomRuleDTO)).build());
         // 返回
         return product.getId();
     }
@@ -179,14 +179,14 @@ public class ErpProductServiceImpl implements ErpProductService {
         ThrowUtil.ifSqlThrow(productMapper.updateById(updateObj),DB_UPDATE_ERROR);
         //同步数据
         var dtos = customRuleMapper.selectProductAllInfoListById(id);
-        erpProductChannel.send(MessageBuilder.withPayload(dtos).build());
+        erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
 
         ErpCustomRuleDTO erpCustomRuleDTO = ProductConvert.INSTANCE.convert(updateObj);
         //获取创建人id
         Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
         erpCustomRuleDTO.setProductCreatorId(String.valueOf(loginUserId));
         //同步数据
-        erpSimpleProductChannel.send(MessageBuilder.withPayload(List.of(erpCustomRuleDTO)).build());
+        erpProductChannel.send(MessageBuilder.withPayload(List.of(erpCustomRuleDTO)).build());
     }
 
     @Override

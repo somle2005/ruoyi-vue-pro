@@ -95,10 +95,10 @@ public class ErpToKingdeeConverter {
      * @param allProducts ERP产品列表
      * @return 转换后的Kingdee产品列表
      */
-    public List<KingdeeProduct> toKingdee(List<ErpCustomRuleDTO> allProducts) {
+    public List<KingdeeProduct> erpCustomRuleToKingdee(List<ErpCustomRuleDTO> allProducts) {
         log.info("Converting ERP products to full Kingdee products");
         return allProducts.stream()
-            .map(product -> convertToKingdeeProduct(product, false))
+            .map(product -> convertToKingdeeProduct(product, true))
             .collect(Collectors.toList());
     }
 
@@ -108,10 +108,10 @@ public class ErpToKingdeeConverter {
      * @param allProducts ERP产品列表
      * @return 转换后的简化版Kingdee产品列表
      */
-    public List<KingdeeProduct> toKingdeeSimple(List<ErpCustomRuleDTO> allProducts) {
+    public List<KingdeeProduct> erpProductToKingdee(List<ErpCustomRuleDTO> allProducts) {
         log.info("Converting ERP products to simple Kingdee products");
         return allProducts.stream()
-            .map(product -> convertToKingdeeProduct(product, true))
+            .map(product -> convertToKingdeeProduct(product, false))
             .collect(Collectors.toList());
     }
 
@@ -119,14 +119,14 @@ public class ErpToKingdeeConverter {
      * 将单个ERP产品转换为Kingdee产品。
      *
      * @param product ERP产品对象
-     * @param isSimple 是否为简化版转换
+     * @param isCustomRuleProduct 是否为简化版转换
      * @return 转换后的Kingdee产品对象
      */
-    private KingdeeProduct convertToKingdeeProduct(ErpCustomRuleDTO product, boolean isSimple) {
+    private KingdeeProduct convertToKingdeeProduct(ErpCustomRuleDTO product, boolean isCustomRuleProduct) {
         KingdeeProduct kingdeeProduct = new KingdeeProduct();
         //普通
         kingdeeProduct.setCheckType("1");
-        if (!isSimple) {
+        if (isCustomRuleProduct) {
             // 如果有供应商产品编码和国家代码都不为空的时候才去设置SKU
             Integer countryCode = product.getCountryCode();
             if (ObjUtil.isNotEmpty(countryCode)) {

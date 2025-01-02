@@ -40,7 +40,7 @@ public class IntegrationConfig {
     }
 
     @Bean
-    public MessageChannel simpleProductChannel() {
+    public MessageChannel customRuleChannel() {
         return new PublishSubscribeChannel(new SimpleAsyncTaskExecutor());
     }
 
@@ -50,17 +50,17 @@ public class IntegrationConfig {
     }
 
     @Bean
-    public IntegrationFlow erpRouter() {
+    public IntegrationFlow productRouter() {
         return IntegrationFlow
                 .from("erpProductChannel") // Incoming messages from erpProductChannel
                 .channel(productChannel()) // Route to productChannel
                 .get();
     }
     @Bean
-    public IntegrationFlow simpleErpRouter() {
+    public IntegrationFlow customRuleRouter() {
         return IntegrationFlow
-            .from("erpSimpleProductChannel") // Incoming messages from simpleErpProductChannel
-            .channel(simpleProductChannel()) // Route to simpleProductChannel
+            .from("erpCustomRuleChannel")
+            .channel(customRuleChannel())
             .get();
     }
 }

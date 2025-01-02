@@ -195,10 +195,30 @@ public class EsbService {
     * @Param [message]
     * @return void
     **/
-    @ServiceActivator(inputChannel = "productChannel")
+    @ServiceActivator(inputChannel = "customRuleChannel")
     public void syncProductsToEccang(Message<List<ErpCustomRuleDTO>> message) {
+        log.info("syncCustomRuleToEccang");
+        List<EccangProduct> eccangProducts = erpToEccangConverter.erpCustomRuleToEccang(message.getPayload());
+        for (EccangProduct eccangProduct : eccangProducts){
+            eccangProduct.setActionType("ADD");
+            EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
+            //根据sku从eccang中获取产品，如果产品不为空，则表示已存在，操作则变为修改
+            if (ObjUtil.isNotEmpty(eccangServiceProduct)){
+                eccangProduct.setActionType("EDIT");
+                //如果是修改就要上传默认采购单价
+                //TODO 后续有变更，请修改
+                eccangProduct.setProductPurchaseValue(0.001F);
+            }
+            log.debug(eccangProduct.toString());
+            eccangService.addBatchProduct(List.of(eccangProduct));
+        }
+        log.info("syncCustomRuleToEccang end");
+    }
+
+    @ServiceActivator(inputChannel = "productChannel")
+    public void syncSimpleProductsToEccang(Message<List<ErpCustomRuleDTO>> message) {
         log.info("syncProductsToEccang");
-        List<EccangProduct> eccangProducts = erpToEccangConverter.toEccang(message.getPayload());
+        List<EccangProduct> eccangProducts = erpToEccangConverter.erpProductToEccang(message.getPayload());
         for (EccangProduct eccangProduct : eccangProducts){
             eccangProduct.setActionType("ADD");
             EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
@@ -215,26 +235,6 @@ public class EsbService {
         log.info("syncProductsToEccang end");
     }
 
-    @ServiceActivator(inputChannel = "simpleProductChannel")
-    public void syncSimpleProductsToEccang(Message<List<ErpCustomRuleDTO>> message) {
-        log.info("syncSimpleProductsToEccang");
-        List<EccangProduct> eccangProducts = erpToEccangConverter.toEccangSimple(message.getPayload());
-        for (EccangProduct eccangProduct : eccangProducts){
-            eccangProduct.setActionType("ADD");
-            EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
-            //根据sku从eccang中获取产品，如果产品不为空，则表示已存在，操作则变为修改
-            if (ObjUtil.isNotEmpty(eccangServiceProduct)){
-                eccangProduct.setActionType("EDIT");
-                //如果是修改就要上传默认采购单价
-                //TODO 后续有变更，请修改
-                eccangProduct.setProductPurchaseValue(0.001F);
-            }
-            log.debug(eccangProduct.toString());
-            eccangService.addBatchProduct(List.of(eccangProduct));
-        }
-        log.info("syncSimpleProductsToEccang end");
-    }
-
     /**
      * @Author Wqh
      * @Description 上传金蝶产品信息
@@ -242,24 +242,24 @@ public class EsbService {
      * @Param [message]
      * @return void
      **/
-    @ServiceActivator(inputChannel = "productChannel")
+    @ServiceActivator(inputChannel = "customRuleChannel")
     public void syncProductsToKingdee(Message<List<ErpCustomRuleDTO>> message) {
+        log.info("syncCustomRuleToKingdee");
+        List<KingdeeProduct> kingdee = erpToKingdeeConverter.erpCustomRuleToKingdee(message.getPayload());
+        for (KingdeeProduct kingdeeProduct : kingdee){
+            kingdeeService.addProduct(kingdeeProduct);
+        }
+        log.info("syncCustomRuleToKingdee end");
+    }
+
+    @ServiceActivator(inputChannel = "productChannel")
+    public void syncSimpleProductsToKingdee(Message<List<ErpCustomRuleDTO>> message) {
         log.info("syncProductsToKingdee");
-        List<KingdeeProduct> kingdee = erpToKingdeeConverter.toKingdee(message.getPayload());
+        List<KingdeeProduct> kingdee = erpToKingdeeConverter.erpProductToKingdee(message.getPayload());
         for (KingdeeProduct kingdeeProduct : kingdee){
             kingdeeService.addProduct(kingdeeProduct);
         }
         log.info("syncProductsToKingdee end");
-    }
-
-    @ServiceActivator(inputChannel = "simpleProductChannel")
-    public void syncSimpleProductsToKingdee(Message<List<ErpCustomRuleDTO>> message) {
-        log.info("syncSimpleProductsToKingdee");
-        List<KingdeeProduct> kingdee = erpToKingdeeConverter.toKingdeeSimple(message.getPayload());
-        for (KingdeeProduct kingdeeProduct : kingdee){
-            kingdeeService.addProduct(kingdeeProduct);
-        }
-        log.info("syncSimpleProductsToKingdee end");
     }
 
     /**

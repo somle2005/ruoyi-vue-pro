@@ -108,10 +108,10 @@ public class ErpToEccangConverter {
      * @param allProducts ERP产品列表
      * @return 转换后的Eccang产品列表
      */
-    public List<EccangProduct> toEccang(List<ErpCustomRuleDTO> allProducts) {
+    public List<EccangProduct> erpCustomRuleToEccang(List<ErpCustomRuleDTO> allProducts) {
         Map<Long, AdminUserRespDTO> userMap = userApi.getUserMap(convertSet(allProducts, product -> Long.parseLong(product.getProductCreatorId())));
         return allProducts.stream()
-            .map(product -> convertToEccangProduct(product, userMap, false))
+            .map(product -> convertToEccangProduct(product, userMap, true))
             .collect(Collectors.toList());
     }
 
@@ -121,10 +121,10 @@ public class ErpToEccangConverter {
      * @param allProducts ERP产品列表
      * @return 转换后的简化版Eccang产品列表
      */
-    public List<EccangProduct> toEccangSimple(List<ErpCustomRuleDTO> allProducts) {
+    public List<EccangProduct> erpProductToEccang(List<ErpCustomRuleDTO> allProducts) {
         Map<Long, AdminUserRespDTO> userMap = userApi.getUserMap(convertSet(allProducts, product -> Long.parseLong(product.getProductCreatorId())));
         return allProducts.stream()
-            .map(product -> convertToEccangProduct(product, userMap, true))
+            .map(product -> convertToEccangProduct(product, userMap, false))
             .collect(Collectors.toList());
     }
 
@@ -133,16 +133,16 @@ public class ErpToEccangConverter {
      *
      * @param product ERP产品对象
      * @param userMap 用户信息映射
-     * @param isSimple 是否为简化版转换
+     * @param isCustomRuleProduct 是否为简化版转换
      * @return 转换后的Eccang产品对象
      */
-    private EccangProduct convertToEccangProduct(ErpCustomRuleDTO product, Map<Long, AdminUserRespDTO> userMap, boolean isSimple) {
+    private EccangProduct convertToEccangProduct(ErpCustomRuleDTO product, Map<Long, AdminUserRespDTO> userMap, boolean isCustomRuleProduct) {
         EccangProduct eccangProduct = new EccangProduct();
         eccangProduct.setPdDeclarationStatement(product.getId());
 
 
         // 设置SKU和标题
-        if (!isSimple) {
+        if (isCustomRuleProduct) {
             Integer countryCode = product.getCountryCode();
             if (ObjUtil.isNotEmpty(countryCode)) {
                 DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
