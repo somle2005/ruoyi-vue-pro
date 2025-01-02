@@ -1,24 +1,17 @@
 package com.somle.eccang.service;
 
-import java.net.SocketTimeoutException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
-import java.time.Year;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
-
 import cn.hutool.core.collection.CollUtil;
 import com.somle.eccang.model.*;
-import com.somle.framework.common.util.json.JsonUtils;
+import com.somle.eccang.model.EccangResponse.EccangPage;
+import com.somle.eccang.repository.EccangTokenRepository;
 import com.somle.framework.common.util.json.JSONObject;
-
+import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.common.util.web.RequestX;
+import com.somle.framework.common.util.web.WebUtils;
+import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
+import lombok.extern.slf4j.Slf4j;
+import okhttp3.ResponseBody;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.integration.support.MessageBuilder;
@@ -29,15 +22,17 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import com.somle.eccang.model.EccangResponse.EccangPage;
-import com.somle.eccang.repository.EccangTokenRepository;
-import com.somle.framework.common.util.general.Limiter;
-import com.somle.framework.common.util.web.WebUtils;
-
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.client.HttpClientErrorException;
+
+import java.io.IOException;
+import java.net.SocketTimeoutException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -45,8 +40,7 @@ public class EccangService {
 
 
     private EccangToken token;
-    private int pageSize = 100;
-    private Limiter limiter = new Limiter(20);
+    private final int pageSize = 100;
 
     @Autowired
     EccangTokenRepository tokenRepo;
@@ -79,11 +73,10 @@ public class EccangService {
     }
 
     public String concatenateParams(JSONObject postData) {
-        String postDataStr = postData.entrySet().stream()
+        return postData.entrySet().stream()
             .map(e -> e.getKey() + "=" + e.getValue().asText())
             .reduce((e1, e2) -> e1 + "&" + e2)
             .orElse("") + token.getUserToken();
-        return postDataStr;
     }
 
     protected JSONObject requestBody(Object reqParams, String ecMethod) {
@@ -108,16 +101,19 @@ public class EccangService {
     // core network io
     @SneakyThrows
     private EccangResponse getResponse(Object payload, String endpoint) {
+        // 重试策略
         var retryPolicy = new ExceptionClassifierRetryPolicy();
         retryPolicy.setPolicyMap(Map.of(
             HttpClientErrorException.class, new SimpleRetryPolicy(10),
-            SocketTimeoutException.class, new SimpleRetryPolicy(10)
+            SocketTimeoutException.class, new SimpleRetryPolicy(10),
+            IOException.class, new SimpleRetryPolicy(10)//eccang的返回可能是null。
         ));
 
+        // 指数回退策略
         var exponentialBackOffPolicy = new ExponentialBackOffPolicy();
-        exponentialBackOffPolicy.setInitialInterval(2000);
-        exponentialBackOffPolicy.setMultiplier(2);
-        exponentialBackOffPolicy.setMaxInterval(180000);
+        exponentialBackOffPolicy.setInitialInterval(2000);  // 初始间隔为2秒
+        exponentialBackOffPolicy.setMultiplier(2);         // 每次重试间隔递增的倍数
+        exponentialBackOffPolicy.setMaxInterval(180000);   // 最大间隔为3分钟
 
         var retryTemplate = new RetryTemplate();
         retryTemplate.setRetryPolicy(retryPolicy);
@@ -125,8 +121,14 @@ public class EccangService {
 
         String url = "http://openapi-web.eccang.com/openApi/api/unity";
 
-
-        EccangResponse responseFinal = retryTemplate.execute(ctx -> {
+        // 使用重试模板进行请求
+        return retryTemplate.execute(ctx -> {
+            // 获取当前重试次数
+            int retryCount = ctx.getRetryCount();
+            if (retryCount >= 10) {
+                // 达到最大重试次数，输出日志提示
+                log.warn("请求已重试 {} 次，达到最大重试限制。endpoint = {}", retryCount,endpoint);
+            }
             var requestBody = requestBody(payload, endpoint);
 
             var request = RequestX.builder()
@@ -135,10 +137,18 @@ public class EccangService {
                 .payload(requestBody)
                 .build();
             try (var response = WebUtils.sendRequest(request)) {
+                // Non-null check for the response
                 switch (response.code()) {
                     case 200:
-                        var responseBody = response.body().string();
+                        ResponseBody body = response.body();
+                        if (body == null ) {
+                            throw new IOException("Received empty response body from the server");
+                        }
+                        var responseBody = body.string();
                         var responseOriginal = JsonUtils.parseObject(responseBody, EccangResponse.class);
+                        if (responseOriginal == null ) {
+                            throw new IllegalArgumentException("parseObject responseOriginal is null");
+                        }
                         validateResponse(responseOriginal);
                         return responseOriginal;
                     case 429:
@@ -148,8 +158,9 @@ public class EccangService {
                 }
             }
         });
-        return responseFinal;
     }
+
+
 
     private void validateResponse(EccangResponse response) {
         //判断resp的code是否为null，为null则返回message直接作为异常信息
@@ -171,6 +182,8 @@ public class EccangService {
                 throw new RuntimeException("Error message from eccang: " + response.getBizContentList(EccangResponse.EccangError.class));
             case "429":
                 throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests, please try again later.");
+            case "saas.api.error.code.0061": //达到限流时-继续重试
+                throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "同一客户每秒请求接口次数不能超过10次");
             default:
                 throw new RuntimeException("Unknown eccang-specific response code: " + response.getCode() + " " + "message: " + response.getMessage());
         }
@@ -186,7 +199,7 @@ public class EccangService {
         payload.put("page", 1);
         payload.put("page_size", pageSize);
         return Stream.iterate(
-            getPage(payload, endpoint),
+            getPage(payload, endpoint), Objects::nonNull,
             bizContent -> {
                 if (bizContent.hasNext()) {
                     log.debug("have next");
@@ -197,8 +210,7 @@ public class EccangService {
                     return null;
                 }
             }
-        ).takeWhile(n -> n != null);
-        // );
+        );
     }
 
 
@@ -269,15 +281,13 @@ public class EccangService {
                 .build())
             .build();
         getOrderUnarchive(vo)
-            .forEach(order -> {
-                saleChannel.send(MessageBuilder.withPayload(order).build());
-            });
+            .forEach(order -> saleChannel.send(MessageBuilder.withPayload(order).build()));
     }
 
     public Stream<EccangOrder> getOrderUnarchive(EccangOrderVO vo) {
         return getOrderUnarchivePages(vo)
             .map(n -> n.getData(EccangOrder.class))
-            .flatMap(n -> n.stream());
+            .flatMap(Collection::stream);
     }
 
     public Stream<EccangOrder> getOrderPlusArchiveSince(EccangOrderVO vo, Integer startYear) {
@@ -287,7 +297,7 @@ public class EccangService {
             .flatMap(year ->
                 getOrderPlusArchivePages(vo, year)
                     .map(n -> n.getData(EccangOrder.class))
-                    .flatMap(n -> n.stream())
+                    .flatMap(Collection::stream)
             );
     }
 
@@ -339,7 +349,7 @@ public class EccangService {
 
     public EccangPage addDepartment(EccangCategory department) {
         try {
-            log.info("adding department: " + department.toString());
+            log.info("adding department: {}", department.toString());
             var result = post("editCategory", department);
             log.debug(result.toString());
             return result;
@@ -390,7 +400,13 @@ public class EccangService {
     }
 
     public EccangCategory getCategoryByNameEn(String nameEn) {
-        return getCategories().filter(n -> n.getPcNameEn().equals(nameEn)).findFirst().get();
+        // 通过 Optional 包裹过滤后的流，以避免抛出 NoSuchElementException
+        Optional<EccangCategory> category = getCategories()
+            .filter(n -> n.getPcNameEn().equals(nameEn))
+            .findFirst();
+
+        // 如果没有找到对应的 category，则抛出异常或返回默认值
+        return category.orElseThrow(() -> new IllegalArgumentException("Category with nameEn " + nameEn + " not found"));
     }
 
     public Stream<EccangOrganization> getOrganizations() {
@@ -398,7 +414,7 @@ public class EccangService {
     }
 
     public EccangOrganization getOrganizationByNameEn(String nameEn) {
-        log.debug("searching organization with name_en " + nameEn);
+        log.debug("searching organization with name_en {}", nameEn);
         Optional<EccangOrganization> first = getOrganizations().filter(n -> n.getNameEn().equals(nameEn)).findFirst();
         if (first.isPresent()) {
             return first.get();
