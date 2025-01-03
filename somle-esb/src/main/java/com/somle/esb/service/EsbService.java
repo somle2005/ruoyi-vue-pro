@@ -2,6 +2,7 @@ package com.somle.esb.service;
 
 import cn.hutool.core.util.ObjUtil;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.supplier.dto.ErpSupplierDTO;
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
@@ -216,7 +217,7 @@ public class EsbService {
     }
 
     @ServiceActivator(inputChannel = "productChannel")
-    public void syncSimpleProductsToEccang(Message<List<ErpCustomRuleDTO>> message) {
+    public void syncSimpleProductsToEccang(Message<List<ErpProductDTO>> message) {
         log.info("syncProductsToEccang");
         List<EccangProduct> eccangProducts = erpToEccangConverter.erpProductToEccang(message.getPayload());
         for (EccangProduct eccangProduct : eccangProducts){
@@ -253,7 +254,7 @@ public class EsbService {
     }
 
     @ServiceActivator(inputChannel = "productChannel")
-    public void syncSimpleProductsToKingdee(Message<List<ErpCustomRuleDTO>> message) {
+    public void syncSimpleProductsToKingdee(Message<List<ErpProductDTO>> message) {
         log.info("syncProductsToKingdee");
         List<KingdeeProduct> kingdee = erpToKingdeeConverter.erpProductToKingdee(message.getPayload());
         for (KingdeeProduct kingdeeProduct : kingdee){
