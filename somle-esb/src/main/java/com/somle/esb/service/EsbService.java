@@ -197,7 +197,7 @@ public class EsbService {
     * @return void
     **/
     @ServiceActivator(inputChannel = "customRuleChannel")
-    public void syncProductsToEccang(Message<List<ErpCustomRuleDTO>> message) {
+    public void syncCustomRuleToEccang(Message<List<ErpCustomRuleDTO>> message) {
         log.info("syncCustomRuleToEccang");
         List<EccangProduct> eccangProducts = erpToEccangConverter.erpCustomRuleToEccang(message.getPayload());
         for (EccangProduct eccangProduct : eccangProducts){
@@ -217,7 +217,7 @@ public class EsbService {
     }
 
     @ServiceActivator(inputChannel = "productChannel")
-    public void syncSimpleProductsToEccang(Message<List<ErpProductDTO>> message) {
+    public void syncProductsToEccang(Message<List<ErpProductDTO>> message) {
         log.info("syncProductsToEccang");
         List<EccangProduct> eccangProducts = erpToEccangConverter.erpProductToEccang(message.getPayload());
         for (EccangProduct eccangProduct : eccangProducts){
@@ -244,7 +244,7 @@ public class EsbService {
      * @return void
      **/
     @ServiceActivator(inputChannel = "customRuleChannel")
-    public void syncProductsToKingdee(Message<List<ErpCustomRuleDTO>> message) {
+    public void syncCustomRuleToKingdee(Message<List<ErpCustomRuleDTO>> message) {
         log.info("syncCustomRuleToKingdee");
         List<KingdeeProduct> kingdee = erpToKingdeeConverter.erpCustomRuleToKingdee(message.getPayload());
         for (KingdeeProduct kingdeeProduct : kingdee){
@@ -254,7 +254,7 @@ public class EsbService {
     }
 
     @ServiceActivator(inputChannel = "productChannel")
-    public void syncSimpleProductsToKingdee(Message<List<ErpProductDTO>> message) {
+    public void syncProductsToKingdee(Message<List<ErpProductDTO>> message) {
         log.info("syncProductsToKingdee");
         List<KingdeeProduct> kingdee = erpToKingdeeConverter.erpProductToKingdee(message.getPayload());
         for (KingdeeProduct kingdeeProduct : kingdee){
