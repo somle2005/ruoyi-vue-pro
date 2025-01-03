@@ -93,12 +93,12 @@ public class ErpToKingdeeConverter {
     /**
      * 将ERP产品列表转换为完整的Kingdee产品列表。
      *
-     * @param allProducts ERP产品列表
+     * @param customRuleDTOs ERP产品列表
      * @return 转换后的Kingdee产品列表
      */
-    public List<KingdeeProduct> erpCustomRuleDTOToKingdeeProduct(List<ErpCustomRuleDTO> allProducts) {
+    public List<KingdeeProduct> customRuleDTOToProduct(List<ErpCustomRuleDTO> customRuleDTOs) {
         log.info("Converting ERP products to full Kingdee products");
-        return allProducts.stream()
+        return customRuleDTOs.stream()
             .map(this::convertToKingdeeProduct)
             .collect(Collectors.toList());
     }
@@ -106,12 +106,12 @@ public class ErpToKingdeeConverter {
     /**
      * 将ERP产品列表转换为简化的Kingdee产品列表。
      *
-     * @param allProducts ERP产品列表
+     * @param productDTOs ERP产品列表
      * @return 转换后的简化版Kingdee产品列表
      */
-    public List<KingdeeProduct> erpProductDTOToKingdeeProduct(List<ErpProductDTO> allProducts) {
+    public List<KingdeeProduct> productDTOToProduct(List<ErpProductDTO> productDTOs) {
         log.info("Converting ERP products to simple Kingdee products");
-        return allProducts.stream()
+        return productDTOs.stream()
             .map(this::convertToKingdeeProduct)
             .collect(Collectors.toList());
     }
