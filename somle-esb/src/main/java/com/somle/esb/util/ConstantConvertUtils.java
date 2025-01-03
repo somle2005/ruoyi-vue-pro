@@ -18,7 +18,7 @@ public final class ConstantConvertUtils {
     * @Param [s]
     * @return java.lang.String
     **/
-    public static String getProductStatus(String countryCode){
+    public static String getCountrySuffix(String countryCode){
         return switch (countryCode) {
             case "CN" -> "CHN";
             case "US" -> "USA";

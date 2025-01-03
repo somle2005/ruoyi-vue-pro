@@ -18,7 +18,6 @@ import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import com.somle.eccang.model.*;
 import com.somle.eccang.service.EccangService;
-import com.somle.kingdee.model.KingdeeProduct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -29,7 +28,7 @@ import java.util.stream.Collectors;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.somle.esb.enums.ErrorCodeConstants.DEPT_LEVEL_ERROR;
 import static com.somle.esb.job.SyncDepartmentsJob.TENANT_ID_DEFAULT;
-import static com.somle.esb.util.ConstantConvertUtils.getProductStatus;
+import static com.somle.esb.util.ConstantConvertUtils.getCountrySuffix;
 
 @Service
 public class ErpToEccangConverter {
@@ -144,9 +143,9 @@ public class ErpToEccangConverter {
         if (ObjUtil.isNotEmpty(countryCode)) {
             DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
             if (StrUtil.isNotBlank(product.getSupplierProductCode())) {
-                eccangProduct.setProductTitle(product.getProductName() + "-" + getProductStatus(dictData.getLabel()));
-                eccangProduct.setProductTitleEn(product.getSupplierProductCode() + "-" + getProductStatus(dictData.getLabel()));
-                eccangProduct.setProductSku(product.getSupplierProductCode() + "-" + getProductStatus(dictData.getLabel()));
+                eccangProduct.setProductTitle(product.getProductName() + "-" + getCountrySuffix(dictData.getLabel()));
+                eccangProduct.setProductTitleEn(product.getSupplierProductCode() + "-" + getCountrySuffix(dictData.getLabel()));
+                eccangProduct.setProductSku(product.getSupplierProductCode() + "-" + getCountrySuffix(dictData.getLabel()));
             }
         }
         // 设置货币代码

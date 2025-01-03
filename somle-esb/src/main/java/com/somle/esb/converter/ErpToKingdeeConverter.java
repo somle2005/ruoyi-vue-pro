@@ -28,7 +28,7 @@ import org.springframework.stereotype.Service;
 
 import lombok.extern.slf4j.Slf4j;
 
-import static com.somle.esb.util.ConstantConvertUtils.getProductStatus;
+import static com.somle.esb.util.ConstantConvertUtils.getCountrySuffix;
 
 @Slf4j
 @Service
@@ -131,8 +131,8 @@ public class ErpToKingdeeConverter {
             // 将字典value转换为label
             DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
             if (StrUtil.isNotBlank(product.getSupplierProductCode())) {
-                kingdeeProduct.setNumber(product.getSupplierProductCode() + "-" + getProductStatus(dictData.getLabel()));
-                kingdeeProduct.setName(product.getProductName() + "-" + getProductStatus(dictData.getLabel()));
+                kingdeeProduct.setNumber(product.getSupplierProductCode() + "-" + getCountrySuffix(dictData.getLabel()));
+                kingdeeProduct.setName(product.getProductName() + "-" + getCountrySuffix(dictData.getLabel()));
             }
         }
         kingdeeProduct.setBarcode(product.getBarCode());
