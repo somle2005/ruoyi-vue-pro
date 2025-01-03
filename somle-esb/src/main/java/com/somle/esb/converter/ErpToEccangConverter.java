@@ -111,7 +111,7 @@ public class ErpToEccangConverter {
     public List<EccangProduct> customRuleDTOToProduct(List<ErpCustomRuleDTO> customRuleDTOs) {
         Map<Long, AdminUserRespDTO> userMap = userApi.getUserMap(convertSet(customRuleDTOs, product -> Long.parseLong(product.getProductCreatorId())));
         return customRuleDTOs.stream()
-            .map(product -> convertToEccangProduct(product, userMap))
+            .map(product -> customRuleToProduct(product, userMap))
             .collect(Collectors.toList());
     }
 
@@ -124,64 +124,64 @@ public class ErpToEccangConverter {
     public List<EccangProduct> productDTOToProduct(List<ErpProductDTO> productDTOs) {
         Map<Long, AdminUserRespDTO> userMap = userApi.getUserMap(convertSet(productDTOs, product -> Long.parseLong(product.getCreator())));
         return productDTOs.stream()
-            .map(product -> convertToEccangProduct(product, userMap))
+            .map(product -> productToProduct(product, userMap))
             .collect(Collectors.toList());
     }
 
     /**
      * 将单个ERP产品转换为Eccang产品。
      *
-     * @param product ERP产品对象
+     * @param customRuleDTO ERP产品对象
      * @param userMap 用户信息映射
      * @return 转换后的Eccang产品对象
      */
-    private EccangProduct convertToEccangProduct(ErpCustomRuleDTO product, Map<Long, AdminUserRespDTO> userMap) {
+    private EccangProduct customRuleToProduct(ErpCustomRuleDTO customRuleDTO, Map<Long, AdminUserRespDTO> userMap) {
         EccangProduct eccangProduct = new EccangProduct();
-        eccangProduct.setPdDeclarationStatement(product.getId());
+        eccangProduct.setPdDeclarationStatement(customRuleDTO.getId());
         // 设置SKU和标题
-        Integer countryCode = product.getCountryCode();
+        Integer countryCode = customRuleDTO.getCountryCode();
         if (ObjUtil.isNotEmpty(countryCode)) {
             DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
-            if (StrUtil.isNotBlank(product.getSupplierProductCode())) {
-                eccangProduct.setProductTitle(product.getProductName() + "-" + getCountrySuffix(dictData.getLabel()));
-                eccangProduct.setProductTitleEn(product.getSupplierProductCode() + "-" + getCountrySuffix(dictData.getLabel()));
-                eccangProduct.setProductSku(product.getSupplierProductCode() + "-" + getCountrySuffix(dictData.getLabel()));
+            if (StrUtil.isNotBlank(customRuleDTO.getSupplierProductCode())) {
+                eccangProduct.setProductTitle(customRuleDTO.getProductName() + "-" + getCountrySuffix(dictData.getLabel()));
+                eccangProduct.setProductTitleEn(customRuleDTO.getSupplierProductCode() + "-" + getCountrySuffix(dictData.getLabel()));
+                eccangProduct.setProductSku(customRuleDTO.getSupplierProductCode() + "-" + getCountrySuffix(dictData.getLabel()));
             }
         }
         // 设置货币代码
-        Integer declaredValueCurrencyCode = product.getDeclaredValueCurrencyCode();
+        Integer declaredValueCurrencyCode = customRuleDTO.getDeclaredValueCurrencyCode();
         if (ObjUtil.isNotEmpty(declaredValueCurrencyCode)) {
             DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.CURRENCY_CODE, String.valueOf(declaredValueCurrencyCode));
             eccangProduct.setPdDeclareCurrencyCode(dictData.getLabel());
         }
-        Integer purchasePriceCurrencyCode = product.getPurchasePriceCurrencyCode();
+        Integer purchasePriceCurrencyCode = customRuleDTO.getPurchasePriceCurrencyCode();
         if (ObjUtil.isNotEmpty(purchasePriceCurrencyCode)) {
             DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.CURRENCY_CODE, String.valueOf(purchasePriceCurrencyCode));
             eccangProduct.setCurrencyCode(dictData.getLabel());
         }
-        eccangProduct.setProductDeclaredValue(product.getDeclaredValue());
-        eccangProduct.setPdOverseaTypeEn(product.getDeclaredTypeEn());
+        eccangProduct.setProductDeclaredValue(customRuleDTO.getDeclaredValue());
+        eccangProduct.setPdOverseaTypeEn(customRuleDTO.getDeclaredTypeEn());
 
         // 设置产品尺寸和重量
-        eccangProduct.setProductWeight(product.getPackageWeight());
-        eccangProduct.setProductWidth(product.getPackageWidth());
-        eccangProduct.setProductLength(product.getPackageLength());
-        eccangProduct.setProductHeight(product.getPackageHeight());
-        eccangProduct.setProductMaterial(product.getProductMaterial());
-        eccangProduct.setPdNetWeight(product.getProductWeight());
-        eccangProduct.setPdNetLength(product.getProductLength() / 100);
-        eccangProduct.setPdNetWidth(product.getProductWidth() / 100);
-        eccangProduct.setPdNetHeight(product.getProductHeight() / 100);
+        eccangProduct.setProductWeight(customRuleDTO.getPackageWeight());
+        eccangProduct.setProductWidth(customRuleDTO.getPackageWidth());
+        eccangProduct.setProductLength(customRuleDTO.getPackageLength());
+        eccangProduct.setProductHeight(customRuleDTO.getPackageHeight());
+        eccangProduct.setProductMaterial(customRuleDTO.getProductMaterial());
+        eccangProduct.setPdNetWeight(customRuleDTO.getProductWeight());
+        eccangProduct.setPdNetLength(customRuleDTO.getProductLength() / 100);
+        eccangProduct.setPdNetWidth(customRuleDTO.getProductWidth() / 100);
+        eccangProduct.setPdNetHeight(customRuleDTO.getProductHeight() / 100);
 
         // 设置其他产品属性
-        eccangProduct.setProductPurchaseValue(product.getProductPurchaseValue());
-        eccangProduct.setFboTaxRate(product.getTaxRate());
-        eccangProduct.setPdOverseaTypeCn(product.getDeclaredType());
-        eccangProduct.setProductImgUrlList(Collections.singletonList(product.getProductImageUrl()));
-        eccangProduct.setHsCode(product.getHscode());
+        eccangProduct.setProductPurchaseValue(customRuleDTO.getProductPurchaseValue());
+        eccangProduct.setFboTaxRate(customRuleDTO.getTaxRate());
+        eccangProduct.setPdOverseaTypeCn(customRuleDTO.getDeclaredType());
+        eccangProduct.setProductImgUrlList(Collections.singletonList(customRuleDTO.getProductImageUrl()));
+        eccangProduct.setHsCode(customRuleDTO.getHscode());
         eccangProduct.setDefaultSupplierCode("默认供应商");
         // 设置物流属性
-        Integer logisticAttribute = product.getLogisticAttribute();
+        Integer logisticAttribute = customRuleDTO.getLogisticAttribute();
         if (ObjUtil.isNotEmpty(logisticAttribute)) {
             eccangProduct.setLogisticAttribute(String.valueOf(logisticAttribute));
         }
@@ -189,11 +189,11 @@ public class ErpToEccangConverter {
         // 设置销售状态和声明价值
         eccangProduct.setSaleStatus(2);
         // 设置产品创建人部门名称
-        MapUtils.findAndThen(userMap, Long.parseLong(product.getProductCreatorId()),
-            user -> eccangProduct.setUserOrganizationId(eccangService.getOrganizationByNameEn(String.valueOf(product.getProductDeptId())).getId()));
+        MapUtils.findAndThen(userMap, Long.parseLong(customRuleDTO.getProductCreatorId()),
+            user -> eccangProduct.setUserOrganizationId(eccangService.getOrganizationByNameEn(String.valueOf(customRuleDTO.getProductDeptId())).getId()));
 
         // 设置品类
-        TreeSet<DeptLevelRespDTO> deptTreeLevel = deptApi.getDeptTreeLevel(product.getProductDeptId());
+        TreeSet<DeptLevelRespDTO> deptTreeLevel = deptApi.getDeptTreeLevel(customRuleDTO.getProductDeptId());
         if (CollectionUtil.isEmpty(deptTreeLevel) || deptTreeLevel.size() > 3) {
             throw new RuntimeException("品类部门信息异常，请联系管理员，检查erp中产品资料库中的部门信息");
         }
@@ -218,7 +218,7 @@ public class ErpToEccangConverter {
      * @param userMap 用户信息映射
      * @return 转换后的Eccang产品对象
      */
-    private EccangProduct convertToEccangProduct(ErpProductDTO product, Map<Long, AdminUserRespDTO> userMap) {
+    private EccangProduct productToProduct(ErpProductDTO product, Map<Long, AdminUserRespDTO> userMap) {
         EccangProduct eccangProduct = new EccangProduct();
         // 设置SKU和标题
         eccangProduct.setProductTitle(product.getName());
