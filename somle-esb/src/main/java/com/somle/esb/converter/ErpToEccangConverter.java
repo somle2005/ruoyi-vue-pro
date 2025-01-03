@@ -108,7 +108,7 @@ public class ErpToEccangConverter {
      * @param allProducts ERP产品列表
      * @return 转换后的Eccang产品列表
      */
-    public List<EccangProduct> erpCustomRuleToEccang(List<ErpCustomRuleDTO> allProducts) {
+    public List<EccangProduct> convertCustomRules(List<ErpCustomRuleDTO> allProducts) {
         Map<Long, AdminUserRespDTO> userMap = userApi.getUserMap(convertSet(allProducts, product -> Long.parseLong(product.getProductCreatorId())));
         return allProducts.stream()
             .map(product -> convertToEccangProduct(product, userMap))
@@ -121,7 +121,7 @@ public class ErpToEccangConverter {
      * @param allProducts ERP产品列表
      * @return 转换后的简化版Eccang产品列表
      */
-    public List<EccangProduct> erpProductToEccang(List<ErpProductDTO> allProducts) {
+    public List<EccangProduct> convertProducts(List<ErpProductDTO> allProducts) {
         Map<Long, AdminUserRespDTO> userMap = userApi.getUserMap(convertSet(allProducts, product -> Long.parseLong(product.getCreator())));
         return allProducts.stream()
             .map(product -> convertToEccangProduct(product, userMap))

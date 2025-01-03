@@ -199,7 +199,7 @@ public class EsbService {
     @ServiceActivator(inputChannel = "customRuleChannel")
     public void syncCustomRuleToEccang(Message<List<ErpCustomRuleDTO>> message) {
         log.info("syncCustomRuleToEccang");
-        List<EccangProduct> eccangProducts = erpToEccangConverter.erpCustomRuleToEccang(message.getPayload());
+        List<EccangProduct> eccangProducts = erpToEccangConverter.convertCustomRules(message.getPayload());
         for (EccangProduct eccangProduct : eccangProducts){
             eccangProduct.setActionType("ADD");
             EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
@@ -219,7 +219,7 @@ public class EsbService {
     @ServiceActivator(inputChannel = "productChannel")
     public void syncProductsToEccang(Message<List<ErpProductDTO>> message) {
         log.info("syncProductsToEccang");
-        List<EccangProduct> eccangProducts = erpToEccangConverter.erpProductToEccang(message.getPayload());
+        List<EccangProduct> eccangProducts = erpToEccangConverter.convertProducts(message.getPayload());
         for (EccangProduct eccangProduct : eccangProducts){
             eccangProduct.setActionType("ADD");
             EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
@@ -246,7 +246,7 @@ public class EsbService {
     @ServiceActivator(inputChannel = "customRuleChannel")
     public void syncCustomRuleToKingdee(Message<List<ErpCustomRuleDTO>> message) {
         log.info("syncCustomRuleToKingdee");
-        List<KingdeeProduct> kingdee = erpToKingdeeConverter.erpCustomRuleToKingdee(message.getPayload());
+        List<KingdeeProduct> kingdee = erpToKingdeeConverter.convertCustomRules(message.getPayload());
         for (KingdeeProduct kingdeeProduct : kingdee){
             kingdeeService.addProduct(kingdeeProduct);
         }
@@ -256,7 +256,7 @@ public class EsbService {
     @ServiceActivator(inputChannel = "productChannel")
     public void syncProductsToKingdee(Message<List<ErpProductDTO>> message) {
         log.info("syncProductsToKingdee");
-        List<KingdeeProduct> kingdee = erpToKingdeeConverter.erpProductToKingdee(message.getPayload());
+        List<KingdeeProduct> kingdee = erpToKingdeeConverter.convertProducts(message.getPayload());
         for (KingdeeProduct kingdeeProduct : kingdee){
             kingdeeService.addProduct(kingdeeProduct);
         }

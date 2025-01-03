@@ -96,7 +96,7 @@ public class ErpToKingdeeConverter {
      * @param allProducts ERP产品列表
      * @return 转换后的Kingdee产品列表
      */
-    public List<KingdeeProduct> erpCustomRuleToKingdee(List<ErpCustomRuleDTO> allProducts) {
+    public List<KingdeeProduct> convertCustomRules(List<ErpCustomRuleDTO> allProducts) {
         log.info("Converting ERP products to full Kingdee products");
         return allProducts.stream()
             .map(this::convertToKingdeeProduct)
@@ -109,7 +109,7 @@ public class ErpToKingdeeConverter {
      * @param allProducts ERP产品列表
      * @return 转换后的简化版Kingdee产品列表
      */
-    public List<KingdeeProduct> erpProductToKingdee(List<ErpProductDTO> allProducts) {
+    public List<KingdeeProduct> convertProducts(List<ErpProductDTO> allProducts) {
         log.info("Converting ERP products to simple Kingdee products");
         return allProducts.stream()
             .map(this::convertToKingdeeProduct)
