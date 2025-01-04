@@ -18,6 +18,8 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -193,7 +195,9 @@ public class WebUtils {
             try {
                 T responseBodyData = parseResponse(response, responseType);
                 int responseCode = response.code();
-                return new SomleResponse<>(responseCode, responseBodyData);
+                // 确保headers不可修改
+                Map<String, List<String>> responseHeaders = Collections.unmodifiableMap(response.headers().toMultimap());
+                return new SomleResponse<>(responseCode, responseBodyData,responseHeaders);
             } catch (JsonParseException e) {
                 // 处理JSON解析异常
                 throw new IllegalArgumentException("JSON parsing error: " + e.getMessage(), e);
