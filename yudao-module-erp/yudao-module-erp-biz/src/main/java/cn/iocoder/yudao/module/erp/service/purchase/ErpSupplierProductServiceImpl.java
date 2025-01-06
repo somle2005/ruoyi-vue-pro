@@ -68,6 +68,8 @@ public class ErpSupplierProductServiceImpl implements ErpSupplierProductService 
     public void deleteSupplierProduct(Long id) {
         // 校验存在
         validateSupplierProductExists(id);
+        //TODO 后续如果还存在其他关联，请做校验
+        ThrowUtil.ifThrow(CollUtil.isNotEmpty(customRuleMapper.selectListBySupplierProductId(id)),CUSTOM_RULE_EXISTS);
         // 删除
         supplierProductMapper.deleteById(id);
     }
@@ -126,10 +128,14 @@ public class ErpSupplierProductServiceImpl implements ErpSupplierProductService 
     }
 
     @Override
-    public List<ErpSupplierProductRespVO> getSupplierProductVOListByStatus(Integer status) {
-        //TODO: only return when product is of that status
+    public List<ErpSupplierProductRespVO> getSupplierProductVOListByStatus() {
         List<ErpSupplierProductDO> list = supplierProductMapper.selectList();
         return BeanUtils.toBean(list, ErpSupplierProductRespVO.class);
+    }
+
+    @Override
+    public List<ErpSupplierProductDO> getSupplierProductList(ErpSupplierProductPageReqVO pageReqVO) {
+        return supplierProductMapper.selectListByProductId(pageReqVO);
     }
 
 }

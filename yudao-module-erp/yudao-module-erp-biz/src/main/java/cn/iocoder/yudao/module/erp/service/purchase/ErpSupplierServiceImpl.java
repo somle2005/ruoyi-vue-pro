@@ -1,13 +1,17 @@
 package cn.iocoder.yudao.module.erp.service.purchase;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
+import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.ErpSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.supplier.ErpSupplierPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.supplier.ErpSupplierSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.purchase.ErpSupplierDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.purchase.ErpSupplierMapper;
 import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -28,6 +32,9 @@ public class ErpSupplierServiceImpl implements ErpSupplierService {
 
     @Resource
     private ErpSupplierMapper supplierMapper;
+    @Resource
+    @Lazy
+    private ErpSupplierProductService supplierProductService;
 
     @Override
     public Long createSupplier(ErpSupplierSaveReqVO createReqVO) {
@@ -49,6 +56,8 @@ public class ErpSupplierServiceImpl implements ErpSupplierService {
     public void deleteSupplier(Long id) {
         // 校验存在
         validateSupplierExists(id);
+        //TODO 后续如果还存在其他关联，请做校验
+        ThrowUtil.ifThrow(CollUtil.isNotEmpty(supplierProductService.getSupplierProductList(new ErpSupplierProductPageReqVO().setSupplierId(id))),SUPPLIER_REFERENCED_BY_PRODUCTS);
         // 删除
         supplierMapper.deleteById(id);
     }

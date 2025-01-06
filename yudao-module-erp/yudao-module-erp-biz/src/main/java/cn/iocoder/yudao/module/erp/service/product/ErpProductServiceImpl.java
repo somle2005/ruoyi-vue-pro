@@ -14,12 +14,14 @@ import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProduc
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.GuidePriceJson;
+import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.ErpSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.customrule.ErpCustomRuleMapper;
 import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
 import cn.iocoder.yudao.module.erp.service.product.bo.ErpProductBO;
+import cn.iocoder.yudao.module.erp.service.purchase.ErpSupplierProductService;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -64,6 +66,8 @@ public class ErpProductServiceImpl implements ErpProductService {
     ErpCustomRuleMapper customRuleMapper;
     @Resource
     AdminUserApi userApi;
+    @Resource
+    private ErpSupplierProductService supplierProductService;
 
 
     private final ReentrantLock LOCK = new ReentrantLock();
@@ -193,6 +197,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         // 校验存在
         validateProductExists(id);
         //TODO 后续如果还存在其他关联，请做校验
+        ThrowUtil.ifThrow(CollUtil.isNotEmpty(supplierProductService.getSupplierProductList(new ErpSupplierProductPageReqVO().setProductId(id))), PRODUCT_BY_SUPPLIER_PRODUCT);
         // 删除
         ThrowUtil.ifSqlThrow(productMapper.deleteById(id),DB_DELETE_ERROR);
     }

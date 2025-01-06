@@ -13,9 +13,10 @@ public interface ErrorCodeConstants {
 
     // ========== ERP 供应商（1-030-100-000） ==========
     ErrorCode SUPPLIER_NOT_EXISTS = new ErrorCode(1_030_100_000, "供应商不存在");
-    ErrorCode SUPPLIER_NOT_ENABLE = new ErrorCode(1_030_100_000, "供应商({})未启用");
-    ErrorCode SUPPLIER_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_100_000, "供应商产品不存在");
-    ErrorCode SUPPLIER_PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_500_000, "供应商产品编码已存在");
+    ErrorCode SUPPLIER_NOT_ENABLE = new ErrorCode(1_030_100_001, "供应商({})未启用");
+    ErrorCode SUPPLIER_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_100_002, "供应商产品不存在");
+    ErrorCode SUPPLIER_PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_100_003, "供应商产品编码已存在");
+    ErrorCode SUPPLIER_REFERENCED_BY_PRODUCTS = new ErrorCode(1_030_100_004, "该供应商已被供应商产品引用，无法删除");
 
     // ========== ERP 采购订单（1-030-101-000） ==========
     ErrorCode PURCHASE_ORDER_NOT_EXISTS = new ErrorCode(1_030_101_000, "采购订单不存在");
@@ -149,6 +150,7 @@ public interface ErrorCodeConstants {
     ErrorCode PRODUCT_FIELD_NOT_MATCH = new ErrorCode(1_030_500_004, "传入的字段值和品类实际字段不匹配");
     ErrorCode PRODUCT_NAME_DUPLICATE = new ErrorCode(1_030_500_005, "产品名称已存在");
     ErrorCode PRODUCT_SERIAL_OVER_LIMIT = new ErrorCode(1_030_500_006, "相同颜色、型号、系列的产品个数产过两位数");
+    ErrorCode PRODUCT_BY_SUPPLIER_PRODUCT = new ErrorCode(1_030_500_007, "该产品已被供应商产品引用，无法删除");
 
     // ========== ERP 产品分类 1-030-501-000 ==========
     ErrorCode PRODUCT_CATEGORY_NOT_EXISTS = new ErrorCode(1_030_501_000, "产品分类不存在");
@@ -199,4 +201,7 @@ public interface ErrorCodeConstants {
     // ========== ERP 海关规则 1-030-604-000 ==========
     ErrorCode CUSTOM_RULE_NOT_EXISTS = new ErrorCode(1_030_604_000, "ERP 海关规则不存在");
     ErrorCode CUSTOM_RULE_PART_NULL = new ErrorCode(1_030_604_001, "集合中存在部分集合产品名称或供应商产品编码为空");
+
+    // ========== ERP 海关规则 1-030-605-000 ==========
+    ErrorCode CUSTOM_RULE_EXISTS = new ErrorCode(1_030_605_000, "该供应商产品已被海关规则引用，无法删除");
 }

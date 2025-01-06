@@ -5,7 +5,6 @@ import jakarta.validation.*;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.purchase.ErpSupplierProductDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.pojo.PageParam;
 
 /**
  * ERP 供应商产品 Service 接口
@@ -52,7 +51,25 @@ public interface ErpSupplierProductService {
      */
     PageResult<ErpSupplierProductDO> getSupplierProductPage(ErpSupplierProductPageReqVO pageReqVO);
 
+    /**
+     * 构建 ERP 供应商产品 分页响应对象
+     *
+     * @param pageResult 分页结果信息
+     * @return ERP 供应商产品 分页响应对象
+     */
     PageResult<ErpSupplierProductRespVO> buildSupplierProductVOPageResult(PageResult<ErpSupplierProductDO> pageResult);
 
-    List<ErpSupplierProductRespVO> getSupplierProductVOListByStatus(Integer status);
+    /**
+     * 获得ERP 供应商产品列表
+     * @return ERP 供应商产品列表
+     */
+    List<ErpSupplierProductRespVO> getSupplierProductVOListByStatus();
+
+    /**
+     * 获得ERP 根据条件获取供应商产品列表
+     *
+     * @param pageReqVO 编号
+     * @return ERP 供应商产品列表
+     */
+    List<ErpSupplierProductDO> getSupplierProductList(ErpSupplierProductPageReqVO pageReqVO);
 }

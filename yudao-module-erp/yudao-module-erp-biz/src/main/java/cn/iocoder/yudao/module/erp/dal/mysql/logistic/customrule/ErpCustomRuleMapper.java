@@ -101,4 +101,15 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
     default List<ErpCustomRuleDTO> selectProductAllInfoListBySupplierId(@NotNull(message = "供应商产品id不能为空") Long id) {
         return selectJoinList(ErpCustomRuleDTO.class, getWrapper().eq(ErpSupplierProductDO::getId, id));
     }
+
+    /**
+     * @Author Wqh
+     * @Description 通过supplierProductId查询海关规则
+     * @Date 16:10 2025/1/3
+     * @Param [supplierProductId]
+     * @return java.util.List<cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule.ErpCustomRuleDO>
+     **/
+    default List<ErpCustomRuleDO> selectListBySupplierProductId(Long supplierProductId){
+        return selectList(new LambdaQueryWrapperX<ErpCustomRuleDO>().eq(ErpCustomRuleDO::getSupplierProductId, supplierProductId));
+    }
 }

@@ -1,6 +1,5 @@
 package cn.iocoder.yudao.module.erp.controller.admin.purchase;
 
-import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -82,9 +81,9 @@ public class ErpSupplierProductController {
     }
 
     @GetMapping("/simple-list")
-    @Operation(summary = "获得ERP 供应商产品精简列表", description = "只包含被开启的产品，主要用于前端的下拉选项")
+    @Operation(summary = "获得ERP 供应商产品精简列表", description = "主要用于前端的下拉选项")
     public CommonResult<List<ErpSupplierProductRespVO>> getProductSimpleList() {
-        List<ErpSupplierProductRespVO> list = supplierProductService.getSupplierProductVOListByStatus(CommonStatusEnum.ENABLE.getStatus());
+        List<ErpSupplierProductRespVO> list = supplierProductService.getSupplierProductVOListByStatus();
         return success(list);
     }
 
