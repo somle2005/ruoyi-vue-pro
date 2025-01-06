@@ -2,7 +2,6 @@ package cn.iocoder.yudao.module.erp.service.logistic.customrule;
 
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import jakarta.annotation.Resource;
-import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.MessageChannel;
