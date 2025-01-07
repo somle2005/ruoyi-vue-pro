@@ -1,25 +1,20 @@
 package com.somle.eccang.service;
 
-import java.net.SocketTimeoutException;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
-import java.time.LocalDateTime;
-import java.time.Year;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.IntStream;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.stream.Stream;
-
 import cn.hutool.core.collection.CollUtil;
 import com.somle.eccang.model.*;
-import com.somle.framework.common.util.json.JsonUtils;
+import com.somle.eccang.model.EccangResponse.EccangPage;
+import com.somle.eccang.model.SyncLog.EccangInventorySyncLog;
+import com.somle.eccang.repository.EccangInventorySyncLogRepository;
+import com.somle.eccang.repository.EccangProductSkuRepository;
+import com.somle.eccang.repository.EccangTokenRepository;
 import com.somle.framework.common.util.json.JSONObject;
-
+import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.common.util.web.RequestX;
+import com.somle.framework.common.util.web.WebUtils;
+import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.MessageChannel;
@@ -29,35 +24,33 @@ import org.springframework.retry.policy.SimpleRetryPolicy;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import com.somle.eccang.model.EccangResponse.EccangPage;
-import com.somle.eccang.repository.EccangTokenRepository;
-import com.somle.framework.common.util.general.Limiter;
-import com.somle.framework.common.util.web.WebUtils;
-
-import jakarta.annotation.PostConstruct;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.HttpClientErrorException;
+
+import java.net.SocketTimeoutException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.time.LocalDateTime;
+import java.time.Year;
+import java.util.*;
+import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class EccangService {
 
 
     private EccangToken token;
-    private int pageSize = 100;
-    private Limiter limiter = new Limiter(20);
+    private final int  pageSize = 100;
 
-    @Autowired
-    EccangTokenRepository tokenRepo;
-
-
-    @Autowired
-    MessageChannel dataChannel;
-
-    @Autowired
-    MessageChannel saleChannel;
-
+    private final EccangTokenRepository tokenRepo;
+    private final MessageChannel dataChannel;
+    private final MessageChannel saleChannel;
+    private final EccangInventorySyncLogRepository syncLogRepository;
+    private final EccangProductSkuRepository ecProductSkuRepository;
 
     @PostConstruct
     public void init() {
@@ -176,7 +169,7 @@ public class EccangService {
         }
     }
 
-    private EccangPage getPage(Object payload, String endpoint) {
+    public EccangPage getPage(Object payload, String endpoint) {
         EccangResponse response = getResponse(payload, endpoint);
         return response.getBizContent(EccangPage.class);
     }
@@ -186,10 +179,10 @@ public class EccangService {
         payload.put("page", 1);
         payload.put("page_size", pageSize);
         return Stream.iterate(
-            getPage(payload, endpoint),
+            getPage(payload, endpoint), Objects::nonNull,
             bizContent -> {
                 if (bizContent.hasNext()) {
-                    log.debug("have next");
+                    log.debug("endpoint ={},page = {},have next", endpoint, payload.get("page"));
                     payload.put("page", bizContent.getPage() + 1);
                     return getPage(payload, endpoint);
                 } else {
@@ -197,8 +190,7 @@ public class EccangService {
                     return null;
                 }
             }
-        ).takeWhile(n -> n != null);
-        // );
+        );
     }
 
 
@@ -269,15 +261,13 @@ public class EccangService {
                 .build())
             .build();
         getOrderUnarchive(vo)
-            .forEach(order -> {
-                saleChannel.send(MessageBuilder.withPayload(order).build());
-            });
+            .forEach(order -> saleChannel.send(MessageBuilder.withPayload(order).build()));
     }
 
     public Stream<EccangOrder> getOrderUnarchive(EccangOrderVO vo) {
         return getOrderUnarchivePages(vo)
             .map(n -> n.getData(EccangOrder.class))
-            .flatMap(n -> n.stream());
+            .flatMap(Collection::stream);
     }
 
     public Stream<EccangOrder> getOrderPlusArchiveSince(EccangOrderVO vo, Integer startYear) {
@@ -287,7 +277,7 @@ public class EccangService {
             .flatMap(year ->
                 getOrderPlusArchivePages(vo, year)
                     .map(n -> n.getData(EccangOrder.class))
-                    .flatMap(n -> n.stream())
+                    .flatMap(Collection::stream)
             );
     }
 
@@ -459,4 +449,148 @@ public class EccangService {
         return code;
     }
 
+    /**
+     * 同步库存信息-全量同步，记录日志，根据日志信息实现断点续连,直到全部数据同步
+     *
+     * @param payload  请求负载
+     * @param endpoint API端点
+     * @return 流式处理的页面数据，注意流式是懒加载
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+    public Stream<EccangPage> getAllPageWithResume(JSONObject payload, String endpoint) {
+        // 从日志中获取最后一次同步的信息
+        Optional<EccangInventorySyncLog> lastLogOpt = syncLogRepository.findFirstByEndPointAndIsCompletedOrderByRequestTime(endpoint, false);
+        int startPage = lastLogOpt
+            .map(lastLog -> {
+                int page = lastLog.getStatus() ? lastLog.getCurrentPage() + 1 : lastLog.getCurrentPage();
+                if (lastLog.getTotalItems() != null && lastLog.getTotalItems() < lastLog.getCurrentPage() * pageSize) {
+                    lastLog.setIsCompleted(true);
+                    syncLogRepository.save(lastLog);
+                    saveNewSyncLog(endpoint, 1); // 重置为1页
+                    return 1;
+                }
+                return page;
+            })
+            .orElseGet(() -> {
+                saveNewSyncLog(endpoint, 1); // 如果没有找到日志，默认从第1页开始
+                return 1;
+            });
+
+        payload.put("page", startPage);
+        payload.put("page_size", pageSize);
+
+    return Stream.iterate(
+            getPageWithLogging(payload, endpoint), Objects::nonNull,
+            page -> {
+                if (page.hasNext()){
+                    payload.put("page", page.getPage() + 1);
+                   return getPageWithLogging(payload, endpoint);
+                }else {
+                    log.debug("no next page , page != null && (page * pageSize) > total");
+                    return null;
+                }
+            }
+        );
+    }
+
+    //保存新的日志记录
+    @Transactional(rollbackFor = Exception.class)
+    protected void saveNewSyncLog(String endpoint, int currentPage) {
+        EccangInventorySyncLog syncLog = EccangInventorySyncLog.builder()
+            .endPoint(endpoint)
+            .currentPage(currentPage)
+            .isCompleted(false)
+            .build();
+        syncLogRepository.save(syncLog);
+    }
+
+    //TODO 增量同步，对已经完全同步的数据，后续获取变更的即可
+
+
+
+
+    /**
+     * 封装发送请求的步骤
+     *
+     * @param payload   请求的负载数据
+     * @param endpoint  请求的API端点
+     * @return          返回页面数据
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+    protected EccangPage getPageWithLogging(JSONObject payload, String endpoint) {
+        try {
+            EccangResponse response = getResponse(payload, endpoint);
+            EccangPage page = response.getBizContent(EccangPage.class);
+            List<EccangProductSku> productSkuList = page.getData(EccangProductSku.class);
+
+            // 确保每个产品SKU的联合ID已经生成
+            productSkuList.forEach(this::ensureIdGenerated);
+            productSkuList.forEach(sku -> sku.setSyncFrom("eccang"));
+
+            // 检查重复的ID并处理
+            List<EccangProductSku> uniqueSkus = productSkuList.stream()
+                .filter(sku -> !ecProductSkuRepository.existsById(sku.getId()))
+                .toList();
+
+            if (uniqueSkus.size() != productSkuList.size()) {
+                // 记录重复的ID
+                List<String> duplicateIds = productSkuList.stream()
+                    .map(EccangProductSku::getId)
+                    .filter(ecProductSkuRepository::existsById)
+                    .toList();
+//                log.warn("Duplicate IDs found: {}", duplicateIds);
+            }
+
+            // 覆盖记录
+            ecProductSkuRepository.saveAll(productSkuList);
+
+            // 记录请求日志
+            logSyncResult(endpoint, payload.getInteger("page"), true, null, page.getTotal());
+            return page;
+        } catch (Exception e) {
+            // 记录错误日志并重新抛出异常
+            logSyncResult(endpoint, payload.getInteger("page"), false, e.getMessage(), null);
+            throw e;
+        }
+    }
+
+    private void ensureIdGenerated(EccangProductSku sku) {
+        if (sku.getId() == null || sku.getId().isEmpty()) {
+            sku.setId(sku.getProductSku() + "-" + sku.getWarehouseCode());
+        }
+    }
+
+
+    /**
+     * 根据 endpoint 更新同步日志记录。
+     * 如果已经存在该 endpoint 的日志记录，则更新其当前页码、状态、错误信息和总条目数；
+     * 如果不存在，则创建新的日志记录。
+     *
+     * @param endpoint       请求的 API 端点（例如：`getProductInventory`）
+     * @param currentPage   当前页码
+     * @param status        请求状态，`true` 表示成功，`false` 表示失败
+     * @param errorMessage  错误信息，当请求失败时记录；如果成功则为 `null`
+     * @param totalItems    该请求的总数据条目数
+     */
+    @Transactional(rollbackFor = Exception.class, propagation = Propagation.REQUIRES_NEW)
+    protected void logSyncResult(String endpoint, Integer currentPage, Boolean status, String errorMessage, Integer totalItems) {
+        // 获取最后一次请求的日志
+        Optional<EccangInventorySyncLog> syncLog = syncLogRepository.findFirstByEndPointAndIsCompletedOrderByRequestTime(endpoint, false);
+        if (syncLog.isPresent()) {
+            EccangInventorySyncLog eScLog = syncLog.get();
+            eScLog.setCurrentPage(currentPage);
+            eScLog.setStatus(status);
+            eScLog.setErrorMessage(errorMessage);
+            eScLog.setTotalItems(totalItems);
+            //如果当前页面*pageSize > totalItems 那么就算完成了
+            if (currentPage * pageSize > totalItems){
+                eScLog.setIsCompleted(true);
+            }
+            // 保存更新后的日志记录
+            syncLogRepository.save(eScLog);
+        } else {
+            // 如果没有找到现有日志记录，创建一条新的日志记录
+            saveNewSyncLog(endpoint, currentPage);
+        }
+    }
 }
