@@ -52,11 +52,11 @@ public class KingdeeController {
         kingdeeService.refreshAuths();
     }
 
-    @GetMapping("/getAuth")
+    @GetMapping("/tokens")
     @ResponseBody
-    public List<KingdeeTokenVO> getAuth() {
+    public List<KingdeeTokenVO> getTokenDetails() {
         // 获取金蝶令牌数据
-        List<KingdeeToken> kingdeeTokens = kingdeeService.getAllKingdeeToken();
+        List<KingdeeToken> kingdeeTokens = kingdeeService.findAllTokens();
 
         // 使用 Stream 和 map 来简化转换过程
         List<KingdeeTokenVO> voList = kingdeeTokens.stream()
