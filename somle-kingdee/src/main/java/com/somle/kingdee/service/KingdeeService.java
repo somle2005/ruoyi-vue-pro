@@ -82,7 +82,7 @@ public class KingdeeService {
      *  获得数据库所有令牌
      * @return List<KingdeeToken>
      */
-    public List<KingdeeToken> findAllTokens () {
+    public List<KingdeeToken> listKingdeeTokens () {
         return tokenRepository.findAll();
     }
 }
