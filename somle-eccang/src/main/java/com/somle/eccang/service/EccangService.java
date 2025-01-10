@@ -167,17 +167,9 @@ public class EccangService {
             throw new RuntimeException(response.getMessage());
         }
         switch (code) {
+            // 请检查requestBody生成时间和实际请求发送时间是否相隔太久
             case "200":
                 return;
-            // 请检查requestBody生成时间和实际请求发送时间是否相隔太久
-            case "saas.api.error.code.0049":
-                throw new RuntimeException("签名过期：时间戳必须在一分钟以内，超出1分钟则过期失效，且只能用一次。 时间戳重新生成后，需要重新生成签名");
-            case "saas.api.error.code.0061": //达到限流时-继续重试
-                throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "(同一客户每秒请求接口次数不能超过10次)请求受限，继续重试");
-            case "saas.api.error.code.0082":
-                throw new RuntimeException("Eccang error, full response: " + response);
-            case "common.error.code.9999":
-                throw new RuntimeException("Eccang return invalid response: " + response.getBizContent(EccangResponse.EccangError.class));
             case "300":
                 List<EccangResponse.EccangError> errors = response.getBizContentList(EccangResponse.EccangError.class);
                 if (errors.isEmpty()) {
@@ -187,6 +179,14 @@ public class EccangService {
                 }
             case "429":
                 throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests, please try again later.");
+            case "saas.api.error.code.0049":
+                throw new RuntimeException("签名过期：时间戳必须在一分钟以内，超出1分钟则过期失效，且只能用一次。 时间戳重新生成后，需要重新生成签名");
+            case "saas.api.error.code.0061": //达到限流时-继续重试
+                throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "(同一客户每秒请求接口次数不能超过10次)请求受限，继续重试");
+            case "saas.api.error.code.0082":
+                throw new RuntimeException("Eccang error, full response: " + response);
+            case "common.error.code.9999":
+                throw new RuntimeException("Eccang return invalid response: " + response.getBizContent(EccangResponse.EccangError.class));
             default:
                 throw new RuntimeException("Unknown eccang-specific response code: " + response.getCode() + " " + "message: " + response.getMessage());
         }
