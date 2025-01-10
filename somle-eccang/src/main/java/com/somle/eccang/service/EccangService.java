@@ -126,12 +126,15 @@ public class EccangService {
 
         EccangResponse responseFinal = retryTemplate.execute(ctx -> {
             var requestBody = requestBody(payload, endpoint);
-
             var request = RequestX.builder()
                 .requestMethod(RequestX.Method.POST)
                 .url(url)
                 .payload(requestBody)
                 .build();
+            // 获取当前重试次数
+            int retryCount = ctx.getRetryCount();
+            // 记录每次重试的日志
+            log.debug("正在请求url= {},第 {} 次重试。endpoint = {}",request.getUrl(), retryCount + 1, endpoint);
             try (var response = WebUtils.sendRequest(request)) {
                 switch (response.code()) {
                     case 200:
@@ -144,6 +147,14 @@ public class EccangService {
                     default:
                         throw new RuntimeException("Unknown response code " + response);
                 }
+            }
+        }, ctx -> {
+            //达到最大重试次数。
+            log.error("All retries completed without success. Last error: ", ctx.getLastThrowable());
+            try {
+                throw ctx.getLastThrowable();
+            } catch (Throwable e) {
+                throw new RuntimeException(e);
             }
         });
         return responseFinal;
@@ -174,6 +185,8 @@ public class EccangService {
                 }
             case "429":
                 throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests, please try again later.");
+            case "saas.api.error.code.0061": //达到限流时-继续重试
+                throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "(同一客户每秒请求接口次数不能超过10次)请求受限，继续重试");
             default:
                 throw new RuntimeException("Unknown eccang-specific response code: " + response.getCode() + " " + "message: " + response.getMessage());
         }
