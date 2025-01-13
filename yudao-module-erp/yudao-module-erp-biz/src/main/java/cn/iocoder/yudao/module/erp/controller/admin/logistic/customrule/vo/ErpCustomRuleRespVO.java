@@ -33,6 +33,9 @@ public class ErpCustomRuleRespVO implements VO {
     @ExcelProperty("产品名称")
     private String productName;
 
+    @Schema(description = "产品sku")
+    private String barCode;
+
     @Schema(description = "申报品名（英文）")
     @ExcelProperty("申报品名（英文）")
     private String declaredTypeEn;
