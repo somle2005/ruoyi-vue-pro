@@ -104,6 +104,7 @@ public class ErpCustomRuleController {
         //2开始拼接
         return BeanUtils.toBean(pageResult,ErpCustomRuleRespVO.class, erpCustomRule -> {
             MapUtils.findAndThen(productVOMap,erpCustomRule.getProductId(), erpCustomRule::setProduct);//设置产品VO实体类
+
         });
     }
 }

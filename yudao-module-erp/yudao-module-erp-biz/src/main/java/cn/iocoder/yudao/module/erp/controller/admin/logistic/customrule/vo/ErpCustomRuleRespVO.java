@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo;
 
+
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
