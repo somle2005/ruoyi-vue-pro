@@ -29,11 +29,10 @@ public class ErpCustomRuleRespVO implements VO {
     @Schema(description = "产品id")
     @ExcelProperty("产品id")
     private Long productId;
-
     /**
      * 产品实体类
      */
-    private ErpProductRespVO productRespVO;
+    private ErpProductRespVO product;
 
     @Schema(description = "申报品名（英文）")
     @ExcelProperty("申报品名（英文）")

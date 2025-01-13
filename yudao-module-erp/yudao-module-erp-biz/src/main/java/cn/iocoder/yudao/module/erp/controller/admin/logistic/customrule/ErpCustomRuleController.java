@@ -103,7 +103,7 @@ public class ErpCustomRuleController {
         Map<Long, ErpProductRespVO> productVOMap = erpProductService.getProductVOMap(convertSet(pageResult.getList(), ErpCustomRuleDO::getProductId));
         //2开始拼接
         return BeanUtils.toBean(pageResult,ErpCustomRuleRespVO.class, erpCustomRule -> {
-            MapUtils.findAndThen(productVOMap,erpCustomRule.getProductId(), erpCustomRule::setProductRespVO);//设置产品VO实体类
+            MapUtils.findAndThen(productVOMap,erpCustomRule.getProductId(), erpCustomRule::setProduct);//设置产品VO实体类
         });
     }
 }
