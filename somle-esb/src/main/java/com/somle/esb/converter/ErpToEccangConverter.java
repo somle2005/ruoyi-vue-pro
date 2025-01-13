@@ -207,7 +207,7 @@ public class ErpToEccangConverter {
             index += 1;
         }
         //设置产品id
-        eccangProduct.setProductId(customRuleDTO.getProductId());
+        eccangProduct.setDesc(String.valueOf(customRuleDTO.getProductId()));//Desc->productId
         return eccangProduct;
     }
 

@@ -77,7 +77,7 @@ public class ErpCustomRuleHandler {
 
             // 2. 获取产品并处理价格
             erpSupplierProductService.getSupplierProductPage(
-                    new ErpSupplierProductPageReqVO().setProductId(eccangProduct.getProductId())
+                    new ErpSupplierProductPageReqVO().setProductId(Long.valueOf(eccangProduct.getDesc()))
                 )
                 .getList().stream()
                 .findFirst()

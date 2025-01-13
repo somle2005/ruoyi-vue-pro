@@ -133,8 +133,7 @@ public class EccangProduct {
     private List<Map<String,Object>> boxArr;
     //返回时候的箱规信息
     private List<Map<String,Object>> productBox;
-    //产品id
-    private Long productId;
+
 
     @JsonIgnore
     public String getProductCategoryName() {
