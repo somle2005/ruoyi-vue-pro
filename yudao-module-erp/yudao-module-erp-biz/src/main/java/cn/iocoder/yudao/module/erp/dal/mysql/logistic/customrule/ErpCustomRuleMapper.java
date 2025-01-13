@@ -112,7 +112,7 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
      * @param productId 产品id
      * @return ErpCustomRuleDO
      */
-    default ErpCustomRuleDO selectByCCodeAndPid(Integer countryCode, Long productId) {
+    default ErpCustomRuleDO getCustomRuleByCountryCodeAndProductId(Integer countryCode, Long productId) {
         return selectOne(new LambdaQueryWrapperX<ErpCustomRuleDO>()
             .eq(ErpCustomRuleDO::getCountryCode, countryCode)
             .eq(ErpCustomRuleDO::getProductId, productId));

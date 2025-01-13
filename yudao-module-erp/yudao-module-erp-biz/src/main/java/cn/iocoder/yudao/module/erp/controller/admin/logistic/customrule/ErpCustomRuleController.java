@@ -90,10 +90,9 @@ public class ErpCustomRuleController {
     public void exportCustomRuleExcel(@Valid ErpCustomRulePageReqVO pageReqVO,
               HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<ErpCustomRuleDO> list = customRuleService.getCustomRulePage(pageReqVO).getList();
+        List<ErpCustomRuleRespVO> list = bindPageResult(customRuleService.getCustomRulePage(pageReqVO)).getList();
         // 导出 Excel
-        ExcelUtils.write(response, "ERP 海关规则.xls", "数据", ErpCustomRuleRespVO.class,
-                        BeanUtils.toBean(list, ErpCustomRuleRespVO.class));
+        ExcelUtils.write(response, "ERP 海关规则.xls", "数据", ErpCustomRuleRespVO.class, list);
     }
 
     private PageResult<ErpCustomRuleRespVO> bindPageResult(PageResult<ErpCustomRuleDO> pageResult){

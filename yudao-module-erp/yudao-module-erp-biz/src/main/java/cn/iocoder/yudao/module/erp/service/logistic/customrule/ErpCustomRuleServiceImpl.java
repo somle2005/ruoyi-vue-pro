@@ -33,7 +33,6 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
     private MessageChannel erpCustomRuleChannel;
 
     private final ErpCustomRuleMapper customRuleMapper;
-    private final ErpProductService erpProductService;
 
 
     @Override
@@ -94,7 +93,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
 
     private void validateExist(Long id, Integer countryCode, Long productId) {
         //TODO 城市code+产品id是否存在,校验-wdy
-        ErpCustomRuleDO erpCustomRuleDO = customRuleMapper.selectByCCodeAndPid(countryCode, productId);
+        ErpCustomRuleDO erpCustomRuleDO = customRuleMapper.getCustomRuleByCountryCodeAndProductId(countryCode, productId);
         if (erpCustomRuleDO == null) {
             return;
         }
