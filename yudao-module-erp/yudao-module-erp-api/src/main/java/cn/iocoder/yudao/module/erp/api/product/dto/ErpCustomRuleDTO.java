@@ -20,6 +20,10 @@ public class ErpCustomRuleDTO {
      */
     private String supplierProductCode;
 
+    /**
+     * 产品id
+     */
+    private Long productId;
 
     /**
      * 产品名称
