@@ -33,8 +33,7 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
                         ErpCustomRuleDO::getDeclaredType,
                         ErpCustomRuleDO::getDeclaredTypeEn,
                         ErpCustomRuleDO::getTaxRate,
-                        ErpCustomRuleDO::getProductId,
-                        ErpCustomRuleDO::getFbaBarCode
+                        ErpCustomRuleDO::getProductId
                     )
 //                .leftJoin(ErpSupplierProductDO.class, ErpSupplierProductDO::getId, ErpCustomRuleDO::getSupplierProductId)
 //                .selectAs(ErpSupplierProductDO::getCode, ErpCustomRuleDTO::getSupplierProductCode)
@@ -106,11 +105,6 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
         return selectJoinList(ErpCustomRuleDTO.class, getWrapper().eq(ErpSupplierProductDO::getId, id));
     }
 
-    default ErpCustomRuleDO selectByCountryCodeAndSupplierProductId(Integer countryCode, Long supplierProductId) {
-        return selectOne(new LambdaQueryWrapperX<ErpCustomRuleDO>()
-                .eq(ErpCustomRuleDO::getCountryCode, countryCode)
-                .eq(ErpCustomRuleDO::getSupplierProductId, supplierProductId));
-    }
 
     /**
      * 根据 城市code 和 产品id 查询entity

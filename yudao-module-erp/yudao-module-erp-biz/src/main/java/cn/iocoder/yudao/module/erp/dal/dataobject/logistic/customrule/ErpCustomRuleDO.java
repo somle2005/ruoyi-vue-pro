@@ -34,17 +34,9 @@ public class ErpCustomRuleDO extends BaseDO {
     private Integer countryCode;
 
     /**
-     * 供应商产品编号
-     */
-    private Long supplierProductId;
-    /**
      * 产品id
      */
     private Long productId;
-    /**
-     * 产品sku
-     */
-    private String barCode;
     /**
      * 申报品名（英文）
      */

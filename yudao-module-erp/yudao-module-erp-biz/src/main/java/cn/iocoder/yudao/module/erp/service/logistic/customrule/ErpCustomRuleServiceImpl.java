@@ -43,7 +43,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         //插入
         ErpCustomRuleDO customRule = BeanUtils.toBean(createReqVO, ErpCustomRuleDO.class);
         //填充barCode(产品sku),根据产品id
-        ThrowUtil.ifSqlThrow(customRuleMapper.insert(customRule.setBarCode(erpProductService.getProduct(customRule.getProductId()).getBarCode())
+        ThrowUtil.ifSqlThrow(customRuleMapper.insert(customRule
         ),DB_INSERT_ERROR);
         Long id = customRule.getId();
         //同步数据
@@ -93,7 +93,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
     }
 
     private void validateExist(Long id, Integer countryCode, Long productId) {
-        //TODO 城市code+产品id是否存在校验-wdy
+        //TODO 城市code+产品id是否存在,校验-wdy
         ErpCustomRuleDO erpCustomRuleDO = customRuleMapper.selectByCCodeAndPid(countryCode, productId);
         if (erpCustomRuleDO == null) {
             return;
