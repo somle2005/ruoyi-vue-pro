@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 /**
@@ -50,5 +51,16 @@ public class ErpProductCategoryDO extends BaseDO {
      * 枚举 {@link cn.iocoder.yudao.framework.common.enums.CommonStatusEnum}
      */
     private Integer status;
-
+    /**
+     * 海关编码
+     */
+    private String hsCode;
+    /**
+     * 申报品名（英文）
+     */
+    private String declaredTypeEn;
+    /**
+     * 申报品名
+     */
+    private String declaredType;
 }

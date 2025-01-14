@@ -94,7 +94,7 @@ public class ErpCustomRuleDTO {
     /**
      * 海关编码
      */
-    private String hscode;
+    private String hsCode;
 
     /**
      * 申报价值
