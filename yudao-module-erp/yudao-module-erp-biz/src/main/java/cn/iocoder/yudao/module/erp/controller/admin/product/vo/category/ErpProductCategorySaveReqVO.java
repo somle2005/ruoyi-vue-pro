@@ -32,7 +32,7 @@ public class ErpProductCategorySaveReqVO {
     @NotNull(message = "开启状态不能为空")
     private Integer status;
 
-    @Schema(description = "海关编码", example = "123456789")
+    @Schema(description = "海关编码")
     private String hsCode;
 
     @Schema(description = "申报品名（英文）", example = "Declared Item Name")
