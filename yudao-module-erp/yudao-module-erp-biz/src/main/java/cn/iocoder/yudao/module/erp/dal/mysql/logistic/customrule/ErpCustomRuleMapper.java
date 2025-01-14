@@ -63,8 +63,6 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
     default PageResult<ErpCustomRuleDO> selectPage(ErpCustomRulePageReqVO reqVO) {
         return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomRuleDO>()
                 .eqIfPresent(ErpCustomRuleDO::getCountryCode, reqVO.getCountryCode())
-//                .eqIfPresent(ErpCustomRuleDO::getType, reqVO.getType())
-//                .eqIfPresent(ErpCustomRuleDO::getSupplierProductId, reqVO.getSupplierProductId())
                 .likeIfPresent(ErpCustomRuleDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
                 .likeIfPresent(ErpCustomRuleDO::getDeclaredType, reqVO.getDeclaredType())
                 .eqIfPresent(ErpCustomRuleDO::getDeclaredValue, reqVO.getDeclaredValue())
