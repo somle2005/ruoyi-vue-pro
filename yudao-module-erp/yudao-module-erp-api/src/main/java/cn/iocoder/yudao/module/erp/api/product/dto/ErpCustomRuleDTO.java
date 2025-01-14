@@ -2,8 +2,6 @@ package cn.iocoder.yudao.module.erp.api.product.dto;
 
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 /**
  * @className: ErpProductDTO
  * @author: Wqh

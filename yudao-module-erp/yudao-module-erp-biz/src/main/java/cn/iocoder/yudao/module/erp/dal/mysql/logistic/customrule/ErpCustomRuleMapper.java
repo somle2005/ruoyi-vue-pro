@@ -41,23 +41,6 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
             .selectAs(ErpProductDO::getBarCode, ErpCustomRuleDTO::getBarCode)
             .selectAs(ErpProductDO::getDeptId, ErpCustomRuleDTO::getProductDeptId);
     }
-
-//    default PageResult<ErpCustomRuleDO> selectPage(ErpCustomRulePageReqVO reqVO) {
-//        return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomRuleDO>()
-//            .eqIfPresent(ErpCustomRuleDO::getCountryCode, reqVO.getCountryCode())
-//            .likeIfPresent(ErpCustomRuleDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
-//            .likeIfPresent(ErpCustomRuleDO::getDeclaredType, reqVO.getDeclaredType())
-//            .eqIfPresent(ErpCustomRuleDO::getDeclaredValue, reqVO.getDeclaredValue())
-//            .eqIfPresent(ErpCustomRuleDO::getDeclaredValueCurrencyCode, reqVO.getDeclaredValueCurrencyCode())
-//            .eqIfPresent(ErpCustomRuleDO::getTaxRate, reqVO.getTaxRate())
-//            .eqIfPresent(ErpCustomRuleDO::getHscode, reqVO.getHscode())
-//            .eqIfPresent(ErpCustomRuleDO::getLogisticAttribute, reqVO.getLogisticAttribute())
-//            .likeIfPresent(ErpCustomRuleDO::getFbaBarCode, reqVO.getFbaBarCode())
-//            .betweenIfPresent(ErpCustomRuleDO::getCreateTime, reqVO.getCreateTime())
-//            .orderByDesc(ErpCustomRuleDO::getId))
-//            ;
-//    }
-
     /**
      * 分页查询ERP海关规则数据
      *
