@@ -44,15 +44,15 @@ public class ErpProductCategoryRespVO {
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
 
-    @Schema(description = "海关编码", example = "123456789")
-    @ExcelProperty("海关编码")
-    private String hsCode;
+    @Schema(description = "默认海关编码", example = "123456789")
+    @ExcelProperty("默认海关编码")
+    private String defaultHsCode;
 
-    @Schema(description = "申报品名（英文）", example = "Declared Item Name")
-    @ExcelProperty("申报品名（英文）")
-    private String declaredTypeEn;
+    @Schema(description = "默认申报品名（英文）", example = "Declared Item Name")
+    @ExcelProperty("默认申报品名（英文）")
+    private String defaultDeclaredTypeEn;
 
-    @Schema(description = "申报品名", example = "申报品名称")
-    @ExcelProperty("申报品名")
-    private String declaredType;
+    @Schema(description = "默认申报品名", example = "申报品名称")
+    @ExcelProperty("默认申报品名")
+    private String defaultDeclaredType;
 }

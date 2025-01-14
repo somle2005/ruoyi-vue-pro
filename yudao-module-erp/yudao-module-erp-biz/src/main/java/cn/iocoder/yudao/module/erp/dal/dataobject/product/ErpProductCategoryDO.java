@@ -52,13 +52,13 @@ public class ErpProductCategoryDO extends BaseDO {
     /**
      * 海关编码
      */
-    private String hsCode;
+    private String defaultHsCode;
     /**
      * 申报品名（英文）
      */
-    private String declaredTypeEn;
+    private String defaultDeclaredTypeEn;
     /**
      * 申报品名
      */
-    private String declaredType;
+    private String defaultDeclaredType;
 }
