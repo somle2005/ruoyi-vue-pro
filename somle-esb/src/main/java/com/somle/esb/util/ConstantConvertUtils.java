@@ -1,5 +1,7 @@
 package com.somle.esb.util;
 
+import org.apache.commons.lang3.StringUtils;
+
 /**
  * @className: ConstantConverUtil
  * @author: Wqh
@@ -27,5 +29,18 @@ public final class ConstantConvertUtils {
             case "SA" -> "KSA";
             default -> countryCode;
         };
+    }
+    /**
+     * 去掉字符串的指定后缀（如果存在）。
+     *
+     * @param value 原字符串
+     * @param suffix 后缀
+     * @return 去掉后缀的字符串
+     */
+    public static String removeSuffix(String value, String suffix) {
+        if (StringUtils.isNotBlank(value) && value.endsWith(suffix)) {
+            return value.substring(0, value.length() - suffix.length());
+        }
+        return value;
     }
 }

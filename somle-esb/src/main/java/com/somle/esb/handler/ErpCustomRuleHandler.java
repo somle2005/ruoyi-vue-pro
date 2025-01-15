@@ -1,6 +1,7 @@
 package com.somle.esb.handler;
 
 import cn.hutool.core.util.ObjUtil;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.ErpSupplierProductPageReqVO;
@@ -9,6 +10,7 @@ import com.somle.eccang.model.EccangProduct;
 import com.somle.eccang.service.EccangService;
 import com.somle.esb.converter.ErpToEccangConverter;
 import com.somle.esb.converter.ErpToKingdeeConverter;
+import com.somle.esb.util.ConstantConvertUtils;
 import com.somle.kingdee.model.KingdeeProduct;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +24,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * @Description: $
@@ -47,21 +50,21 @@ public class ErpCustomRuleHandler {
     ErpToKingdeeConverter erpToKingdeeConverter;
 
     /**
+     * @return void
      * @Author Wqh
      * @Description 上传eccang产品信息
      * @Date 11:18 2024/11/5
      * @Param [message]
-     * @return void
      **/
     @ServiceActivator(inputChannel = "erpCustomRuleChannel")
     public void syncCustomRulesToEccang(@Payload List<ErpCustomRuleDTO> customRules) {
         log.info("syncCustomRuleToEccang");
         List<EccangProduct> eccangProducts = erpToEccangConverter.customRuleDTOToProduct(customRules);
-        for (EccangProduct eccangProduct : eccangProducts){
+        for (EccangProduct eccangProduct : eccangProducts) {
             eccangProduct.setActionType("ADD");
             EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
             //根据sku从eccang中获取产品，如果产品不为空，则表示已存在，操作则变为修改
-            if (ObjUtil.isNotEmpty(eccangServiceProduct)){
+            if (ObjUtil.isNotEmpty(eccangServiceProduct)) {
                 eccangProduct.setActionType("EDIT");
                 //如果是修改就要上传默认采购单价
                 //TODO 后续有变更，请修改
@@ -97,25 +100,85 @@ public class ErpCustomRuleHandler {
                         .ifPresent(eccangProduct::setProductPrice);
                 });
         }
-        eccangService.addBatchProduct(eccangProducts);
-        log.info("syncCustomRuleToEccang end countSize{{}}",eccangProducts.size());
+        List<EccangProduct> products = addOriginalProducts(eccangProducts);
+        eccangService.addBatchProduct(products);
+        log.info("syncCustomRuleToEccang end ,sku={{}}", products.stream().map(EccangProduct::getProductSku).toList());
     }
 
     /**
+     * @return void
      * @Author Wqh
      * @Description 上传金蝶产品信息
      * @Date 11:18 2024/11/5
      * @Param [message]
-     * @return void
      **/
     @ServiceActivator(inputChannel = "erpCustomRuleChannel")
     public void syncCustomRulesToKingdee(@Payload List<ErpCustomRuleDTO> customRules) {
         log.info("syncCustomRuleToKingdee");
         List<KingdeeProduct> kingdee = erpToKingdeeConverter.customRuleDTOToProduct(customRules);
-        for (KingdeeProduct kingdeeProduct : kingdee){
+        List<KingdeeProduct> kingdeeProducts = addOriginalKingdeeProducts(kingdee);
+        for (KingdeeProduct kingdeeProduct : kingdeeProducts) {
             kingdeeService.addProduct(kingdeeProduct);
         }
-        log.info("syncCustomRuleToKingdee end");
+        log.info("syncCustomRuleToKingdee end,skus={{}}}", kingdeeProducts.stream().map(KingdeeProduct::getNumber).toList());
+    }
+
+    /**
+     * 添加默认产品（无国别），在CN中触发。
+     * <p>
+     * 如果集合 EccangProduct 中 productSku 后缀是 "-CHN"，那么在集合中添加去掉后缀的产品。
+     *
+     * @param eccangProducts 产品集合
+     * @return 合并后的产品集合
+     */
+    private List<EccangProduct> addOriginalProducts(List<EccangProduct> eccangProducts) {
+        String suffix = "-" + ConstantConvertUtils.getCountrySuffix("CN");
+        List<EccangProduct> additionalProducts = eccangProducts.parallelStream()
+            .filter(eccangProduct ->
+                StringUtils.isNotBlank(eccangProduct.getProductSku()) &&
+                    eccangProduct.getProductSku().endsWith(suffix)
+            )
+            .map(eccangProduct -> {
+                EccangProduct bean = BeanUtils.toBean(eccangProduct, EccangProduct.class);
+                bean.setProductSku(ConstantConvertUtils.removeSuffix(eccangProduct.getProductSku(), suffix));
+                bean.setProductTitle(ConstantConvertUtils.removeSuffix(eccangProduct.getProductTitle(), suffix));
+                bean.setProductTitleEn(ConstantConvertUtils.removeSuffix(eccangProduct.getProductTitleEn(), suffix));
+                bean.setParentProductId(null);//1、如果产品有父级，则父级为空
+                return bean;
+            })
+            .toList();
+        // 合并原集合与新增集合。多线程安全
+        CopyOnWriteArrayList<EccangProduct> mergedList = new CopyOnWriteArrayList<>(eccangProducts);
+        mergedList.addAll(additionalProducts);
+        return mergedList;
+    }
+
+    /**
+     * 添加默认产品（无后缀），在集合 KingdeeProduct 中处理。
+     * 如果集合中 productSku 后缀是 "-CHN"，那么在集合中添加去掉后缀的产品。
+     *
+     * @param kingdeeProducts 产品集合
+     * @return 合并后的产品集合
+     */
+    private List<KingdeeProduct> addOriginalKingdeeProducts(List<KingdeeProduct> kingdeeProducts) {
+        String suffix = "-" + ConstantConvertUtils.getCountrySuffix("CN");
+        List<KingdeeProduct> additionalProducts = kingdeeProducts.parallelStream()
+            .filter(kingdeeProduct ->
+                StringUtils.isNotBlank(kingdeeProduct.getNumber()) &&
+                    kingdeeProduct.getNumber().endsWith(suffix)
+            )
+            .map(kingdeeProduct -> {
+                KingdeeProduct bean = BeanUtils.toBean(kingdeeProduct, KingdeeProduct.class);
+                bean.setNumber(ConstantConvertUtils.removeSuffix(kingdeeProduct.getNumber(), suffix));
+                bean.setName(ConstantConvertUtils.removeSuffix(kingdeeProduct.getName(), suffix));
+                bean.setParentId(null); // 清除上级物品编号
+                return bean;
+            })
+            .toList();
+        // 合并原集合与新增集合，多线程安全
+        CopyOnWriteArrayList<KingdeeProduct> mergedList = new CopyOnWriteArrayList<>(kingdeeProducts);
+        mergedList.addAll(additionalProducts);
+        return mergedList;
     }
 
 }
