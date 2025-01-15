@@ -102,11 +102,6 @@ public class ErpCustomRuleDTO {
     private String declaredType;
 
     /**
-     * 产品采购单价
-     */
-    private Float productPurchaseValue;
-
-    /**
      * 申报品名EN
      */
     private String declaredTypeEn;

@@ -175,7 +175,6 @@ public class ErpToEccangConverter {
         eccangProduct.setPdNetHeight(customRuleDTO.getProductHeight() / 100);
 
         // 设置其他产品属性
-        eccangProduct.setProductPurchaseValue(customRuleDTO.getProductPurchaseValue());
         eccangProduct.setFboTaxRate(customRuleDTO.getTaxRate());
         eccangProduct.setPdOverseaTypeCn(customRuleDTO.getDeclaredType());
         eccangProduct.setProductImgUrlList(Collections.singletonList(customRuleDTO.getProductImageUrl()));
