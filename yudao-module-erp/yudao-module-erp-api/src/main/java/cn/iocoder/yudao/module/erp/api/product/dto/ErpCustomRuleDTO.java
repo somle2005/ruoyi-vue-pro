@@ -135,4 +135,8 @@ public class ErpCustomRuleDTO {
      * 条形码
      */
     private String fbaBarCode;
+    /**
+     * 采购货币币种
+     */
+    private Integer declaredValueCurrencyCode;
 }
