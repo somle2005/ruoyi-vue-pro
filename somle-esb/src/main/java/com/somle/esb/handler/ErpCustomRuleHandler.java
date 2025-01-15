@@ -100,7 +100,7 @@ public class ErpCustomRuleHandler {
                         .ifPresent(eccangProduct::setProductPrice);
                 });
         }
-        List<EccangProduct> products = addOriginalProducts(eccangProducts);
+        List<EccangProduct> products = addOriginalEccangProducts(eccangProducts);
         eccangService.addBatchProduct(products);
         log.info("syncCustomRuleToEccang end ,sku={{}}", products.stream().map(EccangProduct::getProductSku).toList());
     }
@@ -131,28 +131,20 @@ public class ErpCustomRuleHandler {
      * @param eccangProducts 产品集合
      * @return 合并后的产品集合
      */
-    private List<EccangProduct> addOriginalProducts(List<EccangProduct> eccangProducts) {
-        String suffix = "-" + ConstantConvertUtils.getCountrySuffix("CN");
-        List<EccangProduct> additionalProducts = eccangProducts.parallelStream()
-            .filter(eccangProduct ->
-                StringUtils.isNotBlank(eccangProduct.getProductSku()) &&
-                    eccangProduct.getProductSku().endsWith(suffix)
-            )
-            .map(eccangProduct -> {
-                EccangProduct bean = BeanUtils.toBean(eccangProduct, EccangProduct.class);
-                bean.setProductSku(ConstantConvertUtils.removeSuffix(eccangProduct.getProductSku(), suffix));
-                bean.setProductTitle(ConstantConvertUtils.removeSuffix(eccangProduct.getProductTitle(), suffix));
-                bean.setProductTitleEn(ConstantConvertUtils.removeSuffix(eccangProduct.getProductTitleEn(), suffix));
-                bean.setParentProductId(null);//1、如果产品有父级，则父级为空
-                return bean;
-            })
-            .toList();
-        // 合并原集合与新增集合。多线程安全
-        CopyOnWriteArrayList<EccangProduct> mergedList = new CopyOnWriteArrayList<>(eccangProducts);
-        mergedList.addAll(additionalProducts);
-        return mergedList;
+    private List<EccangProduct> addOriginalEccangProducts(List<EccangProduct> eccangProducts) {
+        return addOriginalProducts(
+            eccangProducts,
+            EccangProduct::getProductSku,
+            EccangProduct::setProductSku,
+            EccangProduct::setProductTitle,
+            product -> product.setParentProductId(null),
+            product -> {
+                if (StringUtils.isNotBlank(product.getProductTitleEn())) {
+                    product.setProductTitleEn(ConstantConvertUtils.removeSuffix(product.getProductTitleEn(), "-" + ConstantConvertUtils.getCountrySuffix("CN")));
+                }
+            }
+        );
     }
-
     /**
      * 添加默认产品（无后缀），在集合 KingdeeProduct 中处理。
      * 如果集合中 productSku 后缀是 "-CHN"，那么在集合中添加去掉后缀的产品。
@@ -161,24 +153,62 @@ public class ErpCustomRuleHandler {
      * @return 合并后的产品集合
      */
     private List<KingdeeProduct> addOriginalKingdeeProducts(List<KingdeeProduct> kingdeeProducts) {
-        String suffix = "-" + ConstantConvertUtils.getCountrySuffix("CN");
-        List<KingdeeProduct> additionalProducts = kingdeeProducts.parallelStream()
-            .filter(kingdeeProduct ->
-                StringUtils.isNotBlank(kingdeeProduct.getNumber()) &&
-                    kingdeeProduct.getNumber().endsWith(suffix)
-            )
-            .map(kingdeeProduct -> {
-                KingdeeProduct bean = BeanUtils.toBean(kingdeeProduct, KingdeeProduct.class);
-                bean.setNumber(ConstantConvertUtils.removeSuffix(kingdeeProduct.getNumber(), suffix));
-                bean.setName(ConstantConvertUtils.removeSuffix(kingdeeProduct.getName(), suffix));
-                bean.setParentId(null); // 清除上级物品编号
-                return bean;
-            })
-            .toList();
-        // 合并原集合与新增集合，多线程安全
-        CopyOnWriteArrayList<KingdeeProduct> mergedList = new CopyOnWriteArrayList<>(kingdeeProducts);
-        mergedList.addAll(additionalProducts);
-        return mergedList;
+        return addOriginalProducts(
+            kingdeeProducts,
+            KingdeeProduct::getNumber,
+            KingdeeProduct::setNumber,
+            KingdeeProduct::setName,
+            product -> product.setParentId(null),
+            null // 没有额外字段需要处理
+        );
     }
 
+
+    /**
+     * 添加默认产品（无后缀），通用方法。
+     * 如果集合中产品编号后缀是 "-CHN"，那么在集合中添加去掉后缀的产品。
+     *
+     * @param <T>              产品类型（如 EccangProduct 或 KingdeeProduct）
+     * @param products         产品集合
+     * @param getNumber        获取编号的方法引用
+     * @param setNumber        设置编号的方法引用
+     * @param setName          设置名称的方法引用（可为 null，如果不需要处理名称）
+     * @param setParent        设置上级编号的方法引用
+     * @param additionalFields 处理其他需要移除后缀的字段的逻辑（可为空）
+     * @return 合并后的产品集合
+     */
+    @SuppressWarnings("unchecked")
+    private <T> List<T> addOriginalProducts(
+        List<T> products,
+        java.util.function.Function<T, String> getNumber,
+        java.util.function.BiConsumer<T, String> setNumber,
+        java.util.function.BiConsumer<T, String> setName,
+        java.util.function.Consumer<T> setParent,
+        java.util.function.Consumer<T> additionalFields
+    ) {
+        String suffix = "-" + ConstantConvertUtils.getCountrySuffix("CN");
+
+        // 过滤和转换产品
+        List<T> additionalProducts = products.stream()
+            .filter(product -> StringUtils.isNotBlank(getNumber.apply(product)) && getNumber.apply(product).endsWith(suffix))
+            .map(product -> {
+                T newProduct = BeanUtils.toBean(product, (Class<T>) product.getClass());
+                setNumber.accept(newProduct, ConstantConvertUtils.removeSuffix(getNumber.apply(product), suffix));
+                if (setName != null) {
+                    setName.accept(newProduct, ConstantConvertUtils.removeSuffix(getNumber.apply(product), suffix));
+                }
+                setParent.accept(newProduct); // 清除上级物品编号
+                if (additionalFields != null) {
+                    additionalFields.accept(newProduct); // 处理额外字段
+                }
+                return newProduct;
+            })
+            .toList();
+
+        // 合并原始集合与新增集合
+        List<T> mergedList = new CopyOnWriteArrayList<>(products);
+        mergedList.addAll(additionalProducts);
+
+        return mergedList;
+    }
 }
