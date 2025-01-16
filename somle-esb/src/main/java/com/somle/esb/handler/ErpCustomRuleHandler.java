@@ -6,16 +6,16 @@ import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.ErpSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.erp.service.purchase.ErpSupplierProductService;
+import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import com.somle.eccang.model.EccangProduct;
 import com.somle.eccang.service.EccangService;
 import com.somle.esb.converter.ErpToEccangConverter;
 import com.somle.esb.converter.ErpToKingdeeConverter;
-import com.somle.esb.util.ConstantConvertUtils;
 import com.somle.kingdee.model.KingdeeProduct;
 import com.somle.kingdee.service.KingdeeService;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -33,21 +33,15 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class ErpCustomRuleHandler {
 
-    @Autowired
-    KingdeeService kingdeeService;
-
-    @Autowired
-    EccangService eccangService;
-
-    @Autowired
-    ErpSupplierProductService erpSupplierProductService;
-    @Autowired
-    ErpToEccangConverter erpToEccangConverter;
-
-    @Autowired
-    ErpToKingdeeConverter erpToKingdeeConverter;
+    private final KingdeeService kingdeeService;
+    private final EccangService eccangService;
+    private final ErpSupplierProductService erpSupplierProductService;
+    private final ErpToEccangConverter erpToEccangConverter;
+    private final ErpToKingdeeConverter erpToKingdeeConverter;
+    private final DictDataApi dictDataApi;
 
     /**
      * @return void
@@ -58,8 +52,8 @@ public class ErpCustomRuleHandler {
      **/
     @ServiceActivator(inputChannel = "erpCustomRuleChannel")
     public void syncCustomRulesToEccang(@Payload List<ErpCustomRuleDTO> customRules) {
-        log.info("syncCustomRuleToEccang");
-        List<EccangProduct> eccangProducts = erpToEccangConverter.customRuleDTOToProduct(customRules);
+        log.info("syncCustomRuleToEccang start, sku={{}}", customRules.stream().map(ErpCustomRuleDTO::getBarCode).toList());
+        List<EccangProduct> eccangProducts = erpToEccangConverter.customRuleDTOToProduct(processCustomRules(customRules));
         for (EccangProduct eccangProduct : eccangProducts) {
             eccangProduct.setActionType("ADD");
             EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
@@ -100,9 +94,8 @@ public class ErpCustomRuleHandler {
                         .ifPresent(eccangProduct::setProductPrice);
                 });
         }
-        List<EccangProduct> products = addOriginalProducts(eccangProducts);
-        eccangService.addBatchProduct(products);
-        log.info("syncCustomRuleToEccang end ,sku={{}}", products.stream().map(EccangProduct::getProductSku).toList());
+        eccangService.addBatchProduct(eccangProducts);
+        log.info("syncCustomRuleToEccang end ,sku={{}}", eccangProducts.stream().map(EccangProduct::getProductSku).toList());
     }
 
     /**
@@ -115,70 +108,34 @@ public class ErpCustomRuleHandler {
     @ServiceActivator(inputChannel = "erpCustomRuleChannel")
     public void syncCustomRulesToKingdee(@Payload List<ErpCustomRuleDTO> customRules) {
         log.info("syncCustomRuleToKingdee");
-        List<KingdeeProduct> kingdee = erpToKingdeeConverter.customRuleDTOToProduct(customRules);
-        List<KingdeeProduct> kingdeeProducts = addOriginalKingdeeProducts(kingdee);
-        for (KingdeeProduct kingdeeProduct : kingdeeProducts) {
+        List<KingdeeProduct> kingdee = erpToKingdeeConverter.customRuleDTOToProduct(processCustomRules(customRules));
+        for (KingdeeProduct kingdeeProduct : kingdee) {
             kingdeeService.addProduct(kingdeeProduct);
         }
-        log.info("syncCustomRuleToKingdee end,skus={{}}}", kingdeeProducts.stream().map(KingdeeProduct::getNumber).toList());
+        log.info("syncCustomRuleToKingdee end,skus={{}}}", kingdee.stream().map(KingdeeProduct::getNumber).toList());
     }
+
 
     /**
-     * 添加默认产品（无国别），在CN中触发。
-     * <p>
-     * 如果集合 EccangProduct 中 productSku 后缀是 "-CHN"，那么在集合中添加去掉后缀的产品。
+     * 处理自定义规则列表，复制 countryCode 为 CN 字典映射值的对象
      *
-     * @param eccangProducts 产品集合
-     * @return 合并后的产品集合
+     * @param customRules 原始海关规则列表
+     * @return 处理后的海关规则列表 List<ErpCustomRuleDTO>
      */
-    private List<EccangProduct> addOriginalProducts(List<EccangProduct> eccangProducts) {
-        String suffix = "-" + ConstantConvertUtils.getCountrySuffix("CN");
-        List<EccangProduct> additionalProducts = eccangProducts.parallelStream()
-            .filter(eccangProduct ->
-                StringUtils.isNotBlank(eccangProduct.getProductSku()) &&
-                    eccangProduct.getProductSku().endsWith(suffix)
-            )
-            .map(eccangProduct -> {
-                EccangProduct bean = BeanUtils.toBean(eccangProduct, EccangProduct.class);
-                bean.setProductSku(ConstantConvertUtils.removeSuffix(eccangProduct.getProductSku(), suffix));
-                bean.setProductTitle(ConstantConvertUtils.removeSuffix(eccangProduct.getProductTitle(), suffix));
-                bean.setProductTitleEn(ConstantConvertUtils.removeSuffix(eccangProduct.getProductTitleEn(), suffix));
-                bean.setParentProductId(null);//1、如果产品有父级，则父级为空
-                return bean;
-            })
-            .toList();
-        // 合并原集合与新增集合。多线程安全
-        CopyOnWriteArrayList<EccangProduct> mergedList = new CopyOnWriteArrayList<>(eccangProducts);
-        mergedList.addAll(additionalProducts);
-        return mergedList;
+    private List<ErpCustomRuleDTO> processCustomRules(List<ErpCustomRuleDTO> customRules) {
+        CopyOnWriteArrayList<ErpCustomRuleDTO> processedRules = new CopyOnWriteArrayList<>(customRules);
+        customRules.stream()
+            .filter(customRule -> customRule.getCountryCode() != null)
+            .forEach(customRule -> Optional.ofNullable(dictDataApi.parseDictData("country_code", "CN"))
+                .flatMap(dictDataRespDTO -> Optional.ofNullable(dictDataRespDTO.getValue()))
+                .ifPresent(value -> {
+                    Integer countryCode = Integer.valueOf(value);
+                    if (customRule.getCountryCode().equals(countryCode)) {
+                        //当前存在国家是CN的数据
+                        ErpCustomRuleDTO bean = BeanUtils.toBean(customRule, ErpCustomRuleDTO.class);
+                        processedRules.add(BeanUtils.toBean(bean.setCountryCode(null), ErpCustomRuleDTO.class));
+                    }
+                }));
+        return processedRules;
     }
-
-    /**
-     * 添加默认产品（无后缀），在集合 KingdeeProduct 中处理。
-     * 如果集合中 productSku 后缀是 "-CHN"，那么在集合中添加去掉后缀的产品。
-     *
-     * @param kingdeeProducts 产品集合
-     * @return 合并后的产品集合
-     */
-    private List<KingdeeProduct> addOriginalKingdeeProducts(List<KingdeeProduct> kingdeeProducts) {
-        String suffix = "-" + ConstantConvertUtils.getCountrySuffix("CN");
-        List<KingdeeProduct> additionalProducts = kingdeeProducts.parallelStream()
-            .filter(kingdeeProduct ->
-                StringUtils.isNotBlank(kingdeeProduct.getNumber()) &&
-                    kingdeeProduct.getNumber().endsWith(suffix)
-            )
-            .map(kingdeeProduct -> {
-                KingdeeProduct bean = BeanUtils.toBean(kingdeeProduct, KingdeeProduct.class);
-                bean.setNumber(ConstantConvertUtils.removeSuffix(kingdeeProduct.getNumber(), suffix));
-                bean.setName(ConstantConvertUtils.removeSuffix(kingdeeProduct.getName(), suffix));
-                bean.setParentId(null); // 清除上级物品编号
-                return bean;
-            })
-            .toList();
-        // 合并原集合与新增集合，多线程安全
-        CopyOnWriteArrayList<KingdeeProduct> mergedList = new CopyOnWriteArrayList<>(kingdeeProducts);
-        mergedList.addAll(additionalProducts);
-        return mergedList;
-    }
-
 }
