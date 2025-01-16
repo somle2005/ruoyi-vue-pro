@@ -79,7 +79,7 @@ public class ErpProductServiceImpl implements ErpProductService {
 
     public void validateFields(ErpProductSaveReqVO saveReqVO) {
         BeanUtils.areAllNonNullFieldsPresent(saveReqVO, ErpProductBO.class);
-    };
+    }
 
     @Override
     public Long createProduct(ErpProductSaveReqVO createReqVO) {
