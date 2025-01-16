@@ -124,7 +124,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         ErpProductDTO erpProductDTO = BeanUtils.toBean(product, ErpProductDTO.class);
         erpProductDTO.setCreator(String.valueOf(loginUserId));
         //同步数据,根据需求文档，新增的时候不同步产品信息(不带国别)。海关规则加CN规则的时候同步。
-//        erpProductChannel.send(MessageBuilder.withPayload(List.of(erpProductDTO)).build());
+        erpProductChannel.send(MessageBuilder.withPayload(List.of(erpProductDTO)).build());
         // 返回
         return product.getId();
     }
@@ -178,7 +178,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         ThrowUtil.ifSqlThrow(productMapper.updateById(updateObj),DB_UPDATE_ERROR);
         //同步数据
         var dtos = customRuleMapper.selectProductAllInfoListById(id);
-        erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
+//        erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
 
         //获取创建人id
         Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
