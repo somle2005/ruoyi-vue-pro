@@ -66,12 +66,23 @@
         </root>
     </springProfile>
     <!-- 其它环境 -->
-    <springProfile name="dev,test,stage,prod,default">
+    <springProfile name="stage,prod,default">
         <root level="INFO">
             <appender-ref ref="STDOUT"/>
             <appender-ref ref="ASYNC"/>
             <appender-ref ref="GRPC"/>
         </root>
     </springProfile>
-
+    <!-- 开发、测试环境 -->
+    <springProfile name="dev,test">
+        <root level="INFO">
+            <appender-ref ref="STDOUT"/>
+        </root>
+        <logger name="com.somle.framework.common.util.web.WebUtils" level="DEBUG" additivity="false">
+            <appender-ref ref="STDOUT"/>
+        </logger>
+        <logger name="com.somle.esb.job" level="DEBUG" additivity="false">
+            <appender-ref ref="STDOUT"/>
+        </logger>
+    </springProfile>
 </configuration>
