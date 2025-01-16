@@ -84,5 +84,8 @@
         <logger name="com.somle.esb.job" level="DEBUG" additivity="false">
             <appender-ref ref="STDOUT"/>
         </logger>
+        <logger name="cn.iocoder.yudao.module.erp.service" level="DEBUG" additivity="false">
+            <appender-ref ref="STDOUT"/>
+        </logger>
     </springProfile>
 </configuration>
