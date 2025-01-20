@@ -244,25 +244,14 @@ public class ErpToEccangConverter {
         eccangProduct.setProductImgUrlList(Collections.singletonList(product.getPrimaryImageUrl()));
         eccangProduct.setDefaultSupplierCode("默认供应商");
         //设置产品包装属性
-        eccangProduct.setProductLength(
-            product.getPackageLength() != null
-                ? product.getPackageLength() / 10f // mm -> cm
-                : 0f // 如果为 null，默认值为 0f
-        );
-        eccangProduct.setProductWidth(
-            product.getPackageWidth() != null
-                ? product.getPackageWidth() / 10f // mm -> cm
-                : 0f // 如果为 null，默认值为 0f
-        );
-        eccangProduct.setProductHeight(
-            product.getPackageHeight() != null
-                ? product.getPackageHeight() / 10f // mm -> cm
-                : 0f // 如果为 null，默认值为 0f
-        );
+        eccangProduct.setProductLength(convertToCm(product.getPackageLength()));  // mm -> cm
+        eccangProduct.setProductWidth(convertToCm(product.getPackageWidth()));    // mm -> cm
+        eccangProduct.setProductHeight(convertToCm(product.getPackageHeight()));  // mm -> cm
+
         eccangProduct.setProductWeight(
             product.getPackageWeight() != null
-                ? product.getPackageWeight().setScale(3, RoundingMode.HALF_UP).floatValue() // 保留三位小数,防止四舍五入
-                : 0f // 如果为 null，默认值为 0f
+                ? product.getPackageWeight().setScale(3, RoundingMode.HALF_UP).floatValue() // 保留三位小数
+                : null // 如果为 null，返回 null
         );
 
         // 设置销售状态和声明价值
@@ -289,7 +278,10 @@ public class ErpToEccangConverter {
 
         return eccangProduct;
     }
-
+    // 辅助方法：转换为厘米并返回Float，避免重复代码
+    private Float convertToCm(Integer mmValue) {
+        return mmValue != null ? mmValue / 10f : null;
+    }
 
     public EccangCategory toEccang(String deptId) {
         //从erp中获取部门信息
