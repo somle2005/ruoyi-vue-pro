@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -242,6 +243,28 @@ public class ErpToEccangConverter {
         eccangProduct.setPdNetHeight(Float.valueOf(product.getHeight()) / 100);
         eccangProduct.setProductImgUrlList(Collections.singletonList(product.getPrimaryImageUrl()));
         eccangProduct.setDefaultSupplierCode("默认供应商");
+        //设置产品包装属性
+        eccangProduct.setProductLength(
+            product.getPackageLength() != null
+                ? product.getPackageLength() / 10f // mm -> cm
+                : 0f // 如果为 null，默认值为 0f
+        );
+        eccangProduct.setProductWidth(
+            product.getPackageWidth() != null
+                ? product.getPackageWidth() / 10f // mm -> cm
+                : 0f // 如果为 null，默认值为 0f
+        );
+        eccangProduct.setProductHeight(
+            product.getPackageHeight() != null
+                ? product.getPackageHeight() / 10f // mm -> cm
+                : 0f // 如果为 null，默认值为 0f
+        );
+        eccangProduct.setProductWeight(
+            product.getPackageWeight() != null
+                ? product.getPackageWeight().setScale(3, RoundingMode.HALF_UP).floatValue() // 保留三位小数,防止四舍五入
+                : 0f // 如果为 null，默认值为 0f
+        );
+
         // 设置销售状态和声明价值
         eccangProduct.setSaleStatus(2);
         // 设置产品创建人部门名称
