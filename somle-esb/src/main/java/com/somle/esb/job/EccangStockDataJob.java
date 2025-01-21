@@ -17,7 +17,7 @@ public class EccangStockDataJob extends EccangDataJob{
                 .forEach(page -> {
                     OssData data = OssData.builder()
                             .database(DATABASE)
-                            .tableName("stock")
+                            .tableName("inventory")
                             .syncType("full")
                             .requestTimestamp(System.currentTimeMillis())
                             .folderDate(today)

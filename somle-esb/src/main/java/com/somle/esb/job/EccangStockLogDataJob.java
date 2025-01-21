@@ -19,7 +19,7 @@ public class EccangStockLogDataJob extends EccangDataJob {
             .forEach(page -> {
                 OssData data = OssData.builder()
                     .database(DATABASE)
-                    .tableName("stock_log")
+                    .tableName("inventory_batch_log")
                     .syncType("inc")
                     .requestTimestamp(System.currentTimeMillis())
                     .folderDate(beforeYesterday)

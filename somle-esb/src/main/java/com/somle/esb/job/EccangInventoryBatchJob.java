@@ -32,7 +32,7 @@ public class EccangInventoryBatchJob extends EccangDataJob {
 
             OssData data = OssData.builder()
                 .database(DATABASE)
-                .tableName("order_Inventory_batch")
+                .tableName("inventory_batch")
                 .syncType("inc")
                 .requestTimestamp(System.currentTimeMillis())
                 .folderDate(beforeYesterday)
