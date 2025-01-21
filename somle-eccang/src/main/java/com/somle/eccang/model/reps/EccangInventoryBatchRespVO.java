@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 @Data
 //eccang-InventoryBatch 响应体
-public class EccangInventoryBatchResp {
+public class EccangInventoryBatchRespVO {
 
     /**
      * 批次库存id
