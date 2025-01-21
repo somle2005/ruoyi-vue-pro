@@ -1,7 +1,6 @@
 package com.somle.esb.job;
 
 
-import com.somle.eccang.model.EccangOrderVO;
 import com.somle.esb.model.OssData;
 import org.springframework.stereotype.Component;
 
