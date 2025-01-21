@@ -5,7 +5,7 @@ import com.somle.esb.model.OssData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EccangStockDataJob extends EccangDataJob{
+public class EccangInventoryDataJob extends EccangDataJob{
 
 
     @Override
