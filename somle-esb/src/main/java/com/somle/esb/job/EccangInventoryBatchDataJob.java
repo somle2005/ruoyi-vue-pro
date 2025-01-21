@@ -12,7 +12,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 //获取批次库存
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class EccangInventoryBatchJob extends EccangDataJob {
+public class EccangInventoryBatchDataJob extends EccangDataJob {
 
 
     @Override
@@ -27,7 +27,6 @@ public class EccangInventoryBatchJob extends EccangDataJob {
             .build()
         ).forEach(page -> {
             totalPages.getAndIncrement();  // 增加页面计数
-            // 获取当前页的记录数
             totalCount.getAndUpdate(v -> page.getTotal());  // 增加总记录数
 
             OssData data = OssData.builder()
