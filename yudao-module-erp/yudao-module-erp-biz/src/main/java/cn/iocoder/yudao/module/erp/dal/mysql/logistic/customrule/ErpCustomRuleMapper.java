@@ -92,6 +92,13 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
     }
 
     /**
+     * 获得全部海关产品信息
+     * @return List<ErpCustomRuleDTO> 全部海关产品信息
+     */
+    default List<ErpCustomRuleDTO> selectProductAllInfoList() {
+        return selectJoinList(ErpCustomRuleDTO.class, getWrapper());
+    }
+    /**
      * @return java.util.List<cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO>
      * @Author Wqh
      * @Description 根据供应商产品id获取产品的全量信息（海关规则，产品供应商）

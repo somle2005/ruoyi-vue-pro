@@ -160,5 +160,13 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
             .collect(Collectors.toList());  // 收集成列表返回
     }
 
-
+    /**
+     * 获得所有海关规则列表
+     *
+     * @return List<ErpCustomRuleDTO>
+     */
+    @Override
+    public List<ErpCustomRuleDTO> listCustomRule() {
+        return customRuleMapper.selectProductAllInfoList();
+    }
 }

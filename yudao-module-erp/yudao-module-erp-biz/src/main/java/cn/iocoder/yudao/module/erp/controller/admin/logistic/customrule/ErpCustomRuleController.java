@@ -2,8 +2,11 @@ package cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
+import cn.iocoder.yudao.module.erp.api.product.ErpCustomRuleApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -35,12 +38,14 @@ import cn.iocoder.yudao.module.erp.service.logistic.customrule.ErpCustomRuleServ
 @RestController
 @RequestMapping("/erp/custom-rule")
 @Validated
-public class ErpCustomRuleController {
+public class ErpCustomRuleController implements ErpCustomRuleApi {
 
     @Resource
     private ErpCustomRuleService customRuleService;
     @Resource
     private ErpProductService erpProductService;
+    @Autowired
+    private ErpCustomRuleService erpCustomRuleService;
 
     @PostMapping("/create")
     @Operation(summary = "创建ERP 海关规则")
@@ -106,5 +111,14 @@ public class ErpCustomRuleController {
             MapUtils.findAndThen(productVOMap,erpCustomRule.getProductId(), erpCustomRule::setProduct);//设置产品VO实体类
 
         });
+    }
+    /**
+     * 获取海关规则
+     *
+     * @return 海关规则集合
+     */
+    @Override
+    public List<ErpCustomRuleDTO> listCustomRule() {
+        return erpCustomRuleService.listCustomRule();
     }
 }

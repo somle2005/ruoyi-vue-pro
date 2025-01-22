@@ -69,4 +69,10 @@ public interface ErpCustomRuleService {
      * @return ErpCustomRuleDTO 海关规则列表List<ErpCustomRuleDO>
      */
     List<ErpCustomRuleDTO> convertToDTOList(List<ErpCustomRuleDO> customRuleDOList);
+
+    /**
+     * 获得所有海关规则列表
+     * @return List<ErpCustomRuleDTO>
+     */
+    List<ErpCustomRuleDTO> listCustomRule();
 }
