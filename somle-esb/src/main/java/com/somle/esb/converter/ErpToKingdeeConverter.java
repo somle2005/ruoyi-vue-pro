@@ -103,9 +103,9 @@ public class ErpToKingdeeConverter {
         kingdeeProduct.setHelpCode(customRuleDTO.getHscode());
         kingdeeProduct.setCostMethod("2");
         kingdeeProduct.setGrossWeight(String.valueOf(customRuleDTO.getPackageWeight()));
-        Float pdNetLength = customRuleDTO.getPackageLength();
-        Float pdNetWidth = customRuleDTO.getPackageWidth();
-        Float pdNetHeight = customRuleDTO.getPackageHeight();
+        Float pdNetLength = mmConvertToCm(customRuleDTO.getPackageLength());
+        Float pdNetWidth = mmConvertToCm(customRuleDTO.getPackageWidth());
+        Float pdNetHeight = mmConvertToCm(customRuleDTO.getPackageHeight());
         kingdeeProduct.setLength(String.valueOf(pdNetLength));
         kingdeeProduct.setWide(String.valueOf(pdNetWidth));
         kingdeeProduct.setHigh(String.valueOf(pdNetHeight));
@@ -121,7 +121,10 @@ public class ErpToKingdeeConverter {
         kingdeeProduct.setMaxInventoryQty(customRuleDTO.getId());
         return kingdeeProduct;
     }
-
+    // 辅助方法：转换为厘米并返回Float，避免重复代码
+    private Float mmConvertToCm(Float mmValue) {
+        return mmValue != null ? mmValue / 10F : null;
+    }
 
     /**
      * 将单个ERP产品转换为Kingdee产品。
