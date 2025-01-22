@@ -31,6 +31,7 @@ import java.util.stream.Collectors;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.somle.esb.enums.ErrorCodeConstants.DEPT_LEVEL_ERROR;
 import static com.somle.esb.util.ConstantConvertUtils.getCountrySuffix;
+import static com.somle.esb.util.ConstantConvertUtils.mmConvertToCm;
 
 @Service
 public class ErpToEccangConverter {
@@ -217,10 +218,7 @@ public class ErpToEccangConverter {
         eccangProduct.setDesc(String.valueOf(customRuleDTO.getProductId()));//Desc->productId
         return eccangProduct;
     }
-    // 辅助方法：转换为厘米并返回Float，避免重复代码
-    private Float mmConvertToCm(Float mmValue) {
-        return mmValue != null ? mmValue / 10F : null;
-    }
+
 
     /**
      * 将单个ERP产品转换为Eccang产品。
@@ -284,10 +282,7 @@ public class ErpToEccangConverter {
 
         return eccangProduct;
     }
-    // 辅助方法：转换为厘米并返回Float，避免重复代码
-    private Float mmConvertToCm(Integer mmValue) {
-        return mmValue != null ? mmValue / 10f : null;
-    }
+
 
     public EccangCategory toEccang(String deptId) {
         //从erp中获取部门信息

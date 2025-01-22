@@ -29,4 +29,12 @@ public final class ConstantConvertUtils {
             default -> countryCode;
         };
     }
+
+    // 辅助方法：转换为厘米并返回Float，避免重复代码
+    public static Float mmConvertToCm(Integer mmValue) {
+        return mmValue != null ? mmValue / 10f : null;
+    }
+    public static Float mmConvertToCm(Float mmValue) {
+        return mmValue != null ? mmValue / 10F : null;
+    }
 }

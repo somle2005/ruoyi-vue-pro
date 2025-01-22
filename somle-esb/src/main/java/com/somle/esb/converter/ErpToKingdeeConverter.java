@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.somle.esb.util.ConstantConvertUtils.getCountrySuffix;
+import static com.somle.esb.util.ConstantConvertUtils.mmConvertToCm;
 
 @Slf4j
 @Service
@@ -121,10 +122,7 @@ public class ErpToKingdeeConverter {
         kingdeeProduct.setMaxInventoryQty(customRuleDTO.getId());
         return kingdeeProduct;
     }
-    // 辅助方法：转换为厘米并返回Float，避免重复代码
-    private Float mmConvertToCm(Float mmValue) {
-        return mmValue != null ? mmValue / 10F : null;
-    }
+
 
     /**
      * 将单个ERP产品转换为Kingdee产品。
