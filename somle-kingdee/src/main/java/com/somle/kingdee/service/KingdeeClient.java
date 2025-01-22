@@ -145,6 +145,11 @@ public class KingdeeClient {
             getCustomFieldByDisplayName("bd_material", "部门"),
             getAuxInfoByNumber(kingdeeProductCopy.getSaleDepartmentId().toString()).getId()
         );
+        //设置自定义字段-报关品名-英文
+        kingdeeProductCopy.setCustomField(
+            getCustomFieldByDisplayName("bd_material", "报关品名(英文)"),
+            kingdeeProductCopy.getDeclaredTypeEn()
+        );
         try {
             kingdeeProductCopy.setCustomField(getCustomFieldByDisplayName("bd_material", "报关品名"), kingdeeProductCopy.getDeclaredTypeZh());
         } catch (Exception e) {
