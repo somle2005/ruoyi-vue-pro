@@ -25,7 +25,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static com.somle.esb.util.ConstantConvertUtils.getCountrySuffix;
-import static com.somle.esb.util.ConstantConvertUtils.mmConvertToCm;
+import static com.somle.framework.common.util.general.LengthConverter.mmToCmAsFloat;
 
 @Slf4j
 @Service
@@ -104,9 +104,9 @@ public class ErpToKingdeeConverter {
         kingdeeProduct.setHelpCode(customRuleDTO.getHscode());
         kingdeeProduct.setCostMethod("2");
         kingdeeProduct.setGrossWeight(String.valueOf(customRuleDTO.getPackageWeight()));
-        Float pdNetLength = mmConvertToCm(customRuleDTO.getPackageLength());
-        Float pdNetWidth = mmConvertToCm(customRuleDTO.getPackageWidth());
-        Float pdNetHeight = mmConvertToCm(customRuleDTO.getPackageHeight());
+        Float pdNetLength = mmToCmAsFloat(customRuleDTO.getPackageLength());
+        Float pdNetWidth = mmToCmAsFloat(customRuleDTO.getPackageWidth());
+        Float pdNetHeight = mmToCmAsFloat(customRuleDTO.getPackageHeight());
         kingdeeProduct.setLength(String.valueOf(pdNetLength));
         kingdeeProduct.setWide(String.valueOf(pdNetWidth));
         kingdeeProduct.setHigh(String.valueOf(pdNetHeight));

@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.somle.esb.enums.ErrorCodeConstants.DEPT_LEVEL_ERROR;
 import static com.somle.esb.util.ConstantConvertUtils.getCountrySuffix;
-import static com.somle.esb.util.ConstantConvertUtils.mmConvertToCm;
+import static com.somle.framework.common.util.general.LengthConverter.mmToCmAsFloat;
 
 @Service
 public class ErpToEccangConverter {
@@ -174,12 +174,12 @@ public class ErpToEccangConverter {
         eccangProduct.setPdNetWeight(customRuleDTO.getProductWeight());
         eccangProduct.setProductMaterial(customRuleDTO.getProductMaterial());
         //mm->cm
-        eccangProduct.setProductWidth(mmConvertToCm(customRuleDTO.getPackageWidth()));
-        eccangProduct.setProductLength(mmConvertToCm(customRuleDTO.getPackageLength()));
-        eccangProduct.setProductHeight(mmConvertToCm(customRuleDTO.getPackageHeight()));
-        eccangProduct.setPdNetLength(mmConvertToCm(customRuleDTO.getProductLength()));
-        eccangProduct.setPdNetWidth(mmConvertToCm(customRuleDTO.getProductWidth()));
-        eccangProduct.setPdNetHeight(mmConvertToCm(customRuleDTO.getProductHeight()));
+        eccangProduct.setProductWidth(mmToCmAsFloat(customRuleDTO.getPackageWidth()));
+        eccangProduct.setProductLength(mmToCmAsFloat(customRuleDTO.getPackageLength()));
+        eccangProduct.setProductHeight(mmToCmAsFloat(customRuleDTO.getPackageHeight()));
+        eccangProduct.setPdNetLength(mmToCmAsFloat(customRuleDTO.getProductLength()));
+        eccangProduct.setPdNetWidth(mmToCmAsFloat(customRuleDTO.getProductWidth()));
+        eccangProduct.setPdNetHeight(mmToCmAsFloat(customRuleDTO.getProductHeight()));
 
         // 设置其他产品属性
         eccangProduct.setFboTaxRate(customRuleDTO.getTaxRate());
@@ -244,13 +244,13 @@ public class ErpToEccangConverter {
         eccangProduct.setProductImgUrlList(Collections.singletonList(product.getPrimaryImageUrl()));
         eccangProduct.setDefaultSupplierCode("默认供应商");
         //产品基础属性
-        eccangProduct.setPdNetLength(mmConvertToCm(Float.valueOf(product.getLength())));
-        eccangProduct.setPdNetWidth(mmConvertToCm(Float.valueOf(product.getWidth())));
-        eccangProduct.setPdNetHeight(mmConvertToCm(Float.valueOf(product.getHeight())));
+        eccangProduct.setPdNetLength(mmToCmAsFloat(Float.valueOf(product.getLength())));
+        eccangProduct.setPdNetWidth(mmToCmAsFloat(Float.valueOf(product.getWidth())));
+        eccangProduct.setPdNetHeight(mmToCmAsFloat(Float.valueOf(product.getHeight())));
         //产品包装属性
-        eccangProduct.setProductLength(mmConvertToCm(product.getPackageLength()));  // mm -> cm
-        eccangProduct.setProductWidth(mmConvertToCm(product.getPackageWidth()));    // mm -> cm
-        eccangProduct.setProductHeight(mmConvertToCm(product.getPackageHeight()));  // mm -> cm
+        eccangProduct.setProductLength(mmToCmAsFloat(product.getPackageLength()));  // mm -> cm
+        eccangProduct.setProductWidth(mmToCmAsFloat(product.getPackageWidth()));    // mm -> cm
+        eccangProduct.setProductHeight(mmToCmAsFloat(product.getPackageHeight()));  // mm -> cm
 
         eccangProduct.setProductWeight(
             product.getPackageWeight() != null
