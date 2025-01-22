@@ -5,6 +5,7 @@ import com.somle.eccang.model.*;
 import com.somle.eccang.model.EccangResponse.EccangPage;
 import com.somle.eccang.model.exception.EccangResponseException;
 import com.somle.eccang.model.req.EccangInventoryBatchReqVO;
+import com.somle.eccang.model.req.EccangReceivingDetailReqVO;
 import com.somle.eccang.model.req.EccangRmaReturnReqVO;
 import com.somle.eccang.repository.EccangTokenRepository;
 import com.somle.framework.common.util.general.Limiter;
@@ -484,4 +485,12 @@ public class EccangService {
         return code;
     }
 
+    /**
+     * 获取入库单明细
+     *
+     * @return java.util.stream.Stream<com.somle.eccang.model.EccangResponse.EccangPage>
+     */
+    public Stream<EccangPage> getReceivingDetailList(EccangReceivingDetailReqVO eccangRmaReturnReqVO) {
+        return getAllPage(JsonUtils.toJSONObject(eccangRmaReturnReqVO), "getReceivingDetailList");
+    }
 }
