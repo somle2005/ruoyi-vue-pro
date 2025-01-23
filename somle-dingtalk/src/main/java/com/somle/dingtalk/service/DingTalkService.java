@@ -52,7 +52,7 @@ public class DingTalkService {
     DingTalkTokenRepository tokenRepository;
 
     @Scheduled(cron = "0 0 * * * ?") // Executes at the start of every hour
-//    @PostConstruct
+    @PostConstruct
     private void init() {
         token = refreshAuth();
     }
