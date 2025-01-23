@@ -52,7 +52,7 @@ public class SyncErpProductJob extends DataJob {
             });
 
             // 发送消息
-            Optional.ofNullable(customRuleDTOS.get()).stream().findFirst().ifPresent(customRuleDTOList -> {
+            Optional.ofNullable(customRuleDTOS.get()).ifPresent(customRuleDTOList -> {
                 barCodes.set(customRuleDTOList.stream().map(ErpCustomRuleDTO::getBarCode).toList());
                 log.debug("发送消息, BarCode = {}", barCodes);
                 erpCustomRuleChannel.send(MessageBuilder.withPayload(customRuleDTOList).build());
