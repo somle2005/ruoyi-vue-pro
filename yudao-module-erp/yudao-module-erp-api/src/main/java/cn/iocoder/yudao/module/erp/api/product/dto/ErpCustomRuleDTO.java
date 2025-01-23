@@ -3,11 +3,9 @@ package cn.iocoder.yudao.module.erp.api.product.dto;
 import lombok.Data;
 
 /**
- * @className: ErpProductDTO
- * @author: Wqh
- * @date: 2024/11/5 10:37
- * @Version: 1.0
- * @description:
+ * 产品数据(含xx海关规则)
+ * <p>
+ * 产品数据:海关规则-> 1:n
  */
 @Data
 public class ErpCustomRuleDTO {

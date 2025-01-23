@@ -17,7 +17,6 @@ import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -65,9 +64,10 @@ public class ErpSupplierProductServiceImpl implements ErpSupplierProductService 
         // 更新
         ErpSupplierProductDO updateObj = BeanUtils.toBean(updateReqVO, ErpSupplierProductDO.class);
         ThrowUtil.ifSqlThrow(supplierProductMapper.updateById(updateObj),DB_UPDATE_ERROR);
-        //同步数据
-        var dtos = customRuleMapper.selectProductAllInfoListBySupplierId(id);
-        erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
+        //同步数据-暂停
+        //        根据供应商产品id获取产品的全量信息（海关规则，产品供应商）
+//        var dtos = customRuleMapper.selectProductAllInfoListBySupplierId(id);
+//        erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
     }
 
     @Override

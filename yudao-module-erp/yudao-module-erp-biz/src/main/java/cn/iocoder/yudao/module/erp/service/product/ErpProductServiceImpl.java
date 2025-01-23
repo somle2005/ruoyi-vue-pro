@@ -9,11 +9,14 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.GuidePriceJson;
+import cn.iocoder.yudao.module.erp.convert.logistic.CustomRuleConvert;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule.ErpCustomRuleDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
@@ -28,6 +31,7 @@ import jakarta.annotation.Resource;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
@@ -131,6 +135,7 @@ public class ErpProductServiceImpl implements ErpProductService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateProduct(ErpProductSaveReqVO updateReqVO) {
         Long id = updateReqVO.getId();
         // 校验存在
@@ -177,9 +182,10 @@ public class ErpProductServiceImpl implements ErpProductService {
         }
         ThrowUtil.ifSqlThrow(productMapper.updateById(updateObj),DB_UPDATE_ERROR);
         //更新产品时->覆盖n个海关规则
-        var dtos = customRuleMapper.selectProductAllInfoListById(id);
-        erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
-
+        //找到产品id对应的所有产品DTO(含海关信息)
+        Optional.ofNullable(this.listErpCustomRuleDTOsByProductId(id)).ifPresent(
+                dtos -> erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build())
+        );
         //获取创建人id
         Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
         ErpProductDTO erpProductDTO = BeanUtils.toBean(updateObj, ErpProductDTO.class);
@@ -276,6 +282,11 @@ public class ErpProductServiceImpl implements ErpProductService {
         }
         List<ErpProductDO> list = productMapper.selectBatchIds(ids);
         return buildProductVOList(list);
+    }
+
+    @Override
+    public List<ErpProductDO> listProducts(Collection<Long> ids) {
+            return productMapper.selectBatchIds(ids);
     }
 
     @Override
@@ -426,5 +437,24 @@ public class ErpProductServiceImpl implements ErpProductService {
         Integer level = deptApi.getDeptLevel(deptId);
         //判断登记是否符合要求
         ThrowUtil.ifThrow(!levels.contains(level), DEPT_LEVEL_NOT_MATCH);
+    }
+
+    /**
+     * 根绝产品id获取n个海关规则信息 1:n
+     * @param productId 产品id
+     * List<ErpCustomRuleDTO> 海关规则+产品 DTOs
+     */
+    public List<ErpCustomRuleDTO> listErpCustomRuleDTOsByProductId(Long productId) {
+        validateProductExists(productId);
+        //1.0 获得产品
+        ErpProductDO erpProductDO = productMapper.selectById(productId);
+        //2.0 获得海关规则
+        List<ErpCustomRuleDO> erpCustomRuleDOList = customRuleMapper.selectByProductId(productId);
+        //3.0 封装返回
+        if (CollUtil.isNotEmpty(erpCustomRuleDOList)) {
+            return erpCustomRuleDOList.stream().map(erpCustomRuleDO -> CustomRuleConvert.INSTANCE.convert(erpCustomRuleDO, erpProductDO)).collect(Collectors.toList());
+        }else{
+            return Collections.emptyList();
+        }
     }
 }

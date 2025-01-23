@@ -55,24 +55,15 @@ public interface ErpCustomRuleService {
     PageResult<ErpCustomRuleDO> getCustomRulePage(ErpCustomRulePageReqVO pageReqVO);
 
     /**
-     * 海关规则列表DO -> 海关规则列表DTO
-     *
-     * @param customRuleDO 海关规则列表DO
-     * @return ErpCustomRuleDTO 海关规则列表DTO
-     */
-    ErpCustomRuleDTO convertToDTO(ErpCustomRuleDO customRuleDO);
-
-    /**
-     * 海关规则列表集合 DOs-> 海关规则列表集合 DTOs
-     *
-     * @param customRuleDOList 海关规则列表List<ErpCustomRuleDTO>
-     * @return ErpCustomRuleDTO 海关规则列表List<ErpCustomRuleDO>
-     */
-    List<ErpCustomRuleDTO> convertToDTOList(List<ErpCustomRuleDO> customRuleDOList);
-
-    /**
      * 获得所有海关规则列表
      * @return List<ErpCustomRuleDTO>
      */
     List<ErpCustomRuleDTO> listCustomRules();
+
+    /**
+     * 根据海关规则id 获得DTO（含海关的产品）
+     * @param id id
+     * @return ErpCustomRuleDTO dto
+     */
+    ErpCustomRuleDTO listErpCustomRuleDTOById(Long id);
 }

@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.service.product;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
@@ -75,6 +76,23 @@ public interface ErpProductService {
     List<ErpProductRespVO> getProductVOList(Collection<Long> ids);
 
     /**
+     * 获得产品 DO 列表
+     * @param ids 编号组
+     * @return 产品 DO 列表
+     */
+    List<ErpProductDO> listProducts(Collection<Long> ids);
+
+    /**
+     * 获得产品 DO Map
+     *
+     * @param ids 编号数组
+     * @return 产品 DO Map
+     */
+    default Map<Long, ErpProductDO> getProductMap(Collection<Long> ids) {
+        return convertMap(listProducts(ids), ErpProductDO::getId);
+    }
+
+    /**
      * 获得产品 VO Map
      *
      * @param ids 编号数组
@@ -108,4 +126,12 @@ public interface ErpProductService {
      */
     Long getProductCountByUnitId(Long unitId);
 
+    /**
+     * 根绝产品id获取n个产品DTO，获取产品+海关规则。如果海关规则无匹配，则返回null
+     * <p>
+     *
+     * @param productId 产品id
+     * List<ErpCustomRuleDTO> 海关规则+产品 DTOs
+     */
+     List<ErpCustomRuleDTO> listErpCustomRuleDTOsByProductId(Long productId);
 }
