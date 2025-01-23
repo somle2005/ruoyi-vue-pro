@@ -40,8 +40,7 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
             .selectAs(ErpProductDO::getMaterial, ErpCustomRuleDTO::getProductMaterial)
             .selectAs(ErpProductDO::getCreator, ErpCustomRuleDTO::getProductCreatorId)
             .selectAs(ErpProductDO::getBarCode, ErpCustomRuleDTO::getBarCode)
-            .selectAs(ErpProductDO::getDeptId, ErpCustomRuleDTO::getProductDeptId)
-            .eq(ErpProductDO::getTenantId, TenantContextHolder.getRequiredTenantId());// 手写 SQL 时，拼接是不生效,多租户方案,所以手动
+            .selectAs(ErpProductDO::getDeptId, ErpCustomRuleDTO::getProductDeptId);
     }
     /**
      * 分页查询ERP海关规则数据
@@ -65,8 +64,7 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
             .betweenIfPresent(ErpCustomRuleDO::getCreateTime, reqVO.getCreateTime())  // 创建时间范围
             .orderByDesc(ErpCustomRuleDO::getId)  // 按id降序排序
             .leftJoin(ErpProductDO.class, ErpProductDO::getId, ErpCustomRuleDO::getProductId)  // 左连接产品表
-            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode()) // 产品SKU编码
-            .eq(ErpProductDO::getTenantId, TenantContextHolder.getRequiredTenantId());// 手写 SQL 时，拼接是不生效,多租户方案,所以手动
+            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode()); // 产品SKU编码
 
         return selectJoinPage(reqVO, ErpCustomRuleDO.class, query);
     }
