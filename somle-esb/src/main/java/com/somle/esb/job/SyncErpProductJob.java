@@ -47,7 +47,7 @@ public class SyncErpProductJob extends DataJob {
             // 显式声明事务，获取业务数据
             TransactionTemplate transactionTemplate = applicationContext.getBean(TransactionTemplate.class);
             transactionTemplate.execute(status -> {
-                customRuleDTOS.set(erpCustomRuleApi.listCustomRule());
+                customRuleDTOS.set(erpCustomRuleApi.listCustomRules());
                 return null;
             });
 

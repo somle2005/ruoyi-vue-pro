@@ -116,7 +116,7 @@ public class ErpCustomRuleController implements ErpCustomRuleApi {
      * @return 海关规则集合
      */
     @Override
-    public List<ErpCustomRuleDTO> listCustomRule() {
-        return customRuleService.listCustomRule();
+    public List<ErpCustomRuleDTO> listCustomRules() {
+        return customRuleService.listCustomRules();
     }
 }

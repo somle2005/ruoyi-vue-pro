@@ -166,7 +166,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
      * @return List<ErpCustomRuleDTO>
      */
     @Override
-    public List<ErpCustomRuleDTO> listCustomRule() {
+    public List<ErpCustomRuleDTO> listCustomRules() {
         return customRuleMapper.selectProductAllInfoList();
     }
 }

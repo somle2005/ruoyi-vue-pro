@@ -74,5 +74,5 @@ public interface ErpCustomRuleService {
      * 获得所有海关规则列表
      * @return List<ErpCustomRuleDTO>
      */
-    List<ErpCustomRuleDTO> listCustomRule();
+    List<ErpCustomRuleDTO> listCustomRules();
 }

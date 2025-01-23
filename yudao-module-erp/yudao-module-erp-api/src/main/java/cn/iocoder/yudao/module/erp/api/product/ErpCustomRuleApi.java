@@ -11,5 +11,5 @@ public interface ErpCustomRuleApi {
      * 获取海关规则
      * @return 海关规则集合
      */
-    public List<ErpCustomRuleDTO> listCustomRule();
+    public List<ErpCustomRuleDTO> listCustomRules();
 }
