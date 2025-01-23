@@ -14,8 +14,14 @@ import lombok.Data;
 public class KingdeeProduct {
 
 
+    //自定义字段为引用辅助资料、引用基础资料时，提交单据保存接口，自定义字段名需要增加【_id】后缀，自定义字段值为：对应辅助资料或基础资料的id
     public void setCustomField(KingdeeCustomField customField, String value) {
-        this.customField.put(customField.getNumber() + "_id", value);
+        //5：基础资料，6：引用基础资料属性
+        if (customField.getFieldType() == 5 || customField.getFieldType() == 6) {
+            this.customField.put(customField.getNumber() + "_id", value);
+        } else {
+            this.customField.put(customField.getNumber(), value);
+        }
     }
 
     private String baseUnitId; // 基本计量单位的ID，标识商品的基本单位
