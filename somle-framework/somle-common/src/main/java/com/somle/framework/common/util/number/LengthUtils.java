@@ -4,7 +4,7 @@ package com.somle.framework.common.util.number;
  * 单位转换工具类
  * 提供毫米 (mm) 与厘米 (cm) 等单位的转换方法
  */
-public class LengthConverter {
+public class LengthUtils {
 
     private static final float MM_TO_CM_CONVERSION_FACTOR = 0.1F;   // 毫米到厘米转换因子
     private static final float MM_TO_M_CONVERSION_FACTOR = 0.001F; // 毫米到米转换因子

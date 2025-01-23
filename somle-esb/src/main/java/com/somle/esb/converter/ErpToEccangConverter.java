@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.somle.esb.enums.ErrorCodeConstants.DEPT_LEVEL_ERROR;
 import static com.somle.esb.util.ConstantConvertUtils.getCountrySuffix;
-import static com.somle.framework.common.util.number.LengthConverter.mmToCmAsFloat;
+import static com.somle.framework.common.util.number.LengthUtils.mmToCmAsFloat;
 
 @Service
 public class ErpToEccangConverter {
