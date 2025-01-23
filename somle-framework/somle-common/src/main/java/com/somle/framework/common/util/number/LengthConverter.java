@@ -1,4 +1,4 @@
-package com.somle.framework.common.util.general;
+package com.somle.framework.common.util.number;
 
 /**
  * 单位转换工具类
