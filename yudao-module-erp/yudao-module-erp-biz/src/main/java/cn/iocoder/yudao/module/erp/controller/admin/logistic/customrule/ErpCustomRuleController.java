@@ -38,7 +38,7 @@ import cn.iocoder.yudao.module.erp.service.logistic.customrule.ErpCustomRuleServ
 @RestController
 @RequestMapping("/erp/custom-rule")
 @Validated
-public class ErpCustomRuleController implements ErpCustomRuleApi {
+public class ErpCustomRuleController {
 
     @Resource
     private ErpCustomRuleService customRuleService;
@@ -109,14 +109,5 @@ public class ErpCustomRuleController implements ErpCustomRuleApi {
             MapUtils.findAndThen(productVOMap,erpCustomRule.getProductId(), erpCustomRule::setProduct);//设置产品VO实体类
 
         });
-    }
-    /**
-     * 获取海关规则
-     *
-     * @return 海关规则集合
-     */
-    @Override
-    public List<ErpCustomRuleDTO> listCustomRules() {
-        return customRuleService.listCustomRules();
     }
 }
