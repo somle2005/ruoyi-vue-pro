@@ -2,7 +2,7 @@ oss:
   bucketName: somle-bigdata-dev
 kingdee:
   outerInstanceIds:
-    - 94829067232219136
+    - 94464631434776576
 
 debug: false
 
