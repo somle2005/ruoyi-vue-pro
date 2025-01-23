@@ -62,7 +62,7 @@ public interface ErpCustomRuleService {
 
     /**
      * 根据海关规则id 获得DTO（含海关的产品）
-     * @param id id
+     * @param id 海关规则id
      * @return ErpCustomRuleDTO dto
      */
     ErpCustomRuleDTO listErpCustomRuleDTOById(Long id);
