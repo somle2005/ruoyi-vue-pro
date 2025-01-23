@@ -44,8 +44,6 @@ public class ErpCustomRuleController implements ErpCustomRuleApi {
     private ErpCustomRuleService customRuleService;
     @Resource
     private ErpProductService erpProductService;
-    @Autowired
-    private ErpCustomRuleService erpCustomRuleService;
 
     @PostMapping("/create")
     @Operation(summary = "创建ERP 海关规则")
@@ -119,6 +117,6 @@ public class ErpCustomRuleController implements ErpCustomRuleApi {
      */
     @Override
     public List<ErpCustomRuleDTO> listCustomRule() {
-        return erpCustomRuleService.listCustomRule();
+        return customRuleService.listCustomRule();
     }
 }
