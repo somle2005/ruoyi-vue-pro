@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRulePageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRuleSaveReqVO;
@@ -25,7 +24,6 @@ import org.springframework.validation.annotation.Validated;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_INSERT_ERROR;
@@ -135,12 +133,11 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
      */
     @Override
     public List<ErpProductDetailDTO> listCustomRules() {
-        List<ErpCustomRuleDO> customRuleDOS = customRuleMapper.selectList();
-        //收集海关规则的productIds
-        List<Long> productIds = customRuleDOS.stream().filter(Objects::nonNull).map(ErpCustomRuleDO::getProductId).toList();
-        Map<Long, ErpProductDO> productMap = erpProductService.getProductMap(productIds);
+        List<Long> productDOIds = erpProductMapper.selectList().stream().map(ErpProductDO::getId).toList();//TODO 后续：关闭状态的产品，不同步。
+        Map<Long, ErpProductDO> productDOMap = erpProductService.getProductMap(productDOIds);
+        List<ErpCustomRuleDO> erpCustomRuleDOS = customRuleMapper.selectByProductId(productDOIds);
 
-        return CustomRuleConvert.INSTANCE.convert(customRuleDOS, productMap);
+        return CustomRuleConvert.INSTANCE.convert(erpCustomRuleDOS, productDOMap);
     }
 
     /**
@@ -171,7 +168,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         //1.0 获得产品
         ErpProductDO erpProductDO = erpProductMapper.selectById(productId);
         //2.0 获得海关规则
-        List<ErpCustomRuleDO> erpCustomRuleDOList = customRuleMapper.selectByProductId(productId);
+        List<ErpCustomRuleDO> erpCustomRuleDOList = customRuleMapper.selectByProductId(Collections.singletonList(productId));
         //3.0 封装返回
         if (CollUtil.isNotEmpty(erpCustomRuleDOList)) {
             return erpCustomRuleDOList.stream().map(erpCustomRuleDO -> CustomRuleConvert.INSTANCE.convert(erpCustomRuleDO, erpProductDO)).collect(Collectors.toList());

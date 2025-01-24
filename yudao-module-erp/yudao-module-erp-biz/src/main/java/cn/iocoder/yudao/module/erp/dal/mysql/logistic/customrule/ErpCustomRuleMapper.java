@@ -80,8 +80,8 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
             .eq(ErpCustomRuleDO::getProductId, productId));
     }
 
-    default List<ErpCustomRuleDO> selectByProductId(Long productId) {
+    default List<ErpCustomRuleDO> selectByProductId(List<Long> productIds) {
         return selectList(new LambdaQueryWrapperX<ErpCustomRuleDO>()
-            .eq(ErpCustomRuleDO::getProductId, productId));
+            .in(ErpCustomRuleDO::getProductId, productIds));
     }
 }
