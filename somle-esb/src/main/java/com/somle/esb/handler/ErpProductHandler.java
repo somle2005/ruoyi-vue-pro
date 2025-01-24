@@ -24,7 +24,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-//@Profile("!dev & !test") // 仅在非 dev 和非 test 环境加载
+@Profile("!dev & !test") // 仅在非 dev 和非 test 环境加载
 @RequiredArgsConstructor
 public class ErpProductHandler {
 
@@ -36,7 +36,7 @@ public class ErpProductHandler {
     @ServiceActivator(inputChannel = "erpProductChannel")
     public void syncProductsToEccang(@Payload List<ErpProductDTO> products) {
         log.info("syncProductsToEccang");
-        List<EccangProduct> eccangProducts = erpToEccangConverter.toEccangProducts(products);
+        List<EccangProduct> eccangProducts = erpToEccangConverter.convertToSimplifiedEccangProductList(products);
         for (EccangProduct eccangProduct : eccangProducts) {
             eccangProduct.setActionType("ADD");
             EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());

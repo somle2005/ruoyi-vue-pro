@@ -8,9 +8,12 @@ import cn.hutool.core.util.ReflectUtil;
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
+import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
+import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.ErpSupplierProductPageReqVO;
+import cn.iocoder.yudao.module.erp.service.purchase.ErpSupplierProductService;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptLevelRespDTO;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
@@ -21,102 +24,43 @@ import com.somle.eccang.model.EccangCategory;
 import com.somle.eccang.model.EccangProduct;
 import com.somle.eccang.service.EccangService;
 import com.somle.esb.enums.TenantId;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.Field;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
-import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 import static com.somle.esb.enums.ErrorCodeConstants.DEPT_LEVEL_ERROR;
 import static com.somle.esb.util.ConstantConvertUtils.getCountrySuffix;
 import static com.somle.framework.common.util.number.LengthUtils.mmToCmAsFloat;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class ErpToEccangConverter {
-
-
-    @Autowired
-    EccangService eccangService;
-
-    @Autowired
-    private DeptApi deptApi;
-    @Autowired
-    private AdminUserApi userApi;
-    @Autowired
-    private DictDataApi dictDataApi;
-
-//    public EccangProduct toEccang(ErpCountrySku erpCountrySku) {
-//        ErpStyleSku erpStyleSku = erpCountrySku.getStyleSku();
-//        Long deptId = erpStyleSku.getSaleDepartmentId();
-//        EccangProduct product = new EccangProduct();
-//        List<ErpDepartment> path = erpDepartmentService.getDepartmentParents(deptId).toList();
-//        Collections.reverse(path);
-//        // Integer level = path.size() - 1;
-//        EccangOrganization organization = eccangService.getOrganizationByNameEn(path.get(2).getId().toString());
-//
-//        product.setProductSku(erpCountrySku.getCountrySku());
-//        product.setProductTitle(erpStyleSku.getNameZh());
-//        product.setProductTitleEn(erpStyleSku.getNameEn());
-//
-//        product.setProductImgUrlList(erpStyleSku.getImageUrlList());
-//
-//        product.setPdNetWeight(erpStyleSku.getWeight());
-//        product.setPdNetLength(erpStyleSku.getLength());
-//        product.setPdNetWeight(erpStyleSku.getWidth());
-//        product.setPdNetHeight(erpStyleSku.getHeight());
-//        product.setProductWeight(erpStyleSku.getPackageWeight());
-//        product.setProductLength(erpStyleSku.getPackageLength());
-//        product.setProductWidth(erpStyleSku.getPackageWidth());
-//        product.setProductHeight(erpStyleSku.getPackageHeight());
-//        product.setProductMaterial(erpStyleSku.getMaterialZh());
-//        product.setMaterialEn(erpStyleSku.getMaterialEn());
-//
-//
-//        product.setProductPurchaseValue(erpStyleSku.getPurchasePrice());
-//        product.setCurrencyCode(erpStyleSku.getPurchasePriceCurrencyCode());
-//        product.setDefaultSupplierCode(erpStyleSku.getDefaultSupplierCode());
-//
-//        product.setSaleStatus(erpStyleSku.getSaleStatus());
-//
-//        product.setLogisticAttribute(erpCountrySku.getLogisticAttribute());
-//        product.setHsCode(erpCountrySku.getHscode());
-//        product.setProductDeclaredValue(erpCountrySku.getDeclaredValue());
-//        product.setPdDeclareCurrencyCode(erpCountrySku.getDeclaredValueCurrencyCode());
-//        product.setPdOverseaTypeCn(erpCountrySku.getDeclaredTypeZh());
-//        product.setPdOverseaTypeEn(erpCountrySku.getDeclaredTypeEn());
-//        product.setFboTaxRate(erpCountrySku.getExportCustomTaxRate());
-//        product.setPdDeclarationStatement(erpCountrySku.getImportCustomTaxRate().toString());
-//
-//
-//
-//        try {
-//            EccangCategory category1 = eccangService.getCategoryByNameEn(path.get(1).getId().toString());
-//            product.setProductCategoryId1(category1.getPcId());
-//            EccangCategory category2 = eccangService.getCategoryByNameEn(path.get(2).getId().toString());
-//            product.setProductCategoryId2(category2.getPcId());
-//            EccangCategory category3 = eccangService.getCategoryByNameEn(deptId.toString());
-//            product.setProductCategoryId3(category3.getPcId());
-//        } catch (Exception e) {
-//        }
-//
-//        product.setUserOrganizationId(organization.getId());
-//        return product;
-//    }
+    private final EccangService eccangService;
+    private final DeptApi deptApi;
+    private final AdminUserApi userApi;
+    private final DictDataApi dictDataApi;
+    private final ErpSupplierProductService erpSupplierProductService;
 
     /**
      * 将ERP产品列表转换为完整的Eccang产品列表。
      *
-     * @param customRuleDTOs ERP产品列表
+     * @param detailDTOS ERP产品列表
      * @return 转换后的Eccang产品列表
      */
-    public List<EccangProduct> ToProduct(List<ErpProductDetailDTO> detailDTOS) {
+    public List<EccangProduct> convertToEccangProductListFromDetails(List<ErpProductDetailDTO> detailDTOS) {
         Map<Long, AdminUserRespDTO> userMap = userApi.getUserMap(convertSet(detailDTOS, detailDTO -> Long.parseLong(detailDTO.getErpProductDTO().getCreator())));
         return detailDTOS.stream()
-            .map(detailDTO -> ToProduct(detailDTO, userMap))
-            .collect(Collectors.toList());
+            .map(detailDTO -> convertToEccangProductFromDetail(detailDTO, userMap))
+            .toList();
     }
 
     /**
@@ -125,21 +69,21 @@ public class ErpToEccangConverter {
      * @param productDTOs ERP产品列表
      * @return 转换后的简化版Eccang产品列表
      */
-    public List<EccangProduct> toEccangProducts(List<ErpProductDTO> productDTOs) {
+    public List<EccangProduct> convertToSimplifiedEccangProductList(List<ErpProductDTO> productDTOs) {
         Map<Long, AdminUserRespDTO> userMap = userApi.getUserMap(convertSet(productDTOs, product -> Long.parseLong(product.getCreator())));
         return productDTOs.stream()
-            .map(product -> ToProduct(product, userMap))
-            .collect(Collectors.toList());
+            .map(product -> convertToSimplifiedEccangProduct(product, userMap))
+            .toList();
     }
 
     /**
      * 将单个ERP产品转换为Eccang产品。
      *
-     * @param customRuleDTO ERP产品对象
+     * @param detailDTO ERP产品对象
      * @param userMap       用户信息映射
      * @return 转换后的Eccang产品对象
      */
-    private EccangProduct ToProduct(ErpProductDetailDTO detailDTO, Map<Long, AdminUserRespDTO> userMap) {
+    private EccangProduct convertToEccangProductFromDetail(ErpProductDetailDTO detailDTO, Map<Long, AdminUserRespDTO> userMap) {
         EccangProduct eccangProduct = new EccangProduct();
         ErpProductDTO productDTO = detailDTO.getErpProductDTO();
         ErpCustomRuleDTO customRuleDTO = detailDTO.getErpCustomRuleDTO();
@@ -221,6 +165,46 @@ public class ErpToEccangConverter {
         }
         //设置产品id
         eccangProduct.setDesc(String.valueOf(productDTO.getId()));//Desc->productId
+
+        //设置默认
+        eccangProduct.setActionType("ADD");
+        EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
+        //根据sku从eccang中获取产品，如果产品不为空，则表示已存在，操作则变为修改
+        if (ObjUtil.isNotEmpty(eccangServiceProduct)) {
+            eccangProduct.setActionType("EDIT");
+            //如果是修改就要上传默认采购单价
+            //TODO 后续有变更，请修改
+            eccangProduct.setProductPurchaseValue(0.001F);
+        }
+        log.debug(eccangProduct.toString());
+        //用product_id在供应商产品里面查，使用查到的第一个价格
+        // 1. 设置默认值
+        eccangProduct.setCurrencyCode(
+            ObjectUtils.defaultIfNull(eccangProduct.getCurrencyCode(), "1") // 默认 CNY
+        );
+        eccangProduct.setProductPrice(
+            ObjectUtils.defaultIfNull(eccangProduct.getProductPrice(), 0f) // 默认价格为 0.0
+        );
+
+        // 2. 获取产品并处理价格
+        erpSupplierProductService.getSupplierProductPage(
+                new ErpSupplierProductPageReqVO().setProductId(Long.valueOf(eccangProduct.getDesc()))
+            )
+            .getList().stream()
+            .findFirst()
+            .ifPresent(erpSupplierProductDO -> {
+                // 设置货币单位
+                Optional.ofNullable(erpSupplierProductDO.getPurchasePriceCurrencyCode())
+                    .map(String::valueOf) // 将 Integer 转换为字符串
+                    .filter(StringUtils::isNotBlank)
+                    .ifPresent(eccangProduct::setCurrencyCode);
+
+                // 设置价格，并确保价格为 BigDecimal 类型，避免转换不一致
+                Optional.ofNullable(erpSupplierProductDO.getPurchasePrice())
+                    .map(BigDecimal::valueOf)
+                    .map(price -> price.setScale(2, RoundingMode.HALF_UP).floatValue())
+                    .ifPresent(eccangProduct::setProductPrice);
+            });
         return eccangProduct;
     }
 
@@ -231,7 +215,7 @@ public class ErpToEccangConverter {
      * @param userMap 用户信息映射
      * @return 转换后的Eccang产品对象
      */
-    private EccangProduct ToProduct(ErpProductDTO product, Map<Long, AdminUserRespDTO> userMap) {
+    private EccangProduct convertToSimplifiedEccangProduct(ErpProductDTO product, Map<Long, AdminUserRespDTO> userMap) {
         EccangProduct eccangProduct = new EccangProduct();
         // 设置SKU和标题
         eccangProduct.setProductTitle(product.getName());
@@ -287,7 +271,7 @@ public class ErpToEccangConverter {
         return eccangProduct;
     }
 
-    public EccangCategory toEccang(String deptId) {
+    public EccangCategory convertToEccangCategoryFromDeptId(String deptId) {
         //从erp中获取部门信息
         DeptRespDTO dept = deptApi.getDept(Long.valueOf(deptId));
         //获取部门名称
@@ -307,7 +291,7 @@ public class ErpToEccangConverter {
             id = categoryByName.getPcId();
             actionType = "EDIT";
         }
-        DeptLevelRespDTO parentDept = getParentName(deptLevel, deptTreeLevel);
+        DeptLevelRespDTO parentDept = getParentDeptLevel(deptLevel, deptTreeLevel);
         Long deptParentId = parentDept.getDeptId();
         if (!Objects.equals(deptParentId, TenantId.DEFAULT.getId())) {
             EccangCategory category = eccangService.getCategoryByErpDeptId(String.valueOf(deptParentId));
@@ -333,11 +317,11 @@ public class ErpToEccangConverter {
      * @Date 2024/11/25
      * @Param [deptTreeLevel]
      **/
-    private DeptLevelRespDTO getParentName(Integer deptLevel, TreeSet<DeptLevelRespDTO> deptTreeLevel) {
+    private DeptLevelRespDTO getParentDeptLevel(Integer deptLevel, TreeSet<DeptLevelRespDTO> deptTreeLevel) {
         if (deptLevel > 3) {
             //向上找父类
             deptTreeLevel.pollLast();
-            getParentName(--deptLevel, deptTreeLevel);
+            getParentDeptLevel(--deptLevel, deptTreeLevel);
         } else {
             //因为erp的层级比eccang高一级，所以移除一个
             deptTreeLevel.pollLast();

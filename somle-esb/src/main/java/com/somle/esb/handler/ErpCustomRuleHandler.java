@@ -1,12 +1,8 @@
 package com.somle.esb.handler;
 
-import cn.hutool.core.util.ObjUtil;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
-import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.ErpSupplierProductPageReqVO;
-import cn.iocoder.yudao.module.erp.service.purchase.ErpSupplierProductService;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import com.somle.eccang.model.EccangProduct;
 import com.somle.eccang.service.EccangService;
@@ -16,17 +12,17 @@ import com.somle.kingdee.model.KingdeeProduct;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.context.annotation.Profile;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
 
-import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 /**
  * @Description: $
@@ -35,13 +31,12 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Slf4j
 @Component
-//@Profile("!dev & !test")
+@Profile("!dev & !test")
 @RequiredArgsConstructor
 public class ErpCustomRuleHandler {
 
     private final KingdeeService kingdeeService;
     private final EccangService eccangService;
-    private final ErpSupplierProductService erpSupplierProductService;
     private final ErpToEccangConverter erpToEccangConverter;
     private final ErpToKingdeeConverter erpToKingdeeConverter;
     private final DictDataApi dictDataApi;
@@ -55,51 +50,12 @@ public class ErpCustomRuleHandler {
      **/
     @ServiceActivator(inputChannel = "erpCustomRuleChannel")
     public void syncCustomRulesToEccang(@Payload List<ErpProductDetailDTO> erpProductDetailDTOS) {
-        log.info("syncCustomRuleToEccang start, sku={{}}", erpProductDetailDTOS.stream().map(erpProductDetailDTO -> erpProductDetailDTO.getErpProductDTO().getBarCode()).toList());
+        log.info("Start syncing custom rules to Eccang, SKUs={}", extractSkus(erpProductDetailDTOS));
         List<ErpProductDetailDTO> dtos = processRules(erpProductDetailDTOS);
-        List<EccangProduct> eccangProducts = erpToEccangConverter.ToProduct(dtos);
-        for (EccangProduct eccangProduct : eccangProducts) {
-            eccangProduct.setActionType("ADD");
-            EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
-            //根据sku从eccang中获取产品，如果产品不为空，则表示已存在，操作则变为修改
-            if (ObjUtil.isNotEmpty(eccangServiceProduct)) {
-                eccangProduct.setActionType("EDIT");
-                //如果是修改就要上传默认采购单价
-                //TODO 后续有变更，请修改
-                eccangProduct.setProductPurchaseValue(0.001F);
-            }
-            log.debug(eccangProduct.toString());
-            //用product_id在供应商产品里面查，使用查到的第一个价格
-            // 1. 设置默认值
-            eccangProduct.setCurrencyCode(
-                ObjectUtils.defaultIfNull(eccangProduct.getCurrencyCode(), "1") // 默认 CNY
-            );
-            eccangProduct.setProductPrice(
-                ObjectUtils.defaultIfNull(eccangProduct.getProductPrice(), 0f) // 默认价格为 0.0
-            );
+        List<EccangProduct> eccangProducts = erpToEccangConverter.convertToEccangProductListFromDetails(dtos);
 
-            // 2. 获取产品并处理价格
-            erpSupplierProductService.getSupplierProductPage(
-                    new ErpSupplierProductPageReqVO().setProductId(Long.valueOf(eccangProduct.getDesc()))
-                )
-                .getList().stream()
-                .findFirst()
-                .ifPresent(erpSupplierProductDO -> {
-                    // 设置货币单位
-                    Optional.ofNullable(erpSupplierProductDO.getPurchasePriceCurrencyCode())
-                        .map(String::valueOf) // 将 Integer 转换为字符串
-                        .filter(StringUtils::isNotBlank)
-                        .ifPresent(eccangProduct::setCurrencyCode);
-
-                    // 设置价格，并确保价格为 BigDecimal 类型，避免转换不一致
-                    Optional.ofNullable(erpSupplierProductDO.getPurchasePrice())
-                        .map(BigDecimal::valueOf)
-                        .map(price -> price.setScale(2, RoundingMode.HALF_UP).floatValue())
-                        .ifPresent(eccangProduct::setProductPrice);
-                });
-        }
         eccangService.addBatchProduct(eccangProducts);
-        log.info("syncCustomRuleToEccang end ,sku={{}}", eccangProducts.stream().map(EccangProduct::getProductSku).toList());
+        log.info("Finished syncing custom rules to Eccang, SKUs={}", extractSkus(eccangProducts));
     }
 
     /**
@@ -111,39 +67,18 @@ public class ErpCustomRuleHandler {
      **/
     @ServiceActivator(inputChannel = "erpCustomRuleChannel")
     public void syncCustomRulesToKingdee(@Payload List<ErpProductDetailDTO> erpProductDetailDTOS) {
-        log.info("syncCustomRuleToKingdee");
+        log.info("Start syncing custom rules to Kingdee, SKUs={}", extractSkus(erpProductDetailDTOS));
         List<KingdeeProduct> kingdee = erpToKingdeeConverter.customRuleDTOToProduct(processRules(erpProductDetailDTOS));
-        for (KingdeeProduct kingdeeProduct : kingdee) {
-            kingdeeService.addProduct(kingdeeProduct);
-        }
-        log.info("syncCustomRuleToKingdee end,skus={{}}}", kingdee.stream().map(KingdeeProduct::getNumber).toList());
+        kingdee.forEach(kingdeeService::addProduct);
+        log.info("Finished syncing custom rules to Kingdee, SKUs={}", extractSkus(kingdee));
     }
-
 
     /**
      * 处理自定义规则列表，复制 countryCode 为 CN 字典映射值的对象
      *
-     * @param customRules 原始海关规则列表
-     * @return 处理后的海关规则列表 List<ErpCustomRuleDTO>
+     * @param erpProductDetailDTOS 产品详情DTOs
+     * @return List<ErpProductDetailDTO> 复制后的list。
      */
-    private List<ErpCustomRuleDTO> processCustomRules(List<ErpCustomRuleDTO> customRules) {
-        CopyOnWriteArrayList<ErpCustomRuleDTO> processedRules = new CopyOnWriteArrayList<>(customRules);
-        customRules.stream()
-            .filter(customRule -> customRule.getCountryCode() != null)
-            .forEach(customRule -> Optional.ofNullable(dictDataApi.parseDictData("country_code", "CN"))
-                .flatMap(dictDataRespDTO -> Optional.ofNullable(dictDataRespDTO.getValue()))
-                .ifPresent(value -> {
-                    Integer countryCode = Integer.valueOf(value);
-                    if (customRule.getCountryCode().equals(countryCode)) {
-                        //当前存在国家是CN的数据
-                        ErpCustomRuleDTO bean = BeanUtils.toBean(customRule, ErpCustomRuleDTO.class);
-                        processedRules.add(BeanUtils.toBean(bean.setCountryCode(null), ErpCustomRuleDTO.class));
-                    }
-                }));
-        return processedRules;
-    }
-
-
     private List<ErpProductDetailDTO> processRules(List<ErpProductDetailDTO> erpProductDetailDTOS) {
         CopyOnWriteArrayList<ErpProductDetailDTO> dtos = new CopyOnWriteArrayList<>(erpProductDetailDTOS);
         erpProductDetailDTOS.stream()
@@ -165,5 +100,34 @@ public class ErpCustomRuleHandler {
                 })
             );
         return dtos;
+    }
+
+    /**
+     * 提取SKU列表
+     *
+     * @param dtos 产品列表（支持不同类型）
+     * @return SKU列表
+     */
+    private <T> List<String> extractSkus(List<T> dtos) {
+        if (dtos == null || dtos.isEmpty()) {
+            return Collections.emptyList();
+        }
+        if (dtos.get(0) instanceof ErpProductDetailDTO) {
+            return dtos.stream()
+                .map(dto -> ((ErpProductDetailDTO) dto).getErpProductDTO().getBarCode())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        } else if (dtos.get(0) instanceof EccangProduct) {
+            return dtos.stream()
+                .map(dto -> ((EccangProduct) dto).getProductSku())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        } else if (dtos.get(0) instanceof KingdeeProduct) {
+            return dtos.stream()
+                .map(dto -> ((KingdeeProduct) dto).getBarcode())
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        }
+        return Collections.emptyList();
     }
 }
