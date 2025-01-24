@@ -124,7 +124,7 @@ public class ErpCustomRuleHandler {
                 .collect(Collectors.toList());
         } else if (dtos.get(0) instanceof KingdeeProduct) {
             return dtos.stream()
-                .map(dto -> ((KingdeeProduct) dto).getBarcode())
+                .map(dto -> ((KingdeeProduct) dto).getNumber())
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
         }
