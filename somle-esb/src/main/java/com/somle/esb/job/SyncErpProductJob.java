@@ -12,6 +12,7 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,7 +35,7 @@ public class SyncErpProductJob extends DataJob {
 
     @Override
     public String execute(String param) throws Exception {
-        AtomicReference<List<String>> barCodes = new AtomicReference<>();
+        AtomicReference<List<String>> barCodes = new AtomicReference<>(new ArrayList<>());
         AtomicReference<Long> tenantId = new AtomicReference<>(TenantId.DEFAULT.getId());
         AtomicReference<List<ErpProductDetailDTO>> customRuleDTOS = new AtomicReference<>();
 
@@ -54,10 +55,14 @@ public class SyncErpProductJob extends DataJob {
             });
 
             // 发送消息
+            log.info("预计同步产品skus,barCodes = {{}}",barCodes.get());
             Optional.ofNullable(customRuleDTOS.get()).ifPresent(detailDTOS -> {
+                barCodes.set(detailDTOS.stream().map(detailDTO -> detailDTO.getErpProductDTO().getBarCode()).toList());
+
                 int total = detailDTOS.size();
                 int processed = 0; // 初始化已处理计数器
 
+               //输出预计同步的barcode集合
                 for (ErpProductDetailDTO detailDTO : detailDTOS) {
                     String barCode = detailDTO.getErpProductDTO().getBarCode();
                     log.debug("发送消息, BarCode = {}", barCode);
