@@ -19,26 +19,9 @@ public interface CustomRuleConvert {
     CustomRuleConvert INSTANCE = Mappers.getMapper(CustomRuleConvert.class);
 
 
-//    ErpCustomRuleDTO convert(ErpCustomRuleDO customRuleDO, ErpProductDO erpProductDO);
-
-
-    // 将外部服务获取的产品信息（Map<Long, ErpProductDO>）传递给转换方法
-//    default List<ErpCustomRuleDTO> convertToDTOList(List<ErpCustomRuleDO> customRuleDOList, Map<Long, ErpProductDO> productMap) {
-//        return customRuleDOList.stream()
-//            .filter(Objects::nonNull)
-//            .map(erpCustomRuleDO -> {
-//                ErpProductDO product = productMap.get(erpCustomRuleDO.getProductId());
-//                return CustomRuleConvert.INSTANCE.convert(erpCustomRuleDO, product);
-//            })
-//            .collect(Collectors.toList());
-//    }
-
-
     ErpCustomRuleDTO convert(ErpCustomRuleDO erpCustomRuleDO);
 
     List<ErpCustomRuleDTO> convert(List<ErpCustomRuleDO> erpCustomRuleDOs);
-
-//    List<ErpCustomRuleDO> convertList(List<ErpCustomRuleDTO> list);
 
     default ErpProductDetailDTO convert(ErpCustomRuleDO erpCustomRuleDO, ErpProductDO erpProductDO) {
         return ErpProductDetailDTO.builder()
