@@ -31,7 +31,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-@Profile("!dev & !test")
+//@Profile("!dev & !test")
 @RequiredArgsConstructor
 public class ErpCustomRuleHandler {
 
@@ -54,9 +54,17 @@ public class ErpCustomRuleHandler {
         List<ErpProductDetailDTO> dtos = processRules(erpProductDetailDTOS);
         List<EccangProduct> eccangProducts = erpToEccangConverter.convertToEccangProductListFromDetails(dtos);
 
-        eccangService.addBatchProduct(eccangProducts);
-        log.info("Finished syncing custom rules to Eccang, SKUs={}", extractSkus(eccangProducts));
+        final int batchSize = 100;
+        // 确保每100个产品详情组成一个列表，然后调用addBatchProduct
+        for (int i = 0; i < eccangProducts.size(); i += batchSize) {
+            // 使用subList来创建从索引i到i+batchSize（或列表末尾）的子列表
+            List<EccangProduct> batchList = eccangProducts.subList(i, Math.min(i + batchSize, eccangProducts.size()));
+            eccangService.addBatchProduct(batchList);
+            log.info("Synced batch to Eccang, SKUs={}", extractSkus(batchList));
+        }
+        log.info("Finished syncing custom rules to Eccang, Total SKUs={}", extractSkus(eccangProducts));
     }
+
 
     /**
      * @return void

@@ -2,14 +2,13 @@ package com.somle.esb.job;
 
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.erp.api.product.ErpCustomRuleApi;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import com.somle.esb.enums.TenantId;
+import com.somle.esb.handler.ErpCustomRuleHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -30,6 +29,8 @@ public class SyncErpProductJob extends DataJob {
     ApplicationContext applicationContext;
     @Autowired
     MessageChannel erpCustomRuleChannel;
+    @Autowired
+    ErpCustomRuleHandler erpCustomRuleHandler;
 
     @Override
     public String execute(String param) throws Exception {
@@ -56,7 +57,9 @@ public class SyncErpProductJob extends DataJob {
             Optional.ofNullable(customRuleDTOS.get()).ifPresent(detailDTOS -> {
                 barCodes.set(detailDTOS.stream().map(detailDTO -> detailDTO.getErpProductDTO().getBarCode()).toList());
                 log.debug("发送消息, BarCode = {}", barCodes);
-                erpCustomRuleChannel.send(MessageBuilder.withPayload(detailDTOS).build());
+//                erpCustomRuleChannel.send(MessageBuilder.withPayload(detailDTOS).build());
+                erpCustomRuleHandler.syncCustomRulesToEccang(detailDTOS);
+                erpCustomRuleHandler.syncCustomRulesToKingdee(detailDTOS);
             });
         } finally {
             TenantContextHolder.clear(); // 清理租户上下文，避免线程复用导致问题
