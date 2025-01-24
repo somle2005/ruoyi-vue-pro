@@ -20,14 +20,10 @@ import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
 import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.integration.support.MessageBuilder;
-//import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import com.somle.dingtalk.model.DingTalkDepartment;
-// import com.somle.model.DingTalkDepartmentMap.DingTalkDepartment;
-// import com.somle.model.DingTalkDepartmentMap;
 import com.somle.dingtalk.model.DingTalkResponse;
 import com.somle.dingtalk.model.DingTalkToken;
 import com.somle.dingtalk.repository.DingTalkTokenRepository;
@@ -52,7 +48,7 @@ public class DingTalkService {
     DingTalkTokenRepository tokenRepository;
 
     @Scheduled(cron = "0 0 * * * ?") // Executes at the start of every hour
-//    @PostConstruct
+    @PostConstruct
     private void init() {
         token = refreshAuth();
     }
