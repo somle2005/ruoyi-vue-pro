@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.service.logistic.customrule;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
@@ -20,8 +21,10 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_INSERT_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
@@ -154,6 +157,22 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         return CustomRuleConvert.INSTANCE.convert(erpCustomRuleDO, erpProductDO);
     }
 
-
+    /**
+     * 根绝产品id(确保存在)获取n个海关规则信息 1:n
+     * @param productId 产品id
+     * List<ErpCustomRuleDTO> 海关规则+产品 DTOs
+     */
+    public List<ErpCustomRuleDTO> listErpCustomRuleDTOsByProductId(Long productId) {
+        //1.0 获得产品
+        ErpProductDO erpProductDO = erpProductMapper.selectById(productId);
+        //2.0 获得海关规则
+        List<ErpCustomRuleDO> erpCustomRuleDOList = customRuleMapper.selectByProductId(productId);
+        //3.0 封装返回
+        if (CollUtil.isNotEmpty(erpCustomRuleDOList)) {
+            return erpCustomRuleDOList.stream().map(erpCustomRuleDO -> CustomRuleConvert.INSTANCE.convert(erpCustomRuleDO, erpProductDO)).collect(Collectors.toList());
+        }else{
+            return Collections.emptyList();
+        }
+    }
 
 }

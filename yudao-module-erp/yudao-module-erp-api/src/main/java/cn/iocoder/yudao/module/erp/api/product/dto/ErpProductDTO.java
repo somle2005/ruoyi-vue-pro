@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.api.product.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -10,6 +11,7 @@ import java.math.BigDecimal;
  * @description:
  */
 @Data
+@Builder
 public class ErpProductDTO {
     /**
      * 产品名称

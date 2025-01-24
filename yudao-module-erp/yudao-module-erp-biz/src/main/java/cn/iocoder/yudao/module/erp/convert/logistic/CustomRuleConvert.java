@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.erp.convert.logistic;
 
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
-import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule.ErpCustomRuleDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import org.mapstruct.Mapper;
@@ -15,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Mapper
 public interface CustomRuleConvert {
+
 
     CustomRuleConvert INSTANCE = Mappers.getMapper(CustomRuleConvert.class);
 
@@ -33,22 +33,7 @@ public interface CustomRuleConvert {
     ErpCustomRuleDTO convert(ErpCustomRuleDO customRuleDO, ErpProductDO erpProductDO);
 
 
-    @Mapping(target = "productWidth", source = "vo.width")
-    @Mapping(target = "productWeight", source = "vo.weight")
-    @Mapping(target = "productName", source = "vo.name")
-    @Mapping(target = "productMaterial", source = "vo.material")
-    @Mapping(target = "productLength", source = "vo.length")
-    @Mapping(target = "productImageUrl", source = "vo.primaryImageUrl")
-    @Mapping(target = "productHeight", source = "vo.height")
-    @Mapping(target = "productDeptId", source = "vo.deptId")
-    @Mapping(target = "productCreatorId", source = "vo.creator")
-    @Mapping(target = "productId", source = "vo.id")
-    @Mapping(target = "fbaBarCode", source = "vo.barCode")
-    @Mapping(target = "id", source = "customRuleDO.id")
-    ErpCustomRuleDTO convert(ErpCustomRuleDO customRuleDO, ErpProductRespVO vo);//不建议使用-vo关联太多
-
-
-    // 将外部服务获取的产品信息（Map<Long, ErpProductRespVO>）传递给转换方法
+    // 将外部服务获取的产品信息（Map<Long, ErpProductDO>）传递给转换方法
     default List<ErpCustomRuleDTO> convertToDTOList(List<ErpCustomRuleDO> customRuleDOList, Map<Long, ErpProductDO> productMap) {
         return customRuleDOList.stream()
             .filter(Objects::nonNull)
@@ -58,6 +43,11 @@ public interface CustomRuleConvert {
             })
             .collect(Collectors.toList());
     }
+
+
+    ErpCustomRuleDO convert(ErpCustomRuleDTO dto);
+
+    List<ErpCustomRuleDO> convertList(List<ErpCustomRuleDTO> list);
 }
 
 

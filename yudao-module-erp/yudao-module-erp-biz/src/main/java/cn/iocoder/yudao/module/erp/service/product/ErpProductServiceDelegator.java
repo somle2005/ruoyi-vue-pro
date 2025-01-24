@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.erp.service.product;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
@@ -167,17 +166,5 @@ public class ErpProductServiceDelegator implements ErpProductService {
     public Long getProductCountByUnitId(Long unitId) {
         ErpProductService service = getDefaultService();
         return service.getProductCountByUnitId(unitId);
-    }
-
-    /**
-     * 根绝产品id获取n个产品DTO，获取产品+海关规则。如果海关规则无匹配，则返回null
-     * <p>
-     *
-     * @param productId 产品id
-     *                  List<ErpCustomRuleDTO> 海关规则+产品 DTOs
-     */
-    @Override
-    public List<ErpCustomRuleDTO> listErpCustomRuleDTOsByProductId(Long productId) {
-        return List.of();
     }
 }
