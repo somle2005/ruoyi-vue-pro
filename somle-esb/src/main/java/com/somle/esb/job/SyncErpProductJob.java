@@ -55,11 +55,21 @@ public class SyncErpProductJob extends DataJob {
 
             // 发送消息
             Optional.ofNullable(customRuleDTOS.get()).ifPresent(detailDTOS -> {
-                barCodes.set(detailDTOS.stream().map(detailDTO -> detailDTO.getErpProductDTO().getBarCode()).toList());
-                log.debug("发送消息, BarCode = {}", barCodes);
-//                erpCustomRuleChannel.send(MessageBuilder.withPayload(detailDTOS).build());
-                erpCustomRuleHandler.syncCustomRulesToEccang(detailDTOS);
-                erpCustomRuleHandler.syncCustomRulesToKingdee(detailDTOS);
+                int total = detailDTOS.size();
+                int processed = 0; // 初始化已处理计数器
+
+                for (ErpProductDetailDTO detailDTO : detailDTOS) {
+                    String barCode = detailDTO.getErpProductDTO().getBarCode();
+                    log.debug("发送消息, BarCode = {}", barCode);
+
+                    // 单独处理每个条目
+                    erpCustomRuleHandler.syncCustomRulesToEccang(List.of(detailDTO));
+                    // 如果需要处理其他同步，取消注释以下行
+                     erpCustomRuleHandler.syncCustomRulesToKingdee(List.of(detailDTO));
+
+                    processed++; // 更新已处理计数器
+                    log.info("SyncErpProduct Processed {}/{} ({}%)", processed, total, (100 * processed / total)); // 输出当前进度
+                }
             });
         } finally {
             TenantContextHolder.clear(); // 清理租户上下文，避免线程复用导致问题

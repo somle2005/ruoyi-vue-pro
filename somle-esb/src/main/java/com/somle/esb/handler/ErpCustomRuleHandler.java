@@ -12,7 +12,6 @@ import com.somle.kingdee.model.KingdeeProduct;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -54,14 +53,10 @@ public class ErpCustomRuleHandler {
         List<ErpProductDetailDTO> dtos = processRules(erpProductDetailDTOS);
         List<EccangProduct> eccangProducts = erpToEccangConverter.convertToEccangProductListFromDetails(dtos);
 
-        final int batchSize = 100;
-        // 确保每100个产品详情组成一个列表，然后调用addBatchProduct
-        for (int i = 0; i < eccangProducts.size(); i += batchSize) {
-            // 使用subList来创建从索引i到i+batchSize（或列表末尾）的子列表
-            List<EccangProduct> batchList = eccangProducts.subList(i, Math.min(i + batchSize, eccangProducts.size()));
-            eccangService.addBatchProduct(batchList);
-            log.info("Synced batch to Eccang, SKUs={}", extractSkus(batchList));
-        }
+        eccangProducts.forEach(eccangProduct -> {
+            eccangService.addBatchProduct(List.of(eccangProduct));
+        });
+
         log.info("Finished syncing custom rules to Eccang, Total SKUs={}", extractSkus(eccangProducts));
     }
 
