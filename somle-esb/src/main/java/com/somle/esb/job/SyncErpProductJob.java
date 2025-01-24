@@ -3,6 +3,7 @@ package com.somle.esb.job;
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.erp.api.product.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import com.somle.esb.enums.TenantId;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +35,7 @@ public class SyncErpProductJob extends DataJob {
     public String execute(String param) throws Exception {
         AtomicReference<List<String>> barCodes = new AtomicReference<>();
         AtomicReference<Long> tenantId = new AtomicReference<>(TenantId.DEFAULT.getId());
-        AtomicReference<List<ErpCustomRuleDTO>> customRuleDTOS = new AtomicReference<>();
+        AtomicReference<List<ErpProductDetailDTO>> customRuleDTOS = new AtomicReference<>();
 
         try {
             // 设置租户 ID
@@ -52,10 +53,10 @@ public class SyncErpProductJob extends DataJob {
             });
 
             // 发送消息
-            Optional.ofNullable(customRuleDTOS.get()).ifPresent(customRuleDTOList -> {
-                barCodes.set(customRuleDTOList.stream().map(ErpCustomRuleDTO::getBarCode).toList());
+            Optional.ofNullable(customRuleDTOS.get()).ifPresent(detailDTOS -> {
+                barCodes.set(detailDTOS.stream().map(detailDTO -> detailDTO.getErpProductDTO().getBarCode()).toList());
                 log.debug("发送消息, BarCode = {}", barCodes);
-                erpCustomRuleChannel.send(MessageBuilder.withPayload(customRuleDTOList).build());
+                erpCustomRuleChannel.send(MessageBuilder.withPayload(detailDTOS).build());
             });
         } finally {
             TenantContextHolder.clear(); // 清理租户上下文，避免线程复用导致问题

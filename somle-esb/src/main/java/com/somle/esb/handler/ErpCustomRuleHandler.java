@@ -4,6 +4,7 @@ import cn.hutool.core.util.ObjUtil;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.ErpSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.erp.service.purchase.ErpSupplierProductService;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
@@ -34,7 +35,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Slf4j
 @Component
-@Profile("!dev & !test")
+//@Profile("!dev & !test")
 @RequiredArgsConstructor
 public class ErpCustomRuleHandler {
 
@@ -53,9 +54,10 @@ public class ErpCustomRuleHandler {
      * @Param [message]
      **/
     @ServiceActivator(inputChannel = "erpCustomRuleChannel")
-    public void syncCustomRulesToEccang(@Payload List<ErpCustomRuleDTO> customRules) {
-        log.info("syncCustomRuleToEccang start, sku={{}}", customRules.stream().map(ErpCustomRuleDTO::getBarCode).toList());
-        List<EccangProduct> eccangProducts = erpToEccangConverter.customRuleDTOToProduct(processCustomRules(customRules));
+    public void syncCustomRulesToEccang(@Payload List<ErpProductDetailDTO> erpProductDetailDTOS) {
+        log.info("syncCustomRuleToEccang start, sku={{}}", erpProductDetailDTOS.stream().map(erpProductDetailDTO -> erpProductDetailDTO.getErpProductDTO().getBarCode()).toList());
+        List<ErpProductDetailDTO> dtos = processRules(erpProductDetailDTOS);
+        List<EccangProduct> eccangProducts = erpToEccangConverter.ToProduct(dtos);
         for (EccangProduct eccangProduct : eccangProducts) {
             eccangProduct.setActionType("ADD");
             EccangProduct eccangServiceProduct = eccangService.getProduct(eccangProduct.getProductSku());
@@ -108,9 +110,9 @@ public class ErpCustomRuleHandler {
      * @Param [message]
      **/
     @ServiceActivator(inputChannel = "erpCustomRuleChannel")
-    public void syncCustomRulesToKingdee(@Payload List<ErpCustomRuleDTO> customRules) {
+    public void syncCustomRulesToKingdee(@Payload List<ErpProductDetailDTO> erpProductDetailDTOS) {
         log.info("syncCustomRuleToKingdee");
-        List<KingdeeProduct> kingdee = erpToKingdeeConverter.customRuleDTOToProduct(processCustomRules(customRules));
+        List<KingdeeProduct> kingdee = erpToKingdeeConverter.customRuleDTOToProduct(processRules(erpProductDetailDTOS));
         for (KingdeeProduct kingdeeProduct : kingdee) {
             kingdeeService.addProduct(kingdeeProduct);
         }
@@ -139,5 +141,29 @@ public class ErpCustomRuleHandler {
                     }
                 }));
         return processedRules;
+    }
+
+
+    private List<ErpProductDetailDTO> processRules(List<ErpProductDetailDTO> erpProductDetailDTOS) {
+        CopyOnWriteArrayList<ErpProductDetailDTO> dtos = new CopyOnWriteArrayList<>(erpProductDetailDTOS);
+        erpProductDetailDTOS.stream()
+            .filter(erpProductDetailDTO -> erpProductDetailDTO.getErpCustomRuleDTO().getCountryCode() != null)
+            .forEach(erpProductDetailDTO -> Optional.ofNullable(dictDataApi.parseDictData("country_code", "CN"))
+                .flatMap(dictDataRespDTO -> Optional.ofNullable(dictDataRespDTO.getValue()))
+                .ifPresent(value -> {
+                    Integer countryCode = Integer.valueOf(value);
+                    if (erpProductDetailDTO.getErpCustomRuleDTO().getCountryCode().equals(countryCode)) {
+                        //当前存在国家是CN的数据
+                        ErpCustomRuleDTO bean = BeanUtils.toBean(erpProductDetailDTO.getErpCustomRuleDTO(), ErpCustomRuleDTO.class);
+                        bean.setCountryCode(null);
+                        dtos.add(BeanUtils.toBean(ErpProductDetailDTO.builder()
+                                .erpCustomRuleDTO(bean)
+                                .erpProductDTO(erpProductDetailDTO.getErpProductDTO())
+                                .build()
+                            , ErpProductDetailDTO.class));
+                    }
+                })
+            );
+        return dtos;
     }
 }

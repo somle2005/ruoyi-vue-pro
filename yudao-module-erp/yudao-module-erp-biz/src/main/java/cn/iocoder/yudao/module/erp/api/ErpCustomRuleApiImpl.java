@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.erp.api;
 
 import cn.iocoder.yudao.module.erp.api.product.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.erp.service.logistic.customrule.ErpCustomRuleService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class ErpCustomRuleApiImpl implements ErpCustomRuleApi {
      * @return 海关规则集合
      */
     @Override
-    public List<ErpCustomRuleDTO> listCustomRules() {
+    public List<ErpProductDetailDTO> listCustomRules() {
         return customRuleService.listCustomRules();
     }
 }

@@ -134,15 +134,15 @@ public class ErpProductServiceImpl implements ErpProductService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateProduct(ErpProductSaveReqVO updateReqVO) {
-        Long id = updateReqVO.getId();
+        Long productId =  updateReqVO.getId();
         // 校验存在
-        validateProductExists(id);
+        validateProductExists(productId);
         //校验不同的id下是否存在相同的产品编码
         validateProductCodeUnique(updateReqVO.getId(), updateReqVO.getBarCode());
         //检验是否存在相同的产品名称
-        validateProductNameUnique(id, updateReqVO.getName());
+        validateProductNameUnique(productId, updateReqVO.getName());
         //校验颜色，型号，系列是否已经有存在相同的产品
-        boolean validateProductColorAndSeriesAndModel = validateProductColorAndSeriesAndModel(id,updateReqVO.getColor(), updateReqVO.getModel(), updateReqVO.getSeries());
+        boolean validateProductColorAndSeriesAndModel = validateProductColorAndSeriesAndModel(productId,updateReqVO.getColor(), updateReqVO.getModel(), updateReqVO.getSeries());
         if (validateProductColorAndSeriesAndModel){
             //获取递增后流水号
             Integer serial = increaseSerial(updateReqVO.getColor(), updateReqVO.getModel(), updateReqVO.getSeries());
@@ -180,7 +180,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         ThrowUtil.ifSqlThrow(productMapper.updateById(updateObj),DB_UPDATE_ERROR);
         //更新产品时->覆盖n个海关规则
         //找到产品id对应的所有产品DTO(含海关信息)
-        Optional.ofNullable(erpCustomRuleService.listErpCustomRuleDTOsByProductId(id)).ifPresent(
+        Optional.ofNullable(erpCustomRuleService.listErpCustomRuleDTOsByProductId(productId)).ifPresent(
                 dtos -> erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build())
         );
         //获取创建人id

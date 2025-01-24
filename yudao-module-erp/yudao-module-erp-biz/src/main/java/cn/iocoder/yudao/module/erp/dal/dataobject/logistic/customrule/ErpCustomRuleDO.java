@@ -32,7 +32,6 @@ public class ErpCustomRuleDO extends BaseDO {
      * 国家编码
      */
     private Integer countryCode;
-
     /**
      * 产品id
      */

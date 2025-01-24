@@ -20,25 +20,25 @@ import java.util.List;
  */
 @Mapper
 public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
-    default MPJLambdaWrapper<ErpCustomRuleDO> getWrapper() {
-        return new MPJLambdaWrapperX<ErpCustomRuleDO>()
-            .selectAll(ErpCustomRuleDO.class)
-            .leftJoin(ErpProductDO.class, ErpProductDO::getId, ErpCustomRuleDO::getProductId)
-            .selectAs(ErpProductDO::getName, ErpCustomRuleDTO::getProductName)
-            .selectAs(ErpProductDO::getPrimaryImageUrl, ErpCustomRuleDTO::getProductImageUrl)
-            .selectAs(ErpProductDO::getWeight, ErpCustomRuleDTO::getProductWeight)
-            .selectAs(ErpProductDO::getLength, ErpCustomRuleDTO::getProductLength)
-            .selectAs(ErpProductDO::getWidth, ErpCustomRuleDTO::getProductWidth)
-            .selectAs(ErpProductDO::getHeight, ErpCustomRuleDTO::getProductHeight)
-            .selectAs(ErpProductDO::getPackageHeight, ErpCustomRuleDTO::getPackageHeight)
-            .selectAs(ErpProductDO::getPackageLength, ErpCustomRuleDTO::getPackageLength)
-            .selectAs(ErpProductDO::getPackageWeight, ErpCustomRuleDTO::getPackageWeight)
-            .selectAs(ErpProductDO::getPackageWidth, ErpCustomRuleDTO::getPackageWidth)
-            .selectAs(ErpProductDO::getMaterial, ErpCustomRuleDTO::getProductMaterial)
-            .selectAs(ErpProductDO::getCreator, ErpCustomRuleDTO::getProductCreatorId)
-            .selectAs(ErpProductDO::getBarCode, ErpCustomRuleDTO::getBarCode)
-            .selectAs(ErpProductDO::getDeptId, ErpCustomRuleDTO::getProductDeptId);
-    }
+//    default MPJLambdaWrapper<ErpCustomRuleDO> getWrapper() {
+//        return new MPJLambdaWrapperX<ErpCustomRuleDO>()
+//            .selectAll(ErpCustomRuleDO.class)
+//            .leftJoin(ErpProductDO.class, ErpProductDO::getId, ErpCustomRuleDO::getProductId)
+//            .selectAs(ErpProductDO::getName, ErpCustomRuleDTO::getProductName)
+//            .selectAs(ErpProductDO::getPrimaryImageUrl, ErpCustomRuleDTO::getProductImageUrl)
+//            .selectAs(ErpProductDO::getWeight, ErpCustomRuleDTO::getProductWeight)
+//            .selectAs(ErpProductDO::getLength, ErpCustomRuleDTO::getProductLength)
+//            .selectAs(ErpProductDO::getWidth, ErpCustomRuleDTO::getProductWidth)
+//            .selectAs(ErpProductDO::getHeight, ErpCustomRuleDTO::getProductHeight)
+//            .selectAs(ErpProductDO::getPackageHeight, ErpCustomRuleDTO::getPackageHeight)
+//            .selectAs(ErpProductDO::getPackageLength, ErpCustomRuleDTO::getPackageLength)
+//            .selectAs(ErpProductDO::getPackageWeight, ErpCustomRuleDTO::getPackageWeight)
+//            .selectAs(ErpProductDO::getPackageWidth, ErpCustomRuleDTO::getPackageWidth)
+//            .selectAs(ErpProductDO::getMaterial, ErpCustomRuleDTO::getProductMaterial)
+//            .selectAs(ErpProductDO::getCreator, ErpCustomRuleDTO::getProductCreatorId)
+//            .selectAs(ErpProductDO::getBarCode, ErpCustomRuleDTO::getBarCode)
+//            .selectAs(ErpProductDO::getDeptId, ErpCustomRuleDTO::getProductDeptId);
+//    }
 
     /**
      * 分页查询ERP海关规则数据

@@ -14,6 +14,10 @@ import java.math.BigDecimal;
 @Builder
 public class ErpProductDTO {
     /**
+     * 产品id
+     */
+    private Long id;
+    /**
      * 产品名称
      */
     private String name;

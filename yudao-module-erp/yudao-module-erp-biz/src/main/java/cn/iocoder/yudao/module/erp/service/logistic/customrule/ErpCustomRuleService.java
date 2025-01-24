@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.erp.service.logistic.customrule;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRulePageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRuleSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule.ErpCustomRuleDO;
@@ -55,17 +56,17 @@ public interface ErpCustomRuleService {
     PageResult<ErpCustomRuleDO> getCustomRulePage(ErpCustomRulePageReqVO pageReqVO);
 
     /**
-     * 获得所有海关规则列表
-     * @return List<ErpCustomRuleDTO>
+     * 获得产品全量信息
+     * @return List<ErpProductDetailDTO>
      */
-    List<ErpCustomRuleDTO> listCustomRules();
+    List<ErpProductDetailDTO> listCustomRules();
 
     /**
      * 根据海关规则id 获得DTO（含海关的产品）
      * @param id 海关规则id
      * @return ErpCustomRuleDTO dto
      */
-    ErpCustomRuleDTO listErpCustomRuleDTOById(Long id);
+    ErpProductDetailDTO listErpCustomRuleDTOById(Long id);
     /**
      * 根绝产品id(确保存在)获取n个产品DTO，获取产品+海关规则。如果海关规则无匹配，则返回null
      * <p>
@@ -73,5 +74,5 @@ public interface ErpCustomRuleService {
      * @param productId 产品id
      * List<ErpCustomRuleDTO> 海关规则+产品 DTOs
      */
-    List<ErpCustomRuleDTO> listErpCustomRuleDTOsByProductId(Long productId);
+    List<ErpProductDetailDTO> listErpCustomRuleDTOsByProductId(Long productId);
 }

@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRulePageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRuleSaveReqVO;
 import cn.iocoder.yudao.module.erp.convert.logistic.CustomRuleConvert;
@@ -23,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -66,7 +68,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         ), DB_INSERT_ERROR);
         Long id = customRule.getId();
         //同步产品数据
-        ErpCustomRuleDTO dto = listErpCustomRuleDTOById(id);
+        ErpProductDetailDTO dto = listErpCustomRuleDTOById(id);
         erpCustomRuleChannel.send(MessageBuilder.withPayload(List.of(dto)).build());
         // 返回
         return id;
@@ -83,7 +85,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         ErpCustomRuleDO updateObj = BeanUtils.toBean(updateReqVO, ErpCustomRuleDO.class);
         ThrowUtil.ifSqlThrow(customRuleMapper.updateById(updateObj), DB_UPDATE_ERROR);
         //同步产品数据
-        ErpCustomRuleDTO dto = listErpCustomRuleDTOById(id);
+        ErpProductDetailDTO dto = listErpCustomRuleDTOById(id);
         erpCustomRuleChannel.send(MessageBuilder.withPayload(List.of(dto)).build());
     }
 
@@ -129,14 +131,16 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
     /**
      * 获得所有海关规则列表
      *
-     * @return List<ErpCustomRuleDTO>
+     * @return List<ErpProductDetailDTO>
      */
     @Override
-    public List<ErpCustomRuleDTO> listCustomRules() {
+    public List<ErpProductDetailDTO> listCustomRules() {
         List<ErpCustomRuleDO> customRuleDOS = customRuleMapper.selectList();
         //收集海关规则的productIds
         List<Long> productIds = customRuleDOS.stream().filter(Objects::nonNull).map(ErpCustomRuleDO::getProductId).toList();
-        return CustomRuleConvert.INSTANCE.convertToDTOList(customRuleDOS, erpProductService.getProductMap(productIds));
+        Map<Long, ErpProductDO> productMap = erpProductService.getProductMap(productIds);
+
+        return CustomRuleConvert.INSTANCE.convert(customRuleDOS, productMap);
     }
 
     /**
@@ -146,7 +150,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
      * @return List<ErpCustomRuleDTO> DTO 海关信息+产品信息
      */
     @Override
-    public ErpCustomRuleDTO listErpCustomRuleDTOById(Long id) {
+    public ErpProductDetailDTO listErpCustomRuleDTOById(Long id) {
         validateCustomRuleExists(id);
         //1.0 根据海关规则的id获得产品id
         ErpCustomRuleDO erpCustomRuleDO = erpCustomRuleMapper.selectById(id);
@@ -159,10 +163,11 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
 
     /**
      * 根绝产品id(确保存在)获取n个海关规则信息 1:n
+     *
      * @param productId 产品id
-     * List<ErpCustomRuleDTO> 海关规则+产品 DTOs
+     *                  List<ErpCustomRuleDTO> 海关规则+产品 DTOs
      */
-    public List<ErpCustomRuleDTO> listErpCustomRuleDTOsByProductId(Long productId) {
+    public List<ErpProductDetailDTO> listErpCustomRuleDTOsByProductId(Long productId) {
         //1.0 获得产品
         ErpProductDO erpProductDO = erpProductMapper.selectById(productId);
         //2.0 获得海关规则
@@ -170,7 +175,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         //3.0 封装返回
         if (CollUtil.isNotEmpty(erpCustomRuleDOList)) {
             return erpCustomRuleDOList.stream().map(erpCustomRuleDO -> CustomRuleConvert.INSTANCE.convert(erpCustomRuleDO, erpProductDO)).collect(Collectors.toList());
-        }else{
+        } else {
             return Collections.emptyList();
         }
     }
