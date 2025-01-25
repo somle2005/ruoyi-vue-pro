@@ -1,6 +1,5 @@
 package cn.iocoder.yudao.module.erp.api.logistic.customrule.dto;
 
-import lombok.Builder;
 import lombok.Data;
 
 /**
@@ -9,7 +8,6 @@ import lombok.Data;
  * 产品数据:海关规则-> 1:n
  */
 @Data
-@Builder
 public class ErpCustomRuleDTO {
     /**
      * 海关规则id  =====>>>> 映射到pd_declaration_statement
