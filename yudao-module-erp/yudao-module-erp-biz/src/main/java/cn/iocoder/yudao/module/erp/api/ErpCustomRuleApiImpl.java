@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.erp.api;
 
-import cn.iocoder.yudao.module.erp.api.product.ErpCustomRuleApi;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.erp.service.logistic.customrule.ErpCustomRuleService;
 import jakarta.annotation.Resource;

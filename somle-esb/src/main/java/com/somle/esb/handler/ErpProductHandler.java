@@ -10,7 +10,6 @@ import com.somle.kingdee.model.KingdeeProduct;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -24,7 +23,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@Profile("!dev & !test") // 仅在非 dev 和非 test 环境加载
+//@Profile("!dev & !test") // 仅在非 dev 和非 test 环境加载
 @RequiredArgsConstructor
 public class ErpProductHandler {
 

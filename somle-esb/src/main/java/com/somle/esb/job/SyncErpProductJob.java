@@ -1,7 +1,7 @@
 package com.somle.esb.job;
 
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
-import cn.iocoder.yudao.module.erp.api.product.ErpCustomRuleApi;
+import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import com.somle.esb.enums.TenantId;
 import com.somle.esb.handler.ErpCustomRuleHandler;

@@ -1,7 +1,7 @@
 package com.somle.esb.handler;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import com.somle.eccang.model.EccangProduct;

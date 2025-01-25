@@ -9,7 +9,7 @@ import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.purchase.vo.ErpSupplierProductPageReqVO;

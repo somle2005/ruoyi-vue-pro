@@ -1,6 +1,5 @@
-package cn.iocoder.yudao.module.erp.api.product;
+package cn.iocoder.yudao.module.erp.api.logistic.customrule;
 
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 
 import java.util.List;
@@ -9,8 +8,8 @@ import java.util.List;
 public interface ErpCustomRuleApi {
 
     /**
-     * 获取海关规则
+     * 获取所有海关规则
      * @return 海关规则集合
      */
-    public List<ErpProductDetailDTO> listCustomRules();
+     List<ErpProductDetailDTO> listCustomRules();
 }

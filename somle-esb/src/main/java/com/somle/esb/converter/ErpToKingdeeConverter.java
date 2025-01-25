@@ -3,7 +3,7 @@ package com.somle.esb.converter;
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.erp.api.supplier.dto.ErpSupplierDTO;
@@ -42,7 +42,7 @@ public class ErpToKingdeeConverter {
     /**
      * 将ERP产品列表转换为完整的Kingdee产品列表。
      *
-     * @param customRuleDTOs ERP产品列表
+     * @param erpProductDetailDTOS  ERP产品列表
      * @return 转换后的Kingdee产品列表
      */
     public List<KingdeeProduct> customRuleDTOToProduct(List<ErpProductDetailDTO> erpProductDetailDTOS) {
@@ -68,7 +68,7 @@ public class ErpToKingdeeConverter {
     /**
      * 将单个ERP产品转换为Kingdee产品。
      *
-     * @param customRuleDTO ERP产品对象
+     * @param erpProductDetailDTO ERP产品对象
      * @return 转换后的Kingdee产品对象
      */
     private KingdeeProduct customRuleToProduct(ErpProductDetailDTO erpProductDetailDTO) {

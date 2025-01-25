@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.erp.convert.logistic;
 
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDetailDTO;
 import cn.iocoder.yudao.module.erp.convert.product.ErpProductConvert;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule.ErpCustomRuleDO;

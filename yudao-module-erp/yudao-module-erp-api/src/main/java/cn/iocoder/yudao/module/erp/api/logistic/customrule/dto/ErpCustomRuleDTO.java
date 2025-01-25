@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.erp.api.product.dto;
+package cn.iocoder.yudao.module.erp.api.logistic.customrule.dto;
 
 import lombok.Builder;
 import lombok.Data;
