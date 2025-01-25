@@ -12,6 +12,7 @@ import com.somle.kingdee.model.KingdeeProduct;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -30,7 +31,7 @@ import java.util.stream.Collectors;
  */
 @Slf4j
 @Component
-//@Profile("!dev & !test")
+@Profile("!dev & !test")
 @RequiredArgsConstructor
 public class ErpCustomRuleHandler {
 
