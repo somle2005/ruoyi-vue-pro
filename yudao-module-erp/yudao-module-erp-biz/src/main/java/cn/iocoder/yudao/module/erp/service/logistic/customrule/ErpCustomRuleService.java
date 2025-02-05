@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.erp.service.logistic.customrule;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRulePageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRuleSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule.ErpCustomRuleDO;
@@ -55,18 +55,27 @@ public interface ErpCustomRuleService {
     PageResult<ErpCustomRuleDO> getCustomRulePage(ErpCustomRulePageReqVO pageReqVO);
 
     /**
-     * 海关规则列表DO -> 海关规则列表DTO
+     * 根据海关规则id 获得DTO（含海关的产品）
      *
-     * @param customRuleDO 海关规则列表DO
-     * @return ErpCustomRuleDTO 海关规则列表DTO
+     * @param id 海关规则id
+     * @return ErpCustomRuleDTO dto
      */
-    ErpCustomRuleDTO convertToDTO(ErpCustomRuleDO customRuleDO);
+    ErpCustomRuleDTO getErpCustomRuleDTOById(Long id);
 
     /**
-     * 海关规则列表集合 DOs-> 海关规则列表集合 DTOs
-     *
-     * @param customRuleDOList 海关规则列表List<ErpCustomRuleDTO>
-     * @return ErpCustomRuleDTO 海关规则列表List<ErpCustomRuleDO>
+     * 获得所有海关规则列表
+     * @param ids 如果为null则返回所有
+     * @return List<ErpProductDetailDTO>
      */
-    List<ErpCustomRuleDTO> convertToDTOList(List<ErpCustomRuleDO> customRuleDOList);
+    List<ErpCustomRuleDTO> listErpCustomRuleDTOs(List<Long> ids);
+
+    /**
+     * 根绝产品id(确保存在)获取n个产品DTO，获取产品+海关规则。如果海关规则无匹配，则返回null
+     * <p>
+     *
+     * @param productId 产品id
+     * List<ErpCustomRuleDTO> 海关规则+产品 DTOs
+     */
+    List<ErpCustomRuleDTO> getErpCustomRuleDTOByProductId(Long productId);
+
 }
