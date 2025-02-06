@@ -45,7 +45,8 @@ public class JSONObject extends ObjectNode{
     }
 
     public String getString(String fieldName) {
-        return this.get(fieldName).asText();
+        var value=this.get(fieldName);
+        return value==null?null:value.asText();
     }
 
     public List<String> getStringList(String fieldName) {
