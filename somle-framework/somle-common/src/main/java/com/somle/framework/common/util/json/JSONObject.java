@@ -57,7 +57,8 @@ public class JSONObject extends ObjectNode{
     }
 
     public Integer getInteger(String fieldName) {
-        return this.get(fieldName).asInt();
+        var value=this.get(fieldName);
+        return value==null?null:value.asInt();
     }
 
     public List<Integer> getIntegerList(String fieldName) {
@@ -69,6 +70,10 @@ public class JSONObject extends ObjectNode{
 
     public JSONArray getJSONArray(String fieldName) {
         return new JSONArray((ArrayNode) this.get(fieldName));
+    }
+
+    public JSONObject getJSONObject(String fieldName) {
+        return new JSONObject((ObjectNode) this.get(fieldName));
     }
 
     private void test(String fieldName) {
