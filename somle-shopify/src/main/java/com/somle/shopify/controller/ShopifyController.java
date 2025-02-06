@@ -1,6 +1,7 @@
 package com.somle.shopify.controller;
 
 
+import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.shopify.service.ShopifyService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,8 +17,7 @@ public class ShopifyController {
     ShopifyService service;
 
     @GetMapping("/products")
-    public JSONObject products(
-    ) {
-        return service.client.getProducts();
+    public JSONArray products() {
+        return service.client().getProducts();
     }
 }
