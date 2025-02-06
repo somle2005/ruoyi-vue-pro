@@ -3,8 +3,11 @@ package cn.iocoder.yudao.module.erp.dal.mysql.product;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
+import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
+import cn.iocoder.yudao.module.system.dal.dataobject.user.AdminUserDO;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -18,16 +21,27 @@ import java.util.List;
 public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
 
     default PageResult<ErpProductDO> selectPage(ErpProductPageReqVO reqVO) {
-        return selectPage(reqVO, new LambdaQueryWrapperX<ErpProductDO>()
-            .likeIfPresent(ErpProductDO::getName, reqVO.getName())
-            .eqIfPresent(ErpProductDO::getCategoryId, reqVO.getCategoryId())
-            .likeIfPresent(ErpProductDO::getBarCode, reqVO.getBarCode())
-            .likeIfPresent(ErpProductDO::getBrand, reqVO.getBrand())
-            .eqIfPresent(ErpProductDO::getDeptId, reqVO.getDeptId())
-            .likeIfPresent(ErpProductDO::getSeries, reqVO.getSeries())
-            .eqIfPresent(ErpProductDO::getStatus, reqVO.getStatus())
-            .betweenIfPresent(ErpProductDO::getCreateTime, reqVO.getCreateTime())
-            .orderByDesc(ErpProductDO::getId));
+        MPJLambdaWrapper<ErpProductDO> orderByDesc = new MPJLambdaWrapperX<ErpProductDO>()
+            .betweenIfPresent(ErpProductDO::getCreateTime, reqVO.getCreateTime()) // 添加创建时间查询
+            .betweenIfPresent(ErpProductDO::getUpdateTime, reqVO.getUpdateTime())  // 添加修改时间查询
+            .leftJoin(AdminUserDO.class, AdminUserDO::getId, ErpProductDO::getDeptId)
+            .likeIfExists(ErpProductDO::getName, reqVO.getName())
+            .eqIfExists(ErpProductDO::getCategoryId, reqVO.getCategoryId())
+            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode())
+            .likeIfExists(ErpProductDO::getBrand, reqVO.getBrand())
+            .eqIfExists(ErpProductDO::getDeptId, reqVO.getDeptId())
+            .likeIfExists(ErpProductDO::getSeries, reqVO.getSeries())
+            .eqIfExists(ErpProductDO::getStatus, reqVO.getStatus())
+            .likeIfExists(ErpProductDO::getPackageWidth, String.valueOf(reqVO.getPackageWidth()))  // 包装宽度查询
+            .likeIfExists(ErpProductDO::getPackageLength, String.valueOf(reqVO.getPackageLength()))  // 包装长度查询
+            .likeIfExists(ErpProductDO::getPackageHeight, String.valueOf(reqVO.getPackageHeight()))  // 包装高度查询
+            .likeIfExists(ErpProductDO::getPackageWeight, String.valueOf(reqVO.getPackageWeight()))  // 包装重量查询
+            .likeIfExists(ErpProductDO::getWidth, String.valueOf(reqVO.getWidth()))  // 包装宽度查询
+            .likeIfExists(ErpProductDO::getLength, String.valueOf(reqVO.getLength()))  // 包装长度查询
+            .likeIfExists(ErpProductDO::getHeight, String.valueOf(reqVO.getHeight()))  // 包装高度查询
+            .likeIfExists(ErpProductDO::getWeight, String.valueOf(reqVO.getWeight()))  // 包装重量查询
+            .orderByDesc(ErpProductDO::getId);
+        return selectPage(reqVO, orderByDesc);
     }
 
     default Long selectCountByCategoryId(Long categoryId) {
