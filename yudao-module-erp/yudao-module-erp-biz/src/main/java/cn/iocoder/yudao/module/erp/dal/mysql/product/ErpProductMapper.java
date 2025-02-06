@@ -24,7 +24,8 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
         MPJLambdaWrapper<ErpProductDO> orderByDesc = new MPJLambdaWrapperX<ErpProductDO>()
             .betweenIfPresent(ErpProductDO::getCreateTime, reqVO.getCreateTime()) // 添加创建时间查询
             .betweenIfPresent(ErpProductDO::getUpdateTime, reqVO.getUpdateTime())  // 添加修改时间查询
-            .leftJoin(AdminUserDO.class, AdminUserDO::getId, ErpProductDO::getDeptId)
+            .leftJoin(AdminUserDO.class, "creatorUser", AdminUserDO::getId, ErpProductDO::getCreator)
+            .leftJoin(AdminUserDO.class, "updaterUser", AdminUserDO::getId, ErpProductDO::getUpdater)
             .likeIfExists(ErpProductDO::getName, reqVO.getName())
             .eqIfExists(ErpProductDO::getCategoryId, reqVO.getCategoryId())
             .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode())
@@ -32,14 +33,18 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
             .eqIfExists(ErpProductDO::getDeptId, reqVO.getDeptId())
             .likeIfExists(ErpProductDO::getSeries, reqVO.getSeries())
             .eqIfExists(ErpProductDO::getStatus, reqVO.getStatus())
-            .likeIfExists(ErpProductDO::getPackageWidth, String.valueOf(reqVO.getPackageWidth()))  // 包装宽度查询
-            .likeIfExists(ErpProductDO::getPackageLength, String.valueOf(reqVO.getPackageLength()))  // 包装长度查询
-            .likeIfExists(ErpProductDO::getPackageHeight, String.valueOf(reqVO.getPackageHeight()))  // 包装高度查询
-            .likeIfExists(ErpProductDO::getPackageWeight, String.valueOf(reqVO.getPackageWeight()))  // 包装重量查询
-            .likeIfExists(ErpProductDO::getWidth, String.valueOf(reqVO.getWidth()))  // 包装宽度查询
-            .likeIfExists(ErpProductDO::getLength, String.valueOf(reqVO.getLength()))  // 包装长度查询
-            .likeIfExists(ErpProductDO::getHeight, String.valueOf(reqVO.getHeight()))  // 包装高度查询
-            .likeIfExists(ErpProductDO::getWeight, String.valueOf(reqVO.getWeight()))  // 包装重量查询
+            .likeIfExists(ErpProductDO::getPackageWidth, reqVO.getPackageWidth())  // 包装宽度查询
+            .likeIfExists(ErpProductDO::getPackageLength, reqVO.getPackageLength())  // 包装长度查询
+            .likeIfExists(ErpProductDO::getPackageHeight, reqVO.getPackageHeight())  // 包装高度查询
+            .likeIfExists(ErpProductDO::getPackageWeight, reqVO.getPackageWeight())  // 包装重量查询
+            .likeIfExists(ErpProductDO::getWidth, reqVO.getWidth())  // 宽度查询
+            .likeIfExists(ErpProductDO::getLength, reqVO.getLength()) // 长度查询
+            .likeIfExists(ErpProductDO::getHeight, reqVO.getHeight())  // 高度查询
+            .likeIfExists(ErpProductDO::getWeight, reqVO.getWeight())  // 重量查询
+            // 创建人 模糊
+            .likeIfExists("creatorUser", AdminUserDO::getNickname, reqVO.getCreator())
+            // 更新人 模糊
+            .likeIfExists("updaterUser", AdminUserDO::getNickname, reqVO.getUpdater())
             .orderByDesc(ErpProductDO::getId);
         return selectPage(reqVO, orderByDesc);
     }
