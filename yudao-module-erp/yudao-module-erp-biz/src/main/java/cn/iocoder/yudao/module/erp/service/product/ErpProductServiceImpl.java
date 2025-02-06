@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
+import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
@@ -19,7 +20,6 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
-import cn.iocoder.yudao.module.erp.service.logistic.customrule.ErpCustomRuleService;
 import cn.iocoder.yudao.module.erp.service.product.bo.ErpProductBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
@@ -67,9 +67,9 @@ public class ErpProductServiceImpl implements ErpProductService {
     @Resource
     DeptApi deptApi;
     @Resource
-    ErpCustomRuleService erpCustomRuleService;
-    @Resource
     AdminUserApi userApi;
+    @Resource
+    ErpCustomRuleApi erpCustomRuleApi;
 
 
     private final ReentrantLock LOCK = new ReentrantLock();
@@ -183,7 +183,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         ThrowUtil.ifSqlThrow(productMapper.updateById(updateObj), DB_UPDATE_ERROR);
         //更新产品时->覆盖n个海关规则
         //找到产品id对应的所有海关规则DTO(含海关信息)
-        Optional.ofNullable(erpCustomRuleService.getErpCustomRuleDTOByProductId(productId)).ifPresent(
+        Optional.ofNullable(erpCustomRuleApi.getErpCustomRuleDTOByProductId(productId)).ifPresent(
             dtos -> {
                 dtos.forEach(dto -> {
                     dto.setProductDTO(ErpProductConvert.INSTANCE.convert(productMapper.selectById(productId)));

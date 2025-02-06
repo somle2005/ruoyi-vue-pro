@@ -3,14 +3,14 @@ package com.somle.esb.job;
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import com.somle.esb.enums.TenantId;
-import com.somle.esb.handler.ErpCustomRuleHandler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,17 +27,16 @@ public class SyncErpProductJob extends DataJob {
     @Autowired
     ErpCustomRuleApi erpCustomRuleApi;
     @Autowired
-    ApplicationContext applicationContext;
+    ErpProductApi erpProductApi;
     @Autowired
     MessageChannel erpCustomRuleChannel;
     @Autowired
-    ErpCustomRuleHandler erpCustomRuleHandler;
+    MessageChannel erpProductChannel;
 
     @Override
     public String execute(String param) throws Exception {
         AtomicReference<List<String>> barCodes = new AtomicReference<>(new ArrayList<>());
         AtomicReference<Long> tenantId = new AtomicReference<>(TenantId.DEFAULT.getId());
-        AtomicReference<List<ErpCustomRuleDTO>> customRuleDTOS = new AtomicReference<>();
         try {
             // 设置租户 ID
             if (Optional.ofNullable(param).isPresent()) {
@@ -45,36 +44,26 @@ public class SyncErpProductJob extends DataJob {
             } else {
                 TenantContextHolder.setTenantId(tenantId.get());// 自动
             }
-            // 显式声明事务，获取业务数据
-            TransactionTemplate transactionTemplate = applicationContext.getBean(TransactionTemplate.class);
-            transactionTemplate.execute(status -> {
-                customRuleDTOS.set(erpCustomRuleApi.listCustomRules());
-                return null;
-            });
-            // 发送消息
-            Optional.ofNullable(customRuleDTOS.get()).ifPresent(detailDTOS -> {
+            Optional.ofNullable(erpCustomRuleApi.listCustomRules(null)).ifPresent(detailDTOS -> {
                 barCodes.set(detailDTOS.stream().map(dto -> dto.getProductDTO().getBarCode()).toList());
                 log.info("预计同步产品skus大小={{}},barCodes = {{}}", barCodes.get().size(), barCodes.get());
-                int total = detailDTOS.size();
-                int processed = 0;
-                //输出预计同步的barcode集合
-                for (ErpCustomRuleDTO detailDTO : detailDTOS) {
-                    String barCode = detailDTO.getProductDTO().getBarCode();
-                    log.debug("发送消息, BarCode = {}", barCode);
-                    // 单独处理每个条目
-                    erpCustomRuleHandler.syncCustomRulesToEccang(List.of(detailDTO));
-                    erpCustomRuleHandler.syncCustomRulesToKingdee(List.of(detailDTO));
-                    processed++;
-                    log.info("SyncErpProduct Processed {}/{} ({}%)", processed, total, (100 * processed / total));
-                }
+                // 发送海关规则数据
+                detailDTOS.forEach(detailDTO -> {
+                    log.debug("发送消息, BarCode = {}", detailDTO.getProductDTO().getBarCode());
+                    erpCustomRuleChannel.send(MessageBuilder.withPayload(detailDTO).build());
+                });
+                //根据detailDTOS获得产品id集合
+                List<Long> productIds = detailDTOS.stream().map(ErpCustomRuleDTO::getProductId).toList();
+                List<ErpProductDTO> productDTOs = erpProductApi.listProductDTOs(null);
+                // 过滤掉已经在 `customRuleDTOS` 中的产品
+                productDTOs.stream()
+                    .filter(dto -> !productIds.contains(dto.getId()))
+                    // 发送产品数据(单个发送，批量待优化)
+                    .toList().forEach(dto -> erpProductChannel.send(MessageBuilder.withPayload(List.of(dto)).build()));
             });
         } finally {
             TenantContextHolder.clear(); // 清理租户上下文，避免线程复用导致问题
         }
-        // 返回数据总量和 barCodes
-        int total = Optional.ofNullable(customRuleDTOS.get())
-            .map(List::size)
-            .orElse(0);
-        return String.format("success, total=%d, barCodes=%s", total, barCodes.get());
+        return "sync start";
     }
 }

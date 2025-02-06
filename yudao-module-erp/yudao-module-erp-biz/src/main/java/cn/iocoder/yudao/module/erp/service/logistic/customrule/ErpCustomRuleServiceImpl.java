@@ -3,15 +3,12 @@ package cn.iocoder.yudao.module.erp.service.logistic.customrule;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRulePageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRuleSaveReqVO;
-import cn.iocoder.yudao.module.erp.convert.logistic.CustomRuleConvert;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule.ErpCustomRuleDO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.customrule.ErpCustomRuleMapper;
-import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
-import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
-import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_INSERT_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
@@ -41,16 +37,10 @@ import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.NO_REPEAT_OF_
 public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
     @Resource
     private MessageChannel erpCustomRuleChannel;
-
     @Resource
     ErpCustomRuleMapper customRuleMapper;
-
-    @Resource
-    ErpProductService erpProductService;
     @Autowired
-    private ErpProductMapper erpProductMapper;
-    @Autowired
-    private ErpCustomRuleMapper erpCustomRuleMapper;
+    ErpCustomRuleApi erpCustomRuleApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -64,8 +54,8 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         ), DB_INSERT_ERROR);
         Long id = customRule.getId();
         //同步数据
-        ErpCustomRuleDTO customRuleDTO = getErpCustomRuleDTOById(id);
-        erpCustomRuleChannel.send(MessageBuilder.withPayload(customRuleDTO).build());
+        ErpCustomRuleDTO customRuleDTO = erpCustomRuleApi.getErpCustomRuleDTOById(id);
+        erpCustomRuleChannel.send(MessageBuilder.withPayload(List.of(customRuleDTO)).build());
         // 返回
         return id;
     }
@@ -82,8 +72,8 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         ErpCustomRuleDO updateObj = BeanUtils.toBean(updateReqVO, ErpCustomRuleDO.class);
         ThrowUtil.ifSqlThrow(customRuleMapper.updateById(updateObj), DB_UPDATE_ERROR);
         //同步数据
-        ErpCustomRuleDTO customRuleDTO = getErpCustomRuleDTOById(id);
-        erpCustomRuleChannel.send(MessageBuilder.withPayload(customRuleDTO).build());
+        ErpCustomRuleDTO customRuleDTO = erpCustomRuleApi.getErpCustomRuleDTOById(id);
+        erpCustomRuleChannel.send(MessageBuilder.withPayload(List.of(customRuleDTO)).build());
     }
 
     @Override
@@ -125,49 +115,4 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         }
     }
 
-    /**
-     * 获得所有海关规则列表
-     *
-     * @return List<ErpProductDetailDTO>
-     */
-    @Override
-    public List<ErpCustomRuleDTO> listErpCustomRuleDTOs(List<Long> ids) {
-        List<Long> productDOIds = ids == null ? erpProductMapper.selectList().stream().map(ErpProductDO::getId).toList() : ids;//TODO 后续：关闭状态的产品，不同步。
-        Map<Long, ErpProductDO> productMap = erpProductService.getProductMap(productDOIds);
-        List<ErpCustomRuleDO> erpCustomRules = customRuleMapper.selectByProductId(productDOIds);
-
-        return CustomRuleConvert.INSTANCE.convert(erpCustomRules, productMap);
-    }
-
-    /**
-     * 根绝产品id(确保存在)获取n个产品DTO，获取产品+海关规则。如果海关规则无匹配，则返回null
-     * <p>
-     *
-     * @param productId 产品id
-     * @return List<ErpCustomRuleDTO> 海关规则+产品 DTOs
-     */
-    @Override
-    public List<ErpCustomRuleDTO> getErpCustomRuleDTOByProductId(Long productId) {
-        List<ErpCustomRuleDO> ruleDOS = customRuleMapper.selectByProductId(List.of(productId));
-        if (!ruleDOS.isEmpty()) {
-            return CustomRuleConvert.INSTANCE.convert(ruleDOS);
-        }
-        return null;
-    }
-
-    /**
-     * 根据海关规则id获取产品的全量信息（海关规则，产品供应商）
-     *
-     * @param id 海关规则id
-     * @return List<ErpCustomRuleDetailDTO> DTO
-     */
-    @Override
-    public ErpCustomRuleDTO getErpCustomRuleDTOById(Long id) {
-        validateCustomRuleExists(id);
-        //1.0 根据海关规则的id获得产品id
-        ErpCustomRuleDO erpCustomRuleDO = erpCustomRuleMapper.selectById(id);
-        //2.0 获得产品
-        ErpProductDO erpProductDO = erpProductMapper.selectById(erpCustomRuleDO.getProductId());
-        return CustomRuleConvert.INSTANCE.convert(erpCustomRuleDO, erpProductDO);
-    }
 }

@@ -8,7 +8,7 @@ import java.util.List;
 @Service
 public interface ErpProductApi {
     /**
-     * 获取所有产品
+     * 获得所有产品DTO，根据ids，如果ids为null返回所有
      */
-    List<ErpProductDTO> listProducts();
+    List<ErpProductDTO> listProductDTOs(List<Long> ids);
 }
