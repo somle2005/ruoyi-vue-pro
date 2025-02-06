@@ -12,7 +12,7 @@ public class ShopifyPayoutDataJob extends ShopifyDataJob {
     public String execute(String param) throws Exception {
         setDate(param);
 
-        var result = shopifyService.client.getPayouts();
+        var result = shopifyService.client().getPayouts();
         var data = OssData.builder()
                 .database(DATABASE)
                 .tableName("payout")

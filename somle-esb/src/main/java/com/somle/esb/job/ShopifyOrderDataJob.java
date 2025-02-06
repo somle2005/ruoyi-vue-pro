@@ -17,7 +17,7 @@ public class ShopifyOrderDataJob extends ShopifyDataJob {
     public String execute(String param) throws Exception {
         setDate(param);
 
-        var result = shopifyService.client.getOrders();
+        var result = shopifyService.client().getOrders();
         var data = OssData.builder()
                 .database(DATABASE)
                 .tableName("order")

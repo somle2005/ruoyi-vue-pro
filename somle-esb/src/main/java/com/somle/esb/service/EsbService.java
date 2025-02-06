@@ -55,7 +55,7 @@ public class EsbService {
                 })
                 .build();
 
-            shopifyService.client.setWebClient(client);
+            shopifyService.client().setWebClient(client);
             log.info("using proxy");
         } catch (Exception e) {
             log.error("not using proxy");
