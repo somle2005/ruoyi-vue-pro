@@ -185,9 +185,6 @@ public class ErpProductServiceImpl implements ErpProductService {
         //找到产品id对应的所有海关规则DTO(含海关信息)
         Optional.ofNullable(erpCustomRuleApi.getErpCustomRuleDTOByProductId(productId)).ifPresent(
             dtos -> {
-                dtos.forEach(dto -> {
-                    dto.setProductDTO(ErpProductConvert.INSTANCE.convert(productMapper.selectById(productId)));
-                });
                 erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
             }
         );

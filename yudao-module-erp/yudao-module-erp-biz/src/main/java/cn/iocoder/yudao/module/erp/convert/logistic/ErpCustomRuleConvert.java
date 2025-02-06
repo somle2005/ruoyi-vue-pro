@@ -13,25 +13,19 @@ import java.util.Map;
 import java.util.Objects;
 
 @Mapper
-public interface CustomRuleConvert {
-    CustomRuleConvert INSTANCE = Mappers.getMapper(CustomRuleConvert.class);
-
-    ErpCustomRuleDTO convert(ErpCustomRuleDO erpCustomRuleDO);
-
-    List<ErpCustomRuleDTO> convert(List<ErpCustomRuleDO> erpCustomRuleDOs);
-
-
+public interface ErpCustomRuleConvert {
+    ErpCustomRuleConvert INSTANCE = Mappers.getMapper(ErpCustomRuleConvert.class);
     //包含产品的 详情规则 转换
     default ErpCustomRuleDTO convert(ErpCustomRuleDO erpCustomRuleDO, ErpProductDO erpProductDO) {
         return BeanUtils.toBean(erpCustomRuleDO, ErpCustomRuleDTO.class).setProductDTO(ErpProductConvert.INSTANCE.convert(erpProductDO));
     }
-
+    //包含产品的 详情规则 转换集合
     default List<ErpCustomRuleDTO> convert(List<ErpCustomRuleDO> erpCustomRuleDOs, Map<Long, ErpProductDO> productMap) {
         return erpCustomRuleDOs.stream()
             .filter(Objects::nonNull)
             .map(erpCustomRuleDO -> {
                 ErpProductDO productDO = productMap.get(erpCustomRuleDO.getProductId());
-                return CustomRuleConvert.INSTANCE.convert(erpCustomRuleDO, productDO);
+                return ErpCustomRuleConvert.INSTANCE.convert(erpCustomRuleDO, productDO);
             })
             .toList();
     }
