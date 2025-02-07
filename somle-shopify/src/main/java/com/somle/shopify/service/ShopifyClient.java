@@ -19,6 +19,7 @@ import java.util.Map;
   *  Shopify 接口文档 <br>
   *  https://shopify.dev/docs/api/admin-rest/
   **/
+
 @Slf4j
 public class ShopifyClient {
 
@@ -28,15 +29,6 @@ public class ShopifyClient {
     public static final String SHOPIFY_ACCESS_TOKEN = "X-Shopify-Access-Token";
     // API
     public static final String BASE_URL = "https://%s.myshopify.com";
-    public static final String SHOP_API = "/admin/api/2021-07/shop.json";
-    public static final String ORDER_API = "/admin/api/2024-10/orders.json?status=any";
-    public static final String PRODUCTS_API = "/admin/api/2024-10/products.json";
-    public static final String PAYOUTS_API = "/admin/api/2024-10/shopify_payments/payouts.json";
-    // KEYS
-    public static final String KEY_SHOP = "shop";
-    public static final String KEY_PRODUCTS = "products";
-    public static final String KEY_ORDERS = "orders";
-    public static final String KEY_PAYOUTS = "payouts";
 
     private final ShopifyToken token;
 
@@ -56,36 +48,20 @@ public class ShopifyClient {
      * 获得店铺信息
      **/
     public JSONObject getShop() {
-        JSONObject shop=getResult(SHOP_API,RequestX.Method.GET,"获取 Shopify 店铺信息");
-        if (shop == null) {
-            return null;
-        }
-        shop = shop.getJSONObject(KEY_SHOP);
-        return shop;
+        return getResult(ShopifyAPI.GET_SHOP);
     }
-
 
     /**
      * 获得订单信息
      **/
     public JSONArray getOrders() {
-        JSONObject result=getResult(ORDER_API,RequestX.Method.GET,"获取 Shopify 订单信息");
-        if (result == null) {
-            return null;
-        }
-        return result.getJSONArray(KEY_ORDERS);
+        return getResult(ShopifyAPI.GET_ORDERS);
     }
-
-
     /**
      * 获得商品信息
      **/
     public JSONArray getProducts() {
-        JSONObject result=getResult(PRODUCTS_API,RequestX.Method.GET,"获取 Shopify 商品信息");
-        if (result == null) {
-            return null;
-        }
-        return result.getJSONArray(KEY_PRODUCTS);
+        return getResult(ShopifyAPI.GET_PRODUCTS);
     }
 
 
@@ -93,27 +69,24 @@ public class ShopifyClient {
      * 获得结算信息
      **/
     public JSONArray getPayouts() {
-        JSONObject result=getResult(PAYOUTS_API,RequestX.Method.GET,"获取 Shopify 结算信息");
-        if (result == null) {
-            return null;
-        }
-        return result.getJSONArray(KEY_PAYOUTS);
+        return getResult(ShopifyAPI.GET_PAYOUTS);
     }
 
 
-    private JSONObject getResult(String api, RequestX.Method method, String msg) {
+
+    private <T> T getResult(ShopifyAPI api) {
         try {
             var request = RequestX.builder()
-                .requestMethod(method)
-                .url(url+api)
+                .requestMethod(api.method())
+                .url(url+api.url())
                 .headers(getHeaders())
                 .build();
             var response = sendRequest(request);
             var bodyString = response.body().string();
             var result = JsonUtils.parseObject(bodyString, JSONObject.class);
-            return result;
+            return (T)api.getData(result,api.returnType());
         } catch (Throwable t) {
-            log.error("{}异常", msg, t);
+            log.error("{}异常", api.action(), t);
             return null;
         }
     }
@@ -133,5 +106,71 @@ public class ShopifyClient {
 
 
 
+
+}
+
+
+/**
+* @Description Shopify 接口定义
+**/
+
+enum ShopifyAPI {
+
+    GET_SHOP("获取 Shopify 店铺信息","/admin/api/2021-07/shop.json",RequestX.Method.GET,"shop",JSONObject.class),
+    GET_ORDERS("获取 Shopify 订单信息","/admin/api/2024-10/orders.json?status=any",RequestX.Method.GET,"orders",JSONArray.class),
+    GET_PRODUCTS("获取 Shopify 商品信息","/admin/api/2024-10/products.json",RequestX.Method.GET,"products",JSONArray.class),
+    GET_PAYOUTS("获取 Shopify 结算信息","/admin/api/2024-10/shopify_payments/payouts.json",RequestX.Method.GET,"payouts",JSONArray.class)
+    ;
+
+    private String action;
+    private String url;
+    private RequestX.Method method;
+    private String jsonField;
+    private Class returnType;
+
+    ShopifyAPI(String action, String url, RequestX.Method method, String jsonField, Class returnType) {
+        this.action = action;
+        this.url = url;
+        this.method = method;
+        this.jsonField = jsonField;
+        this.returnType = returnType;
+    }
+
+    public String action() {
+        return action;
+    }
+
+    public String url() {
+        return url;
+    }
+
+    public String jsonField() {
+        return jsonField;
+    }
+
+    public RequestX.Method method() {
+        return method;
+    }
+
+    public Class returnType() {
+        return returnType;
+    }
+
+    /**
+    * @Description 获取从报文获得有效数据
+    **/
+    public <T> T getData(JSONObject result,Class<T> type) {
+        if (result == null) {
+            return null;
+        }
+        if(JSONObject.class.isAssignableFrom(type)) {
+            return (T)result.getJSONObject(this.jsonField());
+        } else if (JSONArray.class.isAssignableFrom(type)) {
+            return (T)result.getJSONArray(this.jsonField());
+        } else {
+            return null;
+        }
+
+    }
 
 }
