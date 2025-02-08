@@ -132,7 +132,7 @@ public class ErpToEccangConverter {
         // 设置其他产品属性
         Optional.ofNullable(customRuleDTO.getTaxRate()).ifPresent(taxRate -> eccangProduct.setTaxRate(taxRate.floatValue()));
         eccangProduct.setPdOverseaTypeCn(customRuleDTO.getDeclaredType());
-        eccangProduct.setProductImgUrlList(Collections.singletonList(productDTO.getPrimaryImageUrl()));
+//        eccangProduct.setProductImgUrlList(Collections.singletonList(productDTO.getPrimaryImageUrl()));
 //        eccangProduct.setHsCode(customRuleDTO.getHscode());//暂停向eccang同步该属性
         eccangProduct.setDefaultSupplierCode("默认供应商");
         // 设置物流属性
