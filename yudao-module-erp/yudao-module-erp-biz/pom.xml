@@ -89,6 +89,11 @@
             <groupId>cn.iocoder.boot</groupId>
             <artifactId>yudao-spring-boot-starter-biz-tenant</artifactId>
         </dependency>
+        <dependency>
+            <groupId>com.somle</groupId>
+            <artifactId>somle-common</artifactId>
+        </dependency>
+
 
     </dependencies>
 
