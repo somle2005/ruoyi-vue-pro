@@ -8,11 +8,12 @@ import org.springframework.stereotype.Component;
 public class ShopifyPayoutDataJob extends ShopifyDataJob {
 
 
+
     @Override
     public String execute(String param) throws Exception {
         setDate(param);
 
-        var result = shopifyService.client().getPayouts();
+        var result = shopifyClient.getRawPayouts();
         var data = OssData.builder()
                 .database(DATABASE)
                 .tableName("payout")
