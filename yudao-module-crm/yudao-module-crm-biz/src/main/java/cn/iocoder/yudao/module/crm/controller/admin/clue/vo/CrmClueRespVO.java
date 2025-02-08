@@ -10,6 +10,7 @@ import lombok.Data;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "管理后台 - 线索 Response VO")
 @Data
@@ -126,4 +127,19 @@ public class CrmClueRespVO {
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
 
+    //公司名称
+    @Schema(description = "公司名称", example = "北京")
+    private String companyName;
+    //公司介绍
+    @Schema(description = "公司介绍", example = "北京")
+    private String companyIntroduce;
+    //官网
+    @Schema(description = "官网", example = "www.baidu.com")
+    private String companyWebsite;
+    //客户标签-字典-long
+    @Schema(description = "客户标签", example = "1,2,3")
+    private List<Long> labelIds;
+    //国家-字典-long
+    @Schema(description = "国家", example = "1")
+    private List<Long> countryId;
 }

@@ -19,6 +19,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 import static cn.iocoder.yudao.module.crm.enums.DictTypeConstants.CRM_CUSTOMER_INDUSTRY;
@@ -105,5 +106,19 @@ public class CrmClueSaveReqVO {
     @Schema(description = "备注", example = "随便")
     @DiffLogField(name = "备注")
     private String remark;
-
+    //公司名称
+    @Schema(description = "公司名称", example = "北京")
+    private String companyName;
+    //公司介绍
+    @Schema(description = "公司介绍", example = "北京")
+    private String companyIntroduce;
+    //官网
+    @Schema(description = "官网", example = "www.baidu.com")
+    private String companyWebsite;
+    //客户标签-字典-long
+    @Schema(description = "客户标签", example = "1,2,3")
+    private List<String> labelIds;
+    //国家-字典-long
+    @Schema(description = "国家", example = "1")
+    private List<String> countryId;
 }

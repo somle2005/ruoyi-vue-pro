@@ -4,11 +4,15 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.customer.CrmCustomerDO;
 import cn.iocoder.yudao.module.crm.enums.DictTypeConstants;
 import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * CRM 线索 DO
@@ -125,4 +129,40 @@ public class CrmClueDO extends BaseDO {
      */
     private String remark;
 
+    /**
+     * 公司名称
+     *
+     * 存储公司名称，可能用于在 CRM 系统中展示和搜索
+     */
+    private String companyName;
+
+    /**
+     * 公司介绍
+     *
+     * 存储公司简介，通常用于展示公司背景信息
+     */
+    private String companyIntroduce;
+
+    /**
+     * 官网
+     *
+     * 存储公司官方网站的 URL 地址
+     */
+    private String companyWebsite;
+
+    /**
+     * 客户标签列表
+     *
+     * 存储客户标签的 ID 列表，标签来自于字典，用于标记客户特征 crm_client_tag
+     */
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private List<String> labelIds;
+
+    /**
+     * 国家列表
+     *
+     * 存储客户所在国家的 ID 列表，国家信息来自于字典 country_code
+     */
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private List<String> countryId;
 }
