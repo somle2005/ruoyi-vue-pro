@@ -229,7 +229,7 @@ public class ErpToEccangConverter {
         // 设置产品尺寸和重量
         eccangProduct.setProductMaterial(product.getMaterial());
         eccangProduct.setPdNetWeight(product.getWeight().floatValue());
-        eccangProduct.setProductImgUrlList(Collections.singletonList(product.getPrimaryImageUrl()));
+        //eccangProduct.setProductImgUrlList(Collections.singletonList(product.getPrimaryImageUrl()));产品图片属于敏感数据，不同步
         eccangProduct.setDefaultSupplierCode("默认供应商");
         //产品基础属性
         eccangProduct.setPdNetLength(mmToCmAsFloat(Float.valueOf(product.getLength())));
