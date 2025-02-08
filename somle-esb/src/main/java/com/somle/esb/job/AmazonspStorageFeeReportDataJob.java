@@ -2,16 +2,14 @@ package com.somle.esb.job;
 
 
 import com.somle.amazon.controller.vo.AmazonSpReportReqVO;
-import com.somle.amazon.controller.vo.AmazonSpReportReqVO.ProcessingStatuses;
 import com.somle.esb.model.OssData;
-import com.somle.framework.common.util.csv.CsvUtils;
 import com.somle.framework.common.util.csv.TsvUtils;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
 
 @Component
-public class AmazonspFBMReturnReportDataJob extends AmazonspDataJob {
+public class AmazonspStorageFeeReportDataJob extends AmazonspDataJob {
 
 
     @Override
@@ -19,11 +17,10 @@ public class AmazonspFBMReturnReportDataJob extends AmazonspDataJob {
         setDate(param);
 
         var vo = AmazonSpReportReqVO.builder()
-                .reportTypes(List.of("GET_FLAT_FILE_RETURNS_DATA_BY_RETURN_DATE"))
-                .processingStatuses(List.of(ProcessingStatuses.DONE))
+                .reportTypes(List.of("GET_FBA_STORAGE_FEE_CHARGES_DATA"))
+//                .processingStatuses(List.of(ProcessingStatuses.DONE))
                 .createdSince(beforeYesterdayFirstSecond)
                 .createdUntil(beforeYesterdayLastSecond)
-                .pageSize(100)
                 .build();
 
         amazonSpService.clients.stream()
@@ -33,7 +30,7 @@ public class AmazonspFBMReturnReportDataJob extends AmazonspDataJob {
             .forEach(report -> {
                 OssData data = OssData.builder()
                     .database(DATABASE)
-                    .tableName("fbm_return_report")
+                    .tableName("storage_fee_report")
                     .syncType("inc")
                     .requestTimestamp(System.currentTimeMillis())
                     .folderDate(beforeYesterday)

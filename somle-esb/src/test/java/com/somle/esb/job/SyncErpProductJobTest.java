@@ -7,7 +7,6 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import com.somle.esb.handler.ErpCustomRuleHandler;
 import com.somle.esb.handler.ErpProductHandler;
-import com.somle.framework.domain.SomleConsts;
 import com.somle.framework.test.core.ut.BaseSpringIntegrationTest;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
