@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.infra.service.job;
 
+import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
@@ -11,9 +12,11 @@ import cn.iocoder.yudao.module.infra.controller.admin.job.vo.job.JobSaveReqVO;
 import cn.iocoder.yudao.module.infra.dal.dataobject.job.JobDO;
 import cn.iocoder.yudao.module.infra.dal.mysql.job.JobMapper;
 import cn.iocoder.yudao.module.infra.enums.job.JobStatusEnum;
+import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -40,6 +43,32 @@ public class JobServiceImpl implements JobService {
 
     @Resource
     private SchedulerManager schedulerManager;
+
+    @Value("${spring.quartz.memory-auto-load-jobIds:}")
+    private String memoryAutoLoadJobIds;
+    @Value("${spring.quartz.job-store-type}")
+    private String jobStoreType;
+    @PostConstruct
+    public void init()  throws SchedulerException {
+        if(!"memory".equals(jobStoreType)) {
+            return;
+        }
+        if (StrUtil.isBlank(memoryAutoLoadJobIds)) {
+            return;
+        }
+        for (String jobId : memoryAutoLoadJobIds.split(",")) {
+            Long jobIdLong = Long.parseLong(jobId);
+            JobDO job = jobMapper.selectById(jobIdLong);
+            if (job == null) {
+                continue;
+            }
+            // 添加到 Quartz 中
+            schedulerManager.addJob(job.getId(), job.getHandlerName(), job.getHandlerParam(), job.getCronExpression(),
+                0, 1000 * 60 * 60);
+        }
+
+
+    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
