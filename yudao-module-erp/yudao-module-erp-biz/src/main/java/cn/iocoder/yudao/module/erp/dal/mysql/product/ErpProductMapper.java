@@ -1,16 +1,17 @@
 package cn.iocoder.yudao.module.erp.dal.mysql.product;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
+import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
-import cn.iocoder.yudao.module.system.dal.dataobject.user.AdminUserDO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * ERP 产品 Mapper
@@ -24,8 +25,8 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
         MPJLambdaWrapper<ErpProductDO> orderByDesc = new MPJLambdaWrapperX<ErpProductDO>()
             .betweenIfPresent(ErpProductDO::getCreateTime, reqVO.getCreateTime()) // 添加创建时间查询
             .betweenIfPresent(ErpProductDO::getUpdateTime, reqVO.getUpdateTime())  // 添加修改时间查询
-            .leftJoin(AdminUserDO.class, "creatorUser", AdminUserDO::getId, ErpProductDO::getCreator)
-            .leftJoin(AdminUserDO.class, "updaterUser", AdminUserDO::getId, ErpProductDO::getUpdater)
+//            .leftJoin(AdminUserDO.class, "creatorUser", AdminUserDO::getId, ErpProductDO::getCreator)
+//            .leftJoin(AdminUserDO.class, "updaterUser", AdminUserDO::getId, ErpProductDO::getUpdater)
             .likeIfExists(ErpProductDO::getName, reqVO.getName())
             .eqIfExists(ErpProductDO::getCategoryId, reqVO.getCategoryId())
             .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode())
@@ -42,9 +43,11 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
             .likeIfExists(ErpProductDO::getHeight, reqVO.getHeight())  // 高度查询
             .likeIfExists(ErpProductDO::getWeight, reqVO.getWeight())  // 重量查询
             // 创建人 模糊
-            .likeIfExists("creatorUser", AdminUserDO::getNickname, reqVO.getCreator())
+            .eqIfExists(ErpProductDO::getCreator, reqVO.getCreator())
+//            .likeIfExists("creatorUser", AdminUserDO::getNickname, reqVO.getCreator())
             // 更新人 模糊
-            .likeIfExists("updaterUser", AdminUserDO::getNickname, reqVO.getUpdater())
+            .eqIfExists(ErpProductDO::getUpdater, reqVO.getUpdater())
+//            .likeIfExists("updaterUser", AdminUserDO::getNickname, reqVO.getUpdater())
             .orderByDesc(ErpProductDO::getId);
         return selectPage(reqVO, orderByDesc);
     }
@@ -66,27 +69,27 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
     }
 
     /**
+     * @return java.lang.Integer
      * @Author Wqh
      * @Description 根据颜色，系列，型号查询出最大的流水号
      * @Date 13:36 2024/10/21
      * @Param [barCode]
-     * @return java.lang.Integer
      **/
     default ErpProductDO selectMaxSerialByColorAndModelAndSeries(String color, String model, String series) {
         return selectOne(new LambdaQueryWrapperX<ErpProductDO>()
-                .eqIfPresent(ErpProductDO::getColor, color)
-                .eqIfPresent(ErpProductDO::getModel, model)
-                .eqIfPresent(ErpProductDO::getSeries, series)
-                .orderByDesc(ErpProductDO::getSerial)
-                .select(ErpProductDO::getSerial)
-                .last("limit 1"));
+            .eqIfPresent(ErpProductDO::getColor, color)
+            .eqIfPresent(ErpProductDO::getModel, model)
+            .eqIfPresent(ErpProductDO::getSeries, series)
+            .orderByDesc(ErpProductDO::getSerial)
+            .select(ErpProductDO::getSerial)
+            .last("limit 1"));
     }
 
-    default List<ErpProductDO> selectByColorAndSeriesAndModel(String color, String model, String series){
+    default List<ErpProductDO> selectByColorAndSeriesAndModel(String color, String model, String series) {
         return selectList(new LambdaQueryWrapperX<ErpProductDO>()
-                .eqIfPresent(ErpProductDO::getColor, color)
-                .eqIfPresent(ErpProductDO::getModel, model)
-                .eqIfPresent(ErpProductDO::getSeries, series));
+            .eqIfPresent(ErpProductDO::getColor, color)
+            .eqIfPresent(ErpProductDO::getModel, model)
+            .eqIfPresent(ErpProductDO::getSeries, series));
     }
 
     default ErpProductDO selectByName(String name) {
@@ -95,13 +98,14 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
 
     /**
      * 根据条码(barCode)查询出id列表
-     * @param barCode  SKU（编码
+     *
+     * @param barCode SKU（编码
      * @return id集合
      */
     default List<Long> selectIdListByBarCode(String barCode) {
         return selectList(new LambdaQueryWrapperX<ErpProductDO>()
-                .like(ErpProductDO::getBarCode, barCode)
-                .select(ErpProductDO::getId))
-                .stream().map(ErpProductDO::getId).toList();
+            .like(ErpProductDO::getBarCode, barCode)
+            .select(ErpProductDO::getId))
+            .stream().map(ErpProductDO::getId).toList();
     }
 }
