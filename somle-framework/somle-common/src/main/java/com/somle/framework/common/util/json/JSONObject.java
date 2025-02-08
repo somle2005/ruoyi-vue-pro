@@ -36,6 +36,12 @@ public class JSONObject extends ObjectNode{
     }
 
 
+    public JSONObject(JsonNode other) {
+        super(JsonUtils.getNodeFactory());
+        other.fields().forEachRemaining(entry -> this.set(entry.getKey(), entry.getValue()));
+    }
+
+
     public List<Map.Entry<String, JsonNode>> entrySet() {
         return _children.entrySet().stream().toList();
     }
@@ -59,6 +65,11 @@ public class JSONObject extends ObjectNode{
     public Integer getInteger(String fieldName) {
         var value=this.get(fieldName);
         return value==null?null:value.asInt();
+    }
+
+    public Long getLong(String fieldName) {
+        var value=this.get(fieldName);
+        return value==null?null:value.asLong();
     }
 
     public List<Integer> getIntegerList(String fieldName) {
