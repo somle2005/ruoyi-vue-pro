@@ -4,7 +4,6 @@ package com.somle.shopify.service;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.framework.test.core.ut.BaseDbUnitTest;
-import com.somle.shopify.config.ShopifyIntegrationConfig;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -13,7 +12,7 @@ import org.springframework.context.annotation.Import;
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
-@Import({ShopifyShopProfileClient.class, ShopifyIntegrationConfig.class})
+@Import({ShopifyShopProfileClient.class})
 class ShopifyClientTest extends BaseDbUnitTest {
 
     @Resource
