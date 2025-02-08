@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import com.somle.framework.domain.SomleConsts;
 
 @Slf4j
 public class SyncErpProductJobTest extends BaseSpringIntegrationTest {
