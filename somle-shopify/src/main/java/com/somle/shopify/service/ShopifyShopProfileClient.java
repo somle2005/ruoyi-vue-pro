@@ -1,18 +1,25 @@
 package com.somle.shopify.service;
 
 
+import com.somle.framework.common.util.collection.CollectionUtils;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.common.util.web.RequestX;
 import com.somle.framework.common.util.web.WebUtils;
+import com.somle.framework.domain.sales.SalesPlatform;
+import com.somle.framework.domain.shop.ShopProfileClient;
 import com.somle.shopify.model.ShopifyToken;
+import com.somle.shopify.repository.ShopifyTokenRepository;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,7 +28,8 @@ import java.util.Map;
   **/
 
 @Slf4j
-public class ShopifyClient {
+@Component
+public class ShopifyShopProfileClient extends ShopProfileClient {
 
     // Header
     public static final String CONTENT_TYPE = "Content-Type";
@@ -30,17 +38,18 @@ public class ShopifyClient {
     // API
     public static final String BASE_URL = "https://%s.myshopify.com";
 
-    private final ShopifyToken token;
+    private ShopifyToken token;
 
-    private final String url;
+    private String url;
 
     @Setter
     private OkHttpClient webClient;
 
-    public ShopifyClient(ShopifyToken token) {
-        this.token = token;
-        this.url = String.format(BASE_URL, token.getSubdomain());
-        this.webClient = new OkHttpClient();
+    @Autowired
+    ShopifyTokenRepository tokenRepository;
+
+    public ShopifyShopProfileClient() {
+        super(SalesPlatform.SHOPIFY);
     }
 
 
@@ -57,12 +66,21 @@ public class ShopifyClient {
     public JSONArray getOrders() {
         return getResult(ShopifyAPI.GET_ORDERS);
     }
+
+    /**
+     * 获得原始订单信息
+     **/
+    public JSONObject getRawOrders() {
+        return getRawResult(ShopifyAPI.GET_ORDERS);
+    }
     /**
      * 获得商品信息
      **/
     public JSONArray getProducts() {
         return getResult(ShopifyAPI.GET_PRODUCTS);
     }
+
+
 
 
     /**
@@ -72,10 +90,25 @@ public class ShopifyClient {
         return getResult(ShopifyAPI.GET_PAYOUTS);
     }
 
+    /**
+     * 获得原始结算信息
+     **/
+    public JSONObject getRawPayouts() {
+        return getRawResult(ShopifyAPI.GET_PAYOUTS);
+    }
 
 
-    private <T> T getResult(ShopifyAPI api) {
+
+    /**
+    * @Author LeeFJ
+    * @Description
+    * @Date 8:19 2025/2/8
+    * @Param
+    * @return  返回原始报文
+    **/
+    private JSONObject getRawResult(ShopifyAPI api) {
         try {
+            initialize();
             var request = RequestX.builder()
                 .requestMethod(api.method())
                 .url(url+api.url())
@@ -83,12 +116,26 @@ public class ShopifyClient {
                 .build();
             var response = sendRequest(request);
             var bodyString = response.body().string();
-            var result = JsonUtils.parseObject(bodyString, JSONObject.class);
-            return (T)api.getData(result,api.returnType());
+            return JsonUtils.parseObject(bodyString, JSONObject.class);
         } catch (Throwable t) {
             log.error("{}异常", api.action(), t);
             return null;
         }
+    }
+
+    /**
+     * @Author LeeFJ
+     * @Description
+     * @Date 8:19 2025/2/8
+     * @Param
+     * @return  返回有效的业务报文
+     **/
+    private <T> T getResult(ShopifyAPI api) {
+        var result = getRawResult(api);
+        if(result==null) {
+            return null;
+        }
+        return (T) api.getData(result, api.returnType());
     }
 
     private Map<String, String> getHeaders() {
@@ -104,7 +151,22 @@ public class ShopifyClient {
         return webClient.newCall(WebUtils.toOkHttp(request)).execute();
     }
 
+    private void initialize() {
 
+        if(this.webClient!=null && this.token!=null) {
+            return;
+        }
+
+        this.webClient = new OkHttpClient();
+        List<ShopifyToken> tokenList = tokenRepository.findAll();
+        if(CollectionUtils.isEmpty(tokenList)) {
+            throw new RuntimeException("缺少 Shopify Token 配置");
+        }
+
+        this.token = tokenList.get(0);
+        this.url = String.format(BASE_URL, token.getSubdomain());
+
+    }
 
 
 }
