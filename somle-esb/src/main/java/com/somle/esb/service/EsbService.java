@@ -2,7 +2,7 @@ package com.somle.esb.service;
 
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import com.somle.esb.model.OssData;
-import com.somle.shopify.service.ShopifyService;
+import com.somle.shopify.service.ShopifyShopProfileClient;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -24,7 +24,7 @@ public class EsbService {
     MessageChannel dataChannel;
 
     @Autowired
-    ShopifyService shopifyService;
+    ShopifyShopProfileClient shopifyClient;
 
     @Autowired
     private ConfigApi configApi;
@@ -55,7 +55,7 @@ public class EsbService {
                 })
                 .build();
 
-            shopifyService.client().setWebClient(client);
+            shopifyClient.setWebClient(client);
             log.info("using proxy");
         } catch (Exception e) {
             log.error("not using proxy");

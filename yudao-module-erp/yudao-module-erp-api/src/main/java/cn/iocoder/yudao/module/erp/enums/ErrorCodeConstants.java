@@ -201,4 +201,14 @@ public interface ErrorCodeConstants {
     ErrorCode CUSTOM_RULE_PART_NULL = new ErrorCode(1_030_604_001, "集合中存在部分集合产品名称或供应商产品编码为空");
     ErrorCode NO_REPEAT_OF_COUNTRY_CODE_AND_SUPPLIER_PRODUCT_CODE = new ErrorCode(1_030_604_002, "海关规则中，国家代码+供应商产品编码不能重复");
     ErrorCode NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE = new ErrorCode(1_030_604_003, "海关规则中，国家代码+产品编码不能重复");
+
+    // ========== ERP 店铺 1-030-605-000 ==========
+    ErrorCode SHOP_NOT_EXISTS = new ErrorCode(1_030_605_000, "ERP 店铺不存在");
+
+    // ========== ERP 店铺产品 1_030_606_000 ==========
+    ErrorCode SHOP_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_606_000, "ERP 店铺产品不存在");
+
+    // ========== ERP 店铺产品项 1_030_607_000 ==========
+    ErrorCode SHOP_PRODUCT_ITEM_NOT_EXISTS = new ErrorCode(1_030_607_000, "ERP 店铺产品项不存在");
+
 }

@@ -1,10 +1,9 @@
 package com.somle.esb.job;
 
 
-import com.somle.eccang.service.EccangService;
 import com.somle.esb.model.Domain;
 import com.somle.esb.service.EsbService;
-import com.somle.shopify.service.ShopifyService;
+import com.somle.shopify.service.ShopifyShopProfileClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -14,9 +13,9 @@ public class ShopifyDataJob extends DataJob{
     EsbService service;
 
     @Autowired
-    ShopifyService shopifyService;
+    ShopifyShopProfileClient shopifyClient;
 
-    final String DATABASE = Domain.SHOPIFY.toString();;
+    final String DATABASE = Domain.SHOPIFY.toString();
 
 
     @Override
