@@ -7,6 +7,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import com.somle.esb.handler.ErpCustomRuleHandler;
 import com.somle.esb.handler.ErpProductHandler;
+import com.somle.framework.domain.SomleConsts;
 import com.somle.framework.test.core.ut.BaseSpringIntegrationTest;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -34,7 +35,7 @@ public class SyncErpProductJobTest extends BaseSpringIntegrationTest {
         AtomicReference<List<String>> barCodes = new AtomicReference<>(new ArrayList<>());
         AtomicReference<List<ErpCustomRuleDTO>> customRuleDTOS = new AtomicReference<>();
         try {
-            TenantContextHolder.setTenantId(50001L);// 自动
+            TenantContextHolder.setTenantId(SomleConsts.DEFAULT_TENANT_ID);// 自动
             // 发送消息
             Optional.ofNullable(erpCustomRuleApi.listCustomRules(null)).ifPresent(detailDTOS -> {
                 barCodes.set(detailDTOS.stream().map(dto -> dto.getProductDTO().getBarCode()).toList());

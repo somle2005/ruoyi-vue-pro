@@ -2,11 +2,9 @@ package com.somle.esb.service;
 
 
 import cn.iocoder.yudao.framework.mybatis.config.YudaoMybatisAutoConfiguration;
-import cn.iocoder.yudao.framework.security.config.YudaoSecurityAutoConfiguration;
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import cn.iocoder.yudao.module.infra.api.config.ConfigApiImpl;
 import cn.iocoder.yudao.module.infra.api.file.FileApi;
-import cn.iocoder.yudao.module.infra.service.config.ConfigService;
 import cn.iocoder.yudao.module.infra.service.config.ConfigServiceImpl;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.DeptApiImpl;
@@ -17,7 +15,7 @@ import cn.iocoder.yudao.module.system.service.dept.DeptServiceImpl;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.github.yulichang.autoconfigure.MybatisPlusJoinAutoConfiguration;
 import com.somle.framework.test.core.ut.BaseSpringTest;
-import com.somle.shopify.service.ShopifyService;
+import com.somle.shopify.service.ShopifyShopProfileClient;
 import lombok.extern.slf4j.Slf4j;
 import com.somle.ai.service.AiService;
 import com.somle.amazon.service.AmazonService;
@@ -47,7 +45,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 //    DingTalkService.class,
     KingdeeService.class,
     AmazonService.class,
-    ShopifyService.class,
+    ShopifyShopProfileClient.class,
 
 
 
