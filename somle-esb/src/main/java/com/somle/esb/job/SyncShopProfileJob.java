@@ -26,9 +26,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
 import com.somle.framework.common.util.collection.StreamX;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -137,32 +135,50 @@ public class SyncShopProfileJob extends DataJob {
         Map<String,ErpShopProductDO> shopProductsInDBMap= StreamX.from(shopProductsInDB).toMap
                 (ErpShopProductDO::getPlatformProductUid,t->t);
 
+
+        Map<String,ErpShopProductDO> mapToOffline=new HashMap<>(shopProductsInDBMap);
         List<ErpShopProductDO> listToCreate=new ArrayList<>();
         List<ErpShopProductDO> listToUpdate=new ArrayList<>();
         for (ErpShopProductDO productFromShopify : productsFromShopify) {
 
             ErpShopProductDO productDOInDB=shopProductsInDBMap.get(productFromShopify.getPlatformProductUid());
 
-
-
+            // 默认有效状态
+            productFromShopify.setStatus(1);
 
             if(productDOInDB==null) {
                 productFromShopify.setShopId(shopDO.getId());
                 productFromShopify.setCode(shopDO.getId()+"-"+productFromShopify.getPlatformProductUid());
                 listToCreate.add(productFromShopify);
+
             } else {
-                // 设置允许同步更新的属性
+                // 设置允许同步更新的属性，按需要补充
                 productDOInDB.setName(productFromShopify.getName());
                 listToUpdate.add(productDOInDB);
             }
 
+            mapToOffline.remove(productFromShopify.getPlatformProductUid());
         }
+
+        // 新增的部分
         if(!listToCreate.isEmpty()) {
             shopProductService.batchCreate(listToCreate);
         }
+        // 更新的部分
         if(!listToUpdate.isEmpty()) {
             shopProductService.batchUpdate(listToUpdate);
         }
+
+        // 下线失效的部分
+        List<ErpShopProductDO> listToOffline=new ArrayList<>();
+        for (ErpShopProductDO productDO : mapToOffline.values()) {
+            productDO.setStatus(0);
+            listToOffline.add(productDO);
+        }
+        if(!listToOffline.isEmpty()) {
+            shopProductService.batchUpdate(listToOffline);
+        }
+
     }
 
 
