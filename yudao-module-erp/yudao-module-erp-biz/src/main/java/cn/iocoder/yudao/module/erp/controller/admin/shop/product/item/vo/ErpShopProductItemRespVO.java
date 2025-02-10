@@ -20,6 +20,10 @@ public class ErpShopProductItemRespVO {
     @ExcelProperty("产品编号")
     private Long productId;
 
+    @Schema(description = "店铺产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "27593")
+    @ExcelProperty("店铺产品编号")
+    private Long shopProductId;
+
     @Schema(description = "备注", example = "你说的对")
     @ExcelProperty("备注")
     private String remark;

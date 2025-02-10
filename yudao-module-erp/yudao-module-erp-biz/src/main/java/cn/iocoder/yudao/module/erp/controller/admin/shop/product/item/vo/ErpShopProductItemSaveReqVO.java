@@ -16,6 +16,10 @@ public class ErpShopProductItemSaveReqVO {
     @NotNull(message = "产品编号不能为空")
     private Long productId;
 
+    @Schema(description = "店铺产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "27593")
+    @NotNull(message = "店铺产品编号不能为空")
+    private Long shopProductId;
+
     @Schema(description = "备注", example = "你说的对")
     private String remark;
 

@@ -25,6 +25,7 @@ public interface ErpShopProductMapper extends BaseMapperX<ErpShopProductDO> {
                 .eqIfPresent(ErpShopProductDO::getStatus, reqVO.getStatus())
                 .betweenIfPresent(ErpShopProductDO::getCreateTime, reqVO.getCreateTime())
                 .eqIfPresent(ErpShopProductDO::getUrl, reqVO.getUrl())
+                .eqIfPresent(ErpShopProductDO::getShopId, reqVO.getShopId())
                 .orderByDesc(ErpShopProductDO::getId));
     }
 

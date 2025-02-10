@@ -1,7 +1,12 @@
 package cn.iocoder.yudao.module.erp.service.shop.product;
 
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
+import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
+import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
+import com.somle.framework.common.util.collection.StreamX;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -17,6 +22,7 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.dal.mysql.shop.product.ErpShopProductMapper;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.framework.common.pojo.CommonResult.error;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
 
 /**
@@ -30,6 +36,9 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
 
     @Resource
     private ErpShopProductMapper shopProductMapper;
+
+    @Resource
+    private ErpShopProductItemService shopProductItemService;
 
     @Override
     public Long createShopProduct(ErpShopProductSaveReqVO createReqVO) {
@@ -87,6 +96,58 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
 
     @Override
     public void batchUpdate(List<ErpShopProductDO> listToUpdate) {
+
+    }
+
+    /**
+     * 根据店铺编号查询产品
+     *
+     * @param id 店铺产品ID
+     * @return 产品
+     */
+    @Override
+    public ErpShopProductRespVO getShopProductWithItems(Long id) {
+        ErpShopProductDO shopProduct = this.getShopProduct(id);
+        if (shopProduct == null) {
+            throw exception(SHOP_PRODUCT_NOT_EXISTS);
+        }
+        ErpShopProductRespVO respVO = BeanUtils.toBean(shopProduct, ErpShopProductRespVO.class);
+        List<ErpShopProductItemDO> items = shopProductItemService.getShopProductItemsByProductId(shopProduct.getId());
+        respVO.setItems(BeanUtils.toBean(items, ErpShopProductItemRespVO.class));
+        return respVO;
+    }
+
+    @Override
+    @Transactional
+    public void updateShopProductWithItems(ErpShopProductSaveReqVO updateReqVO) {
+        // 保存主表
+        this.updateShopProduct(updateReqVO);
+        // 处理重表数据
+        List<ErpShopProductItemDO> itemsInDB = shopProductItemService.getShopProductItemsByProductId(updateReqVO.getId());
+        Set<Long> itemIdsInDB = StreamX.from(itemsInDB).toSet(ErpShopProductItemDO::getId);
+        Set<Long> itemIdsToDelete = new HashSet<>(itemIdsInDB);
+
+        // 循环处理
+        for (ErpShopProductItemSaveReqVO itemVO : updateReqVO.getItems()) {
+            // 此ID不使用前端传入的ID
+            itemVO.setShopProductId(updateReqVO.getId());
+            // id为空的需要新增
+            if(itemVO.getId()==null) {
+                shopProductItemService.createShopProductItem(itemVO);
+            } else {
+                shopProductItemService.updateShopProductItem(itemVO);
+            }
+            // 移除不需要删除的ID
+            itemIdsToDelete.remove(itemVO.getId());
+        }
+
+        // 删除需要删除的
+        for (Long itemId : itemIdsToDelete) {
+            shopProductItemService.deleteShopProductItem(itemId);
+        }
+
+
+
 
     }
 

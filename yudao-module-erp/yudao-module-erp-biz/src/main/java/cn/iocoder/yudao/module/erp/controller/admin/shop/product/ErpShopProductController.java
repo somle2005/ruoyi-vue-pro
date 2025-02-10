@@ -1,5 +1,8 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product;
 
+import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
+import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -18,12 +21,15 @@ import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+
+import static cn.iocoder.yudao.framework.common.pojo.CommonResult.error;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 
 import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.*;
+import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.SHOP_PRODUCT_NOT_EXISTS;
 
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
@@ -38,6 +44,8 @@ public class ErpShopProductController {
     @Resource
     private ErpShopProductService shopProductService;
 
+
+
     @PostMapping("/create")
     @Operation(summary = "创建ERP 店铺产品")
     @PreAuthorize("@ss.hasPermission('erp:shop-product:create')")
@@ -49,7 +57,7 @@ public class ErpShopProductController {
     @Operation(summary = "更新ERP 店铺产品")
     @PreAuthorize("@ss.hasPermission('erp:shop-product:update')")
     public CommonResult<Boolean> updateShopProduct(@Valid @RequestBody ErpShopProductSaveReqVO updateReqVO) {
-        shopProductService.updateShopProduct(updateReqVO);
+        shopProductService.updateShopProductWithItems(updateReqVO);
         return success(true);
     }
 
@@ -67,8 +75,8 @@ public class ErpShopProductController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('erp:shop-product:query')")
     public CommonResult<ErpShopProductRespVO> getShopProduct(@RequestParam("id") Long id) {
-        ErpShopProductDO shopProduct = shopProductService.getShopProduct(id);
-        return success(BeanUtils.toBean(shopProduct, ErpShopProductRespVO.class));
+        ErpShopProductRespVO respVO=shopProductService.getShopProductWithItems(id);
+        return success(respVO);
     }
 
     @GetMapping("/page")

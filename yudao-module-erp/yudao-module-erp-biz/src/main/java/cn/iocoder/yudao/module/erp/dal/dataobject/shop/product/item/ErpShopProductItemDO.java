@@ -31,6 +31,11 @@ public class ErpShopProductItemDO extends BaseDO {
      * 产品编号
      */
     private Long productId;
+
+    /**
+     * 店铺产品编号
+     */
+    private Long shopProductId;
     /**
      * 备注
      */

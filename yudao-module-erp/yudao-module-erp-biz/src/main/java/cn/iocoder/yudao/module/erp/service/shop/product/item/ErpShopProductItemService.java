@@ -52,4 +52,11 @@ public interface ErpShopProductItemService {
      */
     PageResult<ErpShopProductItemDO> getShopProductItemPage(ErpShopProductItemPageReqVO pageReqVO);
 
+    /**
+     * 获得ERP 店铺产品项列表, 用于 Excel 导出
+     *
+     * @param shopProductId 店铺产品ID
+     * @return ERP 店铺产品项列表
+     */
+    List<ErpShopProductItemDO> getShopProductItemsByProductId(Long shopProductId);
 }

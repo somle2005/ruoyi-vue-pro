@@ -69,4 +69,17 @@ public interface ErpShopProductService {
     * 批量更新
     **/
     void batchUpdate(List<ErpShopProductDO> listToUpdate);
+
+    /**
+    * 根据店铺编号查询产品
+    *
+    * @param id 店铺产品ID
+    * @return 产品
+    */
+    ErpShopProductRespVO getShopProductWithItems(Long id);
+
+    /**
+     *
+     **/
+    void updateShopProductWithItems(@Valid ErpShopProductSaveReqVO updateReqVO);
 }

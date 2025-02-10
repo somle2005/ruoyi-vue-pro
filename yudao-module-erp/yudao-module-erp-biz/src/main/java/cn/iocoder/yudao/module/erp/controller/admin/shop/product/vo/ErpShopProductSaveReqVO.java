@@ -1,5 +1,7 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo;
 
+import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
+import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemSaveReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import java.util.*;
@@ -35,5 +37,8 @@ public class ErpShopProductSaveReqVO {
 
     @Schema(description = "链接", example = "https://www.iocoder.cn")
     private String url;
+
+    @Schema(description = "店铺产品项目", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private List<ErpShopProductItemSaveReqVO> items;
 
 }
