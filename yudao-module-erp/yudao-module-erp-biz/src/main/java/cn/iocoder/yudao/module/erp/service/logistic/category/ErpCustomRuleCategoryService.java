@@ -1,0 +1,67 @@
+package cn.iocoder.yudao.module.erp.service.logistic.category;
+
+import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategoryPageReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategorySaveReqVO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomRuleCategoryDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomRuleCategoryItemDO;
+import jakarta.validation.Valid;
+
+import java.util.List;
+
+/**
+ * 海关品类 Service 接口
+ *
+ * @author 王岽宇
+ */
+public interface ErpCustomRuleCategoryService {
+
+    /**
+     * 创建海关品类
+     *
+     * @param createReqVO 创建信息
+     * @return 编号
+     */
+    Long createCustomRuleCategory(@Valid ErpCustomRuleCategorySaveReqVO createReqVO);
+
+    /**
+     * 更新海关品类
+     *
+     * @param updateReqVO 更新信息
+     */
+    void updateCustomRuleCategory(@Valid ErpCustomRuleCategorySaveReqVO updateReqVO);
+
+    /**
+     * 删除海关品类
+     *
+     * @param id 编号
+     */
+    void deleteCustomRuleCategory(Long id);
+
+    /**
+     * 获得海关品类
+     *
+     * @param id 编号
+     * @return 海关品类
+     */
+    ErpCustomRuleCategoryDO getCustomRuleCategory(Long id);
+
+    /**
+     * 获得海关品类分页
+     *
+     * @param pageReqVO 分页查询
+     * @return 海关品类分页
+     */
+    PageResult<ErpCustomRuleCategoryDO> getCustomRuleCategoryPage(ErpCustomRuleCategoryPageReqVO pageReqVO);
+
+    // ==================== 子表（海关品类子表） ====================
+
+    /**
+     * 获得海关品类子表列表
+     *
+     * @param categoryId 分类表id
+     * @return 海关品类子表列表
+     */
+    List<ErpCustomRuleCategoryItemDO> getCustomRuleCategoryItemListByCategoryId(Integer categoryId);
+
+}

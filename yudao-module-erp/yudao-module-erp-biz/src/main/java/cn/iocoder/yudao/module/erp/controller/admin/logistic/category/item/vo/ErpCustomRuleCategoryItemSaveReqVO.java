@@ -1,0 +1,33 @@
+package cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+import java.math.BigDecimal;
+
+@Schema(description = "管理后台 - 海关品类子表新增/修改 Request VO")
+@Data
+public class ErpCustomRuleCategoryItemSaveReqVO {
+
+    @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "5710")
+    private Long id;
+
+    @Schema(description = "分类表id", requiredMode = Schema.RequiredMode.REQUIRED, example = "25022")
+    @NotNull(message = "分类表id不能为空")
+    private Integer categoryId;
+
+    @Schema(description = "国家-字典", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "国家-字典不能为空")
+    private Integer countryCode;
+
+    @Schema(description = "HS编码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotEmpty(message = "HS编码不能为空")
+    private String hsCode;
+
+    @Schema(description = "税率", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "税率不能为空")
+    private BigDecimal taxRate;
+
+}

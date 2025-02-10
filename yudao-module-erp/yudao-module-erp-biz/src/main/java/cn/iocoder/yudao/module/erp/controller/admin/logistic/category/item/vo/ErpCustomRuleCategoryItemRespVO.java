@@ -1,0 +1,40 @@
+package cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo;
+
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.alibaba.excel.annotation.ExcelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Schema(description = "管理后台 - 海关品类子表 Response VO")
+@Data
+@ExcelIgnoreUnannotated
+public class ErpCustomRuleCategoryItemRespVO {
+
+    @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "5710")
+    @ExcelProperty("编号")
+    private Long id;
+
+    @Schema(description = "分类表id", requiredMode = Schema.RequiredMode.REQUIRED, example = "25022")
+    @ExcelProperty("分类表id")
+    private Integer categoryId;
+
+    @Schema(description = "国家-字典", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("国家-字典")
+    private Integer countryCode;
+
+    @Schema(description = "HS编码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("HS编码")
+    private String hsCode;
+
+    @Schema(description = "税率", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("税率")
+    private BigDecimal taxRate;
+
+    @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("创建时间")
+    private LocalDateTime createTime;
+
+}
