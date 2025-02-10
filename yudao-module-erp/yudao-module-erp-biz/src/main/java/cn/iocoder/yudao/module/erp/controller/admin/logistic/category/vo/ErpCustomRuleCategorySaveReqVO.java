@@ -10,9 +10,6 @@ import java.util.List;
 @Data
 public class ErpCustomRuleCategorySaveReqVO {
 
-    @Schema(description = "乐观锁")
-    private Integer revision;
-
     @Schema(description = "编号", example = "7348")
     private Long id;
 
