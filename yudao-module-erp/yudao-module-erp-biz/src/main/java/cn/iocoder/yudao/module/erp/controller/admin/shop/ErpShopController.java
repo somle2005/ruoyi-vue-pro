@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop;
 
+import com.somle.framework.common.model.ValidationGroup;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -41,14 +42,14 @@ public class ErpShopController {
     @PostMapping("/create")
     @Operation(summary = "创建ERP 店铺")
     @PreAuthorize("@ss.hasPermission('erp:shop:create')")
-    public CommonResult<Long> createShop(@Valid @RequestBody ErpShopSaveReqVO createReqVO) {
+    public CommonResult<Long> createShop(@Validated(value = {ValidationGroup.create.class}) @RequestBody ErpShopSaveReqVO createReqVO) {
         return success(shopService.createShop(createReqVO));
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新ERP 店铺")
     @PreAuthorize("@ss.hasPermission('erp:shop:update')")
-    public CommonResult<Boolean> updateShop(@Valid @RequestBody ErpShopSaveReqVO updateReqVO) {
+    public CommonResult<Boolean> updateShop(@Validated(value = {ValidationGroup.update.class}) @RequestBody ErpShopSaveReqVO updateReqVO) {
         shopService.updateShop(updateReqVO);
         return success(true);
     }

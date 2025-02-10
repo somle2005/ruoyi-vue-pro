@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.vo;
 
+import com.somle.framework.common.model.ValidationGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import java.util.*;
@@ -43,7 +44,7 @@ public class ErpShopSaveReqVO {
     private String platform;
 
     @Schema(description = "销售平台店铺唯一ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "销售平台店铺唯一ID，不能为空")
+    @NotNull(message = "销售平台，不能为空",groups = {ValidationGroup.create.class})
     private String platformShopUid;
 
 }

@@ -105,14 +105,14 @@ public class SyncShopProfileJob extends DataJob {
             throw new RuntimeException("缺少店铺信息VO");
         }
         // 保存店铺
-        ErpShopDO shopDO=shopService.getByPlatform(shopprofileDTO.getSalesPlatform(),shopVO.getPlatformShopUid());
+        ErpShopDO shopDO=shopService.getByPlatform(shopprofileDTO.getSalesPlatform().name(),shopVO.getPlatformShopUid());
         if(shopDO!=null) {
             ErpShopSaveReqVO convertedShopVO = ErpShopConvert.INSTANCE.convert(shopDO);
             convertedShopVO.setName(shopVO.getName());
             shopService.updateShop(convertedShopVO);
         } else {
             shopService.createShop(shopVO);
-            shopDO=shopService.getByPlatform(shopprofileDTO.getSalesPlatform(),shopVO.getPlatformShopUid());
+            shopDO=shopService.getByPlatform(shopprofileDTO.getSalesPlatform().name(),shopVO.getPlatformShopUid());
         }
 
         // 获得产品信息

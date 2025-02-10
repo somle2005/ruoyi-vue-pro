@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.service.shop;
 
+import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import com.somle.framework.domain.sales.SalesPlatform;
 import jakarta.validation.*;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.*;
@@ -36,13 +37,13 @@ public interface ErpShopService {
     void deleteShop(Long id);
 
     /**
-     * 验证ERP 店铺是否存在
-     *
-     * @param platform 平台
-     * @param platformShopUid 平台店铺编号
-     * @return 是否存在
-     */
-    ErpShopDO getByPlatform(SalesPlatform platform, String platformShopUid);
+     * @Author LeeFJ
+     * @Description 按平台和平台店铺uid查询店铺是否存在
+     * @Date 15:11 2025/2/7
+     * @Param platform 平台,枚举 SalesPlatform 的可选值
+     * @return
+     **/
+    public ErpShopDO getByPlatform(String platform, String platformShopUid);
 
     /**
      * 获得ERP 店铺

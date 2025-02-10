@@ -64,12 +64,12 @@ public class ErpShopServiceImpl implements ErpShopService {
     * @Author LeeFJ
     * @Description 按平台和平台店铺uid查询店铺是否存在
     * @Date 15:11 2025/2/7
-    * @Param
+    * @Param platform 平台,枚举 SalesPlatform 的可选值
     * @return
     **/
-    public ErpShopDO getByPlatform(SalesPlatform platform, String platformShopUid) {
+    public ErpShopDO getByPlatform(String platform, String platformShopUid) {
         LambdaQueryWrapperX<ErpShopDO> wrapperX=new LambdaQueryWrapperX<>();
-        wrapperX.eq(ErpShopDO::getPlatform,platform.name());
+        wrapperX.eq(ErpShopDO::getPlatform,platform);
         wrapperX.eq(ErpShopDO::getPlatformShopUid,platformShopUid);
         return shopMapper.selectOne(wrapperX);
     }
