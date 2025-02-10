@@ -121,7 +121,7 @@ public class ErpCustomRuleCategoryItemServiceImplTest extends BaseDbUnitTest {
         customRuleCategoryItemMapper.insert(cloneIgnoreId(dbCustomRuleCategoryItem, o -> o.setCreateTime(null)));
         // 准备参数
         ErpCustomRuleCategoryItemPageReqVO reqVO = new ErpCustomRuleCategoryItemPageReqVO();
-        reqVO.setCategoryId(null);
+//        reqVO.setCategoryId(null);
         reqVO.setCountryCode(null);
         reqVO.setHsCode(null);
         reqVO.setTaxRate(null);

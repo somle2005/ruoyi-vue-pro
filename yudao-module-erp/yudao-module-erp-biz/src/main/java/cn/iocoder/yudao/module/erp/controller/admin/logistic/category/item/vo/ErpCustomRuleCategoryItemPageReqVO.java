@@ -18,8 +18,8 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @ToString(callSuper = true)
 public class ErpCustomRuleCategoryItemPageReqVO extends PageParam {
 
-    @Schema(description = "分类表id", example = "25022")
-    private Integer categoryId;
+//    @Schema(description = "分类表id", example = "25022")
+//    private Integer categoryId;
 
     @Schema(description = "国家-字典")
     private Integer countryCode;

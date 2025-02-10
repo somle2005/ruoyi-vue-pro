@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item;
 
 import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
+import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -26,7 +27,7 @@ public class ErpCustomRuleCategoryItemDO extends TenantBaseDO {
     /**
      * 编号
      */
-    @TableId
+    @TableId(type  = IdType.AUTO)
     private Long id;
     /**
      * 分类表id

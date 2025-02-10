@@ -1,7 +1,12 @@
 package cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo;
 
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomRuleCategoryItemDO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemSaveReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.tool.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 
 import java.util.List;
@@ -10,22 +15,26 @@ import java.util.List;
 @Data
 public class ErpCustomRuleCategorySaveReqVO {
 
-    @Schema(description = "编号", example = "7348")
+    @Schema(description = "编号")
+    @Null(groups = Validation.OnCreate.class, message = "创建时，申请单id必须为空")
+    @NotNull(groups = Validation.OnUpdate.class, message = "更新时，申请单id不能为空")
     private Long id;
 
     @Schema(description = "材质-字典")
+    @NotNull(message = "品类的材质不能为空")
     private Integer material;
 
-    @Schema(description = "报关品名", example = "2")
+    @Schema(description = "报关品名")
+    @NotBlank(message = "报关品名不能为空")
     private String declaredType;
 
     @Schema(description = "英文品名")
+    @NotBlank(message = "英文品名不能为空")
     private String declaredTypeEn;
 
-    @Schema(description = "材质对应string+报关品名")
-    private String combinedValue;
-
     @Schema(description = "海关品类子表列表")
-    private List<ErpCustomRuleCategoryItemDO> customRuleCategoryItems;
+    @NotNull( message = "至少维护一个国别详情")
+    @Valid
+    private List<ErpCustomRuleCategoryItemSaveReqVO> customRuleCategoryItems;
 
 }

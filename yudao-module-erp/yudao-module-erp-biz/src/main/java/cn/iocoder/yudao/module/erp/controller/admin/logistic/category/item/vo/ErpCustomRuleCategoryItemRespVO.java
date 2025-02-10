@@ -17,9 +17,9 @@ public class ErpCustomRuleCategoryItemRespVO {
     @ExcelProperty("编号")
     private Long id;
 
-    @Schema(description = "分类表id", requiredMode = Schema.RequiredMode.REQUIRED, example = "25022")
-    @ExcelProperty("分类表id")
-    private Integer categoryId;
+//    @Schema(description = "分类表id", requiredMode = Schema.RequiredMode.REQUIRED, example = "25022")
+//    @ExcelProperty("分类表id")
+//    private Integer categoryId;
 
     @Schema(description = "国家-字典", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("国家-字典")
