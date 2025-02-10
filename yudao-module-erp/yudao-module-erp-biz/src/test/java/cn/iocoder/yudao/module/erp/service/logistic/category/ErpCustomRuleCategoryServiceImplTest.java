@@ -121,7 +121,6 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
         customRuleCategoryMapper.insert(cloneIgnoreId(dbCustomRuleCategory, o -> o.setCombinedValue(null)));
         // 准备参数
         ErpCustomRuleCategoryPageReqVO reqVO = new ErpCustomRuleCategoryPageReqVO();
-        reqVO.setRevision(null);
         reqVO.setCreateTime(buildBetweenTime(2023, 2, 1, 2023, 2, 28));
         reqVO.setMaterial(null);
         reqVO.setDeclaredType(null);
