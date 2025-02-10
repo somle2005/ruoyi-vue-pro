@@ -3,7 +3,6 @@ package cn.iocoder.yudao.module.erp.convert.logistic.category;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategorySaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomRuleCategoryDO;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper
 public interface ErpCustomRuleCategoryConvert {
