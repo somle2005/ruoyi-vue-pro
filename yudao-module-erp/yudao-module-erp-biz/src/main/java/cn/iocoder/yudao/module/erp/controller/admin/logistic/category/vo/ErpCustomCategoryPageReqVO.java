@@ -29,8 +29,4 @@ public class ErpCustomCategoryPageReqVO extends PageParam {
 
     @Schema(description = "英文品名")
     private String declaredTypeEn;
-
-    @Schema(description = "材质对应string+报关品名")
-    private String combinedValue;
-
 }
