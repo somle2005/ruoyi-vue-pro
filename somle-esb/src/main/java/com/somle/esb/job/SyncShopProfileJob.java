@@ -151,6 +151,8 @@ public class SyncShopProfileJob extends DataJob {
             } else {
                 // 设置允许同步更新的属性，按需要补充
                 productDOInDB.setName(productFromShopify.getName());
+                productDOInDB.setUrl(productFromShopify.getUrl());
+                productDOInDB.setImage(productFromShopify.getImage());
                 listToUpdate.add(productDOInDB);
             }
 

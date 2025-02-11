@@ -1,6 +1,8 @@
 package cn.iocoder.yudao.module.erp.dal.dataobject.shop.product;
 
 import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
+import com.alibaba.excel.annotation.ExcelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import java.util.*;
 import java.time.LocalDateTime;
@@ -37,6 +39,11 @@ public class ErpShopProductDO extends TenantBaseDO {
      * 店铺产品名称
      */
     private String name;
+
+    /**
+     * 主图链接
+     **/
+    private String image;
     /**
      * 店铺产品编码
      */

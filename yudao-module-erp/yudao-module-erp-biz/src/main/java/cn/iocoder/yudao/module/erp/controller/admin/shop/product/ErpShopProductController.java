@@ -1,8 +1,13 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product;
 
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
+import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
+import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
+import com.somle.framework.common.util.collection.StreamX;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -44,6 +49,10 @@ public class ErpShopProductController {
     @Resource
     private ErpShopProductService shopProductService;
 
+    @Resource
+    private ErpShopService shopService;
+    @Autowired
+    private ErpShopService erpShopService;
 
 
     @PostMapping("/create")
@@ -76,6 +85,8 @@ public class ErpShopProductController {
     @PreAuthorize("@ss.hasPermission('erp:shop-product:query')")
     public CommonResult<ErpShopProductRespVO> getShopProduct(@RequestParam("id") Long id) {
         ErpShopProductRespVO respVO=shopProductService.getShopProductWithItems(id);
+        ErpShopDO shopDO = erpShopService.getShop(respVO.getShopId());
+        respVO.setShop(BeanUtils.toBean(shopDO, ErpShopRespVO.class));
         return success(respVO);
     }
 
@@ -83,8 +94,15 @@ public class ErpShopProductController {
     @Operation(summary = "获得ERP 店铺产品分页")
     @PreAuthorize("@ss.hasPermission('erp:shop-product:query')")
     public CommonResult<PageResult<ErpShopProductRespVO>> getShopProductPage(@Valid ErpShopProductPageReqVO pageReqVO) {
+
         PageResult<ErpShopProductDO> pageResult = shopProductService.getShopProductPage(pageReqVO);
-        return success(BeanUtils.toBean(pageResult, ErpShopProductRespVO.class));
+        PageResult<ErpShopProductRespVO> pageResultVO=BeanUtils.toBean(pageResult, ErpShopProductRespVO.class);
+        Set<Long> shopIds= StreamX.from(pageResultVO.getList()).toSet(ErpShopProductRespVO::getShopId);
+        Map<Long,ErpShopRespVO> shopVoMap = erpShopService.getShopMapByIds(shopIds);
+        // 装配对象
+        StreamX.from(pageResultVO.getList()).assemble(shopVoMap,ErpShopProductRespVO::getShopId, ErpShopProductRespVO::setShop);
+        //
+        return success(pageResultVO);
     }
 
     @GetMapping("/export-excel")

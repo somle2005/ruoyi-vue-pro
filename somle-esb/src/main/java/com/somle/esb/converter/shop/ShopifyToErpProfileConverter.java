@@ -74,6 +74,10 @@ abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpShopProfi
                 productDO.setShopId(null);
                 productDO.setUrl(SalesPlatform.SHOPIFY.getSiteURL()+"/products/"+productJson.getString("handle"));
                 productList.add(productDO);
+                JSONObject image=productJson.getJSONObject("image");
+                if(image!=null) {
+                    productDO.setImage(image.getString("src"));
+                }
             }
             return productList;
         }

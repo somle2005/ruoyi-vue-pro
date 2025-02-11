@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo;
 
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
+import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import java.util.*;
@@ -25,6 +26,10 @@ public class ErpShopProductRespVO {
     @ExcelProperty("店铺产品名称")
     private String name;
 
+    @Schema(description = "主图链接", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://")
+    @ExcelProperty("主图链接")
+    private String image;
+
     @Schema(description = "店铺产品编码", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("店铺产品编码")
     private String code;
@@ -48,6 +53,7 @@ public class ErpShopProductRespVO {
     @Schema(description = "店铺产品项目", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ErpShopProductItemRespVO> items;
 
-    // private E
+    @Schema(description = "产品所属店铺", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private ErpShopRespVO shop;
 
 }

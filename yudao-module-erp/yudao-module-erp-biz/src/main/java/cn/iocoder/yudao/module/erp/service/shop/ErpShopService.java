@@ -1,9 +1,14 @@
 package cn.iocoder.yudao.module.erp.service.shop;
 
+import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.ErpShopProductRespVO;
 import jakarta.validation.*;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * ERP 店铺 Service 接口
@@ -59,4 +64,8 @@ public interface ErpShopService {
      */
     PageResult<ErpShopDO> getShopPage(ErpShopPageReqVO pageReqVO);
 
+    /**
+     * 按ShopId集合获取全部不店铺
+     **/
+    Map<Long, ErpShopRespVO> getShopMapByIds(Set<Long> shopIds);
 }

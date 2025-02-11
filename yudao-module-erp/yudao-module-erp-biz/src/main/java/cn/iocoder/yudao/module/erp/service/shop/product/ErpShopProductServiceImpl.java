@@ -1,10 +1,13 @@
 package cn.iocoder.yudao.module.erp.service.shop.product;
 
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespSimpleVO;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
+import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
 import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
 import com.somle.framework.common.util.collection.StreamX;
 import org.springframework.stereotype.Service;
@@ -39,6 +42,9 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
 
     @Resource
     private ErpShopProductItemService shopProductItemService;
+
+    @Resource
+    private ErpProductService productService;
 
     @Override
     public Long createShopProduct(ErpShopProductSaveReqVO createReqVO) {
@@ -96,7 +102,7 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
 
     @Override
     public void batchUpdate(List<ErpShopProductDO> listToUpdate) {
-
+        shopProductMapper.updateBatch(listToUpdate);
     }
 
     /**
@@ -113,7 +119,11 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
         }
         ErpShopProductRespVO respVO = BeanUtils.toBean(shopProduct, ErpShopProductRespVO.class);
         List<ErpShopProductItemDO> items = shopProductItemService.getShopProductItemsByProductId(shopProduct.getId());
-        respVO.setItems(BeanUtils.toBean(items, ErpShopProductItemRespVO.class));
+        List<ErpShopProductItemRespVO> itemRespVOS=BeanUtils.toBean(items, ErpShopProductItemRespVO.class);
+        List<ErpProductRespVO> productList= productService.getProductVOList(StreamX.from(items).map(ErpShopProductItemDO::getProductId).toList());
+        List<ErpProductRespSimpleVO> simpleProductList = BeanUtils.toBean(productList, ErpProductRespSimpleVO.class);
+        StreamX.from(itemRespVOS).assemble(simpleProductList,ErpProductRespSimpleVO::getId,ErpShopProductItemRespVO::getProductId,ErpShopProductItemRespVO::setProduct);
+        respVO.setItems(itemRespVOS);
         return respVO;
     }
 

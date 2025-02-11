@@ -1,6 +1,9 @@
 package cn.iocoder.yudao.module.erp.service.shop;
 
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.ErpShopProductRespVO;
+import com.somle.framework.common.util.collection.CollectionUtils;
+import com.somle.framework.common.util.collection.StreamX;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -11,6 +14,11 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 
 import cn.iocoder.yudao.module.erp.dal.mysql.shop.ErpShopMapper;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
@@ -81,6 +89,18 @@ public class ErpShopServiceImpl implements ErpShopService {
     @Override
     public PageResult<ErpShopDO> getShopPage(ErpShopPageReqVO pageReqVO) {
         return shopMapper.selectPage(pageReqVO);
+    }
+
+    @Override
+    public Map<Long, ErpShopRespVO> getShopMapByIds(Set<Long> shopIds) {
+        if(CollectionUtils.isEmpty(shopIds)) {
+            return new HashMap<>();
+        }
+        LambdaQueryWrapperX<ErpShopDO> wrapperX=new LambdaQueryWrapperX<>();
+        wrapperX.in(ErpShopDO::getId,shopIds);
+        List<ErpShopDO> shopDOList = shopMapper.selectList(wrapperX);
+        return StreamX.from(shopDOList).toMap(ErpShopDO::getId,t->BeanUtils.toBean(t, ErpShopRespVO.class));
+
     }
 
 }
