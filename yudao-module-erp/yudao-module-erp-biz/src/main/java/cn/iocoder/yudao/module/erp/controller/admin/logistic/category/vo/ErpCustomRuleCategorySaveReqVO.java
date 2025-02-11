@@ -11,13 +11,13 @@ import lombok.Data;
 
 import java.util.List;
 
-@Schema(description = "管理后台 - 海关品类新增/修改 Request VO")
+@Schema(description = "管理后台 - 海关分类新增/修改 Request VO")
 @Data
 public class ErpCustomRuleCategorySaveReqVO {
 
     @Schema(description = "编号")
-    @Null(groups = Validation.OnCreate.class, message = "创建时，申请单id必须为空")
-    @NotNull(groups = Validation.OnUpdate.class, message = "更新时，申请单id不能为空")
+    @Null(groups = Validation.OnCreate.class, message = "创建时，海关分类id必须为空")
+    @NotNull(groups = Validation.OnUpdate.class, message = "更新时，海关分类id不能为空")
     private Long id;
 
     @Schema(description = "材质-字典")
@@ -32,7 +32,7 @@ public class ErpCustomRuleCategorySaveReqVO {
     @NotBlank(message = "英文品名不能为空")
     private String declaredTypeEn;
 
-    @Schema(description = "海关品类子表列表")
+    @Schema(description = "海关分类子表列表")
     @NotNull( message = "至少维护一个国别详情")
     @Valid
     private List<ErpCustomRuleCategoryItemSaveReqVO> customRuleCategoryItems;

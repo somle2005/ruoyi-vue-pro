@@ -11,7 +11,7 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * 海关品类子表 Mapper
+ * 海关分类子表 Mapper
  *
  * @author 王岽宇
  */
@@ -30,16 +30,16 @@ public interface ErpCustomRuleCategoryItemMapper extends BaseMapperX<ErpCustomRu
 
     default List<ErpCustomRuleCategoryItemDO> selectListByCategoryId(Integer categoryId) {
         return selectList(new LambdaQueryWrapperX<ErpCustomRuleCategoryItemDO>()
-            .eq(ErpCustomRuleCategoryItemDO::getCategoryId, categoryId));
+            .eq(ErpCustomRuleCategoryItemDO::getCustomCategoryId, categoryId));
     }
 
     default List<ErpCustomRuleCategoryItemDO> selectListByCategoryId(Collection<Long> categoryIds) {
         return selectList(new LambdaQueryWrapperX<ErpCustomRuleCategoryItemDO>()
-            .in(ErpCustomRuleCategoryItemDO::getCategoryId, categoryIds));
+            .inIfPresent(ErpCustomRuleCategoryItemDO::getCustomCategoryId, categoryIds));
     }
 
     default void deleteByCategoryId(Long categoryId) {
         delete(new LambdaQueryWrapperX<ErpCustomRuleCategoryItemDO>()
-            .eq(ErpCustomRuleCategoryItemDO::getCategoryId, categoryId));
+            .eq(ErpCustomRuleCategoryItemDO::getCustomCategoryId, categoryId));
     }
 }

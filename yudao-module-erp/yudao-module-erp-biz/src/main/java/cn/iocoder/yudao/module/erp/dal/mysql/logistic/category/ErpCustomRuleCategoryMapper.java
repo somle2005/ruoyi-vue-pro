@@ -9,7 +9,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 
 /**
- * 海关品类 Mapper
+ * 海关分类 Mapper
  *
  * @author 王岽宇
  */
@@ -20,8 +20,8 @@ public interface ErpCustomRuleCategoryMapper extends BaseMapperX<ErpCustomRuleCa
         return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomRuleCategoryDO>()
             .betweenIfPresent(ErpCustomRuleCategoryDO::getCreateTime, reqVO.getCreateTime())
             .eqIfPresent(ErpCustomRuleCategoryDO::getMaterial, reqVO.getMaterial())
-            .eqIfPresent(ErpCustomRuleCategoryDO::getDeclaredType, reqVO.getDeclaredType())
-            .eqIfPresent(ErpCustomRuleCategoryDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
+            .likeIfPresent(ErpCustomRuleCategoryDO::getDeclaredType, reqVO.getDeclaredType())
+            .likeIfPresent(ErpCustomRuleCategoryDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
             .orderByDesc(ErpCustomRuleCategoryDO::getId));
     }
 

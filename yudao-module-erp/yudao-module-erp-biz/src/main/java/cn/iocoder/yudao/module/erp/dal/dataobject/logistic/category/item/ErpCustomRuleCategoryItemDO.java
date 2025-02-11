@@ -10,7 +10,7 @@ import lombok.*;
 import java.math.BigDecimal;
 
 /**
- * 海关品类子表 DO
+ * 海关分类子表 DO
  *
  * @author 王岽宇
  */
@@ -32,7 +32,7 @@ public class ErpCustomRuleCategoryItemDO extends TenantBaseDO {
     /**
      * 分类表id
      */
-    private Long categoryId;
+    private Long customCategoryId;
     /**
      * 国家-字典
      */

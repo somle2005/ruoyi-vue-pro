@@ -19,7 +19,7 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS;
 
 /**
- * 海关品类子表 Service 实现类
+ * 海关分类子表 Service 实现类
  *
  * @author 王岽宇
  */
@@ -44,7 +44,7 @@ public class ErpCustomRuleCategoryItemServiceImpl implements ErpCustomRuleCatego
 
     @Override
     public void createCustomRuleCategoryItemList(Long categoryId, List<ErpCustomRuleCategoryItemDO> list) {
-        list.forEach(o -> o.setCategoryId(categoryId));
+        list.forEach(o -> o.setCustomCategoryId(categoryId));
         customRuleCategoryItemMapper.insertBatch(list);
     }
 
@@ -97,8 +97,8 @@ public class ErpCustomRuleCategoryItemServiceImpl implements ErpCustomRuleCatego
     /**
      * 根据分类id查询
      *
-     * @param categoryIds 分类id
-     * @return 海关品类子表列表
+     * @param categoryIds 分类id,为空就返回所有
+     * @return 海关分类子表列表
      */
     @Override
     public List<ErpCustomRuleCategoryItemDO> getCustomRuleCategoryItemListByCategoryId(Collection<Long> categoryIds) {

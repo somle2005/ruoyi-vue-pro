@@ -28,7 +28,7 @@
 //import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 //import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 //
-//@Tag(name = "管理后台 - 海关品类子表")
+//@Tag(name = "管理后台 - 海关分类子表")
 ////@RestController 暂不开启
 //@RequestMapping("/erp/custom-rule-category-item")
 //@Validated
@@ -38,14 +38,14 @@
 //    private ErpCustomRuleCategoryItemService customRuleCategoryItemService;
 //
 //    @PostMapping("/create")
-//    @Operation(summary = "创建海关品类子表")
+//    @Operation(summary = "创建海关分类子表")
 //    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category-item:create')")
 //    public CommonResult<Long> createCustomRuleCategoryItem(@Validated(Validation.OnCreate.class)  @RequestBody ErpCustomRuleCategoryItemSaveReqVO createReqVO) {
 //        return success(customRuleCategoryItemService.createCustomRuleCategoryItem(createReqVO));
 //    }
 //
 //    @PutMapping("/update")
-//    @Operation(summary = "更新海关品类子表")
+//    @Operation(summary = "更新海关分类子表")
 //    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category-item:update')")
 //    public CommonResult<Boolean> updateCustomRuleCategoryItem(@Validated(Validation.OnUpdate.class)  @RequestBody ErpCustomRuleCategoryItemSaveReqVO updateReqVO) {
 //        customRuleCategoryItemService.updateCustomRuleCategoryItem(updateReqVO);
@@ -53,7 +53,7 @@
 //    }
 //
 //    @DeleteMapping("/delete")
-//    @Operation(summary = "删除海关品类子表")
+//    @Operation(summary = "删除海关分类子表")
 //    @Parameter(name = "id", description = "编号", required = true)
 //    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category-item:delete')")
 //    public CommonResult<Boolean> deleteCustomRuleCategoryItem(@RequestParam("id") Long id) {
@@ -62,7 +62,7 @@
 //    }
 //
 //    @GetMapping("/get")
-//    @Operation(summary = "获得海关品类子表")
+//    @Operation(summary = "获得海关分类子表")
 //    @Parameter(name = "id", description = "编号", required = true, example = "1024")
 //    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category-item:query')")
 //    public CommonResult<ErpCustomRuleCategoryItemRespVO> getCustomRuleCategoryItem(@RequestParam("id") Long id) {
@@ -71,7 +71,7 @@
 //    }
 //
 //    @GetMapping("/page")
-//    @Operation(summary = "获得海关品类子表分页")
+//    @Operation(summary = "获得海关分类子表分页")
 //    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category-item:query')")
 //    public CommonResult<PageResult<ErpCustomRuleCategoryItemRespVO>> getCustomRuleCategoryItemPage(@Valid ErpCustomRuleCategoryItemPageReqVO pageReqVO) {
 //        PageResult<ErpCustomRuleCategoryItemDO> pageResult = customRuleCategoryItemService.getCustomRuleCategoryItemPage(pageReqVO);
@@ -79,7 +79,7 @@
 //    }
 //
 //    @GetMapping("/export-excel")
-//    @Operation(summary = "导出海关品类子表 Excel")
+//    @Operation(summary = "导出海关分类子表 Excel")
 //    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category-item:export')")
 //    @ApiAccessLog(operateType = EXPORT)
 //    public void exportCustomRuleCategoryItemExcel(@Valid ErpCustomRuleCategoryItemPageReqVO pageReqVO,
@@ -87,7 +87,7 @@
 //        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
 //        List<ErpCustomRuleCategoryItemDO> list = customRuleCategoryItemService.getCustomRuleCategoryItemPage(pageReqVO).getList();
 //        // 导出 Excel
-//        ExcelUtils.write(response, "海关品类子表.xls", "数据", ErpCustomRuleCategoryItemRespVO.class,
+//        ExcelUtils.write(response, "海关分类子表.xls", "数据", ErpCustomRuleCategoryItemRespVO.class,
 //            BeanUtils.toBean(list, ErpCustomRuleCategoryItemRespVO.class));
 //    }
 //

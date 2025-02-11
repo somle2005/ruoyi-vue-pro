@@ -10,14 +10,14 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 /**
- * 海关品类 Service 接口
+ * 海关分类 Service 接口
  *
  * @author 王岽宇
  */
 public interface ErpCustomRuleCategoryService {
 
     /**
-     * 创建海关品类
+     * 创建海关分类
      *
      * @param createReqVO 创建信息
      * @return 编号
@@ -25,43 +25,43 @@ public interface ErpCustomRuleCategoryService {
     Long createCustomRuleCategory(@Valid ErpCustomRuleCategorySaveReqVO createReqVO);
 
     /**
-     * 更新海关品类
+     * 更新海关分类
      *
      * @param updateReqVO 更新信息
      */
     void updateCustomRuleCategory(@Valid ErpCustomRuleCategorySaveReqVO updateReqVO);
 
     /**
-     * 删除海关品类
+     * 删除海关分类
      *
      * @param id 编号
      */
     void deleteCustomRuleCategory(Long id);
 
     /**
-     * 获得海关品类
+     * 获得海关分类
      *
      * @param id 编号
-     * @return 海关品类
+     * @return 海关分类
      */
     ErpCustomRuleCategoryDO getCustomRuleCategory(Long id);
 
     /**
-     * 获得海关品类分页
+     * 获得海关分类分页
      *
      * @param pageReqVO 分页查询
-     * @return 海关品类分页
+     * @return 海关分类分页
      */
     PageResult<ErpCustomRuleCategoryDO> getCustomRuleCategoryPage(ErpCustomRuleCategoryPageReqVO pageReqVO);
 
-    // ==================== 子表（海关品类子表） ====================
+    // ==================== 子表（海关分类子表） ====================
 
     /**
-     * 获得海关品类子表列表
+     * 获得海关分类子表列表
      *
-     * @param categoryId 分类表id
-     * @return 海关品类子表列表
+     * @param customCategoryId 分类表id
+     * @return 海关分类子表列表
      */
-    List<ErpCustomRuleCategoryItemDO> getCustomRuleCategoryItemListByCategoryId(Integer categoryId);
+    List<ErpCustomRuleCategoryItemDO> getCustomRuleCategoryItemListByCategoryId(Integer customCategoryId);
 
 }

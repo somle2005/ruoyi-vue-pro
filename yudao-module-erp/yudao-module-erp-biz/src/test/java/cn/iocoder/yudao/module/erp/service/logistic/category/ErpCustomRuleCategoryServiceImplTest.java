@@ -106,7 +106,6 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
             o.setMaterial(null);
             o.setDeclaredType(null);
             o.setDeclaredTypeEn(null);
-            o.setCombinedValue(null);
         });
         customRuleCategoryMapper.insert(dbCustomRuleCategory);
         // 测试 createTime 不匹配
@@ -117,8 +116,6 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
         customRuleCategoryMapper.insert(cloneIgnoreId(dbCustomRuleCategory, o -> o.setDeclaredType(null)));
         // 测试 declaredTypeEn 不匹配
         customRuleCategoryMapper.insert(cloneIgnoreId(dbCustomRuleCategory, o -> o.setDeclaredTypeEn(null)));
-        // 测试 combinedValue 不匹配
-        customRuleCategoryMapper.insert(cloneIgnoreId(dbCustomRuleCategory, o -> o.setCombinedValue(null)));
         // 准备参数
         ErpCustomRuleCategoryPageReqVO reqVO = new ErpCustomRuleCategoryPageReqVO();
         reqVO.setCreateTime(buildBetweenTime(2023, 2, 1, 2023, 2, 28));

@@ -102,7 +102,7 @@ public class ErpCustomRuleCategoryItemServiceImplTest extends BaseDbUnitTest {
     public void testGetCustomRuleCategoryItemPage() {
         // mock 数据
         ErpCustomRuleCategoryItemDO dbCustomRuleCategoryItem = randomPojo(ErpCustomRuleCategoryItemDO.class, o -> { // 等会查询到
-            o.setCategoryId(null);
+            o.setCustomCategoryId(null);
             o.setCountryCode(null);
             o.setHsCode(null);
             o.setTaxRate(null);
@@ -110,7 +110,7 @@ public class ErpCustomRuleCategoryItemServiceImplTest extends BaseDbUnitTest {
         });
         customRuleCategoryItemMapper.insert(dbCustomRuleCategoryItem);
         // 测试 categoryId 不匹配
-        customRuleCategoryItemMapper.insert(cloneIgnoreId(dbCustomRuleCategoryItem, o -> o.setCategoryId(null)));
+        customRuleCategoryItemMapper.insert(cloneIgnoreId(dbCustomRuleCategoryItem, o -> o.setCustomCategoryId(null)));
         // 测试 countryCode 不匹配
         customRuleCategoryItemMapper.insert(cloneIgnoreId(dbCustomRuleCategoryItem, o -> o.setCountryCode(null)));
         // 测试 hsCode 不匹配

@@ -9,7 +9,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 
-@Schema(description = "管理后台 - 海关品类子表新增/修改 Request VO")
+@Schema(description = "管理后台 - 海关分类子表新增/修改 Request VO")
 @Data
 public class ErpCustomRuleCategoryItemSaveReqVO {
 
