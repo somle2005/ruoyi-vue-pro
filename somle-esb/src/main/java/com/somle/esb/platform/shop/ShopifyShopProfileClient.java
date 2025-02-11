@@ -73,11 +73,19 @@ public class ShopifyShopProfileClient extends ShopProfileClient {
     public JSONObject getRawOrders() {
         return getRawResult(ShopifyAPI.GET_ORDERS);
     }
+
     /**
      * 获得商品信息
      **/
     public JSONArray getProducts() {
         return getResult(ShopifyAPI.GET_PRODUCTS);
+    }
+
+    /**
+     * 获得原始商品信息
+     **/
+    public JSONObject getRawProducts() {
+        return getRawResult(ShopifyAPI.GET_PRODUCTS);
     }
 
 
