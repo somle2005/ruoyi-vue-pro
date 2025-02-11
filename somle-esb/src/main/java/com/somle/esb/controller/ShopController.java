@@ -12,8 +12,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/shopify")
-public class ShopifyController {
+@RequestMapping("/api")
+public class ShopController {
 
     @Autowired
     private ShopifyShopProfileClient shopProfileClient;
@@ -21,8 +21,8 @@ public class ShopifyController {
     @Resource
     private SyncShopProfileJob shopProfileJob;
 
-    @GetMapping("/sync")
-    public CommonResult<String> sync() {
+    @GetMapping("/shop/sync")
+    public CommonResult<String> syncShopProfile() {
         try {
             shopProfileJob.execute(null);
         } catch (Exception e) {
@@ -31,8 +31,8 @@ public class ShopifyController {
         return  CommonResult.success("suc");
     }
 
-    @GetMapping("/products")
-    public JSONObject products() {
+    @GetMapping("/shopify/products")
+    public JSONObject getShopifyProducts() {
         return shopProfileClient.getRawProducts();
     }
 }
