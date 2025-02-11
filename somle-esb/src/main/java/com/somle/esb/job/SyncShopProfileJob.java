@@ -1,8 +1,6 @@
 package com.somle.esb.job;
 
-import cn.iocoder.yudao.framework.quartz.core.scheduler.SchedulerManager;
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
-import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.ErpShopProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.convert.shop.ErpShopConvert;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
@@ -10,11 +8,10 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.ErpShopProductService;
 import com.somle.esb.converter.shop.ErpShopProfileConverter;
+import com.somle.esb.enums.TenantId;
 import com.somle.framework.common.concurrent.AsyncTask;
-import com.somle.framework.common.util.collection.CollectionUtils;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
-import com.somle.framework.domain.SomleConsts;
 import com.somle.framework.domain.sales.SalesPlatform;
 import com.somle.framework.domain.shop.ShopProfileClient;
 import com.somle.framework.domain.shop.ShopProfileType;
@@ -83,7 +80,7 @@ public class SyncShopProfileJob extends DataJob {
 
     private void syncShopProfile(SalesPlatform salesPlatform,Map<SalesPlatform,ShopProfileClient> shopProfileClientMap) {
 
-        TenantContextHolder.setTenantId(SomleConsts.DEFAULT_TENANT_ID);
+        TenantContextHolder.setTenantId(TenantId.DEFAULT.getId());
 
         ShopProfileClient shopProfileClient=shopProfileClientMap.get(salesPlatform);
         if(shopProfileClient==null) {

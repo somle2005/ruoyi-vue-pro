@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import com.somle.esb.enums.TenantId;
 import com.somle.esb.handler.ErpCustomRuleHandler;
 import com.somle.esb.handler.ErpProductHandler;
 import com.somle.framework.test.core.ut.BaseSpringIntegrationTest;
@@ -17,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import com.somle.framework.domain.SomleConsts;
 
 @Slf4j
 public class SyncErpProductJobTest extends BaseSpringIntegrationTest {
@@ -35,7 +35,7 @@ public class SyncErpProductJobTest extends BaseSpringIntegrationTest {
         AtomicReference<List<String>> barCodes = new AtomicReference<>(new ArrayList<>());
         AtomicReference<List<ErpCustomRuleDTO>> customRuleDTOS = new AtomicReference<>();
         try {
-            TenantContextHolder.setTenantId(SomleConsts.DEFAULT_TENANT_ID);// 自动
+            TenantContextHolder.setTenantId(TenantId.DEFAULT.getId());// 自动
             // 发送消息
             Optional.ofNullable(erpCustomRuleApi.listCustomRules(null)).ifPresent(detailDTOS -> {
                 barCodes.set(detailDTOS.stream().map(dto -> dto.getProductDTO().getBarCode()).toList());
