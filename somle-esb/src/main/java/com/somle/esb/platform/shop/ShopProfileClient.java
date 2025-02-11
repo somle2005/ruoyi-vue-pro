@@ -1,8 +1,8 @@
-package com.somle.framework.domain.shop;
+package com.somle.esb.platform.shop;
 
+import com.somle.esb.enums.SalesPlatform;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
-import com.somle.framework.domain.sales.SalesPlatform;
 
 /**
  * @className: IShopProfileClient

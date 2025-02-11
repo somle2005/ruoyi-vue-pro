@@ -1,14 +1,13 @@
 package com.somle.esb.converter.shop;
 
-import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.ErpShopProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
-import com.somle.framework.domain.sales.SalesPlatform;
-import com.somle.framework.domain.shop.ShopProfileType;
-import com.somle.framework.domain.shop.model.ShopProfileDTO;
+import com.somle.esb.enums.SalesPlatform;
+import com.somle.esb.enums.ShopProfileType;
+import com.somle.esb.model.ShopProfileDTO;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;

@@ -1,8 +1,8 @@
 package com.somle.esb.converter.shop;
 
-import com.somle.framework.domain.sales.SalesPlatform;
-import com.somle.framework.domain.shop.ShopProfileType;
-import com.somle.framework.domain.shop.model.ShopProfileDTO;
+import com.somle.esb.enums.SalesPlatform;
+import com.somle.esb.enums.ShopProfileType;
+import com.somle.esb.model.ShopProfileDTO;
 
 import java.util.HashMap;
 import java.util.Map;

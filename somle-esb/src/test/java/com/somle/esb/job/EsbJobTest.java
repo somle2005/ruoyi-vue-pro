@@ -27,7 +27,7 @@ import com.somle.esb.service.EsbService;
 import com.somle.framework.test.core.ut.BaseSpringTest;
 import com.somle.kingdee.service.KingdeeService;
 import com.somle.matomo.service.MatomoService;
-import com.somle.shopify.service.ShopifyShopProfileClient;
+import com.somle.esb.platform.shop.ShopifyShopProfileClient;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;

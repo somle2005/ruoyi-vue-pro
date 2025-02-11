@@ -1,4 +1,4 @@
-package com.somle.framework.domain.sales;
+package com.somle.esb.enums;
 
 import lombok.Getter;
 

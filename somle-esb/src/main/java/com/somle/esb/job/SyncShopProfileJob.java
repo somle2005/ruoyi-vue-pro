@@ -9,13 +9,13 @@ import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.ErpShopProductService;
 import com.somle.esb.converter.shop.ErpShopProfileConverter;
 import com.somle.esb.enums.TenantId;
+import com.somle.esb.platform.shop.ShopProfileClient;
 import com.somle.framework.common.concurrent.AsyncTask;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
-import com.somle.framework.domain.sales.SalesPlatform;
-import com.somle.framework.domain.shop.ShopProfileClient;
-import com.somle.framework.domain.shop.ShopProfileType;
-import com.somle.framework.domain.shop.model.ShopProfileDTO;
+import com.somle.esb.enums.SalesPlatform;
+import com.somle.esb.enums.ShopProfileType;
+import com.somle.esb.model.ShopProfileDTO;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -57,7 +57,7 @@ public class SyncShopProfileJob extends DataJob {
     @Override
     public String execute(String param) throws Exception {
 
-        Map<String,ShopProfileClient> shopProfileClients = applicationContext.getBeansOfType(ShopProfileClient.class);
+        Map<String, ShopProfileClient> shopProfileClients = applicationContext.getBeansOfType(ShopProfileClient.class);
         Map<SalesPlatform,ShopProfileClient> shopProfileClientMap=shopProfileClients.values().stream()
             .collect(Collectors.toMap(t->t.getSalesPlatform(), t -> t));
 

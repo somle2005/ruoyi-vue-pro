@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.erp.service.shop;
 
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
-import com.somle.framework.domain.sales.SalesPlatform;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;

@@ -1,8 +1,8 @@
-package com.somle.framework.domain.shop.model;
+package com.somle.esb.model;
 
 
-import com.somle.framework.domain.sales.SalesPlatform;
-import com.somle.framework.domain.shop.ShopProfileType;
+import com.somle.esb.enums.SalesPlatform;
+import com.somle.esb.enums.ShopProfileType;
 import lombok.Data;
 
 /**

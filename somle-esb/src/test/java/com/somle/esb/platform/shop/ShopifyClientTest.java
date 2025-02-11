@@ -1,4 +1,4 @@
-package com.somle.shopify.service;
+package com.somle.esb.platform.shop;
 
 
 import com.somle.framework.common.util.json.JSONArray;

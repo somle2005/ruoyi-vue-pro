@@ -1,4 +1,4 @@
-package com.somle.framework.domain.shop;
+package com.somle.esb.enums;
 
 public enum ShopProfileType {
     SHOP,PRODUCT,ORDER,PAYOUT;

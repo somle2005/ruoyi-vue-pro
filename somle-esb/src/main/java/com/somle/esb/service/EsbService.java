@@ -2,7 +2,7 @@ package com.somle.esb.service;
 
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import com.somle.esb.model.OssData;
-import com.somle.shopify.service.ShopifyShopProfileClient;
+import com.somle.esb.platform.shop.ShopifyShopProfileClient;
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;

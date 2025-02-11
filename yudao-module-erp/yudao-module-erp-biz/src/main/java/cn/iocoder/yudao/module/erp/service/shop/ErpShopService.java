@@ -1,7 +1,5 @@
 package cn.iocoder.yudao.module.erp.service.shop;
 
-import cn.iocoder.yudao.framework.common.pojo.CommonResult;
-import com.somle.framework.domain.sales.SalesPlatform;
 import jakarta.validation.*;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
