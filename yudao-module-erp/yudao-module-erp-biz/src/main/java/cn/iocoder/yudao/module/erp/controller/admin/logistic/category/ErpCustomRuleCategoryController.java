@@ -12,8 +12,8 @@ import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCust
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategoryRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategorySaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.tool.Validation;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomRuleCategoryDO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomRuleCategoryItemDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
 import cn.iocoder.yudao.module.erp.service.logistic.category.ErpCustomRuleCategoryService;
 import cn.iocoder.yudao.module.erp.service.logistic.category.item.ErpCustomRuleCategoryItemService;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
@@ -42,29 +42,29 @@ import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - 海关分类")
 @RestController
-@RequestMapping("/erp/custom-rule-category")
+@RequestMapping("/erp/custom-category")
 @Validated
 public class ErpCustomRuleCategoryController {
 
     @Resource
-    private ErpCustomRuleCategoryService customRuleCategoryService;
-    @Resource
-    private ErpCustomRuleCategoryItemService customRuleCategoryItemService;
-    @Resource
     DictDataApi dictDataApi;
     @Resource
     AdminUserApi adminUserApi;
+    @Resource
+    private ErpCustomRuleCategoryService customRuleCategoryService;
+    @Resource
+    private ErpCustomRuleCategoryItemService customRuleCategoryItemService;
 
     @PostMapping("/create")
     @Operation(summary = "创建海关分类")
-    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category:create')")
+    @PreAuthorize("@ss.hasPermission('erp:custom-category:create')")
     public CommonResult<Long> createCustomRuleCategory(@Validated(Validation.OnCreate.class) @RequestBody ErpCustomRuleCategorySaveReqVO createReqVO) {
         return success(customRuleCategoryService.createCustomRuleCategory(createReqVO));
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新海关分类")
-    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category:update')")
+    @PreAuthorize("@ss.hasPermission('erp:custom-category:update')")
     public CommonResult<Boolean> updateCustomRuleCategory(@Validated(Validation.OnUpdate.class) @RequestBody ErpCustomRuleCategorySaveReqVO updateReqVO) {
         customRuleCategoryService.updateCustomRuleCategory(updateReqVO);
         return success(true);
@@ -73,7 +73,7 @@ public class ErpCustomRuleCategoryController {
     @DeleteMapping("/delete")
     @Operation(summary = "删除海关分类")
     @Parameter(name = "id", description = "编号", required = true)
-    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category:delete')")
+    @PreAuthorize("@ss.hasPermission('erp:custom-category:delete')")
     public CommonResult<Boolean> deleteCustomRuleCategory(@NotNull(message = "id不能为null") @RequestParam("id") Long id) {
         customRuleCategoryService.deleteCustomRuleCategory(id);
         return success(true);
@@ -82,9 +82,9 @@ public class ErpCustomRuleCategoryController {
     @GetMapping("/get")
     @Operation(summary = "获得海关分类")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
-    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category:query')")
+    @PreAuthorize("@ss.hasPermission('erp:custom-category:query')")
     public CommonResult<ErpCustomRuleCategoryRespVO> getCustomRuleCategory(@NotNull(message = "id不能为null") @RequestParam("id") Long id) {
-        ErpCustomRuleCategoryDO customRuleCategory = customRuleCategoryService.getCustomRuleCategory(id);
+        ErpCustomCategoryDO customRuleCategory = customRuleCategoryService.getCustomRuleCategory(id);
         List<ErpCustomRuleCategoryRespVO> vos = null;
         if (customRuleCategory != null) {
             vos = BindingResult(List.of(customRuleCategory));
@@ -94,20 +94,20 @@ public class ErpCustomRuleCategoryController {
 
     @GetMapping("/page")
     @Operation(summary = "获得海关分类分页")
-    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category:query')")
+    @PreAuthorize("@ss.hasPermission('erp:custom-category:query')")
     public CommonResult<PageResult<ErpCustomRuleCategoryRespVO>> getCustomRuleCategoryPage(@Valid ErpCustomRuleCategoryPageReqVO pageReqVO) {
-        PageResult<ErpCustomRuleCategoryDO> pageResult = customRuleCategoryService.getCustomRuleCategoryPage(pageReqVO);
+        PageResult<ErpCustomCategoryDO> pageResult = customRuleCategoryService.getCustomRuleCategoryPage(pageReqVO);
         return success(new PageResult<>(BindingResult(pageResult.getList()), pageResult.getTotal()));
     }
 
     @GetMapping("/export-excel")
     @Operation(summary = "导出海关分类 Excel")
-    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category:export')")
+    @PreAuthorize("@ss.hasPermission('erp:custom-category:export')")
     @ApiAccessLog(operateType = EXPORT)
     public void exportCustomRuleCategoryExcel(@Valid ErpCustomRuleCategoryPageReqVO pageReqVO,
                                               HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<ErpCustomRuleCategoryDO> list = customRuleCategoryService.getCustomRuleCategoryPage(pageReqVO).getList();
+        List<ErpCustomCategoryDO> list = customRuleCategoryService.getCustomRuleCategoryPage(pageReqVO).getList();
         // 导出 Excel
         ExcelUtils.write(response, "海关分类.xls", "数据", ErpCustomRuleCategoryRespVO.class,
             BeanUtils.toBean(BindingResult(list), ErpCustomRuleCategoryRespVO.class));
@@ -115,12 +115,12 @@ public class ErpCustomRuleCategoryController {
 
     // ==================== 子表（海关分类子表） ====================
 
-    @GetMapping("/custom-rule-category-item/list-by-category-id")
+    @GetMapping("/custom-category-item/list-by-category-id")
     @Operation(summary = "获得海关分类子表列表")
     @Parameter(name = "categoryId", description = "分类表id")
-    @PreAuthorize("@ss.hasPermission('erp:custom-rule-category:query')")
+    @PreAuthorize("@ss.hasPermission('erp:custom-category:query')")
     public CommonResult<List<ErpCustomRuleCategoryItemRespVO>> getCustomRuleCategoryItemListByCategoryId(@NotNull(message = "主表id不能为null") @RequestParam("categoryId") Integer categoryId) {
-        List<ErpCustomRuleCategoryItemDO> itemDOList = customRuleCategoryService.getCustomRuleCategoryItemListByCategoryId(categoryId);
+        List<ErpCustomCategoryItemDO> itemDOList = customRuleCategoryService.getCustomRuleCategoryItemListByCategoryId(categoryId);
         if (CollectionUtils.isEmpty(itemDOList)) {
             return success(Collections.emptyList());
         }
@@ -143,7 +143,7 @@ public class ErpCustomRuleCategoryController {
     @GetMapping({"/simple-list"})
     @Operation(summary = "获得海关分类组合值精简列表", description = "材料+报关品名")
     public CommonResult<List<ErpCustomRuleCategoryItemSimpleRespVO>> getCustomRuleCategoryItemList() {
-        List<ErpCustomRuleCategoryDO> list = customRuleCategoryService.getCustomRuleCategoryPage(null).getList();
+        List<ErpCustomCategoryDO> list = customRuleCategoryService.getCustomRuleCategoryPage(null).getList();
         List<ErpCustomRuleCategoryRespVO> respVOS = BindingResult(list);
         return success(respVOS.stream().map(vo -> new ErpCustomRuleCategoryItemSimpleRespVO()
             .setCustomCategoryId(vo.getId())
@@ -151,9 +151,9 @@ public class ErpCustomRuleCategoryController {
     }
 
 
-    private List<ErpCustomRuleCategoryRespVO> BindingResult(List<ErpCustomRuleCategoryDO> listDOs) {
-        List<Long> ids = listDOs.stream().map(ErpCustomRuleCategoryDO::getId).toList();
-        Map<Long, List<ErpCustomRuleCategoryItemDO>> itemMap = customRuleCategoryItemService.getCustomRuleCategoryItemMap(ids);
+    private List<ErpCustomRuleCategoryRespVO> BindingResult(List<ErpCustomCategoryDO> listDOs) {
+        List<Long> ids = listDOs.stream().map(ErpCustomCategoryDO::getId).toList();
+        Map<Long, List<ErpCustomCategoryItemDO>> itemMap = customRuleCategoryItemService.getCustomRuleCategoryItemMap(ids);
         //1 材料ids
         List<DictDataRespDTO> dtoList = dictDataApi.getDictDataList("erp_product_material");
         //1.1 构造map  字典的value:字典的label
@@ -170,13 +170,13 @@ public class ErpCustomRuleCategoryController {
         //2 渲染
         return BeanUtils.toBean(listDOs, ErpCustomRuleCategoryRespVO.class, vo -> {
             vo.setCombinedValue(materialMap.get(vo.getMaterial().toString()) + vo.getDeclaredType());//组合值
-            List<ErpCustomRuleCategoryItemDO> items = itemMap.get(vo.getId());
+            List<ErpCustomCategoryItemDO> items = itemMap.get(vo.getId());
             Optional.ofNullable(vo.getUpdater()).ifPresent(updater -> vo.setUpdater(userMap.get(Long.parseLong(updater)).getNickname()));//创建人
-            Optional.ofNullable(vo.getCreator()).ifPresent(creator -> vo.setUpdater(userMap.get(Long.parseLong(creator)).getNickname()));//更新人
+            Optional.ofNullable(vo.getCreator()).ifPresent(creator -> vo.setCreator(userMap.get(Long.parseLong(creator)).getNickname()));//更新人
 
             vo.setCustomRuleCategoryItems(BeanUtils.toBean(items, ErpCustomRuleCategoryItemRespVO.class, item -> {
                 Optional.ofNullable(item.getUpdater()).ifPresent(updater -> item.setUpdater(userMap.get(Long.parseLong(updater)).getNickname()));//创建人
-                Optional.ofNullable(item.getCreator()).ifPresent(creator -> item.setUpdater(userMap.get(Long.parseLong(creator)).getNickname()));//更新人
+                Optional.ofNullable(item.getCreator()).ifPresent(creator -> item.setCreator(userMap.get(Long.parseLong(creator)).getNickname()));//更新人
             }));//子表
 
         });

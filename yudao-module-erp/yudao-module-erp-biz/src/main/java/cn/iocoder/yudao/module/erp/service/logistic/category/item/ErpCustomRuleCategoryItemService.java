@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.erp.service.logistic.category.item;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemSaveReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomRuleCategoryItemDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
@@ -32,7 +32,7 @@ public interface ErpCustomRuleCategoryItemService {
      * @param categoryId 海关分类id
      * @param list       海关分类子表列表
      */
-    void createCustomRuleCategoryItemList(Long categoryId, List<ErpCustomRuleCategoryItemDO> list);
+    void createCustomRuleCategoryItemList(Long categoryId, List<ErpCustomCategoryItemDO> list);
 
     /**
      * 更新海关分类子表
@@ -47,7 +47,7 @@ public interface ErpCustomRuleCategoryItemService {
      * @param categoryId 海关分类id
      * @param list       海关分类子表列表
      */
-    void updateCustomRuleCategoryItemList(Long categoryId, List<ErpCustomRuleCategoryItemDO> list);
+    void updateCustomRuleCategoryItemList(Long categoryId, List<ErpCustomCategoryItemDO> list);
 
     /**
      * 删除海关分类子表
@@ -62,7 +62,7 @@ public interface ErpCustomRuleCategoryItemService {
      * @param id 编号
      * @return 海关分类子表
      */
-    ErpCustomRuleCategoryItemDO getCustomRuleCategoryItem(Long id);
+    ErpCustomCategoryItemDO getCustomRuleCategoryItem(Long id);
 
     /**
      * 获得海关分类子表分页
@@ -70,7 +70,7 @@ public interface ErpCustomRuleCategoryItemService {
      * @param pageReqVO 分页查询
      * @return 海关分类子表分页
      */
-    PageResult<ErpCustomRuleCategoryItemDO> getCustomRuleCategoryItemPage(ErpCustomRuleCategoryItemPageReqVO pageReqVO);
+    PageResult<ErpCustomCategoryItemDO> getCustomRuleCategoryItemPage(ErpCustomRuleCategoryItemPageReqVO pageReqVO);
 
     /**
      * 构造categoryId对应的Map
@@ -78,11 +78,11 @@ public interface ErpCustomRuleCategoryItemService {
      * categoryId : list
      *
      * @param categoryIds 分类id
-     * @return Map<Long, List < ErpCustomRuleCategoryItemDO>>
+     * @return Map<Long, List < ErpCustomCategoryItemDO>>
      */
-    default Map<Long, List<ErpCustomRuleCategoryItemDO>> getCustomRuleCategoryItemMap(Collection<Long> categoryIds) {
-        List<ErpCustomRuleCategoryItemDO> list = getCustomRuleCategoryItemListByCategoryId(categoryIds);
-        return list.stream().collect(Collectors.groupingBy(ErpCustomRuleCategoryItemDO::getCustomCategoryId));
+    default Map<Long, List<ErpCustomCategoryItemDO>> getCustomRuleCategoryItemMap(Collection<Long> categoryIds) {
+        List<ErpCustomCategoryItemDO> list = getCustomRuleCategoryItemListByCategoryId(categoryIds);
+        return list.stream().collect(Collectors.groupingBy(ErpCustomCategoryItemDO::getCustomCategoryId));
     }
 
     /**
@@ -91,5 +91,5 @@ public interface ErpCustomRuleCategoryItemService {
      * @param categoryIds 分类id
      * @return 海关分类子表列表
      */
-    List<ErpCustomRuleCategoryItemDO> getCustomRuleCategoryItemListByCategoryId(Collection<Long> categoryIds);
+    List<ErpCustomCategoryItemDO> getCustomRuleCategoryItemListByCategoryId(Collection<Long> categoryIds);
 }

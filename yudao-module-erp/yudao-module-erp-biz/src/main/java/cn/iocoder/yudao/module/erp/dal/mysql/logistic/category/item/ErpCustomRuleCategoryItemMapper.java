@@ -4,7 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemPageReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomRuleCategoryItemDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Collection;
@@ -16,30 +16,30 @@ import java.util.List;
  * @author 王岽宇
  */
 @Mapper
-public interface ErpCustomRuleCategoryItemMapper extends BaseMapperX<ErpCustomRuleCategoryItemDO> {
+public interface ErpCustomRuleCategoryItemMapper extends BaseMapperX<ErpCustomCategoryItemDO> {
 
-    default PageResult<ErpCustomRuleCategoryItemDO> selectPage(ErpCustomRuleCategoryItemPageReqVO reqVO) {
-        return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomRuleCategoryItemDO>()
-//            .eqIfPresent(ErpCustomRuleCategoryItemDO::getCategoryId, reqVO.getCategoryId())
-            .eqIfPresent(ErpCustomRuleCategoryItemDO::getCountryCode, reqVO.getCountryCode())
-            .eqIfPresent(ErpCustomRuleCategoryItemDO::getHsCode, reqVO.getHsCode())
-            .eqIfPresent(ErpCustomRuleCategoryItemDO::getTaxRate, reqVO.getTaxRate())
-            .betweenIfPresent(ErpCustomRuleCategoryItemDO::getCreateTime, reqVO.getCreateTime())
-            .orderByDesc(ErpCustomRuleCategoryItemDO::getId));
+    default PageResult<ErpCustomCategoryItemDO> selectPage(ErpCustomRuleCategoryItemPageReqVO reqVO) {
+        return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomCategoryItemDO>()
+//            .eqIfPresent(ErpCustomCategoryItemDO::getCategoryId, reqVO.getCategoryId())
+            .eqIfPresent(ErpCustomCategoryItemDO::getCountryCode, reqVO.getCountryCode())
+            .eqIfPresent(ErpCustomCategoryItemDO::getHsCode, reqVO.getHsCode())
+            .eqIfPresent(ErpCustomCategoryItemDO::getTaxRate, reqVO.getTaxRate())
+            .betweenIfPresent(ErpCustomCategoryItemDO::getCreateTime, reqVO.getCreateTime())
+            .orderByDesc(ErpCustomCategoryItemDO::getId));
     }
 
-    default List<ErpCustomRuleCategoryItemDO> selectListByCategoryId(Integer categoryId) {
-        return selectList(new LambdaQueryWrapperX<ErpCustomRuleCategoryItemDO>()
-            .eq(ErpCustomRuleCategoryItemDO::getCustomCategoryId, categoryId));
+    default List<ErpCustomCategoryItemDO> selectListByCategoryId(Integer categoryId) {
+        return selectList(new LambdaQueryWrapperX<ErpCustomCategoryItemDO>()
+            .eq(ErpCustomCategoryItemDO::getCustomCategoryId, categoryId));
     }
 
-    default List<ErpCustomRuleCategoryItemDO> selectListByCategoryId(Collection<Long> categoryIds) {
-        return selectList(new LambdaQueryWrapperX<ErpCustomRuleCategoryItemDO>()
-            .inIfPresent(ErpCustomRuleCategoryItemDO::getCustomCategoryId, categoryIds));
+    default List<ErpCustomCategoryItemDO> selectListByCategoryId(Collection<Long> categoryIds) {
+        return selectList(new LambdaQueryWrapperX<ErpCustomCategoryItemDO>()
+            .inIfPresent(ErpCustomCategoryItemDO::getCustomCategoryId, categoryIds));
     }
 
     default void deleteByCategoryId(Long categoryId) {
-        delete(new LambdaQueryWrapperX<ErpCustomRuleCategoryItemDO>()
-            .eq(ErpCustomRuleCategoryItemDO::getCustomCategoryId, categoryId));
+        delete(new LambdaQueryWrapperX<ErpCustomCategoryItemDO>()
+            .eq(ErpCustomCategoryItemDO::getCustomCategoryId, categoryId));
     }
 }

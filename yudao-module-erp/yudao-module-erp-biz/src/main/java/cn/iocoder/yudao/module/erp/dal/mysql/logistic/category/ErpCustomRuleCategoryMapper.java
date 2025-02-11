@@ -4,7 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategoryPageReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomRuleCategoryDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
 import org.apache.ibatis.annotations.Mapper;
 
 
@@ -14,15 +14,15 @@ import org.apache.ibatis.annotations.Mapper;
  * @author 王岽宇
  */
 @Mapper
-public interface ErpCustomRuleCategoryMapper extends BaseMapperX<ErpCustomRuleCategoryDO> {
+public interface ErpCustomRuleCategoryMapper extends BaseMapperX<ErpCustomCategoryDO> {
 
-    default PageResult<ErpCustomRuleCategoryDO> selectPage(ErpCustomRuleCategoryPageReqVO reqVO) {
-        return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomRuleCategoryDO>()
-            .betweenIfPresent(ErpCustomRuleCategoryDO::getCreateTime, reqVO.getCreateTime())
-            .eqIfPresent(ErpCustomRuleCategoryDO::getMaterial, reqVO.getMaterial())
-            .likeIfPresent(ErpCustomRuleCategoryDO::getDeclaredType, reqVO.getDeclaredType())
-            .likeIfPresent(ErpCustomRuleCategoryDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
-            .orderByDesc(ErpCustomRuleCategoryDO::getId));
+    default PageResult<ErpCustomCategoryDO> selectPage(ErpCustomRuleCategoryPageReqVO reqVO) {
+        return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomCategoryDO>()
+            .betweenIfPresent(ErpCustomCategoryDO::getCreateTime, reqVO.getCreateTime())
+            .eqIfPresent(ErpCustomCategoryDO::getMaterial, reqVO.getMaterial())
+            .likeIfPresent(ErpCustomCategoryDO::getDeclaredType, reqVO.getDeclaredType())
+            .likeIfPresent(ErpCustomCategoryDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
+            .orderByDesc(ErpCustomCategoryDO::getId));
     }
 
 }

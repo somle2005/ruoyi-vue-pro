@@ -3,8 +3,8 @@ package cn.iocoder.yudao.module.erp.service.logistic.category;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategoryPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategorySaveReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomRuleCategoryDO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomRuleCategoryItemDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -44,7 +44,7 @@ public interface ErpCustomRuleCategoryService {
      * @param id 编号
      * @return 海关分类
      */
-    ErpCustomRuleCategoryDO getCustomRuleCategory(Long id);
+    ErpCustomCategoryDO getCustomRuleCategory(Long id);
 
     /**
      * 获得海关分类分页
@@ -52,7 +52,7 @@ public interface ErpCustomRuleCategoryService {
      * @param pageReqVO 分页查询
      * @return 海关分类分页
      */
-    PageResult<ErpCustomRuleCategoryDO> getCustomRuleCategoryPage(ErpCustomRuleCategoryPageReqVO pageReqVO);
+    PageResult<ErpCustomCategoryDO> getCustomRuleCategoryPage(ErpCustomRuleCategoryPageReqVO pageReqVO);
 
     // ==================== 子表（海关分类子表） ====================
 
@@ -62,6 +62,6 @@ public interface ErpCustomRuleCategoryService {
      * @param customCategoryId 分类表id
      * @return 海关分类子表列表
      */
-    List<ErpCustomRuleCategoryItemDO> getCustomRuleCategoryItemListByCategoryId(Integer customCategoryId);
+    List<ErpCustomCategoryItemDO> getCustomRuleCategoryItemListByCategoryId(Integer customCategoryId);
 
 }

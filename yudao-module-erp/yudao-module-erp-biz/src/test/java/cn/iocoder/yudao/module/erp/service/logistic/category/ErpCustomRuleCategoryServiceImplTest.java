@@ -4,7 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategoryPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategorySaveReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomRuleCategoryDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.ErpCustomRuleCategoryMapper;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Disabled;
@@ -44,14 +44,14 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
         // 断言
         assertNotNull(customRuleCategoryId);
         // 校验记录的属性是否正确
-        ErpCustomRuleCategoryDO customRuleCategory = customRuleCategoryMapper.selectById(customRuleCategoryId);
+        ErpCustomCategoryDO customRuleCategory = customRuleCategoryMapper.selectById(customRuleCategoryId);
         assertPojoEquals(createReqVO, customRuleCategory, "id");
     }
 
     @Test
     public void testUpdateCustomRuleCategory_success() {
         // mock 数据
-        ErpCustomRuleCategoryDO dbCustomRuleCategory = randomPojo(ErpCustomRuleCategoryDO.class);
+        ErpCustomCategoryDO dbCustomRuleCategory = randomPojo(ErpCustomCategoryDO.class);
         customRuleCategoryMapper.insert(dbCustomRuleCategory);// @Sql: 先插入出一条存在的数据
         // 准备参数
         ErpCustomRuleCategorySaveReqVO updateReqVO = randomPojo(ErpCustomRuleCategorySaveReqVO.class, o -> {
@@ -61,7 +61,7 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
         // 调用
         customRuleCategoryService.updateCustomRuleCategory(updateReqVO);
         // 校验是否更新正确
-        ErpCustomRuleCategoryDO customRuleCategory = customRuleCategoryMapper.selectById(updateReqVO.getId()); // 获取最新的
+        ErpCustomCategoryDO customRuleCategory = customRuleCategoryMapper.selectById(updateReqVO.getId()); // 获取最新的
         assertPojoEquals(updateReqVO, customRuleCategory);
     }
 
@@ -77,7 +77,7 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
     @Test
     public void testDeleteCustomRuleCategory_success() {
         // mock 数据
-        ErpCustomRuleCategoryDO dbCustomRuleCategory = randomPojo(ErpCustomRuleCategoryDO.class);
+        ErpCustomCategoryDO dbCustomRuleCategory = randomPojo(ErpCustomCategoryDO.class);
         customRuleCategoryMapper.insert(dbCustomRuleCategory);// @Sql: 先插入出一条存在的数据
         // 准备参数
         Long id = dbCustomRuleCategory.getId();
@@ -101,7 +101,7 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
     @Disabled  // TODO 请修改 null 为需要的值，然后删除 @Disabled 注解
     public void testGetCustomRuleCategoryPage() {
         // mock 数据
-        ErpCustomRuleCategoryDO dbCustomRuleCategory = randomPojo(ErpCustomRuleCategoryDO.class, o -> { // 等会查询到
+        ErpCustomCategoryDO dbCustomRuleCategory = randomPojo(ErpCustomCategoryDO.class, o -> { // 等会查询到
             o.setCreateTime(null);
             o.setMaterial(null);
             o.setDeclaredType(null);
@@ -125,7 +125,7 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
         reqVO.setCombinedValue(null);
 
         // 调用
-        PageResult<ErpCustomRuleCategoryDO> pageResult = customRuleCategoryService.getCustomRuleCategoryPage(reqVO);
+        PageResult<ErpCustomCategoryDO> pageResult = customRuleCategoryService.getCustomRuleCategoryPage(reqVO);
         // 断言
         assertEquals(1, pageResult.getTotal());
         assertEquals(1, pageResult.getList().size());

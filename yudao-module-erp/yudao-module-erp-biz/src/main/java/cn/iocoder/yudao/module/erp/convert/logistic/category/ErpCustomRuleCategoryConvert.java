@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.erp.convert.logistic.category;
 
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategorySaveReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomRuleCategoryDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
 import org.mapstruct.Mapper;
 
 import java.util.ArrayList;
@@ -13,13 +13,13 @@ public interface ErpCustomRuleCategoryConvert {
     ErpCustomRuleCategoryConvert INSTANCE = org.mapstruct.factory.Mappers.getMapper(ErpCustomRuleCategoryConvert.class);
 
     //VO->DO
-    ErpCustomRuleCategoryDO convert(ErpCustomRuleCategorySaveReqVO bean);
+    ErpCustomCategoryDO convert(ErpCustomRuleCategorySaveReqVO bean);
 
-    default List<ErpCustomRuleCategoryDO> convert(List<ErpCustomRuleCategorySaveReqVO> list) {
+    default List<ErpCustomCategoryDO> convert(List<ErpCustomRuleCategorySaveReqVO> list) {
         if (list == null) {
             return null;
         }
-        List<ErpCustomRuleCategoryDO> result = new ArrayList<>(list.size());
+        List<ErpCustomCategoryDO> result = new ArrayList<>(list.size());
         for (ErpCustomRuleCategorySaveReqVO bean : list) {
             result.add(convert(bean));
         }
