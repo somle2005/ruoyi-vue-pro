@@ -12,11 +12,7 @@ import com.somle.framework.common.util.web.RequestX;
 /**
  * @Description Shopify 接口定义
  */
-public /**
- * @Description Shopify 接口定义
- **/
-
-enum ShopifyAPI {
+ public enum ShopifyAPI {
 
     GET_SHOP("获取 Shopify 店铺信息","/admin/api/2021-07/shop.json",RequestX.Method.GET,"shop",JSONObject.class),
     GET_ORDERS("获取 Shopify 订单信息","/admin/api/2024-10/orders.json?status=any",RequestX.Method.GET,"orders",JSONArray.class),
