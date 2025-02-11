@@ -20,14 +20,14 @@ import java.util.List;
  * @Version: 1.0
  * @description:
  */
-abstract class ShopifyProfileConverter<IN,OUT> extends ErpShopProfileConverter<IN,OUT> {
+abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpShopProfileConverter<IN,OUT> {
 
-    public ShopifyProfileConverter(ShopProfileType shopProfileType) {
+    public ShopifyToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.SHOPIFY, shopProfileType);
     }
 
     @Component
-    private static class ShopifyShopConverter extends ShopifyProfileConverter<JSONObject,ErpShopSaveReqVO> {
+    private static class ShopifyShopConverter extends ShopifyToErpProfileConverter<JSONObject,ErpShopSaveReqVO> {
 
         public ShopifyShopConverter() {
             super(ShopProfileType.SHOP);
@@ -52,7 +52,7 @@ abstract class ShopifyProfileConverter<IN,OUT> extends ErpShopProfileConverter<I
     }
 
     @Component
-    private static class ShopifyShopProductConverter extends ShopifyProfileConverter<JSONArray, List<ErpShopProductDO>> {
+    private static class ShopifyShopProductConverter extends ShopifyToErpProfileConverter<JSONArray, List<ErpShopProductDO>> {
 
         public ShopifyShopProductConverter() {
             super(ShopProfileType.PRODUCT);

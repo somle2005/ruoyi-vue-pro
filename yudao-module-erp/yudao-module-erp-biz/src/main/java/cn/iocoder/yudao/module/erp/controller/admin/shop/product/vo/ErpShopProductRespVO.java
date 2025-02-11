@@ -48,4 +48,6 @@ public class ErpShopProductRespVO {
     @Schema(description = "店铺产品项目", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private List<ErpShopProductItemRespVO> items;
 
+    // private E
+
 }

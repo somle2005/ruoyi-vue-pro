@@ -14,9 +14,9 @@ import java.util.Map;
 * @Param
 * @return
 **/
-public abstract class ErpShopProfileConverter<IN,OUT> {
+public abstract class AbstractErpShopProfileConverter<IN,OUT> {
 
-    private static final Map<String, ErpShopProfileConverter<?,?>> CONVERTERS = new HashMap<>();
+    private static final Map<String, AbstractErpShopProfileConverter<?,?>> CONVERTERS = new HashMap<>();
 
     /**
     * @Author LFJ
@@ -28,7 +28,7 @@ public abstract class ErpShopProfileConverter<IN,OUT> {
 
     public static <VO> VO convert(ShopProfileDTO shopInfoDTO) {
         String key = makeKey(shopInfoDTO.getSalesPlatform(),shopInfoDTO.getShopProfileType());
-        ErpShopProfileConverter<?,?> converter= CONVERTERS.get(key);
+        AbstractErpShopProfileConverter<?,?> converter= CONVERTERS.get(key);
         if (converter==null) {
             throw new IllegalArgumentException("未找到对应的转换器:"+shopInfoDTO.getSalesPlatform().name()+"."+shopInfoDTO.getShopProfileType().name());
         }
@@ -36,7 +36,7 @@ public abstract class ErpShopProfileConverter<IN,OUT> {
     }
 
 
-    protected ErpShopProfileConverter(SalesPlatform salesPlatform, ShopProfileType shopInfoType) {
+    protected AbstractErpShopProfileConverter(SalesPlatform salesPlatform, ShopProfileType shopInfoType) {
         CONVERTERS.put(makeKey(salesPlatform, shopInfoType),this);
     }
 

@@ -7,7 +7,7 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.ErpShopProductService;
-import com.somle.esb.converter.shop.ErpShopProfileConverter;
+import com.somle.esb.converter.shop.AbstractErpShopProfileConverter;
 import com.somle.esb.enums.TenantId;
 import com.somle.esb.platform.shop.ShopProfileClient;
 import com.somle.framework.common.concurrent.AsyncTask;
@@ -94,7 +94,7 @@ public class SyncShopProfileJob extends DataJob {
         }
         // 转换VO
         ShopProfileDTO<JSONObject> shopprofileDTO=new ShopProfileDTO(salesPlatform, ShopProfileType.SHOP,shopJson);
-        ErpShopSaveReqVO shopVO= ErpShopProfileConverter.convert(shopprofileDTO);
+        ErpShopSaveReqVO shopVO= AbstractErpShopProfileConverter.convert(shopprofileDTO);
 
         if(shopVO==null) {
             throw new RuntimeException("缺少店铺信息VO");
@@ -126,7 +126,7 @@ public class SyncShopProfileJob extends DataJob {
     private void syncShopProducts(SalesPlatform salesPlatform,ErpShopDO shopDO, JSONArray productArray) {
         ShopProfileDTO<JSONArray> shopProductsDTO=new ShopProfileDTO(salesPlatform, ShopProfileType.PRODUCT,productArray);
         // 转换
-        List<ErpShopProductDO> productsFromShopify= ErpShopProfileConverter.convert(shopProductsDTO);
+        List<ErpShopProductDO> productsFromShopify= AbstractErpShopProfileConverter.convert(shopProductsDTO);
         // 装配
         List<ErpShopProductDO> shopProductsInDB= shopProductService.selectByShopId(shopDO.getId());
         Map<String,ErpShopProductDO> shopProductsInDBMap= StreamX.from(shopProductsInDB).toMap
