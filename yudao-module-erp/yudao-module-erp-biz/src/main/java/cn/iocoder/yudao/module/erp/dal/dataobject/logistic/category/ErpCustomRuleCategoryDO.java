@@ -22,11 +22,10 @@ import lombok.*;
 @AllArgsConstructor
 public class ErpCustomRuleCategoryDO extends TenantBaseDO {
 
-
     /**
      * 编号
      */
-    @TableId(type  = IdType.AUTO)
+    @TableId(type = IdType.AUTO)
     private Long id;
     /**
      * 材质-字典
@@ -40,9 +39,5 @@ public class ErpCustomRuleCategoryDO extends TenantBaseDO {
      * 英文品名
      */
     private String declaredTypeEn;
-    /**
-     * 材质对应string+报关品名
-     */
-    private String combinedValue;
 
 }

@@ -4,6 +4,9 @@ import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCust
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomRuleCategoryDO;
 import org.mapstruct.Mapper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Mapper
 public interface ErpCustomRuleCategoryConvert {
     //instance
@@ -11,11 +14,12 @@ public interface ErpCustomRuleCategoryConvert {
 
     //VO->DO
     ErpCustomRuleCategoryDO convert(ErpCustomRuleCategorySaveReqVO bean);
-    default java.util.List<ErpCustomRuleCategoryDO> convert(java.util.List<ErpCustomRuleCategorySaveReqVO> list) {
+
+    default List<ErpCustomRuleCategoryDO> convert(List<ErpCustomRuleCategorySaveReqVO> list) {
         if (list == null) {
             return null;
         }
-        java.util.List<ErpCustomRuleCategoryDO> result = new java.util.ArrayList<>(list.size());
+        List<ErpCustomRuleCategoryDO> result = new ArrayList<>(list.size());
         for (ErpCustomRuleCategorySaveReqVO bean : list) {
             result.add(convert(bean));
         }

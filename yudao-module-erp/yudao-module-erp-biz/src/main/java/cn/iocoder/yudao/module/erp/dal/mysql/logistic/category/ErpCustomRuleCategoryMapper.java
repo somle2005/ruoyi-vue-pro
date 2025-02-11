@@ -22,7 +22,6 @@ public interface ErpCustomRuleCategoryMapper extends BaseMapperX<ErpCustomRuleCa
             .eqIfPresent(ErpCustomRuleCategoryDO::getMaterial, reqVO.getMaterial())
             .eqIfPresent(ErpCustomRuleCategoryDO::getDeclaredType, reqVO.getDeclaredType())
             .eqIfPresent(ErpCustomRuleCategoryDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
-            .eqIfPresent(ErpCustomRuleCategoryDO::getCombinedValue, reqVO.getCombinedValue())
             .orderByDesc(ErpCustomRuleCategoryDO::getId));
     }
 
