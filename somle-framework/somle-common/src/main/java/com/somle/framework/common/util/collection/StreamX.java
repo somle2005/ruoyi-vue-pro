@@ -1,5 +1,7 @@
 package com.somle.framework.common.util.collection;
 
+import com.somle.framework.common.function.PairConsumer;
+
 import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -186,7 +188,6 @@ public class StreamX<T> {
     }
 
 
-
     /**
      * 排序
      */
@@ -205,48 +206,47 @@ public class StreamX<T> {
 
     /**
      * 排序,空值最后
+     *
      * @param property 属性
-     * @param  asc 是否降序，否则升序
+     * @param asc      是否降序，否则升序
      */
-    public <R> StreamX<T> sorted(Function<? super T, ? extends R> property,boolean asc) {
-        return sorted(property,asc,true);
+    public <R> StreamX<T> sorted(Function<? super T, ? extends R> property, boolean asc) {
+        return sorted(property, asc, true);
     }
 
     /**
      * 排序
-     * @param property 属性
-     * @param  asc 是否降序，否则升序
-     * @param  nullsLast 是否为空值最后
+     *
+     * @param property  属性
+     * @param asc       是否降序，否则升序
+     * @param nullsLast 是否为空值最后
      */
-    public <R> StreamX<T> sorted(Function<? super T, ? extends R> property,boolean asc,boolean nullsLast) {
-        this.stream = this.stream().sorted((o1,o2)->{
-            R v1=property.apply(o1);
-            R v2=property.apply(o2);
-            int cp=0;
-            if(v1==null && v2==null) cp=0;
-            else if(v1!=null && v2==null) {
-                cp = nullsLast? -1:1;
-            }
-            else if(v1==null && v2!=null) {
-                cp = nullsLast? 1: -1;
-            } else if(v1!=null && v2!=null) {
-                if(v1 instanceof Comparable) {
-                    cp =((Comparable) v1).compareTo((Comparable) v2);
+    public <R> StreamX<T> sorted(Function<? super T, ? extends R> property, boolean asc, boolean nullsLast) {
+        this.stream = this.stream().sorted((o1, o2) -> {
+            R v1 = property.apply(o1);
+            R v2 = property.apply(o2);
+            int cp = 0;
+            if (v1 == null && v2 == null) cp = 0;
+            else if (v1 != null && v2 == null) {
+                cp = nullsLast ? -1 : 1;
+            } else if (v1 == null && v2 != null) {
+                cp = nullsLast ? 1 : -1;
+            } else if (v1 != null && v2 != null) {
+                if (v1 instanceof Comparable) {
+                    cp = ((Comparable) v1).compareTo((Comparable) v2);
                 } else {
-                    String s1=v1.toString();
-                    String s2=v2.toString();
+                    String s1 = v1.toString();
+                    String s2 = v2.toString();
                     cp = s1.compareTo(s2);
                 }
-                if(!asc) {
-                    cp= -1 * cp;
+                if (!asc) {
+                    cp = -1 * cp;
                 }
             }
             return cp;
         });
         return this;
     }
-
-
 
 
     /**
@@ -295,50 +295,46 @@ public class StreamX<T> {
     }
 
 
-
     /**
      * 获得第一个非空元素的指定属性值
      */
-    public <R> R firstProperty(Function<T,R> property) {
-        T first =first();
-        return first==null ? null:property.apply(first);
+    public <R> R firstProperty(Function<T, R> property) {
+        T first = first();
+        return first == null ? null : property.apply(first);
     }
 
     /**
      * 获得第一个非空指定属性值，如果找不到着则返回 null
      */
-    public <R> R firstNonNullProperty(Function<T,R> property) {
+    public <R> R firstNonNullProperty(Function<T, R> property) {
         return stream().filter(Objects::nonNull).map(property).filter(Objects::nonNull).findFirst().orElse(null);
     }
-
-
 
 
     /**
      * 获得第一个非空元素的指定属性值，并指定默认值
      */
-    public <R> R firstProperty(Function<T,R> property,R defaultValue) {
+    public <R> R firstProperty(Function<T, R> property, R defaultValue) {
         R r = firstProperty(property);
-        return r==null?defaultValue:r;
+        return r == null ? defaultValue : r;
     }
 
     /**
      * 获得过滤后第一个非空元素的指定属性值，如果找不到着则返回 null
      */
-    public <R> R firstFilteredProperty(Predicate<? super T> filter,Function<T,R> property) {
+    public <R> R firstFilteredProperty(Predicate<? super T> filter, Function<T, R> property) {
         T first = first(filter);
-        return first==null?null:property.apply(first);
+        return first == null ? null : property.apply(first);
 
     }
 
     /**
      * 获得过滤后第一个非空元素的指定属性值
      */
-    public <R> R firstFilteredProperty(Predicate<? super T> filter,Function<T,R> property, R defaultValue) {
-        R r = firstFilteredProperty(filter,property);
-        return r==null?defaultValue:r;
+    public <R> R firstFilteredProperty(Predicate<? super T> filter, Function<T, R> property, R defaultValue) {
+        R r = firstFilteredProperty(filter, property);
+        return r == null ? defaultValue : r;
     }
-
 
 
     /**
@@ -373,15 +369,15 @@ public class StreamX<T> {
     /**
      * 获得任意一个非空元素的指定属性值
      */
-    public <R> R anyProperty(Function<T,R> property) {
-        T any =any();
-        return any==null ? null:property.apply(any);
+    public <R> R anyProperty(Function<T, R> property) {
+        T any = any();
+        return any == null ? null : property.apply(any);
     }
 
     /**
      * 获得任意一个非空指定属性值，如果找不到着则返回 null
      */
-    public <R> R anyNonNullProperty(Function<T,R> property) {
+    public <R> R anyNonNullProperty(Function<T, R> property) {
         return stream().filter(Objects::nonNull).map(property).filter(Objects::nonNull).findAny().orElse(null);
     }
 
@@ -389,25 +385,25 @@ public class StreamX<T> {
     /**
      * 获得任意一个非空元素的指定属性值
      */
-    public <R> R anyProperty(Function<T,R> property,R defaultValue) {
+    public <R> R anyProperty(Function<T, R> property, R defaultValue) {
         R r = anyProperty(property);
-        return r==null?defaultValue:r;
+        return r == null ? defaultValue : r;
     }
 
     /**
      * 获得过滤后任意一个非空元素的指定属性值
      */
-    public <R> R anyFilteredProperty(Predicate<? super T> filter,Function<T,R> property) {
+    public <R> R anyFilteredProperty(Predicate<? super T> filter, Function<T, R> property) {
         T first = any(filter);
-        return first==null?null:property.apply(first);
+        return first == null ? null : property.apply(first);
     }
 
     /**
      * 获得过滤后任意一个非空元素的指定属性值，并指定默认值
      */
-    public <R> R anyFilteredProperty(Predicate<? super T> filter,Function<T,R> property, R defaultValue) {
-        R r = anyFilteredProperty(filter,property);
-        return r==null?defaultValue:r;
+    public <R> R anyFilteredProperty(Predicate<? super T> filter, Function<T, R> property, R defaultValue) {
+        R r = anyFilteredProperty(filter, property);
+        return r == null ? defaultValue : r;
     }
 
 
@@ -440,20 +436,18 @@ public class StreamX<T> {
     }
 
 
-
-
     /**
      * 获得最后一个非空元素的指定属性值
      */
-    public <R> R lastProperty(Function<T,R> property) {
-        T first =last();
-        return first==null ? null:property.apply(first);
+    public <R> R lastProperty(Function<T, R> property) {
+        T first = last();
+        return first == null ? null : property.apply(first);
     }
 
     /**
      * 获得最后一个非空指定属性值，如果找不到着则返回 null
      */
-    public <R> R lastNonNullProperty(Function<T,R> property) {
+    public <R> R lastNonNullProperty(Function<T, R> property) {
         return stream().filter(Objects::nonNull).reduce((first, second) -> second).map(property).filter(Objects::nonNull).stream().findFirst().orElse(null);
     }
 
@@ -461,29 +455,27 @@ public class StreamX<T> {
     /**
      * 获得最后一个非空元素的指定属性值，并指定默认值
      */
-    public <R> R lastProperty(Function<T,R> property,R defaultValue) {
+    public <R> R lastProperty(Function<T, R> property, R defaultValue) {
         R r = lastProperty(property);
-        return r==null?defaultValue:r;
+        return r == null ? defaultValue : r;
     }
 
     /**
      * 获得过滤后最后一个非空元素的指定属性值
      */
-    public <R> R lastFilteredProperty(Predicate<? super T> filter,Function<T,R> property) {
+    public <R> R lastFilteredProperty(Predicate<? super T> filter, Function<T, R> property) {
         T first = last(filter);
-        return first==null?null:property.apply(first);
+        return first == null ? null : property.apply(first);
 
     }
 
     /**
      * 获得过滤后最后一个非空元素的指定属性值，并指定默认值
      */
-    public <R> R lastFilteredProperty(Predicate<? super T> filter,Function<T,R> property, R defaultValue) {
-        R r = lastFilteredProperty(filter,property);
-        return r==null?defaultValue:r;
+    public <R> R lastFilteredProperty(Predicate<? super T> filter, Function<T, R> property, R defaultValue) {
+        R r = lastFilteredProperty(filter, property);
+        return r == null ? defaultValue : r;
     }
-
-
 
 
     /**
@@ -496,12 +488,12 @@ public class StreamX<T> {
     /**
      * 返回集合中指定属性值为 null 元素的个数
      */
-    public <R> long nulls(Function<T,R> property) {
+    public <R> long nulls(Function<T, R> property) {
         long a = nulls();
-        long b = stream().filter(t->{
-            return t!=null && property.apply(t)==null;
+        long b = stream().filter(t -> {
+            return t != null && property.apply(t) == null;
         }).count();
-        return a+b;
+        return a + b;
     }
 
 
@@ -550,8 +542,6 @@ public class StreamX<T> {
     }
 
 
-
-
     /**
      * 当前集合按特定的Key 生成 Map
      */
@@ -576,8 +566,8 @@ public class StreamX<T> {
      * 当前集合按特定的Key 和 Value 生成 Map
      */
     public <K, V> Map<K, V> toMap(Function<? super T, ? extends K> key, Function<? super T, ? extends V> val) {
-        return this.stream().filter(Objects::nonNull).filter(t->{
-            return key.apply(t)!=null;
+        return this.stream().filter(Objects::nonNull).filter(t -> {
+            return key.apply(t) != null;
         }).collect(Collectors.toMap(key, val));
     }
 
@@ -587,8 +577,8 @@ public class StreamX<T> {
      * @param keepFirstOnDPkey true:如果key值重复，则按顺序保留第一个，其它值忽略；false:如果key值重复，则按顺序保留最后一个，其它值忽略
      */
     public <K, V> Map<K, V> toMap(Function<? super T, ? extends K> key, Function<? super T, ? extends V> val, boolean keepFirstOnDPkey) {
-        return this.stream().filter(Objects::nonNull).filter(t->{
-            return key.apply(t)!=null;
+        return this.stream().filter(Objects::nonNull).filter(t -> {
+            return key.apply(t) != null;
         }).collect(Collectors.toMap(key, val, (v1, v2) -> {
             return keepFirstOnDPkey ? v1 : v2;
         }));
@@ -599,7 +589,7 @@ public class StreamX<T> {
      * 当前集合按特定的Key 生成 Map，如果Key值为null则排除
      */
     public <K> Map<K, List<T>> groupBy(Function<? super T, ? extends K> key) {
-        return this.stream().filter(Objects::nonNull).filter(t->key.apply(t)!=null).collect(Collectors.groupingBy(t -> {
+        return this.stream().filter(Objects::nonNull).filter(t -> key.apply(t) != null).collect(Collectors.groupingBy(t -> {
             K keyVal = key.apply(t);
             return keyVal;
         }));
@@ -608,10 +598,10 @@ public class StreamX<T> {
     /**
      * 当前集合按特定的Key 生成 Map，如果Key值为null，则使用 nullKeyValue 为 key 值
      */
-    public <K> Map<K, List<T>> groupBy(Function<? super T, ? extends K> key,K nullKeyValue) {
+    public <K> Map<K, List<T>> groupBy(Function<? super T, ? extends K> key, K nullKeyValue) {
         return this.stream().filter(Objects::nonNull).collect(Collectors.groupingBy(t -> {
             K keyVal = key.apply(t);
-            if(keyVal==null) {
+            if (keyVal == null) {
                 return nullKeyValue;
             }
             return keyVal;
@@ -623,18 +613,18 @@ public class StreamX<T> {
      */
     public <K, V> Map<K, List<V>> groupBy(Function<? super T, ? extends K> key, Function<? super T, ? extends V> val) {
         Map<K, List<T>> source = groupBy(key);
-        return collectProperty(source,val);
+        return collectProperty(source, val);
     }
 
     /**
      * 当前集合按特定的Key 和 Value 生成 Map
      */
-    public <K, V> Map<K, List<V>> groupBy(Function<? super T, ? extends K> key, Function<? super T, ? extends V> val,K nullKeyVal) {
-        Map<K, List<T>> source = groupBy(key,nullKeyVal);
-        return collectProperty(source,val);
+    public <K, V> Map<K, List<V>> groupBy(Function<? super T, ? extends K> key, Function<? super T, ? extends V> val, K nullKeyVal) {
+        Map<K, List<T>> source = groupBy(key, nullKeyVal);
+        return collectProperty(source, val);
     }
 
-    private <V, K> Map<K, List<V>> collectProperty(Map<K, List<T>> source,Function<? super T, ? extends V> val) {
+    private <V, K> Map<K, List<V>> collectProperty(Map<K, List<T>> source, Function<? super T, ? extends V> val) {
         Map<K, List<V>> map = new HashMap<>();
         source.forEach((k, sl) -> {
             List<V> list = new ArrayList<>();
@@ -643,7 +633,6 @@ public class StreamX<T> {
         });
         return map;
     }
-
 
 
     /**
@@ -753,4 +742,38 @@ public class StreamX<T> {
     }
 
 
+    /**
+     * 将当前Map中的元素，按照指定的key，设置到对应元素的属性中
+     * @param propertyValueMap 以 keyGetter 方法对应的属性值为 key 的属性值对象 Map
+     * @param keyPropertyGetter 获取当前元素属性值的方法，以此属性值为 key，从 propertyValueMap 中获取对应的属性值
+     * @param propertySetter 设置当前元素属性值的方法，将 beanMap 中获取到的属性值设置到当前元素属性中
+     * @return 当前对象
+     **/
+    public <K, M> StreamX<T> assemble(Map<K,M> propertyValueMap, Function<T,K> keyPropertyGetter, PairConsumer<T,M> propertySetter) {
+        this.forEach(t->{
+            if(t==null) {
+                return;
+            }
+            K key = keyPropertyGetter.apply(t);
+            M value = propertyValueMap.get(key);
+            propertySetter.apply(t,value);
+        });
+        return this;
+    }
+
+    /**
+     * 将当前 valueList 中的元素，按照指定的 key，设置到对应元素的属性中
+     * @param valueList 以 keyPropertyGetter4List 方法对应的属性值为 key 的属性值对象 Map
+     * @param keyPropertyGetter4List 用此方法获取当前元素属性值，以此属性值为 key，产生中间 Map
+     * @param keyPropertyGetter 获取当前元素属性值的方法，以此属性值为 key，从中间 Map 中获取对应的属性值
+     * @param propertySetter 设置当前元素属性值的方法，将中间 Map 中获取到的属性值设置到当前元素属性中
+     * @return 当前对象
+     **/
+    public <K, M> StreamX<T> assemble(List<M> valueList, Function<M,K> keyPropertyGetter4List,Function<T,K> keyPropertyGetter, PairConsumer<T,M> propertySetter) {
+        Map<K,M> propertyValueMap=StreamX.from(valueList).toMap(keyPropertyGetter4List,t->t);
+        return this.assemble(propertyValueMap,keyPropertyGetter,propertySetter);
+    }
+
 }
+
+
