@@ -1,8 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo;
 
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
-import com.baomidou.mybatisplus.annotation.FieldFill;
-import com.baomidou.mybatisplus.annotation.TableField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

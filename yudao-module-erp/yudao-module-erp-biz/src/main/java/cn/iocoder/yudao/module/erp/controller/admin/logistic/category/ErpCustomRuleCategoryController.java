@@ -124,7 +124,18 @@ public class ErpCustomRuleCategoryController {
         if (CollectionUtils.isEmpty(itemDOList)) {
             return success(Collections.emptyList());
         }
-
+        // 获取用户信息
+        Set<Long> userIds = itemDOList.stream()
+            .flatMap(item -> Stream.of(
+                Optional.ofNullable(item.getCreator()).map(Long::parseLong),
+                Optional.ofNullable(item.getUpdater()).map(Long::parseLong)
+            ).filter(Optional::isPresent).map(Optional::get))
+            .collect(Collectors.toSet());
+        Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
+        itemDOList.forEach(item -> {
+            item.setCreator(userMap.get(Long.parseLong(item.getCreator())).getNickname());
+            item.setUpdater(userMap.get(Long.parseLong(item.getUpdater())).getNickname());
+        });
         return success(BeanUtils.toBean(itemDOList, ErpCustomRuleCategoryItemRespVO.class));
     }
 
