@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo;
 
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemRespVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +15,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Schema(description = "管理后台 - 海关分类 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class ErpCustomRuleCategoryRespVO {
+public class ErpCustomCategoryRespVO {
 
     @Schema(description = "编号")
     @ExcelProperty("编号")
@@ -54,5 +54,5 @@ public class ErpCustomRuleCategoryRespVO {
     private String updater;
 
     @Schema(description = "海关分类子表列表")
-    private List<ErpCustomRuleCategoryItemRespVO> customRuleCategoryItems;
+    private List<ErpCustomCategoryItemRespVO> customRuleCategoryItems;
 }

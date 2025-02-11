@@ -2,15 +2,15 @@ package cn.iocoder.yudao.module.erp.service.logistic.category;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategoryPageReqVO;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategorySaveReqVO;
-import cn.iocoder.yudao.module.erp.convert.logistic.category.ErpCustomRuleCategoryConvert;
-import cn.iocoder.yudao.module.erp.convert.logistic.category.item.ErpCustomRuleCategoryItemConvert;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryPageReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategorySaveReqVO;
+import cn.iocoder.yudao.module.erp.convert.logistic.category.ErpCustomCategoryConvert;
+import cn.iocoder.yudao.module.erp.convert.logistic.category.item.ErpCustomCategoryItemConvert;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
-import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.ErpCustomRuleCategoryMapper;
-import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.item.ErpCustomRuleCategoryItemMapper;
-import cn.iocoder.yudao.module.erp.service.logistic.category.item.ErpCustomRuleCategoryItemService;
+import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.ErpCustomCategoryMapper;
+import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.item.ErpCustomCategoryItemMapper;
+import cn.iocoder.yudao.module.erp.service.logistic.category.item.ErpCustomCategoryItemService;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,27 +30,27 @@ import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_RULE_C
  */
 @Service
 @Validated
-public class ErpCustomRuleCategoryServiceImpl implements ErpCustomRuleCategoryService {
+public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
     @Autowired
     private DictDataApi dictDataApi;
     @Resource
-    private ErpCustomRuleCategoryMapper customRuleCategoryMapper;
+    private ErpCustomCategoryMapper customRuleCategoryMapper;
     @Resource
-    private ErpCustomRuleCategoryItemMapper customRuleCategoryItemMapper;
+    private ErpCustomCategoryItemMapper customRuleCategoryItemMapper;
     @Autowired
-    private ErpCustomRuleCategoryItemService itemService;
+    private ErpCustomCategoryItemService itemService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createCustomRuleCategory(ErpCustomRuleCategorySaveReqVO createReqVO) {
+    public Long createCustomRuleCategory(ErpCustomCategorySaveReqVO createReqVO) {
         //材质-字典校验
         dictDataApi.validateDictDataList("erp_product_material", List.of(String.valueOf(createReqVO.getMaterial())));
         // 插入
-        ErpCustomCategoryDO customRuleCategory = ErpCustomRuleCategoryConvert.INSTANCE.convert(createReqVO);
+        ErpCustomCategoryDO customRuleCategory = ErpCustomCategoryConvert.INSTANCE.convert(createReqVO);
         customRuleCategoryMapper.insert(customRuleCategory);
 
         // 插入子表
-        List<ErpCustomCategoryItemDO> itemDOS = ErpCustomRuleCategoryItemConvert.INSTANCE.convert(createReqVO.getCustomRuleCategoryItems());
+        List<ErpCustomCategoryItemDO> itemDOS = ErpCustomCategoryItemConvert.INSTANCE.convert(createReqVO.getCustomRuleCategoryItems());
         itemService.createCustomRuleCategoryItemList(customRuleCategory.getId(), itemDOS);
         // 返回
         return customRuleCategory.getId();
@@ -58,7 +58,7 @@ public class ErpCustomRuleCategoryServiceImpl implements ErpCustomRuleCategorySe
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateCustomRuleCategory(ErpCustomRuleCategorySaveReqVO updateReqVO) {
+    public void updateCustomRuleCategory(ErpCustomCategorySaveReqVO updateReqVO) {
         // 校验存在
         validateCustomRuleCategoryExists(updateReqVO.getId());
         //材质-字典校验
@@ -68,7 +68,7 @@ public class ErpCustomRuleCategoryServiceImpl implements ErpCustomRuleCategorySe
         customRuleCategoryMapper.updateById(updateObj);
 
         // 更新子表
-        List<ErpCustomCategoryItemDO> itemDOS = ErpCustomRuleCategoryItemConvert.INSTANCE.convert(updateReqVO.getCustomRuleCategoryItems());
+        List<ErpCustomCategoryItemDO> itemDOS = ErpCustomCategoryItemConvert.INSTANCE.convert(updateReqVO.getCustomRuleCategoryItems());
         updateCustomRuleCategoryItemList(updateReqVO.getId(), itemDOS);
     }
 
@@ -96,9 +96,9 @@ public class ErpCustomRuleCategoryServiceImpl implements ErpCustomRuleCategorySe
     }
 
     @Override
-    public PageResult<ErpCustomCategoryDO> getCustomRuleCategoryPage(ErpCustomRuleCategoryPageReqVO pageReqVO) {
+    public PageResult<ErpCustomCategoryDO> getCustomRuleCategoryPage(ErpCustomCategoryPageReqVO pageReqVO) {
         if (pageReqVO == null) {
-            pageReqVO = new ErpCustomRuleCategoryPageReqVO();
+            pageReqVO = new ErpCustomCategoryPageReqVO();
         }
         return customRuleCategoryMapper.selectPage(pageReqVO);
     }

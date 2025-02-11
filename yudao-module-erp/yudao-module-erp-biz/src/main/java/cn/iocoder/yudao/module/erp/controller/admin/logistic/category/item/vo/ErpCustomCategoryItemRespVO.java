@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 @Schema(description = "管理后台 - 海关分类子表 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class ErpCustomRuleCategoryItemRespVO {
+public class ErpCustomCategoryItemRespVO {
 
     @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "5710")
     @ExcelProperty("编号")

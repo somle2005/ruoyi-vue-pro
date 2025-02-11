@@ -2,10 +2,10 @@ package cn.iocoder.yudao.module.erp.service.logistic.category.item;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemPageReqVO;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemSaveReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemPageReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
-import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.item.ErpCustomRuleCategoryItemMapper;
+import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.item.ErpCustomCategoryItemMapper;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,15 +25,15 @@ import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_RULE_C
  */
 @Service
 @Validated
-public class ErpCustomRuleCategoryItemServiceImpl implements ErpCustomRuleCategoryItemService {
+public class ErpCustomCategoryItemServiceImpl implements ErpCustomCategoryItemService {
     @Autowired
     private DictDataApi dictDataApi;
 
     @Resource
-    private ErpCustomRuleCategoryItemMapper customRuleCategoryItemMapper;
+    private ErpCustomCategoryItemMapper customRuleCategoryItemMapper;
 
     @Override
-    public Long createCustomRuleCategoryItem(ErpCustomRuleCategoryItemSaveReqVO createReqVO) {
+    public Long createCustomRuleCategoryItem(ErpCustomCategoryItemSaveReqVO createReqVO) {
         dictDataApi.validateDictDataList("country_code", List.of(String.valueOf(createReqVO.getCountryCode())));
         // 插入
         ErpCustomCategoryItemDO customRuleCategoryItem = BeanUtils.toBean(createReqVO, ErpCustomCategoryItemDO.class);
@@ -49,7 +49,7 @@ public class ErpCustomRuleCategoryItemServiceImpl implements ErpCustomRuleCatego
     }
 
     @Override
-    public void updateCustomRuleCategoryItem(ErpCustomRuleCategoryItemSaveReqVO updateReqVO) {
+    public void updateCustomRuleCategoryItem(ErpCustomCategoryItemSaveReqVO updateReqVO) {
         dictDataApi.validateDictDataList("country_code", List.of(String.valueOf(updateReqVO.getCountryCode())));
         // 校验存在
         validateCustomRuleCategoryItemExists(updateReqVO.getId());
@@ -85,7 +85,7 @@ public class ErpCustomRuleCategoryItemServiceImpl implements ErpCustomRuleCatego
     }
 
     @Override
-    public PageResult<ErpCustomCategoryItemDO> getCustomRuleCategoryItemPage(ErpCustomRuleCategoryItemPageReqVO pageReqVO) {
+    public PageResult<ErpCustomCategoryItemDO> getCustomRuleCategoryItemPage(ErpCustomCategoryItemPageReqVO pageReqVO) {
         return customRuleCategoryItemMapper.selectPage(pageReqVO);
     }
 

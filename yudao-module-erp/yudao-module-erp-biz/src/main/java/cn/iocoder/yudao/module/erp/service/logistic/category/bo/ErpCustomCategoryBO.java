@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.erp.service.logistic.category.bo;
 
-public class ErpCustomRuleCategoryBO {
+public class ErpCustomCategoryBO {
     /**
      * 编号
      */

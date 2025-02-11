@@ -16,7 +16,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
-public class ErpCustomRuleCategoryItemPageReqVO extends PageParam {
+public class ErpCustomCategoryItemPageReqVO extends PageParam {
 
 //    @Schema(description = "分类表id", example = "25022")
 //    private Integer categoryId;

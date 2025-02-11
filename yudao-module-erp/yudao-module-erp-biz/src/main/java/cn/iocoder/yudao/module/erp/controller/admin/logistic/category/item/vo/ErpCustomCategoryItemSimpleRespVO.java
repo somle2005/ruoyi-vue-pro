@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Schema(description = "管理后台 - 海关分类子表 渠道精简 Response VO")
 @Data
-public class ErpCustomRuleCategoryItemSimpleRespVO {
+public class ErpCustomCategoryItemSimpleRespVO {
 
     private Long customCategoryId;
 

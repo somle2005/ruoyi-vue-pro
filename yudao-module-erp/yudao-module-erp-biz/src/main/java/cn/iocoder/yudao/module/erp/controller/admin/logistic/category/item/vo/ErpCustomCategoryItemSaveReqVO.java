@@ -11,7 +11,7 @@ import java.math.BigDecimal;
 
 @Schema(description = "管理后台 - 海关分类子表新增/修改 Request VO")
 @Data
-public class ErpCustomRuleCategoryItemSaveReqVO {
+public class ErpCustomCategoryItemSaveReqVO {
 
     @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "5710")
     @Null(groups = Validation.OnCreate.class, message = "创建时，子项id必须为空")

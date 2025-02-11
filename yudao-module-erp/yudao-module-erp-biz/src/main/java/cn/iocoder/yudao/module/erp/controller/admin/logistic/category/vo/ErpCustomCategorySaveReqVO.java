@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo;
 
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemSaveReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.tool.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
@@ -13,7 +13,7 @@ import java.util.List;
 
 @Schema(description = "管理后台 - 海关分类新增/修改 Request VO")
 @Data
-public class ErpCustomRuleCategorySaveReqVO {
+public class ErpCustomCategorySaveReqVO {
 
     @Schema(description = "编号")
     @Null(groups = Validation.OnCreate.class, message = "创建时，海关分类id必须为空")
@@ -35,6 +35,6 @@ public class ErpCustomRuleCategorySaveReqVO {
     @Schema(description = "海关分类子表列表")
     @NotNull( message = "至少维护一个国别详情")
     @Valid
-    private List<ErpCustomRuleCategoryItemSaveReqVO> customRuleCategoryItems;
+    private List<ErpCustomCategoryItemSaveReqVO> customRuleCategoryItems;
 
 }

@@ -2,10 +2,10 @@ package cn.iocoder.yudao.module.erp.service.logistic.category;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategoryPageReqVO;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomRuleCategorySaveReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryPageReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategorySaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
-import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.ErpCustomRuleCategoryMapper;
+import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.ErpCustomCategoryMapper;
 import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -21,23 +21,23 @@ import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_RULE_C
 import static org.junit.jupiter.api.Assertions.*;
 
 /**
- * {@link ErpCustomRuleCategoryServiceImpl} 的单元测试类
+ * {@link ErpCustomCategoryServiceImpl} 的单元测试类
  *
  * @author 王岽宇
  */
-@Import(ErpCustomRuleCategoryServiceImpl.class)
-public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
+@Import(ErpCustomCategoryServiceImpl.class)
+public class ErpCustomCategoryServiceImplTest extends BaseDbUnitTest {
 
     @Resource
-    private ErpCustomRuleCategoryServiceImpl customRuleCategoryService;
+    private ErpCustomCategoryServiceImpl customRuleCategoryService;
 
     @Resource
-    private ErpCustomRuleCategoryMapper customRuleCategoryMapper;
+    private ErpCustomCategoryMapper customRuleCategoryMapper;
 
     @Test
     public void testCreateCustomRuleCategory_success() {
         // 准备参数
-        ErpCustomRuleCategorySaveReqVO createReqVO = randomPojo(ErpCustomRuleCategorySaveReqVO.class).setId(null);
+        ErpCustomCategorySaveReqVO createReqVO = randomPojo(ErpCustomCategorySaveReqVO.class).setId(null);
 
         // 调用
         Long customRuleCategoryId = customRuleCategoryService.createCustomRuleCategory(createReqVO);
@@ -54,7 +54,7 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
         ErpCustomCategoryDO dbCustomRuleCategory = randomPojo(ErpCustomCategoryDO.class);
         customRuleCategoryMapper.insert(dbCustomRuleCategory);// @Sql: 先插入出一条存在的数据
         // 准备参数
-        ErpCustomRuleCategorySaveReqVO updateReqVO = randomPojo(ErpCustomRuleCategorySaveReqVO.class, o -> {
+        ErpCustomCategorySaveReqVO updateReqVO = randomPojo(ErpCustomCategorySaveReqVO.class, o -> {
             o.setId(dbCustomRuleCategory.getId()); // 设置更新的 ID
         });
 
@@ -68,7 +68,7 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
     @Test
     public void testUpdateCustomRuleCategory_notExists() {
         // 准备参数
-        ErpCustomRuleCategorySaveReqVO updateReqVO = randomPojo(ErpCustomRuleCategorySaveReqVO.class);
+        ErpCustomCategorySaveReqVO updateReqVO = randomPojo(ErpCustomCategorySaveReqVO.class);
 
         // 调用, 并断言异常
         assertServiceException(() -> customRuleCategoryService.updateCustomRuleCategory(updateReqVO), CUSTOM_RULE_CATEGORY_NOT_EXISTS);
@@ -117,7 +117,7 @@ public class ErpCustomRuleCategoryServiceImplTest extends BaseDbUnitTest {
         // 测试 declaredTypeEn 不匹配
         customRuleCategoryMapper.insert(cloneIgnoreId(dbCustomRuleCategory, o -> o.setDeclaredTypeEn(null)));
         // 准备参数
-        ErpCustomRuleCategoryPageReqVO reqVO = new ErpCustomRuleCategoryPageReqVO();
+        ErpCustomCategoryPageReqVO reqVO = new ErpCustomCategoryPageReqVO();
         reqVO.setCreateTime(buildBetweenTime(2023, 2, 1, 2023, 2, 28));
         reqVO.setMaterial(null);
         reqVO.setDeclaredType(null);

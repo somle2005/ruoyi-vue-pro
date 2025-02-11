@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.item;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemPageReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemPageReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -16,9 +16,9 @@ import java.util.List;
  * @author 王岽宇
  */
 @Mapper
-public interface ErpCustomRuleCategoryItemMapper extends BaseMapperX<ErpCustomCategoryItemDO> {
+public interface ErpCustomCategoryItemMapper extends BaseMapperX<ErpCustomCategoryItemDO> {
 
-    default PageResult<ErpCustomCategoryItemDO> selectPage(ErpCustomRuleCategoryItemPageReqVO reqVO) {
+    default PageResult<ErpCustomCategoryItemDO> selectPage(ErpCustomCategoryItemPageReqVO reqVO) {
         return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomCategoryItemDO>()
 //            .eqIfPresent(ErpCustomCategoryItemDO::getCategoryId, reqVO.getCategoryId())
             .eqIfPresent(ErpCustomCategoryItemDO::getCountryCode, reqVO.getCountryCode())

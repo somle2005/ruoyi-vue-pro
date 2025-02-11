@@ -1,8 +1,8 @@
 package cn.iocoder.yudao.module.erp.service.logistic.category.item;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemPageReqVO;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomRuleCategoryItemSaveReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemPageReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
 import jakarta.validation.Valid;
 
@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
  *
  * @author 王岽宇
  */
-public interface ErpCustomRuleCategoryItemService {
+public interface ErpCustomCategoryItemService {
 
     /**
      * 创建海关分类子表
@@ -24,7 +24,7 @@ public interface ErpCustomRuleCategoryItemService {
      * @param createReqVO 创建信息
      * @return 编号
      */
-    Long createCustomRuleCategoryItem(@Valid ErpCustomRuleCategoryItemSaveReqVO createReqVO);
+    Long createCustomRuleCategoryItem(@Valid ErpCustomCategoryItemSaveReqVO createReqVO);
 
     /**
      * 创建海关分类子表
@@ -39,7 +39,7 @@ public interface ErpCustomRuleCategoryItemService {
      *
      * @param updateReqVO 更新信息
      */
-    void updateCustomRuleCategoryItem(@Valid ErpCustomRuleCategoryItemSaveReqVO updateReqVO);
+    void updateCustomRuleCategoryItem(@Valid ErpCustomCategoryItemSaveReqVO updateReqVO);
 
     /**
      * 更新海关分类子表
@@ -70,7 +70,7 @@ public interface ErpCustomRuleCategoryItemService {
      * @param pageReqVO 分页查询
      * @return 海关分类子表分页
      */
-    PageResult<ErpCustomCategoryItemDO> getCustomRuleCategoryItemPage(ErpCustomRuleCategoryItemPageReqVO pageReqVO);
+    PageResult<ErpCustomCategoryItemDO> getCustomRuleCategoryItemPage(ErpCustomCategoryItemPageReqVO pageReqVO);
 
     /**
      * 构造categoryId对应的Map
