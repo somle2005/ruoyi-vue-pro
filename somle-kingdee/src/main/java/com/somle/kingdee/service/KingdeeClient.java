@@ -4,8 +4,8 @@ import cn.hutool.core.util.ObjUtil;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.common.util.web.RequestX;
-import com.somle.kingdee.model.*;
 import com.somle.framework.common.util.web.WebUtils;
+import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,10 @@ import org.springframework.beans.BeanUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
 import java.util.stream.Stream;
 
 import static com.somle.kingdee.util.SignatureUtils.*;
@@ -147,6 +150,7 @@ public class KingdeeClient {
         );
         setCustomFieldSafely(kingdeeProductCopy, "报关品名", kingdeeProductCopy.getDeclaredTypeZh());
         setCustomFieldSafely(kingdeeProductCopy, "报关品名(英文)", kingdeeProductCopy.getDeclaredTypeEn());
+        kingdeeProductCopy.setIgnoreWarn(true);//保存覆盖已存在产品
         log.debug("adding product");
         String endUrl = "/jdy/v2/bd/material";
         TreeMap<String, String> params = new TreeMap<>();
@@ -156,9 +160,10 @@ public class KingdeeClient {
 
     /**
      * 根绝字段名称获取id，如果有该字段、则设置value，没有就日志记录
+     *
      * @param kingdeeProductCopy 对象
-     * @param displayName 属性名称
-     * @param fieldValue 属性值
+     * @param displayName        属性名称
+     * @param fieldValue         属性值
      */
     private void setCustomFieldSafely(KingdeeProduct kingdeeProductCopy, String displayName, String fieldValue) {
         try {
@@ -170,6 +175,7 @@ public class KingdeeClient {
             log.debug("custom field " + displayName + " skipped for " + token.getAccountName(), e);
         }
     }
+
     public KingdeeResponse addSupplier(KingdeeSupplier kingdeeSupplier) {
         KingdeeSupplier supplierCopy = new KingdeeSupplier();
         BeanUtils.copyProperties(kingdeeSupplier, supplierCopy);
