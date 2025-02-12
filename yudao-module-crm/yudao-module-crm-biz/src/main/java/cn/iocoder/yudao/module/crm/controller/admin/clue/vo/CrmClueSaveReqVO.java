@@ -116,9 +116,9 @@ public class CrmClueSaveReqVO {
     @Schema(description = "官网", example = "www.baidu.com")
     private String companyWebsite;
     //客户标签-字典-long
-    @Schema(description = "客户标签", example = "1,2,3")
-    private List<String> labelIds;
+    @Schema(description = "客户标签")
+    private List<String> labelCodes;
     //国家-字典-long
-    @Schema(description = "国家", example = "1")
-    private List<String> countryId;
+    @Schema(description = "国家")
+    private List<String> countryCodes;
 }

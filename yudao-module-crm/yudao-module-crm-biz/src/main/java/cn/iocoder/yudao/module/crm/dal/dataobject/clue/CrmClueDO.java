@@ -8,7 +8,6 @@ import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
-import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -58,20 +57,20 @@ public class CrmClueDO extends BaseDO {
 
     /**
      * 负责人的用户编号
-     *
+     * <p>
      * 关联 AdminUserDO 的 id 字段
      */
     private Long ownerUserId;
 
     /**
      * 转化状态
-     *
+     * <p>
      * true 表示已转换，会更新 {@link #customerId} 字段
      */
     private Boolean transformStatus;
     /**
      * 客户编号
-     *
+     * <p>
      * 关联 {@link CrmCustomerDO#getId()}
      */
     private Long customerId;
@@ -98,7 +97,7 @@ public class CrmClueDO extends BaseDO {
     private String email;
     /**
      * 所在地
-     *
+     * <p>
      * 关联 {@link cn.iocoder.yudao.framework.ip.core.Area#getId()} 字段
      */
     private Integer areaId;
@@ -108,19 +107,19 @@ public class CrmClueDO extends BaseDO {
     private String detailAddress;
     /**
      * 所属行业
-     *
+     * <p>
      * 对应字典 {@link DictTypeConstants#CRM_CUSTOMER_INDUSTRY}
      */
     private Integer industryId;
     /**
      * 客户等级
-     *
+     * <p>
      * 对应字典 {@link DictTypeConstants#CRM_CUSTOMER_LEVEL}
      */
     private Integer level;
     /**
      * 客户来源
-     *
+     * <p>
      * 对应字典 {@link DictTypeConstants#CRM_CUSTOMER_SOURCE}
      */
     private Integer source;
@@ -131,38 +130,38 @@ public class CrmClueDO extends BaseDO {
 
     /**
      * 公司名称
-     *
+     * <p>
      * 存储公司名称，可能用于在 CRM 系统中展示和搜索
      */
     private String companyName;
 
     /**
      * 公司介绍
-     *
+     * <p>
      * 存储公司简介，通常用于展示公司背景信息
      */
     private String companyIntroduce;
 
     /**
      * 官网
-     *
+     * <p>
      * 存储公司官方网站的 URL 地址
      */
     private String companyWebsite;
 
     /**
      * 客户标签列表
-     *
+     * <p>
      * 存储客户标签的 ID 列表，标签来自于字典，用于标记客户特征 crm_client_tag
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private List<String> labelIds;
+    private List<String> labelCodes;
 
     /**
      * 国家列表
-     *
+     * <p>
      * 存储客户所在国家的 ID 列表，国家信息来自于字典 country_code
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private List<String> countryId;
+    private List<String> countryCodes;
 }

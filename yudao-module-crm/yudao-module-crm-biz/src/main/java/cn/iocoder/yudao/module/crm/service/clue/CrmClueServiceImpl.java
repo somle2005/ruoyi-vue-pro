@@ -55,19 +55,17 @@ import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.USER_NOT_E
 public class CrmClueServiceImpl implements CrmClueService {
 
     @Resource
+    DictDataApi dictDataApi;
+    @Resource
     private CrmClueMapper clueMapper;
-
     @Resource
     private CrmCustomerService customerService;
     @Resource
     private CrmPermissionService crmPermissionService;
     @Resource
     private CrmFollowUpRecordService followUpRecordService;
-
     @Resource
     private AdminUserApi adminUserApi;
-    @Resource
-    DictDataApi dictDataApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -78,14 +76,6 @@ public class CrmClueServiceImpl implements CrmClueService {
         validateRelationDataExists(createReqVO);
         // 1.2 校验负责人是否存在
         adminUserApi.validateUser(createReqVO.getOwnerUserId());
-        // 1.3 校验标签值是否存在
-        if (CollUtil.isNotEmpty(createReqVO.getLabelIds())) {
-            dictDataApi.validateDictDataList("crm_client_tag", createReqVO.getLabelIds());
-        }
-        if (CollUtil.isNotEmpty(createReqVO.getCountryId())) {
-            dictDataApi.validateDictDataList("country_code", createReqVO.getCountryId());
-        }
-
         // 2. 插入线索
         CrmClueDO clue = BeanUtils.toBean(createReqVO, CrmClueDO.class);
         clueMapper.insert(clue);
@@ -126,6 +116,13 @@ public class CrmClueServiceImpl implements CrmClueService {
         if (Objects.nonNull(reqVO.getOwnerUserId()) &&
             Objects.isNull(adminUserApi.getUser(reqVO.getOwnerUserId()))) {
             throw exception(USER_NOT_EXISTS);
+        }
+        // 1.3 校验标签值是否存在
+        if (CollUtil.isNotEmpty(reqVO.getLabelCodes())) {
+            dictDataApi.validateDictDataList("crm_client_tag", reqVO.getLabelCodes());
+        }
+        if (CollUtil.isNotEmpty(reqVO.getCountryCodes())) {
+            dictDataApi.validateDictDataList("country_code", reqVO.getCountryCodes());
         }
     }
 
