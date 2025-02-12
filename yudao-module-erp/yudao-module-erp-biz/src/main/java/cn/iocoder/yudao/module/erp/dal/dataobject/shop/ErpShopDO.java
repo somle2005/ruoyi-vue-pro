@@ -1,6 +1,8 @@
 package cn.iocoder.yudao.module.erp.dal.dataobject.shop;
 
 import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
 import lombok.*;
 import java.util.*;
 import java.time.LocalDateTime;
@@ -36,6 +38,16 @@ public class ErpShopDO extends TenantBaseDO {
      * 店铺编码
      */
     private String code;
+
+    /**
+     * 国家代码
+     **/
+    private String countryCode;
+
+    /**
+     * 店铺域名
+     **/
+    private String domainName;
     /**
      * 备注
      */

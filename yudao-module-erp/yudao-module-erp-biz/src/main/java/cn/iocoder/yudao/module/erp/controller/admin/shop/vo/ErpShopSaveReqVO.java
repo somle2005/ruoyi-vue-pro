@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.vo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.somle.framework.common.model.ValidationGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -17,9 +18,17 @@ public class ErpShopSaveReqVO {
     @NotEmpty(message = "店铺名称不能为空")
     private String name;
 
+    @Schema(description = "店铺域名", example = "www.xxx.com")
+    @NotEmpty(message = "店铺域名")
+    private String domainName;
+
     @Schema(description = "店铺编码", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "店铺编码不能为空")
     private String code;
+
+    @Schema(description = "国家代码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("国家代码")
+    private String countryCode;
 
     @Schema(description = "备注", example = "你猜")
     private String remark;

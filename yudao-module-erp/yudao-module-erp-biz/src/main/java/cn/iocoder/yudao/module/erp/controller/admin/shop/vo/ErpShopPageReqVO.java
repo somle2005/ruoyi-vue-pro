@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.vo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.*;
 import java.util.*;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -20,6 +21,9 @@ public class ErpShopPageReqVO extends PageParam {
 
     @Schema(description = "店铺编码")
     private String code;
+
+    @ExcelProperty("国家代码")
+    private String countryCode;
 
     @Schema(description = "开启状态", example = "1")
     private Integer status;

@@ -24,6 +24,10 @@ public class ErpShopRespVO {
     @ExcelProperty("店铺编码")
     private String code;
 
+    @Schema(description = "国家代码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("国家代码")
+    private String countryCode;
+
     @Schema(description = "备注", example = "你猜")
     @ExcelProperty("备注")
     private String remark;
