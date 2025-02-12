@@ -39,8 +39,6 @@ public interface CrmClueMapper extends BaseMapperX<CrmClueDO> {
             .likeIfPresent(CrmClueDO::getCompanyName, pageReqVO.getCompanyName())// 公司名称
             .likeIfPresent(CrmClueDO::getCompanyIntroduce, pageReqVO.getCompanyIntroduce())// 公司介绍
             .likeIfPresent(CrmClueDO::getCompanyWebsite, pageReqVO.getCompanyWebsite())// 官网
-            .inIfPresent(CrmClueDO::getLabelCodes, pageReqVO.getLabelCodes())// 客户标签
-            .inIfPresent(CrmClueDO::getCountryCodes, pageReqVO.getCountryCodes())// 国家
             .orderByDesc(CrmClueDO::getId);
         return selectJoinPage(pageReqVO, CrmClueDO.class, query);
     }

@@ -8,7 +8,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
-import java.util.List;
 
 @Schema(description = "管理后台 - CRM 客户分页 Request VO")
 @Data
@@ -66,10 +65,5 @@ public class CrmCustomerPageReqVO extends PageParam {
     //官网
     @Schema(description = "官网", example = "www.baidu.com")
     private String companyWebsite;
-    //客户标签-字典-long
-    @Schema(description = "客户标签")
-    private List<Long> labelCodes;
-    //国家-字典-long
-    @Schema(description = "国家")
-    private List<Long> countryCodes;
+
 }
