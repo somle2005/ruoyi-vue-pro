@@ -14,7 +14,6 @@ import cn.iocoder.yudao.module.crm.controller.admin.contact.vo.CrmContactTransfe
 import cn.iocoder.yudao.module.crm.controller.admin.contract.vo.contract.CrmContractTransferReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.customer.vo.customer.*;
 import cn.iocoder.yudao.module.crm.dal.dataobject.business.CrmBusinessDO;
-import cn.iocoder.yudao.module.crm.dal.dataobject.clue.CrmClueDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.contact.CrmContactDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.contract.CrmContractDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.customer.CrmCustomerDO;
