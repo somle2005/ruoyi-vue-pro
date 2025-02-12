@@ -81,7 +81,8 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
         return selectJoinPage(pageReqVO, CrmCustomerDO.class, query);
     }
 
-    default List<CrmCustomerDO> selectBatchIds(Collection<Long> ids, Long ownerUserId) {
+
+    default List<CrmCustomerDO> selectBatchIdsWithOwnerUserId(Collection<Long> ids, Long ownerUserId) {
         MPJLambdaWrapperX<CrmCustomerDO> query = new MPJLambdaWrapperX<>();
         // 拼接数据权限的查询条件
         CrmPermissionUtils.appendPermissionCondition(query, CrmBizTypeEnum.CRM_CUSTOMER.getType(), ids, ownerUserId);

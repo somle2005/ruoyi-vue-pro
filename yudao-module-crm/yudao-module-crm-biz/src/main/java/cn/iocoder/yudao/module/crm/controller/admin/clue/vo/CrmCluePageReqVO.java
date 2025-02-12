@@ -58,8 +58,8 @@ public class CrmCluePageReqVO extends PageParam {
     private String companyWebsite;
     //客户标签-字典-long
     @Schema(description = "客户标签")
-    private List<String> labelCodes;
+    private List<Long> labelCodes;
     //国家-字典-long
     @Schema(description = "国家")
-    private List<String> countryCodes;
+    private List<Long> countryCodes;
 }

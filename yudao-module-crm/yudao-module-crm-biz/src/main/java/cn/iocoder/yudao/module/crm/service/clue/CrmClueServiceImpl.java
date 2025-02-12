@@ -5,6 +5,8 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.Assert;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.crm.controller.admin.clue.vo.CrmCluePageReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.clue.vo.CrmClueSaveReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.clue.vo.CrmClueTransferReqVO;
@@ -12,6 +14,7 @@ import cn.iocoder.yudao.module.crm.controller.admin.customer.vo.customer.CrmCust
 import cn.iocoder.yudao.module.crm.dal.dataobject.clue.CrmClueDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.followup.CrmFollowUpRecordDO;
 import cn.iocoder.yudao.module.crm.dal.mysql.clue.CrmClueMapper;
+import cn.iocoder.yudao.module.crm.enums.DictTypeConstants;
 import cn.iocoder.yudao.module.crm.enums.common.CrmBizTypeEnum;
 import cn.iocoder.yudao.module.crm.enums.permission.CrmPermissionLevelEnum;
 import cn.iocoder.yudao.module.crm.framework.permission.core.annotations.CrmPermission;
@@ -33,13 +36,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.singleton;
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
 import static cn.iocoder.yudao.module.crm.enums.ErrorCodeConstants.CLUE_NOT_EXISTS;
 import static cn.iocoder.yudao.module.crm.enums.ErrorCodeConstants.CLUE_TRANSFORM_FAIL_ALREADY;
 import static cn.iocoder.yudao.module.crm.enums.LogRecordConstants.*;
@@ -119,11 +121,18 @@ public class CrmClueServiceImpl implements CrmClueService {
         }
         // 1.3 校验标签值是否存在
         if (CollUtil.isNotEmpty(reqVO.getLabelCodes())) {
-            dictDataApi.validateDictDataList("crm_client_tag", reqVO.getLabelCodes());
+            Collection<String> labelCodesAsString = reqVO.getLabelCodes().stream()
+                .map(String::valueOf)
+                .toList();
+            dictDataApi.validateDictDataList(DictTypeConstants.CRM_CLIENT_TAG, labelCodesAsString);
         }
         if (CollUtil.isNotEmpty(reqVO.getCountryCodes())) {
-            dictDataApi.validateDictDataList("country_code", reqVO.getCountryCodes());
+            Collection<String> countryCodes = reqVO.getCountryCodes().stream()
+                .map(String::valueOf)
+                .toList();
+            dictDataApi.validateDictDataList(DictTypeConstants.CRM_COUNTRY_CODE, countryCodes);
         }
+
     }
 
     @Override
@@ -224,7 +233,11 @@ public class CrmClueServiceImpl implements CrmClueService {
     @Override
     @CrmPermission(bizType = CrmBizTypeEnum.CRM_CLUE, bizId = "#id", level = CrmPermissionLevelEnum.READ)
     public CrmClueDO getClue(Long id) {
-        return clueMapper.selectById(id);
+        List<CrmClueDO> result = new ArrayList<>();
+        Optional.ofNullable(getClueList(List.of(id), getLoginUserId()))
+            .ifPresent(result::addAll);
+        return result.isEmpty() ? null : result.get(0);
+//        return clueMapper.selectById(id); 无法查询出list类型数据，没有被转换、待解决
     }
 
     @Override

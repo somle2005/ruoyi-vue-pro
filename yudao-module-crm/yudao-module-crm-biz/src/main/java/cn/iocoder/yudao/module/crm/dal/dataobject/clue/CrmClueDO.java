@@ -155,7 +155,7 @@ public class CrmClueDO extends BaseDO {
      * 存储客户标签的 ID 列表，标签来自于字典，用于标记客户特征 crm_client_tag
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private List<String> labelCodes;
+    private List<Long> labelCodes;
 
     /**
      * 国家列表
@@ -163,5 +163,5 @@ public class CrmClueDO extends BaseDO {
      * 存储客户所在国家的 ID 列表，国家信息来自于字典 country_code
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
-    private List<String> countryCodes;
+    private List<Long> countryCodes;
 }

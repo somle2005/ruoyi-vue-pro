@@ -15,5 +15,6 @@ public interface DictTypeConstants {
     String CRM_PRODUCT_STATUS = "crm_product_status"; // CRM 产品状态
     String CRM_FOLLOW_UP_TYPE = "crm_follow_up_type"; // CRM 跟进方式
     String CRM_RECEIVABLE_RETURN_TYPE = "crm_receivable_return_type"; // CRM 回款方式
-
+    String CRM_CLIENT_TAG = "crm_client_tag"; // 客户标签
+    String CRM_COUNTRY_CODE = "country_code";// 国家代码
 }

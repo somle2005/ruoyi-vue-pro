@@ -14,6 +14,7 @@ import cn.iocoder.yudao.module.crm.controller.admin.contact.vo.CrmContactTransfe
 import cn.iocoder.yudao.module.crm.controller.admin.contract.vo.contract.CrmContractTransferReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.customer.vo.customer.*;
 import cn.iocoder.yudao.module.crm.dal.dataobject.business.CrmBusinessDO;
+import cn.iocoder.yudao.module.crm.dal.dataobject.clue.CrmClueDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.contact.CrmContactDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.contract.CrmContractDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.customer.CrmCustomerDO;
@@ -47,8 +48,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.filterList;
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
 import static cn.iocoder.yudao.module.crm.enums.ErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.crm.enums.LogRecordConstants.*;
 import static cn.iocoder.yudao.module.crm.enums.customer.CrmCustomerLimitConfigTypeEnum.CUSTOMER_LOCK_LIMIT;
@@ -488,7 +489,11 @@ public class CrmCustomerServiceImpl implements CrmCustomerService {
     @Override
     @CrmPermission(bizType = CrmBizTypeEnum.CRM_CUSTOMER, bizId = "#id", level = CrmPermissionLevelEnum.READ)
     public CrmCustomerDO getCustomer(Long id) {
-        return customerMapper.selectById(id);
+        List<CrmCustomerDO> result = new ArrayList<>();
+        Optional.ofNullable(customerMapper.selectBatchIdsWithOwnerUserId(List.of(id), getLoginUserId()))
+            .ifPresent(result::addAll);
+        return result.isEmpty() ? null : result.get(0);
+//        return clueMapper.selectById(id); 无法查询出list类型数据，没有被转换、待解决
     }
 
     @Override

@@ -129,17 +129,20 @@ public class CrmClueRespVO {
 
     //公司名称
     @Schema(description = "公司名称", example = "北京")
+    @ExcelProperty("公司名称")
     private String companyName;
     //公司介绍
     @Schema(description = "公司介绍", example = "北京")
+    @ExcelProperty("公司介绍")
     private String companyIntroduce;
     //官网
     @Schema(description = "官网", example = "www.baidu.com")
+    @ExcelProperty("官网")
     private String companyWebsite;
     //客户标签-字典-long
-    @Schema(description = "客户标签", example = "1,2,3")
-    private List<Long> labelIds;
+    @Schema(description = "客户标签")
+    private List<Long> labelCodes;
     //国家-字典-long
-    @Schema(description = "国家", example = "1")
-    private List<Long> countryId;
+    @Schema(description = "国家")
+    private List<Long> countryCodes;
 }

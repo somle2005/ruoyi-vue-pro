@@ -108,17 +108,20 @@ public class CrmClueSaveReqVO {
     private String remark;
     //公司名称
     @Schema(description = "公司名称", example = "北京")
+    @DiffLogField(name = "公司名称")
     private String companyName;
     //公司介绍
     @Schema(description = "公司介绍", example = "北京")
+    @DiffLogField(name = "公司介绍")
     private String companyIntroduce;
     //官网
     @Schema(description = "官网", example = "www.baidu.com")
+    @DiffLogField(name = "官网")
     private String companyWebsite;
     //客户标签-字典-long
     @Schema(description = "客户标签")
-    private List<String> labelCodes;
+    private List<Long> labelCodes;
     //国家-字典-long
     @Schema(description = "国家")
-    private List<String> countryCodes;
+    private List<Long> countryCodes;
 }
