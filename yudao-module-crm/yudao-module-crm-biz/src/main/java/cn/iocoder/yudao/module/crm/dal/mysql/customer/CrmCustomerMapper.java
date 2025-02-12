@@ -56,12 +56,17 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
                 CrmCustomerDO::getId, ownerUserId, pageReqVO.getSceneType(), pageReqVO.getPool());
         // 拼接自身的查询条件
         query.selectAll(CrmCustomerDO.class)
-                .likeIfPresent(CrmCustomerDO::getName, pageReqVO.getName())
-                .eqIfPresent(CrmCustomerDO::getMobile, pageReqVO.getMobile())
-                .eqIfPresent(CrmCustomerDO::getIndustryId, pageReqVO.getIndustryId())
-                .eqIfPresent(CrmCustomerDO::getLevel, pageReqVO.getLevel())
-                .eqIfPresent(CrmCustomerDO::getSource, pageReqVO.getSource())
-                .eqIfPresent(CrmCustomerDO::getFollowUpStatus, pageReqVO.getFollowUpStatus());
+            .likeIfPresent(CrmCustomerDO::getName, pageReqVO.getName())
+            .eqIfPresent(CrmCustomerDO::getMobile, pageReqVO.getMobile())
+            .eqIfPresent(CrmCustomerDO::getIndustryId, pageReqVO.getIndustryId())
+            .eqIfPresent(CrmCustomerDO::getLevel, pageReqVO.getLevel())
+            .eqIfPresent(CrmCustomerDO::getSource, pageReqVO.getSource())
+            .likeIfPresent(CrmCustomerDO::getCompanyName, pageReqVO.getCompanyName()) //公司名称
+            .likeIfPresent(CrmCustomerDO::getCompanyIntroduce, pageReqVO.getCompanyIntroduce()) // 公司介绍
+            .likeIfPresent(CrmCustomerDO::getCompanyWebsite, pageReqVO.getCompanyWebsite()) // 官网
+            .inIfPresent(CrmCustomerDO::getLabelCodes, pageReqVO.getLabelCodes()) // 客户标签
+            .inIfPresent(CrmCustomerDO::getCountryCodes, pageReqVO.getCountryCodes()) // 国家
+            .eqIfPresent(CrmCustomerDO::getFollowUpStatus, pageReqVO.getFollowUpStatus());
 
         // backlog 查询
         if (ObjUtil.isNotNull(pageReqVO.getContactStatus())) {
