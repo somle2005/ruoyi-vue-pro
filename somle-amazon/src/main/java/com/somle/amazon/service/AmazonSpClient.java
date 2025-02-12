@@ -76,6 +76,23 @@ public class AmazonSpClient {
         return response.getPayload();
     }
 
+    @SneakyThrows
+    public String getAccounts() {
+        String endPoint = getEndPoint();
+        String partialUrl = "/sellers/v1/account";
+        String fullUrl = endPoint + partialUrl;
+
+        var request = RequestX.builder()
+            .requestMethod(RequestX.Method.GET)
+            .url(fullUrl)
+            .headers(generateHeaders(auth))
+            .build();
+
+        try(var response = WebUtils.sendRequest(request)){
+            return response.body().string();
+        }
+    }
+
 
 
 
@@ -104,10 +121,24 @@ public class AmazonSpClient {
             .headers(generateHeaders(auth))
             .build();
         try(var response = WebUtils.sendRequest(request)){
-            var bodyString = response.body().string();
-//            var result = JsonUtils.parseObject(bodyString, AmazonSpOrderRespVO.class);
-//            validateResponse(result);
-            return bodyString;
+            return response.body().string();
+        }
+    }
+
+
+    @SneakyThrows
+    public String searchCatalogItems(AmazonSpCatalogReqVO reqVO) {
+        String endPoint = getEndPoint();
+        String partialUrl = "/catalog/2022-04-01/items";
+        String fullUrl = endPoint + partialUrl;
+        var request = RequestX.builder()
+            .requestMethod(RequestX.Method.GET)
+            .url(fullUrl)
+            .queryParams(reqVO)
+            .headers(generateHeaders(auth))
+            .build();
+        try(var response = WebUtils.sendRequest(request)){
+            return response.body().string();
         }
     }
 

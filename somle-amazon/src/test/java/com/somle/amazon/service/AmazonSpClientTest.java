@@ -1,9 +1,6 @@
 package com.somle.amazon.service;
 
-import com.somle.amazon.controller.vo.AmazonSpListingReqVO;
-import com.somle.amazon.controller.vo.AmazonSpOrderReqVO;
-import com.somle.amazon.controller.vo.AmazonSpReportReqVO;
-import com.somle.amazon.controller.vo.AmazonSpReportSaveVO;
+import com.somle.amazon.controller.vo.*;
 import com.somle.amazon.controller.vo.AmazonSpReportReqVO.ProcessingStatuses;
 import com.somle.amazon.model.enums.AmazonCountry;
 import com.somle.framework.common.util.json.JSONObject;
@@ -15,6 +12,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.context.annotation.Import;
 
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -31,7 +29,7 @@ class AmazonSpClientTest extends BaseSpringTest {
 
     @BeforeEach
     void setUp() {
-        client = spService.clients.get(2);
+        client = spService.clients.get(0);
     }
 
 //    @Test
@@ -60,13 +58,35 @@ class AmazonSpClientTest extends BaseSpringTest {
     }
 
     @Test
+    void getAccounts() {
+        var response = client.getAccounts();
+        log.info(response.toString());
+    }
+
+    @Test
     void getListing() {
         var reqVO = AmazonSpListingReqVO.builder()
+            //.identifiersType(AmazonSpListingReqVO.IdentifiersType.ASIN)
             .sellerId(client.getAuth().getSellerId())
-            .marketplaceIds(List.of(AmazonCountry.findByCode("DE").getMarketplaceId()))
-            .includedData(List.of(AmazonSpListingReqVO.IncludedData.OFFERS))
+            .pageSize(10)
+            .marketplaceIds(List.of(AmazonCountry.findByCode("MX").getMarketplaceId()))
+            .includedData(List.of(AmazonSpListingReqVO.IncludedData.OFFERS,AmazonSpListingReqVO.IncludedData.ATTRIBUTES))
             .build();
         var listing = client.searchListingsItems(reqVO);
+        log.info(listing);
+    }
+
+    @Test
+    void getCatalogItems() {
+        var reqVO = AmazonSpCatalogReqVO.builder()
+            .identifiers(Arrays.asList("G02C3063C-U"))
+            .identifiersType(AmazonSpCatalogReqVO.IdentifiersType.SKU)
+            .sellerId(client.getAuth().getSellerId())
+            .keywords("")
+            .marketplaceIds(List.of(AmazonCountry.findByCode("MX").getMarketplaceId()))
+            //.includedData(List.of(AmazonSpCatalogReqVO.IncludedData.ALLOCATED))
+            .build();
+        var listing = client.searchCatalogItems(reqVO);
         log.info(listing);
     }
 
