@@ -5,6 +5,7 @@ package com.somle.framework.common.util.json;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
@@ -80,11 +81,25 @@ public class JSONObject extends ObjectNode{
     }
 
     public JSONArray getJSONArray(String fieldName) {
-        return new JSONArray((ArrayNode) this.get(fieldName));
+        JsonNode value=this.get(fieldName);
+        if(value==null) {
+            return null;
+        }
+        if(value instanceof NullNode) {
+            return null;
+        }
+        return new JSONArray((ArrayNode) value);
     }
 
     public JSONObject getJSONObject(String fieldName) {
-        return new JSONObject((ObjectNode) this.get(fieldName));
+        JsonNode value=this.get(fieldName);
+        if(value==null) {
+            return null;
+        }
+        if(value instanceof NullNode) {
+            return null;
+        }
+        return new JSONObject((ObjectNode) value);
     }
 
     private void test(String fieldName) {

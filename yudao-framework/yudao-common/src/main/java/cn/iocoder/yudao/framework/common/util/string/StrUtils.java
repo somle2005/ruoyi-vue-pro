@@ -4,6 +4,9 @@ import cn.hutool.core.text.StrPool;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
@@ -83,5 +86,44 @@ public class StrUtils {
                 .filter(line -> !line.contains(sequence))
                 .collect(Collectors.joining("\n"));
     }
+
+    /**
+     * 是否为空白
+     * @param str 字符串
+     * @return 是否有内容
+     */
+    public static boolean isBlank(String str) {
+        final int strLen = str==null ? 0 : str.length();
+        if (strLen == 0) {
+            return true;
+        }
+        for (int i = 0; i < strLen; i++) {
+            if (!Character.isWhitespace(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * 异常转字符串
+     * @param e Throwable
+     * @return String
+     * */
+    public static String toString(Throwable e) {
+        if(e==null) return null;
+        StringWriter sw = new StringWriter();
+        PrintWriter pw = new PrintWriter(sw);
+        e.printStackTrace(pw);
+        String content = sw.toString();
+        try {
+            sw.close();
+            pw.close();
+        } catch (IOException e1) {
+        }
+        return content;
+    }
+
+
 
 }

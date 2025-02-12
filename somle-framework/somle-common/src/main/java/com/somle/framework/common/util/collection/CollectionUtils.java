@@ -2,6 +2,7 @@ package com.somle.framework.common.util.collection;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import com.somle.framework.common.util.json.JSONArray;
 
 import java.util.*;
 import java.util.function.*;
@@ -16,6 +17,10 @@ import static java.util.Arrays.asList;
  */
 public class CollectionUtils {
     public static boolean isEmpty(Collection<?> collection) {
+        return collection == null || collection.isEmpty();
+    }
+
+    public static boolean isEmpty(JSONArray collection) {
         return collection == null || collection.isEmpty();
     }
 
