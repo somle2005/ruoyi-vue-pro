@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public enum SalesPlatform {
 
-    AMAZON(false,null),
+    AMAZON(true,"https://www.amazon.com/"),
     JINGDONG(false,null),
-    SHOPIFY(true,"https://fitueyes.com"),
+    SHOPIFY(false,"https://fitueyes.com"),
     BESTBUY(false,null),
     MANOMANO(false,null),
     MATOMO(false,null),

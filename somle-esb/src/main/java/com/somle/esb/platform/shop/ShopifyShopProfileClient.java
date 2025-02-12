@@ -1,6 +1,8 @@
 package com.somle.esb.platform.shop;
 
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.google.common.collect.Lists;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.framework.common.util.collection.CollectionUtils;
 import com.somle.framework.common.util.json.JSONArray;
@@ -19,6 +21,7 @@ import okhttp3.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -29,7 +32,7 @@ import java.util.Map;
 
 @Slf4j
 @Component
-public class ShopifyShopProfileClient extends ShopProfileClient {
+public class ShopifyShopProfileClient extends ShopProfileClient<JSONObject,JSONObject> {
 
     // Header
     public static final String CONTENT_TYPE = "Content-Type";
@@ -56,8 +59,11 @@ public class ShopifyShopProfileClient extends ShopProfileClient {
     /**
      * 获得店铺信息
      **/
-    public JSONObject getShop() {
-        return getResult(ShopifyAPI.GET_SHOP);
+    public List<JSONObject> getShops() {
+        JSONObject shop=getResult(ShopifyAPI.GET_SHOP);
+        List<JSONObject> shops = new ArrayList<>();
+        shops.add(shop);
+        return shops;
     }
 
     /**
@@ -77,8 +83,14 @@ public class ShopifyShopProfileClient extends ShopProfileClient {
     /**
      * 获得商品信息
      **/
-    public JSONArray getProducts() {
-        return getResult(ShopifyAPI.GET_PRODUCTS);
+    public List<JSONObject> getProducts(String shopId,String domainName) {
+        JSONArray productArr = getResult(ShopifyAPI.GET_PRODUCTS);
+        List<JSONObject> products = new ArrayList<>();
+        for (JsonNode productNode : productArr) {
+            JSONObject productJson = new JSONObject(productNode);
+            products.add(productJson);
+        }
+        return products;
     }
 
     /**

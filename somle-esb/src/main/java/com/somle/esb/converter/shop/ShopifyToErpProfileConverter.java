@@ -27,43 +27,48 @@ abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpShopProfi
     }
 
     @Component
-    private static class ShopifyShopConverter extends ShopifyToErpProfileConverter<JSONObject,ErpShopSaveReqVO> {
+    private static class ShopifyShopConverter extends ShopifyToErpProfileConverter<List<JSONObject>,ErpShopSaveReqVO> {
 
         public ShopifyShopConverter() {
             super(ShopProfileType.SHOP);
         }
 
         @Override
-        protected ErpShopSaveReqVO toModelInternal(ShopProfileDTO<JSONObject> shopInfoDTO) {
-            JSONObject shopJson = shopInfoDTO.getPayload();
-            ErpShopSaveReqVO shopDo = new ErpShopSaveReqVO();
-            shopDo.setId(null);
-            shopDo.setName(shopJson.getString("name"));
-            shopDo.setRemark(null);
-            shopDo.setSort(1);
-            shopDo.setStatus(1);
-            shopDo.setType(0);
-            shopDo.setPlatform(SalesPlatform.SHOPIFY.name());
-            shopDo.setPlatformShopUid(shopJson.getString("id"));
-            shopDo.setAccount("unknown");
-            shopDo.setCode(shopDo.getPlatform()+"-"+shopDo.getPlatformShopUid());
-            return shopDo;
+        protected List<ErpShopSaveReqVO> toModelInternal(ShopProfileDTO<List<JSONObject>> shopInfoDTO) {
+            List<JSONObject> shopList = shopInfoDTO.getPayload();
+            List<ErpShopSaveReqVO> returnList=new ArrayList<>();
+            for (JSONObject shopJson : shopList) {
+                ErpShopSaveReqVO shopDo = new ErpShopSaveReqVO();
+                shopDo.setId(null);
+                shopDo.setName(shopJson.getString("name"));
+                shopDo.setRemark(null);
+                shopDo.setSort(1);
+                shopDo.setStatus(1);
+                shopDo.setType(0);
+                shopDo.setCountryCode(shopJson.getString("country"));
+                shopDo.setPlatform(SalesPlatform.SHOPIFY.name());
+                shopDo.setPlatformShopUid(shopJson.getString("id"));
+                shopDo.setAccount("unknown");
+                shopDo.setCode(shopDo.getPlatform()+"-"+shopDo.getPlatformShopUid());
+                returnList.add(shopDo);
+            }
+            return returnList;
         }
     }
 
     @Component
-    private static class ShopifyShopProductConverter extends ShopifyToErpProfileConverter<JSONArray, List<ErpShopProductDO>> {
+    private static class ShopifyShopProductConverter extends ShopifyToErpProfileConverter<List<JSONObject>, ErpShopProductDO> {
 
         public ShopifyShopProductConverter() {
             super(ShopProfileType.PRODUCT);
         }
 
         @Override
-        protected List<ErpShopProductDO> toModelInternal(ShopProfileDTO<JSONArray> shopInfoDTO) {
-            JSONArray productArr = shopInfoDTO.getPayload();
+        protected List<ErpShopProductDO> toModelInternal(ShopProfileDTO<List<JSONObject>> shopInfoDTO) {
+            List<JSONObject> productArr = shopInfoDTO.getPayload();
             List<ErpShopProductDO> productList=new ArrayList<>();
-            for (JsonNode productNode : productArr) {
-                JSONObject productJson=new JSONObject(productNode);
+
+            for (JSONObject productJson : productArr) {
                 ErpShopProductDO productDO = new ErpShopProductDO();
                 productDO.setId(null);
                 productDO.setName(productJson.getString("title"));
@@ -73,12 +78,15 @@ abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpShopProfi
                 productDO.setStatus(1);
                 productDO.setShopId(null);
                 productDO.setUrl(SalesPlatform.SHOPIFY.getSiteURL()+"/products/"+productJson.getString("handle"));
-                productList.add(productDO);
+
                 JSONObject image=productJson.getJSONObject("image");
                 if(image!=null) {
                     productDO.setImage(image.getString("src"));
                 }
+
+                productList.add(productDO);
             }
+
             return productList;
         }
 

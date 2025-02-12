@@ -9,6 +9,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 
+import java.util.List;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 @Slf4j
@@ -20,7 +22,7 @@ class ShopifyClientTest extends BaseDbUnitTest {
 
     @Test
     void testGetProducts() {
-        JSONArray products= client.getProducts();
+        List<JSONObject> products= client.getProducts(null,null);
         assertNotNull(products);
         log.info(products.toString());
         assertFalse(products.isEmpty());
@@ -28,7 +30,10 @@ class ShopifyClientTest extends BaseDbUnitTest {
 
     @Test
     void testGetShop() {
-        JSONObject shop= client.getShop();
+        List<JSONObject> shops= client.getShops();
+        assertNotNull(shops);
+        assertFalse(shops.isEmpty());
+        JSONObject shop=shops.get(0);
         assertNotNull(shop);
         log.info(shop.toString());
         assertNotNull(shop);

@@ -5,6 +5,7 @@ import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -26,13 +27,13 @@ public abstract class AbstractErpShopProfileConverter<IN,OUT> {
     * @return VO
     **/
 
-    public static <VO> VO convert(ShopProfileDTO shopInfoDTO) {
+    public static <VO> List<VO> convert(ShopProfileDTO shopInfoDTO) {
         String key = makeKey(shopInfoDTO.getSalesPlatform(),shopInfoDTO.getShopProfileType());
         AbstractErpShopProfileConverter<?,?> converter= CONVERTERS.get(key);
         if (converter==null) {
             throw new IllegalArgumentException("未找到对应的转换器:"+shopInfoDTO.getSalesPlatform().name()+"."+shopInfoDTO.getShopProfileType().name());
         }
-        return (VO)converter.toModel(shopInfoDTO);
+        return converter.toModel(shopInfoDTO);
     }
 
 
@@ -44,14 +45,14 @@ public abstract class AbstractErpShopProfileConverter<IN,OUT> {
         return salesPlatform.name()+"_"+shopInfoType.name();
     }
 
-    protected OUT toModel(ShopProfileDTO<IN> shopInfoDTO) {
+    protected List<OUT> toModel(ShopProfileDTO<IN> shopInfoDTO) {
         if (shopInfoDTO == null) {
             return null;
         }
         return toModelInternal(shopInfoDTO);
     }
 
-    protected abstract OUT toModelInternal(ShopProfileDTO<IN> shopInfoDTO);
+    protected abstract List<OUT> toModelInternal(ShopProfileDTO<IN> shopInfoDTO);
 
 }
 

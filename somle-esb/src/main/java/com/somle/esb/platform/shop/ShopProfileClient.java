@@ -4,6 +4,8 @@ import com.somle.esb.enums.SalesPlatform;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
 
+import java.util.List;
+
 /**
  * @className: IShopProfileClient
  * @author: Wqh
@@ -11,7 +13,7 @@ import com.somle.framework.common.util.json.JSONObject;
  * @Version: 1.0
  * @description:
  */
-public abstract class ShopProfileClient {
+public abstract class ShopProfileClient<S,P> {
 
     private final SalesPlatform salesPlatform;
 
@@ -23,7 +25,7 @@ public abstract class ShopProfileClient {
         return salesPlatform;
     }
 
-    public abstract JSONObject getShop();
-    public abstract JSONArray getProducts();
+    public abstract List<S> getShops();
+    public abstract List<P> getProducts(String shopId,String domainName);
 
 }
