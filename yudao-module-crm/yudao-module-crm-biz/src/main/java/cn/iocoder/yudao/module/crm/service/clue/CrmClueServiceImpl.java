@@ -5,8 +5,6 @@ import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.Assert;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
-import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.crm.controller.admin.clue.vo.CrmCluePageReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.clue.vo.CrmClueSaveReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.clue.vo.CrmClueTransferReqVO;
@@ -223,7 +221,7 @@ public class CrmClueServiceImpl implements CrmClueService {
     }
 
     private CrmClueDO validateClueExists(Long id) {
-        CrmClueDO crmClueDO = clueMapper.selectById(id);
+        CrmClueDO crmClueDO = getClue(id);
         if (crmClueDO == null) {
             throw exception(CLUE_NOT_EXISTS);
         }
