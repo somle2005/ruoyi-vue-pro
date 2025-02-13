@@ -4,6 +4,7 @@ import cn.hutool.core.text.StrPool;
 import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
@@ -124,6 +125,87 @@ public class StrUtils {
         return content;
     }
 
+    /**
+     * 把各个部分拼接成地址,连接符号按操作系统 斜杠或反斜杠
+     * @param parts 路径的各个部分
+     * @return 拼接后的路径
+     */
+    public static String joinPath(String... parts) {
+        return joinPathInternal(File.separator, parts);
+    }
+
+    /**
+     * 把各个部分拼接成地址 始终使用斜杠
+     * @param parts 路径的各个部分
+     * @return 拼接后的路径
+     */
+    public static String joinUrl(String... parts) {
+        String url = joinPathInternal("/", parts);
+        return url.replace('\\', '/');
+    }
+
+    /**
+     * 把各个部分拼接成地址
+     */
+    private static String joinPathInternal(String sep, String... part) {
+        String p = null;
+        StringBuilder pa = new StringBuilder();
+        for (int i = 0; i < part.length; i++) {
+            if(StrUtils.isBlank(part[i])) {
+                continue;
+                //throw new IllegalArgumentException("子路径不允许为空");
+            }
+            p = part[i] + "";
+            if (i == 0) {
+                p = p.trim();
+                p = StrUtils.removeLast(p, "/");
+                p = StrUtils.removeLast(p, "\\");
+                pa.append(p);
+            } else {
+                p = p.trim();
+                p = StrUtils.removeLast(p, "/");
+                p = StrUtils.removeLast(p, "\\");
+                p = StrUtils.removeFirst(p, "/");
+                p = StrUtils.removeFirst(p, "\\");
+                pa.append(sep + p);
+            }
+        }
+        return pa.toString();
+    }
+
+
+    /**
+     * 移除字符串str中第一个匹配的字符串c
+     * @param str 源文本
+     * @param c	将要移除的内容
+     * @return 处理后的字符串
+     * */
+    public static String removeFirst(String str, String c) {
+
+        if (str == null || c == null) {
+            return str;
+        }
+        while (str.startsWith(c)) {
+            str = str.substring(c.length());
+        }
+        return str;
+    }
+
+    /**
+     * 移除字符串str中最后一个匹配的字符串c
+     * @param str 源文本
+     * @param c	将要移除的内容
+     * @return 处理后的字符串
+     * */
+    public static String removeLast(String str, String c) {
+        if (str == null || c == null) {
+            return str;
+        }
+        while (str.endsWith(c)) {
+            str = str.substring(0, str.length() - c.length());
+        }
+        return str;
+    }
 
 
 }

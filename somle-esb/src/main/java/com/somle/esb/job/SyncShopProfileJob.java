@@ -1,5 +1,7 @@
 package com.somle.esb.job;
 
+import cn.hutool.system.OsInfo;
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.convert.shop.ErpShopConvert;
@@ -129,6 +131,9 @@ public class SyncShopProfileJob extends DataJob {
 
         }
 
+        OsInfo osInfo = new OsInfo();
+        osInfo.isMac();
+
         log.info("sync shop profile success,salesPlatform:{},shopCount:{}",salesPlatform.name(),shops.size());
 
     }
@@ -168,6 +173,8 @@ public class SyncShopProfileJob extends DataJob {
                 productDOInDB.setImage(productFromSalsePlatform.getImage());
                 listToUpdate.add(productDOInDB);
             }
+
+
 
             mapToOffline.remove(productFromSalsePlatform.getPlatformProductUid());
         }
