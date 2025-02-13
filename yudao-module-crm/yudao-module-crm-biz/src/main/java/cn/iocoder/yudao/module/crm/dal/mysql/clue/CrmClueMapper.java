@@ -43,6 +43,14 @@ public interface CrmClueMapper extends BaseMapperX<CrmClueDO> {
         return selectJoinPage(pageReqVO, CrmClueDO.class, query);
     }
 
+    //根据表id查唯一
+    default CrmClueDO selectById(Long id) {
+        MPJLambdaWrapperX<CrmClueDO> wrapperX = new MPJLambdaWrapperX<>();
+        wrapperX.selectAll(CrmClueDO.class)
+            .eq(CrmClueDO::getId, id);
+        return selectJoinOne(CrmClueDO.class, wrapperX);
+    }
+
     default List<CrmClueDO> selectBatchIds(Collection<Long> ids, Long userId) {
         MPJLambdaWrapperX<CrmClueDO> query = new MPJLambdaWrapperX<>();
         // 拼接数据权限的查询条件

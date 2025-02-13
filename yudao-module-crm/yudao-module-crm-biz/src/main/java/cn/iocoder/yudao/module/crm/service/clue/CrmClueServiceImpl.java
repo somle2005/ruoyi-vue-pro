@@ -34,12 +34,13 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.Collection;
+import java.util.List;
+import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.singleton;
-import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
 import static cn.iocoder.yudao.module.crm.enums.ErrorCodeConstants.CLUE_NOT_EXISTS;
 import static cn.iocoder.yudao.module.crm.enums.ErrorCodeConstants.CLUE_TRANSFORM_FAIL_ALREADY;
 import static cn.iocoder.yudao.module.crm.enums.LogRecordConstants.*;
@@ -231,11 +232,7 @@ public class CrmClueServiceImpl implements CrmClueService {
     @Override
     @CrmPermission(bizType = CrmBizTypeEnum.CRM_CLUE, bizId = "#id", level = CrmPermissionLevelEnum.READ)
     public CrmClueDO getClue(Long id) {
-        List<CrmClueDO> result = new ArrayList<>();
-        Optional.ofNullable(getClueList(List.of(id), getLoginUserId()))
-            .ifPresent(result::addAll);
-        return result.isEmpty() ? null : result.get(0);
-//        return clueMapper.selectById(id); 无法查询出list类型数据，没有被转换、待解决
+        return clueMapper.selectById(id);
     }
 
     @Override
