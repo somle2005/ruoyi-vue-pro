@@ -84,6 +84,13 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
         return selectJoinPage(pageReqVO, CrmCustomerDO.class, query);
     }
 
+    //根据表id查唯一
+    default CrmCustomerDO selectByCustomerId(Long customerId) {
+        MPJLambdaWrapperX<CrmCustomerDO> wrapperX = new MPJLambdaWrapperX<>();
+        wrapperX.selectAll(CrmCustomerDO.class)
+                .eq(CrmCustomerDO::getId, customerId);
+        return selectJoinOne(CrmCustomerDO.class,wrapperX);
+    }
 
     default List<CrmCustomerDO> selectBatchIdsWithOwnerUserId(Collection<Long> ids, Long ownerUserId) {
         MPJLambdaWrapperX<CrmCustomerDO> query = new MPJLambdaWrapperX<>();
