@@ -20,6 +20,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 import static com.somle.kingdee.util.SignatureUtils.*;
@@ -32,6 +33,8 @@ import static com.somle.kingdee.util.SignatureUtils.*;
 public class KingdeeClient {
 
     private volatile KingdeeToken token;
+    private final AtomicBoolean isRefreshing = new AtomicBoolean(false); // 防止重复刷新
+
 
 
     public KingdeeClient(KingdeeToken token) {
@@ -357,15 +360,28 @@ public class KingdeeClient {
         if (!response.getErrcode().equals("0")) {
             switch (response.getErrcode()) {
                 case "1000202001":
-                    CompletableFuture.runAsync((() -> {
-                        token = refreshAuth();//刷新token
-                    }));
+                    CompletableFuture.runAsync(this::tryRefreshToken);
                     throw new RuntimeException(StrUtil.format("Kingdee JWT expired,full response ({}) ", response));
                 case "1000002001":
                     throw new RuntimeException(StrUtil.format("当前单据已在金蝶标签页中打开，请关闭单据后重试"));
                 default:
                     throw new RuntimeException(StrUtil.format("Kingdee 未知异常,完整响应:({})", response));
             }
+        }
+    }
+    // 尝试异步刷新令牌
+    private void tryRefreshToken() {
+        if (isRefreshing.compareAndSet(false, true)) {  // 保证同一时间只有一个线程刷新
+            try {
+                token = refreshAuth();
+                log.info("kingdee Token refreshed successfully");
+            } catch (Exception e) {
+                log.error("Failed to refresh kingdee token", e);
+            } finally {
+                isRefreshing.set(false);  // 刷新完成后释放锁
+            }
+        } else {//暂时info
+            log.info("kingdee Token refresh is already in progress, skipping.");
         }
     }
 
