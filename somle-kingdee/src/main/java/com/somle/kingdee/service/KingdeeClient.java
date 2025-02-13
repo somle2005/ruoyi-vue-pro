@@ -1,6 +1,7 @@
 package com.somle.kingdee.service;
 
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.common.util.web.RequestX;
@@ -347,15 +348,21 @@ public class KingdeeClient {
                 .build();
             response = WebUtils.sendRequest(request, KingdeeResponse.class);
         }
-
         validateResponse(response);
-
         return response;
     }
 
     private void validateResponse(KingdeeResponse response) {
         if (!response.getErrcode().equals("0")) {
-            throw new RuntimeException("Kingdee error response: " + response);
+            switch (response.getErrcode()) {
+                case "1000202001":
+                    token = refreshAuth();//刷新token
+                    throw new RuntimeException(StrUtil.format("Kingdee JWT expired,full response ({}) ", response));
+                case "1000002001":
+                    throw new RuntimeException(StrUtil.format("当前单据已在金蝶标签页中打开，请关闭单据后重试"));
+                default:
+                    throw new RuntimeException(StrUtil.format("Kingdee 未知异常,完整响应:({})", response));
+            }
         }
     }
 
