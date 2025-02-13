@@ -22,7 +22,7 @@ public class AmazonspOrderDataJob extends AmazonspDataJob {
     public String execute(String param) throws Exception {
         setDate(param);
 
-        for (var client : amazonSpService.clients) {
+        for (var client : amazonSpService.getClients()) {
             client.getMarketplaceParticipations().stream()
                 .forEach(marketplaceParticipation -> {
                     var vo = AmazonSpOrderReqVO.builder()

@@ -22,7 +22,7 @@ class ShopifyClientTest extends BaseDbUnitTest {
 
     @Test
     void testGetProducts() {
-        List<JSONObject> products= client.getProducts(null,null);
+        List<JSONObject> products= client.getProducts(null,null,null);
         assertNotNull(products);
         log.info(products.toString());
         assertFalse(products.isEmpty());

@@ -83,7 +83,7 @@ public class ShopifyShopProfileClient extends ShopProfileClient<JSONObject,JSONO
     /**
      * 获得商品信息
      **/
-    public List<JSONObject> getProducts(String shopId,String domainName) {
+    public List<JSONObject> getProducts(String shopId,String regionCode,String domainName) {
         JSONArray productArr = getResult(ShopifyAPI.GET_PRODUCTS);
         List<JSONObject> products = new ArrayList<>();
         for (JsonNode productNode : productArr) {

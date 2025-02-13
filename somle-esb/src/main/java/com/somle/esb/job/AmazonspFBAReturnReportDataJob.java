@@ -27,7 +27,7 @@ public class AmazonspFBAReturnReportDataJob extends AmazonspDataJob {
                 .dataEndTime(beforeYesterdayLastSecond.toString())
                 .build();
 
-        amazonSpService.clients.stream()
+        amazonSpService.getClients().stream()
             .flatMap(client ->
                 client.getMarketplaceParticipations().stream()
                     .map(marketplaceParticipation -> {

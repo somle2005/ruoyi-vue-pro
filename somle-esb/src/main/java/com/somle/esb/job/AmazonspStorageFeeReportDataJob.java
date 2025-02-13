@@ -23,7 +23,7 @@ public class AmazonspStorageFeeReportDataJob extends AmazonspDataJob {
                 .dataEndTime(beforeYesterdayLastSecond.toString())
                 .build();
 
-        amazonSpService.clients.stream()
+        amazonSpService.getClients().stream()
             .map(client ->
                 client.createAndGetReportOrNull(vo, "gzip")
             )

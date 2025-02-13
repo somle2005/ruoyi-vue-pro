@@ -7,6 +7,7 @@ import com.somle.amazon.model.enums.*;
 //import com.somle.amazon.repository.AmazonSellerRepository;
 import com.somle.framework.common.util.collection.CollectionUtils;
 import com.somle.framework.common.util.collection.PageUtils;
+import com.somle.framework.common.util.collection.StreamX;
 import com.somle.framework.common.util.general.CoreUtils;
 
 import com.somle.framework.common.util.json.JSONObject;
@@ -37,6 +38,10 @@ public class AmazonSpClient {
 
 
     private AmazonSpAuthDO auth;
+
+    public void setAuth(AmazonSpAuthDO auth) {
+        this.auth = auth;
+    }
 
     private String getEndPoint() {
         return AmazonRegion.findByCode(auth.getRegionCode()).getSpUrl();
@@ -73,7 +78,10 @@ public class AmazonSpClient {
             .headers(generateHeaders(auth))
             .build();
         var response = WebUtils.sendRequest(request, AmazonSpMarketplaceParticipationRespVO.class);
-        return response.getPayload();
+        List<AmazonSpMarketplaceParticipationVO> rawList=response.getPayload();
+        List<AmazonSpMarketplaceParticipationVO> filterdList=response.getPayload();
+        filterdList= StreamX.from(rawList).filter(m->AmazonCountry.findByMarketplaceId(m.getMarketplace().getId())!=null).toList();
+        return filterdList;
     }
 
     @SneakyThrows

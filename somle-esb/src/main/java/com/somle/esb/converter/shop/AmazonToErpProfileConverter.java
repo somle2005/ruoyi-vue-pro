@@ -1,5 +1,6 @@
 package com.somle.esb.converter.shop;
 
+import cn.iocoder.yudao.framework.common.util.lang.CharSymbols;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,6 +11,7 @@ import com.somle.esb.model.ShopProfileDTO;
 import com.somle.framework.common.util.collection.CollectionUtils;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
@@ -22,12 +24,32 @@ import java.util.List;
  * @Version: 1.0
  * @description:
  */
-abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpShopProfileConverter<IN,OUT> {
+public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpShopProfileConverter<IN,OUT> {
+
+    public static final String FIELD_NUMBER_OF_RESULTS = "numberOfResults";
+    public static final String FIELD_PAGINATION = "pagination";
+    public static final String FIELD_NEXT_TOKEN = "nextToken";
+    public static final String FIELD_ERRORS = "errors";
+    public static final String FIELD_CODE = "code";
+    public static final String FIELD_CATALOG = "catalog";
+    public static final String FIELD_ITEMS = "items";
+    public static final String FIELD_DOMAIN_NAME = "domainName";
+    public static final String FIELD_ASIN = "asin";
+    public static final String FIELD_IMAGES = "images";
+    public static final String FIELD_SKU = "sku";
+    public static final String FIELD_URL = "url";
+    public static final String FIELD_MARKETPLACE_ID = "marketplaceId";
+    public static final String FIELD_CLIENT_ID = "clientId";
+    public static final String FIELD_SELLER_ID = "sellerId";
+    public static final String PROTOCOL = "https://";
+    public static final String SUB_PATH_DP = "/dp/";
+    public static final String VALUE_UNKNOWN = "unknown";
 
     public AmazonToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.AMAZON, shopProfileType);
     }
 
+    @Slf4j
     @Component
     private static class ShopifyShopConverter extends AmazonToErpProfileConverter<List<AmazonSpMarketplaceParticipationVO>,ErpShopSaveReqVO> {
 
@@ -51,8 +73,8 @@ abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpShopProfil
                 shopDo.setCountryCode(amazonShop.getMarketplace().getCountryCode());
                 shopDo.setPlatform(SalesPlatform.AMAZON.name());
                 shopDo.setPlatformShopUid(amazonShop.getMarketplace().getId());
-                shopDo.setAccount("unknown");
-                shopDo.setCode(shopDo.getPlatform()+"-"+shopDo.getPlatformShopUid());
+                shopDo.setAccount(VALUE_UNKNOWN);
+                shopDo.setCode(shopDo.getPlatform()+CharSymbols.MINUS+shopDo.getPlatformShopUid());
                 returnList.add(shopDo);
             }
             return returnList;
@@ -60,6 +82,7 @@ abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpShopProfil
     }
 
     @Component
+    @Slf4j
     private static class ShopifyShopProductConverter extends AmazonToErpProfileConverter<List<JSONObject>, ErpShopProductDO> {
 
         public ShopifyShopProductConverter() {
@@ -72,22 +95,21 @@ abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpShopProfil
             List<ErpShopProductDO> productList=new ArrayList<>();
 
             for (JSONObject product : productArr) {
-                //JSONArray offers=productJson.getJSONArray("offers");
-                //for (JsonNode offerNode : offers) {
-                    //JSONObject offer = new JSONObject(offerNode);
-                    //JSONObject audience=offer.getJSONObject("audience");
-                String sku=product.getString("sku");
-                String domainName=product.getString("domainName");
-                JSONObject catalog = product.getJSONObject("catalog");
+
+                String sku=product.getString(FIELD_SKU);
+                String domainName=product.getString(FIELD_DOMAIN_NAME);
+                JSONObject catalog = product.getJSONObject(FIELD_CATALOG);
                 if(catalog==null) {
                     // 这个问题需要排查
+                    //throw new RuntimeException("product catalog is null");
+                    log.error("product catalog is null,sku={}",sku);
                     continue;
                 }
-                String asin=catalog.getString("asin");
-                JSONArray images=catalog.getJSONArray("images");
+                String asin=catalog.getString(FIELD_ASIN);
+                JSONArray images=catalog.getJSONArray(FIELD_IMAGES);
                 String imageUrl=null;
                 if(!CollectionUtils.isEmpty(images)) {
-                    imageUrl=images.getJSONObject(0).getString("url");
+                    imageUrl=images.getJSONObject(0).getString(FIELD_URL);
                 }
 
                 ErpShopProductDO productDO = new ErpShopProductDO();
@@ -97,11 +119,11 @@ abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpShopProfil
                 productDO.setCode(null);
                 productDO.setRemark(null);
 
-                productDO.setPlatformProductUid(sku+"#"+asin);
+                productDO.setPlatformProductUid(sku+ CharSymbols.NU+asin);
 
                 productDO.setStatus(1);
                 productDO.setShopId(null);
-                productDO.setUrl("https://"+domainName+"/dp/"+asin);
+                productDO.setUrl(PROTOCOL +domainName+ SUB_PATH_DP +asin);
                 productDO.setImage(imageUrl);
 
                 productList.add(productDO);

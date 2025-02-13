@@ -28,7 +28,7 @@ public class AmazonspAsinReportDataJob extends AmazonspDataJob {
 
         var dataDate = beforeYesterday;
 
-        for (var client : amazonSpService.clients) {
+        for (var client : amazonSpService.getClients()) {
             client.getMarketplaceParticipations().stream()
                 .forEach(participation -> {
                     var options = AmazonSpReportSaveVO.ReportOptions.builder()

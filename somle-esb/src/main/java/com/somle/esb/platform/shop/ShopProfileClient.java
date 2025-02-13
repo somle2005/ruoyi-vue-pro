@@ -26,6 +26,6 @@ public abstract class ShopProfileClient<S,P> {
     }
 
     public abstract List<S> getShops();
-    public abstract List<P> getProducts(String shopId,String domainName);
+    public abstract List<P> getProducts(String shopId,String regionCode,String domainName);
 
 }

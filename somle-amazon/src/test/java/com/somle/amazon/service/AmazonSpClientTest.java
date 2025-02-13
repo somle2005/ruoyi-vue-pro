@@ -3,6 +3,7 @@ package com.somle.amazon.service;
 import com.somle.amazon.controller.vo.*;
 import com.somle.amazon.controller.vo.AmazonSpReportReqVO.ProcessingStatuses;
 import com.somle.amazon.model.enums.AmazonCountry;
+import com.somle.amazon.model.enums.AmazonRegion;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.test.core.ut.BaseSpringTest;
@@ -29,7 +30,7 @@ class AmazonSpClientTest extends BaseSpringTest {
 
     @BeforeEach
     void setUp() {
-        client = spService.clients.get(0);
+        client = spService.getClient(AmazonRegion.FE);
     }
 
 //    @Test
@@ -69,7 +70,8 @@ class AmazonSpClientTest extends BaseSpringTest {
             //.identifiersType(AmazonSpListingReqVO.IdentifiersType.ASIN)
             .sellerId(client.getAuth().getSellerId())
             .pageSize(10)
-            .marketplaceIds(List.of(AmazonCountry.findByCode("MX").getMarketplaceId()))
+            //.marketplaceIds(List.of(AmazonCountry.findByCode("MX").getMarketplaceId()))
+            .marketplaceIds(List.of(AmazonCountry.findByCode("FR").getMarketplaceId()))
             .includedData(List.of(AmazonSpListingReqVO.IncludedData.OFFERS,AmazonSpListingReqVO.IncludedData.ATTRIBUTES))
             .build();
         var listing = client.searchListingsItems(reqVO);

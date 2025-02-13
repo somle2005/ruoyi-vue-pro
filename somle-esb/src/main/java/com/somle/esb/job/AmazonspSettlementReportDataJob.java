@@ -31,7 +31,7 @@ public class AmazonspSettlementReportDataJob extends AmazonspDataJob {
                 .pageSize(100)
                 .build();
 
-        amazonSpService.clients.stream()
+        amazonSpService.getClients().stream()
             .flatMap(client ->
                 client.getReportStream(vo, null)
             )

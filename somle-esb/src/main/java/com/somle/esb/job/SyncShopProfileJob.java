@@ -66,10 +66,19 @@ public class SyncShopProfileJob extends DataJob {
             .collect(Collectors.toMap(t->t.getSalesPlatform(), t -> t));
 
         for (final SalesPlatform salesPlatform : SalesPlatform.values()) {
+
             // 如果未开启同步则跳过
             if (!salesPlatform.isSyncProfile()) {
                 continue;
             }
+
+            // 如果是本地调试模式
+            if(SpringUtils.isBootInIDE()) {
+                if(!salesPlatform.isAnyMatch(SalesPlatform.AMAZON)) {
+                    continue;
+                }
+            }
+
             AsyncTask.run(()->{
                 try {
                     syncShopProfile(salesPlatform,shopProfileClientMap);
@@ -113,10 +122,14 @@ public class SyncShopProfileJob extends DataJob {
             // 保存店铺
             ErpShopDO shopDO=shopService.getByPlatform(shopprofileDTO.getSalesPlatform().name(),shopVO.getPlatformShopUid());
             if(shopDO!=null) {
+
+                shopDO.setName(shopVO.getName());
+                shopDO.setCountryCode(shopVO.getCountryCode());
+                shopDO.setDomainName(shopVO.getDomainName());
+                shopDO.setPlatformShopUid(shopVO.getPlatformShopUid());
+
                 ErpShopSaveReqVO convertedShopVO = ErpShopConvert.INSTANCE.convert(shopDO);
-                convertedShopVO.setName(shopVO.getName());
-                convertedShopVO.setCountryCode(shopVO.getCountryCode());
-                convertedShopVO.setDomainName(shopVO.getDomainName());
+
                 shopService.updateShop(convertedShopVO);
             } else {
                 shopService.createShop(shopVO);
@@ -124,15 +137,12 @@ public class SyncShopProfileJob extends DataJob {
             }
 
             // 获得产品信息
-            List productArray = shopProfileClient.getProducts(shopDO.getPlatformShopUid(),shopDO.getDomainName());
+            List productArray = shopProfileClient.getProducts(shopDO.getPlatformShopUid(),shopDO.getCountryCode(),shopDO.getDomainName());
             if(productArray!=null && !productArray.isEmpty()) {
                 syncShopProducts(salesPlatform,shopDO,productArray);
             }
 
         }
-
-        OsInfo osInfo = new OsInfo();
-        osInfo.isMac();
 
         log.info("sync shop profile success,salesPlatform:{},shopCount:{}",salesPlatform.name(),shops.size());
 
@@ -144,7 +154,7 @@ public class SyncShopProfileJob extends DataJob {
     private void syncShopProducts(SalesPlatform salesPlatform,ErpShopDO shopDO, List productArray) {
         ShopProfileDTO<JSONArray> shopProductsDTO=new ShopProfileDTO(salesPlatform, ShopProfileType.PRODUCT,productArray);
         // 转换
-        List<ErpShopProductDO> productsSalsePlatform= AbstractErpShopProfileConverter.convert(shopProductsDTO);
+        List<ErpShopProductDO> productsSalesPlatform= AbstractErpShopProfileConverter.convert(shopProductsDTO);
         // 装配
         List<ErpShopProductDO> shopProductsInDB= shopProductService.selectByShopId(shopDO.getId());
         Map<String,ErpShopProductDO> shopProductsInDBMap= StreamX.from(shopProductsInDB).toMap
@@ -154,29 +164,29 @@ public class SyncShopProfileJob extends DataJob {
         Map<String,ErpShopProductDO> mapToOffline=new HashMap<>(shopProductsInDBMap);
         List<ErpShopProductDO> listToCreate=new ArrayList<>();
         List<ErpShopProductDO> listToUpdate=new ArrayList<>();
-        for (ErpShopProductDO productFromSalsePlatform : productsSalsePlatform) {
+        for (ErpShopProductDO productFromSalesPlatform : productsSalesPlatform) {
 
-            ErpShopProductDO productDOInDB=shopProductsInDBMap.get(productFromSalsePlatform.getPlatformProductUid());
+            ErpShopProductDO productDOInDB=shopProductsInDBMap.get(productFromSalesPlatform.getPlatformProductUid());
 
             // 默认有效状态
-            productFromSalsePlatform.setStatus(1);
+            productFromSalesPlatform.setStatus(1);
 
             if(productDOInDB==null) {
-                productFromSalsePlatform.setShopId(shopDO.getId());
-                productFromSalsePlatform.setCode(shopDO.getId()+"#"+productFromSalsePlatform.getPlatformProductUid());
-                listToCreate.add(productFromSalsePlatform);
+                productFromSalesPlatform.setShopId(shopDO.getId());
+                productFromSalesPlatform.setCode(shopDO.getId()+"#"+productFromSalesPlatform.getPlatformProductUid());
+                listToCreate.add(productFromSalesPlatform);
 
             } else {
                 // 设置允许同步更新的属性，按需要补充
-                productDOInDB.setName(productFromSalsePlatform.getName());
-                productDOInDB.setUrl(productFromSalsePlatform.getUrl());
-                productDOInDB.setImage(productFromSalsePlatform.getImage());
+                productDOInDB.setName(productFromSalesPlatform.getName());
+                productDOInDB.setUrl(productFromSalesPlatform.getUrl());
+                productDOInDB.setImage(productFromSalesPlatform.getImage());
                 listToUpdate.add(productDOInDB);
             }
 
 
 
-            mapToOffline.remove(productFromSalsePlatform.getPlatformProductUid());
+            mapToOffline.remove(productFromSalesPlatform.getPlatformProductUid());
         }
 
         // 新增的部分
