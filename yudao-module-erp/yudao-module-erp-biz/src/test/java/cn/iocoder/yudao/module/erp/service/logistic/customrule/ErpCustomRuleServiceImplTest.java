@@ -1,32 +1,24 @@
 package cn.iocoder.yudao.module.erp.service.logistic.customrule;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.mock.mockito.MockBean;
-
-import jakarta.annotation.Resource;
-
+import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
-
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.*;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRulePageReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRuleSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule.ErpCustomRuleDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.customrule.ErpCustomRuleMapper;
-import cn.iocoder.yudao.framework.common.pojo.PageResult;
-
 import jakarta.annotation.Resource;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
-import java.util.*;
-import java.time.LocalDateTime;
 
-import static cn.hutool.core.util.RandomUtil.*;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
-import static cn.iocoder.yudao.framework.test.core.util.AssertUtils.*;
-import static cn.iocoder.yudao.framework.test.core.util.RandomUtils.*;
-import static cn.iocoder.yudao.framework.common.util.date.LocalDateTimeUtils.*;
-import static cn.iocoder.yudao.framework.common.util.object.ObjectUtils.*;
-import static cn.iocoder.yudao.framework.common.util.date.DateUtils.*;
+import static cn.iocoder.yudao.framework.common.util.date.LocalDateTimeUtils.buildBetweenTime;
+import static cn.iocoder.yudao.framework.common.util.object.ObjectUtils.cloneIgnoreId;
+import static cn.iocoder.yudao.framework.test.core.util.AssertUtils.assertPojoEquals;
+import static cn.iocoder.yudao.framework.test.core.util.AssertUtils.assertServiceException;
+import static cn.iocoder.yudao.framework.test.core.util.RandomUtils.randomLongId;
+import static cn.iocoder.yudao.framework.test.core.util.RandomUtils.randomPojo;
+import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_RULE_NOT_EXISTS;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
 /**
  * {@link ErpCustomRuleServiceImpl} 的单元测试类
@@ -92,8 +84,8 @@ public class ErpCustomRuleServiceImplTest extends BaseDbUnitTest {
 
         // 调用
         customRuleService.deleteCustomRule(id);
-       // 校验数据不存在了
-       assertNull(customRuleMapper.selectById(id));
+        // 校验数据不存在了
+        assertNull(customRuleMapper.selectById(id));
     }
 
     @Test
@@ -149,22 +141,22 @@ public class ErpCustomRuleServiceImplTest extends BaseDbUnitTest {
        ErpCustomRulePageReqVO reqVO = new ErpCustomRulePageReqVO();
        reqVO.setCountryCode(null);
        // reqVO.setType(null);
-       // reqVO.setSupplierProductId(null);
-       reqVO.setDeclaredTypeEn(null);
-       reqVO.setDeclaredType(null);
-       reqVO.setDeclaredValue(null);
-       reqVO.setDeclaredValueCurrencyCode(null);
-       reqVO.setTaxRate(null);
-       reqVO.setHscode(null);
-       reqVO.setLogisticAttribute(null);
-       reqVO.setCreateTime(buildBetweenTime(2023, 2, 1, 2023, 2, 28));
+       //       reqVO.setSupplierProductId(null);
+        reqVO.setDeclaredTypeEn(null);
+        reqVO.setDeclaredType(null);
+        reqVO.setDeclaredValue(null);
+        reqVO.setDeclaredValueCurrencyCode(null);
+        reqVO.setTaxRate(null);
+        reqVO.setHscode(null);
+        reqVO.setLogisticAttribute(null);
+        reqVO.setCreateTime(buildBetweenTime(2023, 2, 1, 2023, 2, 28));
 
-       // 调用
-       PageResult<ErpCustomRuleDO> pageResult = customRuleService.getCustomRulePage(reqVO);
-       // 断言
-       assertEquals(1, pageResult.getTotal());
-       assertEquals(1, pageResult.getList().size());
-       assertPojoEquals(dbCustomRule, pageResult.getList().get(0));
+        // 调用
+        PageResult<ErpCustomRuleDO> pageResult = customRuleService.getCustomRulePage(reqVO);
+        // 断言
+        assertEquals(1, pageResult.getTotal());
+        assertEquals(1, pageResult.getList().size());
+        assertPojoEquals(dbCustomRule, pageResult.getList().get(0));
     }
 
 }

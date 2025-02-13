@@ -146,7 +146,7 @@ class AmazonSpClientTest extends BaseSpringTest {
                 .marketplaceIds(List.of(AmazonCountry.findByCode("DE").getMarketplaceId()))
                 .reportOptions(options)
                 .build();
-        var reportString = client.createAndGetReport(vo, "gzip");
+        var reportString = client.createAndGetReport(vo);
         var report = JsonUtils.parseObject(reportString, JSONObject.class);
         log.info(report.toString());
     }
@@ -165,7 +165,7 @@ class AmazonSpClientTest extends BaseSpringTest {
 //            .marketplaceIds(List.of(AmazonCountry.findByCode("DE").getMarketplaceId()))
 //            .reportOptions(options)
             .build();
-        var reportString = client.createAndGetReport(vo, "gzip");
+        var reportString = client.createAndGetReport(vo);
         log.info(reportString);
     }
 
@@ -190,7 +190,7 @@ class AmazonSpClientTest extends BaseSpringTest {
 //                .pageSize(100)
 //                .build();
 //        var report = client.getReports(vo).get(0);
-        log.info(client.getReport("970685020124",null));
+        log.info(client.waitAndGetReportDocument("970685020124"));
     }
 
 
