@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Stream;
 
 import static com.somle.kingdee.util.SignatureUtils.*;
@@ -30,7 +31,7 @@ import static com.somle.kingdee.util.SignatureUtils.*;
 @Data
 public class KingdeeClient {
 
-    private KingdeeToken token;
+    private volatile KingdeeToken token;
 
 
     public KingdeeClient(KingdeeToken token) {
@@ -356,7 +357,9 @@ public class KingdeeClient {
         if (!response.getErrcode().equals("0")) {
             switch (response.getErrcode()) {
                 case "1000202001":
-                    token = refreshAuth();//刷新token
+                    CompletableFuture.runAsync((() -> {
+                        token = refreshAuth();//刷新token
+                    }));
                     throw new RuntimeException(StrUtil.format("Kingdee JWT expired,full response ({}) ", response));
                 case "1000002001":
                     throw new RuntimeException(StrUtil.format("当前单据已在金蝶标签页中打开，请关闭单据后重试"));
