@@ -33,7 +33,7 @@ import static com.somle.kingdee.util.SignatureUtils.*;
 public class KingdeeClient {
 
     private volatile KingdeeToken token;
-    private final AtomicBoolean isRefreshing = new AtomicBoolean(false); // 防止重复刷新
+    private final AtomicBoolean isRefreshing = new AtomicBoolean(false); // 防止重复刷新(后续可以替换分布式锁，保证唯一)
 
 
 
