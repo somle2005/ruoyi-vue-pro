@@ -67,7 +67,7 @@ public enum EnvEnum {
 
 
     /**
-     * 是否任意一个
+     * 是否匹配任意一个
      **/
     public boolean isAnyMatch(EnvEnum... envEnums) {
         boolean matched = false;
