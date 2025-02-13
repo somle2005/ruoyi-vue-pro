@@ -222,7 +222,7 @@ public class CrmClueServiceImpl implements CrmClueService {
     }
 
     private CrmClueDO validateClueExists(Long id) {
-        CrmClueDO crmClueDO = getClue(id);
+        CrmClueDO crmClueDO = clueMapper.selectById(id);
         if (crmClueDO == null) {
             throw exception(CLUE_NOT_EXISTS);
         }
