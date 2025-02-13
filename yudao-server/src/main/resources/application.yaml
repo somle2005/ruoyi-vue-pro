@@ -1,3 +1,11 @@
+server:
+  servlet:
+    encoding:
+      enabled: true
+      charset: UTF-8 # 必须设置 UTF-8，避免 WebFlux 流式返回（AI 场景）会乱码问题
+      force: true
+  port: 55002
+
 oss:
   endpoint: https://oss-cn-hangzhou.aliyuncs.com
 
@@ -31,16 +39,66 @@ spring:
     type: REDIS
     redis:
       time-to-live: 1h # 设置过期时间为 1 小时
+  # Data 配置项
+  data:
+    redis:
+      repositories:
+        enabled: false # 项目未使用到 Spring Data Redis 的 Repository，所以直接禁用，保证启动速度
+  # Kafka 配置项，对应 KafkaProperties 配置类
+  kafka:
+    # Kafka Producer 配置项
+    producer:
+      acks: 1 # 0-不应答。1-leader 应答。all-所有 leader 和 follower 应答。
+      retries: 3 # 发送失败时，重试发送的次数
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # 消息的 value 的序列化
+    # Kafka Consumer 配置项
+    consumer:
+      auto-offset-reset: earliest # 设置消费者分组最初的消费进度为 earliest 。可参考博客 https://blog.csdn.net/lishuangzhe7047/article/details/74530417 理解
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: '*'
+    # Kafka Consumer Listener 监听器配置
+    listener:
+      missing-topics-fatal: false # 消费监听接口监听的主题不存在时，默认会报错。所以通过设置为 false ，解决报错
+  # AI 相关配置
+  ai:
+    vectorstore: # 向量存储
+      redis:
+        index: default-index
+        prefix: "default:"
+    embedding:
+      transformer:
+        onnx:
+          model-uri: https://raw.gitcode.com/yudaocode/yudao-demo/raw/master/yudao-static/ai/model.onnx
+        tokenizer:
+          uri: https://raw.gitcode.com/yudaocode/yudao-demo/raw/master/yudao-static/ai/tokenizer.json
+    qianfan: # 文心一言
+      api-key: x0cuLZ7XsaTCU08vuJWO87Lg
+      secret-key: R9mYF9dl9KASgi5RUq0FQt3wRisSnOcK
+    zhipuai: # 智谱 AI
+      api-key: 32f84543e54eee31f8d56b2bd6020573.3vh9idLJZ2ZhxDEs
+    openai: # OpenAI 官方
+      api-key: sk-yzKea6d8e8212c3bdd99f9f44ced1cae37c097e5aa3BTS7z
+      base-url: https://api.gptsapi.net
+    azure: # OpenAI 微软
+      openai:
+        endpoint: https://eastusprejade.openai.azure.com
+        api-key: xxx
+    ollama:
+      base-url: http://127.0.0.1:11434
+      chat:
+        model: llama3
+    stabilityai:
+      api-key: sk-e53UqbboF8QJCscYvzJscJxJXoFcFg4iJjl1oqgE7baJETmx
+  cloud:
+    ai:
+      tongyi: # 通义千问
+        tongyi:
+          api-key: sk-Zsd81gZYg7
 
-server:
-  servlet:
-    encoding:
-      enabled: true
-      charset: UTF-8 # 必须设置 UTF-8，避免 WebFlux 流式返回（AI 场景）会乱码问题
-      force: true
-  port: 55002
 
---- #################### 接口文档配置 ####################
+
+#################### 接口文档配置 ####################
 
 springdoc:
   api-docs:
@@ -91,18 +149,13 @@ mybatis-plus-join:
   table-alias: t # 表别名(默认 t)
   logic-del-type: on # 副表逻辑删除条件的位置，支持 WHERE、ON，默认 ON
 
-# Spring Data Redis 配置
-spring:
-  data:
-    redis:
-      repositories:
-        enabled: false # 项目未使用到 Spring Data Redis 的 Repository，所以直接禁用，保证启动速度
+
 
 # VO 转换（数据翻译）相关
 easy-trans:
   is-enable-global: true # 启用全局翻译（拦截所有 SpringMVC ResponseBody 进行自动翻译 )。如果对于性能要求很高可关闭此配置，或通过 @IgnoreTrans 忽略某个接口
 
---- #################### 验证码相关配置 ####################
+#################### 验证码相关配置 ####################
 
 aj:
   captcha:
@@ -121,7 +174,7 @@ aj:
     req-check-minute-limit: 60 # check 接口一分钟内请求数限制
     req-verify-minute-limit: 60 # verify 接口一分钟内请求数限制
 
---- #################### 消息队列相关 ####################
+#################### 消息队列相关 ####################
 
 # rocketmq 配置项，对应 RocketMQProperties 配置类
 rocketmq:
@@ -129,86 +182,8 @@ rocketmq:
   producer:
     group: ${spring.application.name}_PRODUCER # 生产者分组
 
-spring:
-  # Kafka 配置项，对应 KafkaProperties 配置类
-  kafka:
-    # Kafka Producer 配置项
-    producer:
-      acks: 1 # 0-不应答。1-leader 应答。all-所有 leader 和 follower 应答。
-      retries: 3 # 发送失败时，重试发送的次数
-      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer # 消息的 value 的序列化
-    # Kafka Consumer 配置项
-    consumer:
-      auto-offset-reset: earliest # 设置消费者分组最初的消费进度为 earliest 。可参考博客 https://blog.csdn.net/lishuangzhe7047/article/details/74530417 理解
-      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
-      properties:
-        spring.json.trusted.packages: '*'
-    # Kafka Consumer Listener 监听器配置
-    listener:
-      missing-topics-fatal: false # 消费监听接口监听的主题不存在时，默认会报错。所以通过设置为 false ，解决报错
 
---- #################### AI 相关配置 ####################
-
-spring:
-  ai:
-    vectorstore: # 向量存储
-      redis:
-        index: default-index
-        prefix: "default:"
-    embedding:
-      transformer:
-        onnx:
-          model-uri: https://raw.gitcode.com/yudaocode/yudao-demo/raw/master/yudao-static/ai/model.onnx
-        tokenizer:
-          uri: https://raw.gitcode.com/yudaocode/yudao-demo/raw/master/yudao-static/ai/tokenizer.json
-    qianfan: # 文心一言
-      api-key: x0cuLZ7XsaTCU08vuJWO87Lg
-      secret-key: R9mYF9dl9KASgi5RUq0FQt3wRisSnOcK
-    zhipuai: # 智谱 AI
-      api-key: 32f84543e54eee31f8d56b2bd6020573.3vh9idLJZ2ZhxDEs
-    openai: # OpenAI 官方
-      api-key: sk-yzKea6d8e8212c3bdd99f9f44ced1cae37c097e5aa3BTS7z
-      base-url: https://api.gptsapi.net
-    azure: # OpenAI 微软
-      openai:
-        endpoint: https://eastusprejade.openai.azure.com
-        api-key: xxx
-    ollama:
-      base-url: http://127.0.0.1:11434
-      chat:
-        model: llama3
-    stabilityai:
-      api-key: sk-e53UqbboF8QJCscYvzJscJxJXoFcFg4iJjl1oqgE7baJETmx
-  cloud:
-    ai:
-      tongyi: # 通义千问
-        tongyi:
-          api-key: sk-Zsd81gZYg7
-
-yudao:
-  ai:
-    deep-seek: # DeepSeek
-      enable: true
-      api-key: sk-e94db327cc7d457d99a8de8810fc6b12
-      model: deepseek-chat
-    xinghuo: # 讯飞星火
-      enable: true
-      appId: 13c8cca6
-      appKey: cb6415c19d6162cda07b47316fcb0416
-      secretKey: Y2JiYTIxZjA3MDMxMjNjZjQzYzVmNzdh
-      model: generalv3.5
-    midjourney:
-      enable: true
-  #    base-url: https://api.holdai.top/mj-relax/mj
-      base-url: https://api.holdai.top/mj
-      api-key: sk-dZEPiVaNcT3FHhef51996bAa0bC74806BeAb620dA5Da10Bf
-      notify-url: http://java.nat300.top/admin-api/ai/image/midjourney/notify
-    suno:
-      enable: true
-  #    base-url: https://suno-55ishh05u-status2xxs-projects.vercel.app
-      base-url: http://127.0.0.1:3001
-
---- #################### 芋道相关配置 ####################
+#################### 芋道相关配置 ####################
 
 yudao:
   info:
@@ -225,6 +200,27 @@ yudao:
   security:
     permit-all_urls:
       - /admin-api/mp/open/** # 微信公众号开放平台，微信回调接口，不需要登录
+  ai:
+    deep-seek: # DeepSeek
+      enable: true
+      api-key: sk-e94db327cc7d457d99a8de8810fc6b12
+      model: deepseek-chat
+    xinghuo: # 讯飞星火
+      enable: true
+      appId: 13c8cca6
+      appKey: cb6415c19d6162cda07b47316fcb0416
+      secretKey: Y2JiYTIxZjA3MDMxMjNjZjQzYzVmNzdh
+      model: generalv3.5
+    midjourney:
+      enable: true
+      #    base-url: https://api.holdai.top/mj-relax/mj
+      base-url: https://api.holdai.top/mj
+      api-key: sk-dZEPiVaNcT3FHhef51996bAa0bC74806BeAb620dA5Da10Bf
+      notify-url: http://java.nat300.top/admin-api/ai/image/midjourney/notify
+    suno:
+      enable: true
+      #    base-url: https://suno-55ishh05u-status2xxs-projects.vercel.app
+      base-url: http://127.0.0.1:3001
   websocket:
     enable: true # websocket的开关
     path: /infra/ws # 路径
