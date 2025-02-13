@@ -85,7 +85,7 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
     }
 
     //根据表id查唯一
-    default CrmCustomerDO selectByCustomerId(Long customerId) {
+    default CrmCustomerDO selectById(Long customerId) {
         MPJLambdaWrapperX<CrmCustomerDO> wrapperX = new MPJLambdaWrapperX<>();
         wrapperX.selectAll(CrmCustomerDO.class)
                 .eq(CrmCustomerDO::getId, customerId);

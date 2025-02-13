@@ -371,7 +371,7 @@ public class CrmCustomerServiceImpl implements CrmCustomerService {
     @CrmPermission(bizType = CrmBizTypeEnum.CRM_CUSTOMER, bizId = "#id", level = CrmPermissionLevelEnum.OWNER)
     public void putCustomerPool(Long id) {
         // 1. 校验存在
-        CrmCustomerDO customer = customerMapper.selectByCustomerId(id);
+        CrmCustomerDO customer = customerMapper.selectById(id);
         if (customer == null) {
             throw exception(CUSTOMER_NOT_EXISTS);
         }
@@ -487,7 +487,7 @@ public class CrmCustomerServiceImpl implements CrmCustomerService {
     @Override
     @CrmPermission(bizType = CrmBizTypeEnum.CRM_CUSTOMER, bizId = "#id", level = CrmPermissionLevelEnum.READ)
     public CrmCustomerDO getCustomer(Long id) {
-        return customerMapper.selectByCustomerId(id);
+        return customerMapper.selectById(id);
     }
 
     @Override
@@ -590,7 +590,7 @@ public class CrmCustomerServiceImpl implements CrmCustomerService {
     }
 
     private CrmCustomerDO validateCustomerExists(Long id) {
-        CrmCustomerDO customerDO = customerMapper.selectByCustomerId(id);
+        CrmCustomerDO customerDO = customerMapper.selectById(id);
         if (customerDO == null) {
             throw exception(CUSTOMER_NOT_EXISTS);
         }
