@@ -12,6 +12,8 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+
 @RestController
 @RequestMapping("/api")
 public class ShopController {
@@ -34,6 +36,6 @@ public class ShopController {
 
     @GetMapping("/shopify/products")
     public JSONObject getShopifyProducts() {
-        return shopProfileClient.getRawProducts();
+        return shopProfileClient.getRawProducts(new HashMap<>());
     }
 }

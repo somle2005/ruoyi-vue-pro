@@ -3,6 +3,8 @@ package com.somle.esb.platform.shop;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
+import com.somle.esb.converter.shop.AmazonToErpProfileConverter;
+import com.somle.esb.converter.shop.ShopifyToErpProfileConverter;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.framework.common.util.collection.CollectionUtils;
 import com.somle.framework.common.util.json.JSONArray;
@@ -23,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -44,6 +47,8 @@ public class ShopifyShopProfileClient extends ShopProfileClient<JSONObject,JSONO
     }
 
 
+
+
     /**
      * 获得店铺信息
      **/
@@ -52,12 +57,17 @@ public class ShopifyShopProfileClient extends ShopProfileClient<JSONObject,JSONO
     }
 
 
-
     /**
      * 获得商品信息
      **/
     public List<JSONObject> getProducts(String shopId,String regionCode,String domainName) {
-        return client.getProducts();
+        Map<String,String> params = new HashMap<>();
+        params.put("limit","250");
+        List<JSONObject> list=client.getProducts(params);
+        for(JSONObject product:list){
+            product.put(ShopifyToErpProfileConverter.FIELD_DOMAIN, domainName);
+        }
+        return list;
     }
 
 

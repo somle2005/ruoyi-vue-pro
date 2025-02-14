@@ -20,7 +20,9 @@ import java.util.List;
  * @Version: 1.0
  * @description:
  */
-abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpShopProfileConverter<IN,OUT> {
+public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpShopProfileConverter<IN,OUT> {
+
+    public static final String FIELD_DOMAIN = "domain";
 
     public ShopifyToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.SHOPIFY, shopProfileType);
@@ -38,10 +40,12 @@ abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpShopProfi
             List<JSONObject> shopList = shopInfoDTO.getPayload();
             List<ErpShopSaveReqVO> returnList=new ArrayList<>();
             for (JSONObject shopJson : shopList) {
+                String domain=shopJson.getString(FIELD_DOMAIN);
                 ErpShopSaveReqVO shopDo = new ErpShopSaveReqVO();
                 shopDo.setId(null);
                 shopDo.setName(shopJson.getString("name"));
                 shopDo.setRemark(null);
+                shopDo.setDomainName(domain);
                 shopDo.setSort(1);
                 shopDo.setStatus(1);
                 shopDo.setType(0);
@@ -70,6 +74,7 @@ abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpShopProfi
 
             for (JSONObject productJson : productArr) {
                 ErpShopProductDO productDO = new ErpShopProductDO();
+                String domain=productJson.getString(FIELD_DOMAIN);
                 productDO.setId(null);
                 productDO.setName(productJson.getString("title"));
                 productDO.setCode(null);
@@ -77,7 +82,7 @@ abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpShopProfi
                 productDO.setPlatformProductUid(productJson.getString("id"));
                 productDO.setStatus(1);
                 productDO.setShopId(null);
-                productDO.setUrl(SalesPlatform.SHOPIFY.getSiteURL()+"/products/"+productJson.getString("handle"));
+                productDO.setUrl("Https://"+domain+"/products/"+productJson.getString("handle"));
 
                 JSONObject image=productJson.getJSONObject("image");
                 if(image!=null) {

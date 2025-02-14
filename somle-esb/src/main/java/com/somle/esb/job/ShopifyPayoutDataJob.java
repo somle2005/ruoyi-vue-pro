@@ -4,6 +4,8 @@ package com.somle.esb.job;
 import com.somle.esb.model.OssData;
 import org.springframework.stereotype.Component;
 
+import java.util.HashMap;
+
 @Component
 public class ShopifyPayoutDataJob extends ShopifyDataJob {
 
@@ -13,7 +15,7 @@ public class ShopifyPayoutDataJob extends ShopifyDataJob {
     public String execute(String param) throws Exception {
         setDate(param);
 
-        var result = shopifyClient.getRawPayouts();
+        var result = shopifyClient.getRawPayouts(new HashMap<>());
         var data = OssData.builder()
                 .database(DATABASE)
                 .tableName("payout")
