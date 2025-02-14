@@ -1,7 +1,7 @@
-package com.somle.framework.common.concurrent;
+package cn.iocoder.yudao.framework.common.util.concurrent;
 
 
-import com.somle.framework.common.util.date.DateFormatConstants;
+import cn.iocoder.yudao.framework.common.util.lang.date.DateFormatConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.retry.RetryCallback;
@@ -26,9 +26,7 @@ import java.util.function.Supplier;
 @Slf4j
 public class AsyncTask {
 
-
-
-    final static List<DecoratorItem>  DECORATORS=new ArrayList<>();
+    final static List<DecoratorItem<?>>  DECORATORS=new ArrayList<>();
 
     public static interface DecoratorClear {
         void clear();

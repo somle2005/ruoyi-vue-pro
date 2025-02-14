@@ -1,17 +1,15 @@
-package cn.iocoder.yudao.framework.common.util.string;
+package cn.iocoder.yudao.framework.common.util.lang.string;
 
 import cn.hutool.core.text.StrPool;
-import cn.hutool.core.util.ArrayUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.lang.array.ArrayUtil;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,7 +39,7 @@ public class StrUtils {
      * @since 3.0.6
      */
     public static boolean startWithAny(String str, Collection<String> prefixes) {
-        if (StrUtil.isEmpty(str) || ArrayUtil.isEmpty(prefixes)) {
+        if (StrUtil.isEmpty(str) || CollectionUtils.isEmpty(prefixes)) {
             return false;
         }
 
@@ -205,6 +203,80 @@ public class StrUtils {
             str = str.substring(0, str.length() - c.length());
         }
         return str;
+    }
+
+
+
+    /**
+     * 把数组拼接成字符串，默认用逗号隔开
+     * @param array 数组
+     * @return 拼接后的字符串
+     * */
+    public static String join(Object... array)
+    {
+        return ArrayUtil.join(array);
+    }
+
+    /**
+     * 把数组拼接成字符串
+     * @param array 数组
+     * @param sep 分隔符
+     * @return 拼接后的字符串
+     * */
+    public static String join(Object[] array,String sep)
+    {
+        return ArrayUtil.join(array,sep,"");
+    }
+
+
+    /**
+     * 把数组拼接成字符串
+     * @param array 数组
+     * @param sep 分隔符
+     * @param quote 引号
+     * @return 拼接后的字符串
+     * */
+    public static String join(Object[] array,String sep,String quote)
+    {
+        return ArrayUtil.join(array,sep,quote);
+    }
+
+
+    /**
+     * 把数组拼接成字符串，默认用逗号隔开
+     * @param list 元素清单，toString()后再拼接
+     * @return 拼接后的字符串
+     * */
+    @SuppressWarnings("rawtypes")
+    public static String join(Collection list)
+    {
+        return ArrayUtil.join(list.toArray());
+    }
+
+    /**
+     * 把数组拼接成字符串
+     * @param list 元素清单，toString()后再拼接
+     * @param sep 分隔符
+     * @param quote 引号
+     * @return 拼接后的字符串
+     * */
+    @SuppressWarnings("rawtypes")
+    public static String join(Collection list,String sep,String quote)
+    {
+        return ArrayUtil.join(list.toArray(),sep,quote);
+    }
+
+    /**
+     * 把数组拼接成字符串
+     * @param list 元素清单，toString()后再拼接
+     * @param sep 分隔符
+     * @return 拼接后的字符串
+     * */
+    @SuppressWarnings("rawtypes")
+    public static String join(Collection list,String sep)
+    {
+        if(list==null) return null;
+        return ArrayUtil.join(list.toArray(),sep,"");
     }
 
 

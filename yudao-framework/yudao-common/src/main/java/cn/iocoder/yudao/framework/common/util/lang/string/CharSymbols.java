@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.framework.common.util.lang;
+package cn.iocoder.yudao.framework.common.util.lang.string;
 
 /**
  * 常用字符

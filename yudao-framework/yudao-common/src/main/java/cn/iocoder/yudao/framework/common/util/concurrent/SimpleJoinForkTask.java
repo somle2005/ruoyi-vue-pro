@@ -1,4 +1,4 @@
-package com.somle.framework.common.concurrent;
+package cn.iocoder.yudao.framework.common.util.concurrent;
 
 
 import java.util.ArrayList;

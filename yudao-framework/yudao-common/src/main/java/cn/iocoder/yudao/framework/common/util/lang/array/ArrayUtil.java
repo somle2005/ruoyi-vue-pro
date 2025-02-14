@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.framework.common.util.lang;
+package cn.iocoder.yudao.framework.common.util.lang.array;
 
 import java.lang.reflect.Array;
 import java.util.*;

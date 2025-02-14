@@ -27,6 +27,10 @@ public class CollectionUtils {
         return Arrays.stream(collections).anyMatch(CollectionUtil::isEmpty);
     }
 
+    public static boolean isEmpty(Collection<?> collection) {
+        return collection==null || collection.isEmpty();
+    }
+
     public static <T> boolean anyMatch(Collection<T> from, Predicate<T> predicate) {
         return from.stream().anyMatch(predicate);
     }

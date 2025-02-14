@@ -3,7 +3,7 @@ package cn.iocoder.yudao.framework.common.util.log;
 
 
 import cn.hutool.core.date.DateUtil;
-import cn.iocoder.yudao.framework.common.util.string.StrUtils;
+import cn.iocoder.yudao.framework.common.util.lang.string.StrUtils;
 import org.apache.commons.io.FileUtils;
 
 import java.io.BufferedWriter;

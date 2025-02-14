@@ -7,8 +7,8 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.system.OsInfo;
-import cn.iocoder.yudao.framework.common.util.lang.ArrayUtil;
-import cn.iocoder.yudao.framework.common.util.string.StrUtils;
+import cn.iocoder.yudao.framework.common.util.lang.array.ArrayUtil;
+import cn.iocoder.yudao.framework.common.util.lang.string.StrUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 

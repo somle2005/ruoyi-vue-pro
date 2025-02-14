@@ -3,19 +3,13 @@ package cn.iocoder.yudao.framework.common.util.spring;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.extra.spring.SpringUtil;
-import cn.hutool.setting.yaml.YamlUtil;
 import cn.iocoder.yudao.framework.common.enums.EnvEnum;
 import cn.iocoder.yudao.framework.common.util.config.MavenProject;
 import cn.iocoder.yudao.framework.common.util.config.YMLProperties;
 import cn.iocoder.yudao.framework.common.util.io.StreamUtil;
-import cn.iocoder.yudao.framework.common.util.string.StrUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.event.ApplicationEnvironmentPreparedEvent;
-import org.springframework.boot.context.event.ApplicationStartingEvent;
-import org.springframework.context.ApplicationListener;
-import org.springframework.stereotype.Component;
+import org.springframework.context.ApplicationContext;
 
 import java.io.File;
 import java.io.InputStream;
@@ -125,6 +119,10 @@ public class SpringUtils extends SpringUtil  {
         return IS_IN_IDE;
     }
 
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) {
+       super.setApplicationContext(applicationContext);
+    }
 
     /**
      * 启动前初始化相关常量
@@ -132,6 +130,8 @@ public class SpringUtils extends SpringUtil  {
     public static void bootInitialize() {
         initBootstrapYML();
         System.out.println("Env="+EnvEnum.current().name()+" "+EnvEnum.current().text()+" ; BOOT_IN_IDE="+isBootInIDE());
+
+
     }
 
 }

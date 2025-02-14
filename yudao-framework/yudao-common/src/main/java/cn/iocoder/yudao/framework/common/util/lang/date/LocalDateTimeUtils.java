@@ -1,4 +1,4 @@
-package com.somle.framework.common.util.date;
+package cn.iocoder.yudao.framework.common.util.lang.date;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.LocalDateTimeUtil;
