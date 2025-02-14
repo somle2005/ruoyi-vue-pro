@@ -4,6 +4,7 @@ package com.somle.esb.platform.shop;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.framework.test.core.ut.BaseDbUnitTest;
+import com.somle.shopify.service.ShopifyClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -18,11 +19,11 @@ import static org.junit.jupiter.api.Assertions.*;
 class ShopifyClientTest extends BaseDbUnitTest {
 
     @Resource
-    ShopifyShopProfileClient client;
+    ShopifyClient client;
 
     @Test
     void testGetProducts() {
-        List<JSONObject> products= client.getProducts(null,null,null);
+        List<JSONObject> products= client.getProducts();
         assertNotNull(products);
         log.info(products.toString());
         assertFalse(products.isEmpty());

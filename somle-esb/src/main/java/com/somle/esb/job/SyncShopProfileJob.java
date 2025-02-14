@@ -1,5 +1,6 @@
 package com.somle.esb.job;
 
+import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
@@ -50,10 +51,7 @@ public class SyncShopProfileJob extends DataJob {
     @Resource
     private ErpShopProductService shopProductService;
 
-    @PostConstruct
-    public void init() {
 
-    }
 
     @Override
     public String execute(String param) throws Exception {
@@ -74,7 +72,7 @@ public class SyncShopProfileJob extends DataJob {
             // 如果是本地调试模式
             if(SpringUtils.isBootInIDE()) {
                 // 调试指定的平台
-                if(!salesPlatform.isAnyMatch(SalesPlatform.AMAZON)) {
+                if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY)) {
                     continue;
                 }
             }
@@ -184,7 +182,7 @@ public class SyncShopProfileJob extends DataJob {
 
             if(productDOInDB==null) {
                 productFromSalesPlatform.setShopId(shopDO.getId());
-                productFromSalesPlatform.setCode(shopDO.getId()+"#"+productFromSalesPlatform.getPlatformProductUid());
+                productFromSalesPlatform.setCode(shopDO.getId()+ CharSymbols.NU +productFromSalesPlatform.getPlatformProductUid());
                 listToCreate.add(productFromSalesPlatform);
 
             } else {
