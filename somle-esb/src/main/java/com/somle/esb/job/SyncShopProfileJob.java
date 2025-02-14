@@ -1,6 +1,5 @@
 package com.somle.esb.job;
 
-import cn.hutool.system.OsInfo;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
@@ -9,14 +8,12 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.ErpShopProductService;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.esb.converter.shop.AbstractErpShopProfileConverter;
 import com.somle.esb.enums.TenantId;
 import com.somle.esb.platform.shop.ShopProfileClient;
-import com.somle.framework.common.concurrent.AsyncTask;
+import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import com.somle.framework.common.util.collection.CollectionUtils;
 import com.somle.framework.common.util.json.JSONArray;
-import com.somle.framework.common.util.json.JSONObject;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
@@ -61,10 +58,12 @@ public class SyncShopProfileJob extends DataJob {
     @Override
     public String execute(String param) throws Exception {
 
+        // 获得所有注册的 ShopProfileClient 类型的 Spring Bean
         Map<String, ShopProfileClient> shopProfileClients = applicationContext.getBeansOfType(ShopProfileClient.class);
         Map<SalesPlatform,ShopProfileClient> shopProfileClientMap=shopProfileClients.values().stream()
             .collect(Collectors.toMap(t->t.getSalesPlatform(), t -> t));
 
+        // 遍历所有销售平台
         for (final SalesPlatform salesPlatform : SalesPlatform.values()) {
 
             // 如果未开启同步则跳过
@@ -74,11 +73,13 @@ public class SyncShopProfileJob extends DataJob {
 
             // 如果是本地调试模式
             if(SpringUtils.isBootInIDE()) {
+                // 调试指定的平台
                 if(!salesPlatform.isAnyMatch(SalesPlatform.AMAZON)) {
                     continue;
                 }
             }
 
+            // 异步并行处理各个平台数据
             AsyncTask.run(()->{
                 try {
                     syncShopProfile(salesPlatform,shopProfileClientMap);
@@ -91,29 +92,38 @@ public class SyncShopProfileJob extends DataJob {
     }
 
 
+    /**
+     * 同步指定平台的店铺资料
+     **/
     private void syncShopProfile(SalesPlatform salesPlatform,Map<SalesPlatform,ShopProfileClient> shopProfileClientMap) {
 
+        // 设置租户为默认租户
         TenantContextHolder.setTenantId(TenantId.DEFAULT.getId());
-
-        ShopProfileClient shopProfileClient=shopProfileClientMap.get(salesPlatform);
+        // 按平台获取店铺资料对接的客户端类型
+        ShopProfileClient<?,?> shopProfileClient=shopProfileClientMap.get(salesPlatform);
         if(shopProfileClient==null) {
             log.error( salesPlatform.name() + " 店铺信息客户端未实现，请参考 ShopProfileClient 实现");
             return;
         }
 
         // 获取店铺信息
-        List shops = shopProfileClient.getShops();
+        List<?> shops = shopProfileClient.getShops();
+        // 同步店铺资料
         syncShops(salesPlatform,shops,shopProfileClient);
     }
 
-    private void syncShops(SalesPlatform salesPlatform,List shops,ShopProfileClient shopProfileClient) {
+    /**
+     * 同步店铺资料
+     **/
+    private void syncShops(SalesPlatform salesPlatform,List<?> shops,ShopProfileClient<?,?> shopProfileClient) {
 
         if(CollectionUtils.isEmpty(shops)) {
             throw new RuntimeException("缺少店铺信息");
         }
         // 转换VO
-        ShopProfileDTO<List> shopprofileDTO=new ShopProfileDTO(salesPlatform, ShopProfileType.SHOP,shops);
+        ShopProfileDTO<List<?>> shopprofileDTO=new ShopProfileDTO<>(salesPlatform, ShopProfileType.SHOP,shops);
         List<ErpShopSaveReqVO> shopVOs= AbstractErpShopProfileConverter.convert(shopprofileDTO);
+        // 循环店铺
         for (ErpShopSaveReqVO shopVO : shopVOs) {
 
             if(shopVO==null) {
@@ -122,22 +132,23 @@ public class SyncShopProfileJob extends DataJob {
             // 保存店铺
             ErpShopDO shopDO=shopService.getByPlatform(shopprofileDTO.getSalesPlatform().name(),shopVO.getPlatformShopUid());
             if(shopDO!=null) {
-
+                // 更新时设置的属性
                 shopDO.setName(shopVO.getName());
                 shopDO.setCountryCode(shopVO.getCountryCode());
                 shopDO.setDomainName(shopVO.getDomainName());
                 shopDO.setPlatformShopUid(shopVO.getPlatformShopUid());
-
                 ErpShopSaveReqVO convertedShopVO = ErpShopConvert.INSTANCE.convert(shopDO);
-
+                // 更新
                 shopService.updateShop(convertedShopVO);
             } else {
+                // 创建
                 shopService.createShop(shopVO);
+                // 从数据库刷新 DO
                 shopDO=shopService.getByPlatform(shopprofileDTO.getSalesPlatform().name(),shopVO.getPlatformShopUid());
             }
 
-            // 获得产品信息
-            List productArray = shopProfileClient.getProducts(shopDO.getPlatformShopUid(),shopDO.getCountryCode(),shopDO.getDomainName());
+            // 拉取产品信息
+            List<?> productArray = shopProfileClient.getProducts(shopDO.getPlatformShopUid(),shopDO.getCountryCode(),shopDO.getDomainName());
             if(productArray!=null && !productArray.isEmpty()) {
                 syncShopProducts(salesPlatform,shopDO,productArray);
             }
@@ -183,9 +194,7 @@ public class SyncShopProfileJob extends DataJob {
                 productDOInDB.setImage(productFromSalesPlatform.getImage());
                 listToUpdate.add(productDOInDB);
             }
-
-
-
+            // 移除有效的产品
             mapToOffline.remove(productFromSalesPlatform.getPlatformProductUid());
         }
 

@@ -6,7 +6,6 @@ import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.somle.amazon.controller.vo.*;
-import com.somle.amazon.model.enums.AmazonCountry;
 import com.somle.amazon.model.enums.AmazonRegion;
 import com.somle.amazon.service.AmazonSpClient;
 import com.somle.amazon.service.AmazonSpService;
@@ -25,7 +24,10 @@ import java.io.File;
 import java.util.*;
 import java.util.function.Supplier;
 
-
+/**
+ * @author LeeFJ
+ * 亚马逊数据同步客户端
+ **/
 @Slf4j
 @Component
 public class AmazonShopProfileClient extends ShopProfileClient {
@@ -37,23 +39,30 @@ public class AmazonShopProfileClient extends ShopProfileClient {
         super(SalesPlatform.AMAZON);
     }
 
-    private Map<String,String> marketIdReagionMapping = new HashMap<>();
+    /**
+     * marketId 和 Region的对照关系
+     **/
+    private final Map<String,String> marketIdRegionMapping = new HashMap<>();
 
+    /**
+     * 拉取店铺信息
+     **/
     @Override
     public List<AmazonSpMarketplaceParticipationVO> getShops() {
         List<AmazonSpMarketplaceParticipationVO> allMarketplaces = new ArrayList<>();
         amazonSpService.getClients().forEach(client -> {
             List<AmazonSpMarketplaceParticipationVO> marketplaces = client.getMarketplaceParticipations();
             for (AmazonSpMarketplaceParticipationVO marketplace : marketplaces) {
-                //log.info("country:"+marketplace.getMarketplace().getCountryCode()+" -> region:"+client.getAuth().getRegionCode());
-                marketIdReagionMapping.put(marketplace.getMarketplace().getId(),client.getAuth().getRegionCode());
-
+                marketIdRegionMapping.put(marketplace.getMarketplace().getId(),client.getAuth().getRegionCode());
             }
             allMarketplaces.addAll(marketplaces);
         });
         return allMarketplaces;
     }
 
+    /**
+     * 拉取产品信息
+     **/
     @Override
     public List<JSONObject> getProducts(String marketplaceId,String countryCode,String domainName) {
 
@@ -66,11 +75,14 @@ public class AmazonShopProfileClient extends ShopProfileClient {
         }
 
         List<JSONObject> allProducts = new ArrayList<>();
-        String regionCode = marketIdReagionMapping.get(marketplaceId);
+        String regionCode = marketIdRegionMapping.get(marketplaceId);
         AmazonRegion region=AmazonRegion.valueOf(regionCode);
         AmazonSpClient client=amazonSpService.getClient(region);
+
+        // 采集 Marketplace 对应的 Product
         List<JSONObject> marketProducts = new MarketProductCollector(marketplaceId,domainName, client,amazonSpService).collect();
         allProducts.addAll(marketProducts);
+
         // 开发环境启用 Mock 模拟
         if(SpringUtils.isBootInIDE()) {
             writeMockFileIf(marketplaceId,countryCode, allProducts);
@@ -78,10 +90,16 @@ public class AmazonShopProfileClient extends ShopProfileClient {
         return allProducts;
     }
 
+    /**
+     * 获得 Mock 文件
+     **/
     private final File getMockFile(String marketplaceId,String countryCode) {
         return new File("./log/mock/amazon-product-"+marketplaceId+"-"+countryCode+".json");
     }
 
+    /**
+     * 写入 Mock 文件
+     **/
     private void writeMockFileIf(String marketplaceId,String countryCode,List<JSONObject> allProducts) {
         if(allProducts==null || allProducts.isEmpty()) {
             return;
@@ -93,6 +111,9 @@ public class AmazonShopProfileClient extends ShopProfileClient {
         }
     }
 
+    /**
+     * 读取 Mock 文件
+     **/
     private List<JSONObject> readMockFile(String marketplaceId,String countryCode) {
         File mockFile=getMockFile(marketplaceId,countryCode);
         if (mockFile.exists()) {
@@ -111,6 +132,9 @@ public class AmazonShopProfileClient extends ShopProfileClient {
 }
 
 
+/**
+ * 产品信息收集
+ **/
 @Slf4j
 class MarketProductCollector {
 
@@ -122,18 +146,16 @@ class MarketProductCollector {
     //
     private final int limit;
 
-    private AmazonSpService amazonSpService;
+    private final AmazonSpService amazonSpService;
 
-    private String domainName;
-    private String marketplaceId;
+    private final String domainName;
+    private final String marketplaceId;
     private AmazonSpClient client;
 
-    private FileLogger fileLogger = new FileLogger("./log/amazon-asin-sku.log");
+    private final FileLogger fileLogger = new FileLogger("./log/amazon-asin-sku.log");
 
     private Map<String, JSONObject> allListingItemMap = new HashMap<>();
     private Map<String, JSONObject> allCatalogItemMap = new HashMap<>();
-
-    private Map<String, Integer> retryTimesMap = new HashMap<>();
 
 
     public MarketProductCollector(String marketplaceId,String domainName, AmazonSpClient client,AmazonSpService amazonSpService) {
@@ -141,23 +163,27 @@ class MarketProductCollector {
         this.marketplaceId = marketplaceId;
         this.client = client;
         this.domainName = domainName;
-        // 本机开发时只取5条测试，线上全部
+        // 本机开发时只取前5条测试，线上全部
         this.limit=SpringUtils.isBootInIDE()? 5 : -1;
     }
 
-
+    /**
+     * 开始采集产品数据
+     **/
     public List<JSONObject> collect() {
 
         if(SpringUtils.isBootInIDE()) {
             fileLogger.separator("开始采集 - mktId=" + this.marketplaceId + "@" + client.getAuth().getClientId());
         }
+        // 采集 Listing 数据
         collectAllListingItems();
+        // 采集 Catalog 数据
         if (!allListingItemMap.isEmpty()) {
             collectAllCatalogItems();
         }
 
+        // 取数完毕后,装配数据并返回
         List<JSONObject> allProducts = new ArrayList<>();
-        // 取数完毕后,装配数据
         for (Map.Entry<String, JSONObject> entry : allListingItemMap.entrySet()) {
             JSONObject catalog = allCatalogItemMap.get(entry.getKey());
             JSONObject listingItem = entry.getValue();
@@ -173,29 +199,29 @@ class MarketProductCollector {
 
     }
 
+    /**
+     * 采集全部 Catalog 数据
+     **/
     private void collectAllCatalogItems() {
         allCatalogItemMap.clear();
         for (String sku : allListingItemMap.keySet()) {
-            collectCatalogItems(List.of(sku), null);
+            collectCatalogItems(sku, null,0);
         }
     }
 
-    private void collectCatalogItems(List<String> skus, String pageToken) {
+    /**
+     * 分页采集 Catalog 数据
+     **/
+    private void collectCatalogItems(String sku, String pageToken,Integer retryTimes) {
 
-        if(skus.contains("amzn.gr.FT-S1607MB-EU--6O-RrejYxQF6qp-AC")) {
-            System.out.println();
-        }
-
-        Integer retryTimes = retryTimesMap.getOrDefault(pageToken, 0);
+        // 重试超限
         if (retryTimes > 5) {
-            log.error("collectCatalogItems - mktId=" + this.marketplaceId + "@" + client.getAuth().getClientId() + " - sku=" + skus + " - pageToken=" + pageToken + " - retryTimes=" + retryTimes + " - 超过最大重试次数，不再继续执行");
+            log.error("collectCatalogItems - mktId=" + this.marketplaceId + "@" + client.getAuth().getClientId() + " - sku=" + sku + " - pageToken=" + pageToken + " - retryTimes=" + retryTimes + " - 超过最大重试次数，不再继续执行");
             return;
         }
-        retryTimesMap.put(pageToken,retryTimes+1);
-
 
         var reqCatalogVO = AmazonSpCatalogReqVO.builder()
-            .identifiers(skus)
+            .identifiers(List.of(sku))
             .pageToken(pageToken)
             .pageSize(20)
             .identifiersType(AmazonSpCatalogReqVO.IdentifiersType.SKU)
@@ -206,9 +232,10 @@ class MarketProductCollector {
         var catalogBody = client.searchCatalogItems(reqCatalogVO);
         JSONObject result = JsonUtils.parseObject(catalogBody, JSONObject.class);
 
-        // 处理接口访问超限
+        // 处理接口返回错误的情况
         boolean doNext = handleErrors(API_NAME_CATALOG,result,()->{
-            collectCatalogItems(skus,pageToken);
+            // 失败后的重试
+            collectCatalogItems(sku,pageToken,retryTimes+1);
             return null;
         });
         // 如果有异常则不再继续执行
@@ -216,27 +243,21 @@ class MarketProductCollector {
             return;
         }
 
-
+        // 处理采集到的数据
         var catalogItems = result.getJSONArray(AmazonToErpProfileConverter.FIELD_ITEMS);
-        if (catalogItems != null) {
+        if (catalogItems != null && !catalogItems.isEmpty()) {
             for (JsonNode catalogNode : catalogItems) {
                 JSONObject catalogJson = new JSONObject(catalogNode);
                 String asin = catalogJson.getString(AmazonToErpProfileConverter.FIELD_ASIN);
-                String sku = skus.get(0);
-
                 if(SpringUtils.isBootInIDE()) {
                     fileLogger.info(sku + " -> " + asin);
                 }
-
                 allCatalogItemMap.put(sku, catalogJson);
             }
         } else {
-
-            log.warn("fetch amazon catalog by skus " + skus + " error " + catalogBody);
+            log.warn("fetch amazon catalog by sku " + sku + " error " + catalogBody);
         }
 
-
-        Integer numberOfResults = result.getInteger(AmazonToErpProfileConverter.FIELD_NUMBER_OF_RESULTS);
 
         log.info("fetch amazon catalog by skus " + (catalogItems == null ? 0 : catalogItems.size()) + " , " + allCatalogItemMap.size());
 
@@ -245,11 +266,12 @@ class MarketProductCollector {
             return;
         }
 
+        // 如果有下一页则继续采集
         JSONObject pagination = result.getJSONObject(AmazonToErpProfileConverter.FIELD_PAGINATION);
         if (pagination != null) {
             String nextPageToken = pagination.getString(AmazonToErpProfileConverter.FIELD_NEXT_TOKEN);
             if (!StrUtils.isEmpty(nextPageToken)) {
-                collectCatalogItems(skus, nextPageToken);
+                collectCatalogItems(sku, nextPageToken,0);
             }
         }
 
@@ -257,11 +279,13 @@ class MarketProductCollector {
 
     /**
      * 检查并处理错误
+     * @@param retry 重试操作
      * @return 返回是否可以继续执行后续步骤
      **/
-    private boolean handleErrors(String name, JSONObject result, Supplier actionAfterHandled) {
+    private boolean handleErrors(String name, JSONObject result, Supplier<?> retry) {
 
         var errors=result.getJSONArray(AmazonToErpProfileConverter.FIELD_ERRORS);
+        // 遍历并识别错误
         boolean hasQuotaExceededError=false;
         boolean hasUnauthorizedError=false;
         if(!CollectionUtils.isEmpty(errors)) {
@@ -279,18 +303,20 @@ class MarketProductCollector {
                 }
             }
         } else {
+
+            // 如果没有错误，则返回 true，指示主调方继续执行后续步骤
             return true;
         }
 
-        // 以下处理错误
-
+        // 处理接口调用超限错误
         if(hasQuotaExceededError) {
             log.info("Amazon "+name+" 接口调用超限, sleep 3s;t="+Thread.currentThread().getId());
             CoreUtils.sleep(3000);
             // 重试
-            actionAfterHandled.get();
+            retry.get();
         }
 
+        // 处理接口调用未授权错误
         if(hasUnauthorizedError) {
             log.error("Amazon "+name+" 接口调用未授权,marketplaceId="+marketplaceId+";clientId="+client.getAuth().getClientId()+", 尝试刷新 Token 后重试");
             boolean refreshed=amazonSpService.refreshAuth();
@@ -298,32 +324,33 @@ class MarketProductCollector {
                 CoreUtils.sleep(1000);
             }
             // 重试
-            actionAfterHandled.get();
+            retry.get();
         }
 
-
-
+        // 如果有错误，则返回 false，指示主调方不必执行后续步骤
         return false;
 
     }
 
 
+    /**
+     * 开始采集 Listing 数据
+     **/
     private void collectAllListingItems() {
         allListingItemMap.clear();
-        collectListingItems(null);
+        collectListingItems(null,0);
     }
 
-
-    private void collectListingItems(String pageToken) {
+    /**
+     * 分页采集 Listing 数据
+     **/
+    private void collectListingItems(String pageToken,Integer retryTimes) {
 
         // 控制重试次数
-        Integer retryTimes = retryTimesMap.getOrDefault(pageToken, 0);
         if (retryTimes > 5) {
             log.error("collectListingItems - mktId=" + this.marketplaceId + "@" + client.getAuth().getClientId() + " - pageToken=" + pageToken + " - retryTimes=" + retryTimes + " - 超过最大重试次数，不再继续执行");
             return;
         }
-        retryTimesMap.put(pageToken,retryTimes+1);
-
 
         var reqVO = AmazonSpListingReqVO.builder()
             .sellerId(client.getAuth().getSellerId())
@@ -337,7 +364,7 @@ class MarketProductCollector {
 
         // 处理接口访问超限
         boolean doNext = handleErrors(API_NAME_LISTING,result,()->{
-            collectListingItems(pageToken);
+            collectListingItems(pageToken,retryTimes+1);
             return null;
         });
         // 如果有未处理的异常则不再继续执行
@@ -346,14 +373,14 @@ class MarketProductCollector {
         }
 
         var listingItems = result.getJSONArray(AmazonToErpProfileConverter.FIELD_ITEMS);
-        if (listingItems != null) {
+        if (listingItems != null && !listingItems.isEmpty()) {
             for (JsonNode listingNode : listingItems) {
                 JSONObject productJson = new JSONObject(listingNode);
                 String sku = productJson.getString(AmazonToErpProfileConverter.FIELD_SKU);
-                //productJson.put("clientId",client.getAuth().getClientId());
-                //
                 allListingItemMap.put(sku, productJson);
             }
+        } else {
+            log.warn("fetch amazon catalog by market " + marketplaceId + " error " + bodyString);
         }
 
         Integer numberOfResults = result.getInteger(AmazonToErpProfileConverter.FIELD_NUMBER_OF_RESULTS);
@@ -365,11 +392,12 @@ class MarketProductCollector {
             return;
         }
 
+        // 如果有下一页则继续采集下一页
         JSONObject pagination = result.getJSONObject(AmazonToErpProfileConverter.FIELD_PAGINATION);
         if (pagination != null) {
             String nextPageToken = pagination.getString(AmazonToErpProfileConverter.FIELD_NEXT_TOKEN);
             if (!StrUtils.isEmpty(nextPageToken)) {
-                collectListingItems(nextPageToken);
+                collectListingItems(nextPageToken,0);
             }
         }
 

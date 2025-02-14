@@ -1,9 +1,8 @@
 package com.somle.esb.converter.shop;
 
-import cn.iocoder.yudao.framework.common.util.lang.CharSymbols;
+import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.amazon.controller.vo.AmazonSpMarketplaceParticipationVO;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
@@ -37,13 +36,14 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
     public static final String FIELD_ASIN = "asin";
     public static final String FIELD_IMAGES = "images";
     public static final String FIELD_SKU = "sku";
-    public static final String FIELD_URL = "url";
+    public static final String FIELD_LINK = "link";
     public static final String FIELD_MARKETPLACE_ID = "marketplaceId";
     public static final String FIELD_CLIENT_ID = "clientId";
     public static final String FIELD_SELLER_ID = "sellerId";
     public static final String PROTOCOL = "https://";
     public static final String SUB_PATH_DP = "/dp/";
     public static final String VALUE_UNKNOWN = "unknown";
+    public static final String VALUE_NONE = "none";
 
     public AmazonToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.AMAZON, shopProfileType);
@@ -99,17 +99,18 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                 String sku=product.getString(FIELD_SKU);
                 String domainName=product.getString(FIELD_DOMAIN_NAME);
                 JSONObject catalog = product.getJSONObject(FIELD_CATALOG);
-                if(catalog==null) {
-                    // 这个问题需要排查
-                    //throw new RuntimeException("product catalog is null");
-                    log.error("product catalog is null,sku={}",sku);
-                    continue;
-                }
-                String asin=catalog.getString(FIELD_ASIN);
-                JSONArray images=catalog.getJSONArray(FIELD_IMAGES);
-                String imageUrl=null;
-                if(!CollectionUtils.isEmpty(images)) {
-                    imageUrl=images.getJSONObject(0).getString(FIELD_URL);
+                String asin=VALUE_NONE;
+                String imageUrl=VALUE_NONE;
+                if(catalog!=null) {
+                    asin=catalog.getString(FIELD_ASIN);
+                    JSONArray images=catalog.getJSONArray(FIELD_IMAGES);
+                    if(!CollectionUtils.isEmpty(images)) {
+                        JSONObject marketplaceJSON=images.getJSONObject(0);
+                        JSONArray marketplaceImages=marketplaceJSON.getJSONArray(FIELD_IMAGES);
+                        if(!CollectionUtils.isEmpty(marketplaceImages)) {
+                            imageUrl =marketplaceImages.getJSONObject(0).getString(FIELD_LINK);
+                        }
+                    }
                 }
 
                 ErpShopProductDO productDO = new ErpShopProductDO();
