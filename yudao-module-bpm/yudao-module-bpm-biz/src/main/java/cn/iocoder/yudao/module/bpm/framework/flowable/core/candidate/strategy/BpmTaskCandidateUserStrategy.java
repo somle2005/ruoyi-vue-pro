@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.bpm.framework.flowable.core.candidate.strategy;
 
-import cn.iocoder.yudao.framework.common.util.string.StrUtils;
+import cn.iocoder.yudao.framework.common.util.lang.string.StrUtils;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.candidate.BpmTaskCandidateStrategy;
 import cn.iocoder.yudao.module.bpm.framework.flowable.core.enums.BpmTaskCandidateStrategyEnum;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;

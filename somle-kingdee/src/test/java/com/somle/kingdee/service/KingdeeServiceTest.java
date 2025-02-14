@@ -1,6 +1,6 @@
 package com.somle.kingdee.service;
 
-import com.somle.framework.common.util.date.LocalDateTimeUtils;
+import cn.iocoder.yudao.framework.common.util.lang.date.LocalDateTimeUtils;
 import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.test.core.ut.BaseSpringTest;
 import com.somle.kingdee.model.KingdeePurOrderReqVO;
