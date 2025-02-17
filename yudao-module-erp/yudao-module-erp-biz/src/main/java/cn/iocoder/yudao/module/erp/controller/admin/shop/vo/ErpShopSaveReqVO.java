@@ -1,5 +1,8 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.vo;
 
+import cn.iocoder.yudao.framework.common.validation.InEnum;
+import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
+import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.somle.framework.common.model.ValidationGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -35,6 +38,7 @@ public class ErpShopSaveReqVO {
 
     @Schema(description = "开启状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "开启状态不能为空")
+    @InEnum(ErpOffStatus.class)
     private Integer status;
 
     @Schema(description = "排序")
@@ -42,6 +46,7 @@ public class ErpShopSaveReqVO {
 
     @Schema(description = "类型 0线上 1线上", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "类型 0线上 1线上不能为空")
+    @InEnum(ErpShopType.class)
     private Integer type;
 
     @Schema(description = "平台账户", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")

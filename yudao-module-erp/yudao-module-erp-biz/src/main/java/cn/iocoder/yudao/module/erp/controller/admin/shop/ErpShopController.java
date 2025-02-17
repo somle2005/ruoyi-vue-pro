@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop;
 
+import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import com.somle.framework.common.model.ValidationGroup;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
@@ -19,12 +20,16 @@ import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+
+import static cn.iocoder.yudao.framework.common.pojo.CommonResult.error;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 
 import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.*;
+import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.SHOP_NOT_ALLOW_DELETE;
+import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.SHOP_NOT_EXISTS;
 
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
@@ -59,6 +64,14 @@ public class ErpShopController {
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('erp:shop:delete')")
     public CommonResult<Boolean> deleteShop(@RequestParam("id") Long id) {
+        ErpShopDO shop= shopService.getShop(id);
+        if(shop==null) {
+            return error(SHOP_NOT_EXISTS);
+        }
+        ErpShopType shopType = ErpShopType.fromCode(shop.getType());
+        if(shopType==ErpShopType.ONLINE) {
+            return error(SHOP_NOT_ALLOW_DELETE);
+        }
         shopService.deleteShop(id);
         return success(true);
     }

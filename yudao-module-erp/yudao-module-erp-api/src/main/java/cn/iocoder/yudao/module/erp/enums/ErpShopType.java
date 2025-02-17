@@ -1,20 +1,22 @@
 package cn.iocoder.yudao.module.erp.enums;
 
+import cn.iocoder.yudao.framework.common.core.IntArrayValuable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
 @RequiredArgsConstructor
 @Getter
-public enum ErpShopType {
+public enum ErpShopType  implements IntArrayValuable  {
 
     ONLINE(0, "线上"),
     PHYSICAL(1, "线下");
 
-
+    public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(ErpShopType::getCode).toArray();
 
     /**
      * 存储状态码和描述的字段
@@ -49,6 +51,11 @@ public enum ErpShopType {
             }
         }
         return null;
+    }
+
+    @Override
+    public int[] array() {
+        return ARRAYS;
     }
 
 

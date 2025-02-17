@@ -4,6 +4,7 @@ import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShop
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
+import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
 import com.somle.framework.common.util.collection.StreamX;
@@ -34,7 +35,7 @@ import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 
 import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.*;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.SHOP_PRODUCT_NOT_EXISTS;
+import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
 
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
@@ -75,6 +76,18 @@ public class ErpShopProductController {
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('erp:shop-product:delete')")
     public CommonResult<Boolean> deleteShopProduct(@RequestParam("id") Long id) {
+        ErpShopProductDO productDO = shopProductService.getShopProduct(id);
+        if(productDO==null) {
+            return error(SHOP_PRODUCT_NOT_EXISTS);
+        }
+        ErpShopDO shop= shopService.getShop(productDO.getShopId());
+        if(shop==null) {
+            return error(SHOP_NOT_EXISTS);
+        }
+        ErpShopType shopType = ErpShopType.fromCode(shop.getType());
+        if(shopType==ErpShopType.ONLINE) {
+            return error(SHOP_PRODUCT_NOT_ALLOW_DELETE);
+        }
         shopProductService.deleteShopProduct(id);
         return success(true);
     }

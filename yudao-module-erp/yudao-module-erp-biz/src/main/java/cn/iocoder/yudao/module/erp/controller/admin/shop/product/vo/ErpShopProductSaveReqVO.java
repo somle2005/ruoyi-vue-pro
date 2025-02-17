@@ -1,7 +1,9 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo;
 
+import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemSaveReqVO;
+import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -44,6 +46,7 @@ public class ErpShopProductSaveReqVO {
 
     @Schema(description = "开启状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "开启状态不能为空")
+    @InEnum(ErpOffStatus.class)
     private Integer status;
 
     @Schema(description = "链接", example = "https://www.iocoder.cn")
