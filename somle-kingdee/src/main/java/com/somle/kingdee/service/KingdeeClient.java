@@ -37,7 +37,8 @@ public class KingdeeClient {
     }
 
     protected KingdeeToken refreshAuth() {
-        return fillAuth(pushAuth(token));
+        this.token = fillAuth(pushAuth(token));
+        return this.token;
     }
 
     private KingdeeToken fillAuth(KingdeeToken token) {
