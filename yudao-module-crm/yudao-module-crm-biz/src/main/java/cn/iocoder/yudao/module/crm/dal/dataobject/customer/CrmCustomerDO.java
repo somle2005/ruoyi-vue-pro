@@ -132,7 +132,7 @@ public class CrmCustomerDO extends BaseDO {
      * <p>
      * 存储公司简介，通常用于展示公司背景信息
      */
-    private String companyIntroduce;
+    private String companyIntroduction;
 
     /**
      * 官网
@@ -144,7 +144,7 @@ public class CrmCustomerDO extends BaseDO {
     /**
      * 客户标签列表
      * <p>
-     * 存储客户标签的 ID 列表，标签来自于字典，用于标记客户特征 crm_client_tag
+     * 对应字典 {@link DictTypeConstants#CRM_CLIENT_TAG}
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<Long> labelCodes;
@@ -152,7 +152,7 @@ public class CrmCustomerDO extends BaseDO {
     /**
      * 国家列表
      * <p>
-     * 存储客户所在国家的 ID 列表，国家信息来自于字典 country_code
+     * 对应字典 {@link DictTypeConstants#CRM_COUNTRY_CODE}
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<Long> countryCodes;

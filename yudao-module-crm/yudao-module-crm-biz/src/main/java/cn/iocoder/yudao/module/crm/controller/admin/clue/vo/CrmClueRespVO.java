@@ -130,7 +130,7 @@ public class CrmClueRespVO {
     //公司介绍
     @Schema(description = "公司介绍", example = "北京")
     @ExcelProperty("公司介绍")
-    private String companyIntroduce;
+    private String companyIntroduction;
     //官网
     @Schema(description = "官网", example = "www.baidu.com")
     @ExcelProperty("官网")

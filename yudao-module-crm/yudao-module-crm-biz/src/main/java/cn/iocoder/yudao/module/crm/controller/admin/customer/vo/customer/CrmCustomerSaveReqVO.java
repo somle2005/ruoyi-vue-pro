@@ -100,7 +100,7 @@ public class CrmCustomerSaveReqVO {
     //公司介绍
     @Schema(description = "公司介绍", example = "北京")
     @DiffLogField(name = "公司介绍")
-    private String companyIntroduce;
+    private String companyIntroduction;
     //官网
     @Schema(description = "官网", example = "www.baidu.com")
     @DiffLogField(name = "官网")

@@ -124,7 +124,7 @@ public class CrmCustomerCreateReqBO {
      * <p>
      * 存储公司简介，通常用于展示公司背景信息
      */
-    private String companyIntroduce;
+    private String companyIntroduction;
 
     /**
      * 官网
