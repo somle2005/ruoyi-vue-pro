@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import com.somle.amazon.controller.vo.AmazonSpMarketplaceParticipationVO;
+import com.somle.esb.enums.ESBConstants;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
@@ -42,10 +43,7 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
     public static final String FIELD_MARKETPLACE_ID = "marketplaceId";
     public static final String FIELD_CLIENT_ID = "clientId";
     public static final String FIELD_SELLER_ID = "sellerId";
-    public static final String PROTOCOL = "https://";
     public static final String SUB_PATH_DP = "/dp/";
-    public static final String VALUE_UNKNOWN = "unknown";
-    public static final String VALUE_NONE = "none";
 
     public AmazonToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.AMAZON, shopProfileType);
@@ -75,7 +73,7 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                 shopDo.setCountryCode(amazonShop.getMarketplace().getCountryCode());
                 shopDo.setPlatform(SalesPlatform.AMAZON.name());
                 shopDo.setPlatformShopUid(amazonShop.getMarketplace().getId());
-                shopDo.setAccount(VALUE_UNKNOWN);
+                shopDo.setAccount(ESBConstants.VALUE_UNKNOWN);
                 shopDo.setCode(shopDo.getPlatform()+CharSymbols.MINUS+shopDo.getPlatformShopUid());
                 returnList.add(shopDo);
             }
@@ -101,8 +99,8 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                 String sku=product.getString(FIELD_SKU);
                 String domainName=product.getString(FIELD_DOMAIN_NAME);
                 JSONObject catalog = product.getJSONObject(FIELD_CATALOG);
-                String asin=VALUE_NONE;
-                String imageUrl=VALUE_NONE;
+                String asin= ESBConstants.VALUE_NONE;
+                String imageUrl=ESBConstants.VALUE_NONE;
                 if(catalog!=null) {
                     asin=catalog.getString(FIELD_ASIN);
                     JSONArray images=catalog.getJSONArray(FIELD_IMAGES);
@@ -126,7 +124,7 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
 
                 productDO.setStatus(ErpOffStatus.OPEN.getCode());
                 productDO.setShopId(null);
-                productDO.setUrl(PROTOCOL +domainName+ SUB_PATH_DP +asin);
+                productDO.setUrl(ESBConstants.PROTOCOL_HTTPS +domainName+ SUB_PATH_DP +asin);
                 productDO.setImage(imageUrl);
 
                 productList.add(productDO);
