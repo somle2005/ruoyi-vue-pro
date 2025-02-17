@@ -46,9 +46,6 @@ public class CrmCluePageReqVO extends PageParam {
     @Schema(description = "跟进状态", example = "true")
     private Boolean followUpStatus;
 
-    //公司名称
-    @Schema(description = "公司名称", example = "北京")
-    private String companyName;
     //公司介绍
     @Schema(description = "公司介绍", example = "北京")
     private String companyIntroduce;

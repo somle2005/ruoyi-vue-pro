@@ -97,10 +97,6 @@ public class CrmCustomerSaveReqVO {
     @DiffLogField(name = "备注")
     private String remark;
 
-    //公司名称
-    @Schema(description = "公司名称", example = "北京")
-    @DiffLogField(name = "公司名称")
-    private String companyName;
     //公司介绍
     @Schema(description = "公司介绍", example = "北京")
     @DiffLogField(name = "公司介绍")

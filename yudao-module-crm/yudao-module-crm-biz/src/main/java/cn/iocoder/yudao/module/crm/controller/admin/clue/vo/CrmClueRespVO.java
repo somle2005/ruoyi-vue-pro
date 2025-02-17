@@ -127,10 +127,6 @@ public class CrmClueRespVO {
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
 
-    //公司名称
-    @Schema(description = "公司名称", example = "北京")
-    @ExcelProperty("公司名称")
-    private String companyName;
     //公司介绍
     @Schema(description = "公司介绍", example = "北京")
     @ExcelProperty("公司介绍")

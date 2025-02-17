@@ -120,13 +120,6 @@ public class CrmCustomerCreateReqBO {
     private LocalDateTime contactNextTime;
 
     /**
-     * 公司名称
-     * <p>
-     * 存储公司名称，可能用于在 CRM 系统中展示和搜索
-     */
-    private String companyName;
-
-    /**
      * 公司介绍
      * <p>
      * 存储公司简介，通常用于展示公司背景信息

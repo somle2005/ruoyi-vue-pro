@@ -61,7 +61,6 @@ public interface CrmCustomerMapper extends BaseMapperX<CrmCustomerDO> {
             .eqIfPresent(CrmCustomerDO::getIndustryId, pageReqVO.getIndustryId())
             .eqIfPresent(CrmCustomerDO::getLevel, pageReqVO.getLevel())
             .eqIfPresent(CrmCustomerDO::getSource, pageReqVO.getSource())
-            .likeIfPresent(CrmCustomerDO::getCompanyName, pageReqVO.getCompanyName()) //公司名称
             .likeIfPresent(CrmCustomerDO::getCompanyIntroduce, pageReqVO.getCompanyIntroduce()) // 公司介绍
             .likeIfPresent(CrmCustomerDO::getCompanyWebsite, pageReqVO.getCompanyWebsite()) // 官网
             .eqIfPresent(CrmCustomerDO::getFollowUpStatus, pageReqVO.getFollowUpStatus());
