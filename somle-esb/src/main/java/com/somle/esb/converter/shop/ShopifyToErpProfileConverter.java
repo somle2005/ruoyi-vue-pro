@@ -1,10 +1,13 @@
 package com.somle.esb.converter.shop;
 
+import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.esb.enums.ESBConstants;
+import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
@@ -32,7 +35,10 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
     public static final String SUB_PATH_PRODUCTS = "/products/";
     public static final String FIELD_NAME = "name";
     public static final String FIELD_COUNTRY = "country";
-
+    public static final String FIELD_CURRENCY = "currency";
+    public static final String FIELD_PRICE = "price";
+    public static final String QUERY_STRING_VAR_VARIANT = "variant";
+    public static final String FIELD_VARIANTS = QUERY_STRING_VAR_VARIANT + "s";
 
     public ShopifyToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.SHOPIFY, shopProfileType);
@@ -75,6 +81,8 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
     @Component
     private static class ShopifyShopProductConverter extends ShopifyToErpProfileConverter<List<JSONObject>, ErpShopProductDO> {
 
+
+
         public ShopifyShopProductConverter() {
             super(ShopProfileType.PRODUCT);
         }
@@ -85,23 +93,34 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
             List<ErpShopProductDO> productList=new ArrayList<>();
 
             for (JSONObject productJson : productArr) {
-                ErpShopProductDO productDO = new ErpShopProductDO();
-                String domain=productJson.getString(FIELD_DOMAIN);
-                productDO.setId(null);
-                productDO.setName(productJson.getString(FIELD_TITLE));
-                productDO.setCode(null);
-                productDO.setRemark(null);
-                productDO.setPlatformProductUid(productJson.getString(FIELD_ID));
-                productDO.setStatus(ErpOffStatus.OPEN.getCode());
-                productDO.setShopId(null);
-                productDO.setUrl(ESBConstants.PROTOCOL_HTTPS +domain+ SUB_PATH_PRODUCTS +productJson.getString(FIELD_HANDLE));
 
-                JSONObject image=productJson.getJSONObject(FIELD_IMAGE);
-                if(image!=null) {
-                    productDO.setImage(image.getString(FIELD_SRC));
+                JSONArray variants = productJson.getJSONArray(FIELD_VARIANTS);
+                for (JsonNode variant : variants) {
+                    JSONObject variantJson = new JSONObject(variant);
+                    String variantId=variantJson.getString(FIELD_ID);
+                    ErpShopProductDO productDO = new ErpShopProductDO();
+                    String domain=productJson.getString(FIELD_DOMAIN);
+                    productDO.setId(null);
+                    productDO.setName(productJson.getString(FIELD_TITLE)+ CharSymbols.MINUS+variantJson.getString(ShopifyToErpProfileConverter.FIELD_TITLE));
+                    productDO.setCurrency(productJson.getString(FIELD_CURRENCY));
+                    productDO.setPrice(variantJson.getBigDecimal(FIELD_PRICE));
+                    productDO.setCode(null);
+                    productDO.setRemark(null);
+                    productDO.setPlatformProductUid(productJson.getString(FIELD_ID)+CharSymbols.MINUS+variantId);
+                    productDO.setStatus(ErpOffStatus.OPEN.getCode());
+                    productDO.setShopId(null);
+                    productDO.setUrl(ESBConstants.PROTOCOL_HTTPS +domain+ SUB_PATH_PRODUCTS +productJson.getString(FIELD_HANDLE)+CharSymbols.QUESTION+ QUERY_STRING_VAR_VARIANT + CharSymbols.EQ +variantId);
+
+                    JSONObject image=productJson.getJSONObject(FIELD_IMAGE);
+                    if(image!=null) {
+                        productDO.setImage(image.getString(FIELD_SRC));
+                    }
+
+                    productList.add(productDO);
+
                 }
 
-                productList.add(productDO);
+
             }
 
             return productList;

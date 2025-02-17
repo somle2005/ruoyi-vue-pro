@@ -4,6 +4,8 @@ import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShop
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.*;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
@@ -25,6 +27,15 @@ public class ErpShopProductRespVO {
     @Schema(description = "店铺产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "赵六")
     @ExcelProperty("店铺产品名称")
     private String name;
+
+
+    @Schema(description = "价格")
+    @ExcelProperty("价格")
+    private BigDecimal price;
+
+    @Schema(description = "币种")
+    @ExcelProperty("币种")
+    private String currency;
 
     @Schema(description = "主图链接", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://")
     @ExcelProperty("主图链接")

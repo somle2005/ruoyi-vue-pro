@@ -119,8 +119,8 @@ public class SyncShopProfileJob extends DataJob {
             throw new RuntimeException("缺少店铺信息");
         }
         // 转换VO
-        ShopProfileDTO<List<?>> shopprofileDTO=new ShopProfileDTO<>(salesPlatform, ShopProfileType.SHOP,shops);
-        List<ErpShopSaveReqVO> shopVOs= AbstractErpShopProfileConverter.convert(shopprofileDTO);
+        ShopProfileDTO<List<?>> shopProfileDTO=new ShopProfileDTO<>(salesPlatform, ShopProfileType.SHOP,shops);
+        List<ErpShopSaveReqVO> shopVOs= AbstractErpShopProfileConverter.convert(shopProfileDTO);
         // 循环店铺
         for (ErpShopSaveReqVO shopVO : shopVOs) {
 
@@ -128,7 +128,7 @@ public class SyncShopProfileJob extends DataJob {
                 throw new RuntimeException("缺少店铺信息VO");
             }
             // 保存店铺
-            ErpShopDO shopDO=shopService.getByPlatform(shopprofileDTO.getSalesPlatform().name(),shopVO.getPlatformShopUid());
+            ErpShopDO shopDO=shopService.getByPlatform(shopProfileDTO.getSalesPlatform().name(),shopVO.getPlatformShopUid());
             if(shopDO!=null) {
                 // 更新时设置的属性
                 shopDO.setName(shopVO.getName());
@@ -144,7 +144,7 @@ public class SyncShopProfileJob extends DataJob {
                 // 创建
                 shopService.createShop(shopVO);
                 // 从数据库刷新 DO
-                shopDO=shopService.getByPlatform(shopprofileDTO.getSalesPlatform().name(),shopVO.getPlatformShopUid());
+                shopDO=shopService.getByPlatform(shopProfileDTO.getSalesPlatform().name(),shopVO.getPlatformShopUid());
             }
 
             // 拉取产品信息
@@ -193,6 +193,8 @@ public class SyncShopProfileJob extends DataJob {
                 productDOInDB.setUrl(productFromSalesPlatform.getUrl());
                 productDOInDB.setImage(productFromSalesPlatform.getImage());
                 productDOInDB.setStatus(productFromSalesPlatform.getStatus());
+                productDOInDB.setCurrency(productFromSalesPlatform.getCurrency());
+                productDOInDB.setPrice(productFromSalesPlatform.getPrice());
                 listToUpdate.add(productDOInDB);
             }
             // 移除有效的产品

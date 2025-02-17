@@ -2,8 +2,11 @@ package cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo;
 
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemSaveReqVO;
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.*;
 import jakarta.validation.constraints.*;
 
@@ -19,6 +22,14 @@ public class ErpShopProductSaveReqVO {
 
     @Schema(description = "平台产品ID编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "18131")
     private String platformProductUid;
+
+    @Schema(description = "价格")
+    @ExcelProperty("价格")
+    private BigDecimal price;
+
+    @Schema(description = "币种")
+    @ExcelProperty("币种")
+    private String currency;
 
     @Schema(description = "店铺产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "赵六")
     @NotEmpty(message = "店铺产品名称不能为空")

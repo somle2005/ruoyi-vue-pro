@@ -48,24 +48,32 @@ public class ShopifyShopProfileClient extends ShopProfileClient<JSONObject,JSONO
 
 
 
-
+    private Map<String,JSONObject> shopMap = new HashMap<>();
     /**
      * 获得店铺信息
      **/
     public List<JSONObject> getShops() {
-        return client.getShops();
+        List<JSONObject> shops=client.getShops();
+        for (JSONObject shop : shops) {
+            shopMap.put(shop.getString("id"),shop);
+        }
+        return shops;
     }
 
 
     /**
      * 获得商品信息
      **/
-    public List<JSONObject> getProducts(String shopId,String regionCode,String domainName) {
+    public List<JSONObject> getProducts(String shopPlatformUid,String regionCode,String domainName) {
         Map<String,String> params = new HashMap<>();
         params.put("limit","250");
         List<JSONObject> list=client.getProducts(params);
         for(JSONObject product:list){
             product.put(ShopifyToErpProfileConverter.FIELD_DOMAIN, domainName);
+            JSONObject shop=shopMap.get(shopPlatformUid);
+            if(shop!=null) {
+                product.put(ShopifyToErpProfileConverter.FIELD_CURRENCY, shop.getString(ShopifyToErpProfileConverter.FIELD_CURRENCY));
+            }
         }
         return list;
     }

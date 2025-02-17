@@ -1,6 +1,8 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo;
 
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.*;
 import io.swagger.v3.oas.annotations.media.Schema;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
@@ -23,6 +25,12 @@ public class ErpShopProductPageReqVO extends PageParam {
 
     @Schema(description = "店铺产品编码")
     private String code;
+
+    @Schema(description = "价格")
+    private BigDecimal price;
+
+    @Schema(description = "币种")
+    private String currency;
 
     @Schema(description = "备注", example = "你猜")
     private String remark;

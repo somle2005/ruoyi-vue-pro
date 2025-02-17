@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.amazon.controller.vo.AmazonSpMarketplaceParticipationVO;
 import com.somle.esb.enums.ESBConstants;
 import com.somle.esb.enums.SalesPlatform;
@@ -40,10 +41,16 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
     public static final String FIELD_IMAGES = "images";
     public static final String FIELD_SKU = "sku";
     public static final String FIELD_LINK = "link";
+    public static final String FIELD_PRICE = "price";
     public static final String FIELD_MARKETPLACE_ID = "marketplaceId";
     public static final String FIELD_CLIENT_ID = "clientId";
     public static final String FIELD_SELLER_ID = "sellerId";
     public static final String SUB_PATH_DP = "/dp/";
+    public static final String FIELD_OFFERS = "offers";
+    public static final String FIELD_OFFER_TYPE = "offerType";
+    public static final String FIELD_AMOUNT = "amount";
+    public static final String FIELD_CURRENCY = "currency";
+    public static final String VALUE_B2C = "B2C";
 
     public AmazonToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.AMAZON, shopProfileType);
@@ -85,6 +92,8 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
     @Slf4j
     private static class ShopifyShopProductConverter extends AmazonToErpProfileConverter<List<JSONObject>, ErpShopProductDO> {
 
+
+
         public ShopifyShopProductConverter() {
             super(ShopProfileType.PRODUCT);
         }
@@ -117,6 +126,20 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                 productDO.setId(null);
                 productDO.setName(sku);
 
+                JSONArray offers=product.getJSONArray(FIELD_OFFERS);
+                if(!CollectionUtils.isEmpty(offers)) {
+                    for (JsonNode offer : offers) {
+                        JSONObject offerJson = new JSONObject(offer);
+                        String offerType=offerJson.getString(FIELD_OFFER_TYPE);
+                        if(VALUE_B2C.equals(offerType)) {
+                            JSONObject priceJson = offerJson.getJSONObject(FIELD_PRICE);
+                            if (priceJson != null) {
+                                productDO.setPrice(priceJson.getBigDecimal(FIELD_AMOUNT));
+                                productDO.setCurrency(priceJson.getString(FIELD_CURRENCY));
+                            }
+                        }
+                    }
+                }
                 productDO.setCode(null);
                 productDO.setRemark(null);
 

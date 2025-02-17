@@ -4,6 +4,8 @@ import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
+import java.math.BigDecimal;
 import java.util.*;
 import java.time.LocalDateTime;
 import java.time.LocalDateTime;
@@ -40,6 +42,16 @@ public class ErpShopProductDO extends TenantBaseDO {
      */
     private String name;
 
+
+    /**
+     * 价格
+     **/
+    private BigDecimal price;
+
+    /**
+     * 币种
+     **/
+    private String currency;
     /**
      * 主图链接
      **/

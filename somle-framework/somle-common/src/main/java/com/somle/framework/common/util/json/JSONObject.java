@@ -9,6 +9,7 @@ import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -53,7 +54,24 @@ public class JSONObject extends ObjectNode{
 
     public String getString(String fieldName) {
         var value=this.get(fieldName);
-        return value==null?null:value.asText();
+        if(value==null) {
+            return null;
+        }
+        if(value instanceof NullNode) {
+            return null;
+        }
+        return value.asText();
+    }
+
+    public BigDecimal getBigDecimal(String fieldName) {
+        var value=this.get(fieldName);
+        if(value==null) {
+            return null;
+        }
+        if(value instanceof NullNode) {
+            return null;
+        }
+        return new BigDecimal(value.asText());
     }
 
     public List<String> getStringList(String fieldName) {
