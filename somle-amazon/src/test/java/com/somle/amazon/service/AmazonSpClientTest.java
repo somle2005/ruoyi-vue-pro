@@ -28,9 +28,11 @@ class AmazonSpClientTest extends BaseSpringTest {
 
     private AmazonSpClient client;
 
+    private final AmazonRegion region = AmazonRegion.EU;
+
     @BeforeEach
     void setUp() {
-        client = spService.getClient(AmazonRegion.FE);
+        client = spService.getClient(region);
     }
 
 //    @Test
@@ -66,12 +68,16 @@ class AmazonSpClientTest extends BaseSpringTest {
 
     @Test
     void getListing() {
+        AmazonCountry country=AmazonCountry.FR;
+        if(country.getRegion()!=region) {
+            throw new IllegalArgumentException("country 与 region 不匹配");
+        }
         var reqVO = AmazonSpListingReqVO.builder()
             //.identifiersType(AmazonSpListingReqVO.IdentifiersType.ASIN)
             .sellerId(client.getAuth().getSellerId())
             .pageSize(10)
             //.marketplaceIds(List.of(AmazonCountry.findByCode("MX").getMarketplaceId()))
-            .marketplaceIds(List.of(AmazonCountry.findByCode("FR").getMarketplaceId()))
+            .marketplaceIds(List.of(country.getMarketplaceId()))
             .includedData(List.of(AmazonSpListingReqVO.IncludedData.OFFERS,AmazonSpListingReqVO.IncludedData.ATTRIBUTES))
             .build();
         var listing = client.searchListingsItems(reqVO);

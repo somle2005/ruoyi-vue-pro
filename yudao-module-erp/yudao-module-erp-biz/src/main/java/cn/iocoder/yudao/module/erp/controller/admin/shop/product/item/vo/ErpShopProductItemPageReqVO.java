@@ -18,6 +18,9 @@ public class ErpShopProductItemPageReqVO extends PageParam {
     @Schema(description = "产品编号", example = "27593")
     private Long productId;
 
+    @Schema(description = "产品数量", example = "27593")
+    private Long quantity;
+
     @Schema(description = "备注", example = "你说的对")
     private String remark;
 

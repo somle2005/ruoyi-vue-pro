@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import java.util.*;
@@ -15,6 +16,10 @@ public class ErpShopProductItemSaveReqVO {
     @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "27593")
     @NotNull(message = "产品编号不能为空")
     private Long productId;
+
+    @Schema(description = "产品数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "27593")
+    @ExcelProperty("产品数量")
+    private Long quantity;
 
     @Schema(description = "店铺产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "27593")
     @NotNull(message = "店铺产品编号不能为空")
