@@ -72,7 +72,7 @@ public class SyncShopProfileJob extends DataJob {
             // 如果是本地调试模式
             if(SpringUtils.isBootInIDE()) {
                 // 调试指定的平台
-                if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY)) {
+                if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY,SalesPlatform.AMAZON)) {
                     continue;
                 }
             }
@@ -135,6 +135,8 @@ public class SyncShopProfileJob extends DataJob {
                 shopDO.setCountryCode(shopVO.getCountryCode());
                 shopDO.setDomainName(shopVO.getDomainName());
                 shopDO.setPlatformShopUid(shopVO.getPlatformShopUid());
+                shopDO.setType(shopVO.getType());
+                shopDO.setStatus(shopVO.getStatus());
                 ErpShopSaveReqVO convertedShopVO = ErpShopConvert.INSTANCE.convert(shopDO);
                 // 更新
                 shopService.updateShop(convertedShopVO);
@@ -190,6 +192,7 @@ public class SyncShopProfileJob extends DataJob {
                 productDOInDB.setName(productFromSalesPlatform.getName());
                 productDOInDB.setUrl(productFromSalesPlatform.getUrl());
                 productDOInDB.setImage(productFromSalesPlatform.getImage());
+                productDOInDB.setStatus(productFromSalesPlatform.getStatus());
                 listToUpdate.add(productDOInDB);
             }
             // 移除有效的产品

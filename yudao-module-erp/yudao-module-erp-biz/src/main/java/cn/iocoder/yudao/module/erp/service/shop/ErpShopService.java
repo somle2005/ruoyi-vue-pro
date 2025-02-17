@@ -68,4 +68,9 @@ public interface ErpShopService {
      * 按ShopId集合获取全部不店铺
      **/
     Map<Long, ErpShopRespVO> getShopMapByIds(Set<Long> shopIds);
+
+    /**
+     * 按条件查询店铺，不分页
+     **/
+    List<ErpShopDO> getShopList(@Valid ErpShopPageReqVO pageReqVO);
 }

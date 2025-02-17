@@ -2,6 +2,8 @@ package com.somle.esb.converter.shop;
 
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
+import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
+import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.framework.common.util.json.JSONArray;
 import com.somle.framework.common.util.json.JSONObject;
@@ -15,7 +17,7 @@ import java.util.List;
 
 /**
  * @className: ShopifyConverter
- * @author: Wqh
+ * @author: LeeFJ
  * @date: 2025/2/8 9:22
  * @Version: 1.0
  * @description:
@@ -47,8 +49,8 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                 shopDo.setRemark(null);
                 shopDo.setDomainName(domain);
                 shopDo.setSort(1);
-                shopDo.setStatus(1);
-                shopDo.setType(0);
+                shopDo.setStatus(ErpOffStatus.OPEN.getCode());
+                shopDo.setType(ErpShopType.ONLINE.getCode());
                 shopDo.setCountryCode(shopJson.getString("country"));
                 shopDo.setPlatform(SalesPlatform.SHOPIFY.name());
                 shopDo.setPlatformShopUid(shopJson.getString("id"));
@@ -80,7 +82,7 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                 productDO.setCode(null);
                 productDO.setRemark(null);
                 productDO.setPlatformProductUid(productJson.getString("id"));
-                productDO.setStatus(1);
+                productDO.setStatus(ErpOffStatus.OPEN.getCode());
                 productDO.setShopId(null);
                 productDO.setUrl("Https://"+domain+"/products/"+productJson.getString("handle"));
 

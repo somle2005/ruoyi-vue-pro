@@ -164,7 +164,7 @@ class MarketProductCollector {
         this.client = client;
         this.domainName = domainName;
         // 本机开发时只取前5条测试，线上全部
-        this.limit=SpringUtils.isBootInIDE()? 5 : -1;
+        this.limit=SpringUtils.isBootInIDE()? -1 : -1;
     }
 
     /**

@@ -80,6 +80,14 @@ public class ErpShopController {
         return success(BeanUtils.toBean(pageResult, ErpShopRespVO.class));
     }
 
+    @GetMapping("/list")
+    @Operation(summary = "获得ERP 店铺分页")
+    @PreAuthorize("@ss.hasPermission('erp:shop:query')")
+    public CommonResult<List<ErpShopDO>> getShopList(@Valid ErpShopPageReqVO pageReqVO) {
+        List<ErpShopDO> pageResult = shopService.getShopList(pageReqVO);
+        return success(BeanUtils.toBean(pageResult, ErpShopDO.class));
+    }
+
     @GetMapping("/export-excel")
     @Operation(summary = "导出ERP 店铺 Excel")
     @PreAuthorize("@ss.hasPermission('erp:shop:export')")

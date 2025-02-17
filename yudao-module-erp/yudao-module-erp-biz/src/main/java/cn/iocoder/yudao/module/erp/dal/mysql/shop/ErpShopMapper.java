@@ -29,4 +29,6 @@ public interface ErpShopMapper extends BaseMapperX<ErpShopDO> {
                 .orderByDesc(ErpShopDO::getId));
     }
 
+
+
 }

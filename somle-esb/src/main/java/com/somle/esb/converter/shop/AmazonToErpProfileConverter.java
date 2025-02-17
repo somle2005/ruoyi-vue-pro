@@ -3,6 +3,8 @@ package com.somle.esb.converter.shop;
 import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
+import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
+import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import com.somle.amazon.controller.vo.AmazonSpMarketplaceParticipationVO;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
@@ -18,7 +20,7 @@ import java.util.List;
 
 /**
  * @className: ShopifyConverter
- * @author: Wqh
+ * @author: LeeFJ
  * @date: 2025/2/8 9:22
  * @Version: 1.0
  * @description:
@@ -68,8 +70,8 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                 shopDo.setDomainName(amazonShop.getMarketplace().getDomainName());
                 shopDo.setRemark(null);
                 shopDo.setSort(1);
-                shopDo.setStatus(1);
-                shopDo.setType(0);
+                shopDo.setStatus(ErpOffStatus.OPEN.getCode());
+                shopDo.setType(ErpShopType.ONLINE.getCode());
                 shopDo.setCountryCode(amazonShop.getMarketplace().getCountryCode());
                 shopDo.setPlatform(SalesPlatform.AMAZON.name());
                 shopDo.setPlatformShopUid(amazonShop.getMarketplace().getId());
@@ -122,7 +124,7 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
 
                 productDO.setPlatformProductUid(sku+ CharSymbols.NU+asin);
 
-                productDO.setStatus(1);
+                productDO.setStatus(ErpOffStatus.OPEN.getCode());
                 productDO.setShopId(null);
                 productDO.setUrl(PROTOCOL +domainName+ SUB_PATH_DP +asin);
                 productDO.setImage(imageUrl);
