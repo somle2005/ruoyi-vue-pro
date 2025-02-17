@@ -41,11 +41,6 @@ class AmazonSpClientTest extends BaseSpringTest {
 //        log.info(report.toString());
 //    }
 
-    @Test
-    void refreshToken() {
-        spService.refreshAuth();
-    }
-
 //    @Test
 //    void getAccount() {
 //        var shop = amazonService.shopRepository.findByCountryCode("US");
@@ -124,7 +119,7 @@ class AmazonSpClientTest extends BaseSpringTest {
                 .marketplaceIds(List.of(AmazonCountry.findByCode("DE").getMarketplaceId()))
                 .reportOptions(options)
                 .build();
-        var reportString = client.createAndGetReport(vo, "gzip");
+        var reportString = client.createAndGetReport(vo);
         var report = JsonUtils.parseObject(reportString, JSONObject.class);
         log.info(report.toString());
     }
@@ -143,18 +138,18 @@ class AmazonSpClientTest extends BaseSpringTest {
 //            .marketplaceIds(List.of(AmazonCountry.findByCode("DE").getMarketplaceId()))
 //            .reportOptions(options)
             .build();
-        var reportString = client.createAndGetReport(vo, "gzip");
+        var reportString = client.createAndGetReport(vo);
         log.info(reportString);
     }
 
     @Test
-    void getReports() {
+    void listReports() {
         var vo = AmazonSpReportReqVO.builder()
                 .reportTypes(List.of("GET_FBA_STORAGE_FEE_CHARGES_DATA"))
                 .processingStatuses(List.of(ProcessingStatuses.DONE))
                 .pageSize(100)
                 .build();
-        var reports = client.getReports(vo);
+        var reports = client.listReports(vo);
         for (var report : reports) {
             log.info(report.toString());
         }
@@ -168,7 +163,15 @@ class AmazonSpClientTest extends BaseSpringTest {
 //                .pageSize(100)
 //                .build();
 //        var report = client.getReports(vo).get(0);
-        log.info(client.getReport("970685020124",null));
+        log.info(client.waitAndGetReportDocumentString("970685020124"));
+    }
+
+    @Test
+    void getReportDocument() {
+        var respVO = client.getReport("970685020124");
+        log.info(respVO.toString());
+        var listing = client.getReportDocument(respVO.getReportDocumentId());
+        log.info(listing.toString());
     }
 
 

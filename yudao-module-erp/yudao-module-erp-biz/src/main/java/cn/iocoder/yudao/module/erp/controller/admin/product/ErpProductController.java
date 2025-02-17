@@ -4,12 +4,14 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
+import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSimpleRespVO;
 import cn.iocoder.yudao.module.erp.service.product.ErpProductServiceDelegator;
-import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,12 +40,11 @@ public class ErpProductController {
 
     @Resource
     private ErpProductServiceDelegator productService;
-    @Resource
-    private AdminUserApi adminUserApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建产品")
     @PreAuthorize("@ss.hasPermission('erp:product:create')")
+    @Idempotent
     public CommonResult<Long> createProduct(@Valid @RequestBody ErpProductSaveReqVO createReqVO) {
         return success(productService.createProduct(createReqVO));
     }
@@ -87,12 +88,9 @@ public class ErpProductController {
 
     @GetMapping("/simple-list")
     @Operation(summary = "获得产品精简列表", description = "只包含被开启的产品，主要用于前端的下拉选项")
-    public CommonResult<List<ErpProductRespVO>> getProductSimpleList() {
+    public CommonResult<List<ErpProductSimpleRespVO>> getProductSimpleList() {
         List<ErpProductRespVO> list = productService.getProductVOListByStatus(true);
-        return success(convertList(list, product -> new ErpProductRespVO().setId(product.getId())
-            .setName(product.getName()).setBarCode(product.getBarCode())
-            .setCategoryId(product.getCategoryId()).setCategoryName(product.getCategoryName())
-            .setUnitId(product.getUnitId()).setUnitName(product.getUnitName())));
+        return success(convertList(list, vo -> BeanUtils.toBean(vo, ErpProductSimpleRespVO.class)));
     }
 
     @GetMapping("/export-excel")

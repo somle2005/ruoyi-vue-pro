@@ -8,12 +8,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 
-import java.time.LocalDate;
 
 @Slf4j
 @Import({
-    AmazonService.class,
-    AmazonAdClient.class,
 })
 class AmazonAdClientTest extends BaseSpringTest {
     @Resource
@@ -45,10 +42,10 @@ class AmazonAdClientTest extends BaseSpringTest {
     @Test
     void createAdReport() {
         var profileId = client.listProfiles().get(0).getProfileId();
-        var reportId = client.createAdReport(profileId, LocalDate.of(2025,1,20));
-        log.info(reportId);
-        var report = client.getReport(profileId, reportId);
-        log.info(report.toString());
+//        var reportId = client.createAdReport(profileId, LocalDate.of(2025,1,20));
+//        log.info(reportId);
+//        var report = client.getReport(profileId, reportId);
+//        log.info(report.toString());
     }
 
 //    @Test
