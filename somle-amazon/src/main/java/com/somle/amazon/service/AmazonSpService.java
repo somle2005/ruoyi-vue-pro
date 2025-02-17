@@ -1,7 +1,5 @@
 package com.somle.amazon.service;
 
-import cn.iocoder.yudao.framework.common.util.config.Variable;
-import com.somle.amazon.model.enums.AmazonRegion;
 import com.somle.amazon.repository.AmazonAdAuthRepository;
 import com.somle.amazon.repository.AmazonAdClientRepository;
 import com.somle.amazon.repository.AmazonSpAuthRepository;
@@ -43,34 +41,31 @@ public class AmazonSpService {
             .map(AmazonSpClient::new)
             .toList();
         // 启动后刷新 Token
-        refreshAuth();
+        refreshAuths();
     }
 
     private Variable isAuthRefreshed = new Variable(null, 1000 * 60 * 30, Variable.ExpireType.LIVE);
 
     @Scheduled(cron = "0 0,30 * * * *")
-    public Boolean refreshAuth() {
+    public boolean refreshAuths() {
         if(isAuthRefreshed.getValue()!= null) {
             log.info("请勿频繁刷新 Amazon Token");
             return false;
         }
-
-        clients.stream()
-            .forEach(client -> {
-                var auth = client.getAuth();
-                var newAccessToken = amazonService.refreshAccessToken(
-                    auth.getClientId(),
-                    clientRepository.findById(auth.getClientId()).get().getSecret(),
-                    auth.getRefreshToken()
-                );
-                auth.setAccessToken(newAccessToken);
-                client.setAuth(auth);
-                authRepository.save(auth);
-            });
-
-        isAuthRefreshed.setValue(true);
-
+        clients.forEach(this::refreshAuth);
         return true;
+    }
+
+    private void refreshAuth(AmazonSpClient client) {
+        var auth = client.getAuth();
+        var newAccessToken = amazonService.refreshAccessToken(
+            auth.getClientId(),
+            clientRepository.findById(auth.getClientId()).get().getSecret(),
+            auth.getRefreshToken()
+        );
+        auth.setAccessToken(newAccessToken);
+        client.setAuth(auth);
+        authRepository.save(auth);
     }
 
 }

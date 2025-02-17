@@ -13,7 +13,7 @@ public class AmazonSpController {
 
     @PostMapping("refreshAuth")
     void refreshAuth() {
-        service.refreshAuth();
+        service.refreshAuths();
     }
 
 //    @GetMapping("orders")
