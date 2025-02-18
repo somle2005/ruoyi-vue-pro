@@ -48,8 +48,9 @@ public class KingdeeClient {
     }
 
     private KingdeeToken fillAuth(KingdeeToken newToken) {
-        token.setAppSignature(getAppSignature(newToken));
-        newToken.setAppSignature(getAppSignature(newToken));//响应返回值没有签名->需要计算
+        String signature = getAppSignature(newToken);
+        token.setAppSignature(signature);
+        newToken.setAppSignature(signature);//响应返回值没有签名->需要计算
 
         token.setAppToken(getAppToken(newToken));
         log.info("tokens filled successfully");
