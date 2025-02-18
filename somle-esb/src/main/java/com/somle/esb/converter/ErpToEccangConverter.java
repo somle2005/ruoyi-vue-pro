@@ -193,7 +193,7 @@ public class ErpToEccangConverter {
             eccangProduct.setActionType("EDIT");
             //如果是修改就要上传默认采购单价
             //TODO 后续有变更，请修改
-            eccangProduct.setProductPurchaseValue(0.001F);
+            eccangProduct.setProductPurchaseValue(0F);
         }
         //SKU和标题
         eccangProduct.setProductTitle(product.getName());
