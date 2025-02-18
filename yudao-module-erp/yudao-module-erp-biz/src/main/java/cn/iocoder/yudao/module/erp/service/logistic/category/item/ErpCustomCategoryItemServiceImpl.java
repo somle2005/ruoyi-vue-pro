@@ -7,7 +7,6 @@ import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.Er
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.item.ErpCustomCategoryItemMapper;
-import cn.iocoder.yudao.module.erp.enums.DictTypeConstants;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
