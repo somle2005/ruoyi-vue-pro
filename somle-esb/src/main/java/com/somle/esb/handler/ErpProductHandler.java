@@ -10,6 +10,7 @@ import com.somle.kingdee.model.KingdeeProductSaveReqVO;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Profile;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -23,7 +24,7 @@ import java.util.List;
  */
 @Slf4j
 @Component
-//@Profile("prod")
+@Profile("prod")
 @RequiredArgsConstructor
 public class ErpProductHandler {
 
