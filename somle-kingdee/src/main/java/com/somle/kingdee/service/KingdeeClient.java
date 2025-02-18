@@ -169,10 +169,6 @@ public class KingdeeClient {
         setUnitId("立方厘米", kingdeeUnit -> reqVO.setVolumeUnitId(kingdeeUnit.getId()));
         setUnitId("kg", kingdeeUnit -> reqVO.setWeightUnitId(kingdeeUnit.getId()));
         setUnitId("套", kingdeeUnit -> reqVO.setBaseUnitId(kingdeeUnit.getId()));
-//        reqVO.setCustomField(
-//            getCustomFieldByDisplayName("bd_material", "部门"),
-//            getAuxInfoByNumber(reqVO.getSaleDepartmentId().toString()).getId()
-//        );
         try {
             Optional.ofNullable(getAuxInfoByNumber(reqVO.getSaleDepartmentId().toString()))
                 .ifPresent(kingdeeUnit ->
