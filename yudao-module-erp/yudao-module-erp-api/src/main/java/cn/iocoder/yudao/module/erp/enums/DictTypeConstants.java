@@ -17,4 +17,6 @@ public interface DictTypeConstants {
     String PURCHASE_REQUEST_OFF_STATUS = "erp_purchase_request_off_status";
     //申请单审核状态
     String PURCHASE_REQUEST_APPLICATION_STATUS = "erp_purchase_request_application_status";
+    //ERP 国家字段
+    String ERP_COUNTRY_CODE = "country_code";
 }
