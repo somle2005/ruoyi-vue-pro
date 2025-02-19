@@ -43,5 +43,9 @@ public class ErpProductRespSimpleVO extends BaseDO {
     @ExcelProperty("材料（中文）")
     private String material;
 
+    @Schema(description = "主图", example = "https://www.iocoder.cn")
+    @ExcelProperty("主图")
+    private String primaryImageUrl;
+
 
 }
