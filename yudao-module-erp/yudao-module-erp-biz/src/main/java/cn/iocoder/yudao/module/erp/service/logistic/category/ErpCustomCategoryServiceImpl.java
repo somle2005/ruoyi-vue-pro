@@ -1,7 +1,9 @@
 package cn.iocoder.yudao.module.erp.service.logistic.category;
 
+import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryImportExcelVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategorySaveReqVO;
 import cn.iocoder.yudao.module.erp.convert.logistic.category.ErpCustomCategoryConvert;
@@ -13,11 +15,14 @@ import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.item.ErpCustomCat
 import cn.iocoder.yudao.module.erp.service.logistic.category.item.ErpCustomCategoryItemService;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -28,6 +33,7 @@ import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_RULE_C
  *
  * @author 王岽宇
  */
+@Slf4j
 @Service
 @Validated
 public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
@@ -103,6 +109,30 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
         return customRuleCategoryMapper.selectPage(pageReqVO);
     }
 
+    /**
+     * 导入excel来创建主子表
+     *
+     * @param excelVOList excel数据
+     */
+    @Override
+    public List<ErpCustomCategoryImportExcelVO> importCustomRuleCategory(List<ErpCustomCategoryImportExcelVO> excelVOList) {
+        HashMap<ErpCustomCategoryDO, List<ErpCustomCategoryItemDO>> map = new HashMap<>();
+        for (ErpCustomCategoryImportExcelVO excelVO : excelVOList) {
+            // 转换主表对象
+            ErpCustomCategoryDO aDo = BeanUtils.toBean(excelVO, ErpCustomCategoryDO.class);
+            // 转换子表对象
+            ErpCustomCategoryItemDO itemDO = BeanUtils.toBean(excelVO, ErpCustomCategoryItemDO.class);
+            map.computeIfAbsent(aDo, k -> new ArrayList<>()).add(itemDO);
+        }
+
+        log.info("map:{}", excelVOList);
+        for (ErpCustomCategoryDO aDo : map.keySet()) {
+            customRuleCategoryMapper.insert(aDo);
+        }
+
+        return null;
+    }
+
     // ==================== 子表（海关分类子表） ====================
 
     @Override
@@ -118,8 +148,9 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
 
     /**
      * 更新海关分类子表
+     *
      * @param categoryId 海关分类id
-     * @param list 海关分类子表
+     * @param list       海关分类子表
      */
     private void updateCustomRuleCategoryItemList(Long categoryId, List<ErpCustomCategoryItemDO> list) {
         deleteCustomRuleCategoryItemByCategoryId(categoryId);
