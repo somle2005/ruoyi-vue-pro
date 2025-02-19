@@ -1,6 +1,5 @@
 package cn.iocoder.yudao.module.erp.service.logistic.category;
 
-import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryImportExcelVO;
@@ -23,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -115,7 +115,8 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
      * @param excelVOList excel数据
      */
     @Override
-    public List<ErpCustomCategoryImportExcelVO> importCustomRuleCategory(List<ErpCustomCategoryImportExcelVO> excelVOList) {
+    @Transactional(rollbackFor = Exception.class)
+    public Integer importCustomRuleCategory(List<ErpCustomCategoryImportExcelVO> excelVOList) {
         HashMap<ErpCustomCategoryDO, List<ErpCustomCategoryItemDO>> map = new HashMap<>();
         for (ErpCustomCategoryImportExcelVO excelVO : excelVOList) {
             // 转换主表对象
@@ -124,13 +125,13 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
             ErpCustomCategoryItemDO itemDO = BeanUtils.toBean(excelVO, ErpCustomCategoryItemDO.class);
             map.computeIfAbsent(aDo, k -> new ArrayList<>()).add(itemDO);
         }
-
-        log.info("map:{}", excelVOList);
         for (ErpCustomCategoryDO aDo : map.keySet()) {
+            List<ErpCustomCategoryItemDO> items = map.get(aDo);
             customRuleCategoryMapper.insert(aDo);
+            items.forEach(item -> item.setCustomCategoryId(aDo.getId()));
+            customRuleCategoryItemMapper.insertBatch(items);
         }
-
-        return null;
+        return map.size();
     }
 
     // ==================== 子表（海关分类子表） ====================
