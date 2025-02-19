@@ -105,15 +105,7 @@ public class ErpShopServiceImpl implements ErpShopService {
 
     @Override
     public List<ErpShopDO> getShopList(ErpShopPageReqVO reqVO) {
-        return shopMapper.selectList(new LambdaQueryWrapperX<ErpShopDO>()
-            .likeIfPresent(ErpShopDO::getName, reqVO.getName())
-            .likeIfPresent(ErpShopDO::getCode, reqVO.getCode())
-            .eqIfPresent(ErpShopDO::getStatus, reqVO.getStatus())
-            .betweenIfPresent(ErpShopDO::getCreateTime, reqVO.getCreateTime())
-            .eqIfPresent(ErpShopDO::getType, reqVO.getType())
-            .eqIfPresent(ErpShopDO::getPlatform, reqVO.getPlatform())
-            .eqIfPresent(ErpShopDO::getAccount, reqVO.getAccount())
-            .orderByDesc(ErpShopDO::getId));
+        return shopMapper.getShopList(reqVO);
     }
 
 }

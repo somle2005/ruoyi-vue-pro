@@ -25,4 +25,10 @@ public interface ErpShopProductItemMapper extends BaseMapperX<ErpShopProductItem
                 .orderByDesc(ErpShopProductItemDO::getId));
     }
 
+    default List<ErpShopProductItemDO> getShopProductItemsByProductId(Long shopProductId) {
+        return this.selectList(
+            LambdaQueryWrapperX.create(ErpShopProductItemDO.class).eq(ErpShopProductItemDO::getShopProductId,shopProductId)
+        );
+    }
+
 }

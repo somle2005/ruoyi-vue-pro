@@ -75,9 +75,7 @@ public class ErpShopProductItemServiceImpl implements ErpShopProductItemService 
 
     @Override
     public List<ErpShopProductItemDO> getShopProductItemsByProductId(Long shopProductId) {
-        return shopProductItemMapper.selectList(
-            LambdaQueryWrapperX.create(ErpShopProductItemDO.class).eq(ErpShopProductItemDO::getShopProductId,shopProductId)
-        );
+        return shopProductItemMapper.getShopProductItemsByProductId(shopProductId);
     }
 
 }

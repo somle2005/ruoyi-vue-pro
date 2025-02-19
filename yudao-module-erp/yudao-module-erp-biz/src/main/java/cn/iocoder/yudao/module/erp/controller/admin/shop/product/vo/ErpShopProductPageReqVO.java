@@ -20,6 +20,12 @@ public class ErpShopProductPageReqVO extends PageParam {
     @Schema(description = "店铺产品名称", example = "赵六")
     private String name;
 
+    @Schema(description = "店铺名称", example = "赵六")
+    private String shopName;
+
+    @Schema(description = "平台", example = "赵六")
+    private String platform;
+
     @Schema(description = "店铺ID")
     private Long shopId;
 
