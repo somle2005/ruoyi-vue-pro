@@ -211,6 +211,8 @@ public interface ErrorCodeConstants {
     // ========== ERP 店铺 1-030-607-000 ==========
     ErrorCode SHOP_NOT_EXISTS = new ErrorCode(1_030_607_000, "ERP 店铺不存在");
     ErrorCode SHOP_NOT_ALLOW_DELETE = new ErrorCode(1_030_607_001, "线上店铺不允许删除");
+    ErrorCode SHOP_CAN_NOT_CREATE_ONLINE_SHOP = new ErrorCode(1_030_607_002, "不允许创建线上店铺");
+    ErrorCode SHOP_CAN_NOT_UPDATE_ONLINE_SHOP = new ErrorCode(1_030_607_003, "不允许变更为线上店铺");
 
     // ========== ERP 店铺产品 1_030_608_000 ==========
     ErrorCode SHOP_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_608_000, "ERP 店铺产品不存在");

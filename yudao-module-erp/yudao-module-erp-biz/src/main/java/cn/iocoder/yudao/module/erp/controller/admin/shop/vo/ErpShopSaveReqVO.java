@@ -57,8 +57,7 @@ public class ErpShopSaveReqVO {
     @NotNull(message = "销售平台，不能为空")
     private String platform;
 
-    @Schema(description = "销售平台店铺唯一ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "销售平台，不能为空",groups = {ValidationGroup.create.class})
+    @Schema(description = "销售平台店铺唯一ID", example = "1")
     private String platformShopUid;
 
 }
