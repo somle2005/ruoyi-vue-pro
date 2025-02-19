@@ -249,7 +249,7 @@ public class ErpToEccangConverter {
             ObjectUtils.defaultIfNull(eccangProduct.getActionType(), "ADD") //操作类型
         );
         eccangProduct.setCurrencyCode(
-            ObjectUtils.defaultIfNull(eccangProduct.getCurrencyCode(), "CNY") // 默认币种代码CNY
+            ObjectUtils.defaultIfNull(eccangProduct.getCurrencyCode(), "RMB") // 默认币种代码RMB
         );
         eccangProduct.setProductPrice(
             ObjectUtils.defaultIfNull(eccangProduct.getProductPrice(), 0f) // 默认价格为 0.0
