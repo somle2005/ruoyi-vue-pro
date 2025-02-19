@@ -157,24 +157,6 @@ public class ErpToEccangConverter {
             //TODO 后续有变更，请修改
             eccangProduct.setProductPurchaseValue(0.001F);
         }
-        //用product_id在(供应商产品表)里面查，使用查到的第一个价格。处理货币单位+价格
-        erpSupplierProductService.getSupplierProductPage(
-                new ErpSupplierProductPageReqVO().setProductId(customRuleDTO.getProductId())
-            )
-            .getList().stream()
-            .findFirst()
-            .ifPresent(erpSupplierProductDO -> {
-                //货币单位
-                Optional.ofNullable(erpSupplierProductDO.getPurchasePriceCurrencyCode())
-                    .map(String::valueOf) // 将 Integer 转换为字符串
-                    .filter(StringUtils::isNotBlank)
-                    .ifPresent(eccangProduct::setCurrencyCode);
-                //价格，并确保价格为 BigDecimal 类型，避免转换不一致
-                Optional.ofNullable(erpSupplierProductDO.getPurchasePrice())
-                    .map(BigDecimal::valueOf)
-                    .map(price -> price.setScale(2, RoundingMode.HALF_UP).floatValue())
-                    .ifPresent(eccangProduct::setProductPrice);
-            });
         return eccangProduct;
     }
 
