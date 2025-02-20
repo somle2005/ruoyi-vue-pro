@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.erp.service.logistic.category;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryImportExcelVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategorySaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
@@ -55,10 +54,6 @@ public interface ErpCustomCategoryService {
      */
     PageResult<ErpCustomCategoryDO> getCustomRuleCategoryPage(ErpCustomCategoryPageReqVO pageReqVO);
 
-    /**
-     * 导入excel来创建主子表
-     */
-    List<ErpCustomCategoryImportExcelVO> importCustomRuleCategory(@Valid List<ErpCustomCategoryImportExcelVO> excelVOList);
     // ==================== 子表（海关分类子表） ====================
 
     /**

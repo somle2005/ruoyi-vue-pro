@@ -1,10 +1,5 @@
 package cn.iocoder.yudao.module.erp.service.logistic.category.bo;
 
-import lombok.Data;
-
-import java.util.List;
-
-@Data
 public class ErpCustomCategoryBO {
     /**
      * 编号
@@ -26,6 +21,4 @@ public class ErpCustomCategoryBO {
      * 材质对应string+报关品名(动态计算)
      */
     private String combinedValue;
-
-    private List<ErpCustomCategoryItemBO> customRuleCategoryItems;
 }
