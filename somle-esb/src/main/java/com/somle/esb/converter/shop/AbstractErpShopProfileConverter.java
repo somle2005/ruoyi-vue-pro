@@ -1,8 +1,14 @@
 package com.somle.esb.converter.shop;
 
+import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
+import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
+import cn.iocoder.yudao.module.system.api.dict.dto.DictDataRespDTO;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
+import com.somle.framework.common.util.collection.StreamX;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +24,30 @@ import java.util.Map;
 public abstract class AbstractErpShopProfileConverter<IN,OUT> {
 
     private static final Map<String, AbstractErpShopProfileConverter<?,?>> CONVERTERS = new HashMap<>();
+
+    @Resource
+    DictDataApi dictDataApi;
+
+    private static Map<String, DictDataRespDTO> countryLabelDict=null;
+
+    @PostConstruct
+    public void init() {
+        if(countryLabelDict!=null) {
+            return;
+        }
+        List<DictDataRespDTO> list= dictDataApi.getDictDataList(DictTypeConstants.COUNTRY_CODE);
+        countryLabelDict = StreamX.from(list).toMap(DictDataRespDTO::getLabel);
+    }
+
+    protected String getCountryDictValue(String label) {
+//        DictDataRespDTO dto = countryLabelDict.get(label);
+//        if(dto==null) {
+//            return label;
+//        }
+//        return dto.getValue();
+        // 目前先原封返回，后续再优化
+        return label;
+    }
 
     /**
     * @Author LFJ

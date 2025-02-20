@@ -72,9 +72,9 @@ public class SyncShopProfileJob extends DataJob {
             // 如果是本地调试模式
             if(SpringUtils.isBootInIDE()) {
                 // 调试指定的平台
-                // if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY,SalesPlatform.AMAZON)) {
-                // if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY)) {
-                if(!salesPlatform.isAnyMatch(SalesPlatform.AMAZON)) {
+                 if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY,SalesPlatform.AMAZON)) {
+                 // if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY)) {
+                 // if(!salesPlatform.isAnyMatch(SalesPlatform.AMAZON)) {
                     continue;
                 }
             }
@@ -154,7 +154,7 @@ public class SyncShopProfileJob extends DataJob {
             // 拉取产品信息
             List<?> productArray = shopProfileClient.getProducts(shopDO.getPlatformShopUid(),shopDO.getCountryCode(),shopDO.getDomainName());
             if(productArray!=null && !productArray.isEmpty()) {
-                syncShopProducts(salesPlatform,shopDO,productArray);
+                //syncShopProducts(salesPlatform,shopDO,productArray);
             }
 
         }

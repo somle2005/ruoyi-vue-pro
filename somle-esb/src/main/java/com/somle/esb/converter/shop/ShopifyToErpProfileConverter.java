@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpProductListingStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
+import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.esb.enums.ESBConstants;
 import com.somle.framework.common.util.json.JSONArray;
@@ -13,6 +14,7 @@ import com.somle.framework.common.util.json.JSONObject;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
+import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -44,6 +46,10 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
     public static final String QUERY_STRING_VAR_VARIANT = "variant";
     public static final String FIELD_VARIANTS = QUERY_STRING_VAR_VARIANT + "s";
     public static final String FIELD_CREATED_AT = "created_at";
+    public static final String FIELD_SKU = "sku";
+    public static final String FIELS_STATUS = "status";
+    public static final String VALUE_ACTIVE = "active";
+
 
     public ShopifyToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.SHOPIFY, shopProfileType);
@@ -83,7 +89,7 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                 shopDo.setSort(1);
                 shopDo.setStatus(ErpOffStatus.OPEN.getCode());
                 shopDo.setType(ErpShopType.ONLINE.getCode());
-                shopDo.setCountryCode(shopJson.getString(FIELD_COUNTRY));
+                shopDo.setCountryCode(getCountryDictValue(shopJson.getString(FIELD_COUNTRY)));
                 shopDo.setPlatform(SalesPlatform.SHOPIFY.name());
                 shopDo.setPlatformShopUid(shopJson.getString(FIELD_ID));
                 shopDo.setAccount(ESBConstants.VALUE_UNKNOWN);
@@ -96,6 +102,7 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
 
     @Component
     private static class ShopifyShopProductConverter extends ShopifyToErpProfileConverter<List<JSONObject>, ErpShopProductDO> {
+
 
 
 
@@ -114,10 +121,11 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                 for (JsonNode variant : variants) {
                     JSONObject variantJson = new JSONObject(variant);
                     String variantId=variantJson.getString(FIELD_ID);
+                    String sku=variantJson.getString(FIELD_SKU);
                     ErpShopProductDO productDO = new ErpShopProductDO();
                     String domain=productJson.getString(FIELD_DOMAIN);
                     productDO.setId(null);
-                    productDO.setName(productJson.getString(FIELD_TITLE)+ CharSymbols.MINUS+variantJson.getString(ShopifyToErpProfileConverter.FIELD_TITLE));
+                    productDO.setName(sku);
                     productDO.setCurrency(productJson.getString(FIELD_CURRENCY));
                     productDO.setPrice(variantJson.getBigDecimal(FIELD_PRICE));
                     productDO.setCode(null);
@@ -126,7 +134,13 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                     productDO.setListingTime(toLocalDateTime(productJson.getString(FIELD_CREATED_AT)));
 
                     productDO.setPlatformProductUid(productJson.getString(FIELD_ID)+CharSymbols.MINUS+variantId);
-                    productDO.setStatus(ErpProductListingStatus.ONLINE.getCode());
+                    String status = productJson.getString(FIELS_STATUS);
+                    if(status.equals(VALUE_ACTIVE)) {
+                        productDO.setStatus(ErpProductListingStatus.ONLINE.getCode());
+                    } else {
+                        productDO.setStatus(ErpProductListingStatus.OFFLINE.getCode());
+                    }
+
                     productDO.setShopId(null);
                     productDO.setUrl(ESBConstants.PROTOCOL_HTTPS +domain+ SUB_PATH_PRODUCTS +productJson.getString(FIELD_HANDLE)+CharSymbols.QUESTION+ QUERY_STRING_VAR_VARIANT + CharSymbols.EQ +variantId);
 

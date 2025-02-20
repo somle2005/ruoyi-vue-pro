@@ -67,12 +67,12 @@ public class AmazonShopProfileClient extends ShopProfileClient {
     public List<JSONObject> getProducts(String marketplaceId,String countryCode,String domainName) {
 
         // 开发环境启用 Mock 模拟
-        List<JSONObject> mockProducts = readMockFile(marketplaceId,countryCode);
-        if(SpringUtils.isBootInIDE()) {
-            if (mockProducts != null) {
-                return mockProducts;
-            }
-        }
+        // List<JSONObject> mockProducts = readMockFile(marketplaceId,countryCode);
+        // if(SpringUtils.isBootInIDE()) {
+        //     if (mockProducts != null) {
+        //        return mockProducts;
+        //     }
+        // }
 
         List<JSONObject> allProducts = new ArrayList<>();
         String regionCode = marketIdRegionMapping.get(marketplaceId);
@@ -84,9 +84,9 @@ public class AmazonShopProfileClient extends ShopProfileClient {
         allProducts.addAll(marketProducts);
 
         // 开发环境启用 Mock 模拟
-        if(SpringUtils.isBootInIDE()) {
-            writeMockFileIf(marketplaceId,countryCode, allProducts);
-        }
+        // if(SpringUtils.isBootInIDE()) {
+        //     writeMockFileIf(marketplaceId,countryCode, allProducts);
+        // }
         return allProducts;
     }
 
@@ -144,7 +144,7 @@ class MarketProductCollector {
     public static final String ERROR_CODE_UNAUTHORIZED = "Unauthorized";
     public static final String API_NAME_LISTING = "Listing";
     //
-    private final int limit;
+    private int limit = -1;
 
     private final AmazonSpService amazonSpService;
 
@@ -164,7 +164,7 @@ class MarketProductCollector {
         this.client = client;
         this.domainName = domainName;
         // 本机开发时只取前5条测试，线上全部
-        this.limit=-1;
+        // this.limit=SpringUtils.isBootInIDE() ? 5 : -1;
     }
 
     /**

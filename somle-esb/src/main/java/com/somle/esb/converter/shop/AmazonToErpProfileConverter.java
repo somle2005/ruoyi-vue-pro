@@ -52,9 +52,12 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
     public static final String FIELD_AMOUNT = "amount";
     public static final String FIELD_CURRENCY = "currency";
     public static final String VALUE_B2C = "B2C";
+    public static final String VALUE_UNKNOWN = "unknown";
+
     public static final String FIELD_SUMMARIES = "summaries";
     public static final String FIELD_CREATED_DATE = "createdDate";
     public static final String FIELD_MAIN_IMAGE = "mainImage";
+    public static final String AMAZON_MONGOOSE_STATUS_UNKNOWN = "mongoose_status_unknown";
 
     public AmazonToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.AMAZON, shopProfileType);
@@ -81,7 +84,7 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                 shopDo.setSort(1);
                 shopDo.setStatus(ErpOffStatus.OPEN.getCode());
                 shopDo.setType(ErpShopType.ONLINE.getCode());
-                shopDo.setCountryCode(amazonShop.getMarketplace().getCountryCode());
+                shopDo.setCountryCode(getCountryDictValue(amazonShop.getMarketplace().getCountryCode()));
                 shopDo.setPlatform(SalesPlatform.AMAZON.name());
                 shopDo.setPlatformShopUid(amazonShop.getMarketplace().getId());
                 shopDo.setAccount(ESBConstants.VALUE_UNKNOWN);
@@ -155,7 +158,11 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                             JSONObject priceJson = offerJson.getJSONObject(FIELD_PRICE);
                             if (priceJson != null) {
                                 productDO.setPrice(priceJson.getBigDecimal(FIELD_AMOUNT));
-                                productDO.setCurrency(priceJson.getString(FIELD_CURRENCY));
+                                String currency=priceJson.getString(FIELD_CURRENCY);
+                                if(AMAZON_MONGOOSE_STATUS_UNKNOWN.equals(currency)) {
+                                    currency=VALUE_UNKNOWN;
+                                }
+                                productDO.setCurrency(currency);
                             }
                         }
                     }

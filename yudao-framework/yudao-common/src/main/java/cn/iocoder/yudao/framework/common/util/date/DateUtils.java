@@ -5,6 +5,7 @@ import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.util.StrUtil;
 import lombok.extern.slf4j.Slf4j;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.*;
 import java.util.Calendar;
@@ -380,6 +381,22 @@ public class DateUtils {
         return datetime;
     }
 
+
+    public static void main(String[] args) {
+        DateUtils.parse("2023-08-15T18:58:32-07:00");
+
+        String dateStr = "2023-08-15T18:57:43-07:00";
+        // 定义日期格式
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX");
+        try {
+            // 解析字符串为 Date 对象
+            Date date = sdf.parse(dateStr);
+            System.out.println(date);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+
+    }
 
 
 }
