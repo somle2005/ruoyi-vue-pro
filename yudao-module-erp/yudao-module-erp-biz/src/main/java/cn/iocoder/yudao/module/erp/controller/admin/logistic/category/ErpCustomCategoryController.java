@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
+import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemSimpleRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryPageReqVO;
@@ -31,7 +32,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
@@ -100,21 +100,6 @@ public class ErpCustomCategoryController {
     public CommonResult<PageResult<ErpCustomCategoryRespVO>> getCustomRuleCategoryPage(@Valid ErpCustomCategoryPageReqVO pageReqVO) {
         PageResult<ErpCustomCategoryDO> pageResult = customRuleCategoryService.getCustomRuleCategoryPage(pageReqVO);
         return success(new PageResult<>(BindingResult(pageResult.getList()), pageResult.getTotal()));
-    }
-
-    @PostMapping("/import")
-    @Operation(summary = "导入模型")
-    @PreAuthorize("@ss.hasPermission('erp:custom-category:import')")
-    public CommonResult<String> importModel(@RequestParam("file") MultipartFile file,
-                                            @RequestParam(value = "updateSupport", required = false, defaultValue = "false") Boolean updateSupport) throws IOException {
-//        BpmModelCreateReqVO createReqVO = BeanUtils.toBean(importReqVO, BpmModelCreateReqVO.class);
-//        // 读取文件
-//        String bpmnXml = IoUtils.readUtf8(importReqVO.getBpmnFile().getInputStream(), false);
-//        return success(modelService.createModel(createReqVO, bpmnXml));
-//        List<UserImportExcelVO> list = ExcelUtils.read(file, UserImportExcelVO.class);
-//        return success(userService.importUserList(list, updateSupport));
-        //TODO 导入excel
-        return null;
     }
 
     @GetMapping("/export-excel")

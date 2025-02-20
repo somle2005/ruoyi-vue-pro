@@ -4,8 +4,8 @@ import cn.hutool.core.util.ObjUtil;
 import com.somle.framework.common.util.json.JSONObject;
 import com.somle.framework.common.util.json.JsonUtils;
 import com.somle.framework.common.util.web.RequestX;
-import com.somle.kingdee.model.*;
 import com.somle.framework.common.util.web.WebUtils;
+import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -14,7 +14,12 @@ import org.springframework.beans.BeanUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.*;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.TreeMap;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 import static com.somle.kingdee.util.SignatureUtils.*;
@@ -33,18 +38,26 @@ public class KingdeeClient {
         this.token = token;
     }
 
-    public KingdeeToken refreshAuth() {
-        return fillAuth(pushAuth(token));
+    /**
+     * 根据OuterInstanceId覆盖内存的KingdeeToken
+     *
+     * @return KingdeeToken
+     */
+    protected KingdeeToken refreshAuth() {
+        return fillAuth(pushAuth(token.getOuterInstanceId()));
     }
 
-    public KingdeeToken fillAuth(KingdeeToken token) {
-        token.setAppSignature(getAppSignature(token));
-        token.setAppToken(getAppToken(token));
+    private KingdeeToken fillAuth(KingdeeToken newToken) {
+        String signature = getAppSignature(newToken);
+        token.setAppSignature(signature);
+        newToken.setAppSignature(signature);//响应返回值没有签名->需要计算
+
+        token.setAppToken(getAppToken(newToken));
         log.info("tokens filled successfully");
         return token;
     }
 
-    public String getAppToken(KingdeeToken token) {
+    private String getAppToken(KingdeeToken token) {
         log.info("preparing app token");
         String appKey = token.getAppKey();
         String appSignature = token.getAppSignature();
@@ -66,8 +79,7 @@ public class KingdeeClient {
         return response.getData(JSONObject.class).getString("app-token");
     }
 
-    public KingdeeToken pushAuth(KingdeeToken token) {
-        String outerInstanceId = token.getOuterInstanceId();
+    private KingdeeToken pushAuth(String outerInstanceId) {
         String reqMtd = "POST";
         String ctime = String.valueOf(System.currentTimeMillis());
         String endUrl = "/jdyconnector/app_management/push_app_authorize";
@@ -113,11 +125,29 @@ public class KingdeeClient {
         return response;
     }
 
-    public KingdeeUnit getMeasureUnitByNumber(String number) {
-        String endUrl = "/jdy/v2/bd/measure_unit_detail";
-        TreeMap<String, String> params = new TreeMap<>();
-        params.put("number", number);
-        return getResponse(endUrl, params).getData(KingdeeUnit.class);
+    /**
+     * 安全设置单位id，如果它存在。
+     * @param unitName 单位名称
+     * @param setter 回调函数
+     */
+    private void setUnitId(String unitName, Consumer<KingdeeUnit> setter) {
+        getMeasureUnitByNumber(unitName, (kingdeeUnit, e) -> {
+            if (e == null) {
+                setter.accept(kingdeeUnit);
+            }
+        });
+    }
+    public void getMeasureUnitByNumber(String number, BiConsumer<KingdeeUnit, Exception> callback) {
+        try {
+            String endUrl = "/jdy/v2/bd/measure_unit_detail";
+            TreeMap<String, String> params = new TreeMap<>();
+            params.put("number", number);
+            KingdeeUnit kingdeeUnit = getResponse(endUrl, params).getData(KingdeeUnit.class);
+            callback.accept(kingdeeUnit, null);
+        } catch (Exception e) {
+            log.debug("getMeasureUnitByNumber error,当前产品的单位也许不存在。", e);
+            callback.accept(null, e);
+        }
     }
 
     public KingdeeResponse getMaterial(String number) {
@@ -128,48 +158,56 @@ public class KingdeeClient {
         return response;
     }
 
-    public KingdeeResponse addProduct(KingdeeProduct product) {
-        KingdeeProduct kingdeeProductCopy = new KingdeeProduct();
-        BeanUtils.copyProperties(product, kingdeeProductCopy);
+    public KingdeeResponse addProduct(KingdeeProductSaveReqVO product) {
+        KingdeeProductSaveReqVO reqVO = new KingdeeProductSaveReqVO();
+        BeanUtils.copyProperties(product, reqVO);
         try {
-            String id = getMaterial(kingdeeProductCopy.getNumber()).getData(JSONObject.class).getString("id");
-            kingdeeProductCopy.setId(id);
+            String id = getMaterial(reqVO.getNumber()).getData(JSONObject.class).getString("id");
+            reqVO.setId(id);
         } catch (Exception e) {
-            log.debug("id not found for " + kingdeeProductCopy.getNumber() + "adding new");
+            log.debug("id not found for ({}) adding new", reqVO.getNumber());
         }
-
-        kingdeeProductCopy.setVolumeUnitId(getMeasureUnitByNumber("立方厘米").getId());
-        kingdeeProductCopy.setWeightUnitId(getMeasureUnitByNumber("kg").getId());
-        kingdeeProductCopy.setBaseUnitId(getMeasureUnitByNumber("套").getId());
-        kingdeeProductCopy.setCustomField(
-            getCustomFieldByDisplayName("bd_material", "部门"),
-            getAuxInfoByNumber(kingdeeProductCopy.getSaleDepartmentId().toString()).getId()
-        );
-        setCustomFieldSafely(kingdeeProductCopy, "报关品名", kingdeeProductCopy.getDeclaredTypeZh());
-        setCustomFieldSafely(kingdeeProductCopy, "报关品名(英文)", kingdeeProductCopy.getDeclaredTypeEn());
+        setUnitId("立方厘米", kingdeeUnit -> reqVO.setVolumeUnitId(kingdeeUnit.getId()));
+        setUnitId("kg", kingdeeUnit -> reqVO.setWeightUnitId(kingdeeUnit.getId()));
+        setUnitId("套", kingdeeUnit -> reqVO.setBaseUnitId(kingdeeUnit.getId()));
+        try {
+            Optional.ofNullable(getAuxInfoByNumber(reqVO.getSaleDepartmentId().toString()))
+                .ifPresent(kingdeeUnit ->
+                    setCustomFieldSafely(reqVO, "部门", kingdeeUnit.getId())
+                );
+        } catch (Exception e) {
+            log.debug("getAuxInfoByNumber error for sale department ID: {}", reqVO.getSaleDepartmentId(), e);
+        }
+        setCustomFieldSafely(reqVO, "部门", reqVO.getDeclaredTypeZh());
+        setCustomFieldSafely(reqVO, "报关品名", reqVO.getDeclaredTypeZh());
+        setCustomFieldSafely(reqVO, "报关品名(英文)", reqVO.getDeclaredTypeEn());
+        reqVO.setIgnoreWarn(true);//保存覆盖已存在产品
         log.debug("adding product");
         String endUrl = "/jdy/v2/bd/material";
         TreeMap<String, String> params = new TreeMap<>();
-        KingdeeResponse response = postResponse(endUrl, params, kingdeeProductCopy);
-        return response;
+        return postResponse(endUrl, params, reqVO);
     }
+
+
 
     /**
      * 根绝字段名称获取id，如果有该字段、则设置value，没有就日志记录
-     * @param kingdeeProductCopy 对象
+     *
+     * @param reqVO       对象
      * @param displayName 属性名称
-     * @param fieldValue 属性值
+     * @param fieldValue  属性值
      */
-    private void setCustomFieldSafely(KingdeeProduct kingdeeProductCopy, String displayName, String fieldValue) {
+    private void setCustomFieldSafely(KingdeeProductSaveReqVO reqVO, String displayName, String fieldValue) {
         try {
             KingdeeCustomField customField = getCustomFieldByDisplayName("bd_material", displayName);
             if (customField != null) {
-                kingdeeProductCopy.setCustomField(customField, fieldValue);
+                reqVO.setCustomField(customField, fieldValue);
             }
         } catch (Exception e) {
             log.debug("custom field " + displayName + " skipped for " + token.getAccountName(), e);
         }
     }
+
     public KingdeeResponse addSupplier(KingdeeSupplier kingdeeSupplier) {
         KingdeeSupplier supplierCopy = new KingdeeSupplier();
         BeanUtils.copyProperties(kingdeeSupplier, supplierCopy);

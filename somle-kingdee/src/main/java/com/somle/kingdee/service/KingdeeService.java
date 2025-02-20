@@ -2,7 +2,7 @@ package com.somle.kingdee.service;
 
 
 import com.somle.kingdee.model.KingdeeAuxInfoDetail;
-import com.somle.kingdee.model.KingdeeProduct;
+import com.somle.kingdee.model.KingdeeProductSaveReqVO;
 import com.somle.kingdee.model.KingdeeToken;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
 import com.somle.kingdee.repository.KingdeeTokenRepository;
@@ -29,12 +29,12 @@ public class KingdeeService {
     @Autowired
     private KingdeeTokenRepository tokenRepository;
 
-    private List<KingdeeClient> clientList;
+    private List<KingdeeClient> clients;
 
     @PostConstruct
     public void init() {
         // clientList = tokenRepository.findAll().stream().map(n->new KingdeeClient(n)).toList();
-        clientList = outerInstanceIds.stream()
+        clients = outerInstanceIds.stream()
             .map(n -> new KingdeeClient(tokenRepository.findByOuterInstanceId(n)))
             .toList();
     }
@@ -46,10 +46,9 @@ public class KingdeeService {
 
     @Scheduled(cron = "0 0 * * * *")
     public boolean refreshAuths() {
-        return clientList.parallelStream()
-            .map(n->n.refreshAuth())
-            .map(n->saveToken(n))
-            .allMatch(n->n==true);
+        return clients.parallelStream()
+            .map(KingdeeClient::refreshAuth)
+            .allMatch(this::saveToken);
     }
 
     public boolean saveToken(KingdeeToken token) {
@@ -66,16 +65,16 @@ public class KingdeeService {
 
 
     public void addDepartment(KingdeeAuxInfoDetail department) {
-        clientList.parallelStream().forEach(n-> n.addDepartment(department));
+        clients.parallelStream().forEach(n-> n.addDepartment(department));
     }
 
 
-    public void addProduct(KingdeeProduct product) {
-        clientList.parallelStream().forEach(n-> n.addProduct(product));
+    public void addProduct(KingdeeProductSaveReqVO product) {
+        clients.parallelStream().forEach(n-> n.addProduct(product));
     }
 
     public void addSupplier(KingdeeSupplier kingdeeSupplier) {
-        clientList.parallelStream().forEach(n-> n.addSupplier(kingdeeSupplier));
+        clients.parallelStream().forEach(n-> n.addSupplier(kingdeeSupplier));
     }
 
     /**

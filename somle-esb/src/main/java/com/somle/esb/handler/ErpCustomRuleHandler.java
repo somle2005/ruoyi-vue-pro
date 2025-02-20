@@ -1,5 +1,6 @@
 package com.somle.esb.handler;
 
+import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.service.purchase.ErpSupplierProductService;
@@ -8,7 +9,7 @@ import com.somle.eccang.model.EccangProduct;
 import com.somle.eccang.service.EccangService;
 import com.somle.esb.converter.ErpToEccangConverter;
 import com.somle.esb.converter.ErpToKingdeeConverter;
-import com.somle.kingdee.model.KingdeeProduct;
+import com.somle.kingdee.model.KingdeeProductSaveReqVO;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,7 +29,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
  */
 @Slf4j
 @Component
-@Profile("!dev & !test")
+@Profile("prod")
 @RequiredArgsConstructor
 public class ErpCustomRuleHandler {
 
@@ -68,11 +69,11 @@ public class ErpCustomRuleHandler {
     @ServiceActivator(inputChannel = "erpCustomRuleChannel")
     public void syncCustomRulesToKingdee(@Payload List<ErpCustomRuleDTO> customRules) {
         log.debug("syncCustomRuleToKingdee");
-        List<KingdeeProduct> kingdee = erpToKingdeeConverter.convert(processRules(customRules));
-        for (KingdeeProduct kingdeeProduct : kingdee) {
-            kingdeeService.addProduct(kingdeeProduct);
+        List<KingdeeProductSaveReqVO> kingdee = erpToKingdeeConverter.convert(processRules(customRules));
+        for (KingdeeProductSaveReqVO reqVO : kingdee) {
+            kingdeeService.addProduct(reqVO);
         }
-        log.info("syncCustomRuleToKingdee end,skus={{}}}", kingdee.stream().map(KingdeeProduct::getNumber).toList());
+        log.info("syncCustomRuleToKingdee end,skus={{}}}", kingdee.stream().map(KingdeeProductSaveReqVO::getNumber).toList());
     }
 
 
@@ -86,7 +87,7 @@ public class ErpCustomRuleHandler {
         CopyOnWriteArrayList<ErpCustomRuleDTO> processedRules = new CopyOnWriteArrayList<>(customRules);
         customRules.stream()
             .filter(customRule -> customRule.getCountryCode() != null)
-            .forEach(customRule -> Optional.ofNullable(dictDataApi.parseDictData("country_code", "CN"))
+            .forEach(customRule -> Optional.ofNullable(dictDataApi.parseDictData(DictTypeConstants.COUNTRY_CODE, "CN"))
                 .flatMap(dictDataRespDTO -> Optional.ofNullable(dictDataRespDTO.getValue()))
                 .ifPresent(value -> {
                     Integer countryCode = Integer.valueOf(value);
