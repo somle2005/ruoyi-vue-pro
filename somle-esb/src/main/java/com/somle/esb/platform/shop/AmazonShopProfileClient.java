@@ -164,7 +164,7 @@ class MarketProductCollector {
         this.client = client;
         this.domainName = domainName;
         // 本机开发时只取前5条测试，线上全部
-        this.limit=SpringUtils.isBootInIDE()? 5 : -1;
+        this.limit=-1;
     }
 
     /**
@@ -178,16 +178,16 @@ class MarketProductCollector {
         // 采集 Listing 数据
         collectAllListingItems();
         // 采集 Catalog 数据
-        if (!allListingItemMap.isEmpty()) {
-            collectAllCatalogItems();
-        }
+//        if (!allListingItemMap.isEmpty()) {
+//            collectAllCatalogItems();
+//        }
 
         // 取数完毕后,装配数据并返回
         List<JSONObject> allProducts = new ArrayList<>();
         for (Map.Entry<String, JSONObject> entry : allListingItemMap.entrySet()) {
-            JSONObject catalog = allCatalogItemMap.get(entry.getKey());
+            // JSONObject catalog = allCatalogItemMap.get(entry.getKey());
             JSONObject listingItem = entry.getValue();
-            listingItem.put(AmazonToErpProfileConverter.FIELD_CATALOG, catalog);
+            // listingItem.put(AmazonToErpProfileConverter.FIELD_CATALOG, catalog);
             listingItem.put(AmazonToErpProfileConverter.FIELD_MARKETPLACE_ID, this.marketplaceId);
             listingItem.put(AmazonToErpProfileConverter.FIELD_DOMAIN_NAME, this.domainName);
             listingItem.put(AmazonToErpProfileConverter.FIELD_CLIENT_ID, this.client.getAuth().getClientId());
@@ -357,7 +357,7 @@ class MarketProductCollector {
             .pageSize(20)
             .pageToken(pageToken)
             .marketplaceIds(List.of(marketplaceId))
-            .includedData(List.of(AmazonSpListingReqVO.IncludedData.OFFERS, AmazonSpListingReqVO.IncludedData.ATTRIBUTES))
+            .includedData(List.of(AmazonSpListingReqVO.IncludedData.OFFERS, AmazonSpListingReqVO.IncludedData.ATTRIBUTES,AmazonSpListingReqVO.IncludedData.SUMMARIES))
             .build();
         var bodyString = client.searchListingsItems(reqVO);
         JSONObject result = JsonUtils.parseObject(bodyString, JSONObject.class);

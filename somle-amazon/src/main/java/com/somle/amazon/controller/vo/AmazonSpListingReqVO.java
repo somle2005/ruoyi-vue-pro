@@ -70,6 +70,15 @@ public class AmazonSpListingReqVO {
         PRODUCT_TYPES
     }
 
+
+    public String getIncludedData() {
+        StringBuilder builder=new StringBuilder();
+        for (IncludedData includedDatum : includedData) {
+            builder.append(includedDatum.name().toLowerCase()+",");
+        }
+        return  builder.toString();
+    }
+
     public enum IdentifiersType {
         ASIN, SKU, UPC
     }

@@ -42,7 +42,10 @@ public class ErpShopProductDO extends TenantBaseDO {
      */
     private String name;
 
-
+    /**
+     * 上架时间
+     **/
+    private LocalDateTime listingTime;
     /**
      * 价格
      **/

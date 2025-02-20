@@ -9,6 +9,9 @@ import java.time.LocalDateTime;
 import java.time.LocalDateTime;
 import com.baomidou.mybatisplus.annotation.*;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
  * ERP 店铺 DO
@@ -48,6 +51,11 @@ public class ErpShopDO extends TenantBaseDO {
      * 店铺域名
      **/
     private String domainName;
+
+    /**
+     * 开店时间
+     **/
+    private LocalDateTime openTime;
     /**
      * 备注
      */

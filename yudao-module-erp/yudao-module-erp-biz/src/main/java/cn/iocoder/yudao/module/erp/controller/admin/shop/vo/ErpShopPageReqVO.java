@@ -28,6 +28,10 @@ public class ErpShopPageReqVO extends PageParam {
     @Schema(description = "开启状态", example = "1")
     private Integer status;
 
+    @Schema(description = "开店时间")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    private LocalDateTime[] openTime;
+
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;

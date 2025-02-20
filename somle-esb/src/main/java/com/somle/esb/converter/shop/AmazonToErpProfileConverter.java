@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
+import cn.iocoder.yudao.module.erp.enums.ErpProductListingStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.amazon.controller.vo.AmazonSpMarketplaceParticipationVO;
@@ -51,6 +52,9 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
     public static final String FIELD_AMOUNT = "amount";
     public static final String FIELD_CURRENCY = "currency";
     public static final String VALUE_B2C = "B2C";
+    public static final String FIELD_SUMMARIES = "summaries";
+    public static final String FIELD_CREATED_DATE = "createdDate";
+    public static final String FIELD_MAIN_IMAGE = "mainImage";
 
     public AmazonToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.AMAZON, shopProfileType);
@@ -107,24 +111,40 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
 
                 String sku=product.getString(FIELD_SKU);
                 String domainName=product.getString(FIELD_DOMAIN_NAME);
-                JSONObject catalog = product.getJSONObject(FIELD_CATALOG);
+                // JSONObject catalog = product.getJSONObject(FIELD_CATALOG);
+                JSONArray summaries=product.getJSONArray(FIELD_SUMMARIES);
+
                 String asin= ESBConstants.VALUE_NONE;
                 String imageUrl=ESBConstants.VALUE_NONE;
-                if(catalog!=null) {
-                    asin=catalog.getString(FIELD_ASIN);
-                    JSONArray images=catalog.getJSONArray(FIELD_IMAGES);
-                    if(!CollectionUtils.isEmpty(images)) {
-                        JSONObject marketplaceJSON=images.getJSONObject(0);
-                        JSONArray marketplaceImages=marketplaceJSON.getJSONArray(FIELD_IMAGES);
-                        if(!CollectionUtils.isEmpty(marketplaceImages)) {
-                            imageUrl =marketplaceImages.getJSONObject(0).getString(FIELD_LINK);
-                        }
-                    }
-                }
+//                if(catalog!=null) {
+//                    asin=catalog.getString(FIELD_ASIN);
+//                    JSONArray images=catalog.getJSONArray(FIELD_IMAGES);
+//                    if(!CollectionUtils.isEmpty(images)) {
+//                        JSONObject marketplaceJSON=images.getJSONObject(0);
+//                        JSONArray marketplaceImages=marketplaceJSON.getJSONArray(FIELD_IMAGES);
+//                        if(!CollectionUtils.isEmpty(marketplaceImages)) {
+//                            imageUrl =marketplaceImages.getJSONObject(0).getString(FIELD_LINK);
+//                        }
+//                    }
+//                }
+
+
+
 
                 ErpShopProductDO productDO = new ErpShopProductDO();
                 productDO.setId(null);
                 productDO.setName(sku);
+
+                if(summaries!=null && !summaries.isEmpty()) {
+                    JSONObject summary=summaries.getJSONObject(0);
+                    productDO.setListingTime(summary.getLocalDateTime(FIELD_CREATED_DATE));
+                    asin=summary.getString(FIELD_ASIN);
+                    JSONObject mainImage=summary.getJSONObject(FIELD_MAIN_IMAGE);
+                    if(mainImage!=null) {
+                        imageUrl=mainImage.getString(FIELD_LINK);
+                    }
+                }
+
 
                 JSONArray offers=product.getJSONArray(FIELD_OFFERS);
                 if(!CollectionUtils.isEmpty(offers)) {
@@ -145,10 +165,13 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
 
                 productDO.setPlatformProductUid(sku+ CharSymbols.NU+asin);
 
-                productDO.setStatus(ErpOffStatus.OPEN.getCode());
+                productDO.setStatus(ErpProductListingStatus.ONLINE.getCode());
                 productDO.setShopId(null);
                 productDO.setUrl(ESBConstants.PROTOCOL_HTTPS +domainName+ SUB_PATH_DP +asin);
                 productDO.setImage(imageUrl);
+
+
+
 
                 productList.add(productDO);
             }

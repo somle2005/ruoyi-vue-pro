@@ -73,7 +73,10 @@ class AmazonSpClientTest extends BaseSpringTest {
             .pageSize(10)
             //.marketplaceIds(List.of(AmazonCountry.findByCode("MX").getMarketplaceId()))
             .marketplaceIds(List.of(country.getMarketplaceId()))
-            .includedData(List.of(AmazonSpListingReqVO.IncludedData.OFFERS,AmazonSpListingReqVO.IncludedData.ATTRIBUTES))
+            .includedData(List.of(AmazonSpListingReqVO.IncludedData.OFFERS,AmazonSpListingReqVO.IncludedData.ATTRIBUTES,AmazonSpListingReqVO.IncludedData.SUMMARIES
+                // AmazonSpListingReqVO.IncludedData.FULFILLMENT_AVAILABILITY,AmazonSpListingReqVO.IncludedData.ISSUES,AmazonSpListingReqVO.IncludedData.PROCUREMENT,
+                // AmazonSpListingReqVO.IncludedData.PRODUCT_TYPES //,AmazonSpListingReqVO.IncludedData.RELATIONSHIPS
+            ))
             .build();
         var listing = client.searchListingsItems(reqVO);
         log.info(listing);

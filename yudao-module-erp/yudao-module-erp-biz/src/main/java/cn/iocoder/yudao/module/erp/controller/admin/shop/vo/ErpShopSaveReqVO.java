@@ -7,8 +7,13 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import com.somle.framework.common.model.ValidationGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+
+import java.time.LocalDateTime;
 import java.util.*;
 import jakarta.validation.constraints.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
+import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 @Schema(description = "管理后台 - ERP 店铺新增/修改 Request VO")
 @Data
@@ -40,6 +45,10 @@ public class ErpShopSaveReqVO {
     @NotNull(message = "开启状态不能为空")
     @InEnum(ErpOffStatus.class)
     private Integer status;
+
+    @Schema(description = "开店时间")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    private LocalDateTime openTime;
 
     @Schema(description = "排序")
     private Integer sort;

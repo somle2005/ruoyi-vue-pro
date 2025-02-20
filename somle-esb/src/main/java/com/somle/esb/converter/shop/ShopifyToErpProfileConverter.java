@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
+import cn.iocoder.yudao.module.erp.enums.ErpProductListingStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.esb.enums.ESBConstants;
@@ -14,6 +15,9 @@ import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
 import org.springframework.stereotype.Component;
 
+import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,9 +43,20 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
     public static final String FIELD_PRICE = "price";
     public static final String QUERY_STRING_VAR_VARIANT = "variant";
     public static final String FIELD_VARIANTS = QUERY_STRING_VAR_VARIANT + "s";
+    public static final String FIELD_CREATED_AT = "created_at";
 
     public ShopifyToErpProfileConverter(ShopProfileType shopProfileType) {
         super(SalesPlatform.SHOPIFY, shopProfileType);
+    }
+
+    public static LocalDateTime toLocalDateTime(String dateStr) {
+
+        DateTimeFormatter formatter = DateTimeFormatter.ISO_OFFSET_DATE_TIME;
+        // 解析字符串为 ZonedDateTime 对象
+        ZonedDateTime zonedDateTime = ZonedDateTime.parse(dateStr, formatter);
+        // 将 ZonedDateTime 转换为 Date 对象
+        return zonedDateTime.toLocalDateTime();
+
     }
 
     @Component
@@ -64,6 +79,7 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                 shopDo.setName(shopJson.getString(FIELD_NAME));
                 shopDo.setRemark(null);
                 shopDo.setDomainName(domain);
+                shopDo.setOpenTime(toLocalDateTime(shopJson.getString(FIELD_CREATED_AT)));
                 shopDo.setSort(1);
                 shopDo.setStatus(ErpOffStatus.OPEN.getCode());
                 shopDo.setType(ErpShopType.ONLINE.getCode());
@@ -106,8 +122,11 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                     productDO.setPrice(variantJson.getBigDecimal(FIELD_PRICE));
                     productDO.setCode(null);
                     productDO.setRemark(null);
+
+                    productDO.setListingTime(toLocalDateTime(productJson.getString(FIELD_CREATED_AT)));
+
                     productDO.setPlatformProductUid(productJson.getString(FIELD_ID)+CharSymbols.MINUS+variantId);
-                    productDO.setStatus(ErpOffStatus.OPEN.getCode());
+                    productDO.setStatus(ErpProductListingStatus.ONLINE.getCode());
                     productDO.setShopId(null);
                     productDO.setUrl(ESBConstants.PROTOCOL_HTTPS +domain+ SUB_PATH_PRODUCTS +productJson.getString(FIELD_HANDLE)+CharSymbols.QUESTION+ QUERY_STRING_VAR_VARIANT + CharSymbols.EQ +variantId);
 
@@ -125,6 +144,8 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
 
             return productList;
         }
+
+
 
     }
 

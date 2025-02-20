@@ -37,21 +37,11 @@ public interface ErpShopProductMapper extends BaseMapperX<ErpShopProductDO> {
             .innerJoin(ErpShopDO.class, ErpShopDO::getId, ErpShopProductDO::getShopId)  // 连接店铺表
             .likeIfExists(ErpShopDO::getName, reqVO.getShopName())
             .likeIfExists(ErpShopDO::getPlatform, reqVO.getPlatform())
+            .likeIfExists(ErpShopDO::getAccount, reqVO.getAccount())
             ;
 
         return selectJoinPage(reqVO, ErpShopProductDO.class, query);
 
-
-
-//        return selectPage(reqVO, new LambdaQueryWrapperX<ErpShopProductDO>()
-//                .likeIfPresent(ErpShopProductDO::getName, reqVO.getName())
-//                .eqIfPresent(ErpShopProductDO::getCode, reqVO.getCode())
-//                .eqIfPresent(ErpShopProductDO::getRemark, reqVO.getRemark())
-//                .eqIfPresent(ErpShopProductDO::getStatus, reqVO.getStatus())
-//                .betweenIfPresent(ErpShopProductDO::getCreateTime, reqVO.getCreateTime())
-//                .eqIfPresent(ErpShopProductDO::getUrl, reqVO.getUrl())
-//                .eqIfPresent(ErpShopProductDO::getShopId, reqVO.getShopId())
-//                .orderByDesc(ErpShopProductDO::getId));
     }
 
 }

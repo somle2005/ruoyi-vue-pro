@@ -1,5 +1,7 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo;
 
+import cn.iocoder.yudao.framework.common.validation.InEnum;
+import cn.iocoder.yudao.module.erp.enums.ErpProductListingStatus;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -26,6 +28,9 @@ public class ErpShopProductPageReqVO extends PageParam {
     @Schema(description = "平台", example = "赵六")
     private String platform;
 
+    @Schema(description = "店铺别名", example = "店铺别名")
+    private String account;
+
     @Schema(description = "店铺ID")
     private Long shopId;
 
@@ -42,7 +47,12 @@ public class ErpShopProductPageReqVO extends PageParam {
     private String remark;
 
     @Schema(description = "开启状态", example = "1")
+    @InEnum(ErpProductListingStatus.class)
     private Integer status;
+
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    @Schema(description = "上架时间", example = "")
+    private LocalDateTime[] listingTime;
 
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)

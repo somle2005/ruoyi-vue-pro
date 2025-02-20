@@ -57,6 +57,7 @@ public class ErpShopController {
         if(StrUtils.isEmpty(createReqVO.getDomainName())) {
             createReqVO.setDomainName("https://");
         }
+        // 不允许用户删除在线店铺
         if(type==ErpShopType.ONLINE) {
             return error(SHOP_CAN_NOT_CREATE_ONLINE_SHOP);
         }
@@ -77,10 +78,16 @@ public class ErpShopController {
         if(StrUtils.isEmpty(updateReqVO.getDomainName())) {
             updateReqVO.setDomainName("https://");
         }
+        // 不允许用户将线上店铺变更为线下店铺
         ErpShopType typeInDB=ErpShopType.fromCode(shopInDB.getType());
         ErpShopType typeFromRequest=ErpShopType.fromCode(updateReqVO.getType());
         if(typeFromRequest==ErpShopType.ONLINE && typeFromRequest!=typeInDB) {
             return error(SHOP_CAN_NOT_UPDATE_ONLINE_SHOP);
+        }
+
+        // 如果是线上店铺，不允许修改指定字段
+        if(typeInDB==ErpShopType.ONLINE) {
+            // 后期看业务需求再行完善
         }
 
         shopService.updateShop(updateReqVO);
@@ -96,6 +103,7 @@ public class ErpShopController {
         if(shop==null) {
             return error(SHOP_NOT_EXISTS);
         }
+        // 不允许用户删除在线店铺
         ErpShopType shopType = ErpShopType.fromCode(shop.getType());
         if(shopType==ErpShopType.ONLINE) {
             return error(SHOP_NOT_ALLOW_DELETE);

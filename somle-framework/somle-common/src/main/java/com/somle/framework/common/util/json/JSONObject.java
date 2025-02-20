@@ -2,6 +2,7 @@ package com.somle.framework.common.util.json;
 
 
 
+import cn.iocoder.yudao.framework.common.util.date.DateUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.JsonNodeFactory;
@@ -10,10 +11,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -122,6 +123,19 @@ public class JSONObject extends ObjectNode{
 
     private void test(String fieldName) {
         this.get(1);
+    }
+
+    public Date getDate(String fieldName) {
+        String value=this.getString(fieldName);
+        return DateUtils.parse(value);
+    }
+
+    public LocalDateTime getLocalDateTime(String fieldName) {
+        Date date=this.getDate(fieldName);
+        if(date==null)  return null;
+        Instant instant = date.toInstant();
+        ZoneId zoneId = ZoneId.systemDefault();
+        return instant.atZone(zoneId).toLocalDateTime();
     }
 //    public JSONObject(ObjectNode node) {
 //        this.setAll(node);

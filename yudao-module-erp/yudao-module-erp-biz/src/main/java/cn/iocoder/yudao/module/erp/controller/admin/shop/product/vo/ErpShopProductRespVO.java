@@ -11,6 +11,8 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import com.alibaba.excel.annotation.*;
 
+import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
+
 @Schema(description = "管理后台 - ERP 店铺产品 Response VO")
 @Data
 @ExcelIgnoreUnannotated
@@ -36,6 +38,10 @@ public class ErpShopProductRespVO {
     @Schema(description = "币种")
     @ExcelProperty("币种")
     private String currency;
+
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    @Schema(description = "上架时间", example = "")
+    private LocalDateTime listingTime;
 
     @Schema(description = "主图链接", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://")
     @ExcelProperty("主图链接")

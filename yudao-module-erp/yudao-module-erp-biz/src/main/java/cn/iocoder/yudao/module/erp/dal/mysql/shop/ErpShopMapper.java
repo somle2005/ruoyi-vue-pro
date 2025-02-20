@@ -25,7 +25,7 @@ public interface ErpShopMapper extends BaseMapperX<ErpShopDO> {
                 .betweenIfPresent(ErpShopDO::getCreateTime, reqVO.getCreateTime())
                 .eqIfPresent(ErpShopDO::getType, reqVO.getType())
                 .eqIfPresent(ErpShopDO::getPlatform, reqVO.getPlatform())
-                .eqIfPresent(ErpShopDO::getAccount, reqVO.getAccount())
+                .likeIfPresent(ErpShopDO::getAccount, reqVO.getAccount())
                 .orderByDesc(ErpShopDO::getId));
     }
 
@@ -37,7 +37,7 @@ public interface ErpShopMapper extends BaseMapperX<ErpShopDO> {
             .betweenIfPresent(ErpShopDO::getCreateTime, reqVO.getCreateTime())
             .eqIfPresent(ErpShopDO::getType, reqVO.getType())
             .eqIfPresent(ErpShopDO::getPlatform, reqVO.getPlatform())
-            .eqIfPresent(ErpShopDO::getAccount, reqVO.getAccount())
+            .likeIfPresent(ErpShopDO::getAccount, reqVO.getAccount())
             .orderByDesc(ErpShopDO::getId));
     }
 
