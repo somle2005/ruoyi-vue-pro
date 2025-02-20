@@ -40,11 +40,11 @@ public class ErpCustomRuleDO extends BaseDO {
     /**
      * 申报品名（英文）
      */
-    private String declaredTypeEn;
+//    private String declaredTypeEn;
     /**
      * 申报品名
      */
-    private String declaredType;
+//    private String declaredType;
     /**
      * 申报金额
      */
@@ -56,7 +56,7 @@ public class ErpCustomRuleDO extends BaseDO {
     /**
      * 税率
      */
-    private BigDecimal taxRate;
+//    private BigDecimal taxRate;
     /**
      * hs编码
      */
