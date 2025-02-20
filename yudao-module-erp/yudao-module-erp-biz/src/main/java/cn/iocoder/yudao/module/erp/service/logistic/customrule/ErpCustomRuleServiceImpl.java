@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.service.logistic.customrule;
 
+import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
@@ -9,6 +10,8 @@ import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCu
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRuleSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule.ErpCustomRuleDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.customrule.ErpCustomRuleMapper;
+import cn.iocoder.yudao.module.erp.enums.ErpDictTypeConstants;
+import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +21,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_INSERT_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
@@ -36,11 +41,13 @@ import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.NO_REPEAT_OF_
 @Validated
 public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
     @Resource
-    private MessageChannel erpCustomRuleChannel;
-    @Resource
     ErpCustomRuleMapper customRuleMapper;
     @Autowired
     ErpCustomRuleApi erpCustomRuleApi;
+    @Resource
+    private MessageChannel erpCustomRuleChannel;
+    @Autowired
+    private DictDataApi dictDataApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -115,4 +122,12 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         }
     }
 
+    private void baseValidator(ErpCustomRuleSaveReqVO vo) {
+        //国编
+        Optional.ofNullable(vo.getCountryCode()).ifPresent(i -> dictDataApi.validateDictDataList(DictTypeConstants.COUNTRY_CODE, Collections.singleton(String.valueOf(i))));
+        //货币
+        Optional.ofNullable(vo.getDeclaredValueCurrencyCode()).ifPresent(i -> dictDataApi.validateDictDataList(DictTypeConstants.CURRENCY_CODE, Collections.singleton(String.valueOf(i))));
+        //物流属性校验
+        Optional.ofNullable(vo.getLogisticAttribute()).ifPresent(i -> dictDataApi.validateDictDataList(ErpDictTypeConstants.ERP_LOGISTIC_ATTRIBUTE, Collections.singleton(String.valueOf(i))));
+    }
 }

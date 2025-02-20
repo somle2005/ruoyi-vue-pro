@@ -1,12 +1,21 @@
 package cn.iocoder.yudao.module.erp.service.logistic.customrule.bo;
 
+import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.Data;
+import lombok.experimental.Accessors;
+
 import java.math.BigDecimal;
 
-public class ErpCustomRuleBO {
+/**
+ * 海关规则 BO
+ */
+@Data
+public class ErpCustomRuleBO extends TenantBaseDO {
     /**
      * 海关规则id
      */
-    private Long erpCustomRuleId;
+    private Long id;
     /**
      * 国家编码
      */

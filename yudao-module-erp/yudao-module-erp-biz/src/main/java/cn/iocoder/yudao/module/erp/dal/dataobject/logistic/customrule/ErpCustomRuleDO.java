@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.dal.dataobject.logistic.customrule;
 
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -21,7 +22,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ErpCustomRuleDO extends BaseDO {
+public class ErpCustomRuleDO extends TenantBaseDO {
 
     /**
      * 海关规则id
@@ -60,7 +61,7 @@ public class ErpCustomRuleDO extends BaseDO {
     /**
      * hs编码
      */
-    private String hscode;
+//    private String hscode;
     /**
      * 物流属性
      */

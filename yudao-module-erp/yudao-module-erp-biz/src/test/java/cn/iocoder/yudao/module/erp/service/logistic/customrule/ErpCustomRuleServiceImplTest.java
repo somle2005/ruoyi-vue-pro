@@ -107,7 +107,6 @@ public class ErpCustomRuleServiceImplTest extends BaseDbUnitTest {
 //           o.setSupplierProductId(null);
             o.setDeclaredValue(null);
             o.setDeclaredValueCurrencyCode(null);
-            o.setHscode(null);
             o.setLogisticAttribute(null);
             o.setCreateTime(null);
         });
@@ -124,7 +123,6 @@ public class ErpCustomRuleServiceImplTest extends BaseDbUnitTest {
         // 测试 declaredValueCurrencyCode 不匹配
         customRuleMapper.insert(cloneIgnoreId(dbCustomRule, o -> o.setDeclaredValueCurrencyCode(null)));
         // 测试 hscode 不匹配
-        customRuleMapper.insert(cloneIgnoreId(dbCustomRule, o -> o.setHscode(null)));
         // 测试 logisticAttribute 不匹配
         customRuleMapper.insert(cloneIgnoreId(dbCustomRule, o -> o.setLogisticAttribute(null)));
         // 测试 createTime 不匹配

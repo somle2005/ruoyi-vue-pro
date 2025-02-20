@@ -22,7 +22,7 @@ public interface ErpCustomCategoryItemMapper extends BaseMapperX<ErpCustomCatego
         return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomCategoryItemDO>()
 //            .eqIfPresent(ErpCustomCategoryItemDO::getCategoryId, reqVO.getCategoryId())
             .eqIfPresent(ErpCustomCategoryItemDO::getCountryCode, reqVO.getCountryCode())
-            .eqIfPresent(ErpCustomCategoryItemDO::getHsCode, reqVO.getHsCode())
+//            .eqIfPresent(ErpCustomCategoryItemDO::getHsCode, reqVO.getHsCode())
             .eqIfPresent(ErpCustomCategoryItemDO::getTaxRate, reqVO.getTaxRate())
             .betweenIfPresent(ErpCustomCategoryItemDO::getCreateTime, reqVO.getCreateTime())
             .orderByDesc(ErpCustomCategoryItemDO::getId));
