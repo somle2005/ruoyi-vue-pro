@@ -58,7 +58,7 @@ public interface ErpCustomCategoryService {
     /**
      * 导入excel来创建主子表
      */
-    Integer importCustomRuleCategory(@Valid List<ErpCustomCategoryImportExcelVO> excelVOList);
+    List<ErpCustomCategoryImportExcelVO> importCustomRuleCategory(@Valid List<ErpCustomCategoryImportExcelVO> excelVOList);
     // ==================== 子表（海关分类子表） ====================
 
     /**

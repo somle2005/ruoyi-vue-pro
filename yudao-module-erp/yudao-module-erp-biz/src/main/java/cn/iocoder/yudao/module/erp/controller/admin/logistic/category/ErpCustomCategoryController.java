@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemSimpleRespVO;
+import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryImportExcelVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategorySaveReqVO;
@@ -23,6 +24,7 @@ import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.Parameters;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
@@ -32,6 +34,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.*;
@@ -102,20 +105,22 @@ public class ErpCustomCategoryController {
         return success(new PageResult<>(BindingResult(pageResult.getList()), pageResult.getTotal()));
     }
 
-//    @PostMapping("/import")
-//    @Operation(summary = "导入海关分类数据")
-//    @Parameters({
-//        @Parameter(name = "file", description = "Excel 文件", required = true),
-//        @Parameter(name = "updateSupport", description = "是否支持更新，默认为 false", example = "true")
-//    })
+    @PostMapping("/import")
+    @Operation(summary = "导入海关分类数据")
+    @Parameters({
+        @Parameter(name = "file", description = "Excel 文件", required = true),
+        @Parameter(name = "updateSupport", description = "是否支持更新，默认为 false", example = "true")
+    })
+//    @PreAuthorize("@ss.hasPermission('erp:custom-category:import')")
+    public CommonResult<String> importCustomRuleCategory(@RequestParam("file") MultipartFile file,
+                                                         @RequestParam(value = "updateSupport", required = false, defaultValue = "false") Boolean updateSupport) throws Exception {
+        List<ErpCustomCategoryImportExcelVO> list = ExcelUtils.read(file, ErpCustomCategoryImportExcelVO.class);
+        customRuleCategoryService.importCustomRuleCategory(list);
+//        List<ErpCustomCategoryDO> list = ExcelUtils.read(file, ErpCustomCategoryDO.class);
+//        customRuleCategoryService.createCustomRuleCategoryList(list);
+        return success("导入成功");
+    }
 
-    /// /    @PreAuthorize("@ss.hasPermission('erp:custom-category:import')")
-//    public CommonResult<String> importCustomRuleCategory(@RequestParam("file") MultipartFile file,
-//                                                         @RequestParam(value = "updateSupport", required = false, defaultValue = "false") Boolean updateSupport) throws Exception {
-//        List<ErpCustomCategoryImportExcelVO> list = ExcelUtils.read(file, ErpCustomCategoryImportExcelVO.class);
-//        Integer i = customRuleCategoryService.importCustomRuleCategory(list);
-//        return success(StrUtil.format("导入成功，一共 {} 条数据", i));
-//    }
     @GetMapping("/export-excel")
     @Operation(summary = "导出海关分类 Excel")
     @PreAuthorize("@ss.hasPermission('erp:custom-category:export')")
