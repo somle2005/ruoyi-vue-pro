@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.erp.dal.mysql.shop.product;
 import java.util.*;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
@@ -11,6 +12,7 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
+import jodd.util.StringUtil;
 import org.apache.ibatis.annotations.Mapper;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.*;
 
@@ -21,6 +23,8 @@ import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.*;
  */
 @Mapper
 public interface ErpShopProductMapper extends BaseMapperX<ErpShopProductDO> {
+
+    String EXISTS_SQL = "select 1 from erp_shop_product_item pi join erp_product p on p.id=pi.product_id where pi.shop_product_id=t.id and p.bar_code like {0}";
 
     default PageResult<ErpShopProductDO> selectPage(ErpShopProductPageReqVO reqVO) {
 
@@ -39,6 +43,10 @@ public interface ErpShopProductMapper extends BaseMapperX<ErpShopProductDO> {
             .likeIfExists(ErpShopDO::getPlatform, reqVO.getPlatform())
             .likeIfExists(ErpShopDO::getAccount, reqVO.getAccount())
             ;
+
+        if(!StringUtil.isBlank(reqVO.getBarCode())) {
+            query.exists(EXISTS_SQL, CharSymbols.PERCENT +reqVO.getBarCode()+CharSymbols.PERCENT);
+        }
 
         return selectJoinPage(reqVO, ErpShopProductDO.class, query);
 

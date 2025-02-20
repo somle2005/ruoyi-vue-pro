@@ -114,6 +114,9 @@ public class ErpShopProductController {
         Map<Long,ErpShopRespVO> shopVoMap = erpShopService.getShopMapByIds(shopIds);
         // 装配对象
         StreamX.from(pageResultVO.getList()).assemble(shopVoMap,ErpShopProductRespVO::getShopId, ErpShopProductRespVO::setShop);
+        List<Long> productIds=StreamX.from(pageResultVO.getList()).toList(ErpShopProductRespVO::getId);
+        Map<Long,List<ErpShopProductItemRespVO>> itemsGroup=shopProductService.getItemGroupMap(productIds);
+        StreamX.from(pageResultVO.getList()).assemble(itemsGroup,ErpShopProductRespVO::getId, ErpShopProductRespVO::setItems);
         //
         return success(pageResultVO);
     }

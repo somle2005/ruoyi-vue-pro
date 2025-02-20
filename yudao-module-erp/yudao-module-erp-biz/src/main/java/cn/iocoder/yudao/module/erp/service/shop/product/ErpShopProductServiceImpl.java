@@ -9,6 +9,7 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
 import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
 import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
+import com.somle.framework.common.util.collection.CollectionUtils;
 import com.somle.framework.common.util.collection.StreamX;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
@@ -125,6 +126,20 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
         StreamX.from(itemRespVOS).assemble(simpleProductList,ErpProductRespSimpleVO::getId,ErpShopProductItemRespVO::getProductId,ErpShopProductItemRespVO::setProduct);
         respVO.setItems(itemRespVOS);
         return respVO;
+    }
+
+    @Override
+    public Map<Long, List<ErpShopProductItemRespVO>> getItemGroupMap(List<Long> productIds) {
+        if(CollectionUtils.isEmpty(productIds)) {
+            return Map.of();
+        }
+        List<ErpShopProductItemDO> itemsInDB=shopProductItemService.getShopProductItemsByProductIds(productIds);
+        List<ErpShopProductItemRespVO> respItemsVOs=BeanUtils.toBean(itemsInDB, ErpShopProductItemRespVO.class);
+        List<ErpProductRespVO> productList= productService.getProductVOList(StreamX.from(itemsInDB).map(ErpShopProductItemDO::getProductId).toList());
+        Map<Long,ErpProductRespSimpleVO> productMap=StreamX.from(productList).toMap(ErpProductRespVO::getId,t->BeanUtils.toBean(t, ErpProductRespSimpleVO.class));
+        StreamX.from(respItemsVOs).assemble(productMap,ErpShopProductItemRespVO::getProductId,ErpShopProductItemRespVO::setProduct);
+        Map<Long,List<ErpShopProductItemRespVO>> itemsGroup=StreamX.from(respItemsVOs).groupBy(ErpShopProductItemRespVO::getShopProductId);
+        return itemsGroup;
     }
 
     @Override

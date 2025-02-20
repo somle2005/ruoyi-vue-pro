@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.erp.service.shop.product.item;
 
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
+import com.somle.framework.common.util.collection.CollectionUtils;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -76,6 +77,14 @@ public class ErpShopProductItemServiceImpl implements ErpShopProductItemService 
     @Override
     public List<ErpShopProductItemDO> getShopProductItemsByProductId(Long shopProductId) {
         return shopProductItemMapper.getShopProductItemsByProductId(shopProductId);
+    }
+
+    @Override
+    public List<ErpShopProductItemDO> getShopProductItemsByProductIds(List<Long> productIds) {
+        if(CollectionUtils.isEmpty(productIds)) {
+            return List.of();
+        }
+        return shopProductItemMapper.selectList(ErpShopProductItemDO::getShopProductId,productIds);
     }
 
 }

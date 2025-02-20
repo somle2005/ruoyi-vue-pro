@@ -59,4 +59,9 @@ public interface ErpShopProductItemService {
      * @return ERP 店铺产品项列表
      */
     List<ErpShopProductItemDO> getShopProductItemsByProductId(Long shopProductId);
+
+    /**
+     * 按ID集合获得全部Item
+     **/
+    List<ErpShopProductItemDO> getShopProductItemsByProductIds(List<Long> productIds);
 }

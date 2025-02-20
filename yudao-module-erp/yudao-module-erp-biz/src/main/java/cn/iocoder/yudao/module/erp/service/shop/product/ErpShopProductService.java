@@ -1,6 +1,9 @@
 package cn.iocoder.yudao.module.erp.service.shop.product;
 
 import java.util.*;
+
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespSimpleVO;
+import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import jakarta.validation.*;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
@@ -77,6 +80,8 @@ public interface ErpShopProductService {
     * @return 产品
     */
     ErpShopProductRespVO getShopProductWithItems(Long id);
+
+    Map<Long,List<ErpShopProductItemRespVO>> getItemGroupMap(List<Long> productIds);
 
     /**
      *

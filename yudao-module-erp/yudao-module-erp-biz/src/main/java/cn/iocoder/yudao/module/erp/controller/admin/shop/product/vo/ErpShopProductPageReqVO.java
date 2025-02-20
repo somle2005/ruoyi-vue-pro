@@ -43,6 +43,9 @@ public class ErpShopProductPageReqVO extends PageParam {
     @Schema(description = "币种")
     private String currency;
 
+    @Schema(description = "SKU（编码）")
+    private String barCode;
+
     @Schema(description = "备注", example = "你猜")
     private String remark;
 
