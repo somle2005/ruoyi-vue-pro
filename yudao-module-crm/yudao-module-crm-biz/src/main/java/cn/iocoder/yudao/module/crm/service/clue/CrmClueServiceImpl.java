@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.crm.service.clue;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.Assert;
+import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.crm.controller.admin.clue.vo.CrmCluePageReqVO;
@@ -12,7 +13,7 @@ import cn.iocoder.yudao.module.crm.controller.admin.customer.vo.customer.CrmCust
 import cn.iocoder.yudao.module.crm.dal.dataobject.clue.CrmClueDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.followup.CrmFollowUpRecordDO;
 import cn.iocoder.yudao.module.crm.dal.mysql.clue.CrmClueMapper;
-import cn.iocoder.yudao.module.crm.enums.DictTypeConstants;
+import cn.iocoder.yudao.module.crm.enums.CrmDictTypeConstants;
 import cn.iocoder.yudao.module.crm.enums.common.CrmBizTypeEnum;
 import cn.iocoder.yudao.module.crm.enums.permission.CrmPermissionLevelEnum;
 import cn.iocoder.yudao.module.crm.framework.permission.core.annotations.CrmPermission;
@@ -126,13 +127,13 @@ public class CrmClueServiceImpl implements CrmClueService {
             Collection<String> labelCodesAsString = reqVO.getLabelCodes().stream()
                 .map(String::valueOf)
                 .toList();
-            dictDataApi.validateDictDataList(DictTypeConstants.CRM_CLIENT_TAG, labelCodesAsString);
+            dictDataApi.validateDictDataList(CrmDictTypeConstants.CRM_CLIENT_TAG, labelCodesAsString);
         }
         if (CollUtil.isNotEmpty(reqVO.getCountryCodes())) {
             Collection<String> countryCodes = reqVO.getCountryCodes().stream()
                 .map(String::valueOf)
                 .toList();
-            dictDataApi.validateDictDataList(DictTypeConstants.CRM_COUNTRY_CODE, countryCodes);
+            dictDataApi.validateDictDataList(DictTypeConstants.COUNTRY_CODE, countryCodes);
         }
     }
 

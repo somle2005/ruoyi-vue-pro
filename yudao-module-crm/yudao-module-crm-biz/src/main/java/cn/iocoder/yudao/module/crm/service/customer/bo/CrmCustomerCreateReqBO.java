@@ -2,7 +2,7 @@ package cn.iocoder.yudao.module.crm.service.customer.bo;
 
 import cn.iocoder.yudao.framework.common.validation.Mobile;
 import cn.iocoder.yudao.framework.common.validation.Telephone;
-import cn.iocoder.yudao.module.crm.enums.DictTypeConstants;
+import cn.iocoder.yudao.module.crm.enums.CrmDictTypeConstants;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
@@ -39,19 +39,19 @@ public class CrmCustomerCreateReqBO {
     /**
      * 所属行业
      * <p>
-     * 对应字典 {@link DictTypeConstants#CRM_CUSTOMER_INDUSTRY}
+     * 对应字典 {@link CrmDictTypeConstants#CRM_CUSTOMER_INDUSTRY}
      */
     private Integer industryId;
     /**
      * 客户等级
      * <p>
-     * 对应字典 {@link DictTypeConstants#CRM_CUSTOMER_LEVEL}
+     * 对应字典 {@link CrmDictTypeConstants#CRM_CUSTOMER_LEVEL}
      */
     private Integer level;
     /**
      * 客户来源
      * <p>
-     * 对应字典 {@link DictTypeConstants#CRM_CUSTOMER_SOURCE}
+     * 对应字典 {@link CrmDictTypeConstants#CRM_CUSTOMER_SOURCE}
      */
     private Integer source;
 

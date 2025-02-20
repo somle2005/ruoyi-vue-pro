@@ -22,7 +22,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
-import static cn.iocoder.yudao.module.crm.enums.DictTypeConstants.CRM_CUSTOMER_INDUSTRY;
+import static cn.iocoder.yudao.module.crm.enums.CrmDictTypeConstants.CRM_CUSTOMER_INDUSTRY;
 
 @Schema(description = "管理后台 - CRM 线索创建/更新 Request VO")
 @Data

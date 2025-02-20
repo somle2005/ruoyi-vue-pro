@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.crm.controller.admin.customer.vo.customer;
 
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.module.crm.enums.CrmDictTypeConstants;
 import cn.iocoder.yudao.module.infra.enums.DictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -93,17 +94,17 @@ public class CrmCustomerRespVO {
 
     @Schema(description = "所属行业", requiredMode = Schema.RequiredMode.REQUIRED, example = "13563")
     @ExcelProperty(value = "所属行业", converter = DictConvert.class)
-    @DictFormat(cn.iocoder.yudao.module.crm.enums.DictTypeConstants.CRM_CUSTOMER_INDUSTRY)
+    @DictFormat(CrmDictTypeConstants.CRM_CUSTOMER_INDUSTRY)
     private Integer industryId;
 
     @Schema(description = "客户等级", requiredMode = Schema.RequiredMode.REQUIRED, example = "13563")
     @ExcelProperty(value = "客户等级", converter = DictConvert.class)
-    @DictFormat(cn.iocoder.yudao.module.crm.enums.DictTypeConstants.CRM_CUSTOMER_LEVEL)
+    @DictFormat(CrmDictTypeConstants.CRM_CUSTOMER_LEVEL)
     private Integer level;
 
     @Schema(description = "客户来源", requiredMode = Schema.RequiredMode.REQUIRED, example = "13563")
     @ExcelProperty(value = "客户来源", converter = DictConvert.class)
-    @DictFormat(cn.iocoder.yudao.module.crm.enums.DictTypeConstants.CRM_CUSTOMER_SOURCE)
+    @DictFormat(CrmDictTypeConstants.CRM_CUSTOMER_SOURCE)
     private Integer source;
 
     @Schema(description = "负责人的用户编号", example = "25682")

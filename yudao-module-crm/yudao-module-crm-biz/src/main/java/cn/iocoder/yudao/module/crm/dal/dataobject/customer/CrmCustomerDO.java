@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.crm.dal.dataobject.customer;
 
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
-import cn.iocoder.yudao.module.crm.enums.DictTypeConstants;
+import cn.iocoder.yudao.module.crm.enums.CrmDictTypeConstants;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -107,19 +107,19 @@ public class CrmCustomerDO extends BaseDO {
     /**
      * 所属行业
      * <p>
-     * 对应字典 {@link DictTypeConstants#CRM_CUSTOMER_INDUSTRY}
+     * 对应字典 {@link CrmDictTypeConstants#CRM_CUSTOMER_INDUSTRY}
      */
     private Integer industryId;
     /**
      * 客户等级
      * <p>
-     * 对应字典 {@link DictTypeConstants#CRM_CUSTOMER_LEVEL}
+     * 对应字典 {@link CrmDictTypeConstants#CRM_CUSTOMER_LEVEL}
      */
     private Integer level;
     /**
      * 客户来源
      * <p>
-     * 对应字典 {@link DictTypeConstants#CRM_CUSTOMER_SOURCE}
+     * 对应字典 {@link CrmDictTypeConstants#CRM_CUSTOMER_SOURCE}
      */
     private Integer source;
     /**
@@ -144,7 +144,7 @@ public class CrmCustomerDO extends BaseDO {
     /**
      * 客户标签列表
      * <p>
-     * 对应字典 {@link DictTypeConstants#CRM_CLIENT_TAG}
+     * 对应字典 {@link CrmDictTypeConstants#CRM_CLIENT_TAG}
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<Long> labelCodes;
@@ -152,7 +152,7 @@ public class CrmCustomerDO extends BaseDO {
     /**
      * 国家列表
      * <p>
-     * 对应字典 {@link DictTypeConstants#CRM_COUNTRY_CODE}
+     * 对应字典 {@link cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants#COUNTRY_CODE}
      */
     @TableField(typeHandler = JacksonTypeHandler.class)
     private List<Long> countryCodes;
