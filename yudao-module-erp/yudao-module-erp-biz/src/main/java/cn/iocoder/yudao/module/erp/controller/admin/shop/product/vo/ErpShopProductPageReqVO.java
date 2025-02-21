@@ -64,4 +64,10 @@ public class ErpShopProductPageReqVO extends PageParam {
     @Schema(description = "链接", example = "https://www.iocoder.cn")
     private String url;
 
+    @Schema(description = "所属部门ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Long deptId;
+
+    @Schema(description = "所属部门名称", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String deptName;
+
 }

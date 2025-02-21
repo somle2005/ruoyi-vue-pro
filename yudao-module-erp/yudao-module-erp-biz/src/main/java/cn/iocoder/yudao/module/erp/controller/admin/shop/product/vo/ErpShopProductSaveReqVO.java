@@ -64,4 +64,8 @@ public class ErpShopProductSaveReqVO {
     @Schema(description = "上架时间", example = "")
     private LocalDateTime listingTime;
 
+    @Schema(description = "所属部门ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Long deptId;
+
+
 }

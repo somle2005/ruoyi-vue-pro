@@ -73,4 +73,14 @@ public class ErpShopProductRespVO {
     @Schema(description = "产品所属店铺", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
     private ErpShopRespVO shop;
 
+    @Schema(description = "所属部门ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Long departmentId;
+
+    @Schema(description = "所属部门ID", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private Long deptId;
+
+    @Schema(description = "所属部门名称", requiredMode = Schema.RequiredMode.NOT_REQUIRED)
+    private String deptName;
+
+
 }

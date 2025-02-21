@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product;
 
+import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
@@ -8,6 +9,8 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProdu
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
+import cn.iocoder.yudao.module.system.api.dept.DeptApi;
+import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
@@ -55,11 +58,22 @@ public class ErpShopProductController {
     @Autowired
     private ErpShopService erpShopService;
 
+    @Autowired
+    private DeptApi deptApi;
+
 
     @PostMapping("/create")
     @Operation(summary = "创建ERP 店铺产品")
     @PreAuthorize("@ss.hasPermission('erp:shop-product:create')")
     public CommonResult<Long> createShopProduct(@Valid @RequestBody ErpShopProductSaveReqVO createReqVO) {
+
+        if(createReqVO.getDeptId()!=null) {
+            DeptRespDTO deptDTO=deptApi.getDept(createReqVO.getDeptId());
+            if(deptDTO==null) {
+                return error(SHOP_PRODUCT_DEPT_NOT_EXISTS);
+            }
+        }
+
         return success(shopProductService.createShopProduct(createReqVO));
     }
 
@@ -67,6 +81,14 @@ public class ErpShopProductController {
     @Operation(summary = "更新ERP 店铺产品")
     @PreAuthorize("@ss.hasPermission('erp:shop-product:update')")
     public CommonResult<Boolean> updateShopProduct(@Valid @RequestBody ErpShopProductSaveReqVO updateReqVO) {
+
+        if(updateReqVO.getDeptId()!=null) {
+            DeptRespDTO deptDTO=deptApi.getDept(updateReqVO.getDeptId());
+            if(deptDTO==null) {
+                return error(SHOP_PRODUCT_DEPT_NOT_EXISTS);
+            }
+        }
+
         shopProductService.updateShopProductWithItems(updateReqVO);
         return success(true);
     }
@@ -100,6 +122,15 @@ public class ErpShopProductController {
         ErpShopProductRespVO respVO=shopProductService.getShopProductWithItems(id);
         ErpShopDO shopDO = erpShopService.getShop(respVO.getShopId());
         respVO.setShop(BeanUtils.toBean(shopDO, ErpShopRespVO.class));
+
+        if(respVO.getDeptId()!=null) {
+            DeptRespDTO deptDTO=deptApi.getDept(respVO.getDeptId());
+            if(deptDTO!=null) {
+                respVO.setDeptName(deptDTO.getName());
+            }
+        }
+
+
         return success(respVO);
     }
 
@@ -117,6 +148,16 @@ public class ErpShopProductController {
         List<Long> productIds=StreamX.from(pageResultVO.getList()).toList(ErpShopProductRespVO::getId);
         Map<Long,List<ErpShopProductItemRespVO>> itemsGroup=shopProductService.getItemGroupMap(productIds);
         StreamX.from(pageResultVO.getList()).assemble(itemsGroup,ErpShopProductRespVO::getId, ErpShopProductRespVO::setItems);
+
+        List<Long> deptIds=StreamX.from(pageResultVO.getList()).filter(ObjectUtil::isNotNull).toList(ErpShopProductRespVO::getDeptId);
+        List<DeptRespDTO> deptDTOList=deptApi.getDeptList(deptIds);
+        deptDTOList=StreamX.from(deptDTOList).filter(ObjectUtil::isNotNull).toList();
+        StreamX.from(pageResultVO.getList()).assemble(deptDTOList,DeptRespDTO::getId,ErpShopProductRespVO::getDeptId,(prod,dept)->{
+            if(dept!=null) {
+                prod.setDeptName(dept.getName());
+            }
+        });
+
         //
         return success(pageResultVO);
     }

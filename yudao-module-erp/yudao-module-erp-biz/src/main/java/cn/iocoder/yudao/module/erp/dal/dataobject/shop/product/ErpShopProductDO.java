@@ -81,4 +81,9 @@ public class ErpShopProductDO extends TenantBaseDO {
      */
     private String platformProductUid;
 
+    /**
+     * 部门ID
+     */
+    private Long deptId;
+
 }
