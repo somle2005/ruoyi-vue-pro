@@ -7,6 +7,8 @@ import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCust
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 
 /**
  * 海关分类 Mapper
@@ -25,4 +27,13 @@ public interface ErpCustomCategoryMapper extends BaseMapperX<ErpCustomCategoryDO
             .orderByDesc(ErpCustomCategoryDO::getId));
     }
 
+    //获得海关分类列表的list
+    default List<ErpCustomCategoryDO> getCustomRuleCategoryList(ErpCustomCategoryPageReqVO reqVO) {
+        return selectList(new LambdaQueryWrapperX<ErpCustomCategoryDO>()
+            .betweenIfPresent(ErpCustomCategoryDO::getCreateTime, reqVO.getCreateTime())
+            .eqIfPresent(ErpCustomCategoryDO::getMaterial, reqVO.getMaterial())
+            .likeIfPresent(ErpCustomCategoryDO::getDeclaredType, reqVO.getDeclaredType())
+            .likeIfPresent(ErpCustomCategoryDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
+            .orderByDesc(ErpCustomCategoryDO::getId));
+    }
 }

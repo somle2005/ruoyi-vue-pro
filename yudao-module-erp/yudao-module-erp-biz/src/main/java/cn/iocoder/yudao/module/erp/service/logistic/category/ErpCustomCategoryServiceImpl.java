@@ -103,6 +103,20 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
         return customRuleCategoryMapper.selectPage(pageReqVO);
     }
 
+    /**
+     * 获得海关分类的list
+     *
+     * @param pageReqVO 分页查询
+     * @return 海关分类list
+     */
+    @Override
+    public List<ErpCustomCategoryDO> getCustomRuleCategoryList(ErpCustomCategoryPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new ErpCustomCategoryPageReqVO();
+        }
+        return customRuleCategoryMapper.getCustomRuleCategoryList(pageReqVO);
+    }
+
     // ==================== 子表（海关分类子表） ====================
 
     @Override
@@ -118,8 +132,9 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
 
     /**
      * 更新海关分类子表
+     *
      * @param categoryId 海关分类id
-     * @param list 海关分类子表
+     * @param list       海关分类子表
      */
     private void updateCustomRuleCategoryItemList(Long categoryId, List<ErpCustomCategoryItemDO> list) {
         deleteCustomRuleCategoryItemByCategoryId(categoryId);

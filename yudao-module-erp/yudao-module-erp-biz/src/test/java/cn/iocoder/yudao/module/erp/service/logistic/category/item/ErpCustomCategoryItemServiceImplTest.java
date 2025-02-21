@@ -121,7 +121,7 @@ public class ErpCustomCategoryItemServiceImplTest extends BaseDbUnitTest {
         ErpCustomCategoryItemPageReqVO reqVO = new ErpCustomCategoryItemPageReqVO();
 //        reqVO.setCategoryId(null);
         reqVO.setCountryCode(null);
-        reqVO.setHsCode(null);
+//        reqVO.setHsCode(null);
         reqVO.setTaxRate(null);
         reqVO.setCreateTime(buildBetweenTime(2023, 2, 1, 2023, 2, 28));
 
