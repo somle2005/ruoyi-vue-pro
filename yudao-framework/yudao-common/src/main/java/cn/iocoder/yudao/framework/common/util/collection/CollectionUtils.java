@@ -341,10 +341,5 @@ public class CollectionUtils {
         return list.stream().filter(Objects::nonNull).flatMap(Collection::stream).collect(Collectors.toList());
     }
 
-    public static boolean isEmpty(Collection<?> collection) {
-        return collection == null || collection.isEmpty();
-    }
-
-
 
 }
