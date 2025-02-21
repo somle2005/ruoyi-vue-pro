@@ -24,12 +24,10 @@ import java.util.List;
  */
 @Mapper
 public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
-    default PageResult<ErpCustomRuleDO> selectPage(@NotNull ErpCustomRulePageReqVO reqVO) {
-
+    default PageResult<ErpCustomRuleDO> selectPage(ErpCustomRulePageReqVO reqVO) {
         // 构建查询，应用条件并进行分页查询
         MPJLambdaWrapper<ErpCustomRuleDO> query = new MPJLambdaWrapperX<ErpCustomRuleDO>()
             .selectAll(ErpCustomRuleDO.class)  // 选择所有列
-            .selectAll(ErpCustomRuleDO.class)
             .eqIfPresent(ErpCustomRuleDO::getCountryCode, reqVO.getCountryCode())  // 国家编码
             .eqIfPresent(ErpCustomRuleDO::getDeclaredValue, reqVO.getDeclaredValue())  // 申报金额
             .eqIfPresent(ErpCustomRuleDO::getDeclaredValueCurrencyCode, reqVO.getDeclaredValueCurrencyCode())  // 申报金额币种
@@ -38,19 +36,7 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
             .betweenIfPresent(ErpCustomRuleDO::getCreateTime, reqVO.getCreateTime())  // 创建时间范围
             .orderByDesc(ErpCustomRuleDO::getId)  // 按id降序排序
             .leftJoin(ErpProductDO.class, ErpProductDO::getId, ErpCustomRuleDO::getProductId)  // 左连接产品表
-            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode()) // 产品SKU编码
-            .orderByDesc(ErpCustomRuleDO::getId)
-            .leftJoin(ErpProductDO.class, ErpProductDO::getId, ErpCustomRuleDO::getProductId)
-            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode())
-            .leftJoin(ErpCustomCategoryDO.class, ErpCustomCategoryDO::getId, ErpProductDO::getCustomCategoryId) // 关联分类表
-            .select(ErpCustomCategoryDO::getDeclaredType)
-            .select(ErpCustomCategoryDO::getDeclaredTypeEn)
-            .select(ErpCustomCategoryDO::getMaterial)
-            .leftJoin(ErpCustomCategoryItemDO.class, ErpCustomCategoryItemDO::getId, ErpCustomCategoryDO::getId)
-            .select(ErpCustomCategoryItemDO::getCountryCode)
-            .select(ErpCustomCategoryItemDO::getTaxRate)
-            .eqIfExists(ErpCustomCategoryItemDO::getCountryCode, reqVO.getCountryCode())  // 匹配 ErpCustomCategoryItemDO 的 countryCode 与 ErpCustomRuleDO 的 countryCode
-            ;
+            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode()); // 产品SKU编码
         return selectJoinPage(reqVO, ErpCustomRuleDO.class, query);
     }
 
