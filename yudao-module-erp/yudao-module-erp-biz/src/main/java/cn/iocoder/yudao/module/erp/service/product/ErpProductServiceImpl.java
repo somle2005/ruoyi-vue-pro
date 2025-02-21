@@ -182,7 +182,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         }
         ThrowUtil.ifSqlThrow(productMapper.updateById(updateObj), DB_UPDATE_ERROR);
         //更新产品时->覆盖n个海关规则
-        //找到产品id对应的所有海关规则DTO(含海关信息)
+        //找到产品id对应的所有海关规则DTO(含海关信息+海关分类)，如果没有海关分类信息(产品逻辑必须有)，那么就不更新海关规则
         Optional.ofNullable(erpCustomRuleApi.getErpCustomRuleDTOByProductId(productId)).ifPresent(
             dtos -> {
                 erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());

@@ -57,4 +57,13 @@ class ErpCustomRuleMapperTest extends BaseDbUnitTest {
     void testSelectByProductId() {
         log.info("{}", erpCustomRuleMapper.selectByProductId(List.of(1L, 2L)));
     }
+
+    @Test
+    void testSelectByProductId1() {
+        var bos = erpCustomRuleMapper.selectByProductId(List.of(487L, 486L));
+        log.info("{}", erpCustomRuleMapper.selectByProductId(List.of(487L, 486L)));
+        if (bos.isEmpty()) {
+            log.info("{}", bos);
+        }
+    }
 }

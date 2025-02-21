@@ -31,5 +31,5 @@ public interface ErpCustomRuleApi {
      * @param productId 产品id
      * @return List<ErpCustomRuleDTO> 海关规则DTO +产品 DTOs
      */
-    List<ErpCustomRuleDTO> getErpCustomRuleDTOByProductId(Long productId);
+    List<ErpCustomRuleDTO> getErpCustomRuleDTOByProductId(@NotNull Long productId);
 }

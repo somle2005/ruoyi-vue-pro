@@ -73,7 +73,7 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
      * @param productIds ids
      * @return List<ErpCustomRuleDO>
      */
-    default List<ErpCustomRuleBO> selectByProductId(List<Long> productIds) {
+    default List<ErpCustomRuleBO> selectByProductId(@NotNull List<Long> productIds) {
         MPJLambdaWrapper<ErpCustomRuleDO> boWrapper = getBOWrapper(new ErpCustomRulePageReqVO());
         boWrapper.in(ErpCustomRuleDO::getProductId, productIds);
         return selectJoinList(ErpCustomRuleBO.class, boWrapper);

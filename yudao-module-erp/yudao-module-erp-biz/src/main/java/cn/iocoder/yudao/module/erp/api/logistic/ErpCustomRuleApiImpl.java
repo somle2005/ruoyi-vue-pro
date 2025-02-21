@@ -63,13 +63,12 @@ public class ErpCustomRuleApiImpl implements ErpCustomRuleApi {
 
     @Override
     public List<ErpCustomRuleDTO> getErpCustomRuleDTOByProductId(Long productId) {
-        // 获取规则和产品信息 TODO 修改
-//        List<ErpCustomRuleBO> ruleBOS = customRuleMapper.selectByProductId(List.of(productId));
-//        if (ruleBOS.isEmpty()) {
-//            return null;
-//        }
-//        Map<Long, ErpProductDO> productMap = erpProductService.getProductMap(List.of(productId));
-//        return ErpCustomRuleConvert.INSTANCE.convert(ruleBOS, productMap);
-        return null;
+        //获取规则和产品信息
+        List<ErpCustomRuleBO> ruleBOS = customRuleMapper.selectByProductId(List.of(productId));
+        if (ruleBOS.isEmpty()) {
+            return null;
+        }
+        Map<Long, ErpProductDO> productMap = erpProductService.getProductMap(List.of(productId));
+        return ErpCustomRuleConvert.INSTANCE.convert(ruleBOS, productMap);
     }
 }
