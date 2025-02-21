@@ -16,6 +16,7 @@ import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.quartz.SchedulerException;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -120,12 +121,14 @@ public class JobServiceImpl implements JobService {
     }
 
     private void validateJobHandlerExists(String handlerName) {
-        Object handler = SpringUtil.getBean(handlerName);
-        if (handler == null) {
+        try {
+            Object handler = SpringUtil.getBean(handlerName);
+            assert handler != null;
+            if (!(handler instanceof JobHandler)) {
+                throw exception(JOB_HANDLER_BEAN_TYPE_ERROR);
+            }
+        } catch (NoSuchBeanDefinitionException e) {
             throw exception(JOB_HANDLER_BEAN_NOT_EXISTS);
-        }
-        if (!(handler instanceof JobHandler)) {
-            throw exception(JOB_HANDLER_BEAN_TYPE_ERROR);
         }
     }
 

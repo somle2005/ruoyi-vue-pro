@@ -4,9 +4,9 @@ import com.somle.amazon.controller.vo.*;
 import com.somle.amazon.controller.vo.AmazonSpReportReqVO.ProcessingStatuses;
 import com.somle.amazon.model.enums.AmazonCountry;
 import com.somle.amazon.model.enums.AmazonRegion;
-import com.somle.framework.common.util.json.JSONObject;
-import com.somle.framework.common.util.json.JsonUtils;
-import com.somle.framework.test.core.ut.BaseSpringTest;
+import cn.iocoder.yudao.framework.common.util.json.JSONObject;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
+import cn.iocoder.yudao.framework.test.core.ut.BaseSpringTest;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.*;
@@ -151,7 +151,7 @@ class AmazonSpClientTest extends BaseSpringTest {
                 .reportOptions(options)
                 .build();
         var reportString = client.createAndGetReport(vo);
-        var report = JsonUtils.parseObject(reportString, JSONObject.class);
+        var report = JsonUtilsX.parseObject(reportString, JSONObject.class);
         log.info(report.toString());
     }
 
