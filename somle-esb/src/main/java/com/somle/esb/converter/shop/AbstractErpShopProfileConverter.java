@@ -1,12 +1,12 @@
 package com.somle.esb.converter.shop;
 
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import cn.iocoder.yudao.module.system.api.dict.dto.DictDataRespDTO;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
-import com.somle.framework.common.util.collection.StreamX;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 

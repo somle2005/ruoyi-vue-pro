@@ -1,8 +1,8 @@
 package cn.iocoder.yudao.module.erp.service.shop.product.item;
 
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
-import com.somle.framework.common.util.collection.CollectionUtils;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;

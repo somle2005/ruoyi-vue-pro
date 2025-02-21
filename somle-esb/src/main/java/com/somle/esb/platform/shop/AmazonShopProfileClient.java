@@ -1,6 +1,11 @@
 package com.somle.esb.platform.shop;
 
 import cn.hutool.core.io.FileUtil;
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.general.CoreUtils;
+import cn.iocoder.yudao.framework.common.util.json.JSONObject;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
+import cn.iocoder.yudao.framework.common.util.lang.string.StrUtils;
 import cn.iocoder.yudao.framework.common.util.log.FileLogger;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -11,11 +16,6 @@ import com.somle.amazon.service.AmazonSpClient;
 import com.somle.amazon.service.AmazonSpService;
 import com.somle.esb.converter.shop.AmazonToErpProfileConverter;
 import com.somle.esb.enums.SalesPlatform;
-import com.somle.framework.common.util.collection.CollectionUtils;
-import com.somle.framework.common.util.general.CoreUtils;
-import com.somle.framework.common.util.json.JSONObject;
-import com.somle.framework.common.util.json.JsonUtils;
-import com.somle.framework.common.util.string.StrUtils;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -106,7 +106,7 @@ public class AmazonShopProfileClient extends ShopProfileClient {
         }
         File mockFile=getMockFile(marketplaceId,countryCode);
         if (!getMockFile(marketplaceId,countryCode).exists()) {
-            String productJSONStr = JsonUtils.toJsonString(allProducts);
+            String productJSONStr = JsonUtilsX.toJsonString(allProducts);
             FileUtil.writeString(productJSONStr, mockFile, "UTF-8");
         }
     }
@@ -118,7 +118,7 @@ public class AmazonShopProfileClient extends ShopProfileClient {
         File mockFile=getMockFile(marketplaceId,countryCode);
         if (mockFile.exists()) {
             String productJSONStr = FileUtil.readString(mockFile, "UTF-8");
-            List<JSONObject> jsonArray = JsonUtils.parseArray(productJSONStr, JSONObject.class);
+            List<JSONObject> jsonArray = JsonUtilsX.parseArray(productJSONStr, JSONObject.class);
             List<JSONObject> list = new ArrayList<>();
             for (ObjectNode node : jsonArray) {
                 list.add(new JSONObject(node));
@@ -230,7 +230,7 @@ class MarketProductCollector {
             .includedData(List.of(AmazonSpCatalogReqVO.IncludedData.IMAGES, AmazonSpCatalogReqVO.IncludedData.ATTRIBUTES))
             .build();
         var catalogBody = client.searchCatalogItems(reqCatalogVO);
-        JSONObject result = JsonUtils.parseObject(catalogBody, JSONObject.class);
+        JSONObject result = JsonUtilsX.parseObject(catalogBody, JSONObject.class);
 
         // 处理接口返回错误的情况
         boolean doNext = handleErrors(API_NAME_CATALOG,result,()->{
@@ -360,7 +360,7 @@ class MarketProductCollector {
             .includedData(List.of(AmazonSpListingReqVO.IncludedData.OFFERS, AmazonSpListingReqVO.IncludedData.ATTRIBUTES,AmazonSpListingReqVO.IncludedData.SUMMARIES))
             .build();
         var bodyString = client.searchListingsItems(reqVO);
-        JSONObject result = JsonUtils.parseObject(bodyString, JSONObject.class);
+        JSONObject result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
 
         // 处理接口访问超限
         boolean doNext = handleErrors(API_NAME_LISTING,result,()->{

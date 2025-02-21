@@ -4,7 +4,6 @@ import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import com.alibaba.excel.annotation.ExcelProperty;
-import com.somle.framework.common.model.ValidationGroup;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 

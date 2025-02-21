@@ -1,5 +1,8 @@
 package com.somle.esb.job;
 
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
+import cn.iocoder.yudao.framework.common.util.json.JSONArray;
 import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
@@ -13,8 +16,6 @@ import com.somle.esb.converter.shop.AbstractErpShopProfileConverter;
 import com.somle.esb.enums.TenantId;
 import com.somle.esb.platform.shop.ShopProfileClient;
 import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
-import com.somle.framework.common.util.collection.CollectionUtils;
-import com.somle.framework.common.util.json.JSONArray;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
@@ -23,7 +24,6 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
-import com.somle.framework.common.util.collection.StreamX;
 
 import java.util.*;
 import java.util.stream.Collectors;

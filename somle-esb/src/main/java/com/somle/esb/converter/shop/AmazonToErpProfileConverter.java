@@ -1,5 +1,6 @@
 package com.somle.esb.converter.shop;
 
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
@@ -12,11 +13,10 @@ import com.somle.esb.enums.ESBConstants;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
-import com.somle.framework.common.util.collection.CollectionUtils;
-import com.somle.framework.common.util.json.JSONArray;
-import com.somle.framework.common.util.json.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import cn.iocoder.yudao.framework.common.util.json.JSONObject;
+import cn.iocoder.yudao.framework.common.util.json.JSONArray;
 
 import java.util.ArrayList;
 import java.util.List;

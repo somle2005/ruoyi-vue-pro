@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.erp.enums;
 
-import cn.iocoder.yudao.framework.common.core.IntArrayValuable;
+import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import cn.iocoder.yudao.framework.common.enums.DateIntervalEnum;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -11,7 +11,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter
-public enum ErpOffStatus implements IntArrayValuable {
+public enum ErpOffStatus implements ArrayValuable<Integer> {
 
     OPEN(1, "开启"),
     CLOSED(2, "已关闭"),
@@ -26,14 +26,14 @@ public enum ErpOffStatus implements IntArrayValuable {
         }
     }
 
-    public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(ErpOffStatus::getCode).toArray();
+    public static final Integer[] ARRAYS = Arrays.stream(values()).map(ErpOffStatus::getCode).toArray(Integer[]::new);
 
     // 存储状态码和描述的字段
-    private final int code;
+    private final Integer code;
     private final String description;
 
     // 获取状态码
-    public int getCode() {
+    public Integer getCode() {
         return code;
     }
 
@@ -58,7 +58,7 @@ public enum ErpOffStatus implements IntArrayValuable {
     }
 
     @Override
-    public int[] array() {
+    public Integer[] array() {
         return ARRAYS;
     }
 }

@@ -1,5 +1,7 @@
 package cn.iocoder.yudao.module.erp.service.shop.product;
 
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespSimpleVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
@@ -9,8 +11,6 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
 import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
 import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
-import com.somle.framework.common.util.collection.CollectionUtils;
-import com.somle.framework.common.util.collection.StreamX;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -136,7 +136,7 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
         List<ErpShopProductItemDO> itemsInDB=shopProductItemService.getShopProductItemsByProductIds(productIds);
         List<ErpShopProductItemRespVO> respItemsVOs=BeanUtils.toBean(itemsInDB, ErpShopProductItemRespVO.class);
         List<ErpProductRespVO> productList= productService.getProductVOList(StreamX.from(itemsInDB).map(ErpShopProductItemDO::getProductId).toList());
-        Map<Long,ErpProductRespSimpleVO> productMap=StreamX.from(productList).toMap(ErpProductRespVO::getId,t->BeanUtils.toBean(t, ErpProductRespSimpleVO.class));
+        Map<Long,ErpProductRespSimpleVO> productMap= StreamX.from(productList).toMap(ErpProductRespVO::getId, t->BeanUtils.toBean(t, ErpProductRespSimpleVO.class));
         StreamX.from(respItemsVOs).assemble(productMap,ErpShopProductItemRespVO::getProductId,ErpShopProductItemRespVO::setProduct);
         Map<Long,List<ErpShopProductItemRespVO>> itemsGroup=StreamX.from(respItemsVOs).groupBy(ErpShopProductItemRespVO::getShopProductId);
         return itemsGroup;

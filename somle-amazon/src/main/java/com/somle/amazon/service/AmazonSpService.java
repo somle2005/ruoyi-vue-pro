@@ -1,12 +1,12 @@
 package com.somle.amazon.service;
 
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.config.Variable;
 import com.somle.amazon.model.enums.AmazonRegion;
 import com.somle.amazon.repository.AmazonAdAuthRepository;
 import com.somle.amazon.repository.AmazonAdClientRepository;
 import com.somle.amazon.repository.AmazonSpAuthRepository;
 import com.somle.amazon.repository.AmazonSpClientRepository;
-import com.somle.framework.common.util.collection.StreamX;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

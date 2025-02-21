@@ -1,9 +1,9 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop;
 
 import cn.hutool.core.util.IdUtil;
+import cn.iocoder.yudao.framework.common.model.ValidationGroup;
+import cn.iocoder.yudao.framework.common.util.lang.string.StrUtils;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
-import com.somle.framework.common.model.ValidationGroup;
-import com.somle.framework.common.util.string.StrUtils;
 import org.apache.tomcat.util.net.openssl.ciphers.Protocol;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;

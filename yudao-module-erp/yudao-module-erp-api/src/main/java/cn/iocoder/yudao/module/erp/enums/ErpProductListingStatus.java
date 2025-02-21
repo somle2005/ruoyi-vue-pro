@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.erp.enums;
 
-import cn.iocoder.yudao.framework.common.core.IntArrayValuable;
+import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -10,7 +10,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter
-public enum ErpProductListingStatus implements IntArrayValuable {
+public enum ErpProductListingStatus implements ArrayValuable<Integer> {
 
     ONLINE(1, "上架"),
     OFFLINE(2, "下架");
@@ -24,7 +24,7 @@ public enum ErpProductListingStatus implements IntArrayValuable {
         }
     }
 
-    public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(ErpProductListingStatus::getCode).toArray();
+    public static final Integer[] ARRAYS = Arrays.stream(values()).map(ErpProductListingStatus::getCode).toArray(Integer[]::new);
 
     // 存储状态码和描述的字段
     private final int code;
@@ -56,7 +56,7 @@ public enum ErpProductListingStatus implements IntArrayValuable {
     }
 
     @Override
-    public int[] array() {
+    public Integer[] array() {
         return ARRAYS;
     }
 }

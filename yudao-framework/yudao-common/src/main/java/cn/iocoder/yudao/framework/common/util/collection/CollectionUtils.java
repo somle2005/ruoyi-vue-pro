@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.hutool.core.util.ArrayUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.json.JSONArray;
 import com.google.common.collect.ImmutableMap;
 
 import java.util.*;
@@ -30,6 +31,10 @@ public class CollectionUtils {
 
     public static boolean isEmpty(Collection<?> collection) {
         return collection==null || collection.isEmpty();
+    }
+
+    public static boolean isEmpty(JSONArray collection) {
+        return collection == null || collection.isEmpty();
     }
 
     public static <T> boolean anyMatch(Collection<T> from, Predicate<T> predicate) {

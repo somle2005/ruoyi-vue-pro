@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product;
 
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
@@ -7,7 +8,6 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProdu
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
-import com.somle.framework.common.util.collection.StreamX;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;

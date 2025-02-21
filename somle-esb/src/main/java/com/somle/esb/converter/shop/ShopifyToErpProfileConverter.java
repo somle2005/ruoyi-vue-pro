@@ -1,5 +1,7 @@
 package com.somle.esb.converter.shop;
 
+import cn.iocoder.yudao.framework.common.util.json.JSONArray;
+import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.common.util.lang.string.CharSymbols;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
@@ -9,8 +11,6 @@ import cn.iocoder.yudao.module.erp.enums.ErpShopType;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.esb.enums.ESBConstants;
-import com.somle.framework.common.util.json.JSONArray;
-import com.somle.framework.common.util.json.JSONObject;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;

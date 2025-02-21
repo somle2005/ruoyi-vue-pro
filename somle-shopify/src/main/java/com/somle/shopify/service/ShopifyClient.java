@@ -1,8 +1,9 @@
 package com.somle.shopify.service;
 
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.json.JSONArray;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.somle.framework.common.util.collection.CollectionUtils;
-import com.somle.framework.common.util.json.JSONArray;
+
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
@@ -14,7 +15,6 @@ import lombok.Setter;
 import lombok.SneakyThrows;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
-import org.assertj.core.util.Maps;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.*;
@@ -143,7 +143,7 @@ public class ShopifyClient {
                 .build();
             var response = sendRequest(request);
             var bodyString = response.body().string();
-            return JsonUtils.parseObject(bodyString, JSONObject.class);
+            return JsonUtilsX.parseObject(bodyString, JSONObject.class);
         } catch (Throwable t) {
             log.error("{}异常", api.action(), t);
             return null;

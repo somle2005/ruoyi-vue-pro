@@ -1,8 +1,6 @@
 package com.somle.esb.platform.shop;
 
 import com.somle.esb.enums.SalesPlatform;
-import com.somle.framework.common.util.json.JSONArray;
-import com.somle.framework.common.util.json.JSONObject;
 
 import java.util.List;
 

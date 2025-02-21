@@ -1,9 +1,9 @@
 package cn.iocoder.yudao.module.erp.service.shop;
 
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.ErpShopProductRespVO;
-import com.somle.framework.common.util.collection.CollectionUtils;
-import com.somle.framework.common.util.collection.StreamX;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -99,7 +99,7 @@ public class ErpShopServiceImpl implements ErpShopService {
         LambdaQueryWrapperX<ErpShopDO> wrapperX=new LambdaQueryWrapperX<>();
         wrapperX.in(ErpShopDO::getId,shopIds);
         List<ErpShopDO> shopDOList = shopMapper.selectList(wrapperX);
-        return StreamX.from(shopDOList).toMap(ErpShopDO::getId,t->BeanUtils.toBean(t, ErpShopRespVO.class));
+        return StreamX.from(shopDOList).toMap(ErpShopDO::getId, t->BeanUtils.toBean(t, ErpShopRespVO.class));
 
     }
 

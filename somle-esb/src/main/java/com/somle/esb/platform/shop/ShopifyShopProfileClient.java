@@ -1,17 +1,12 @@
 package com.somle.esb.platform.shop;
 
 
+import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.google.common.collect.Lists;
 import com.somle.esb.converter.shop.AmazonToErpProfileConverter;
 import com.somle.esb.converter.shop.ShopifyToErpProfileConverter;
 import com.somle.esb.enums.SalesPlatform;
-import com.somle.framework.common.util.collection.CollectionUtils;
-import com.somle.framework.common.util.json.JSONArray;
-import com.somle.framework.common.util.json.JSONObject;
-import com.somle.framework.common.util.json.JsonUtils;
-import com.somle.framework.common.util.web.RequestX;
-import com.somle.framework.common.util.web.WebUtils;
 import com.somle.shopify.enums.ShopifyAPI;
 import com.somle.shopify.model.ShopifyToken;
 import com.somle.shopify.repository.ShopifyTokenRepository;

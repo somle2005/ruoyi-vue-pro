@@ -2,22 +2,22 @@ package com.somle.shopify.controller;
 
 
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
-import com.somle.shopify.service.ShopifyService;
+import com.somle.shopify.service.ShopifyClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/shopify")
 public class ShopifyController {
     @Autowired
-    ShopifyService service;
+    ShopifyClient client;
 
     @GetMapping("/products")
-    public JSONObject products(
-    ) {
-        return service.client.getProducts();
+    public JSONObject products() {
+        return client.getRawProducts(new HashMap<>());
     }
 }
