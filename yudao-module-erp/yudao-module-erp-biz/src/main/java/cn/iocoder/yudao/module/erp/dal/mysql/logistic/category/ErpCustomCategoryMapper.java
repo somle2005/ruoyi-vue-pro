@@ -18,22 +18,21 @@ import java.util.List;
 @Mapper
 public interface ErpCustomCategoryMapper extends BaseMapperX<ErpCustomCategoryDO> {
 
-    default PageResult<ErpCustomCategoryDO> selectPage(ErpCustomCategoryPageReqVO reqVO) {
-        return selectPage(reqVO, new LambdaQueryWrapperX<ErpCustomCategoryDO>()
+    default LambdaQueryWrapperX<ErpCustomCategoryDO> buildQueryWrapper(ErpCustomCategoryPageReqVO reqVO) {
+        return new LambdaQueryWrapperX<ErpCustomCategoryDO>()
             .betweenIfPresent(ErpCustomCategoryDO::getCreateTime, reqVO.getCreateTime())
             .eqIfPresent(ErpCustomCategoryDO::getMaterial, reqVO.getMaterial())
             .likeIfPresent(ErpCustomCategoryDO::getDeclaredType, reqVO.getDeclaredType())
             .likeIfPresent(ErpCustomCategoryDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
-            .orderByDesc(ErpCustomCategoryDO::getId));
+            .orderByDesc(ErpCustomCategoryDO::getId);
+    }
+
+    default PageResult<ErpCustomCategoryDO> selectPage(ErpCustomCategoryPageReqVO reqVO) {
+        return selectPage(reqVO, buildQueryWrapper(reqVO));
     }
 
     //获得海关分类列表的list
     default List<ErpCustomCategoryDO> getCustomRuleCategoryList(ErpCustomCategoryPageReqVO reqVO) {
-        return selectList(new LambdaQueryWrapperX<ErpCustomCategoryDO>()
-            .betweenIfPresent(ErpCustomCategoryDO::getCreateTime, reqVO.getCreateTime())
-            .eqIfPresent(ErpCustomCategoryDO::getMaterial, reqVO.getMaterial())
-            .likeIfPresent(ErpCustomCategoryDO::getDeclaredType, reqVO.getDeclaredType())
-            .likeIfPresent(ErpCustomCategoryDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())
-            .orderByDesc(ErpCustomCategoryDO::getId));
+        return selectList(buildQueryWrapper(reqVO));
     }
 }

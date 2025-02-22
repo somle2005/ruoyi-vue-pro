@@ -83,7 +83,7 @@ public class ErpCustomRuleController {
         if (customRule == null) {
             return success(null);
         }
-        List<ErpCustomRuleRespVO> voList = bindDOList(List.of(customRule));
+        List<ErpCustomRuleRespVO> voList = bindBOList(List.of(customRule));
         if (CollUtil.isEmpty(voList)) {
             return success(null);
         }
@@ -125,14 +125,4 @@ public class ErpCustomRuleController {
         });
     }
 
-    private List<ErpCustomRuleRespVO> bindDOList(List<ErpCustomRuleDO> list) {
-        if (CollUtil.isEmpty(list)) {
-            return Collections.emptyList();
-        }
-        Map<Long, ErpProductRespVO> productVOMap = erpProductService.getProductVOMap(convertSet(list, ErpCustomRuleDO::getProductId));
-        //2开始拼接
-        return BeanUtils.toBean(list, ErpCustomRuleRespVO.class, vo -> {
-            MapUtils.findAndThen(productVOMap, vo.getProductId(), vo::setProduct);//设置产品vo
-        });
-    }
 }

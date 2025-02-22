@@ -6,7 +6,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 /**
- * 海关规则 BO
+ * 海关规则 BO 组合海关规则+海关分类主子表信息  海关规则<->海关分类子表
  */
 @Data
 public class ErpCustomRuleBO extends ErpCustomRuleDO {

@@ -24,9 +24,8 @@ import java.util.List;
  */
 @Mapper
 public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
-    default PageResult<ErpCustomRuleDO> selectPage(ErpCustomRulePageReqVO reqVO) {
-        // 构建查询，应用条件并进行分页查询
-        MPJLambdaWrapper<ErpCustomRuleDO> query = new MPJLambdaWrapperX<ErpCustomRuleDO>()
+    default MPJLambdaWrapper<ErpCustomRuleDO> bindQueryWrapper(ErpCustomRulePageReqVO reqVO) {
+        return new MPJLambdaWrapperX<ErpCustomRuleDO>()
             .selectAll(ErpCustomRuleDO.class)  // 选择所有列
             .eqIfPresent(ErpCustomRuleDO::getCountryCode, reqVO.getCountryCode())  // 国家编码
             .eqIfPresent(ErpCustomRuleDO::getDeclaredValue, reqVO.getDeclaredValue())  // 申报金额
@@ -34,10 +33,16 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
             .eqIfPresent(ErpCustomRuleDO::getLogisticAttribute, reqVO.getLogisticAttribute())  // 物流属性
             .likeIfPresent(ErpCustomRuleDO::getFbaBarCode, reqVO.getFbaBarCode())  // FBA条形码
             .betweenIfPresent(ErpCustomRuleDO::getCreateTime, reqVO.getCreateTime())  // 创建时间范围
+            .betweenIfPresent(ErpCustomRuleDO::getUpdateTime, reqVO.getUpdateTime())  // 更新时间范围
             .orderByDesc(ErpCustomRuleDO::getId)  // 按id降序排序
             .leftJoin(ErpProductDO.class, ErpProductDO::getId, ErpCustomRuleDO::getProductId)  // 左连接产品表
-            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode()); // 产品SKU编码
-        return selectJoinPage(reqVO, ErpCustomRuleDO.class, query);
+            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode()) // 产品SKU编码
+            ;
+    }
+
+    default PageResult<ErpCustomRuleDO> selectPage(ErpCustomRulePageReqVO reqVO) {
+        // 构建查询，应用条件并进行分页查询
+        return selectJoinPage(reqVO, ErpCustomRuleDO.class, bindQueryWrapper(reqVO));
     }
 
     /**
@@ -67,18 +72,7 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
 
     //连表查询
     private MPJLambdaWrapper<ErpCustomRuleDO> getBOWrapper(@NotNull ErpCustomRulePageReqVO reqVO) {
-        return new MPJLambdaWrapperX<ErpCustomRuleDO>()
-            .selectAll(ErpCustomRuleDO.class)
-            .eqIfPresent(ErpCustomRuleDO::getCountryCode, reqVO.getCountryCode())  // 国家编码
-            .eqIfPresent(ErpCustomRuleDO::getDeclaredValue, reqVO.getDeclaredValue())  // 申报金额
-            .eqIfPresent(ErpCustomRuleDO::getDeclaredValueCurrencyCode, reqVO.getDeclaredValueCurrencyCode())  // 申报金额币种
-            .eqIfPresent(ErpCustomRuleDO::getLogisticAttribute, reqVO.getLogisticAttribute())  // 物流属性
-            .likeIfPresent(ErpCustomRuleDO::getFbaBarCode, reqVO.getFbaBarCode())  // FBA条形码
-            .betweenIfPresent(ErpCustomRuleDO::getCreateTime, reqVO.getCreateTime())  // 创建时间范围
-            .betweenIfPresent(ErpCustomRuleDO::getUpdateTime, reqVO.getUpdateTime())  // 更新时间范围
-            .orderByDesc(ErpCustomRuleDO::getId)
-            .leftJoin(ErpProductDO.class, ErpProductDO::getId, ErpCustomRuleDO::getProductId)
-            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode())  // 产品条形码
+        return bindQueryWrapper(reqVO)
             .leftJoin(ErpCustomCategoryDO.class, ErpCustomCategoryDO::getId, ErpProductDO::getCustomCategoryId)
             .selectAsClass(ErpCustomCategoryDO.class, ErpCustomRuleBO.class)
             .leftJoin(ErpCustomCategoryItemDO.class, ErpCustomCategoryItemDO::getCustomCategoryId, ErpCustomCategoryDO::getId)
