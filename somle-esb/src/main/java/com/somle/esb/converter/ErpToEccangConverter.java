@@ -91,9 +91,8 @@ public class ErpToEccangConverter {
             ? getCountrySuffix(dictDataApi.getDictData(DictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode)).getLabel())
             : "";
         String barCode = productDTO.getBarCode();
-        String productName = productDTO.getName();
         String suffix = countrySuffix.isEmpty() ? "" : "-" + countrySuffix;
-        eccangProduct.setProductTitle(productName + suffix);
+        eccangProduct.setProductTitle(productDTO.getName() + suffix);
         eccangProduct.setProductTitleEn(CharSequenceUtil.isNotBlank(barCode) ? barCode + suffix : barCode);
         eccangProduct.setProductSku(CharSequenceUtil.isNotBlank(barCode) ? barCode + suffix : barCode);
         //申报币种
@@ -106,7 +105,8 @@ public class ErpToEccangConverter {
         eccangProduct.setProductDeclaredValue(customRuleDTO.getDeclaredValue().floatValue());
         eccangProduct.setPdOverseaTypeEn(customRuleDTO.getDeclaredTypeEn());
 
-        this.setProductSizeAndWeight(eccangProduct, productDTO, (product, dto) -> product.setProductWeight(dto.getPackageWeight().floatValue()));
+        this.setProductSizeAndWeight(eccangProduct, productDTO, (product, dto) -> {
+        });
         //其他产品属性
         Optional.ofNullable(customRuleDTO.getTaxRate()).ifPresent(taxRate -> eccangProduct.setTaxRate(taxRate.floatValue()));
         eccangProduct.setPdOverseaTypeCn(customRuleDTO.getDeclaredType());
@@ -114,9 +114,10 @@ public class ErpToEccangConverter {
 //        eccangProduct.setHsCode(customRuleDTO.getHscode());//不同步hsCode
         // 物流属性
         Integer logisticAttribute = customRuleDTO.getLogisticAttribute();
-        if (ObjUtil.isNotEmpty(logisticAttribute)) {
-            eccangProduct.setLogisticAttribute(String.valueOf(logisticAttribute));
-        }
+        eccangProduct.setLogisticAttribute(Optional.ofNullable(logisticAttribute)
+            .map(String::valueOf)
+            .orElse(null));
+
         this.setProductCategoriesAndOrganizationId(eccangProduct, productDTO, userMap);
         //产品id
 //        eccangProduct.setDesc(String.valueOf(customRuleDTO.getProductId()));//Desc->productId
@@ -136,11 +137,8 @@ public class ErpToEccangConverter {
         eccangProduct.setProductTitle(productDTO.getName());
         eccangProduct.setProductTitleEn(productDTO.getBarCode());
         eccangProduct.setProductSku(productDTO.getBarCode());
-        this.setProductSizeAndWeight(eccangProduct, productDTO, (product, dto) -> product.setProductWeight(
-            dto.getPackageWeight() != null
-                ? dto.getPackageWeight().setScale(3, RoundingMode.HALF_UP).floatValue() // 保留三位小数
-                : null // 如果为 null，返回 null
-        ));
+        this.setProductSizeAndWeight(eccangProduct, productDTO, (product, dto) -> {
+        });
         this.setProductCategoriesAndOrganizationId(eccangProduct, productDTO, userMap);
         return eccangProduct;
     }
@@ -155,13 +153,13 @@ public class ErpToEccangConverter {
             ObjectUtils.defaultIfNull(eccangProduct.getSaleStatus(), 2) // 销售状态
         );
         eccangProduct.setActionType(
-            ObjectUtils.defaultIfNull(eccangProduct.getActionType(), "ADD") //操作类型
+            ObjectUtils.defaultIfNull(eccangProduct.getActionType(), "ADD") //默认操作类型
         );
         eccangProduct.setCurrencyCode(
             ObjectUtils.defaultIfNull(eccangProduct.getCurrencyCode(), "RMB") // 默认币种代码RMB
         );
         eccangProduct.setProductPrice(
-            ObjectUtils.defaultIfNull(eccangProduct.getProductPrice(), 0f) // 默认价格为 0.0
+            ObjectUtils.defaultIfNull(eccangProduct.getProductPrice(), 0F) // 默认价格为 0.0
         );
         eccangProduct.setPdDeclareCurrencyCode(
             ObjectUtils.defaultIfNull(eccangProduct.getPdDeclareCurrencyCode(), "USD") // 默认申报币种USD
@@ -283,7 +281,11 @@ public class ErpToEccangConverter {
         eccangProduct.setProductLength(mmToCmAsFloat(productDTO.getPackageLength()));  // 包装长
         eccangProduct.setProductWidth(mmToCmAsFloat(productDTO.getPackageWidth()));    // 包装宽
         eccangProduct.setProductHeight(mmToCmAsFloat(productDTO.getPackageHeight()));  // 包装高
-//        eccangProduct.setProductWeight(Objects.requireNonNullElse(productDTO.getPackageWeight(), BigDecimal.ZERO).floatValue());
+        eccangProduct.setProductWeight(
+            Optional.ofNullable(productDTO.getPackageWeight())
+                .map(weight -> weight.setScale(3, RoundingMode.HALF_UP).floatValue())//保留三位小数
+                .orElse(null)
+        );
         consumer.accept(eccangProduct, productDTO);//自定义尺寸和重量
     }
 }
