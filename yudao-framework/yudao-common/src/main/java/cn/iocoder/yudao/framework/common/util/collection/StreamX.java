@@ -1,9 +1,10 @@
 package cn.iocoder.yudao.framework.common.util.collection;
 
 
-import cn.iocoder.yudao.framework.common.util.function.PairConsumer;
+
 
 import java.util.*;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -750,14 +751,14 @@ public class StreamX<T> {
      * @param propertySetter 设置当前元素属性值的方法，将 beanMap 中获取到的属性值设置到当前元素属性中
      * @return 当前对象
      **/
-    public <K, M> StreamX<T> assemble(Map<K,M> propertyValueMap, Function<T,K> keyPropertyGetter, PairConsumer<T,M> propertySetter) {
+    public <K, M> StreamX<T> assemble(Map<K,M> propertyValueMap, Function<T,K> keyPropertyGetter, BiConsumer<T,M> propertySetter) {
         this.forEach(t->{
             if(t==null) {
                 return;
             }
             K key = keyPropertyGetter.apply(t);
             M value = propertyValueMap.get(key);
-            propertySetter.apply(t,value);
+            propertySetter.accept(t,value);
         });
         return this;
     }
@@ -770,7 +771,7 @@ public class StreamX<T> {
      * @param propertySetter 设置当前元素属性值的方法，将中间 Map 中获取到的属性值设置到当前元素属性中
      * @return 当前对象
      **/
-    public <K, M> StreamX<T> assemble(List<M> valueList, Function<M,K> keyPropertyGetter4List,Function<T,K> keyPropertyGetter, PairConsumer<T,M> propertySetter) {
+    public <K, M> StreamX<T> assemble(List<M> valueList, Function<M,K> keyPropertyGetter4List,Function<T,K> keyPropertyGetter, BiConsumer<T,M> propertySetter) {
         Map<K,M> propertyValueMap=StreamX.from(valueList).toMap(keyPropertyGetter4List,t->t);
         return this.assemble(propertyValueMap,keyPropertyGetter,propertySetter);
     }
