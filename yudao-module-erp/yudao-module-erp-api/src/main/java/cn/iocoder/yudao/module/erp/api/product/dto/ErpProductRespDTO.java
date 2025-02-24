@@ -140,7 +140,7 @@ public class ErpProductRespDTO{
     /**
      * 指导价，json格式
      */
-    private List<GuidePriceJson> guidePriceList;
+    private List<GuidePriceJsonDTO> guidePriceList;
 
     /**
      * 专利类型

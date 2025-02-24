@@ -16,7 +16,7 @@ import java.math.BigDecimal;
  */
 @Data
 @AllArgsConstructor
-public class GuidePriceJson implements Serializable {
+public class GuidePriceJsonDTO implements Serializable {
     /**
      * 国别代码
      **/
