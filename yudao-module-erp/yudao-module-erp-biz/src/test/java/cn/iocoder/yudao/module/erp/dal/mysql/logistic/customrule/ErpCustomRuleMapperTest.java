@@ -66,4 +66,10 @@ class ErpCustomRuleMapperTest extends BaseDbUnitTest {
             log.info("{}", bos);
         }
     }
+    @Test
+    void selectBOList() {
+//        List<ErpCustomRuleBO> erpCustomRuleBOS = erpCustomRuleMapper.selectBOList(new ErpCustomRulePageReqVO().setCustomCategoryId(318L));
+//        318不存在海关规则，所以没有数据
+//        log.info("{}", erpCustomRuleBOS);
+    }
 }

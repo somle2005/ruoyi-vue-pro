@@ -206,7 +206,6 @@ public interface ErrorCodeConstants {
     ErrorCode CUSTOM_RULE_CATEGORY_NOT_EXISTS = new ErrorCode(1_030_605_001, "海关分类不存在");
     // ========== 海关分类子表 1-030-606-000 ==========
     ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS = new ErrorCode(1_030_606_001, "海关分类子表不存在");
-    //当前海关规则的产品下不存在海关分类数据
-    ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID = new ErrorCode(1_030_606_002, "产品中不存在海关分类数据");
+    ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID = new ErrorCode(1_030_606_002, "所选产品中不存在海关分类数据");
 
 }

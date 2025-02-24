@@ -24,6 +24,7 @@ import java.util.List;
  */
 @Mapper
 public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
+    //规则->产品
     default MPJLambdaWrapper<ErpCustomRuleDO> bindQueryWrapper(ErpCustomRulePageReqVO reqVO) {
         return new MPJLambdaWrapperX<ErpCustomRuleDO>()
             .selectAll(ErpCustomRuleDO.class)  // 选择所有列
@@ -34,7 +35,7 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
             .likeIfPresent(ErpCustomRuleDO::getFbaBarCode, reqVO.getFbaBarCode())  // FBA条形码
             .betweenIfPresent(ErpCustomRuleDO::getCreateTime, reqVO.getCreateTime())  // 创建时间范围
             .betweenIfPresent(ErpCustomRuleDO::getUpdateTime, reqVO.getUpdateTime())  // 更新时间范围
-            .orderByDesc(ErpCustomRuleDO::getId)  // 按id降序排序
+            .orderByAsc(ErpCustomRuleDO::getId)  // 按id降序排序
             .leftJoin(ErpProductDO.class, ErpProductDO::getId, ErpCustomRuleDO::getProductId)  // 左连接产品表
             .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode()) // 产品SKU编码
             ;
@@ -70,23 +71,46 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
         return selectJoinList(ErpCustomRuleBO.class, boWrapper);
     }
 
-    //连表查询
+    //海关分类
     private MPJLambdaWrapper<ErpCustomRuleDO> getBOWrapper(@NotNull ErpCustomRulePageReqVO reqVO) {
         return bindQueryWrapper(reqVO)
             .leftJoin(ErpCustomCategoryDO.class, ErpCustomCategoryDO::getId, ErpProductDO::getCustomCategoryId)
             .selectAsClass(ErpCustomCategoryDO.class, ErpCustomRuleBO.class)
             .leftJoin(ErpCustomCategoryItemDO.class, ErpCustomCategoryItemDO::getCustomCategoryId, ErpCustomCategoryDO::getId)
+//            .eq(ErpCustomRuleDO::getCountryCode,ErpCustomCategoryItemDO::getCountryCode)
             .selectAsClass(ErpCustomCategoryItemDO.class, ErpCustomRuleBO.class)
             .eqIfExists(ErpCustomCategoryItemDO::getCountryCode, reqVO.getCountryCode())  // 匹配 ErpCustomCategoryItemDO 的 countryCode 与请求中的 countryCode
+            .orderByAsc(ErpCustomRuleDO::getId)
             ;
     }
 
-    // 分页查询 ErpCustomRuleBO 海关规则数据(3表联查)
+    // 分页查询 ErpCustomRuleBO 海关规则数据(3表联查)海关规则->产品->分类 ，不关联国家查询
     default PageResult<ErpCustomRuleBO> selectBOPage(@NotNull ErpCustomRulePageReqVO reqVO) {
         return selectJoinPage(reqVO, ErpCustomRuleBO.class, getBOWrapper(reqVO));
     }
 
-    //查到ErpCustomRuleBO通过id
+    // list查询 ErpCustomRuleBO 海关规则数据(3表联查)海关规则->产品->分类，不关联国家查询
+    default List<ErpCustomRuleBO> selectBOList(@NotNull ErpCustomRulePageReqVO reqVO) {
+        return selectJoinList(ErpCustomRuleBO.class, getBOWrapper(reqVO));
+    }
+
+    //关联国家查询 customCategoryId
+    default List<ErpCustomRuleBO> selectBOListEqCountryCodeByCategoryId(@NotNull ErpCustomRulePageReqVO reqVO, @NotNull Long customCategoryId) {
+        return selectJoinList(ErpCustomRuleBO.class, getBOWrapper(reqVO)
+            .eq(ErpCustomRuleDO::getCountryCode, ErpCustomCategoryItemDO::getCountryCode)
+            .eq(ErpCustomCategoryItemDO::getCustomCategoryId, customCategoryId)
+        );
+    }
+
+    //关联国家查询 customCategoryItemId
+    default List<ErpCustomRuleBO> selectBOListEqCountryCodeByItemId(@NotNull ErpCustomRulePageReqVO reqVO, @NotNull List<Long> customCategoryItemId) {
+        return selectJoinList(ErpCustomRuleBO.class, getBOWrapper(reqVO)
+            .eq(ErpCustomRuleDO::getCountryCode, ErpCustomCategoryItemDO::getCountryCode)
+            .in(ErpCustomCategoryItemDO::getId, customCategoryItemId)
+        );
+    }
+
+    //查到ErpCustomRuleBO通过id 关联国家查询
     default ErpCustomRuleBO getCustomRuleBOById(@NotNull Long id) {
         MPJLambdaWrapper<ErpCustomRuleDO> wrapper = getBOWrapper(new ErpCustomRulePageReqVO());
         wrapper.eq(ErpCustomRuleDO::getId, id);
@@ -101,6 +125,7 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
         if (ids != null) {
             wrapper.in(ErpCustomRuleDO::getId, ids);
         }
+        wrapper.eq(ErpCustomRuleDO::getCountryCode, ErpCustomCategoryItemDO::getCountryCode);
         return this.selectJoinList(ErpCustomRuleBO.class, wrapper);
     }
 }

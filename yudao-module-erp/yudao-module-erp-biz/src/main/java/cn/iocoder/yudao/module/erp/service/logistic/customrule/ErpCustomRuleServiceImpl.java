@@ -34,8 +34,7 @@ import java.util.stream.Collectors;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_BATCH_INSERT_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_RULE_NOT_EXISTS;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE;
+import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
 
 /**
  * ERP 海关规则 Service 实现类
@@ -66,6 +65,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
             validateExist(null, countryCode, createReqVO.getProductId());
         });
         List<ErpCustomRuleDO> doList = createReqVO.getCountryCode().stream().map(countryCode -> copyPropertiesIgnoreType(createReqVO, countryCode)).toList();
+        ThrowUtil.ifThrow(erpProductService.getProduct(createReqVO.getProductId()).getCustomCategoryId() == null, CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID);
         //批量添加
         ThrowUtil.ifThrow(!customRuleMapper.insertBatch(doList, doList.size()), DB_BATCH_INSERT_ERROR);
         //同步数据
@@ -87,6 +87,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         validateExist(id, countryCode, updateReqVO.getProductId());
         // 校验存在
         validateCustomRuleExists(id);
+        ThrowUtil.ifThrow(erpProductService.getProduct(updateReqVO.getProductId()).getCustomCategoryId() == null, CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID);
         // 更新
         ErpCustomRuleDO updateObj = copyPropertiesIgnoreType(updateReqVO, countryCode);
         ThrowUtil.ifSqlThrow(customRuleMapper.updateById(updateObj), DB_UPDATE_ERROR);
