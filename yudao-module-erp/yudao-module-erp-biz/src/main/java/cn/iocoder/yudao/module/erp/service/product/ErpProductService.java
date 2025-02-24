@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.service.product;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
@@ -125,5 +126,19 @@ public interface ErpProductService {
      * @return 产品数量
      */
     Long getProductCountByUnitId(Long unitId);
+
+    /**
+     * 获取所有产品信息
+     *
+     * @return 产品信息集合
+     */
+    public List<ErpProductRespDTO> getAllProductVOInfo();
+
+    /**
+     * 获取根据状态获取所有产品信息
+     * @param status 是否启用
+     * @return 产品信息集合
+     */
+    public List<ErpProductRespVO> getProductVOInfoByStatus(boolean status);
 
 }

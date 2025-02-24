@@ -11,11 +11,11 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
 import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.GuidePriceJson;
-import cn.iocoder.yudao.module.erp.convert.product.ErpProductConvert;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
@@ -361,6 +361,21 @@ public class ErpProductServiceImpl implements ErpProductService {
     @Override
     public Long getProductCountByUnitId(Long unitId) {
         return productMapper.selectCountByUnitId(unitId);
+    }
+
+    @Override
+    public List<ErpProductRespDTO> getAllProductVOInfo() {
+        List<ErpProductDO> erpProductDOS = productMapper.selectListByStatus(true);
+        List<ErpProductRespVO> erpProductRespVOS = buildProductVOList(erpProductDOS);
+        List<ErpProductRespDTO> erpProductRespDTOS = BeanUtils.toBean(erpProductRespVOS, ErpProductRespDTO.class);
+        return erpProductRespDTOS;
+    }
+
+    @Override
+    public List<ErpProductRespVO> getProductVOInfoByStatus(boolean status) {
+        List<ErpProductDO> erpProductDOS = productMapper.selectListByStatus(status);
+        List<ErpProductRespVO> erpProductRespVOS = buildProductVOList(erpProductDOS);
+        return erpProductRespVOS;
     }
 
     private boolean validateProductColorAndSeriesAndModel(Long id, String color, String model, String series) {

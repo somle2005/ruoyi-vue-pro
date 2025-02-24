@@ -82,8 +82,7 @@ public interface CrmReceivableMapper extends BaseMapperX<CrmReceivableDO> {
         // SQL sum 查询
         List<Map<String, Object>> result = selectMaps(new QueryWrapper<CrmReceivableDO>()
                 .select("contract_id, SUM(price) AS total_price")
-                .in("audit_status", CrmAuditStatusEnum.DRAFT.getStatus(), // 草稿 + 审批中 + 审批通过
-                        CrmAuditStatusEnum.PROCESS.getStatus(), CrmAuditStatusEnum.APPROVE.getStatus())
+                .in("audit_status", CrmAuditStatusEnum.APPROVE.getStatus())// 只有审批通过的回款才计算到已回款金额中
                 .groupBy("contract_id")
                 .in("contract_id", contractIds));
         // 获得金额

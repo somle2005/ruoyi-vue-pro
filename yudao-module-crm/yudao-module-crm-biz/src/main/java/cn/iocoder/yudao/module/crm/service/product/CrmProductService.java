@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.crm.controller.admin.product.vo.product.CrmProductPageReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.product.vo.product.CrmProductSaveReqVO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.product.CrmProductDO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
@@ -97,6 +98,6 @@ public interface CrmProductService {
      * @param ids 编号数组
      * @return 产品列表
      */
-    List<CrmProductDO> validProductList(Collection<Long> ids);
+    List<ErpProductDO> validProductList(Collection<Long> ids);
 
 }

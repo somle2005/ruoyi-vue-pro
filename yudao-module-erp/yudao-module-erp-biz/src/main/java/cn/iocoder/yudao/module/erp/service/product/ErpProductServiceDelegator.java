@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.service.product;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
@@ -163,5 +164,17 @@ public class ErpProductServiceDelegator implements ErpProductService {
     public Long getProductCountByUnitId(Long unitId) {
         ErpProductService service = getDefaultService();
         return service.getProductCountByUnitId(unitId);
+    }
+
+    @Override
+    public List<ErpProductRespDTO> getAllProductVOInfo() {
+        ErpProductService service = getDefaultService();
+        return service.getAllProductVOInfo();
+    }
+
+    @Override
+    public List<ErpProductRespVO> getProductVOInfoByStatus(boolean status) {
+        ErpProductService service = getDefaultService();
+        return service.getProductVOInfoByStatus(status);
     }
 }

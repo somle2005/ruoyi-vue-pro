@@ -78,4 +78,11 @@ public class ErpCustomRuleApiImpl implements ErpCustomRuleApi {
         }
         return null;
     }
+
+    @Override
+    public List<ErpCustomRuleDTO> getAllCustomRulesDTOInfo() {
+        List<ErpCustomRuleDO> ruleDOS = customRuleMapper.selectList();
+        List<ErpCustomRuleDTO> erpCustomRuleDTOS = ruleDOS.stream().map(ruleDO -> ErpCustomRuleConvert.INSTANCE.convert(ruleDO, null)).toList();
+        return erpCustomRuleDTOS;
+    }
 }

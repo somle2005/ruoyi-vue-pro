@@ -13,6 +13,9 @@ import cn.iocoder.yudao.module.crm.controller.admin.product.vo.product.CrmProduc
 import cn.iocoder.yudao.module.crm.dal.dataobject.product.CrmProductDO;
 import cn.iocoder.yudao.module.crm.enums.product.CrmProductStatusEnum;
 import cn.iocoder.yudao.module.crm.service.product.CrmProductService;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
+import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSimpleRespVO;
+import cn.iocoder.yudao.module.erp.service.product.ErpProductServiceDelegator;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -39,6 +42,10 @@ public class CrmProductController {
 
     @Resource
     private CrmProductService productService;
+
+    @Resource
+    private ErpProductServiceDelegator erpProductService;
+
     @Resource
     private AdminUserApi adminUserApi;
 
@@ -77,10 +84,9 @@ public class CrmProductController {
 
     @GetMapping("/simple-list")
     @Operation(summary = "获得产品精简列表", description = "只包含被开启的产品，主要用于前端的下拉选项")
-    public CommonResult<List<CrmProductRespVO>> getProductSimpleList() {
-        List<CrmProductDO> list = productService.getProductListByStatus(CrmProductStatusEnum.ENABLE.getStatus());
-        return success(convertList(list, product -> new CrmProductRespVO().setId(product.getId()).setName(product.getName())
-                .setUnit(product.getUnit()).setNo(product.getNo()).setPrice(product.getPrice())));
+    public CommonResult<List<ErpProductSimpleRespVO>> getProductSimpleList() {
+        List<ErpProductRespVO> list = erpProductService.getProductVOListByStatus(true);
+        return success(convertList(list, vo -> BeanUtils.toBean(vo, ErpProductSimpleRespVO.class)));
     }
 
     @GetMapping("/page")
