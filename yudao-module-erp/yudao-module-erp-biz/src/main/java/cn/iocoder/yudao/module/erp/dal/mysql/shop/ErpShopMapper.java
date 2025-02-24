@@ -42,5 +42,7 @@ public interface ErpShopMapper extends BaseMapperX<ErpShopDO> {
     }
 
 
-
+    default ErpShopDO getShopByAccount(String account) {
+        return this.selectOne(LambdaQueryWrapperX.create(ErpShopDO.class).eq(ErpShopDO::getAccount,account));
+    }
 }

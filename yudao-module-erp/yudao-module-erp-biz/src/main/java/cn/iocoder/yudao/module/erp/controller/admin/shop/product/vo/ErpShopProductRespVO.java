@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo;
 
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,7 +17,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Schema(description = "管理后台 - ERP 店铺产品 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class ErpShopProductRespVO {
+public class ErpShopProductRespVO extends BaseDO {
 
     @Schema(description = "店铺产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "18131")
     @ExcelProperty("店铺产品编号")
@@ -62,6 +63,10 @@ public class ErpShopProductRespVO {
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
+
+    @Schema(description = "更新时间", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("更新时间")
+    private LocalDateTime updateTime;
 
     @Schema(description = "链接", example = "https://www.iocoder.cn")
     @ExcelProperty("链接")

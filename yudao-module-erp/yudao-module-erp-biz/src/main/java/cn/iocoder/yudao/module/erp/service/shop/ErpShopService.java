@@ -5,6 +5,7 @@ import jakarta.validation.*;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -73,4 +74,9 @@ public interface ErpShopService {
      * 按条件查询店铺，不分页
      **/
     List<ErpShopDO> getShopList(@Valid ErpShopPageReqVO pageReqVO);
+
+    /**
+     * 按 account 查询店铺
+     **/
+    ErpShopDO getShopByAccount(String account);
 }

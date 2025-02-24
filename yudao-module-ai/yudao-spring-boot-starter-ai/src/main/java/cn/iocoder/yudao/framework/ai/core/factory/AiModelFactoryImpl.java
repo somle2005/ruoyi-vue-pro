@@ -88,7 +88,7 @@ public class AiModelFactoryImpl implements AiModelFactory {
                 case YI_YAN:
                     return buildYiYanChatModel(apiKey);
                 case DEEP_SEEK:
-                    return buildDeepSeekChatModel(apiKey);
+                    return buildDeepSeekChatModel(apiKey,url);
                 case ZHI_PU:
                     return buildZhiPuChatModel(apiKey, url);
                 case XING_HUO:
@@ -274,8 +274,8 @@ public class AiModelFactoryImpl implements AiModelFactory {
     /**
      * 可参考 {@link YudaoAiAutoConfiguration#deepSeekChatModel(YudaoAiProperties)}
      */
-    private static DeepSeekChatModel buildDeepSeekChatModel(String apiKey) {
-        return new DeepSeekChatModel(apiKey);
+    private static DeepSeekChatModel buildDeepSeekChatModel(String apiKey,String url) {
+        return new DeepSeekChatModel(apiKey,url);
     }
 
     /**

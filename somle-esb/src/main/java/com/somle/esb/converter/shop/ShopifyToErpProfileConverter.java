@@ -8,13 +8,11 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.module.erp.enums.ErpOffStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpProductListingStatus;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
-import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.esb.enums.ESBConstants;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
 import com.somle.esb.model.ShopProfileDTO;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -47,7 +45,7 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
     public static final String FIELD_VARIANTS = QUERY_STRING_VAR_VARIANT + "s";
     public static final String FIELD_CREATED_AT = "created_at";
     public static final String FIELD_SKU = "sku";
-    public static final String FIELS_STATUS = "status";
+    public static final String FIELDS_STATUS = "status";
     public static final String VALUE_ACTIVE = "active";
 
 
@@ -92,7 +90,7 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                 shopDo.setCountryCode(getCountryDictValue(shopJson.getString(FIELD_COUNTRY)));
                 shopDo.setPlatform(SalesPlatform.SHOPIFY.name());
                 shopDo.setPlatformShopUid(shopJson.getString(FIELD_ID));
-                shopDo.setAccount(ESBConstants.VALUE_UNKNOWN);
+                //shopDo.setAccount(null);
                 shopDo.setCode(shopDo.getPlatform()+"-"+shopDo.getPlatformShopUid());
                 returnList.add(shopDo);
             }
@@ -134,7 +132,7 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                     productDO.setListingTime(toLocalDateTime(productJson.getString(FIELD_CREATED_AT)));
 
                     productDO.setPlatformProductUid(productJson.getString(FIELD_ID)+CharSymbols.MINUS+variantId);
-                    String status = productJson.getString(FIELS_STATUS);
+                    String status = productJson.getString(FIELDS_STATUS);
                     if(status.equals(VALUE_ACTIVE)) {
                         productDO.setStatus(ErpProductListingStatus.ONLINE.getCode());
                     } else {

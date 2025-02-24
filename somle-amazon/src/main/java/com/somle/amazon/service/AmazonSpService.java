@@ -1,6 +1,7 @@
 package com.somle.amazon.service;
 
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
+import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import cn.iocoder.yudao.framework.common.util.config.Variable;
 import com.somle.amazon.model.enums.AmazonRegion;
 import com.somle.amazon.repository.AmazonAdAuthRepository;
@@ -44,8 +45,12 @@ public class AmazonSpService {
         clients = authRepository.findAll().stream()
             .map(AmazonSpClient::new)
             .toList();
+
         // 启动后刷新 Token
-        refreshAuths();
+        AsyncTask.run(() -> {
+            refreshAuths();
+        });
+
     }
 
     private Map<String,Variable> isAuthRefreshedMap = new HashMap<>();
@@ -56,7 +61,7 @@ public class AmazonSpService {
         return true;
     }
 
-    public boolean refreshAuth(AmazonSpClient client) {
+    public synchronized boolean refreshAuth(AmazonSpClient client) {
         var auth = client.getAuth();
 
         Variable isAuthRefreshed=isAuthRefreshedMap.get(auth.getClientId());

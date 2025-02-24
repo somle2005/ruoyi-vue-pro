@@ -108,4 +108,9 @@ public class ErpShopServiceImpl implements ErpShopService {
         return shopMapper.getShopList(reqVO);
     }
 
+    @Override
+    public ErpShopDO getShopByAccount(String account) {
+        return shopMapper.getShopByAccount(account);
+    }
+
 }

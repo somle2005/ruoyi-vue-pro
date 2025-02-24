@@ -2,6 +2,7 @@ package cn.iocoder.yudao.framework.ai.core.model.deepseek;
 
 import cn.hutool.core.collection.ListUtil;
 import cn.hutool.core.lang.Assert;
+import jodd.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.metadata.ChatGenerationMetadata;
 import org.springframework.ai.chat.model.ChatModel;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.Map;
 
 import static cn.iocoder.yudao.framework.ai.core.model.deepseek.DeepSeekChatOptions.MODEL_DEFAULT;
+import static cn.iocoder.yudao.framework.ai.core.model.deepseek.DeepSeekChatOptions.MODEL_REASONER;
 
 /**
  * DeepSeek {@link ChatModel} 实现类
@@ -42,10 +44,17 @@ public class DeepSeekChatModel implements ChatModel {
      *
      * 不过要注意，DeepSeek 没有完全兼容，所以不能使用 {@link org.springframework.ai.openai.OpenAiChatModel} 调用，但是实现会参考它
      */
-    private final OpenAiApi openAiApi;
+    private OpenAiApi openAiApi;
 
     public DeepSeekChatModel(String apiKey) {
         this(apiKey, DeepSeekChatOptions.builder().model(MODEL_DEFAULT).temperature(0.7F).build());
+    }
+
+    public DeepSeekChatModel(String apiKey,String url) {
+        this(apiKey, DeepSeekChatOptions.builder().model(MODEL_REASONER).temperature(0.7F).build());
+        if(!StringUtil.isBlank(url)) {
+            this.openAiApi = new OpenAiApi(url, apiKey);
+        }
     }
 
     public DeepSeekChatModel(String apiKey, DeepSeekChatOptions options) {

@@ -1,16 +1,26 @@
 package cn.iocoder.yudao.module.erp.service.shop.product;
 
+import cn.hutool.core.util.ObjectUtil;
+import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
+import cn.iocoder.yudao.framework.common.util.lang.DataParser;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespSimpleVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemSaveReqVO;
+import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
 import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
+import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
+import cn.iocoder.yudao.module.system.api.dept.DeptApi;
+import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
+import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -27,6 +37,7 @@ import cn.iocoder.yudao.module.erp.dal.mysql.shop.product.ErpShopProductMapper;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.error;
+import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
 
 /**
@@ -46,6 +57,15 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
 
     @Resource
     private ErpProductService productService;
+
+    @Autowired
+    private DeptApi deptApi;
+
+    @Resource
+    AdminUserApi userApi;
+
+    @Resource
+    private ErpShopService shopService;
 
     @Override
     public Long createShopProduct(ErpShopProductSaveReqVO createReqVO) {
@@ -142,6 +162,21 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
         return itemsGroup;
     }
 
+
+    @Transactional
+    @Override
+    public Long createShopProductWithItems(ErpShopProductSaveReqVO createReqVO) {
+        Long id=this.createShopProduct(createReqVO);
+        createReqVO.setId(id);
+        updateShopProductWithItems(createReqVO);
+        return id;
+    }
+
+    @Override
+    public ErpShopProductDO getShopProductByCode(String code) {
+        return shopProductMapper.getShopProductByCode(code);
+    }
+
     @Override
     @Transactional
     public void updateShopProductWithItems(ErpShopProductSaveReqVO updateReqVO) {
@@ -175,5 +210,52 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
 
 
     }
+
+    @Override
+    public CommonResult<PageResult<ErpShopProductRespVO>> getShopProductPageVO(ErpShopProductPageReqVO pageReqVO) {
+
+
+
+        PageResult<ErpShopProductDO> pageResult = this.getShopProductPage(pageReqVO);
+        List<Long> userIds=new ArrayList<>();
+        for(ErpShopProductDO product:pageResult.getList()) {
+            userIds.add(DataParser.parseLong(product.getCreator()));
+            userIds.add(DataParser.parseLong(product.getUpdater()));
+        }
+        Map<Long, AdminUserRespDTO> userMap=userApi.getUserMap(userIds);
+        for(ErpShopProductDO product:pageResult.getList()) {
+            AdminUserRespDTO creator=userMap.get(DataParser.parseLong(product.getCreator()));
+            if(creator!=null) {
+                product.setCreator(creator.getNickname());
+            }
+            AdminUserRespDTO updater=userMap.get(DataParser.parseLong(product.getUpdater()));
+            if(updater!=null) {
+                product.setUpdater(updater.getNickname());
+            }
+        }
+
+        PageResult<ErpShopProductRespVO> pageResultVO=BeanUtils.toBean(pageResult, ErpShopProductRespVO.class);
+        Set<Long> shopIds= StreamX.from(pageResultVO.getList()).toSet(ErpShopProductRespVO::getShopId);
+        Map<Long, ErpShopRespVO> shopVoMap = shopService.getShopMapByIds(shopIds);
+        // 装配对象
+        StreamX.from(pageResultVO.getList()).assemble(shopVoMap,ErpShopProductRespVO::getShopId, ErpShopProductRespVO::setShop);
+        List<Long> productIds=StreamX.from(pageResultVO.getList()).toList(ErpShopProductRespVO::getId);
+        Map<Long,List<ErpShopProductItemRespVO>> itemsGroup=this.getItemGroupMap(productIds);
+        StreamX.from(pageResultVO.getList()).assemble(itemsGroup,ErpShopProductRespVO::getId, ErpShopProductRespVO::setItems);
+
+        List<Long> deptIds=StreamX.from(pageResultVO.getList()).filter(ObjectUtil::isNotNull).toList(ErpShopProductRespVO::getDeptId);
+        List<DeptRespDTO> deptDTOList=deptApi.getDeptList(deptIds);
+        deptDTOList=StreamX.from(deptDTOList).filter(ObjectUtil::isNotNull).toList();
+        StreamX.from(pageResultVO.getList()).assemble(deptDTOList,DeptRespDTO::getId,ErpShopProductRespVO::getDeptId,(prod,dept)->{
+            if(dept!=null) {
+                prod.setDeptName(dept.getName());
+            }
+        });
+
+        //
+        return success(pageResultVO);
+    }
+
+
 
 }

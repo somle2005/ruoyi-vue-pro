@@ -133,6 +133,7 @@ public class ShopifyClient {
      * @return  返回原始报文
      **/
     private JSONObject getRawResult(ShopifyAPI api,Map<String,?> params) {
+        Response response = null;
         try {
             initialize();
             var request = RequestX.builder()
@@ -141,12 +142,16 @@ public class ShopifyClient {
                 .headers(getHeaders())
                 .queryParams(params)
                 .build();
-            var response = sendRequest(request);
+            response = sendRequest(request);
             var bodyString = response.body().string();
             return JsonUtilsX.parseObject(bodyString, JSONObject.class);
         } catch (Throwable t) {
             log.error("{}异常", api.action(), t);
             return null;
+        } finally {
+            if(response!=null) {
+                response.code();
+            }
         }
     }
 

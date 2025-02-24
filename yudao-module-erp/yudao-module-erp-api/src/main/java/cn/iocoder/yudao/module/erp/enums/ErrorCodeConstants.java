@@ -213,12 +213,16 @@ public interface ErrorCodeConstants {
     ErrorCode SHOP_NOT_ALLOW_DELETE = new ErrorCode(1_030_607_001, "线上店铺不允许删除");
     ErrorCode SHOP_CAN_NOT_CREATE_ONLINE_SHOP = new ErrorCode(1_030_607_002, "不允许创建线上店铺");
     ErrorCode SHOP_CAN_NOT_UPDATE_ONLINE_SHOP = new ErrorCode(1_030_607_003, "不允许变更为线上店铺");
+    ErrorCode SHOP_ACCOUNT_EXISTS = new ErrorCode(1_030_607_004, "店铺已存在");
+    ErrorCode REQUIRE_SHOP_ACCOUNT = new ErrorCode(1_030_607_005, "店铺缺少别名");
+
+
 
     // ========== ERP 店铺产品 1_030_608_000 ==========
     ErrorCode SHOP_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_608_000, "ERP 店铺产品不存在");
     ErrorCode SHOP_PRODUCT_NOT_ALLOW_DELETE = new ErrorCode(1_030_608_001, "线上店铺的产品不允许删除");
     ErrorCode SHOP_PRODUCT_DEPT_NOT_EXISTS = new ErrorCode(1_030_608_002, "部门不存在");
-
+    ErrorCode SHOP_PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_608_003, "店铺产品代码重复");
 
     // ========== ERP 店铺产品项 1_030_609_000 ==========
     ErrorCode SHOP_PRODUCT_ITEM_NOT_EXISTS = new ErrorCode(1_030_609_000, "ERP 店铺产品项不存在");

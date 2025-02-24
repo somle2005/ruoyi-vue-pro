@@ -1,7 +1,9 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop.product;
 
+import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
+import cn.iocoder.yudao.framework.common.util.lang.DataParser;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
@@ -11,6 +13,9 @@ import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
 import cn.iocoder.yudao.module.erp.service.shop.product.item.ErpShopProductItemService;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
+import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import jodd.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
@@ -55,11 +60,12 @@ public class ErpShopProductController {
 
     @Resource
     private ErpShopService shopService;
-    @Autowired
-    private ErpShopService erpShopService;
 
     @Autowired
     private DeptApi deptApi;
+
+    @Resource
+    AdminUserApi userApi;
 
 
     @PostMapping("/create")
@@ -67,6 +73,28 @@ public class ErpShopProductController {
     @PreAuthorize("@ss.hasPermission('erp:shop-product:create')")
     public CommonResult<Long> createShopProduct(@Valid @RequestBody ErpShopProductSaveReqVO createReqVO) {
 
+        // 校验店铺是否存在
+        ErpShopDO shopDO = shopService.getShop(createReqVO.getShopId());
+        if(shopDO==null) {
+            return error(SHOP_NOT_EXISTS);
+        }
+
+        // 校验店铺账号是否填写
+        if(StringUtil.isBlank(shopDO.getAccount())) {
+            return error(REQUIRE_SHOP_ACCOUNT);
+        }
+
+        if(StringUtil.isBlank(createReqVO.getPlatformProductUid())) {
+            createReqVO.setPlatformProductUid(IdUtil.nanoId());
+        }
+
+        // 校验产品编码
+        ErpShopProductDO productDO =shopProductService.getShopProductByCode(createReqVO.getCode());
+        if(productDO!=null) {
+            return error(SHOP_PRODUCT_CODE_DUPLICATE);
+        }
+
+        // 校验部门
         if(createReqVO.getDeptId()!=null) {
             DeptRespDTO deptDTO=deptApi.getDept(createReqVO.getDeptId());
             if(deptDTO==null) {
@@ -74,7 +102,7 @@ public class ErpShopProductController {
             }
         }
 
-        return success(shopProductService.createShopProduct(createReqVO));
+        return success(shopProductService.createShopProductWithItems(createReqVO));
     }
 
     @PutMapping("/update")
@@ -120,7 +148,7 @@ public class ErpShopProductController {
     @PreAuthorize("@ss.hasPermission('erp:shop-product:query')")
     public CommonResult<ErpShopProductRespVO> getShopProduct(@RequestParam("id") Long id) {
         ErpShopProductRespVO respVO=shopProductService.getShopProductWithItems(id);
-        ErpShopDO shopDO = erpShopService.getShop(respVO.getShopId());
+        ErpShopDO shopDO = shopService.getShop(respVO.getShopId());
         respVO.setShop(BeanUtils.toBean(shopDO, ErpShopRespVO.class));
 
         if(respVO.getDeptId()!=null) {
@@ -130,7 +158,6 @@ public class ErpShopProductController {
             }
         }
 
-
         return success(respVO);
     }
 
@@ -139,27 +166,9 @@ public class ErpShopProductController {
     @PreAuthorize("@ss.hasPermission('erp:shop-product:query')")
     public CommonResult<PageResult<ErpShopProductRespVO>> getShopProductPage(@Valid ErpShopProductPageReqVO pageReqVO) {
 
-        PageResult<ErpShopProductDO> pageResult = shopProductService.getShopProductPage(pageReqVO);
-        PageResult<ErpShopProductRespVO> pageResultVO=BeanUtils.toBean(pageResult, ErpShopProductRespVO.class);
-        Set<Long> shopIds= StreamX.from(pageResultVO.getList()).toSet(ErpShopProductRespVO::getShopId);
-        Map<Long,ErpShopRespVO> shopVoMap = erpShopService.getShopMapByIds(shopIds);
-        // 装配对象
-        StreamX.from(pageResultVO.getList()).assemble(shopVoMap,ErpShopProductRespVO::getShopId, ErpShopProductRespVO::setShop);
-        List<Long> productIds=StreamX.from(pageResultVO.getList()).toList(ErpShopProductRespVO::getId);
-        Map<Long,List<ErpShopProductItemRespVO>> itemsGroup=shopProductService.getItemGroupMap(productIds);
-        StreamX.from(pageResultVO.getList()).assemble(itemsGroup,ErpShopProductRespVO::getId, ErpShopProductRespVO::setItems);
+        return shopProductService.getShopProductPageVO(pageReqVO);
 
-        List<Long> deptIds=StreamX.from(pageResultVO.getList()).filter(ObjectUtil::isNotNull).toList(ErpShopProductRespVO::getDeptId);
-        List<DeptRespDTO> deptDTOList=deptApi.getDeptList(deptIds);
-        deptDTOList=StreamX.from(deptDTOList).filter(ObjectUtil::isNotNull).toList();
-        StreamX.from(pageResultVO.getList()).assemble(deptDTOList,DeptRespDTO::getId,ErpShopProductRespVO::getDeptId,(prod,dept)->{
-            if(dept!=null) {
-                prod.setDeptName(dept.getName());
-            }
-        });
 
-        //
-        return success(pageResultVO);
     }
 
     @GetMapping("/export-excel")

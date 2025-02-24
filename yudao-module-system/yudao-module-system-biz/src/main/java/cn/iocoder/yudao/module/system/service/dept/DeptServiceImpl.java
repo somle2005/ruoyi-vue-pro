@@ -83,7 +83,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Scheduled(cron = "0 0,30 * * * *")
     protected void resetAllTenantHierarchy() {
-        DeptServiceImpl proxy=SpringUtils.getBean(DeptServiceImpl.class);
+        DeptServiceImpl proxy=SpringUtils.getBeanByExactType(DeptServiceImpl.class);
         List<Long> tenantIds=deptMapper.selectTenantIdList();
         for (Long tenantId : tenantIds) {
             proxy.resetHierarchy(tenantId);
@@ -221,7 +221,6 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public DeptDO getDept(Long id) {
-        resetAllTenantHierarchy();
         return deptMapper.selectById(id);
     }
 

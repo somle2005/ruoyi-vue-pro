@@ -50,6 +50,15 @@ public class ErpShopController {
     @Operation(summary = "创建ERP 店铺")
     @PreAuthorize("@ss.hasPermission('erp:shop:create')")
     public CommonResult<Long> createShop(@Validated(value = {ValidationGroup.create.class}) @RequestBody ErpShopSaveReqVO createReqVO) {
+
+        // 做一个 account 校验
+        if(!StrUtils.isBlank(createReqVO.getAccount())) {
+            ErpShopDO shopDO = shopService.getShopByAccount(createReqVO.getAccount());
+            if(shopDO!=null) {
+                return error(SHOP_ACCOUNT_EXISTS);
+            }
+        }
+
         ErpShopType type=ErpShopType.fromCode(createReqVO.getType());
         if(StrUtils.isEmpty(createReqVO.getPlatformShopUid())) {
             createReqVO.setPlatformShopUid(IdUtil.nanoId());
@@ -57,7 +66,8 @@ public class ErpShopController {
         if(StrUtils.isEmpty(createReqVO.getDomainName())) {
             createReqVO.setDomainName("https://");
         }
-        // 不允许用户删除在线店铺
+
+        // 不允许用户创建在线店铺
         if(type==ErpShopType.ONLINE) {
             return error(SHOP_CAN_NOT_CREATE_ONLINE_SHOP);
         }

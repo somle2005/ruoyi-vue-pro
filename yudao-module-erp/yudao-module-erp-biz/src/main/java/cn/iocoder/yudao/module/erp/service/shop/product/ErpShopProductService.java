@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.erp.service.shop.product;
 
 import java.util.*;
 
+import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespSimpleVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import jakarta.validation.*;
@@ -9,6 +10,7 @@ import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
+import jakarta.validation.constraints.NotEmpty;
 
 /**
  * ERP 店铺产品 Service 接口
@@ -81,10 +83,31 @@ public interface ErpShopProductService {
     */
     ErpShopProductRespVO getShopProductWithItems(Long id);
 
+    /**
+    * 根据店铺编号查询产品对应条目的分组
+    *
+    * @param productIds 店铺产品ID集合
+    * @return 产品对应条目的分组
+    */
     Map<Long,List<ErpShopProductItemRespVO>> getItemGroupMap(List<Long> productIds);
 
     /**
-     *
+     * 更新店铺产品协同ERP产品明细
      **/
     void updateShopProductWithItems(@Valid ErpShopProductSaveReqVO updateReqVO);
+
+    /**
+     * 获得分页查询装配好的VO
+     **/
+    CommonResult<PageResult<ErpShopProductRespVO>> getShopProductPageVO(@Valid ErpShopProductPageReqVO pageReqVO);
+
+    /**
+     * 创建店铺产品协同ERP产品明细
+     **/
+    Long createShopProductWithItems(@Valid ErpShopProductSaveReqVO createReqVO);
+
+    /**
+     * 通过产品编码查询店铺产品
+     **/
+    ErpShopProductDO getShopProductByCode(@NotEmpty(message = "店铺产品编码不能为空") String code);
 }

@@ -10,7 +10,9 @@ import cn.iocoder.yudao.framework.common.util.log.FileLogger;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import com.somle.amazon.controller.vo.*;
+import com.somle.amazon.controller.vo.AmazonSpCatalogReqVO;
+import com.somle.amazon.controller.vo.AmazonSpListingReqVO;
+import com.somle.amazon.controller.vo.AmazonSpMarketplaceParticipationVO;
 import com.somle.amazon.model.enums.AmazonRegion;
 import com.somle.amazon.service.AmazonSpClient;
 import com.somle.amazon.service.AmazonSpService;
@@ -21,7 +23,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -76,8 +81,8 @@ public class AmazonShopProfileClient extends ShopProfileClient {
 
         List<JSONObject> allProducts = new ArrayList<>();
         String regionCode = marketIdRegionMapping.get(marketplaceId);
-        AmazonRegion region=AmazonRegion.valueOf(regionCode);
-        AmazonSpClient client=amazonSpService.getClient(region);
+        AmazonRegion region = AmazonRegion.valueOf(regionCode);
+        AmazonSpClient client = amazonSpService.getClient(region);
 
         // 采集 Marketplace 对应的 Product
         List<JSONObject> marketProducts = new MarketProductCollector(marketplaceId,domainName, client,amazonSpService).collect();

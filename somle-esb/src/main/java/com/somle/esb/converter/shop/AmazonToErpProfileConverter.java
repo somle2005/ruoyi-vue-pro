@@ -87,7 +87,7 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                 shopDo.setCountryCode(getCountryDictValue(amazonShop.getMarketplace().getCountryCode()));
                 shopDo.setPlatform(SalesPlatform.AMAZON.name());
                 shopDo.setPlatformShopUid(amazonShop.getMarketplace().getId());
-                shopDo.setAccount(ESBConstants.VALUE_UNKNOWN);
+                //shopDo.setAccount(null);
                 shopDo.setCode(shopDo.getPlatform()+CharSymbols.MINUS+shopDo.getPlatformShopUid());
                 returnList.add(shopDo);
             }
@@ -146,6 +146,11 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                     if(mainImage!=null) {
                         imageUrl=mainImage.getString(FIELD_LINK);
                     }
+                }
+
+                // 如果未绑定ASIN，则跳过
+                if(ESBConstants.VALUE_NONE.equals(asin)) {
+                    continue;
                 }
 
 

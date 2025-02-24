@@ -24,7 +24,8 @@ import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.*;
 @Mapper
 public interface ErpShopProductMapper extends BaseMapperX<ErpShopProductDO> {
 
-    String EXISTS_SQL = "select 1 from erp_shop_product_item pi join erp_product p on p.id=pi.product_id where pi.shop_product_id=t.id and p.bar_code like {0}";
+    static final String BAR_CODE_EXISTS_SQL = "select 1 from erp_shop_product_item pi join erp_product p on p.id=pi.product_id where pi.shop_product_id=t.id and p.bar_code like {0}";
+    static final String DEPT_ID_EXISTS_SQL = "select 1 from system_dept d where hierarchy like CONCAT((SELECT hierarchy from system_dept where id={0}),\"%\") and d.id=t.dept_id";
 
     default PageResult<ErpShopProductDO> selectPage(ErpShopProductPageReqVO reqVO) {
 
@@ -45,11 +46,18 @@ public interface ErpShopProductMapper extends BaseMapperX<ErpShopProductDO> {
             ;
 
         if(!StringUtil.isBlank(reqVO.getBarCode())) {
-            query.exists(EXISTS_SQL, CharSymbols.PERCENT +reqVO.getBarCode()+CharSymbols.PERCENT);
+            query.exists(BAR_CODE_EXISTS_SQL, CharSymbols.PERCENT +reqVO.getBarCode()+CharSymbols.PERCENT);
+        }
+
+        if(reqVO.getDeptId()!=null) {
+            query.exists(DEPT_ID_EXISTS_SQL, reqVO.getDeptId());
         }
 
         return selectJoinPage(reqVO, ErpShopProductDO.class, query);
 
     }
 
+    default ErpShopProductDO getShopProductByCode(String code) {
+        return selectOne(ErpShopProductDO::getCode, code);
+    }
 }
