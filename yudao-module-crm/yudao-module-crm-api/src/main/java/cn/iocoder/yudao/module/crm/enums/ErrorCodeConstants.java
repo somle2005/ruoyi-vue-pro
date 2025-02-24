@@ -19,11 +19,11 @@ public interface ErrorCodeConstants {
 
     ErrorCode CONTRACT_APPROVE_FAIL_NOT_DRAFT = new ErrorCode(1_020_000_006, "合同审核失败，原因：合同没处在审批中状态");
 
-    ErrorCode CONTRACT_CANCEL_APPROVE_FAIL_NOT_APPROVE = new ErrorCode(1_020_000_006, "取消合同审核失败，原因：合同没处在审批通过或审批中的状态");
-
     ErrorCode CONTRACT_CANCEL_APPROVE_FAIL_RECEIVABLE_EXIST = new ErrorCode(1_020_000_007, "取消合同审核失败，原因：合同已存在回款单据");
 
     ErrorCode CONTRACT_APPROVE_FAIL_NOT_PROCESS = new ErrorCode(1_020_000_008, "合同审核失败，原因：合同没处在审批中状态");
+
+    ErrorCode CONTRACT_CANCEL_APPROVE_FAIL_NOT_APPROVE = new ErrorCode(1_020_000_009, "取消合同审核失败，原因：合同没处在审批通过或审批中的状态");
 
     // ========== 线索管理 1-020-001-000 ==========
     ErrorCode CLUE_NOT_EXISTS = new ErrorCode(1_020_001_000, "线索不存在");
