@@ -4,7 +4,9 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
+import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.datapermission.core.annotation.DataPermission;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptLevelRespDTO;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptSaveReqDTO;
@@ -16,11 +18,14 @@ import cn.iocoder.yudao.module.system.dal.mysql.dept.DeptMapper;
 import cn.iocoder.yudao.module.system.dal.redis.RedisKeyConstants;
 import com.google.common.annotations.VisibleForTesting;
 import lombok.extern.slf4j.Slf4j;
+import org.dromara.hutool.core.thread.AsyncUtil;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.MessageChannel;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import jakarta.annotation.Resource;
@@ -66,7 +71,37 @@ public class DeptServiceImpl implements DeptService {
 
         // 发送管道
         departmentOutputChannel.send(MessageBuilder.withPayload(deptConvert.toRespDTO(deptDO)).build());
+
+        // 处理 hierarchy 字段
+        AsyncTask.run(() -> {
+            resetHierarchy(deptDO.getTenantId());
+        });
+
         return deptDO.getId();
+    }
+
+
+    @Scheduled(cron = "0 0,30 * * * *")
+    protected void resetAllTenantHierarchy() {
+        DeptServiceImpl proxy=SpringUtils.getBean(DeptServiceImpl.class);
+        List<Long> tenantIds=deptMapper.selectTenantIdList();
+        for (Long tenantId : tenantIds) {
+            proxy.resetHierarchy(tenantId);
+        }
+    }
+
+    @Transactional
+    protected void resetHierarchy(Long tenantId) {
+        deptMapper.clearAllHierarchy(tenantId);
+        deptMapper.setRootHierarchy(0L, tenantId);
+        int depth=0;
+        while (depth<16) {
+            int updates=deptMapper.setDescendantsHierarchy(tenantId);
+            if(updates==0) {
+                break;
+            }
+            depth++;
+        }
     }
 
     @Override
@@ -89,6 +124,11 @@ public class DeptServiceImpl implements DeptService {
 
         // 发送管道
         departmentOutputChannel.send(MessageBuilder.withPayload(deptConvert.toRespDTO(updateObj)).build());
+
+        // 处理 hierarchy 字段
+        AsyncTask.run(() -> {
+            resetHierarchy(updateObj.getTenantId());
+        });
     }
 
 //    @Override
@@ -181,6 +221,7 @@ public class DeptServiceImpl implements DeptService {
 
     @Override
     public DeptDO getDept(Long id) {
+        resetAllTenantHierarchy();
         return deptMapper.selectById(id);
     }
 
