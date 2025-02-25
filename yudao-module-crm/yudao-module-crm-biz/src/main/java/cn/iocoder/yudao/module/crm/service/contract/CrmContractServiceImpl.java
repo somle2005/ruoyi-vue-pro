@@ -29,8 +29,8 @@ import cn.iocoder.yudao.module.crm.service.customer.CrmCustomerService;
 import cn.iocoder.yudao.module.crm.service.permission.CrmPermissionService;
 import cn.iocoder.yudao.module.crm.service.permission.bo.CrmPermissionCreateReqBO;
 import cn.iocoder.yudao.module.crm.service.permission.bo.CrmPermissionTransferReqBO;
-import cn.iocoder.yudao.module.crm.service.product.CrmProductService;
 import cn.iocoder.yudao.module.crm.service.receivable.CrmReceivableService;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
@@ -79,8 +79,7 @@ public class CrmContractServiceImpl implements CrmContractService {
 
     @Resource
     private CrmPermissionService crmPermissionService;
-    @Resource
-    private CrmProductService productService;
+
     @Resource
     private CrmCustomerService customerService;
     @Resource
@@ -95,7 +94,7 @@ public class CrmContractServiceImpl implements CrmContractService {
     @Resource
     private AdminUserApi adminUserApi;
     @Resource
-    private BpmProcessInstanceApi bpmProcessInstanceApi;
+    private ErpProductApi erpProductApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -209,7 +208,7 @@ public class CrmContractServiceImpl implements CrmContractService {
 
     private List<CrmContractProductDO> validateContractProducts(List<CrmContractSaveReqVO.Product> list) {
         // 1. 校验产品存在
-        productService.validProductList(convertSet(list, CrmContractSaveReqVO.Product::getProductId));
+        erpProductApi.validProductList(convertSet(list, CrmContractSaveReqVO.Product::getProductId));
         // 2. 转化为 CrmContractProductDO 列表
         return convertList(list, o -> BeanUtils.toBean(o, CrmContractProductDO.class,
                 item -> item.setTotalPrice(MoneyUtils.priceMultiply(item.getContractPrice(), item.getCount()))));
