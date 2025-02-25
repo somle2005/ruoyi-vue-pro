@@ -157,7 +157,7 @@ class MarketProductCollector {
     private final String marketplaceId;
     private AmazonSpClient client;
 
-    private final FileLogger fileLogger = new FileLogger("./log/amazon-asin-sku.log");
+    // private final FileLogger fileLogger = new FileLogger("./log/amazon-asin-sku.log");
 
     private Map<String, JSONObject> allListingItemMap = new HashMap<>();
     private Map<String, JSONObject> allCatalogItemMap = new HashMap<>();
@@ -177,9 +177,9 @@ class MarketProductCollector {
      **/
     public List<JSONObject> collect() {
 
-        if(SpringUtils.isBootInIDE()) {
-            fileLogger.separator("开始采集 - mktId=" + this.marketplaceId + "@" + client.getAuth().getClientId());
-        }
+//        if(SpringUtils.isBootInIDE()) {
+//            fileLogger.separator("开始采集 - mktId=" + this.marketplaceId + "@" + client.getAuth().getClientId());
+//        }
         // 采集 Listing 数据
         collectAllListingItems();
         // 采集 Catalog 数据
@@ -254,9 +254,9 @@ class MarketProductCollector {
             for (JsonNode catalogNode : catalogItems) {
                 JSONObject catalogJson = new JSONObject(catalogNode);
                 String asin = catalogJson.getString(AmazonToErpProfileConverter.FIELD_ASIN);
-                if(SpringUtils.isBootInIDE()) {
-                    fileLogger.info(sku + " -> " + asin);
-                }
+//                if(SpringUtils.isBootInIDE()) {
+//                    fileLogger.info(sku + " -> " + asin);
+//                }
                 allCatalogItemMap.put(sku, catalogJson);
             }
         } else {

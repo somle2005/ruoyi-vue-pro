@@ -70,14 +70,14 @@ public class SyncShopProfileJob extends DataJob {
             }
 
             // 如果是本地调试模式
-            if(SpringUtils.isBootInIDE()) {
-                // 调试指定的平台
-                 if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY,SalesPlatform.AMAZON)) {
-                 // if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY)) {
-                 // if(!salesPlatform.isAnyMatch(SalesPlatform.AMAZON)) {
-                    continue;
-                }
-            }
+//            if(SpringUtils.isBootInIDE()) {
+//                // 调试指定的平台
+//                 if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY,SalesPlatform.AMAZON)) {
+//                 // if(!salesPlatform.isAnyMatch(SalesPlatform.SHOPIFY)) {
+//                 // if(!salesPlatform.isAnyMatch(SalesPlatform.AMAZON)) {
+//                    continue;
+//                }
+//            }
 
             // 异步并行处理各个平台数据
             AsyncTask.run(()->{
