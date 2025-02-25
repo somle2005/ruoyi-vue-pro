@@ -1,10 +1,9 @@
 package cn.iocoder.yudao.module.erp.controller.admin.shop;
 
 import cn.hutool.core.util.IdUtil;
-import cn.iocoder.yudao.framework.common.model.ValidationGroup;
+import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.framework.common.util.lang.string.StrUtils;
 import cn.iocoder.yudao.module.erp.enums.ErpShopType;
-import org.apache.tomcat.util.net.openssl.ciphers.Protocol;
 import org.springframework.web.bind.annotation.*;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -13,7 +12,6 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Operation;
 
-import jakarta.validation.constraints.*;
 import jakarta.validation.*;
 import jakarta.servlet.http.*;
 import java.util.*;

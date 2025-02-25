@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.framework.common.model;
+package cn.iocoder.yudao.framework.common.validation;
 
 /**
  * @author: LeeFJ

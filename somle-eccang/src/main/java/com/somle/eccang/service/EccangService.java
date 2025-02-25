@@ -4,8 +4,10 @@ import cn.hutool.core.collection.CollUtil;
 import com.somle.eccang.model.*;
 import com.somle.eccang.model.EccangResponse.EccangPage;
 import com.somle.eccang.model.exception.EccangResponseException;
+import com.somle.eccang.model.reps.EccangSkuRelationRespVO;
 import com.somle.eccang.model.req.EccangInventoryBatchReqVO;
 import com.somle.eccang.model.req.EccangRmaReturnReqVO;
+import com.somle.eccang.model.req.EccangSkuRelationReqVO;
 import com.somle.eccang.repository.EccangTokenRepository;
 import cn.iocoder.yudao.framework.common.util.general.CoreUtils;
 import cn.iocoder.yudao.framework.common.util.general.Limiter;
@@ -321,6 +323,31 @@ public class EccangService {
         }
         return null;
     }
+
+
+    /**
+     * 设置平台SKU关系
+     **/
+    public List<EccangSkuRelationRespVO> setSkuRelation(String platformSku,String shopAccount,List<String> prdSku) {
+        EccangSkuRelationReqVO vo = EccangSkuRelationReqVO.builder().page(1).pageSize(100)
+            .condition(EccangSkuRelationReqVO.Condition.builder().platformSku(platformSku).build())
+            .build();
+        return post("getSkuRelation", vo, EccangSkuRelationRespVO.class);
+    }
+
+
+    /**
+     * 按平台SKU获得映射关系
+     **/
+    public List<EccangSkuRelationRespVO> getSkuRelation(String platformSku) {
+        EccangSkuRelationReqVO vo = EccangSkuRelationReqVO.builder().page(1).pageSize(100)
+            .condition(EccangSkuRelationReqVO.Condition.builder().platformSku(platformSku).build())
+            .build();
+        return post("getSkuRelation", vo, EccangSkuRelationRespVO.class);
+    }
+
+
+
 
     public Stream<EccangPage> getInventory() {
         var payload = JsonUtilsX.newObject();

@@ -4,14 +4,13 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
-import cn.iocoder.yudao.framework.common.util.lang.DataParser;
+import cn.iocoder.yudao.framework.common.util.number.NumberUtils;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespSimpleVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
 import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
 import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
@@ -30,7 +29,6 @@ import java.util.*;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.vo.*;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.ErpShopProductDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 
 import cn.iocoder.yudao.module.erp.dal.mysql.shop.product.ErpShopProductMapper;
@@ -219,16 +217,16 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
         PageResult<ErpShopProductDO> pageResult = this.getShopProductPage(pageReqVO);
         List<Long> userIds=new ArrayList<>();
         for(ErpShopProductDO product:pageResult.getList()) {
-            userIds.add(DataParser.parseLong(product.getCreator()));
-            userIds.add(DataParser.parseLong(product.getUpdater()));
+            userIds.add(NumberUtils.parseLong(product.getCreator()));
+            userIds.add(NumberUtils.parseLong(product.getUpdater()));
         }
         Map<Long, AdminUserRespDTO> userMap=userApi.getUserMap(userIds);
         for(ErpShopProductDO product:pageResult.getList()) {
-            AdminUserRespDTO creator=userMap.get(DataParser.parseLong(product.getCreator()));
+            AdminUserRespDTO creator=userMap.get(NumberUtils.parseLong(product.getCreator()));
             if(creator!=null) {
                 product.setCreator(creator.getNickname());
             }
-            AdminUserRespDTO updater=userMap.get(DataParser.parseLong(product.getUpdater()));
+            AdminUserRespDTO updater=userMap.get(NumberUtils.parseLong(product.getUpdater()));
             if(updater!=null) {
                 product.setUpdater(updater.getNickname());
             }

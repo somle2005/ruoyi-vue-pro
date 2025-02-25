@@ -25,7 +25,6 @@ import java.util.List;
 import java.util.Map;
 
 import static cn.iocoder.yudao.framework.ai.core.model.deepseek.DeepSeekChatOptions.MODEL_DEFAULT;
-import static cn.iocoder.yudao.framework.ai.core.model.deepseek.DeepSeekChatOptions.MODEL_REASONER;
 
 /**
  * DeepSeek {@link ChatModel} 实现类
@@ -45,19 +44,12 @@ public class DeepSeekChatModel implements ChatModel {
     /**
      * DeepSeek 兼容 OpenAI 的 HTTP 接口，所以复用它的实现，简化接入成本
      *
-     * 不过要注意，DeepSeek 没有完全兼容，所以不能使用 {@link org.springframework.ai.openai.OpenAiChatModel} 调用，但是实现会参考它
+     * 不过要注意，DeepSeek 没有完全兼容，所以不能使用 {@link OpenAiChatModel} 调用，但是实现会参考它
      */
-    private OpenAiApi openAiApi;
+    private final OpenAiApi openAiApi;
 
     public DeepSeekChatModel(String apiKey) {
         this(apiKey, DeepSeekChatOptions.builder().model(MODEL_DEFAULT).temperature(0.7F).build());
-    }
-
-    public DeepSeekChatModel(String apiKey,String url) {
-        this(apiKey, DeepSeekChatOptions.builder().model(MODEL_REASONER).temperature(0.7F).build());
-        if(!StringUtil.isBlank(url)) {
-            this.openAiApi = new OpenAiApi(url, apiKey);
-        }
     }
 
     public DeepSeekChatModel(String apiKey, DeepSeekChatOptions options) {

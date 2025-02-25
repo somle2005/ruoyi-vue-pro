@@ -169,4 +169,10 @@ public class EccangTest extends BaseSpringTest {
     }
 
 
+    @Test
+    public void getSkuRelation() {
+        service.getSkuRelation("RS3800");
+    }
+
+
 }
