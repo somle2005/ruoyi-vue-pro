@@ -4,8 +4,6 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.ClassUtil;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.iocoder.yudao.framework.common.enums.EnvEnum;
-import cn.iocoder.yudao.framework.common.util.config.MavenProject;
-import cn.iocoder.yudao.framework.common.util.config.YMLProperties;
 import cn.iocoder.yudao.framework.common.util.io.StreamUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
@@ -56,6 +54,7 @@ public class SpringUtils extends SpringUtil  {
      * 获得当前环境类型
      **/
     public static EnvEnum getEnv() {
+        bootInitialize();
         EnvEnum current = EnvEnum.current();
         if(current==null || current==EnvEnum.UNKNOWN) {
             String activeProfile = getActiveProfile();
@@ -96,28 +95,28 @@ public class SpringUtils extends SpringUtil  {
     }
 
 
-    private static Class STARTUP_CLASS = null;
-    private static Boolean IS_IN_IDE = null ;
+//    private static Class STARTUP_CLASS = null;
+//    private static Boolean IS_IN_IDE = null ;
     /**
      * 是否从IDE启动
      * */
-    public static Boolean isBootInIDE() {
-        if(IS_IN_IDE!=null) return IS_IN_IDE;
-        Throwable ta=new Throwable();
-        StackTraceElement[] tas= ta.getStackTrace();
-        String clsName=tas[tas.length-1].getClassName();
-        STARTUP_CLASS= ClassUtil.loadClass(clsName);
-        try {
-            MavenProject project = new MavenProject(STARTUP_CLASS);
-            if(project.hasPomFile() && project.hasMainSourceDir() && project.hasTargetDir()) {
-                IS_IN_IDE = true;
-            } else {
-                IS_IN_IDE = false;
-            }} catch (Exception e) {
-            IS_IN_IDE = false;
-        }
-        return IS_IN_IDE;
-    }
+//    public static Boolean isBootInIDE() {
+//        if(IS_IN_IDE!=null) return IS_IN_IDE;
+//        Throwable ta=new Throwable();
+//        StackTraceElement[] tas= ta.getStackTrace();
+//        String clsName=tas[tas.length-1].getClassName();
+//        STARTUP_CLASS= ClassUtil.loadClass(clsName);
+//        try {
+//            MavenProject project = new MavenProject(STARTUP_CLASS);
+//            if(project.hasPomFile() && project.hasMainSourceDir() && project.hasTargetDir()) {
+//                IS_IN_IDE = true;
+//            } else {
+//                IS_IN_IDE = false;
+//            }} catch (Exception e) {
+//            IS_IN_IDE = false;
+//        }
+//        return IS_IN_IDE;
+//    }
 
     @Override
     public void setApplicationContext(ApplicationContext applicationContext) {
@@ -129,8 +128,8 @@ public class SpringUtils extends SpringUtil  {
      **/
     public static void bootInitialize() {
         initBootstrapYML();
-        System.out.println("Env="+EnvEnum.current().name()+" "+EnvEnum.current().text()+" ; BOOT_IN_IDE="+isBootInIDE());
-
+        System.out.println("Env="+EnvEnum.current().name()+" "+EnvEnum.current().text());
+        // System.out.println("Env="+EnvEnum.current().name()+" "+EnvEnum.current().text()+" ; BOOT_IN_IDE="+isBootInIDE());
 
     }
 

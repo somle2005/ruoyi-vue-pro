@@ -7,8 +7,8 @@ import cn.hutool.core.util.IdUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.crypto.digest.DigestUtil;
 import cn.hutool.system.OsInfo;
-import cn.iocoder.yudao.framework.common.util.lang.array.ArrayUtil;
-import cn.iocoder.yudao.framework.common.util.lang.string.StrUtils;
+import cn.iocoder.yudao.framework.common.util.collection.ArrayUtils;
+import cn.iocoder.yudao.framework.common.util.string.StrUtils;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 
@@ -108,7 +108,7 @@ public class FileUtils {
      * 获得相对于指定基础路径的文件
      */
     public static File resolveByPath(String basicDirPath, String... part) {
-        part = ArrayUtil.unshift(part, basicDirPath);
+        part = ArrayUtils.unshift(part, basicDirPath);
         return  new File(StrUtils.joinPath(part));
     }
 
