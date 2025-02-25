@@ -41,6 +41,23 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
             ;
     }
 
+    //海关分类
+    private MPJLambdaWrapper<ErpCustomRuleDO> getBOWrapper(@NotNull ErpCustomRulePageReqVO reqVO) {
+        return bindQueryWrapper(reqVO)
+            .leftJoin(ErpCustomCategoryDO.class, ErpCustomCategoryDO::getId, ErpProductDO::getCustomCategoryId)
+            .likeIfExists(ErpCustomCategoryDO::getDeclaredType, reqVO.getDeclaredType())  // 申报品名
+            .likeIfExists(ErpCustomCategoryDO::getDeclaredTypeEn, reqVO.getDeclaredTypeEn())  // 申报品名en
+            .selectAsClass(ErpCustomCategoryDO.class, ErpCustomRuleBO.class)
+            .leftJoin(ErpCustomCategoryItemDO.class, ErpCustomCategoryItemDO::getCustomCategoryId, ErpCustomCategoryDO::getId)
+//            .eq(ErpCustomRuleDO::getCountryCode,ErpCustomCategoryItemDO::getCountryCode)
+            .selectAsClass(ErpCustomCategoryItemDO.class, ErpCustomRuleBO.class)
+            .eqIfExists(ErpCustomCategoryItemDO::getCountryCode, reqVO.getCountryCode())  // countryCode
+            .likeIfExists(ErpCustomCategoryItemDO::getHscode, reqVO.getHscode())  // hsCode
+            .likeIfExists(ErpCustomCategoryItemDO::getTaxRate, reqVO.getTaxRate())  // taxRate
+            .orderByAsc(ErpCustomRuleDO::getId)
+            ;
+    }
+
     default PageResult<ErpCustomRuleDO> selectPage(ErpCustomRulePageReqVO reqVO) {
         // 构建查询，应用条件并进行分页查询
         return selectJoinPage(reqVO, ErpCustomRuleDO.class, bindQueryWrapper(reqVO));
@@ -71,18 +88,6 @@ public interface ErpCustomRuleMapper extends BaseMapperX<ErpCustomRuleDO> {
         return selectJoinList(ErpCustomRuleBO.class, boWrapper);
     }
 
-    //海关分类
-    private MPJLambdaWrapper<ErpCustomRuleDO> getBOWrapper(@NotNull ErpCustomRulePageReqVO reqVO) {
-        return bindQueryWrapper(reqVO)
-            .leftJoin(ErpCustomCategoryDO.class, ErpCustomCategoryDO::getId, ErpProductDO::getCustomCategoryId)
-            .selectAsClass(ErpCustomCategoryDO.class, ErpCustomRuleBO.class)
-            .leftJoin(ErpCustomCategoryItemDO.class, ErpCustomCategoryItemDO::getCustomCategoryId, ErpCustomCategoryDO::getId)
-//            .eq(ErpCustomRuleDO::getCountryCode,ErpCustomCategoryItemDO::getCountryCode)
-            .selectAsClass(ErpCustomCategoryItemDO.class, ErpCustomRuleBO.class)
-            .eqIfExists(ErpCustomCategoryItemDO::getCountryCode, reqVO.getCountryCode())  // 匹配 ErpCustomCategoryItemDO 的 countryCode 与请求中的 countryCode
-            .orderByAsc(ErpCustomRuleDO::getId)
-            ;
-    }
 
     // 分页查询 ErpCustomRuleBO 海关规则数据(3表联查)海关规则->产品->分类 ，不关联国家查询
     default PageResult<ErpCustomRuleBO> selectBOPage(@NotNull ErpCustomRulePageReqVO reqVO) {
