@@ -12,7 +12,6 @@ import cn.iocoder.yudao.module.crm.enums.common.CrmAuditStatusEnum;
 import cn.iocoder.yudao.module.crm.enums.common.CrmBizTypeEnum;
 import cn.iocoder.yudao.module.crm.enums.common.CrmSceneTypeEnum;
 import cn.iocoder.yudao.module.crm.util.CrmPermissionUtils;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.math.BigDecimal;
@@ -80,11 +79,12 @@ public interface CrmReceivableMapper extends BaseMapperX<CrmReceivableDO> {
             return Collections.emptyMap();
         }
         // SQL sum 查询
-        List<Map<String, Object>> result = selectMaps(new QueryWrapper<CrmReceivableDO>()
-                .select("contract_id, SUM(price) AS total_price")
-                .in("audit_status", CrmAuditStatusEnum.APPROVE.getStatus())// 只有审批通过的回款才计算到已回款金额中
-                .groupBy("contract_id")
-                .in("contract_id", contractIds));
+        List<Map<String, Object>> result = selectMaps(new MPJLambdaWrapperX<CrmReceivableDO>()
+                .select(CrmReceivableDO::getContractId).
+                selectSum(CrmReceivableDO::getPrice, "total_price")
+                .in(CrmReceivableDO::getAuditStatus, CrmAuditStatusEnum.APPROVE.getStatus())// 只有审批通过的回款才计算到已回款金额中
+                .groupBy(CrmReceivableDO::getContractId)
+                .in(CrmReceivableDO::getContractId, contractIds));
         // 获得金额
         return convertMap(result, obj -> (Long) obj.get("contract_id"), obj -> (BigDecimal) obj.get("total_price"));
     }

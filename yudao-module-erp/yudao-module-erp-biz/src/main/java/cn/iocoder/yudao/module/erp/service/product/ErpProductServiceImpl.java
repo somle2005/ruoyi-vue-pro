@@ -11,7 +11,6 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
 import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
@@ -26,6 +25,7 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
@@ -273,6 +273,7 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
+    @Cacheable(cacheNames = "erpProductService_getProductVOListByStatus", key = "#status", unless = "#result == null")
     public List<ErpProductRespVO> getProductVOListByStatus(Boolean status) {
         List<ErpProductDO> list = productMapper.selectListByStatus(status);
         return buildProductVOList(list);
