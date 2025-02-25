@@ -3,33 +3,24 @@ package cn.iocoder.yudao.module.erp.service.logistic.category;
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
-import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategoryPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.vo.ErpCustomCategorySaveReqVO;
-import cn.iocoder.yudao.module.erp.controller.admin.logistic.customrule.vo.ErpCustomRulePageReqVO;
 import cn.iocoder.yudao.module.erp.convert.logistic.category.ErpCustomCategoryConvert;
 import cn.iocoder.yudao.module.erp.convert.logistic.category.item.ErpCustomCategoryItemConvert;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.ErpCustomCategoryMapper;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.item.ErpCustomCategoryItemMapper;
-import cn.iocoder.yudao.module.erp.dal.mysql.logistic.customrule.ErpCustomRuleMapper;
 import cn.iocoder.yudao.module.erp.service.logistic.category.item.ErpCustomCategoryItemService;
-import cn.iocoder.yudao.module.erp.service.logistic.customrule.bo.ErpCustomRuleBO;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.messaging.MessageChannel;
-import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
-import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
@@ -52,12 +43,6 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
     private ErpCustomCategoryItemMapper customRuleCategoryItemMapper;
     @Autowired
     private ErpCustomCategoryItemService itemService;
-    @Autowired
-    private ErpCustomRuleMapper customRuleMapper;
-    @Autowired
-    private ErpCustomRuleApi customRuleApi;
-    @Autowired
-    MessageChannel erpCustomRuleChannel;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -72,7 +57,7 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
         List<ErpCustomCategoryItemDO> itemDOS = ErpCustomCategoryItemConvert.INSTANCE.convert(createReqVO.getCustomRuleCategoryItems());
         itemService.createCustomRuleCategoryItemList(categoryId, itemDOS);
         //同步
-        this.syncCustomRuleCategory(categoryId);
+//        this.syncCustomRuleCategory(categoryId);
         return categoryId;
     }
 
@@ -91,7 +76,7 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
         List<ErpCustomCategoryItemDO> itemDOS = ErpCustomCategoryItemConvert.INSTANCE.convert(updateReqVO.getCustomRuleCategoryItems());
         List<Long> itemIds = updateCustomRuleCategoryItemList(categoryId, itemDOS);
         //同步
-        this.syncCustomRuleCategoryItem(itemIds);
+//        this.syncCustomRuleCategoryItem(itemIds);
     }
 
     @Override
@@ -183,30 +168,19 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
         customRuleCategoryItemMapper.deleteByCategoryId(categoryId);
     }
 
-    //同步海关规则方法 categoryId
-    private void syncCustomRuleCategory(Long categoryId) {
-        List<ErpCustomRuleBO> ruleBOS = customRuleMapper.selectBOListEqCountryCodeByCategoryId(new ErpCustomRulePageReqVO(), categoryId);
-        syncCustomRule(ruleBOS);
-    }
-
-    //同步海关规则方法 categoryItemId
-    private void syncCustomRuleCategoryItem(List<Long> categoryItemId) {
-        List<ErpCustomRuleBO> ruleBOS = customRuleMapper.selectBOListEqCountryCodeByItemId(new ErpCustomRulePageReqVO(), categoryItemId);
-        syncCustomRule(ruleBOS);
-    }
-
-    private void syncCustomRule(List<ErpCustomRuleBO> ruleBOS) {
-        if (ruleBOS != null && !ruleBOS.isEmpty()) {
-            // 如果 ruleBOS 不为空，则获取相关的 dtos
-            List<ErpCustomRuleDTO> dtos = customRuleApi.listCustomRules(ruleBOS.stream()
-                .map(ErpCustomRuleBO::getId)
-                .filter(Objects::nonNull) //
-                .toList());
-            // 确保 dtos 也不为空，避免发送空消息
-            if (dtos != null && !dtos.isEmpty()) {
-                erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
-            }
-        }
-    }
-
+//    //同步海关规则方法 categoryId
+//    private void syncCustomRuleCategory(Long categoryId) {
+//        List<ErpCustomRuleBO> ruleBOS = customRuleMapper.selectBOListEqCountryCodeByCategoryId(new ErpCustomRulePageReqVO(), categoryId);
+//        //获得变更的海关规则ids
+//        List<Long> ids = ruleBOS.stream().map(ErpCustomRuleBO::getId).toList();
+//        erpCustomRuleService.syncErpCustomRule(ids);
+//    }
+//
+//    //同步海关规则方法 categoryItemId
+//    private void syncCustomRuleCategoryItem(List<Long> categoryItemId) {
+//        List<ErpCustomRuleBO> ruleBOS = customRuleMapper.selectBOListEqCountryCodeByItemId(new ErpCustomRulePageReqVO(), categoryItemId);
+//        //获得变更的海关规则ids
+//        List<Long> ids = ruleBOS.stream().map(ErpCustomRuleBO::getId).toList();
+//        erpCustomRuleService.syncErpCustomRule(ids);
+//    }
 }

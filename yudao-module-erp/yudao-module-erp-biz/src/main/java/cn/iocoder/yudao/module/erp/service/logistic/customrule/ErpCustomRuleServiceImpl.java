@@ -70,8 +70,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         ThrowUtil.ifThrow(!customRuleMapper.insertBatch(doList, doList.size()), DB_BATCH_INSERT_ERROR);
         //同步数据
         List<Long> ids = doList.stream().map(ErpCustomRuleDO::getId).toList();
-        List<ErpCustomRuleDTO> dtos = erpCustomRuleApi.listCustomRules(ids);
-        erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
+        this.syncErpCustomRule(ids);
         // 返回
         return (long) ids.size();
     }
@@ -92,8 +91,13 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
         ErpCustomRuleDO updateObj = copyPropertiesIgnoreType(updateReqVO, countryCode);
         ThrowUtil.ifSqlThrow(customRuleMapper.updateById(updateObj), DB_UPDATE_ERROR);
         //同步数据
-        ErpCustomRuleDTO customRuleDTO = erpCustomRuleApi.getErpCustomRuleDTOById(id);
-        erpCustomRuleChannel.send(MessageBuilder.withPayload(List.of(customRuleDTO)).build());
+        this.syncErpCustomRule(Collections.singletonList(id));
+    }
+
+    //同步海关规则方法
+    private void syncErpCustomRule(List<Long> ruleIds) {
+        List<ErpCustomRuleDTO> dtos = erpCustomRuleApi.listCustomRules(ruleIds);
+        erpCustomRuleChannel.send(MessageBuilder.withPayload(List.of(dtos)).build());
     }
 
     @Override

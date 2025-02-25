@@ -5,8 +5,6 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCust
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import lombok.Data;
 
-import java.util.List;
-
 //1子表 : 1主表 : 1产品
 @Data
 public class ErpCustomCategoryItemBO extends ErpCustomCategoryItemDO {

@@ -22,7 +22,7 @@ public interface ErpCustomRuleApi {
      * @param id 海关规则id
      * @return ErpCustomRuleDTO dto
      */
-    ErpCustomRuleDTO getErpCustomRuleDTOById(@NotNull Long id);
+    ErpCustomRuleDTO getErpCustomRule(@NotNull Long id);
 
     /**
      * 根绝产品id(确保存在)获取n个产品DTO，获取产品+海关规则。如果海关规则无匹配，则返回null
@@ -31,5 +31,5 @@ public interface ErpCustomRuleApi {
      * @param productId 产品id
      * @return List<ErpCustomRuleDTO> 海关规则DTO +产品 DTOs
      */
-    List<ErpCustomRuleDTO> getErpCustomRuleDTOByProductId(@NotNull Long productId);
+    List<ErpCustomRuleDTO> listDTOsByProductId(@NotNull Long productId);
 }

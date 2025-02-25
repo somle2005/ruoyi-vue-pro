@@ -5,11 +5,7 @@ import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.item.vo.ErpCustomCategoryItemPageReqVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
-import cn.iocoder.yudao.module.erp.service.logistic.category.bo.ErpCustomCategoryBO;
-import cn.iocoder.yudao.module.erp.service.logistic.category.bo.ErpCustomCategoryItemBO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 

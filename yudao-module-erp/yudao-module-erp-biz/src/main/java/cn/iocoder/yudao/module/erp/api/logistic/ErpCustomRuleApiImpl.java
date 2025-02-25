@@ -49,7 +49,7 @@ public class ErpCustomRuleApiImpl implements ErpCustomRuleApi {
 
 
     @Override
-    public ErpCustomRuleDTO getErpCustomRuleDTOById(Long id) {
+    public ErpCustomRuleDTO getErpCustomRule(Long id) {
         //1.0 根据海关规则的id获得产品id
         ErpCustomRuleBO ruleBO = erpCustomRuleService.getCustomRuleBOById(id);
         if (ruleBO == null) {
@@ -62,7 +62,7 @@ public class ErpCustomRuleApiImpl implements ErpCustomRuleApi {
 
 
     @Override
-    public List<ErpCustomRuleDTO> getErpCustomRuleDTOByProductId(Long productId) {
+    public List<ErpCustomRuleDTO> listDTOsByProductId(Long productId) {
         //获取规则和产品信息
         List<ErpCustomRuleBO> ruleBOS = customRuleMapper.selectByProductId(List.of(productId));
         if (ruleBOS.isEmpty()) {
