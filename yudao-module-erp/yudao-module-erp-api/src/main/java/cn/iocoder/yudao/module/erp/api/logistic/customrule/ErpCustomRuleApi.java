@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.erp.api.logistic.customrule;
 
 import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;

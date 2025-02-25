@@ -61,9 +61,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
     public Long createCustomRule(ErpCustomRuleSaveReqVO createReqVO) {
         baseValidator(createReqVO);
         //判断国别+产品编码是否重复
-        createReqVO.getCountryCode().forEach(countryCode -> {
-            validateExist(null, countryCode, createReqVO.getProductId());
-        });
+        createReqVO.getCountryCode().forEach(countryCode -> validateExist(null, countryCode, createReqVO.getProductId()));
         List<ErpCustomRuleDO> doList = createReqVO.getCountryCode().stream().map(countryCode -> copyPropertiesIgnoreType(createReqVO, countryCode)).toList();
         ThrowUtil.ifThrow(erpProductService.getProduct(createReqVO.getProductId()).getCustomCategoryId() == null, CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID);
         //批量添加
@@ -97,7 +95,7 @@ public class ErpCustomRuleServiceImpl implements ErpCustomRuleService {
     //同步海关规则方法
     private void syncErpCustomRule(List<Long> ruleIds) {
         List<ErpCustomRuleDTO> dtos = erpCustomRuleApi.listCustomRules(ruleIds);
-        erpCustomRuleChannel.send(MessageBuilder.withPayload(List.of(dtos)).build());
+        erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
     }
 
     @Override
