@@ -10,14 +10,11 @@ import cn.iocoder.yudao.module.crm.dal.dataobject.product.CrmProductDO;
 import cn.iocoder.yudao.module.crm.dal.mysql.product.CrmProductMapper;
 import cn.iocoder.yudao.module.crm.enums.common.CrmBizTypeEnum;
 import cn.iocoder.yudao.module.crm.enums.permission.CrmPermissionLevelEnum;
-import cn.iocoder.yudao.module.crm.enums.product.CrmProductStatusEnum;
 import cn.iocoder.yudao.module.crm.framework.permission.core.annotations.CrmPermission;
 import cn.iocoder.yudao.module.crm.service.permission.CrmPermissionService;
 import cn.iocoder.yudao.module.crm.service.permission.bo.CrmPermissionCreateReqBO;
-import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
-import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
-import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.service.impl.DiffParseFunction;
@@ -30,7 +27,6 @@ import org.springframework.validation.annotation.Validated;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 import static cn.iocoder.yudao.module.crm.enums.ErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.crm.enums.LogRecordConstants.*;
 
@@ -47,19 +43,16 @@ public class CrmProductServiceImpl implements CrmProductService {
     @Resource(name = "crmProductMapper")
     private CrmProductMapper productMapper;
 
-    @Resource(name = "erpProductMapper")
-    private ErpProductMapper erpProductMapper;
-
     @Resource
     private CrmProductCategoryService productCategoryService;
     @Resource
     private CrmPermissionService permissionService;
 
     @Resource
-    private ErpProductService erpProductService;
+    private AdminUserApi adminUserApi;
 
     @Resource
-    private AdminUserApi adminUserApi;
+    private ErpProductApi erpProductApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -155,47 +148,10 @@ public class CrmProductServiceImpl implements CrmProductService {
         return productMapper.selectCountByCategoryId(categoryId);
     }
 
-    @Override
-    public List<CrmProductDO> getProductListByStatus(Integer status) {
-        boolean flag = CrmProductStatusEnum.isEnable(status);
-        List<ErpProductRespVO> erpProductRespVOS = erpProductService.getProductVOInfoByStatus(flag);
-        List<CrmProductDO> crmProductDOS =  erpProductRespVOSConvertToCrmProductDOS(erpProductRespVOS);
-        return crmProductDOS;
-    }
-
-    /**
-     * 把erpProductRespVO转换为CrmProductDO
-     * */
-    private List<CrmProductDO> erpProductRespVOSConvertToCrmProductDOS(List<ErpProductRespVO> erpProductRespVOS) {
-        List<CrmProductDO> crmProductDOS = new ArrayList<>();
-        for (ErpProductRespVO erpProductRespVO : erpProductRespVOS) {
-            CrmProductDO crmProductDO = new CrmProductDO();
-            crmProductDO.setId(erpProductRespVO.getId());
-            crmProductDO.setName(erpProductRespVO.getName());
-            crmProductDO.setUnit(Math.toIntExact(erpProductRespVO.getUnitId()));
-            crmProductDO.setNo(erpProductRespVO.getBarCode());
-            crmProductDOS.add(crmProductDO);
-        }
-        return crmProductDOS;
-    }
 
     @Override
-    public List<ErpProductDO> validProductList(Collection<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
-            return Collections.emptyList();
-        }
-        List<ErpProductDO> erpProductDOS = erpProductMapper.selectBatchIds(ids);
-        Map<Long, ErpProductDO> productMap = convertMap(erpProductDOS, ErpProductDO::getId);
-        for (Long id : ids) {
-            ErpProductDO product = productMap.get(id);
-            if (productMap.get(id) == null) {
-                throw exception(PRODUCT_NOT_EXISTS);
-            }
-            if (!product.getStatus()) {
-                throw exception(PRODUCT_NOT_ENABLE, product.getName());
-            }
-        }
-        return erpProductDOS;
+    public List<ErpProductDTO> validProductList(Collection<Long> ids) {
+        return erpProductApi.validProductList(ids);
     }
 
     @Override

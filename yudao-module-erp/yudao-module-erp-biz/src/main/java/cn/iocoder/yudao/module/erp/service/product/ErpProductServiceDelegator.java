@@ -165,16 +165,4 @@ public class ErpProductServiceDelegator implements ErpProductService {
         ErpProductService service = getDefaultService();
         return service.getProductCountByUnitId(unitId);
     }
-
-    @Override
-    public List<ErpProductRespDTO> getAllProductVOInfo() {
-        ErpProductService service = getDefaultService();
-        return service.getAllProductVOInfo();
-    }
-
-    @Override
-    public List<ErpProductRespVO> getProductVOInfoByStatus(boolean status) {
-        ErpProductService service = getDefaultService();
-        return service.getProductVOInfoByStatus(status);
-    }
 }

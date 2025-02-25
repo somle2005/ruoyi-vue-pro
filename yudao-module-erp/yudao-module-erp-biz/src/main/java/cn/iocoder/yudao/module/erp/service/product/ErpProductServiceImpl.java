@@ -363,21 +363,6 @@ public class ErpProductServiceImpl implements ErpProductService {
         return productMapper.selectCountByUnitId(unitId);
     }
 
-    @Override
-    public List<ErpProductRespDTO> getAllProductVOInfo() {
-        List<ErpProductDO> erpProductDOS = productMapper.selectListByStatus(true);
-        List<ErpProductRespVO> erpProductRespVOS = buildProductVOList(erpProductDOS);
-        List<ErpProductRespDTO> erpProductRespDTOS = BeanUtils.toBean(erpProductRespVOS, ErpProductRespDTO.class);
-        return erpProductRespDTOS;
-    }
-
-    @Override
-    public List<ErpProductRespVO> getProductVOInfoByStatus(boolean status) {
-        List<ErpProductDO> erpProductDOS = productMapper.selectListByStatus(status);
-        List<ErpProductRespVO> erpProductRespVOS = buildProductVOList(erpProductDOS);
-        return erpProductRespVOS;
-    }
-
     private boolean validateProductColorAndSeriesAndModel(Long id, String color, String model, String series) {
         List<ErpProductDO> products = productMapper.selectByColorAndSeriesAndModel(color, model, series);
         //如果id不为空，并且包含在集合内，则表示为更新

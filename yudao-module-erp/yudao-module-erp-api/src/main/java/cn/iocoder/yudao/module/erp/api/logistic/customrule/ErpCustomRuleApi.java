@@ -30,11 +30,4 @@ public interface ErpCustomRuleApi {
      * List<ErpCustomRuleDTO> 海关规则+产品 DTOs
      */
     List<ErpCustomRuleDTO> getErpCustomRuleDTOByProductId(Long productId);
-
-    /**
-     * 获取所有海关规则
-     *
-     * @return 海关规则集合
-     */
-    public List<ErpCustomRuleDTO> getAllCustomRulesDTOInfo();
 }

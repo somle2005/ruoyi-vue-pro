@@ -19,10 +19,10 @@ import cn.iocoder.yudao.module.crm.service.business.CrmBusinessService;
 import cn.iocoder.yudao.module.crm.service.business.CrmBusinessStatusService;
 import cn.iocoder.yudao.module.crm.service.customer.CrmCustomerService;
 import cn.iocoder.yudao.module.crm.service.product.CrmProductService;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
-import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
-import cn.iocoder.yudao.module.erp.service.product.ErpProductUnitService;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductUnitApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductUnitDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -65,15 +65,12 @@ public class CrmBusinessController {
     private CrmBusinessStatusService businessStatusTypeService;
     @Resource
     private CrmBusinessStatusService businessStatusService;
-    @Resource
-    private CrmProductService productService;
 
     @Resource
-    private ErpProductService erpProductService;
+    private ErpProductApi erpProductApi;
 
     @Resource
-    ErpProductUnitService productUnitService;
-
+    private ErpProductUnitApi erpProductUnitApi;
     @Resource
     private AdminUserApi adminUserApi;
     @Resource
@@ -128,12 +125,12 @@ public class CrmBusinessController {
         // 拼接产品项
         List<CrmBusinessProductDO> businessProducts = businessService.getBusinessProductListByBusinessId(businessVO.getId());
 
-        Map<Long, ErpProductDO> erpProductMap = erpProductService.getProductMap(
-                convertSet(businessProducts, CrmBusinessProductDO::getProductId));
+        Map<Long, ErpProductDTO> erpProductMap = erpProductApi.getProductMap(convertSet(businessProducts, CrmBusinessProductDO::getProductId));
 
-        List<ErpProductDO> erpProductDOList = erpProductMap.values().stream().toList();
-        Map<Long, ErpProductUnitDO> unitMap = productUnitService.getProductUnitMap(
-                convertSet(erpProductDOList, ErpProductDO::getUnitId));
+        List<ErpProductDTO> erpProductDOList = erpProductMap.values().stream().toList();
+
+        Map<Long, ErpProductUnitDTO> unitMap = erpProductUnitApi.getProductUnitMap(
+                convertSet(erpProductDOList, ErpProductDTO::getUnitId));
 
         businessVO.setProducts(BeanUtils.toBean(businessProducts, CrmBusinessRespVO.Product.class, businessProductVO ->
                 MapUtils.findAndThen(erpProductMap, businessProductVO.getProductId(),

@@ -4,7 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.crm.controller.admin.product.vo.product.CrmProductPageReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.product.vo.product.CrmProductSaveReqVO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.product.CrmProductDO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
@@ -85,19 +85,11 @@ public interface CrmProductService {
     Long getProductByCategoryId(Long categoryId);
 
     /**
-     * 获得指定状态的产品列表
-     *
-     * @param status 状态
-     * @return 产品列表
-     */
-    List<CrmProductDO> getProductListByStatus(Integer status);
-
-    /**
      * 校验产品们的有效性
      *
      * @param ids 编号数组
      * @return 产品列表
      */
-    List<ErpProductDO> validProductList(Collection<Long> ids);
+    List<ErpProductDTO> validProductList(Collection<Long> ids);
 
 }

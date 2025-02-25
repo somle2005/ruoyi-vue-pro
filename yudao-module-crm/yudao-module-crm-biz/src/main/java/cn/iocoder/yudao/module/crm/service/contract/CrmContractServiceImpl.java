@@ -298,7 +298,7 @@ public class CrmContractServiceImpl implements CrmContractService {
             throw exception(CONTRACT_SUBMIT_FAIL_NOT_DRAFT);
         }
 
-       //2.修改合同状态为已提交
+       //2.修改合同状态为审批中
         contractMapper.updateById(new CrmContractDO().setId(id).setAuditStatus(CrmAuditStatusEnum.PROCESS.getStatus()));
     }
 

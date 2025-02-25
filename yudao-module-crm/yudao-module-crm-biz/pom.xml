@@ -72,11 +72,11 @@
             <artifactId>yudao-spring-boot-starter-test</artifactId>
         </dependency>
 
-        <!-- 引入下ERP相关依赖 -->
+        <!-- 引入ERP模块的API相关依赖 -->
         <dependency>
             <groupId>cn.iocoder.boot</groupId>
-            <artifactId>yudao-module-erp-biz</artifactId>
-            <version>2.4.0-SNAPSHOT</version>
+            <artifactId>yudao-module-erp-api</artifactId>
+            <version>${revision}</version>
         </dependency>
     </dependencies>
 </project>

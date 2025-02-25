@@ -1,10 +1,14 @@
 package cn.iocoder.yudao.module.erp.api.product;
 
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpCustomRuleRespDTO;
+
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 
 public interface ErpProductApi {
     /**
@@ -13,8 +17,36 @@ public interface ErpProductApi {
     List<ErpProductDTO> listProductDTOs(List<Long> ids);
 
     /**
-     * 获得所有erp产品信息
+     * 获得产品 DO Map
+     *
+     * @param ids 编号数组
+     * @return 产品 DO Map
      */
-    List<ErpProductRespDTO> listProductRespDTOs();
+    default Map<Long, ErpProductDTO> getProductMap(Collection<Long> ids) {
+        return convertMap(listProducts(ids), ErpProductDTO::getId);
+    }
 
+    /**
+     * 获得产品 DO 列表
+     *
+     * @param ids 编号组
+     * @return 产品 DO 列表
+     */
+    List<ErpProductDTO> listProducts(Collection<Long> ids);
+
+    /**
+     * 校验产品们的有效性
+     *
+     * @param ids 编号数组
+     * @return 产品列表
+     */
+    List<ErpProductDTO> validProductList(Collection<Long> ids);
+
+    /**
+     * 获得指定状态的产品 VO 列表
+     *
+     * @param status 状态
+     * @return 产品 VO 列表
+     */
+    List<ErpProductRespDTO> getProductVOListByStatus(Boolean status);
 }
