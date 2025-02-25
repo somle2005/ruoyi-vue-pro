@@ -11,6 +11,7 @@ import org.springframework.ai.chat.model.Generation;
 import org.springframework.ai.chat.prompt.ChatOptions;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.model.ModelOptionsUtils;
+import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.ai.openai.metadata.OpenAiChatResponseMetadata;
@@ -33,6 +34,8 @@ import static cn.iocoder.yudao.framework.ai.core.model.deepseek.DeepSeekChatOpti
  */
 @Slf4j
 public class DeepSeekChatModel implements ChatModel {
+
+    OpenAiChatModel openAiChatModel;
 
     private static final String BASE_URL = "https://api.deepseek.com";
 
@@ -62,10 +65,21 @@ public class DeepSeekChatModel implements ChatModel {
     }
 
     public DeepSeekChatModel(String apiKey, DeepSeekChatOptions options, RetryTemplate retryTemplate) {
+        this(apiKey,options,retryTemplate,null);
+    }
+
+    public DeepSeekChatModel(String apiKey, DeepSeekChatOptions options,String url) {
+        this(apiKey,options,RetryUtils.DEFAULT_RETRY_TEMPLATE,url);
+    }
+
+    public DeepSeekChatModel(String apiKey, DeepSeekChatOptions options, RetryTemplate retryTemplate,String url) {
         Assert.notEmpty(apiKey, "apiKey 不能为空");
         Assert.notNull(options, "options 不能为空");
         Assert.notNull(retryTemplate, "retryTemplate 不能为空");
-        this.openAiApi = new OpenAiApi(BASE_URL, apiKey);
+        if(StringUtil.isBlank(url)) {
+            url=BASE_URL;
+        }
+        this.openAiApi = new OpenAiApi(url, apiKey);
         this.defaultOptions = options;
         this.retryTemplate = retryTemplate;
     }
