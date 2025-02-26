@@ -17,17 +17,23 @@ import java.util.List;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class EccangModifySkuRelationReqVO {
 
-    /** 平台sku */
-    private String platform_sku;
-    /** 仓库代码 */
-    private String warehouse_code;
-    /** 店铺账号数组 */
-    private String user_account;
-    /** 仓库sku数据数组 */
-    private List<PCR> pcr;
-    /** 原仓库SKU数据数组 */
-    private String origin;
+    private List<ModifyData> data;
 
+    @Data
+    @Builder
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class ModifyData {
+        /** 平台sku */
+        private String platformSku;
+        /** 仓库代码 */
+        private String warehouseCode;
+        /** 店铺账号数组 */
+        private List<String> userAccount;
+        /** 仓库sku数据数组 */
+        private List<PCR> pcr;
+        /** 原仓库SKU数据数组 */
+        private List<Origin> origin;
+    }
 
 
 
@@ -36,15 +42,29 @@ public class EccangModifySkuRelationReqVO {
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class PCR {
         /** 平台sku */
-        private String product_sku;
+        private String productSku;
         /** 仓库代码 */
-        private String product_sku_qty;
+        private String productSkuQty;
         /** 店铺账号数组 */
-        private String product_sku_name_cn;
+        private String productSkuNameCn;
         /** 仓库sku数据数组 */
-        private String product_sku_pu_price;
+        private String productSkuPuPrice;
         /** 原仓库SKU数据数组 */
         private String origin;
+    }
+
+
+    @Data
+    @Builder
+    @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
+    public static class Origin {
+        /** 原仓库代码 */
+        private String warehouseCode;
+        /** 原店铺账号数组 */
+        private String userAccount;
+        /** 原仓库sku */
+        private String productSku;
+
     }
 
 }

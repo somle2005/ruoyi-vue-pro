@@ -2,6 +2,7 @@ package com.somle.eccang;
 
 import com.somle.eccang.config.EccangIntegrationConfig;
 import com.somle.eccang.model.*;
+import com.somle.eccang.model.req.EccangModifySkuRelationReqVO;
 import com.somle.eccang.repository.EccangTokenRepository;
 import com.somle.eccang.service.EccangService;
 import cn.iocoder.yudao.framework.test.core.ut.BaseSpringTest;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Arrays;
 import java.util.List;
 
 
@@ -172,6 +174,22 @@ public class EccangTest extends BaseSpringTest {
     @Test
     public void getSkuRelation() {
         service.getSkuRelation("RS3800");
+    }
+
+    @Test
+    public void setSkuRelation() {
+        List<EccangModifySkuRelationReqVO.PCR> list=List.of(
+            EccangModifySkuRelationReqVO.PCR.builder().productSku("TEST-01").productSkuQty("1").productSkuNameCn("测试商品-01").build(),
+            EccangModifySkuRelationReqVO.PCR.builder().productSku("TEST-03").productSkuQty("1").productSkuNameCn("测试商品-03").build()
+        );
+
+        //Walmart_HO_USA[Walmart_HO]
+
+        // EccangResponse ret=service.setSkuRelation("TT206002GB-EU","Amazon_FENGE_US" ,list);
+
+        EccangResponse ret=service.setSkuRelation("DT-109501","Amazon_FENGE_US" ,list);
+
+        System.out.println(ret);
     }
 
 

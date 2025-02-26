@@ -6,6 +6,7 @@ import com.somle.eccang.model.EccangResponse.EccangPage;
 import com.somle.eccang.model.exception.EccangResponseException;
 import com.somle.eccang.model.reps.EccangSkuRelationRespVO;
 import com.somle.eccang.model.req.EccangInventoryBatchReqVO;
+import com.somle.eccang.model.req.EccangModifySkuRelationReqVO;
 import com.somle.eccang.model.req.EccangRmaReturnReqVO;
 import com.somle.eccang.model.req.EccangSkuRelationReqVO;
 import com.somle.eccang.repository.EccangTokenRepository;
@@ -30,10 +31,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.Year;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -328,11 +326,13 @@ public class EccangService {
     /**
      * 设置平台SKU关系
      **/
-    public List<EccangSkuRelationRespVO> setSkuRelation(String platformSku,String shopAccount,List<String> prdSku) {
-        EccangSkuRelationReqVO vo = EccangSkuRelationReqVO.builder().page(1).pageSize(100)
-            .condition(EccangSkuRelationReqVO.Condition.builder().platformSku(platformSku).build())
-            .build();
-        return post("getSkuRelation", vo, EccangSkuRelationRespVO.class);
+    public EccangResponse setSkuRelation(String platformSku,String account,List<EccangModifySkuRelationReqVO.PCR> pcrList) {
+
+        EccangModifySkuRelationReqVO vo = EccangModifySkuRelationReqVO.builder().data(
+            List.of(EccangModifySkuRelationReqVO.ModifyData.builder().userAccount(List.of(account)).platformSku(platformSku).pcr(pcrList).build())
+        ).build();
+
+        return getResponse(vo,"modifySkuRelation");
     }
 
 

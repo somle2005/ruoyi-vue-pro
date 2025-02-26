@@ -81,7 +81,7 @@ public interface ErpShopProductService {
     * @param id 店铺产品ID
     * @return 产品
     */
-    ErpShopProductRespVO getShopProductWithItems(Long id);
+    ErpShopProductRespVO getShopProductVoModel(Long id);
 
     /**
     * 根据店铺编号查询产品对应条目的分组

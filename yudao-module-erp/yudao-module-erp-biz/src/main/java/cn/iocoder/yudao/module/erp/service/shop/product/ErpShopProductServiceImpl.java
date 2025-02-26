@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.number.NumberUtils;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.module.erp.api.shop.dto.SkuRelationDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespSimpleVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
@@ -19,7 +20,11 @@ import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import jodd.util.StringUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 import jakarta.annotation.Resource;
 import org.springframework.validation.annotation.Validated;
@@ -46,6 +51,12 @@ import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
 @Service
 @Validated
 public class ErpShopProductServiceImpl implements ErpShopProductService {
+
+
+    @Resource
+    MessageChannel eccangSkuRelationOutputChannel;
+
+
 
     @Resource
     private ErpShopProductMapper shopProductMapper;
@@ -131,7 +142,7 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
      * @return 产品
      */
     @Override
-    public ErpShopProductRespVO getShopProductWithItems(Long id) {
+    public ErpShopProductRespVO getShopProductVoModel(Long id) {
         ErpShopProductDO shopProduct = this.getShopProduct(id);
         if (shopProduct == null) {
             throw exception(SHOP_PRODUCT_NOT_EXISTS);
@@ -167,6 +178,7 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
         Long id=this.createShopProduct(createReqVO);
         createReqVO.setId(id);
         updateShopProductWithItems(createReqVO);
+        sendToEccang(createReqVO.getId());
         return id;
     }
 
@@ -205,8 +217,49 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
         }
 
 
+        sendToEccang(updateReqVO.getId());
+
+    }
+
+    private void sendToEccang(Long id) {
+        ErpShopProductRespVO productVo = this.getShopProductVoModel(id);
+
+        // 条件判断
+        if(productVo==null) {
+            return;
+        }
+
+        // 需要有店铺
+        if(productVo.getShop()==null) {
+            return;
+        }
+
+        // 店铺需要维护别名
+        if(StringUtil.isBlank(productVo.getShop().getAccount())) {
+            return;
+        }
+
+        // 与产品有关联关系
+        if(!CollectionUtils.isEmpty(productVo.getItems())) {
+            for (ErpShopProductItemRespVO item : productVo.getItems()) {
+                if(item.getProduct()==null) {
+                    return;
+                }
+            }
+        }
 
 
+
+        SkuRelationDTO dto = SkuRelationDTO.builder()
+            .platformSku(productVo.getName())
+            .account(productVo.getShop().getAccount())
+            .relations(StreamX.from(productVo.getItems()).map(item->SkuRelationDTO.Relation.builder()
+                .productSku(item.getProduct().getBarCode())
+                .productSkuQty(item.getQuantity())
+                .build()).toList())
+            .build();
+
+        eccangSkuRelationOutputChannel.send(MessageBuilder.withPayload(dto).build());
     }
 
     @Override

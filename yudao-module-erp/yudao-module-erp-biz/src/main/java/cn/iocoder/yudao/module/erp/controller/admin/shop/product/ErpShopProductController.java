@@ -139,7 +139,7 @@ public class ErpShopProductController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('erp:shop-product:query')")
     public CommonResult<ErpShopProductRespVO> getShopProduct(@RequestParam("id") Long id) {
-        ErpShopProductRespVO respVO=shopProductService.getShopProductWithItems(id);
+        ErpShopProductRespVO respVO=shopProductService.getShopProductVoModel(id);
         ErpShopDO shopDO = shopService.getShop(respVO.getShopId());
         respVO.setShop(BeanUtils.toBean(shopDO, ErpShopRespVO.class));
 
