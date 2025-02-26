@@ -18,7 +18,7 @@ public interface ErpProductConvert {
 
 
     ErpProductDTO convert(ErpProductDO erpProductDO);
-    ErpProductRespDTO convertErpProductRespVO(ErpProductRespVO erpProductRespVO);
+    ErpProductRespDTO convert(ErpProductRespVO erpProductRespVO);
 
     default List<ErpProductDTO> convert(List<ErpProductDO> erpProductDOs) {
         if (erpProductDOs != null) {
@@ -38,12 +38,12 @@ public interface ErpProductConvert {
         }
         return result;
     }
-    default List<ErpProductRespDTO> convertErpProductRespVO(List<ErpProductRespVO> erpProductRespVOS) {
+    default List<ErpProductRespDTO> toErpProductRespVO(List<ErpProductRespVO> erpProductRespVOS) {
         if (erpProductRespVOS == null) {
             return null;
         }
         return erpProductRespVOS.stream()
-                .map(this::convertErpProductRespVO)
+                .map(this::convert)
                 .collect(Collectors.toList());
     }
 }

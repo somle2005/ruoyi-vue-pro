@@ -55,6 +55,6 @@ public class ErpProductApiImpl implements ErpProductApi {
     @Override
     public List<ErpProductRespDTO> getProductVOListByStatus(Boolean status) {
         List<ErpProductRespVO> erpProductRespVOList = erpProductService.getProductVOListByStatus(status);
-        return ErpProductConvert.INSTANCE.convertErpProductRespVO(erpProductRespVOList);
+        return ErpProductConvert.INSTANCE.toErpProductRespVO(erpProductRespVOList);
     }
 }
