@@ -28,7 +28,7 @@ public class CrmProductController {
     @GetMapping("/simple-list")
     @Operation(summary = "获得产品精简列表", description = "只包含被开启的产品，主要用于前端的下拉选项")
     public CommonResult<List<ErpProductSimpleRespDTO>> getProductSimpleList() {
-        List<ErpProductRespDTO> list = erpProductApi.getProductVOListByStatus(true);
+        List<ErpProductRespDTO> list = erpProductApi.getProductDTOListByStatus(true);
         return success(convertList(list, vo -> BeanUtils.toBean(vo, ErpProductSimpleRespDTO.class)));
     }
 

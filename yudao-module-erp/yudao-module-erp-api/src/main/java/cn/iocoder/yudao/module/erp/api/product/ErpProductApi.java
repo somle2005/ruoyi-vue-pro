@@ -43,10 +43,10 @@ public interface ErpProductApi {
     List<ErpProductDTO> validProductList(Collection<Long> ids);
 
     /**
-     * 获得指定状态的产品 VO 列表
+     * 获得指定状态的产品 DTO 列表
      *
      * @param status 状态
-     * @return 产品 VO 列表
+     * @return 产品 DTO 列表
      */
-    List<ErpProductRespDTO> getProductVOListByStatus(Boolean status);
+    List<ErpProductRespDTO> getProductDTOListByStatus(Boolean status);
 }

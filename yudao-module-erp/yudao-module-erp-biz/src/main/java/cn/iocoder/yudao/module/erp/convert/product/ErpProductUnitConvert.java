@@ -1,9 +1,7 @@
 package cn.iocoder.yudao.module.erp.convert.product;
 
 
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductUnitDTO;
-import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
