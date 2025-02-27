@@ -121,7 +121,7 @@ public class ErpToEccangConverter {
         this.setProductCategoriesAndOrganizationId(eccangProduct, productDTO, userMap);
         //产品id
 //        eccangProduct.setDesc(String.valueOf(customRuleDTO.getProductId()));//Desc->productId
-        return eccangProduct;
+        return tearDown(eccangProduct);
     }
 
     /**
@@ -140,10 +140,12 @@ public class ErpToEccangConverter {
         this.setProductSizeAndWeight(eccangProduct, productDTO, (product, dto) -> {
         });
         this.setProductCategoriesAndOrganizationId(eccangProduct, productDTO, userMap);
-        return eccangProduct;
+        return tearDown(eccangProduct);
     }
 
-    //设置eccangProduct默认值
+    /**
+     * 转换前置操作-设置eccangProduct默认值
+     */
     private EccangProduct setDefaultValue(EccangProduct eccangProduct) {
         eccangProduct.setDefaultSupplierCode(
             ObjectUtils.defaultIfNull(eccangProduct.getDefaultSupplierCode(), "默认供应商")
@@ -153,7 +155,7 @@ public class ErpToEccangConverter {
             ObjectUtils.defaultIfNull(eccangProduct.getSaleStatus(), 2) // 销售状态
         );
         eccangProduct.setActionType(
-            ObjectUtils.defaultIfNull(eccangProduct.getActionType(), "ADD") //默认操作类型
+            ObjectUtils.defaultIfNull(eccangProduct.getActionType(), "ADD") //默认新增
         );
         eccangProduct.setCurrencyCode(
             ObjectUtils.defaultIfNull(eccangProduct.getCurrencyCode(), "RMB") // 默认币种代码RMB
@@ -168,7 +170,15 @@ public class ErpToEccangConverter {
             ObjectUtils.defaultIfNull(eccangProduct.getProductDeclaredValue(), 0.001F));// 申报价值
         eccangProduct.setPdOverseaTypeEn(
             ObjectUtils.defaultIfNull(eccangProduct.getPdOverseaTypeEn(), "无")); //申报品名英文
-        //根据sku从eccang中获取产品，如果产品不为空，则表示已存在，操作则变为修改
+        return eccangProduct;
+    }
+
+
+    /**
+     * 转换后置操作-判断是否是新增还是添加
+     */
+    private EccangProduct tearDown(EccangProduct eccangProduct) {
+        //根据sku从eccang中获取产品，存在->修改,不存在->新增
         if (ObjUtil.isNotEmpty(eccangService.getProduct(eccangProduct.getProductSku()))) {
             eccangProduct.setActionType("EDIT");
             //如果是修改就要上传默认采购单价
