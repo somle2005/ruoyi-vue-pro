@@ -140,9 +140,6 @@ public class ErpShopProductController {
     @PreAuthorize("@ss.hasPermission('erp:shop-product:query')")
     public CommonResult<ErpShopProductRespVO> getShopProduct(@RequestParam("id") Long id) {
         ErpShopProductRespVO respVO=shopProductService.getShopProductVoModel(id);
-        ErpShopDO shopDO = shopService.getShop(respVO.getShopId());
-        respVO.setShop(BeanUtils.toBean(shopDO, ErpShopRespVO.class));
-
         if(respVO.getDeptId()!=null) {
             DeptRespDTO deptDTO=deptApi.getDept(respVO.getDeptId());
             if(deptDTO!=null) {

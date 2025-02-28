@@ -90,7 +90,7 @@ public abstract class ShopifyToErpProfileConverter<IN,OUT> extends AbstractErpSh
                 shopDo.setCountryCode(getCountryDictValue(shopJson.getString(FIELD_COUNTRY)));
                 shopDo.setPlatform(SalesPlatform.SHOPIFY.name());
                 shopDo.setPlatformShopUid(shopJson.getString(FIELD_ID));
-                //shopDo.setAccount(null);
+                shopDo.setAccount(CharSymbols.EMPTY);
                 shopDo.setCode(shopDo.getPlatform()+"-"+shopDo.getPlatformShopUid());
                 returnList.add(shopDo);
             }

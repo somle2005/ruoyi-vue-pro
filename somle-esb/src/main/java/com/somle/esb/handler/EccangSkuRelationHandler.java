@@ -1,5 +1,6 @@
 package com.somle.esb.handler;
 
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.module.erp.api.shop.dto.SkuRelationDTO;
 import com.somle.ai.service.AiService;
 import com.somle.eccang.model.EccangResponse;
@@ -24,7 +25,6 @@ import java.util.List;
  */
 @Slf4j
 @Component
-@Profile("prod")
 @RequiredArgsConstructor
 public class EccangSkuRelationHandler {
 
@@ -33,6 +33,10 @@ public class EccangSkuRelationHandler {
 
     @ServiceActivator(inputChannel = "eccangSkuRelationOutputChannel")
     public void handleSale(SkuRelationDTO relationDTO) {
+
+        if(SpringUtils.isProd()) {
+            return;
+        }
 
         if(relationDTO==null) {
             return;

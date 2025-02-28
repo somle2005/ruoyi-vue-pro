@@ -4,7 +4,9 @@ import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
+import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import cn.iocoder.yudao.framework.common.util.number.NumberUtils;
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.api.shop.dto.SkuRelationDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespSimpleVO;
@@ -12,6 +14,7 @@ import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProduc
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.product.item.vo.ErpShopProductItemSaveReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.shop.vo.ErpShopRespVO;
+import cn.iocoder.yudao.module.erp.dal.dataobject.shop.ErpShopDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.shop.product.item.ErpShopProductItemDO;
 import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
 import cn.iocoder.yudao.module.erp.service.shop.ErpShopService;
@@ -154,6 +157,10 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
         List<ErpProductRespSimpleVO> simpleProductList = BeanUtils.toBean(productList, ErpProductRespSimpleVO.class);
         StreamX.from(itemRespVOS).assemble(simpleProductList,ErpProductRespSimpleVO::getId,ErpShopProductItemRespVO::getProductId,ErpShopProductItemRespVO::setProduct);
         respVO.setItems(itemRespVOS);
+        // 店铺
+        ErpShopDO shopDO = shopService.getShop(respVO.getShopId());
+        respVO.setShop(BeanUtils.toBean(shopDO, ErpShopRespVO.class));
+
         return respVO;
     }
 
@@ -254,12 +261,17 @@ public class ErpShopProductServiceImpl implements ErpShopProductService {
             .platformSku(productVo.getName())
             .account(productVo.getShop().getAccount())
             .relations(StreamX.from(productVo.getItems()).map(item->SkuRelationDTO.Relation.builder()
-                .productSku(item.getProduct().getBarCode())
+                // 如果是非生产环境加 TEST- 前缀区别
+                .productSku(SpringUtils.isProd()?"":"TEST-"+item.getProduct().getBarCode())
                 .productSkuQty(item.getQuantity())
                 .build()).toList())
             .build();
 
-        eccangSkuRelationOutputChannel.send(MessageBuilder.withPayload(dto).build());
+
+        AsyncTask.run(()->{
+            eccangSkuRelationOutputChannel.send(MessageBuilder.withPayload(dto).build());
+        });
+
     }
 
     @Override

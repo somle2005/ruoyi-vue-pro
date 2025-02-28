@@ -1,6 +1,5 @@
 package com.somle.esb.enums;
 
-import cn.iocoder.yudao.framework.common.enums.EnvEnum;
 import lombok.Getter;
 
 @Getter

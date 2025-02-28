@@ -87,7 +87,7 @@ public abstract class AmazonToErpProfileConverter<IN,OUT> extends AbstractErpSho
                 shopDo.setCountryCode(getCountryDictValue(amazonShop.getMarketplace().getCountryCode()));
                 shopDo.setPlatform(SalesPlatform.AMAZON.name());
                 shopDo.setPlatformShopUid(amazonShop.getMarketplace().getId());
-                //shopDo.setAccount(null);
+                shopDo.setAccount(CharSymbols.EMPTY);
                 shopDo.setCode(shopDo.getPlatform()+CharSymbols.MINUS+shopDo.getPlatformShopUid());
                 returnList.add(shopDo);
             }
