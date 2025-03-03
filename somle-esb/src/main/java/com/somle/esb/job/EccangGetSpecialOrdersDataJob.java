@@ -24,7 +24,7 @@ public class EccangGetSpecialOrdersDataJob extends EccangDataJob{
                 OssData.builder()
                         .database(DATABASE)
                         .tableName("special_orders")
-                        .syncType("full")
+                        .syncType("inc")
                         .requestTimestamp(System.currentTimeMillis())
                         .folderDate(today)
                         .content(specialOrdersList)

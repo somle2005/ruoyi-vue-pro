@@ -1,5 +1,6 @@
 package com.somle.eccang.service;
 
+import cn.iocoder.yudao.framework.common.util.date.LocalDateTimeUtils;
 import com.alibaba.fastjson.JSONObject;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -10,6 +11,8 @@ import org.dom4j.io.SAXReader;
 import org.springframework.stereotype.Service;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 
 
 @Slf4j
@@ -28,12 +31,25 @@ public class EccangWMSService {
 
        //请求报文 xml格式
         String serviceMethod = "getSpecialOrdersList";
+        // 获取当前日期
+        LocalDate today = LocalDate.now();
+        // 获取前天的日期
+        LocalDate dayBeforeYesterday = today.minusDays(2);
+        // 获取昨天的日期
+        LocalDate yesterday = today.minusDays(1);
+        // 定义日期格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(LocalDateTimeUtils.FORMAT_YEAR_MONTH_DAY);
+
+        // 将日期格式化为字符串
+        String dayBeforeYesterdayormattedDate = dayBeforeYesterday.format(formatter) + " 00:00:00";
+        String yesterdayformattedDate = yesterday.format(formatter)+ " 00:00:00";
+
         String requestBody =
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                         "<SOAP-ENV:Envelope xmlns:SOAP-ENV=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:ns1=\"http://www.example.org/Ec/\">\n" +
                         "    <SOAP-ENV:Body>\n" +
                         "        <ns1:callService>\n" +
-                        "            <paramsJson>{\"pageSize\":\"20\",\"page\":\"1\"}</paramsJson>\n" +
+                        "            <paramsJson>{\"pageSize\":\"20\",\"spo_add_time_from\":\"" + dayBeforeYesterdayormattedDate + "\",\"spo_add_time_to\":\"" + yesterdayformattedDate + "\",\"page\":\"1\"}</paramsJson>\n" +
                         "            <appToken>" + appToken + "</appToken>\n" +
                         "            <appKey>" + appKey +"</appKey>\n" +
                         "            <service>" + serviceMethod + "</service>\n" +

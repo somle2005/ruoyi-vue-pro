@@ -24,7 +24,7 @@ public class EccangGetStpoListNewDataJob extends EccangDataJob{
                 OssData.builder()
                         .database(DATABASE)
                         .tableName("stpo_list_new")
-                        .syncType("full")
+                        .syncType("inc")
                         .requestTimestamp(System.currentTimeMillis())
                         .folderDate(today)
                         .content(list)
