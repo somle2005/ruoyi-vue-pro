@@ -7,7 +7,6 @@ import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
-import com.somle.cdiscount.model.CdiscountToken;
 import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +18,6 @@ import java.util.Map;
 @Slf4j
 public class CdiscountClient {
 
-    private final CdiscountToken token;
     //Cdiscount平台API请求路径
     private final String URL = "https://api.octopia-io.net/seller/v2";
 
@@ -34,8 +32,7 @@ public class CdiscountClient {
    //卖家ID
     public static final String SELLER_ID = "79730";
 
-    public CdiscountClient(CdiscountToken token) {
-        this.token = token;
+    public CdiscountClient() {
         this.webClient = new OkHttpClient();
     }
 
@@ -49,13 +46,19 @@ public class CdiscountClient {
 
     @SneakyThrows
     public JSONObject getOrders() {
-       //Cdiscount平台订单查询接口路径
-        var endpoint = "/orders?salesChannelId=CDISFR&shippingCountry=Fr";
+        //Cdiscount平台订单查询接口路径
+        var endpoint = "/orders";
         var request = RequestX.builder()
-            .requestMethod(RequestX.Method.GET)
-            .url(URL+endpoint)
-            .headers(getHeaders())
-            .build();
+                .requestMethod(RequestX.Method.GET)
+                .url(URL+endpoint)
+                .queryParams(
+                        Map.of(
+                                "salesChannelId", "CDISFR",
+                                "shippingCountry", "Fr"
+                        )
+                )
+                .headers(getHeaders())
+                .build();
         var bodyString = sendRequest(request).body().string();
         var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
         return result;
@@ -73,8 +76,8 @@ public class CdiscountClient {
                         "Content-Type", "application/x-www-form-urlencoded"
                 ), TOKEN_REQUEST_BODY
         );
-        CdiscountToken token = JsonUtilsX.parseObject(body, CdiscountToken.class);
-        return token.getAccess_token();
+        JSONObject jsonObject = JsonUtilsX.parseObject(body, JSONObject.class);
+        return jsonObject.getString("access_token");
     }
 
 }
