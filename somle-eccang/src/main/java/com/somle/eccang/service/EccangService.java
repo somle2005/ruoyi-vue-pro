@@ -1,6 +1,7 @@
 package com.somle.eccang.service;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.iocoder.yudao.framework.common.util.date.LocalDateTimeUtils;
 import cn.iocoder.yudao.framework.common.util.general.CoreUtils;
 import cn.iocoder.yudao.framework.common.util.general.Limiter;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
@@ -26,8 +27,10 @@ import org.springframework.web.client.HttpClientErrorException;
 
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -165,6 +168,10 @@ public class EccangService {
 
     private EccangPage getPage(Object payload, String endpoint) {
         EccangResponse response = getResponse(payload, endpoint);
+        // 当bizContent为"[]"时也为空，返回null，否则会转换报错 by gumaomao
+        if ("[]".equals(response.getBizContentString())) {
+            return null;
+        }
         return response.getBizContent(EccangPage.class);
     }
 
@@ -410,6 +417,24 @@ public class EccangService {
 
     public Stream<EccangProduct> getProducts() {
         return list("getWmsProductList", EccangProduct.class);
+    }
+
+    public Stream<Object> getStpoListNew() {
+        String endpoint = "getStpoListNew";
+        var payload = JsonUtilsX.newObject();
+
+        // 获取当前日期
+        LocalDate today = LocalDate.now();
+        // 获取前一天的日期
+        LocalDate dayBeforeYesterday = today.minusDays(2);
+        // 定义日期格式
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(LocalDateTimeUtils.FORMAT_YEAR_MONTH_DAY);
+
+        // 将日期格式化为字符串
+        String formattedDate = dayBeforeYesterday.format(formatter);
+        //传入前一天的日期，如今天是"2025-03-03",传入前天的日期，即"2025-03-01"
+        payload.put("dateFor", formattedDate);
+        return getAllPage(payload, endpoint).flatMap(n -> n.getData(Object.class).stream());
     }
 
     /**

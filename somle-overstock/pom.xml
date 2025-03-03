@@ -10,8 +10,7 @@
     </parent>
 
     <groupId>com.somle</groupId>
-    <artifactId>somle-eccang</artifactId>
-
+    <artifactId>somle-overstock</artifactId>
 
     <dependencies>
         <dependency>
@@ -25,24 +24,10 @@
             <scope>test</scope>
         </dependency>
 
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
-
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-integration</artifactId>
-        </dependency>
-
-        <!-- 添加dom4j依赖解析xml结果 -->
-        <dependency>
-            <groupId>org.dom4j</groupId>
-            <artifactId>dom4j</artifactId>
-            <version>2.1.3</version>
-        </dependency>
-
     </dependencies>
 
 </project>
