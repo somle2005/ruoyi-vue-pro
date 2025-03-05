@@ -297,7 +297,9 @@ public class AmazonSpClient {
                 // 获取当前重试次数
                 int retryCount = ctx.getRetryCount();
                 // 记录每次重试的日志
-                log.debug("遇到错误: {}", ctx.getLastThrowable().getStackTrace().toString());
+                if (ctx.getLastThrowable() != null) {
+                    log.debug("遇到错误: {}", ctx.getLastThrowable().getStackTrace().toString());
+                }
                 log.debug("正在请求url= {},第 {} 次重试。", request.getUrl(), retryCount + 1);
                 try(var response = WebUtils.sendRequest(request)){
                     validateResponse(response);
