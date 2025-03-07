@@ -1,10 +1,11 @@
 package com.somle.esb.job;
 
 
+import com.somle.eccang.model.reps.EccangStpoListNewRespVO;
+import com.somle.eccang.model.req.EccangStpoListNewReqVo;
 import com.somle.esb.model.OssData;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
 
 /**
  * @className: EccangGetStpoListNewDataJob
@@ -14,24 +15,27 @@ import java.util.List;
  * @description: 获取海外仓头程单(待发货)上传到数仓
  */
 @Component
-public class EccangGetStpoListNewDataJob extends EccangDataJob{
+public class EccangStpoListNewDataJob extends EccangDataJob{
 
     @Override
     public String execute(String param) throws Exception {
-        setDate(param);
-        List<Object> list = eccangService.getStpoListNew().toList();
-        service.send(
-                OssData.builder()
+       setDate(param);
+       eccangService.getStpoListNew(EccangStpoListNewReqVo.builder()
+                .dateFor(beforeYesterday.toString())
+                .dateTo(yesterday.toString())
+                .build()).forEach(
+                        eccangStpoListNewRespVO -> {
+                        var data = OssData.builder()
                         .database(DATABASE)
                         .tableName("stpo_list_new")
                         .syncType("inc")
                         .requestTimestamp(System.currentTimeMillis())
                         .folderDate(today)
-                        .content(list)
+                        .content(eccangStpoListNewRespVO)
                         .headers(null)
-                        .build()
-        );
-
+                        .build();
+                        service.send(data);
+                        });
         return "data upload success";
     }
 }

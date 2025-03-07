@@ -1,7 +1,6 @@
 package com.somle.eccang.service;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.iocoder.yudao.framework.common.util.date.LocalDateTimeUtils;
 import cn.iocoder.yudao.framework.common.util.general.CoreUtils;
 import cn.iocoder.yudao.framework.common.util.general.Limiter;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
@@ -11,8 +10,10 @@ import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.somle.eccang.model.*;
 import com.somle.eccang.model.EccangResponse.EccangPage;
 import com.somle.eccang.model.exception.EccangResponseException;
+import com.somle.eccang.model.reps.EccangStpoListNewRespVO;
 import com.somle.eccang.model.req.EccangInventoryBatchReqVO;
 import com.somle.eccang.model.req.EccangRmaReturnReqVO;
+import com.somle.eccang.model.req.EccangStpoListNewReqVo;
 import com.somle.eccang.repository.EccangTokenRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.SneakyThrows;
@@ -24,13 +25,10 @@ import org.springframework.messaging.MessageChannel;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
-
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Year;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -168,10 +166,6 @@ public class EccangService {
 
     private EccangPage getPage(Object payload, String endpoint) {
         EccangResponse response = getResponse(payload, endpoint);
-        // 当bizContent为"[]"时也为空，返回null，否则会转换报错 by gumaomao
-        if ("[]".equals(response.getBizContentString())) {
-            return null;
-        }
         return response.getBizContent(EccangPage.class);
     }
 
@@ -419,17 +413,9 @@ public class EccangService {
         return list("getWmsProductList", EccangProduct.class);
     }
 
-    public Stream<Object> getStpoListNew() {
-
+    public Stream<EccangStpoListNewRespVO> getStpoListNew(EccangStpoListNewReqVo vo) {
         String endpoint = "getStpoListNew";
-        var payload = JsonUtilsX.newObject();
-        // 获取前一天的日期
-        LocalDate dayBeforeYesterday = LocalDate.now().minusDays(2);
-        // 定义日期格式
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(LocalDateTimeUtils.FORMAT_YEAR_MONTH_DAY);
-        //传入前一天的日期，如今天是"2025-03-03",传入前天的日期，即"2025-03-01"
-        payload.put("dateFor", dayBeforeYesterday.format(formatter));
-        return getAllPage(payload, endpoint).flatMap(n -> n.getData(Object.class).stream());
+        return getAllPage(JsonUtilsX.toJSONObject(vo), endpoint).flatMap(n -> n.getData(EccangStpoListNewRespVO.class).stream());
     }
     /**
      * @return java.util.stream.Stream<com.somle.eccang.model.EccangUserAccount>
