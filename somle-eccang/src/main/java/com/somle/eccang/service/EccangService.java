@@ -168,6 +168,10 @@ public class EccangService {
 
     private EccangPage getPage(Object payload, String endpoint) {
         EccangResponse response = getResponse(payload, endpoint);
+        // 当bizContent为"[]"时也为空，返回null，否则会转换报错 by gumaomao
+        if ("[]".equals(response.getBizContentString())) {
+            return null;
+        }
         return response.getBizContent(EccangPage.class);
     }
 
