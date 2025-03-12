@@ -13,6 +13,9 @@ import java.time.LocalDateTime;
 @Data
 @ExcelIgnoreUnannotated
 public class ErpCustomProductRespVO {
+    @Schema(description = "id")
+    @ExcelProperty("id")
+    private Long id;
 
     @Schema(description = "产品id", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("产品id")
