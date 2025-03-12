@@ -2,13 +2,18 @@ package cn.iocoder.yudao.module.erp.service.logistic.category.product;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.product.vo.ErpCustomProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.logistic.category.product.vo.ErpCustomProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.product.ErpCustomProductDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.logistic.category.product.ErpCustomProductMapper;
+import cn.iocoder.yudao.module.erp.service.logistic.category.ErpCustomCategoryService;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.Collections;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_PRODUCT_NOT_EXISTS;
@@ -24,9 +29,15 @@ public class ErpCustomProductServiceImpl implements ErpCustomProductService {
 
     @Resource
     private ErpCustomProductMapper customProductMapper;
-
+    @Autowired
+    ErpProductApi erpProductApi;
+    @Autowired
+    ErpCustomCategoryService erpCustomCategoryService;
     @Override
     public Long createCustomProduct(ErpCustomProductSaveReqVO createReqVO) {
+        //校验存在
+        //产品存在+分类存在
+        validData(createReqVO);
         // 插入
         ErpCustomProductDO customProduct = BeanUtils.toBean(createReqVO, ErpCustomProductDO.class);
         customProductMapper.insert(customProduct);
@@ -34,8 +45,14 @@ public class ErpCustomProductServiceImpl implements ErpCustomProductService {
         return customProduct.getId();
     }
 
+    private void validData(ErpCustomProductSaveReqVO vo) {
+        erpProductApi.validProductList(Collections.singletonList(vo.getProductId()));
+        erpCustomCategoryService.validCustomRuleCategory(Collections.singletonList(vo.getCustomCategoryId()));
+    }
+
     @Override
     public void updateCustomProduct(ErpCustomProductSaveReqVO updateReqVO) {
+        validData(updateReqVO);
         // 校验存在
         validateCustomProductExists(updateReqVO.getId());
         // 更新

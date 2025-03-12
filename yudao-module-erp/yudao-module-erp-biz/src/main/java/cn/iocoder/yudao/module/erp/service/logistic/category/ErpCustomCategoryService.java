@@ -56,6 +56,13 @@ public interface ErpCustomCategoryService {
     default Map<Long, ErpCustomCategoryDO> getCustomRuleCategoryMap(Collection<Long> ids) {
         return convertMap(listCustomRuleCategory(ids), ErpCustomCategoryDO::getId);
     }
+
+    /**
+     * 校验有效性
+     *
+     * @param ids ids
+     */
+    void validCustomRuleCategory(List<Long> ids);
     /**
      * 获得海关分类分页
      *
