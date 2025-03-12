@@ -8,7 +8,7 @@ import org.springframework.stereotype.Component;
 
 
 /**
- * @className: EccangGetStpoListNewDataJob
+ * @className: EccangStpoListNewDataJob
  * @author: gumaomao
  * @date: 2025/02/28
  * @Version: 1.0
@@ -21,8 +21,8 @@ public class EccangStpoListNewDataJob extends EccangDataJob{
     public String execute(String param) throws Exception {
        setDate(param);
        eccangService.getStpoListNew(EccangStpoListNewReqVo.builder()
-                .dateFor(beforeYesterday.toString())
-                .dateTo(yesterday.toString())
+                .dateFor(beforeYesterdayFirstSecond.toString())
+                .dateTo(beforeYesterdayLastSecond.toString())
                 .build()).forEach(
                         eccangStpoListNewRespVO -> {
                         var data = OssData.builder()
@@ -30,7 +30,7 @@ public class EccangStpoListNewDataJob extends EccangDataJob{
                         .tableName("stpo_list_new")
                         .syncType("inc")
                         .requestTimestamp(System.currentTimeMillis())
-                        .folderDate(today)
+                        .folderDate(beforeYesterday)
                         .content(eccangStpoListNewRespVO)
                         .headers(null)
                         .build();

@@ -2,6 +2,7 @@ package com.somle.eccang.model.reps;
 
 
 import cn.hutool.core.date.DateTime;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.AllArgsConstructor;
@@ -66,7 +67,7 @@ public class EccangStpoListNewRespVO {
     private String stpoStatusName; // 单据状态名称
     private List<Product> productInfo; // 订单产品信息
     private List<PackingInfo> packingInfo; // 装箱单信息
-    private List<DgOrder> dgOrderInfo; // 轨迹信息
+    private JsonNode dgOrderInfo; // 轨迹信息
     private List<PackingReceivingAndPurchaseEntry> packingReceivingAndPurchaseInfo; // 装箱批次信息
     private String stpoCancelPlanRemark; // 回退备注
     private String isStraight; // 是否直发
