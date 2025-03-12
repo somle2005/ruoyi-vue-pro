@@ -20,6 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -100,6 +101,11 @@ public class ErpCustomCategoryServiceImpl implements ErpCustomCategoryService {
     @Override
     public ErpCustomCategoryDO getCustomRuleCategory(Long id) {
         return customRuleCategoryMapper.selectById(id);
+    }
+
+    //get list方法
+    public List<ErpCustomCategoryDO> listCustomRuleCategory(Collection<Long> ids) {
+        return customRuleCategoryMapper.selectByIds(ids);
     }
 
     @Override

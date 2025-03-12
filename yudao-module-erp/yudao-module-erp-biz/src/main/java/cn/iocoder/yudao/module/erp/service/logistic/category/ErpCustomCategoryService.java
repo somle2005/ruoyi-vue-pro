@@ -7,7 +7,11 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.ErpCustomCat
 import cn.iocoder.yudao.module.erp.dal.dataobject.logistic.category.item.ErpCustomCategoryItemDO;
 import jakarta.validation.Valid;
 
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 
 /**
  * 海关分类 Service 接口
@@ -46,6 +50,12 @@ public interface ErpCustomCategoryService {
      */
     ErpCustomCategoryDO getCustomRuleCategory(Long id);
 
+    List<ErpCustomCategoryDO> listCustomRuleCategory(Collection<Long> ids);
+
+    //getMap
+    default Map<Long, ErpCustomCategoryDO> getCustomRuleCategoryMap(Collection<Long> ids) {
+        return convertMap(listCustomRuleCategory(ids), ErpCustomCategoryDO::getId);
+    }
     /**
      * 获得海关分类分页
      *
@@ -61,6 +71,8 @@ public interface ErpCustomCategoryService {
      * @return 海关分类list
      */
     List<ErpCustomCategoryDO> getCustomRuleCategoryList(ErpCustomCategoryPageReqVO pageReqVO);
+
+
     // ==================== 子表（海关分类子表） ====================
 
     /**

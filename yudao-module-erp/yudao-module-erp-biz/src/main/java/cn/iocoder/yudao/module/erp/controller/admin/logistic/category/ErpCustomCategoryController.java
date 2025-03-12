@@ -153,7 +153,7 @@ public class ErpCustomCategoryController {
     }
 
 
-    private List<ErpCustomCategoryRespVO> BindingResult(List<ErpCustomCategoryDO> listDOs) {
+    public List<ErpCustomCategoryRespVO> BindingResult(List<ErpCustomCategoryDO> listDOs) {
         List<Long> ids = listDOs.stream().map(ErpCustomCategoryDO::getId).toList();
         Map<Long, List<ErpCustomCategoryItemDO>> itemMap = customRuleCategoryItemService.getCustomRuleCategoryItemMap(ids);
         //1 材料ids
