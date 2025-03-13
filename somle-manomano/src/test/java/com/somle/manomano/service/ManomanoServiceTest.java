@@ -22,7 +22,7 @@ class ManomanoServiceTest extends SomleBaseDbUnitTest {
         var end = LocalDateTime.now();
 
 
-        log.info(service.getClient().getOrders().toString());
+        log.info(service.getClient().getOffersInfo().toString());
     }
 
 }
