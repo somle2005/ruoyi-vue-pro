@@ -1,6 +1,7 @@
 package com.somle.eccang.service;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.general.CoreUtils;
 import cn.iocoder.yudao.framework.common.util.general.Limiter;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
@@ -11,6 +12,7 @@ import com.somle.eccang.model.*;
 import com.somle.eccang.model.EccangResponse.EccangPage;
 import com.somle.eccang.model.exception.EccangResponseException;
 import com.somle.eccang.model.req.EccangInventoryBatchReqVO;
+import com.somle.eccang.model.req.EccangReceivingReqVo;
 import com.somle.eccang.model.req.EccangRmaReturnReqVO;
 import com.somle.eccang.repository.EccangTokenRepository;
 import jakarta.annotation.PostConstruct;
@@ -114,7 +116,10 @@ public class EccangService {
             // 获取当前重试次数
             int retryCount = ctx.getRetryCount();
             // 记录每次重试的日志
-            log.debug("正在请求url= {},第 {} 次重试。endpoint = {}", request.getUrl(), retryCount + 1, endpoint);
+            if (ctx.getRetryCount() != 0) {
+                log.debug("正在请求url= {},第 {} 次重试。endpoint = {}", request.getUrl(), retryCount, endpoint);
+                log.debug("重试原因：{}", ctx.getLastThrowable().toString());
+            }
             try (var response = WebUtils.sendRequest(request)) {
                 switch (response.code()) {
                     case 200:
@@ -185,7 +190,6 @@ public class EccangService {
                 }
             }
         );
-        // );
     }
 
 
