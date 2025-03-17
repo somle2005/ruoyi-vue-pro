@@ -443,6 +443,16 @@ public class EccangService {
         return getAllPage(JsonUtilsX.toJSONObject(eccangRmaReturnReqVO), "getRmaReturnList");
     }
 
+    /**
+     * @return java.util.stream.Stream<com.somle.eccang.model.EccangResponse.EccangPage>
+     * @Author gumaomao
+     * @Description 入库单管理——查询入库单信息
+     * @Date  2025/03/13
+     **/
+    public Stream<EccangPage> streamReceiving(EccangReceivingReqVo eccangReceivingReqVo) {
+        String endpoint = "getReceiving";
+        return getAllPage(JsonUtilsX.toJSONObject(eccangReceivingReqVo), endpoint);
+    }
     public String parseCountryCode(String code) {
         switch (code) {
             case "USA":
