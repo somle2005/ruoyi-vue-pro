@@ -12,4 +12,16 @@
     <!--@mbg.generated-->
     id, access_token, subdomain
   </sql>
+
+  <select id="getHeaders" resultType="java.lang.String">
+    SELECT
+      `NAME`,
+      access_token
+    FROM
+      `erp_shop`,
+      shopify_token
+    WHERE
+      erp_shop.auth_id = shopify_token.id
+      AND NAME = #{storeName}
+  </select>
 </mapper>
