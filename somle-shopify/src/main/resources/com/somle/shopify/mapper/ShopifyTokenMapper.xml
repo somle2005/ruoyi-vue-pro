@@ -13,10 +13,9 @@
     id, access_token, subdomain
   </sql>
 
-  <select id="getHeaders" resultType="java.lang.String">
+  <select id="getHeaders" resultType="com.somle.shopify.domain.HeaderDto">
     SELECT
-      `name`,
-      access_token
+        *
     FROM
       `erp_shop`,
       shopify_token
