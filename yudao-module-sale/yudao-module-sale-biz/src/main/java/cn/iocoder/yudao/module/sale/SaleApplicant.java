@@ -8,7 +8,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author: LaoSan
  * @create: 2025-03-18 11:19
  **/
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {"com.somle", "cn.iocoder.yudao.module"})
 public class SaleApplicant {
 
     public static void main(String[] args) {
