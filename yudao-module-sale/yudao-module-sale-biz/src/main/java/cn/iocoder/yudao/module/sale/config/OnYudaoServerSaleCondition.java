@@ -1,4 +1,4 @@
-package config;
+package cn.iocoder.yudao.module.sale.config;
 
 import org.springframework.context.annotation.Condition;
 import org.springframework.context.annotation.ConditionContext;

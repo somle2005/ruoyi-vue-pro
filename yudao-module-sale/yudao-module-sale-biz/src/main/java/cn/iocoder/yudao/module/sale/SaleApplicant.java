@@ -1,10 +1,11 @@
 package cn.iocoder.yudao.module.sale;
 
-import config.OnYudaoServerSaleCondition;
+import cn.iocoder.yudao.module.sale.config.OnYudaoServerSaleCondition;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Conditional;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 /**
  * @description:
@@ -14,6 +15,7 @@ import org.springframework.context.annotation.Conditional;
 @Conditional(OnYudaoServerSaleCondition.class)
 @SpringBootApplication(scanBasePackages = {"com.somle", "cn.iocoder.yudao.module"})
 @MapperScan(basePackages = {"com.somle", "cn.iocoder.yudao.module"})
+@EnableJpaRepositories(basePackages = "com.somle")
 public class SaleApplicant {
 
     public static void main(String[] args) {
