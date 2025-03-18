@@ -1,19 +1,16 @@
 package cn.iocoder.yudao.framework.quartz.core.handler;
 
 import cn.hutool.core.date.LocalDateTimeUtil;
-import cn.hutool.core.exceptions.ExceptionUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.thread.ThreadUtil;
+import cn.iocoder.yudao.framework.common.util.custom.MyExceptionUtil;
 import cn.iocoder.yudao.framework.quartz.core.enums.JobDataKeyEnum;
 import cn.iocoder.yudao.framework.quartz.core.service.JobLogFrameworkService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.quartz.DisallowConcurrentExecution;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
-import org.quartz.PersistJobDataAfterExecution;
+import org.quartz.*;
 import org.springframework.context.ApplicationContext;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-import jakarta.annotation.Resource;
 
 import java.time.LocalDateTime;
 
@@ -88,8 +85,7 @@ public class JobHandlerInvoker extends QuartzJobBean {
         boolean success = exception == null;
         if (!success) {
 //            data = getRootCauseMessage(exception);
-            var stackString = ExceptionUtil.stacktraceToString(exception);
-            data = stackString.length() > 4000? stackString.substring(0,4000) : stackString;
+            data = MyExceptionUtil.getExceptionDetail(exception);
         }
         // 更新日志
         try {
