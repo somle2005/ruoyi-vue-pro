@@ -1,6 +1,7 @@
 package com.somle.walmart.service;
 
 
+import com.somle.walmart.model.WalmartToken;
 import com.somle.walmart.repository.WalmartTokenRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
@@ -21,7 +22,19 @@ public class WalmartService {
 
     public WalmartClient getClient() {
         if (client == null) {
-            var token = tokenRepository.findAll().get(0);
+            var token = tokenRepository.findAll().get(1);
+            if (token.getSvcName().equals("Walmart Marketplace")) {
+                client = new WalmartMarketplaceClient(token);
+            } else {
+                client = new WalmartDsvClient(token, "752076");
+            }
+        }
+        return client;
+    }
+
+
+    public WalmartClient getClient(WalmartToken token) {
+        if (client == null) {
             if (token.getSvcName().equals("Walmart Marketplace")) {
                 client = new WalmartMarketplaceClient(token);
             } else {

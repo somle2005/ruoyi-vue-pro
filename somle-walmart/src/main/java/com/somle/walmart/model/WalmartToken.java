@@ -14,6 +14,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class WalmartToken {
     @Id
+    private Integer id;
     private String clientId;
     private String clientSecret;
     private String svcName;

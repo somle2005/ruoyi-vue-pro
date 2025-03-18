@@ -29,7 +29,7 @@ public class WalmartDsvClient extends WalmartClient{
                 .scheme("https")
                 .host("api-gateway.walmart.com")
                 .addPathSegments(endpoint)
-                .addQueryParameter("shipNode", shipNode)
+                .addQueryParameter("shipNode", "752076")
                 .build();
     }
 

@@ -1,22 +1,32 @@
 package com.somle.walmart.service;
 
 
+import cn.iocoder.yudao.framework.common.util.general.CoreUtils;
 import cn.iocoder.yudao.framework.common.util.io.IoUtils;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
-import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
+import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
+import com.alibaba.fastjson.JSON;
+import com.somle.walmart.model.WalmartAllItemsReqVO;
 import com.somle.walmart.model.WalmartOrderReqVO;
 import com.somle.walmart.model.WalmartToken;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -24,6 +34,7 @@ import java.util.zip.ZipInputStream;
 public abstract class WalmartClient {
 
 
+    private final int pageSize = 50;
     WalmartToken token;
 
     private String accessToken;
@@ -80,7 +91,7 @@ public abstract class WalmartClient {
         Response response = client.newCall(request).execute();
         var bodyString = response.body().string();
         log.info(bodyString);
-        var result = JsonUtils.parseObject(bodyString, JSONObject.class);
+        var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
         return result.getString("access_token");
     }
 
@@ -103,7 +114,7 @@ public abstract class WalmartClient {
                 .build();
         Response response = client.newCall(request).execute();
         var bodyString = response.body().string();
-        var result = JsonUtils.parseObject(bodyString, JSONObject.class);
+        var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
         return result;
     }
 
@@ -121,7 +132,7 @@ public abstract class WalmartClient {
                 .build();
         Response response = client.newCall(request).execute();
         var bodyString = response.body().string();
-        var result = JsonUtils.parseObject(bodyString, JSONObject.class);
+        var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
         return result.getStringList("availableApReportDates");
     }
 
@@ -186,7 +197,91 @@ public abstract class WalmartClient {
                 .build();
         Response response = client.newCall(request).execute();
         var bodyString = response.body().string();
-        var result = JsonUtils.parseObject(bodyString, JSONObject.class);
+        var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
         return result;
     }
+
+    @SneakyThrows
+    public JSONObject getAllItems() {
+        OkHttpClient client = new OkHttpClient().newBuilder()
+            .build();
+        HttpUrl url = url("v3/items");
+        HttpUrl.Builder urlBuilder = url.newBuilder();
+        urlBuilder.addQueryParameter("limit", "30");
+
+        Request request = new Request.Builder()
+            .url(urlBuilder.build().toString())
+            .method("GET", null)
+            .headers(headers())
+            .build();
+        Response response = client.newCall(request).execute();
+        var bodyString = response.body().string();
+        var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
+        return result;
+    }
+
+//    @SneakyThrows
+//    public Stream<JSONObject> streamAllItems(WalmartAllItemsReqVO walmartAllItemsReqVO) {
+//        String endpoint = "v3/items";
+//        return getAllPage(JsonUtilsX.toJSONObject(walmartAllItemsReqVO), endpoint);
+//    }
+//
+//    private Stream<JSONObject> getAllPage(JSONObject payload, String endpoint) {
+//        payload.put("page", 1);
+//        payload.put("page_size", pageSize);
+//        return Stream.iterate(
+//            getPage(payload, endpoint), Objects::nonNull,
+//            bizContent -> {
+//                if (bizContent.hasNext()) {
+//                    log.debug("have next,endpoint:{}当前进度：{}/{}", endpoint, (bizContent.getPage() - 1) * pageSize + bizContent.getData().size(), bizContent.getTotal());
+//                    payload.put("page", bizContent.getPage() + 1);
+//                    return getPage(payload, endpoint);
+//                } else {
+//                    log.debug("no next page");
+//                    return null;
+//                }
+//            }
+//        );
+//    }
+//
+//    private JSONObject getPage(Object payload, String endpoint) {
+//        JSONObject response = getResponse(payload, endpoint);
+//        return response.getBizContent(EccangPage.class);
+//    }
+//
+//    @SneakyThrows
+//    private JSONObject getResponse(Object payload, String endpoint) {
+//
+//        String url = url(endpoint).toString();
+//
+//        JSONObject responseFinal = CoreUtils.retry(ctx -> {
+//            var requestBody = requestBody(payload, endpoint);
+//            var request = RequestX.builder()
+//                .requestMethod(RequestX.Method.POST)
+//                .url(url)
+//                .payload(requestBody)
+//                .build();
+//            // 获取当前重试次数
+//            int retryCount = ctx.getRetryCount();
+//            // 记录每次重试的日志
+//            if (ctx.getRetryCount() != 0) {
+//                log.debug("正在请求url= {},第 {} 次重试。endpoint = {}", request.getUrl(), retryCount, endpoint);
+//                log.debug("重试原因：{}", ctx.getLastThrowable().toString());
+//            }
+//            try (var response = WebUtils.sendRequest(request)) {
+//                switch (response.code()) {
+//                    case 200:
+//                        var responseBody = response.body().string();
+//                        var responseOriginal = JsonUtilsX.parseObject(responseBody, EccangResponse.class);
+//                        validateResponse(responseOriginal);
+//                        return responseOriginal;
+//                    case 429:
+//                        throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, "Too many requests, please try again later.");
+//                    default:
+//                        throw new RuntimeException("Unknown response code " + response);
+//                }
+//            }
+//        });
+//        return responseFinal;
+//    }
 }

@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.sale.controller;
 
 import cn.iocoder.yudao.module.sale.job.ShopifyListingJob;
+import cn.iocoder.yudao.module.sale.job.WalmartListingJob;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -17,10 +18,20 @@ public class TestController {
 
     @Resource
     private ShopifyListingJob shopifyListingJob;
+    @Resource
+    private WalmartListingJob walmartListingJob;
 
     @GetMapping("/shopifyListingJob")
     public String shopifyListingJob(String param){
         String execute = shopifyListingJob.execute(param);
+        return "test";
+    }
+
+
+
+    @GetMapping("/walmartListingJob")
+    public String walmartListingJob(String param) throws Exception {
+        String execute = walmartListingJob.execute(param);
         return "test";
     }
 
