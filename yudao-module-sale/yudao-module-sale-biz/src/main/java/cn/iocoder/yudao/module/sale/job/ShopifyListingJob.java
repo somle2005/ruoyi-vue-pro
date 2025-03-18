@@ -2,19 +2,25 @@ package cn.iocoder.yudao.module.sale.job;
 
 import cn.iocoder.yudao.framework.common.util.custom.MyExceptionUtil;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
-import cn.iocoder.yudao.module.sale.domain.entity.*;
-import cn.iocoder.yudao.module.sale.mapper.*;
+import cn.iocoder.yudao.module.sale.domain.entity.ErpShop;
+import cn.iocoder.yudao.module.sale.domain.entity.ErpSku;
+import cn.iocoder.yudao.module.sale.mapper.ErpShopMapper;
+import cn.iocoder.yudao.module.sale.mapper.ErpSkuMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.somle.shopify.domain.*;
+import com.somle.shopify.domain.RetrieveAListOfProductsDto;
+import com.somle.shopify.domain.RetrieveAListOfProductsVo;
 import com.somle.shopify.service.ShopifyClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.util.*;
+import org.springframework.util.CollectionUtils;
+import org.springframework.util.StringUtils;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -123,18 +129,27 @@ public class ShopifyListingJob implements JobHandler {
                 erpSku.setPlatName(erpShop.getPlatName());
                 erpSku.setPlatShopCode(erpShop.getPlatShopCode());
                 erpSku.setProductType(eachItem.getProductType());
-                erpSku.setBuyableStatus(0);
-                erpSku.setDiscoverableStatus(0);
-                erpSku.setTitle("");
-                erpSku.setWeight(new BigDecimal("0"));
-                erpSku.setWeightUnit("");
-                erpSku.setBarcode("");
-                erpSku.setLabel("");
-                erpSku.setDescribe(new Object());
+                String status = eachItem.getStatus();
+                if ("active".equals(status)) {
+                    erpSku.setBuyableStatus(1);
+                }
+                LocalDateTime publishedAt = eachItem.getPublishedAt();
+                if (publishedAt != null) {
+                    erpSku.setDiscoverableStatus(1);
+                } else {
+                    erpSku.setDiscoverableStatus(0);
+                }
+                erpSku.setTitle(eachVariant.getTitle());
+                erpSku.setWeight(eachVariant.getWeight());
+                erpSku.setWeightUnit(eachVariant.getWeightUnit());
+                erpSku.setBarcode(eachVariant.getBarcode());
+                erpSku.setLabel(eachItem.getTags());
+                erpSku.setDescribe(eachItem.getBodyHtml());
                 erpSku.setMainImageUrl("");
                 erpSku.setCreatedAt(LocalDateTime.now());
                 erpSku.setUpdatedAt(LocalDateTime.now());
-                erpSku.setListingTime(LocalDateTime.now());
+              //  LocalDateTime publishedAt = eachItem.getPublishedAt();
+                erpSku.setListingTime(publishedAt);
                 erpSku.setListingUpdateTime(LocalDateTime.now());
                 erpSku.setTimeZone("");
                 erpSku.setTaxable(0);

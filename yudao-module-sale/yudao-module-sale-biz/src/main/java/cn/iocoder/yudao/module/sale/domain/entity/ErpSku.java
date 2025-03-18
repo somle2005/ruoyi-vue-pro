@@ -1,12 +1,10 @@
 package cn.iocoder.yudao.module.sale.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
+import lombok.Data;
+
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import lombok.Data;
 
 /**
  * ERP平台sku表
@@ -126,7 +124,7 @@ public class ErpSku {
      * 描述
      */
     @TableField(value = "`describe`")
-    private Object describe;
+    private String describe;
 
     /**
      * 主图url

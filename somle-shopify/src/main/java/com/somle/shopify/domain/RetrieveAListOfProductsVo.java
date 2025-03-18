@@ -2,6 +2,8 @@ package com.somle.shopify.domain;
 
 import lombok.*;
 
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -26,7 +28,7 @@ public class RetrieveAListOfProductsVo {
         private String createdAt;
         private String handle;
         private String updatedAt;
-        private Object publishedAt;
+        private LocalDateTime publishedAt;
         private String templateSuffix;
         private String publishedScope;
         private String tags;
@@ -36,6 +38,12 @@ public class RetrieveAListOfProductsVo {
         private List<OptionsDTO> options;
         private List<ImagesDTO> images;
         private ImageDTO image;
+
+        public String getBodyHtml() {
+
+
+            return bodyHtml;
+        }
 
         @NoArgsConstructor
         @Data
@@ -75,7 +83,7 @@ public class RetrieveAListOfProductsVo {
             private String inventoryManagement;
             private Boolean requiresShipping;
             private String sku;
-            private Double weight;
+            private BigDecimal weight;
             private String weightUnit;
             private Long inventoryItemId;
             private Integer inventoryQuantity;
