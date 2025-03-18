@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.sale.domain.entity.ErpShop;
 import cn.iocoder.yudao.module.sale.domain.entity.ErpSku;
 import cn.iocoder.yudao.module.sale.mapper.ErpShopMapper;
 import cn.iocoder.yudao.module.sale.mapper.ErpSkuMapper;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.shopify.domain.RetrieveAListOfProductsDto;
 import com.somle.shopify.domain.RetrieveAListOfProductsVo;
@@ -133,8 +134,8 @@ public class ShopifyListingJob implements JobHandler {
                 if ("active".equals(status)) {
                     erpSku.setBuyableStatus(1);
                 }
-                LocalDateTime publishedAt = eachItem.getPublishedAt();
-                if (publishedAt != null) {
+                String publishedAt = eachItem.getPublishedAt();
+                if (StringUtils.hasText(publishedAt)) {
                     erpSku.setDiscoverableStatus(1);
                 } else {
                     erpSku.setDiscoverableStatus(0);
@@ -145,50 +146,45 @@ public class ShopifyListingJob implements JobHandler {
                 erpSku.setBarcode(eachVariant.getBarcode());
                 erpSku.setLabel(eachItem.getTags());
                 erpSku.setDescribe(eachItem.getBodyHtml());
-                erpSku.setMainImageUrl("");
-                erpSku.setCreatedAt(LocalDateTime.now());
-                erpSku.setUpdatedAt(LocalDateTime.now());
-              //  LocalDateTime publishedAt = eachItem.getPublishedAt();
-                erpSku.setListingTime(publishedAt);
-                erpSku.setListingUpdateTime(LocalDateTime.now());
-                erpSku.setTimeZone("");
-                erpSku.setTaxable(0);
-                erpSku.setVendor("");
-                erpSku.setVariantPosition(0);
-                erpSku.setSpuId(0L);
-                erpSku.setSpuTitle("");
-                erpSku.setSpuCreatedAt(LocalDateTime.now());
-                erpSku.setSpuUpdatedAt(LocalDateTime.now());
-                erpSku.setOriginalJson("");
-                erpSku.setCreator("");
-                erpSku.setCreateTime(LocalDateTime.now());
-                erpSku.setUpdater("");
-                erpSku.setUpdateTime(LocalDateTime.now());
-                erpSku.setDeleted(0);
-
-                if (existId != null) {
-                    erpSku.setId(existId);
+                RetrieveAListOfProductsVo.ProductsDTO.ImageDTO image = eachItem.getImage();
+                if (image != null) {
+                    String src = image.getSrc();
+                    erpSku.setMainImageUrl(src);
                 }
-
-
-
-/*
+                erpSku.setCreatedAt(eachVariant.getCreatedAt());
+                erpSku.setUpdatedAt(eachVariant.getUpdatedAt());
+                erpSku.setListingTime(publishedAt);
+                erpSku.setListingUpdateTime(eachVariant.getUpdatedAt());
+                Boolean taxable = eachVariant.getTaxable();
+                if (taxable){
+                    erpSku.setTaxable(1);
+                }else {
+                    erpSku.setTaxable(0);
+                }
+                erpSku.setVendor(eachItem.getVendor());
+                erpSku.setVariantPosition(eachVariant.getPosition());
+                erpSku.setSpuId(eachItem.getId());
+                erpSku.setSpuTitle(eachItem.getTitle());
+                erpSku.setSpuCreatedAt(eachItem.getCreatedAt());
+                erpSku.setSpuUpdatedAt(eachItem.getUpdatedAt());
+                String originalJson = JSON.toJSONString(eachItem);
+                erpSku.setOriginalJson(originalJson);
+                erpSku.setCreator("admin");
+                erpSku.setCreateTime(LocalDateTime.now());
+                erpSku.setDeleted(0);
                 if (existId == null) {
                     saveErpSkus.add(erpSku);
-                } else if (!jsonString.equals(existOriginalJson)) {
+                } else if (!originalJson.equals(existOriginalJson)) {
                     updateErpSkus.add(erpSku);
-                }*/
+                }
             }
         }
-
         if (!CollectionUtils.isEmpty(saveErpSkus)) {
             erpSkuMapper.insert(saveErpSkus);
         }
         if (!CollectionUtils.isEmpty(updateErpSkus)) {
             erpSkuMapper.updateById(updateErpSkus);
         }
-
-
     }
 
 }

@@ -1,6 +1,9 @@
 package cn.iocoder.yudao.module.sale.domain.entity;
 
-import com.baomidou.mybatisplus.annotation.*;
+import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -124,7 +127,7 @@ public class ErpSku {
      * 描述
      */
     @TableField(value = "`describe`")
-    private String describe;
+    private Object describe;
 
     /**
      * 主图url
@@ -136,31 +139,25 @@ public class ErpSku {
      * 创建时间
      */
     @TableField(value = "created_at")
-    private LocalDateTime createdAt;
+    private String createdAt;
 
     /**
      * 修改时间
      */
     @TableField(value = "updated_at")
-    private LocalDateTime updatedAt;
+    private String updatedAt;
 
     /**
      * 上架时间
      */
     @TableField(value = "listing_time")
-    private LocalDateTime listingTime;
+    private String listingTime;
 
     /**
      * 上架更新时间
      */
     @TableField(value = "listing_update_time")
-    private LocalDateTime listingUpdateTime;
-
-    /**
-     * 时区
-     */
-    @TableField(value = "time_zone")
-    private String timeZone;
+    private String listingUpdateTime;
 
     /**
      * 征税状态0征税1不征税
@@ -196,13 +193,13 @@ public class ErpSku {
      * spu创建时间
      */
     @TableField(value = "spu_created_at")
-    private LocalDateTime spuCreatedAt;
+    private String spuCreatedAt;
 
     /**
      * spu更新时间
      */
     @TableField(value = "spu_updated_at")
-    private LocalDateTime spuUpdatedAt;
+    private String spuUpdatedAt;
 
     /**
      * 原始json

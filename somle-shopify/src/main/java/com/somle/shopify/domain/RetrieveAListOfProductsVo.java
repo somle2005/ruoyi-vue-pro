@@ -1,9 +1,10 @@
 package com.somle.shopify.domain;
 
-import lombok.*;
+import cn.iocoder.yudao.framework.common.util.custom.HtmlEscapeUtil;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -28,7 +29,7 @@ public class RetrieveAListOfProductsVo {
         private String createdAt;
         private String handle;
         private String updatedAt;
-        private LocalDateTime publishedAt;
+        private String publishedAt;
         private String templateSuffix;
         private String publishedScope;
         private String tags;
@@ -40,9 +41,7 @@ public class RetrieveAListOfProductsVo {
         private ImageDTO image;
 
         public String getBodyHtml() {
-
-
-            return bodyHtml;
+            return HtmlEscapeUtil.escapeHtmlInTags(bodyHtml);
         }
 
         @NoArgsConstructor

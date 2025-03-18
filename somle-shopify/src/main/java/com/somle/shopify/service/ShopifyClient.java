@@ -40,12 +40,13 @@ public class ShopifyClient {
         RequestX request = RequestX.builder()
                 .requestMethod(RequestX.Method.GET)
                 .url(headers.getDomain() + endpoint)
+                .queryParams(dto)
                 .headers(headerValues)
                 .build();
         Integer successCode = dto.getSuccessCode();
         try {
             Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();
-            String responseJson = response.body().toString();
+            String responseJson = response.body().string();
             if (!successCode.equals(response.code())) {
                 throw new RuntimeException(responseJson);
             }
