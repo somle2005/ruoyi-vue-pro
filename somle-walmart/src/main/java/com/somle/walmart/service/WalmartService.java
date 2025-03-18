@@ -1,9 +1,9 @@
 package com.somle.walmart.service;
 
 
-import com.somle.walmart.repository.WalmartTokenRepository;
-import jakarta.annotation.PostConstruct;
-import lombok.Getter;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.somle.walmart.domain.WalmartToken;
+import com.somle.walmart.mapper.WalmartTokenMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -14,14 +14,15 @@ import org.springframework.stereotype.Service;
 public class WalmartService {
 
     @Autowired
-    private WalmartTokenRepository tokenRepository;
+    private WalmartTokenMapper walmartTokenMapper;
 
 
     private WalmartClient client;
 
     public WalmartClient getClient() {
         if (client == null) {
-            var token = tokenRepository.findAll().get(0);
+            LambdaQueryWrapper<WalmartToken> wrapper = new LambdaQueryWrapper<>();
+            var token = walmartTokenMapper.selectList(wrapper).get(0);
             if (token.getSvcName().equals("Walmart Marketplace")) {
                 client = new WalmartMarketplaceClient(token);
             } else {

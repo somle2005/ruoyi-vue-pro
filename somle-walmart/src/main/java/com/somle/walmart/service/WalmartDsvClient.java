@@ -1,7 +1,7 @@
 package com.somle.walmart.service;
 
 
-import com.somle.walmart.model.WalmartToken;
+import com.somle.walmart.domain.WalmartToken;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 

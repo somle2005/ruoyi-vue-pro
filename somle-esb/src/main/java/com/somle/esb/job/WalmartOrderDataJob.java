@@ -1,12 +1,8 @@
 package com.somle.esb.job;
 
 
-import com.somle.esb.model.Domain;
 import com.somle.esb.model.OssData;
-import com.somle.esb.service.EsbService;
-import com.somle.walmart.model.WalmartOrderReqVO;
-import com.somle.walmart.service.WalmartService;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.somle.walmart.domain.WalmartOrderReqVO;
 import org.springframework.stereotype.Component;
 
 @Component
