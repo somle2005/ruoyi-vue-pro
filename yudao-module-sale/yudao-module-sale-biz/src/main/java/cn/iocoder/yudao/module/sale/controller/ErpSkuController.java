@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.sale.controller;
 
 import cn.iocoder.yudao.module.sale.domain.entity.ErpSku;
 import cn.iocoder.yudao.module.sale.mapper.ErpSkuMapper;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.web.bind.annotation.*;
 
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
  *
  * @author xxxxx
  */
+@Tag(name = "erpSku")
 @RestController
 @RequestMapping("/erpSku/")
 public class ErpSkuController {

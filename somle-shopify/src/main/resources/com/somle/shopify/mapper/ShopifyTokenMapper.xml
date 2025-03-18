@@ -15,13 +15,13 @@
 
   <select id="getHeaders" resultType="java.lang.String">
     SELECT
-      `NAME`,
+      `name`,
       access_token
     FROM
       `erp_shop`,
       shopify_token
     WHERE
       erp_shop.auth_id = shopify_token.id
-      AND NAME = #{storeName}
+      AND `name` = #{storeName}
   </select>
 </mapper>
