@@ -1,14 +1,17 @@
 package cn.iocoder.yudao.module.sale;
 
+import config.OnYudaoServerSaleCondition;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Conditional;
 
 /**
  * @description:
  * @author: LaoSan
  * @create: 2025-03-18 11:19
  **/
+@Conditional(OnYudaoServerSaleCondition.class)
 @SpringBootApplication(scanBasePackages = {"com.somle", "cn.iocoder.yudao.module"})
 @MapperScan(basePackages = {"com.somle", "cn.iocoder.yudao.module"})
 public class SaleApplicant {
