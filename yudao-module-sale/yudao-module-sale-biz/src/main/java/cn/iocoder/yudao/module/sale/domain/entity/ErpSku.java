@@ -88,6 +88,12 @@ public class ErpSku {
     private Integer buyableStatus;
 
     /**
+     * 是否预售0否1是
+     */
+    @TableField(value = "preorder_status")
+    private Integer preorderStatus;
+
+    /**
      * 是否已上架0否1是
      */
     @TableField(value = "discoverable_status")
@@ -112,6 +118,18 @@ public class ErpSku {
     private String weightUnit;
 
     /**
+     * upc
+     */
+    @TableField(value = "upc")
+    private String upc;
+
+    /**
+     * gtin
+     */
+    @TableField(value = "gtin")
+    private String gtin;
+
+    /**
      * 条形码
      */
     @TableField(value = "barcode")
@@ -127,7 +145,7 @@ public class ErpSku {
      * 描述
      */
     @TableField(value = "`describe`")
-    private Object describe;
+    private String describe;
 
     /**
      * 主图url
