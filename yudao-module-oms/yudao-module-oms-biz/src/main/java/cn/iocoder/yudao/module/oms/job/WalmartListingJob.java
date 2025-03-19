@@ -18,11 +18,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
+
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -44,14 +42,14 @@ public class WalmartListingJob implements JobHandler {
     private ErpSkuMapper erpSkuMapper;
 
     @Override
-    public String execute(String param) throws Exception {
+    public synchronized String execute(String param) throws Exception {
         if (!StringUtils.hasText(param)) {
             throw new RuntimeException("请输入店铺数组");
         }
         List<String> storeNames = Arrays.asList(param.split(","));
         String errorMsg = "";
         if (!CollectionUtils.isEmpty(storeNames)) {
-            LambdaQueryWrapper<ErpShop> inWrapper = new LambdaQueryWrapper<ErpShop>().eq(ErpShop::getDeleted, 0).in(ErpShop::getName, storeNames);
+            LambdaQueryWrapper<ErpShop> inWrapper = new LambdaQueryWrapper<ErpShop>().eq(ErpShop::getPlatName, "Walmart").eq(ErpShop::getDeleted, 0).in(ErpShop::getName, storeNames);
             List<ErpShop> erpShops = erpShopMapper.selectList(inWrapper);
             Map<String, ErpShop> nameMap = erpShops.stream().collect(Collectors.toMap(ErpShop::getName, e -> e));
             for (String storeName : storeNames) {
@@ -88,22 +86,24 @@ public class WalmartListingJob implements JobHandler {
     }
 
 
-    private void saveOrUpdateSku(List<WalmartAllItemsResVO.ItemResponseDTO> items, ErpShop erpShop) {
-
+    private void saveOrUpdateSku(List<WalmartAllItemsResVO.ItemResponseDTO> itemDTOs, ErpShop erpShop) {
+        ArrayList<WalmartAllItemsResVO.ItemResponseDTO> items = new ArrayList<>();
+        Map<String, List<WalmartAllItemsResVO.ItemResponseDTO>> skuMap = itemDTOs.stream().filter(e -> StringUtils.hasText(e.getSku())).collect(Collectors.groupingBy(WalmartAllItemsResVO.ItemResponseDTO::getSku));
+        Set<String> allSkus = skuMap.keySet();
+        for (String sku : allSkus) {
+            WalmartAllItemsResVO.ItemResponseDTO erpSku = skuMap.get(sku).get(0);
+            items.add(erpSku);
+        }
         if (CollectionUtils.isEmpty(items)) {
             return;
         }
-        List<String> allSkus = items.stream().map(e -> e.getSku()).collect(Collectors.toList());
-
-        LambdaQueryWrapper<ErpSku> existEq = new LambdaQueryWrapper<ErpSku>().in(ErpSku::getSku, allSkus).eq(ErpSku::getDeleted, 0);
+        LambdaQueryWrapper<ErpSku> existEq = new LambdaQueryWrapper<ErpSku>().in(ErpSku::getSku, allSkus).eq(ErpSku::getStoreName, erpShop.getName()).eq(ErpSku::getDeleted, 0);
         List<ErpSku> existSkus = erpSkuMapper.selectList(existEq);
         Map<String, ErpSku> existSkuIdMaps = existSkus.stream().collect(Collectors.toMap(ErpSku::getSku, e -> e));
 
         List<ErpSku> saveErpSkus = new ArrayList<>();
         List<ErpSku> updateErpSkus = new ArrayList<>();
-
         for (WalmartAllItemsResVO.ItemResponseDTO eachItem : items) {
-
             ErpSku existErpSku = existSkuIdMaps.get(eachItem.getSku());
             Long existId = null;
             String existOriginalJson = null;
@@ -111,11 +111,14 @@ public class WalmartListingJob implements JobHandler {
                 existId = existErpSku.getId();
                 existOriginalJson = existErpSku.getOriginalJson();
             }
-
-
             ErpSku erpSku = new ErpSku();
             erpSku.setPlatSkuCode(eachItem.getWpid());
             erpSku.setSku(eachItem.getSku());
+            erpSku.setStoreId(erpShop.getId());
+            erpSku.setStoreName(erpShop.getName());
+            erpSku.setPlatId(erpShop.getPlatId());
+            erpSku.setPlatName(erpShop.getPlatName());
+            erpSku.setPlatShopCode(erpShop.getPlatShopCode());
             erpSku.setConditionType(eachItem.getCondition());
             if ("In_stock".equals(eachItem.getAvailability())) {
                 erpSku.setBuyableStatus(1);
@@ -130,7 +133,6 @@ public class WalmartListingJob implements JobHandler {
                 erpSku.setDiscoverableStatus(1);
                 erpSku.setPreorderStatus(1);
             }
-
             erpSku.setUpc(eachItem.getUpc());
             erpSku.setGtin(eachItem.getGtin());
             erpSku.setTitle(eachItem.getProductName());
@@ -138,7 +140,6 @@ public class WalmartListingJob implements JobHandler {
             erpSku.setCreator("admin");
             erpSku.setCreateTime(LocalDateTime.now());
             erpSku.setDeleted(0);
-
             String originalJson = JSON.toJSONString(eachItem);
 
             if (existId == null) {

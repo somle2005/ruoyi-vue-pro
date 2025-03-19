@@ -18,10 +18,7 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -39,14 +36,14 @@ public class ShopifyListingJob implements JobHandler {
     private ErpShopMapper erpShopMapper;
 
     @Override
-    public String execute(String param) {
+    public synchronized String execute(String param) {
         if (!StringUtils.hasText(param)) {
             throw new RuntimeException("请输入店铺数组");
         }
         List<String> storeNames = Arrays.asList(param.split(","));
         String errorMsg = "";
         if (!CollectionUtils.isEmpty(storeNames)) {
-            LambdaQueryWrapper<ErpShop> inWrapper = new LambdaQueryWrapper<ErpShop>().eq(ErpShop::getDeleted, 0).in(ErpShop::getName, storeNames);
+            LambdaQueryWrapper<ErpShop> inWrapper = new LambdaQueryWrapper<ErpShop>().eq(ErpShop::getPlatName, "Shopify").eq(ErpShop::getDeleted, 0).in(ErpShop::getName, storeNames);
             List<ErpShop> erpShops = erpShopMapper.selectList(inWrapper);
             Map<String, ErpShop> nameMap = erpShops.stream().collect(Collectors.toMap(ErpShop::getName, e -> e));
             for (String storeName : storeNames) {
@@ -89,8 +86,8 @@ public class ShopifyListingJob implements JobHandler {
     private ErpSkuMapper erpSkuMapper;
 
     private void saveOrUpdateSku(List<RetrieveAListOfProductsVo.ProductsDTO> items, ErpShop erpShop) {
-        //过滤掉没有子体 items
-        items = items.stream().filter(e -> !CollectionUtils.isEmpty(e.getVariants())).collect(Collectors.toList());
+        //过滤掉没有子体 items 和 sku为空
+        items = items.stream().filter(e -> !CollectionUtils.isEmpty(e.getVariants()) && StringUtils.hasText(e.getVariants().get(0).getSku())).collect(Collectors.toList());
         if (CollectionUtils.isEmpty(items)) {
             return;
         }
@@ -102,7 +99,8 @@ public class ShopifyListingJob implements JobHandler {
                 allSkus.add(sku);
             }
         }
-        LambdaQueryWrapper<ErpSku> existEq = new LambdaQueryWrapper<ErpSku>().in(ErpSku::getSku, allSkus).eq(ErpSku::getDeleted, 0);
+        LambdaQueryWrapper<ErpSku> existEq = new LambdaQueryWrapper<ErpSku>().in(ErpSku::getSku, allSkus)
+            .eq(ErpSku::getStoreName, erpShop.getName()).eq(ErpSku::getDeleted, 0);
         List<ErpSku> existSkus = erpSkuMapper.selectList(existEq);
         Map<String, ErpSku> existSkuIdMaps = existSkus.stream().collect(Collectors.toMap(ErpSku::getSku, e -> e));
 
@@ -156,9 +154,9 @@ public class ShopifyListingJob implements JobHandler {
                 erpSku.setListingTime(publishedAt);
                 erpSku.setListingUpdateTime(eachVariant.getUpdatedAt());
                 Boolean taxable = eachVariant.getTaxable();
-                if (taxable){
+                if (taxable) {
                     erpSku.setTaxable(1);
-                }else {
+                } else {
                     erpSku.setTaxable(0);
                 }
                 erpSku.setVendor(eachItem.getVendor());
@@ -180,7 +178,14 @@ public class ShopifyListingJob implements JobHandler {
             }
         }
         if (!CollectionUtils.isEmpty(saveErpSkus)) {
-            erpSkuMapper.insert(saveErpSkus);
+            Map<String, List<ErpSku>> skuMap = saveErpSkus.stream().collect(Collectors.groupingBy(ErpSku::getSku));
+            Set<String> skus = skuMap.keySet();
+            List<ErpSku> doSaveErpSkus = new ArrayList<>();
+            for (String sku : skus) {
+                ErpSku erpSku = skuMap.get(sku).get(0);
+                doSaveErpSkus.add(erpSku);
+            }
+            erpSkuMapper.insert(doSaveErpSkus);
         }
         if (!CollectionUtils.isEmpty(updateErpSkus)) {
             erpSkuMapper.updateById(updateErpSkus);
