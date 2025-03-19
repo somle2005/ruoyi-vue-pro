@@ -117,7 +117,7 @@
 
         <dependency>
             <groupId>cn.iocoder.boot</groupId>
-            <artifactId>yudao-module-sale-biz</artifactId>
+            <artifactId>yudao-module-oms-biz</artifactId>
             <version>${revision}</version>
         </dependency>
 

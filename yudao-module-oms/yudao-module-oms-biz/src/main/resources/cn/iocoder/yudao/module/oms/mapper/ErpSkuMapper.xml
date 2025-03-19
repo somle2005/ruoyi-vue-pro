@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.iocoder.yudao.module.oms.mapper.ErpSkuMapper">
+  <resultMap id="BaseResultMap" type="cn.iocoder.yudao.module.oms.domain.entity.ErpSku">
+    <!--@mbg.generated-->
+    <!--@Table erp_sku-->
+    <id column="id" property="id" />
+    <result column="sku" property="sku" />
+    <result column="sku_id" property="skuId" />
+    <result column="store_id" property="storeId" />
+    <result column="store_name" property="storeName" />
+    <result column="plat_id" property="platId" />
+    <result column="plat_name" property="platName" />
+    <result column="plat_shop_code" property="platShopCode" />
+    <result column="plat_sku_code" property="platSkuCode" />
+    <result column="product_type" property="productType" />
+    <result column="condition_type" property="conditionType" />
+    <result column="buyable_status" property="buyableStatus" />
+    <result column="discoverable_status" property="discoverableStatus" />
+    <result column="title" property="title" />
+    <result column="weight" property="weight" />
+    <result column="weight_unit" property="weightUnit" />
+    <result column="barcode" property="barcode" />
+    <result column="label" property="label" />
+    <result column="describe" property="describe" />
+    <result column="main_image_url" property="mainImageUrl" />
+    <result column="created_at" property="createdAt" />
+    <result column="updated_at" property="updatedAt" />
+    <result column="listing_time" property="listingTime" />
+    <result column="listing_update_time" property="listingUpdateTime" />
+    <result column="time_zone" property="timeZone" />
+    <result column="taxable" property="taxable" />
+    <result column="vendor" property="vendor" />
+    <result column="variant_position" property="variantPosition" />
+    <result column="spu_id" property="spuId" />
+    <result column="spu_title" property="spuTitle" />
+    <result column="spu_created_at" property="spuCreatedAt" />
+    <result column="spu_updated_at" property="spuUpdatedAt" />
+    <result column="original_json" property="originalJson" />
+    <result column="creator" property="creator" />
+    <result column="create_time" property="createTime" />
+    <result column="updater" property="updater" />
+    <result column="update_time" property="updateTime" />
+    <result column="deleted" property="deleted" />
+  </resultMap>
+  <sql id="Base_Column_List">
+    <!--@mbg.generated-->
+    id, sku, sku_id, store_id, store_name, plat_id, plat_name, plat_shop_code, plat_sku_code, 
+    product_type, condition_type, buyable_status, discoverable_status, title, weight, 
+    weight_unit, barcode, `label`, `describe`, main_image_url, created_at, updated_at, 
+    listing_time, listing_update_time, time_zone, taxable, vendor, variant_position, 
+    spu_id, spu_title, spu_created_at, spu_updated_at, original_json, creator, create_time, 
+    updater, update_time, deleted
+  </sql>
+</mapper>
