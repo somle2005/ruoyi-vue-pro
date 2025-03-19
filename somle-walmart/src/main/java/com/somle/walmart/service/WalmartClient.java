@@ -1,10 +1,12 @@
 package com.somle.walmart.service;
 
-
 import cn.iocoder.yudao.framework.common.util.io.IoUtils;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
+import com.alibaba.fastjson.JSON;
+import com.somle.walmart.domain.WalmartAllItemsResVO;
 import com.somle.walmart.domain.WalmartOrderReqVO;
 import com.somle.walmart.domain.WalmartToken;
 import lombok.SneakyThrows;
@@ -80,7 +82,7 @@ public abstract class WalmartClient {
         Response response = client.newCall(request).execute();
         var bodyString = response.body().string();
         log.info(bodyString);
-        var result = JsonUtils.parseObject(bodyString, JSONObject.class);
+        JSONObject result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
         return result.getString("access_token");
     }
 
@@ -188,5 +190,25 @@ public abstract class WalmartClient {
         var bodyString = response.body().string();
         var result = JsonUtils.parseObject(bodyString, JSONObject.class);
         return result;
+    }
+
+    @SneakyThrows
+    public WalmartAllItemsResVO getAllItems(String offset) {
+        OkHttpClient client = new OkHttpClient().newBuilder()
+            .build();
+        HttpUrl url = url("v3/items");
+        HttpUrl.Builder urlBuilder = url.newBuilder();
+        urlBuilder.addQueryParameter("offset", offset);
+        urlBuilder.addQueryParameter("limit", "500");
+
+        Request request = new Request.Builder()
+            .url(urlBuilder.build().toString())
+            .method("GET", null)
+            .headers(headers())
+            .build();
+        Response response = client.newCall(request).execute();
+        var bodyString = response.body().string();
+        WalmartAllItemsResVO walmartAllItemsResVO = JSON.parseObject(bodyString, WalmartAllItemsResVO.class);
+        return walmartAllItemsResVO;
     }
 }

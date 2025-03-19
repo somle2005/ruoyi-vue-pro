@@ -32,4 +32,16 @@ public class WalmartService {
         return client;
     }
 
+
+    public WalmartClient getClient(WalmartToken token) {
+        if (client == null) {
+            if (token.getSvcName().equals("Walmart Marketplace")) {
+                client = new WalmartMarketplaceClient(token);
+            } else {
+                client = new WalmartDsvClient(token, "752076");
+            }
+        }
+        return client;
+    }
+
 }

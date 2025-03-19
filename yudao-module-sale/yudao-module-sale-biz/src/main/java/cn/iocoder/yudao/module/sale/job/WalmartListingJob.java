@@ -1,30 +1,28 @@
 package cn.iocoder.yudao.module.sale.job;
 
-
 import cn.iocoder.yudao.framework.common.util.custom.MyExceptionUtil;
-import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
 import cn.iocoder.yudao.module.sale.domain.entity.ErpShop;
+import cn.iocoder.yudao.module.sale.domain.entity.ErpSku;
 import cn.iocoder.yudao.module.sale.mapper.ErpShopMapper;
+import cn.iocoder.yudao.module.sale.mapper.ErpSkuMapper;
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.somle.shopify.domain.RetrieveAListOfProductsDto;
-import com.somle.shopify.domain.RetrieveAListOfProductsVo;
-import com.somle.walmart.model.WalmartToken;
-import com.somle.walmart.repository.WalmartTokenRepository;
-import com.somle.walmart.service.WalmartClient;
+import com.somle.walmart.domain.WalmartAllItemsResVO;
+import com.somle.walmart.domain.WalmartToken;
+import com.somle.walmart.mapper.WalmartTokenMapper;
+import com.somle.walmart.service.WalmartMarketplaceClient;
 import com.somle.walmart.service.WalmartService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Headers;
-import okhttp3.HttpUrl;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
-
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -37,10 +35,14 @@ public class WalmartListingJob implements JobHandler {
     private WalmartService walmartService;
 
     @Resource
-    private WalmartTokenRepository walmartTokenRepository;
+    private WalmartTokenMapper walmartTokenMapper;
 
     @Resource
     private ErpShopMapper erpShopMapper;
+
+    @Resource
+    private ErpSkuMapper erpSkuMapper;
+
     @Override
     public String execute(String param) throws Exception {
         if (!StringUtils.hasText(param)) {
@@ -58,29 +60,20 @@ public class WalmartListingJob implements JobHandler {
                     if (erpShop == null) {
                         throw new RuntimeException("当前店铺名称不存在");
                     }
-                    Long lastId = 1L;
+                    int offet = 0;
                     while (true) {
+                        WalmartToken walmartToken = walmartTokenMapper.selectById(erpShop.getAuthId());
+                        WalmartMarketplaceClient walmartClient = (WalmartMarketplaceClient) walmartService.getClient(walmartToken);
+                        WalmartAllItemsResVO walmartAllItemsResVO = walmartClient.getAllItems(String.valueOf(offet));
+                        if (CollectionUtils.isEmpty(walmartAllItemsResVO.getItemResponse())) {
+                            break;
+                        }
 
-                        Optional<WalmartToken> walmartToken = walmartTokenRepository.findById(erpShop.getAuthId());
-                        WalmartClient walmartClient = walmartService.getClient(walmartToken.get());
-                        JSONObject allItems = walmartClient.getAllItems();
-                        System.out.println(allItems);
-
-//                        RetrieveAListOfProductsDto dto = new RetrieveAListOfProductsDto();
-//                        dto.setSuccessCode(200);
-//                        dto.setLimit(250L);
-//                        dto.setSince_id(lastId);
-//                        dto.setShopName(storeName);
-//                        RetrieveAListOfProductsVo retrieveAListOfProductsVo = shopifyClient.retrieveAListOfProducts(dto);
-//                        List<RetrieveAListOfProductsVo.ProductsDTO> items = retrieveAListOfProductsVo.getProducts();
-//                        if (CollectionUtils.isEmpty(items)) {
-//                            break;
-//                        }
-//                        //操作db，新增或者更新
-//                        saveOrUpdateSku(items, erpShop);
-//                        lastId = items.get(items.size() - 1).getId();
-//                        //防止限流
-//                        TimeUnit.MILLISECONDS.sleep(200L);
+                        //操作db，新增或者更新
+                        saveOrUpdateSku(walmartAllItemsResVO.getItemResponse(), erpShop);
+                        offet += 500;
+                        //防止限流
+                        TimeUnit.MILLISECONDS.sleep(200L);
                     }
                 } catch (Exception e) {
                     log.error("店铺名称{},出现异常", storeName, e);
@@ -92,5 +85,73 @@ public class WalmartListingJob implements JobHandler {
             throw new RuntimeException(errorMsg);
         }
         return "success";
+    }
+
+
+    private void saveOrUpdateSku(List<WalmartAllItemsResVO.ItemResponseDTO> items, ErpShop erpShop) {
+
+        if (CollectionUtils.isEmpty(items)) {
+            return;
+        }
+        List<String> allSkus = items.stream().map(e -> e.getSku()).collect(Collectors.toList());
+
+        LambdaQueryWrapper<ErpSku> existEq = new LambdaQueryWrapper<ErpSku>().in(ErpSku::getSku, allSkus).eq(ErpSku::getDeleted, 0);
+        List<ErpSku> existSkus = erpSkuMapper.selectList(existEq);
+        Map<String, ErpSku> existSkuIdMaps = existSkus.stream().collect(Collectors.toMap(ErpSku::getSku, e -> e));
+
+        List<ErpSku> saveErpSkus = new ArrayList<>();
+        List<ErpSku> updateErpSkus = new ArrayList<>();
+
+        for (WalmartAllItemsResVO.ItemResponseDTO eachItem : items) {
+
+            ErpSku existErpSku = existSkuIdMaps.get(eachItem.getSku());
+            Long existId = null;
+            String existOriginalJson = null;
+            if (existErpSku != null) {
+                existId = existErpSku.getId();
+                existOriginalJson = existErpSku.getOriginalJson();
+            }
+
+
+            ErpSku erpSku = new ErpSku();
+            erpSku.setPlatSkuCode(eachItem.getWpid());
+            erpSku.setSku(eachItem.getSku());
+            erpSku.setConditionType(eachItem.getCondition());
+            if ("In_stock".equals(eachItem.getAvailability())) {
+                erpSku.setBuyableStatus(1);
+                erpSku.setDiscoverableStatus(1);
+                erpSku.setPreorderStatus(0);
+            } else if ("Out_of_stock".equals(eachItem.getAvailability())) {
+                erpSku.setBuyableStatus(0);
+                erpSku.setDiscoverableStatus(0);
+                erpSku.setPreorderStatus(0);
+            } else {
+                erpSku.setBuyableStatus(0);
+                erpSku.setDiscoverableStatus(1);
+                erpSku.setPreorderStatus(1);
+            }
+
+            erpSku.setUpc(eachItem.getUpc());
+            erpSku.setGtin(eachItem.getGtin());
+            erpSku.setTitle(eachItem.getProductName());
+            erpSku.setProductType(eachItem.getProductType());
+            erpSku.setCreator("admin");
+            erpSku.setCreateTime(LocalDateTime.now());
+            erpSku.setDeleted(0);
+
+            String originalJson = JSON.toJSONString(eachItem);
+
+            if (existId == null) {
+                saveErpSkus.add(erpSku);
+            } else if (!originalJson.equals(existOriginalJson)) {
+                updateErpSkus.add(erpSku);
+            }
+        }
+        if (!CollectionUtils.isEmpty(saveErpSkus)) {
+            erpSkuMapper.insert(saveErpSkus);
+        }
+        if (!CollectionUtils.isEmpty(updateErpSkus)) {
+            erpSkuMapper.updateById(updateErpSkus);
+        }
     }
 }
