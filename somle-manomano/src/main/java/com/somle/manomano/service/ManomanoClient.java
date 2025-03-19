@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.somle.manomano.model.ManomanoShop;
+import com.somle.manomano.model.reps.OffersInfoRespVO;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
@@ -48,7 +49,7 @@ public class ManomanoClient {
     }
 
     @SneakyThrows
-    public JSONObject getOffersInfo() {
+    public OffersInfoRespVO getOffersInfo() {
         var endpoint = "/offer-information/offers";
         var request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
@@ -61,8 +62,8 @@ public class ManomanoClient {
             .headers(getHeaders())
             .build();
         var bodyString = WebUtils.sendRequest(request).body().string();
-        var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
-        return result;
+        OffersInfoRespVO offersInfoRespVO = JsonUtilsX.parseObject(bodyString, OffersInfoRespVO.class);
+        return offersInfoRespVO;
     }
 
 }
