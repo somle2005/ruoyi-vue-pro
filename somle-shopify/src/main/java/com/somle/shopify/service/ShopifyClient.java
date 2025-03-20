@@ -6,7 +6,6 @@ import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
 import com.somle.shopify.domain.*;
-import com.somle.shopify.mapper.ErpShopMapper;
 import com.somle.shopify.mapper.ShopifyTokenMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -24,9 +23,6 @@ import java.util.Map;
 public class ShopifyClient {
 
     @Resource
-    private ErpShopMapper erpShopMapper;
-
-    @Resource
     private ShopifyTokenMapper shopifyTokenMapper;
 
     OkHttpClient webClient = new OkHttpClient();
@@ -35,34 +31,29 @@ public class ShopifyClient {
 
     public void refreshToken() {
         //查询所有能认证的店铺
-        List<String> shopNames = erpShopMapper.getShopAndTokenInfo();
+        List<String> shopNames = shopifyTokenMapper.getShopAndTokenInfo();
         if (!CollectionUtils.isEmpty(shopNames)) {
             //循环调用平台获取token接口
             for (String shopName : shopNames) {
-                TokenInfo token = getToken(shopName);
-
+                TokenInfo token = applyPlatObtainToken(shopName);
                 tokenMap.put(shopName, token);
             }
         }
-        List<ShopifyToken> shopifyTokens = shopifyTokenMapper.selectList(null);
-       // tokenMap.put()
-
     }
 
-    private TokenInfo getToken(String shopName) {
-        // 拿shopName 调用平台接口 目前 shopify token为固定
-        if ("Shopify_FIT_USA".equals(shopName)){
-
-        }
+    private TokenInfo applyPlatObtainToken(String shopName) {
         TokenInfo tokenInfo = new TokenInfo();
-        tokenInfo.setAccessToken("");
-
-        return null;
-
+        // 拿shopName 调用平台接口 目前 shopify token为固定
+        String accessToken = null;
+        if ("Shopify_FIT_USA".equals(shopName)) {
+            accessToken = "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";
+        }
+        tokenInfo.setAccessToken(accessToken);
+        return tokenInfo;
     }
-
 
     public HeaderDto getHeaders(String storeName) {
+        TokenInfo tokenInfo = tokenMap.get(storeName);
         HeaderDto headers = shopifyTokenMapper.getHeaders(storeName);
         if (headers == null) {
             throw new RuntimeException("accessToken is null");

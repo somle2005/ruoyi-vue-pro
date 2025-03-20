@@ -9,5 +9,9 @@ import lombok.Data;
  **/
 @Data
 public class TokenInfo {
+    private String name;
+
     private String accessToken;
+
+    private String domain;
 }

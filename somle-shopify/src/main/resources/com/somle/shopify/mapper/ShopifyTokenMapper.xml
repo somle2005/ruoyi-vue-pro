@@ -1,17 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.somle.shopify.mapper.ShopifyTokenMapper">
-  <resultMap id="BaseResultMap" type="com.somle.shopify.domain.ShopifyToken">
-    <!--@mbg.generated-->
-    <!--@Table shopify_token-->
-    <id column="id" property="id" />
-    <result column="access_token" property="accessToken" />
-    <result column="subdomain" property="subdomain" />
-  </resultMap>
-  <sql id="Base_Column_List">
-    <!--@mbg.generated-->
-    id, access_token, subdomain
-  </sql>
 
   <select id="getHeaders" resultType="com.somle.shopify.domain.HeaderDto">
     SELECT
@@ -23,4 +12,14 @@
       erp_shop.auth_id = shopify_token.id
       AND `name` = #{storeName}
   </select>
+
+  <select id="getShopAndTokenInfo" resultType="java.lang.String">
+    select erp_shop.name,
+           shopify_token.access_token
+    from erp_shop
+           join shopify_token on erp_shop.auth_id = shopify_token.id
+    where erp_shop.deleted = 0
+      and erp_shop.plat_name = 'Shopify'
+  </select>
+
 </mapper>

@@ -6,10 +6,14 @@ import com.somle.shopify.domain.ShopifyToken;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.util.List;
+
 
 @Mapper
 public interface ShopifyTokenMapper extends BaseMapper<ShopifyToken> {
 
     HeaderDto getHeaders(@Param("storeName") String storeName);
+
+    List<String> getShopAndTokenInfo();
 
 }
