@@ -1,15 +1,19 @@
 package com.somle.shopify.service;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import com.somle.shopify.domain.ShopAndTokenInfo;
 import com.somle.shopify.mapper.ShopifyTokenMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -29,11 +33,38 @@ public class ShopifyService {
     @Resource
     private ShopifyClient shopifyClient;
 
+    @Resource
+    private ConfigApi configApi;
+
+
     @PostConstruct
     public void init() {
         CompletableFuture.runAsync(() -> {
+            initClient();
             refreshToken();
         });
+    }
+
+    private void initClient() {
+        var proxyHost = configApi.getConfigValueByKey("proxy.host");
+        var proxyPort = Integer.valueOf(configApi.getConfigValueByKey("proxy.port"));
+        var proxyUsername = configApi.getConfigValueByKey("proxy.username");
+        var proxyPassword = configApi.getConfigValueByKey("proxy.password");
+
+        // Create a Proxy instance
+        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+
+        OkHttpClient client = new OkHttpClient.Builder()
+            .proxy(proxy)
+            .proxyAuthenticator((route, response) -> {
+                String credential = okhttp3.Credentials.basic(proxyUsername, proxyPassword);
+                return response.request().newBuilder()
+                    .header("Proxy-Authorization", credential)
+                    .build();
+            })
+            .build();
+
+        shopifyClient.webClient = client;
     }
 
     //0 0 0 1 1 ?
