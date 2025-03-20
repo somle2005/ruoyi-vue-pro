@@ -8,10 +8,12 @@ import lombok.Data;
  * @create: 2025-03-20 14:26
  **/
 @Data
-public class TokenInfo {
-    private String name;
+public class ShopAndTokenInfo {
+
+    private String shopName;
 
     private String accessToken;
 
     private String domain;
+
 }

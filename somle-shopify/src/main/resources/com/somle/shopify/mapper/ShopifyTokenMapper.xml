@@ -2,24 +2,14 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.somle.shopify.mapper.ShopifyTokenMapper">
 
-  <select id="getHeaders" resultType="com.somle.shopify.domain.HeaderDto">
-    SELECT
-        *
-    FROM
-      `erp_shop`,
-      shopify_token
-    WHERE
-      erp_shop.auth_id = shopify_token.id
-      AND `name` = #{storeName}
-  </select>
-
-  <select id="getShopAndTokenInfo" resultType="java.lang.String">
-    select erp_shop.name,
-           shopify_token.access_token
-    from erp_shop
-           join shopify_token on erp_shop.auth_id = shopify_token.id
-    where erp_shop.deleted = 0
-      and erp_shop.plat_name = 'Shopify'
+  <select id="getShopAndTokenInfo" resultType="com.somle.shopify.domain.ShopAndTokenInfo">
+      select `name` as shopName,
+             access_token,
+             domain
+      from erp_shop
+               join shopify_token on erp_shop.auth_id = shopify_token.id
+      where erp_shop.deleted = 0
+        and erp_shop.plat_name = 'Shopify'
   </select>
 
 </mapper>

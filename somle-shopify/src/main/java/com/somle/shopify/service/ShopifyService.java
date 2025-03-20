@@ -1,0 +1,65 @@
+package com.somle.shopify.service;
+
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import com.somle.shopify.domain.ShopAndTokenInfo;
+import com.somle.shopify.mapper.ShopifyTokenMapper;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
+/**
+ * @description:
+ * @author: LaoSan
+ * @create: 2025-03-20 15:10
+ **/
+@Slf4j
+@ConditionalOnProperty(name = "threePartyPlatform.shopify.refreshToken.enable", havingValue = "true")
+@Component
+public class ShopifyService {
+
+    @Resource
+    private ShopifyTokenMapper shopifyTokenMapper;
+
+    @Resource
+    private ShopifyClient shopifyClient;
+
+    @PostConstruct
+    public void init() {
+        CompletableFuture.runAsync(() -> {
+            refreshToken();
+        });
+    }
+
+    //0 0 0 1 1 ?
+    @Scheduled(cron = "${threePartyPlatform.shopify.refreshToken.cron}")
+    public void refreshToken() {
+        log.info("Shopify refreshToken start");
+        //查询所有能认证的店铺
+        List<ShopAndTokenInfo> shopAndTokenInfos = shopifyTokenMapper.getShopAndTokenInfo();
+        if (!CollectionUtils.isEmpty(shopAndTokenInfos)) {
+            //循环调用 平台获取token接口
+            for (ShopAndTokenInfo shopAndTokenInfo : shopAndTokenInfos) {
+                applyPlatObtainToken(shopAndTokenInfo);
+                shopifyClient.tokenMap.put(shopAndTokenInfo.getShopName(), shopAndTokenInfo);
+            }
+        }
+        //把token更新入库,由于Shopify token 固定所以不进行
+    }
+
+    private ShopAndTokenInfo applyPlatObtainToken(ShopAndTokenInfo shopAndTokenInfo) {
+        // 拿shopName 调用平台接口 目前 shopify token为固定
+        String accessToken = null;
+        if ("Shopify_FIT_USA".equals(shopAndTokenInfo.getShopName())) {
+            accessToken = "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";
+        }
+        shopAndTokenInfo.setAccessToken(accessToken);
+        return shopAndTokenInfo;
+    }
+
+}
