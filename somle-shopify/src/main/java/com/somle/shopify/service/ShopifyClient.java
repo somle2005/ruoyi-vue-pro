@@ -1,26 +1,66 @@
 package com.somle.shopify.service;
 
 
-import cn.iocoder.yudao.framework.common.util.web.*;
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.web.RequestX;
+import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
 import com.somle.shopify.domain.*;
+import com.somle.shopify.mapper.ErpShopMapper;
 import com.somle.shopify.mapper.ShopifyTokenMapper;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
-import org.springframework.stereotype.Service;
+import okhttp3.OkHttpClient;
+import okhttp3.Response;
+import org.springframework.stereotype.Component;
 
-import java.util.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 // https://shopify.dev/docs/api/admin-rest/
 @Slf4j
-@Service
+@Component
 public class ShopifyClient {
+
+    @Resource
+    private ErpShopMapper erpShopMapper;
 
     @Resource
     private ShopifyTokenMapper shopifyTokenMapper;
 
     OkHttpClient webClient = new OkHttpClient();
+
+    Map<String, TokenInfo> tokenMap = new HashMap();
+
+    public void refreshToken() {
+        //查询所有能认证的店铺
+        List<String> shopNames = erpShopMapper.getShopAndTokenInfo();
+        if (!CollectionUtils.isEmpty(shopNames)) {
+            //循环调用平台获取token接口
+            for (String shopName : shopNames) {
+                TokenInfo token = getToken(shopName);
+
+                tokenMap.put(shopName, token);
+            }
+        }
+        List<ShopifyToken> shopifyTokens = shopifyTokenMapper.selectList(null);
+       // tokenMap.put()
+
+    }
+
+    private TokenInfo getToken(String shopName) {
+        // 拿shopName 调用平台接口 目前 shopify token为固定
+        if ("Shopify_FIT_USA".equals(shopName)){
+
+        }
+        TokenInfo tokenInfo = new TokenInfo();
+        tokenInfo.setAccessToken("");
+
+        return null;
+
+    }
+
 
     public HeaderDto getHeaders(String storeName) {
         HeaderDto headers = shopifyTokenMapper.getHeaders(storeName);
@@ -38,11 +78,11 @@ public class ShopifyClient {
         Map<String, String> headerValues = new HashMap<>();
         headerValues.put("X-Shopify-Access-Token", headers.getAccessToken());
         RequestX request = RequestX.builder()
-                .requestMethod(RequestX.Method.GET)
-                .url(headers.getDomain() + endpoint)
-                .queryParams(dto)
-                .headers(headerValues)
-                .build();
+            .requestMethod(RequestX.Method.GET)
+            .url(headers.getDomain() + endpoint)
+            .queryParams(dto)
+            .headers(headerValues)
+            .build();
         Integer successCode = dto.getSuccessCode();
         try {
             Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();

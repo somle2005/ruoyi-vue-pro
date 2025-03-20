@@ -8,6 +8,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * ERP平台sku表
@@ -68,6 +69,12 @@ public class ErpSku {
      */
     @TableField(value = "plat_sku_code")
     private String platSkuCode;
+
+    /**
+     * 模式类型,standard,parent,child
+     */
+    @TableField(value = "pattern_type")
+    private String patternType;
 
     /**
      * 产品类型
@@ -196,30 +203,6 @@ public class ErpSku {
     private Integer variantPosition;
 
     /**
-     * spuId
-     */
-    @TableField(value = "spu_id")
-    private Long spuId;
-
-    /**
-     * spu标题
-     */
-    @TableField(value = "spu_title")
-    private String spuTitle;
-
-    /**
-     * spu创建时间
-     */
-    @TableField(value = "spu_created_at")
-    private String spuCreatedAt;
-
-    /**
-     * spu更新时间
-     */
-    @TableField(value = "spu_updated_at")
-    private String spuUpdatedAt;
-
-    /**
      * 原始json
      */
     @TableField(value = "original_json")
@@ -254,4 +237,7 @@ public class ErpSku {
      */
     @TableField(value = "deleted")
     private Integer deleted;
+
+    @TableField(exist = false)
+    private List<String> childSkus;
 }

@@ -2,10 +2,13 @@ package cn.iocoder.yudao.module.oms.job;
 
 import cn.iocoder.yudao.framework.common.util.custom.MyExceptionUtil;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
+import cn.iocoder.yudao.module.oms.domain.dto.ErpSkuVariantBridgeDto;
+import cn.iocoder.yudao.module.oms.domain.dto.ErpSkuVariantBridgeDto.ErpSkuVariantBridgeChildDto;
 import cn.iocoder.yudao.module.oms.domain.entity.ErpShop;
 import cn.iocoder.yudao.module.oms.domain.entity.ErpSku;
 import cn.iocoder.yudao.module.oms.mapper.ErpShopMapper;
-import cn.iocoder.yudao.module.oms.mapper.ErpSkuMapper;
+import cn.iocoder.yudao.module.oms.service.ErpSkuService;
+import cn.iocoder.yudao.module.oms.service.ErpSkuVariantBridgeService;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.shopify.domain.RetrieveAListOfProductsDto;
@@ -18,7 +21,10 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -83,113 +89,154 @@ public class ShopifyListingJob implements JobHandler {
     }
 
     @Resource
-    private ErpSkuMapper erpSkuMapper;
+    private ErpSkuVariantBridgeService erpSkuVariantBridgeService;
+
+    @Resource
+    private ErpSkuService erpSkuService;
 
     private void saveOrUpdateSku(List<RetrieveAListOfProductsVo.ProductsDTO> items, ErpShop erpShop) {
-        //过滤掉没有子体 items 和 sku为空
-        items = items.stream().filter(e -> !CollectionUtils.isEmpty(e.getVariants()) && StringUtils.hasText(e.getVariants().get(0).getSku())).collect(Collectors.toList());
-        if (CollectionUtils.isEmpty(items)) {
-            return;
+        List<ErpSku> doDBErpSkus = new ArrayList<>();
+        for (RetrieveAListOfProductsVo.ProductsDTO parentItem : items) {
+            //组装数据
+            assemblyData(erpShop, doDBErpSkus, parentItem);
         }
-        List<String> allSkus = new ArrayList<>();
-        for (RetrieveAListOfProductsVo.ProductsDTO item : items) {
-            List<RetrieveAListOfProductsVo.ProductsDTO.VariantsDTO> variants = item.getVariants();
-            for (RetrieveAListOfProductsVo.ProductsDTO.VariantsDTO variant : variants) {
-                String sku = variant.getSku();
-                allSkus.add(sku);
-            }
-        }
-        LambdaQueryWrapper<ErpSku> existEq = new LambdaQueryWrapper<ErpSku>().in(ErpSku::getSku, allSkus)
-            .eq(ErpSku::getStoreName, erpShop.getName()).eq(ErpSku::getDeleted, 0);
-        List<ErpSku> existSkus = erpSkuMapper.selectList(existEq);
-        Map<String, ErpSku> existSkuIdMaps = existSkus.stream().collect(Collectors.toMap(ErpSku::getSku, e -> e));
+        //批量插入或更新ErpSku
+        List<ErpSku> allErpSkus = erpSkuService.insertOrUpdateErpSku(erpShop, doDBErpSkus);
+        //处理父子关系 组装入参数据
+        List<ErpSkuVariantBridgeDto> erpSkuVariantBridgeDtos = getErpSkuVariantBridgeDtos(erpShop, allErpSkus);
+        //新增或者更新DB的产品父子关系
+        erpSkuVariantBridgeService.insertOrUpdateErpSkuVariantBridge(erpShop.getName(), erpSkuVariantBridgeDtos);
+    }
 
-        List<ErpSku> saveErpSkus = new ArrayList<>();
-        List<ErpSku> updateErpSkus = new ArrayList<>();
+    private List<ErpSkuVariantBridgeDto> getErpSkuVariantBridgeDtos(ErpShop erpShop, List<ErpSku> allErpSkus) {
+        Map<String, ErpSku> allSkuMap = allErpSkus.stream().collect(Collectors.toMap(ErpSku::getSku, e -> e));
+        List<ErpSkuVariantBridgeDto> erpSkuVariantBridgeDtos = new ArrayList<>();
+        for (ErpSku parentErpSku : allErpSkus) {
+            String patternType = parentErpSku.getPatternType();
+            if ("parent".equals(patternType)) {
+                ErpSkuVariantBridgeDto erpSkuVariantBridgeDto = new ErpSkuVariantBridgeDto();
+                erpSkuVariantBridgeDto.setStoreId(erpShop.getId());
+                erpSkuVariantBridgeDto.setStoreName(erpShop.getName());
+                erpSkuVariantBridgeDto.setPlatId(erpShop.getPlatId());
+                erpSkuVariantBridgeDto.setPlatName(erpShop.getPlatName());
+                erpSkuVariantBridgeDto.setParentId(parentErpSku.getId());
+                erpSkuVariantBridgeDto.setParentSku(parentErpSku.getSku());
+                List<String> childSkus = parentErpSku.getChildSkus();
+                List<ErpSkuVariantBridgeChildDto> childrenS = new ArrayList<>();
+                if (!CollectionUtils.isEmpty(childSkus)) {
+                    for (String childSku : childSkus) {
+                        ErpSkuVariantBridgeChildDto erpSkuVariantBridgeChildDto = new ErpSkuVariantBridgeChildDto();
+                        ErpSku childErpSku = allSkuMap.get(childSku);
+                        if (childErpSku != null) {
+                            erpSkuVariantBridgeChildDto.setChildId(childErpSku.getId());
+                        }
+                        erpSkuVariantBridgeChildDto.setChildSku(childSku);
+                        childrenS.add(erpSkuVariantBridgeChildDto);
+                    }
+                }
+                erpSkuVariantBridgeDto.setChildrenS(childrenS);
+                erpSkuVariantBridgeDtos.add(erpSkuVariantBridgeDto);
+            }
+        }
+        return erpSkuVariantBridgeDtos;
+    }
 
-        for (RetrieveAListOfProductsVo.ProductsDTO eachItem : items) {
-            List<RetrieveAListOfProductsVo.ProductsDTO.VariantsDTO> variants = eachItem.getVariants();
-            for (RetrieveAListOfProductsVo.ProductsDTO.VariantsDTO eachVariant : variants) {
-                String sku = eachVariant.getSku();
-                ErpSku existErpSku = existSkuIdMaps.get(sku);
-                Long existId = null;
-                String existOriginalJson = null;
-                if (existErpSku != null) {
-                    existId = existErpSku.getId();
-                    existOriginalJson = existErpSku.getOriginalJson();
-                }
-                ErpSku erpSku = new ErpSku();
-                erpSku.setId(existId);
-                erpSku.setSku(eachVariant.getSku());
-                erpSku.setSkuId(eachVariant.getId());
-                erpSku.setStoreId(erpShop.getId());
-                erpSku.setStoreName(erpShop.getName());
-                erpSku.setPlatId(erpShop.getPlatId());
-                erpSku.setPlatName(erpShop.getPlatName());
-                erpSku.setPlatShopCode(erpShop.getPlatShopCode());
-                erpSku.setProductType(eachItem.getProductType());
-                String status = eachItem.getStatus();
-                if ("active".equals(status)) {
-                    erpSku.setBuyableStatus(1);
-                }
-                String publishedAt = eachItem.getPublishedAt();
-                if (StringUtils.hasText(publishedAt)) {
-                    erpSku.setDiscoverableStatus(1);
-                } else {
-                    erpSku.setDiscoverableStatus(0);
-                }
-                erpSku.setTitle(eachVariant.getTitle());
-                erpSku.setWeight(eachVariant.getWeight());
-                erpSku.setWeightUnit(eachVariant.getWeightUnit());
-                erpSku.setBarcode(eachVariant.getBarcode());
-                erpSku.setLabel(eachItem.getTags());
-                erpSku.setDescribe(eachItem.getBodyHtml());
-                RetrieveAListOfProductsVo.ProductsDTO.ImageDTO image = eachItem.getImage();
-                if (image != null) {
-                    String src = image.getSrc();
-                    erpSku.setMainImageUrl(src);
-                }
-                erpSku.setCreatedAt(eachVariant.getCreatedAt());
-                erpSku.setUpdatedAt(eachVariant.getUpdatedAt());
-                erpSku.setListingTime(publishedAt);
-                erpSku.setListingUpdateTime(eachVariant.getUpdatedAt());
-                Boolean taxable = eachVariant.getTaxable();
-                if (taxable) {
-                    erpSku.setTaxable(1);
-                } else {
-                    erpSku.setTaxable(0);
-                }
-                erpSku.setVendor(eachItem.getVendor());
-                erpSku.setVariantPosition(eachVariant.getPosition());
-                erpSku.setSpuId(eachItem.getId());
-                erpSku.setSpuTitle(eachItem.getTitle());
-                erpSku.setSpuCreatedAt(eachItem.getCreatedAt());
-                erpSku.setSpuUpdatedAt(eachItem.getUpdatedAt());
-                String originalJson = JSON.toJSONString(eachItem);
-                erpSku.setOriginalJson(originalJson);
-                erpSku.setCreator("admin");
-                erpSku.setCreateTime(LocalDateTime.now());
-                erpSku.setDeleted(0);
-                if (existId == null) {
-                    saveErpSkus.add(erpSku);
-                } else if (!originalJson.equals(existOriginalJson)) {
-                    updateErpSkus.add(erpSku);
-                }
-            }
+    private void assemblyData(ErpShop erpShop, List<ErpSku> doDBErpSkus, RetrieveAListOfProductsVo.ProductsDTO parentItem) {
+        //处理父产品
+        ErpSku parentErpSku = new ErpSku();
+        parentErpSku.setSku(parentItem.getSku());
+        parentErpSku.setSkuId(parentItem.getId());
+        parentErpSku.setStoreId(erpShop.getId());
+        parentErpSku.setStoreName(erpShop.getName());
+        parentErpSku.setPlatId(erpShop.getPlatId());
+        parentErpSku.setPlatName(erpShop.getPlatName());
+        parentErpSku.setPlatShopCode(erpShop.getPlatShopCode());
+        parentErpSku.setPatternType("parent");
+        String productType = parentItem.getProductType();
+        parentErpSku.setProductType(productType);
+        List<String> childSkus = new ArrayList<>();
+        List<RetrieveAListOfProductsVo.ProductsDTO.VariantsDTO> variants = parentItem.getVariants();
+        if (!CollectionUtils.isEmpty(variants)) {
+            childSkus = variants.stream().map(RetrieveAListOfProductsVo.ProductsDTO.VariantsDTO::getSku).collect(Collectors.toList());
         }
-        if (!CollectionUtils.isEmpty(saveErpSkus)) {
-            Map<String, List<ErpSku>> skuMap = saveErpSkus.stream().collect(Collectors.groupingBy(ErpSku::getSku));
-            Set<String> skus = skuMap.keySet();
-            List<ErpSku> doSaveErpSkus = new ArrayList<>();
-            for (String sku : skus) {
-                ErpSku erpSku = skuMap.get(sku).get(0);
-                doSaveErpSkus.add(erpSku);
-            }
-            erpSkuMapper.insert(doSaveErpSkus);
+        parentErpSku.setChildSkus(childSkus);
+        String status = parentItem.getStatus();
+        Integer buyableStatus = 0;
+        if ("active".equals(status)) {
+            buyableStatus = 1;
         }
-        if (!CollectionUtils.isEmpty(updateErpSkus)) {
-            erpSkuMapper.updateById(updateErpSkus);
+        parentErpSku.setBuyableStatus(buyableStatus);
+        String publishedAt = parentItem.getPublishedAt();
+        Integer discoverableStatus = 0;
+        if (StringUtils.hasText(publishedAt)) {
+            discoverableStatus = 1;
+        }
+        parentErpSku.setDiscoverableStatus(discoverableStatus);
+        parentErpSku.setTitle(parentItem.getTitle());
+        String tags = parentItem.getTags();
+        parentErpSku.setLabel(tags);
+        String bodyHtml = parentItem.getBodyHtml();
+        parentErpSku.setDescribe(bodyHtml);
+        RetrieveAListOfProductsVo.ProductsDTO.ImageDTO image = parentItem.getImage();
+        String mainImageUrl = null;
+        if (image != null) {
+            mainImageUrl = image.getSrc();
+        }
+        parentErpSku.setMainImageUrl(mainImageUrl);
+        parentErpSku.setCreatedAt(parentItem.getCreatedAt());
+        parentErpSku.setUpdatedAt(parentItem.getUpdatedAt());
+        parentErpSku.setListingTime(publishedAt);
+        parentErpSku.setListingUpdateTime(parentItem.getUpdatedAt());
+        String vendor = parentItem.getVendor();
+        parentErpSku.setVendor(vendor);
+        String originalJson = JSON.toJSONString(parentItem);
+        parentErpSku.setOriginalJson(originalJson);
+        parentErpSku.setCreator("admin");
+        parentErpSku.setCreateTime(LocalDateTime.now());
+        parentErpSku.setDeleted(0);
+        doDBErpSkus.add(parentErpSku);
+        //处理子产品
+        if (!CollectionUtils.isEmpty(variants)) {
+            for (RetrieveAListOfProductsVo.ProductsDTO.VariantsDTO childItem : variants) {
+                ErpSku childErpSku = new ErpSku();
+                childErpSku.setSku(childItem.getSku());
+                childErpSku.setSkuId(childItem.getId());
+                childErpSku.setStoreId(erpShop.getId());
+                childErpSku.setStoreName(erpShop.getName());
+                childErpSku.setPlatId(erpShop.getPlatId());
+                childErpSku.setPlatName(erpShop.getPlatName());
+                childErpSku.setPlatShopCode(erpShop.getPlatShopCode());
+                childErpSku.setPatternType("child");
+                childErpSku.setProductType(productType);
+                childErpSku.setBuyableStatus(buyableStatus);
+                childErpSku.setDiscoverableStatus(discoverableStatus);
+                childErpSku.setTitle(childItem.getTitle());
+                childErpSku.setWeight(childItem.getWeight());
+                childErpSku.setWeightUnit(childItem.getWeightUnit());
+                childErpSku.setBarcode(childItem.getBarcode());
+                childErpSku.setLabel(tags);
+                childErpSku.setDescribe(bodyHtml);
+                childErpSku.setMainImageUrl(mainImageUrl);
+                childErpSku.setCreatedAt(childItem.getCreatedAt());
+                childErpSku.setUpdatedAt(childItem.getUpdatedAt());
+                childErpSku.setListingTime(publishedAt);
+                childErpSku.setListingUpdateTime(childItem.getUpdatedAt());
+                Boolean taxable = childItem.getTaxable();
+                if (taxable != null && taxable) {
+                    childErpSku.setTaxable(1);
+                } else {
+                    childErpSku.setTaxable(0);
+                }
+                childErpSku.setVendor(vendor);
+                childErpSku.setVariantPosition(childItem.getPosition());
+                childErpSku.setOriginalJson(originalJson);
+                childErpSku.setCreator("admin");
+                childErpSku.setCreateTime(LocalDateTime.now());
+                childErpSku.setDeleted(0);
+                doDBErpSkus.add(childErpSku);
+            }
         }
     }
+
 
 }

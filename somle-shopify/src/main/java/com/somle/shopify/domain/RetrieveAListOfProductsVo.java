@@ -3,6 +3,7 @@ package com.somle.shopify.domain;
 import cn.iocoder.yudao.framework.common.util.custom.HtmlEscapeUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,6 +23,7 @@ public class RetrieveAListOfProductsVo {
     @Data
     public static class ProductsDTO {
         private Long id;
+        private String sku;
         private String title;
         private String bodyHtml;
         private String vendor;
@@ -42,6 +44,10 @@ public class RetrieveAListOfProductsVo {
 
         public String getBodyHtml() {
             return HtmlEscapeUtil.escapeHtmlInTags(bodyHtml);
+        }
+
+        public String getSku() {
+            return id.toString();
         }
 
         @NoArgsConstructor
@@ -89,6 +95,14 @@ public class RetrieveAListOfProductsVo {
             private Integer oldInventoryQuantity;
             private String adminGraphqlApiId;
             private Object imageId;
+
+            public String getSku() {
+                String finalSku = sku;
+                if (!StringUtils.hasText(sku)) {
+                    finalSku = id.toString();
+                }
+                return finalSku;
+            }
         }
 
         @NoArgsConstructor

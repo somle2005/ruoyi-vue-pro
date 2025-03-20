@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.oms.domain.entity;
+package com.somle.shopify.domain;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;

@@ -13,7 +13,7 @@ import org.springframework.context.annotation.Conditional;
  **/
 @Conditional(OnYudaoServerSaleCondition.class)
 @SpringBootApplication(scanBasePackages = {"com.somle", "cn.iocoder.yudao.module"})
-@MapperScan(basePackages = {"com.somle", "cn.iocoder.yudao.module"})
+@MapperScan(basePackages = {"com.somle.shopify.mapper","com.somle.walmart.mapper", "cn.iocoder.yudao.module.oms.mapper"})
 public class SaleApplicant {
 
     public static void main(String[] args) {
