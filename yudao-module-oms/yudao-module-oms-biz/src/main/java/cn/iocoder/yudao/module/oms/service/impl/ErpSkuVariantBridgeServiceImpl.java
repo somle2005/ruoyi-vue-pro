@@ -1,9 +1,9 @@
 package cn.iocoder.yudao.module.oms.service.impl;
 
 import cn.iocoder.yudao.framework.common.util.custom.MyCollectionUtils;
-import cn.iocoder.yudao.module.oms.domain.dto.ErpSkuVariantBridgeDto;
-import cn.iocoder.yudao.module.oms.domain.entity.ErpSkuVariantBridge;
-import cn.iocoder.yudao.module.oms.mapper.ErpSkuVariantBridgeMapper;
+import cn.iocoder.yudao.module.oms.model.dto.ErpSkuVariantBridgeDto;
+import cn.iocoder.yudao.module.oms.model.entity.ErpSkuVariantBridge;
+import cn.iocoder.yudao.module.oms.dal.ErpSkuVariantBridgeMapper;
 import cn.iocoder.yudao.module.oms.service.ErpSkuVariantBridgeService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

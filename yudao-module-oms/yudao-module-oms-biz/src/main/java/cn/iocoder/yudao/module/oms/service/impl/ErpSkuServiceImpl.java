@@ -1,8 +1,8 @@
 package cn.iocoder.yudao.module.oms.service.impl;
 
-import cn.iocoder.yudao.module.oms.domain.entity.ErpShop;
-import cn.iocoder.yudao.module.oms.domain.entity.ErpSku;
-import cn.iocoder.yudao.module.oms.mapper.ErpSkuMapper;
+import cn.iocoder.yudao.module.oms.model.entity.ErpShop;
+import cn.iocoder.yudao.module.oms.model.entity.ErpSku;
+import cn.iocoder.yudao.module.oms.dal.ErpSkuMapper;
 import cn.iocoder.yudao.module.oms.service.ErpSkuService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.annotation.Resource;

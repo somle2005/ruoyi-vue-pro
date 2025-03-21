@@ -2,10 +2,10 @@ package cn.iocoder.yudao.module.oms.job;
 
 import cn.iocoder.yudao.framework.common.util.custom.MyExceptionUtil;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
-import cn.iocoder.yudao.module.oms.domain.entity.ErpShop;
-import cn.iocoder.yudao.module.oms.domain.entity.ErpSku;
-import cn.iocoder.yudao.module.oms.mapper.ErpShopMapper;
-import cn.iocoder.yudao.module.oms.mapper.ErpSkuMapper;
+import cn.iocoder.yudao.module.oms.model.entity.ErpShop;
+import cn.iocoder.yudao.module.oms.model.entity.ErpSku;
+import cn.iocoder.yudao.module.oms.dal.ErpShopMapper;
+import cn.iocoder.yudao.module.oms.dal.ErpSkuMapper;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.walmart.domain.GetAllItemsDto;

@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.oms.service;
 
-import cn.iocoder.yudao.module.oms.domain.entity.ErpShop;
-import cn.iocoder.yudao.module.oms.domain.entity.ErpSku;
+import cn.iocoder.yudao.module.oms.model.entity.ErpShop;
+import cn.iocoder.yudao.module.oms.model.entity.ErpSku;
 
 import java.util.List;
 

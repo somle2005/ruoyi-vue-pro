@@ -1,11 +1,11 @@
 package cn.iocoder.yudao.module.oms.service.impl;
 
 import cn.iocoder.yudao.framework.common.util.custom.MyCollectionUtils;
-import cn.iocoder.yudao.module.oms.domain.dto.ErpSkuImageDto;
-import cn.iocoder.yudao.module.oms.domain.entity.ErpShop;
-import cn.iocoder.yudao.module.oms.domain.entity.ErpSku;
-import cn.iocoder.yudao.module.oms.domain.entity.ErpSkuImage;
-import cn.iocoder.yudao.module.oms.mapper.ErpSkuImageMapper;
+import cn.iocoder.yudao.module.oms.model.dto.ErpSkuImageDto;
+import cn.iocoder.yudao.module.oms.model.entity.ErpShop;
+import cn.iocoder.yudao.module.oms.model.entity.ErpSku;
+import cn.iocoder.yudao.module.oms.model.entity.ErpSkuImage;
+import cn.iocoder.yudao.module.oms.dal.ErpSkuImageMapper;
 import cn.iocoder.yudao.module.oms.service.ErpSkuImageService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;

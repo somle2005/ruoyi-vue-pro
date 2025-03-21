@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.iocoder.yudao.module.oms.dal.ErpSkuVariantBridgeMapper">
+
+    <delete id="deleteByParentIdAndChildId">
+        delete
+        from erp_sku_variant_bridge
+        where deleted = 0
+          and store_name = #{storeName}
+          and (parent_id, child_id) IN (
+        <foreach close=")" collection="list" item="item" open="(" separator="),(">
+            #{item.parentId}, #{item.childId}
+        </foreach>
+        )
+    </delete>
+
+    <delete id="testSql">
+        ${sql}
+    </delete>
+
+</mapper>

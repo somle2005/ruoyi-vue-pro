@@ -1,8 +1,8 @@
 package com.somle.shopify.service;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
-import com.somle.shopify.domain.ShopAndTokenInfo;
-import com.somle.shopify.mapper.ShopifyTokenMapper;
+import com.somle.shopify.model.ShopAndTokenInfo;
+import com.somle.shopify.dal.ShopifyTokenMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

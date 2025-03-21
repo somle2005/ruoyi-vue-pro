@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.oms.controller;
 
-import cn.iocoder.yudao.module.oms.domain.entity.ErpSku;
-import cn.iocoder.yudao.module.oms.mapper.ErpSkuMapper;
+import cn.iocoder.yudao.module.oms.model.entity.ErpSku;
+import cn.iocoder.yudao.module.oms.dal.ErpSkuMapper;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.web.bind.annotation.*;
