@@ -17,6 +17,7 @@ import org.springframework.context.annotation.Conditional;
 public class SaleApplicant {
 
     public static void main(String[] args) {
+        //ad
         SpringApplication.run(SaleApplicant.class, args);
     }
 
