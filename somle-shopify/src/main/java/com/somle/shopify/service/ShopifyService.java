@@ -1,7 +1,6 @@
 package com.somle.shopify.service;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
-import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import com.somle.shopify.domain.ShopAndTokenInfo;
 import com.somle.shopify.mapper.ShopifyTokenMapper;
 import jakarta.annotation.PostConstruct;
@@ -33,10 +32,6 @@ public class ShopifyService {
     @Resource
     private ShopifyClient shopifyClient;
 
-    @Resource
-    private ConfigApi configApi;
-
-
     @PostConstruct
     public void init() {
         CompletableFuture.runAsync(() -> {
@@ -46,14 +41,11 @@ public class ShopifyService {
     }
 
     private void initClient() {
-        var proxyHost = configApi.getConfigValueByKey("proxy.host");
-        var proxyPort = Integer.valueOf(configApi.getConfigValueByKey("proxy.port"));
-        var proxyUsername = configApi.getConfigValueByKey("proxy.username");
-        var proxyPassword = configApi.getConfigValueByKey("proxy.password");
-
-        // Create a Proxy instance
+        String proxyHost = "intra.somle.com";
+        Integer proxyPort = 55014;
+        String proxyUsername = "admin";
+        String proxyPassword = "sM234s,a.sm";
         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-
         OkHttpClient client = new OkHttpClient.Builder()
             .proxy(proxy)
             .proxyAuthenticator((route, response) -> {
@@ -67,7 +59,6 @@ public class ShopifyService {
         shopifyClient.webClient = client;
     }
 
-    //0 0 0 1 1 ?
     @Scheduled(cron = "${threePartyPlatform.shopify.refreshToken.cron}")
     public void refreshToken() {
         log.info("Shopify refreshToken start");

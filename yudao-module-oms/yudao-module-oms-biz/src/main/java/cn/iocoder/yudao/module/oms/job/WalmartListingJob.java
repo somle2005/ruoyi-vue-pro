@@ -8,11 +8,9 @@ import cn.iocoder.yudao.module.oms.mapper.ErpShopMapper;
 import cn.iocoder.yudao.module.oms.mapper.ErpSkuMapper;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.somle.walmart.domain.GetAllItemsDto;
 import com.somle.walmart.domain.WalmartAllItemsResVO;
-import com.somle.walmart.domain.WalmartToken;
-import com.somle.walmart.mapper.WalmartTokenMapper;
-import com.somle.walmart.service.WalmartMarketplaceClient;
-import com.somle.walmart.service.WalmartService;
+import com.somle.walmart.service.WalmartClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -24,22 +22,27 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+
+
+/*1.循环请求v3/items，拿到"gtin": "00782926650858".
+    2.批量根据"gtin": "00782926650858"调用v3/items/walmart/search，根据标题配对，组装进sku
+    3.请求完全以后，把全部变体父sku取出来，分组。若子sku等于父sku即为父sku的信息，否则取主要的，否则则null
+    4.父子入库
+    5.处理不含有变体的sku当做单体入库*/
+
 //Walmart sku拉取
 @Slf4j
 @Component
 public class WalmartListingJob implements JobHandler {
 
     @Resource
-    private WalmartService walmartService;
-
-    @Resource
-    private WalmartTokenMapper walmartTokenMapper;
-
-    @Resource
     private ErpShopMapper erpShopMapper;
 
     @Resource
     private ErpSkuMapper erpSkuMapper;
+
+    @Resource
+    private WalmartClient walmartClient;
 
     @Override
     public synchronized String execute(String param) throws Exception {
@@ -58,18 +61,20 @@ public class WalmartListingJob implements JobHandler {
                     if (erpShop == null) {
                         throw new RuntimeException("当前店铺名称不存在");
                     }
-                    int offet = 0;
+                    String nextCursor = "*";
                     while (true) {
-                        WalmartToken walmartToken = walmartTokenMapper.selectById(erpShop.getAuthId());
-                        WalmartMarketplaceClient walmartClient = (WalmartMarketplaceClient) walmartService.getClient(walmartToken);
-                        WalmartAllItemsResVO walmartAllItemsResVO = walmartClient.getAllItems(String.valueOf(offet));
+                        GetAllItemsDto getAllItemsDto = new GetAllItemsDto();
+                        getAllItemsDto.setNextCursor(nextCursor);
+                        getAllItemsDto.setLimit(500L);
+                        getAllItemsDto.setShopName(storeName);
+                        getAllItemsDto.setSuccessCode(200);
+                        WalmartAllItemsResVO walmartAllItemsResVO = walmartClient.getAllItems(getAllItemsDto);
                         if (CollectionUtils.isEmpty(walmartAllItemsResVO.getItemResponse())) {
                             break;
                         }
-
                         //操作db，新增或者更新
                         saveOrUpdateSku(walmartAllItemsResVO.getItemResponse(), erpShop);
-                        offet += 500;
+                        nextCursor= walmartAllItemsResVO.getNextCursor();
                         //防止限流
                         TimeUnit.MILLISECONDS.sleep(200L);
                     }

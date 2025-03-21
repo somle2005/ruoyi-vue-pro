@@ -212,3 +212,7 @@ threePartyPlatform:
     refreshToken:
       enable: true
       cron: "0 0 0 1 1 ?"
+  walmart:
+    refreshToken:
+      enable: true
+      cron: "0 */10 * * * ?"

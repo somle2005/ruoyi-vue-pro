@@ -23,4 +23,14 @@ public class WalmartToken {
 
     @TableField(value = "consumer_channel_type")
     private String consumerChannelType;
+
+    @TableField(value = "correlation_id")
+    private String correlationId;
+
+    @TableField(value = "access_token")
+    private String accessToken;
+
+    @TableField(value = "domain")
+    private String domain;
+
 }

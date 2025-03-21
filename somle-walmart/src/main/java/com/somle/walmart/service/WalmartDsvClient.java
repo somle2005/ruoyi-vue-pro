@@ -1,15 +1,13 @@
 package com.somle.walmart.service;
 
 
-import com.somle.walmart.domain.WalmartToken;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
 
 // https://developer.walmart.com/doc/us/us-supplier/us-supplier-getstarted/
 @Slf4j
 public class WalmartDsvClient extends WalmartClient{
 
-    private String shipNode;
+/*    private String shipNode;
 
     public WalmartDsvClient(WalmartToken token, String shipNode) {
         super(token);
@@ -31,7 +29,7 @@ public class WalmartDsvClient extends WalmartClient{
                 .addPathSegments(endpoint)
                 .addQueryParameter("shipNode", "752076")
                 .build();
-    }
+    }*/
 
 
 }
