@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
  * ERP 店铺表
  */
 @Data
-@TableName(value = "erp_shop")
-public class ErpShop {
+@TableName(value = "oms_shop")
+public class OmsShop {
     /**
      * 店铺id
      */

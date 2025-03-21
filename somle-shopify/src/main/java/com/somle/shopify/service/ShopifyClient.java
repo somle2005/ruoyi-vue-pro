@@ -5,10 +5,10 @@ import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
-import com.somle.shopify.model.RetrieveAListOfProductsDto;
-import com.somle.shopify.model.RetrieveAListOfProductsVo;
-import com.somle.shopify.model.ShopAndTokenInfo;
-import com.somle.shopify.model.TokenHead;
+import com.somle.shopify.model.ShopifyRetrieveAListOfProductsDTO;
+import com.somle.shopify.model.ShopifyRetrieveAListOfProductsVO;
+import com.somle.shopify.model.ShopifyShopAndTokenInfo;
+import com.somle.shopify.model.ShopifyTokenHead;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -28,30 +28,30 @@ public class ShopifyClient {
 
     OkHttpClient webClient;
 
-    public Map<String, ShopAndTokenInfo> tokenMap = new HashMap();
+    public Map<String, ShopifyShopAndTokenInfo> tokenMap = new HashMap();
 
-    private TokenHead getTokenHeadInfo(String storeName) {
-        TokenHead tokenHead = new TokenHead();
-        ShopAndTokenInfo shopAndTokenInfo = tokenMap.get(storeName);
-        if (shopAndTokenInfo == null || !StringUtils.hasText(shopAndTokenInfo.getAccessToken())
-            || !StringUtils.hasText(shopAndTokenInfo.getDomain())) {
+    private ShopifyTokenHead getTokenHeadInfo(String storeName) {
+        ShopifyTokenHead tokenHead = new ShopifyTokenHead();
+        ShopifyShopAndTokenInfo shopifyShopAndTokenInfo = tokenMap.get(storeName);
+        if (shopifyShopAndTokenInfo == null || !StringUtils.hasText(shopifyShopAndTokenInfo.getAccessToken())
+            || !StringUtils.hasText(shopifyShopAndTokenInfo.getDomain())) {
             throw new RuntimeException("accessToken is null");
         }
-        tokenHead.setShopAndTokenInfo(shopAndTokenInfo);
+        tokenHead.setShopifyShopAndTokenInfo(shopifyShopAndTokenInfo);
         Map<String, String> tokenValues = new HashMap<>();
-        tokenValues.put("X-Shopify-Access-Token", shopAndTokenInfo.getAccessToken());
+        tokenValues.put("X-Shopify-Access-Token", shopifyShopAndTokenInfo.getAccessToken());
         tokenHead.setTokenValues(tokenValues);
         return tokenHead;
     }
 
-    public RetrieveAListOfProductsVo retrieveAListOfProducts(RetrieveAListOfProductsDto dto) {
-        RetrieveAListOfProductsVo retrieveAListOfProductsVo = null;
+    public ShopifyRetrieveAListOfProductsVO retrieveAListOfProducts(ShopifyRetrieveAListOfProductsDTO dto) {
+        ShopifyRetrieveAListOfProductsVO shopifyRetrieveAListOfProductsVo = null;
         String shopName = dto.getShopName();
-        TokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
+        ShopifyTokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
         String endpoint = "/admin/api/2024-10/products.json";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(tokenHeadInfo.getShopAndTokenInfo().getDomain() + endpoint)
+            .url(tokenHeadInfo.getShopifyShopAndTokenInfo().getDomain() + endpoint)
             .queryParams(dto)
             .headers(tokenHeadInfo.getTokenValues())
             .build();
@@ -62,21 +62,21 @@ public class ShopifyClient {
             if (!successCode.equals(response.code())) {
                 throw new RuntimeException(responseJson);
             }
-            retrieveAListOfProductsVo = JSON.parseObject(responseJson, RetrieveAListOfProductsVo.class);
+            shopifyRetrieveAListOfProductsVo = JSON.parseObject(responseJson, ShopifyRetrieveAListOfProductsVO.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-        return retrieveAListOfProductsVo;
+        return shopifyRetrieveAListOfProductsVo;
     }
 
 
     @SneakyThrows
     public JSONObject getOrders(String shopName) {
         String endpoint = "/admin/api/2024-10/orders.json?status=any";
-        TokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
+        ShopifyTokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(tokenHeadInfo.getShopAndTokenInfo().getDomain() + endpoint)
+            .url(tokenHeadInfo.getShopifyShopAndTokenInfo().getDomain() + endpoint)
             .headers(tokenHeadInfo.getTokenValues())
             .build();
         String bodyString = sendRequest(request).body().string();
@@ -87,10 +87,10 @@ public class ShopifyClient {
     @SneakyThrows
     public JSONObject getPayouts(String shopName) {
         var endpoint = "/admin/api/2024-10/shopify_payments/payouts.json";
-        TokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
+        ShopifyTokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
         var request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(tokenHeadInfo.getShopAndTokenInfo().getDomain() + endpoint)
+            .url(tokenHeadInfo.getShopifyShopAndTokenInfo().getDomain() + endpoint)
             .headers(tokenHeadInfo.getTokenValues())
             .build();
         var bodyString = sendRequest(request).body().string();

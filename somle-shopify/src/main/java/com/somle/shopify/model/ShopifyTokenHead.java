@@ -11,7 +11,7 @@ import java.util.Map;
  * @create: 2025-03-20 15:00
  **/
 @Data
-public class TokenHead {
-    private ShopAndTokenInfo shopAndTokenInfo;
+public class ShopifyTokenHead {
+    private ShopifyShopAndTokenInfo shopifyShopAndTokenInfo;
     private Map<String, String> tokenValues = new HashMap<>();
 }

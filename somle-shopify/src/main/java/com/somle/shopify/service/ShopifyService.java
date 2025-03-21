@@ -1,7 +1,7 @@
 package com.somle.shopify.service;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
-import com.somle.shopify.model.ShopAndTokenInfo;
+import com.somle.shopify.model.ShopifyShopAndTokenInfo;
 import com.somle.shopify.dal.ShopifyTokenMapper;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -63,25 +63,25 @@ public class ShopifyService {
     public void refreshToken() {
         log.info("Shopify refreshToken start");
         //查询所有能认证的店铺
-        List<ShopAndTokenInfo> shopAndTokenInfos = shopifyTokenMapper.getShopAndTokenInfo();
-        if (!CollectionUtils.isEmpty(shopAndTokenInfos)) {
+        List<ShopifyShopAndTokenInfo> shopifyShopAndTokenInfos = shopifyTokenMapper.getShopAndTokenInfo();
+        if (!CollectionUtils.isEmpty(shopifyShopAndTokenInfos)) {
             //循环调用 平台获取token接口
-            for (ShopAndTokenInfo shopAndTokenInfo : shopAndTokenInfos) {
-                applyPlatObtainToken(shopAndTokenInfo);
-                shopifyClient.tokenMap.put(shopAndTokenInfo.getShopName(), shopAndTokenInfo);
+            for (ShopifyShopAndTokenInfo shopifyShopAndTokenInfo : shopifyShopAndTokenInfos) {
+                applyPlatObtainToken(shopifyShopAndTokenInfo);
+                shopifyClient.tokenMap.put(shopifyShopAndTokenInfo.getShopName(), shopifyShopAndTokenInfo);
             }
         }
         //把token更新入库,由于Shopify token 固定所以不进行
     }
 
-    private ShopAndTokenInfo applyPlatObtainToken(ShopAndTokenInfo shopAndTokenInfo) {
+    private ShopifyShopAndTokenInfo applyPlatObtainToken(ShopifyShopAndTokenInfo shopifyShopAndTokenInfo) {
         // 拿shopName 调用平台接口 目前 shopify token为固定
         String accessToken = null;
-        if ("Shopify_FIT_USA".equals(shopAndTokenInfo.getShopName())) {
+        if ("Shopify_FIT_USA".equals(shopifyShopAndTokenInfo.getShopName())) {
             accessToken = "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";
         }
-        shopAndTokenInfo.setAccessToken(accessToken);
-        return shopAndTokenInfo;
+        shopifyShopAndTokenInfo.setAccessToken(accessToken);
+        return shopifyShopAndTokenInfo;
     }
 
 }

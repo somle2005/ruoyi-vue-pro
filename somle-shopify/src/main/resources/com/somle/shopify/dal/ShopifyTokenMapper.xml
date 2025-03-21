@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.somle.shopify.dal.ShopifyTokenMapper">
 
-  <select id="getShopAndTokenInfo" resultType="com.somle.shopify.model.ShopAndTokenInfo">
+  <select id="getShopAndTokenInfo" resultType="com.somle.shopify.model.ShopifyShopAndTokenInfo">
       select `name` as shopName,
              access_token,
              domain

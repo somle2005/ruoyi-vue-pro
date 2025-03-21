@@ -8,7 +8,7 @@ import lombok.Data;
  * @create: 2025-03-20 14:26
  **/
 @Data
-public class ShopAndTokenInfo {
+public class WalmartShopAndTokenInfo {
 
     private Long tokenId;
     private String shopName;

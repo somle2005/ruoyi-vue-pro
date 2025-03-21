@@ -15,7 +15,7 @@ import java.util.List;
  **/
 @NoArgsConstructor
 @Data
-public class RetrieveAListOfProductsVo {
+public class ShopifyRetrieveAListOfProductsVO {
 
     private List<ProductsDTO> products;
 

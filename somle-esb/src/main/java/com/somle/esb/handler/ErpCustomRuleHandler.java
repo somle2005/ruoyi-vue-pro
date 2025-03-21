@@ -85,7 +85,7 @@ public class ErpCustomRuleHandler {
                     if (customRule.getCountryCode().equals(countryCode)) {
                         //当前存在国家是CN的数据
                         ErpCustomRuleDTO bean = BeanUtils.toBean(customRule, ErpCustomRuleDTO.class);
-                        processedRules.add(BeanUtils.toBean(bean.setCountryCode(null), ErpCustomRuleDTO.class));
+                       // processedRules.add(BeanUtils.toBean(bean.setCountryCode(null), ErpCustomRuleDTO.class));
                     }
                 }));
         return processedRules;

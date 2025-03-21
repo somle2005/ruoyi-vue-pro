@@ -8,7 +8,7 @@ import lombok.Data;
  * @create: 2025-03-21 10:45
  **/
 @Data
-public class GetAllItemsDto {
+public class WalmartGetAllItemsDTO {
 
     private String nextCursor;
 

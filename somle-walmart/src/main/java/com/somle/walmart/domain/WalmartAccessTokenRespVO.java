@@ -9,7 +9,7 @@ import lombok.Data;
  * @create: 2025-03-20 17:36
  **/
 @Data
-public class AccessTokenRespVO {
+public class WalmartAccessTokenRespVO {
 
     @JSONField(name = "access_token")
     private String accessToken;

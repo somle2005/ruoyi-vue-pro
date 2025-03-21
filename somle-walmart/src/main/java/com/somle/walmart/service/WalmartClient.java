@@ -29,34 +29,34 @@ public class WalmartClient {
 
     OkHttpClient webClient = new OkHttpClient();
 
-    public Map<String, ShopAndTokenInfo> tokenMap = new HashMap();
+    public Map<String, WalmartShopAndTokenInfo> tokenMap = new HashMap();
 
-    private TokenHead getTokenHeadInfo(String storeName) {
-        TokenHead tokenHead = new TokenHead();
-        ShopAndTokenInfo shopAndTokenInfo = tokenMap.get(storeName);
-        if (shopAndTokenInfo == null || !StringUtils.hasText(shopAndTokenInfo.getAccessToken())
-            || !StringUtils.hasText(shopAndTokenInfo.getDomain())) {
+    private WalmartTokenHead getTokenHeadInfo(String storeName) {
+        WalmartTokenHead walmartTokenHead = new WalmartTokenHead();
+        WalmartShopAndTokenInfo walmartShopAndTokenInfo = tokenMap.get(storeName);
+        if (walmartShopAndTokenInfo == null || !StringUtils.hasText(walmartShopAndTokenInfo.getAccessToken())
+            || !StringUtils.hasText(walmartShopAndTokenInfo.getDomain())) {
             throw new RuntimeException("accessToken is null");
         }
-        tokenHead.setShopAndTokenInfo(shopAndTokenInfo);
+        walmartTokenHead.setWalmartShopAndTokenInfo(walmartShopAndTokenInfo);
         Map<String, String> tokenValues = new HashMap<>();
-        tokenValues.put("WM_SVC.NAME", shopAndTokenInfo.getSvcName());
-        tokenValues.put("WM_QOS.CORRELATION_ID", shopAndTokenInfo.getCorrelationId());
-        tokenValues.put("WM_SEC.ACCESS_TOKEN", shopAndTokenInfo.getAccessToken());
-        tokenHead.setTokenValues(tokenValues);
-        return tokenHead;
+        tokenValues.put("WM_SVC.NAME", walmartShopAndTokenInfo.getSvcName());
+        tokenValues.put("WM_QOS.CORRELATION_ID", walmartShopAndTokenInfo.getCorrelationId());
+        tokenValues.put("WM_SEC.ACCESS_TOKEN", walmartShopAndTokenInfo.getAccessToken());
+        walmartTokenHead.setTokenValues(tokenValues);
+        return walmartTokenHead;
     }
 
 
-    public WalmartAllItemsResVO getAllItems(GetAllItemsDto dto) {
+    public WalmartAllItemsResVO getAllItems(WalmartGetAllItemsDTO dto) {
         Integer successCode = dto.getSuccessCode();
-        TokenHead tokenHeadInfo = getTokenHeadInfo(dto.getShopName());
-        ShopAndTokenInfo shopAndTokenInfo = tokenHeadInfo.getShopAndTokenInfo();
-        Map<String, String> tokenValues = tokenHeadInfo.getTokenValues();
+        WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(dto.getShopName());
+        WalmartShopAndTokenInfo walmartShopAndTokenInfo = walmartTokenHeadInfo.getWalmartShopAndTokenInfo();
+        Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         String endpoint = "/v3/items";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(shopAndTokenInfo.getDomain() + endpoint)
+            .url(walmartShopAndTokenInfo.getDomain() + endpoint)
             .queryParams(dto)
             .headers(tokenValues)
             .build();
@@ -76,13 +76,13 @@ public class WalmartClient {
 
     @SneakyThrows
     public JSONObject getOrders(WalmartOrderReqVO vo) {
-        TokenHead tokenHeadInfo = getTokenHeadInfo(vo.getShopName());
-        ShopAndTokenInfo shopAndTokenInfo = tokenHeadInfo.getShopAndTokenInfo();
-        Map<String, String> tokenValues = tokenHeadInfo.getTokenValues();
+        WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(vo.getShopName());
+        WalmartShopAndTokenInfo walmartShopAndTokenInfo = walmartTokenHeadInfo.getWalmartShopAndTokenInfo();
+        Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         String endpoint = "/v3/orders";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(shopAndTokenInfo.getDomain() + endpoint)
+            .url(walmartShopAndTokenInfo.getDomain() + endpoint)
             .headers(tokenValues)
             .build();
         Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();
@@ -94,18 +94,18 @@ public class WalmartClient {
     @SneakyThrows
     public String getReconFile(LocalDate date, String shopName) {
         String dateStr = date.format(DateTimeFormatter.ofPattern("MMddyyyy"));
-        TokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
-        ShopAndTokenInfo shopAndTokenInfo = tokenHeadInfo.getShopAndTokenInfo();
-        Map<String, String> tokenValues = tokenHeadInfo.getTokenValues();
+        WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(shopName);
+        WalmartShopAndTokenInfo walmartShopAndTokenInfo = walmartTokenHeadInfo.getWalmartShopAndTokenInfo();
+        Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         String endpoint = "/v3/report/reconreport/availableReconFiles";
-        GetReconFileReq getReconFileReq = new GetReconFileReq();
-        getReconFileReq.setReportVersion("v1");
-        getReconFileReq.setReportDate(dateStr);
+        WalmartGetReconFileReq walmartGetReconFileReq = new WalmartGetReconFileReq();
+        walmartGetReconFileReq.setReportVersion("v1");
+        walmartGetReconFileReq.setReportDate(dateStr);
         tokenValues.put("Accept", "application/octet-stream");
         RequestX request = RequestX.builder()
-            .url(shopAndTokenInfo.getDomain() + endpoint)
+            .url(walmartShopAndTokenInfo.getDomain() + endpoint)
             .requestMethod(RequestX.Method.GET)
-            .queryParams(getReconFileReq)
+            .queryParams(walmartGetReconFileReq)
             .headers(tokenValues)
             .build();
         Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();

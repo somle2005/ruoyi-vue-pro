@@ -3,7 +3,7 @@ package cn.iocoder.yudao.framework.quartz.core.handler;
 import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.thread.ThreadUtil;
-import cn.iocoder.yudao.framework.common.util.custom.MyExceptionUtil;
+import cn.iocoder.yudao.framework.common.util.string.StrUtils;
 import cn.iocoder.yudao.framework.quartz.core.enums.JobDataKeyEnum;
 import cn.iocoder.yudao.framework.quartz.core.service.JobLogFrameworkService;
 import jakarta.annotation.Resource;
@@ -85,7 +85,7 @@ public class JobHandlerInvoker extends QuartzJobBean {
         boolean success = exception == null;
         if (!success) {
 //            data = getRootCauseMessage(exception);
-            data = MyExceptionUtil.getExceptionDetail(exception);
+            data = StrUtils.toString(exception);
         }
         // 更新日志
         try {

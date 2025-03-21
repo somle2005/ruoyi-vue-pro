@@ -16,7 +16,7 @@
 
     <name>${project.artifactId}</name>
     <description>
-        销售模块
+        订单模块
     </description>
 
 </project>

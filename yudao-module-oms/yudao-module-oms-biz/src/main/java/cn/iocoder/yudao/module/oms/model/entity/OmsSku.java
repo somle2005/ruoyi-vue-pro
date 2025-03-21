@@ -14,8 +14,8 @@ import java.util.List;
  * ERP平台sku表
  */
 @Data
-@TableName(value = "erp_sku")
-public class ErpSku {
+@TableName(value = "oms_sku")
+public class OmsSku {
     /**
      * 自增主键
      */

@@ -8,7 +8,7 @@ import lombok.Data;
  * @create: 2025-03-21 11:20
  **/
 @Data
-public class GetReconFileReq {
+public class WalmartGetReconFileReq {
 
     private String reportVersion;
     private String reportDate;
