@@ -28,6 +28,11 @@ mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
+yudao:
+  info:
+    version: 1.0.0
+    base-package: cn.iocoder.yudao
+
 threePartyPlatform:
   shopify:
     refreshToken:

@@ -3,10 +3,11 @@ package com.somle.walmart.service;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import com.alibaba.fastjson.JSON;
-import com.somle.walmart.domain.WalmartAccessTokenRespVO;
-import com.somle.walmart.domain.WalmartShopAndTokenInfo;
-import com.somle.walmart.domain.WalmartToken;
-import com.somle.walmart.mapper.WalmartTokenMapper;
+import com.somle.walmart.dal.WalmartShopAndTokenInfoMapper;
+import com.somle.walmart.dal.WalmartTokenMapper;
+import com.somle.walmart.model.WalmartAccessTokenRespVO;
+import com.somle.walmart.model.WalmartShopAndTokenInfo;
+import com.somle.walmart.model.WalmartToken;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -31,20 +32,23 @@ public class WalmartService {
     private WalmartTokenMapper walmartTokenMapper;
 
     @Resource
+    private WalmartShopAndTokenInfoMapper walmartShopAndTokenInfoMapper;
+
+    @Resource
     private WalmartClient walmartClient;
 
     @PostConstruct
     public void init() {
+        refreshToken();
         CompletableFuture.runAsync(() -> {
-            refreshToken();
+
         });
     }
     @Scheduled(cron = "${threePartyPlatform.walmart.refreshToken.cron}")
     public void refreshToken() {
         log.info("Walmart refreshToken start");
         //查询所有能认证的店铺
-        List<WalmartShopAndTokenInfo> walmartShopAndTokenInfos = walmartTokenMapper.getShopAndTokenInfo();
-
+        List<WalmartShopAndTokenInfo> walmartShopAndTokenInfos = walmartShopAndTokenInfoMapper.getShopAndTokenInfo();
         List<WalmartToken> updateWalmartTokens = new ArrayList<>();
         if (!CollectionUtils.isEmpty(walmartShopAndTokenInfos)) {
             //循环调用 平台获取token接口

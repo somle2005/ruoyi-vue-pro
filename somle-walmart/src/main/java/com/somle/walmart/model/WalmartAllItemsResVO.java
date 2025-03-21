@@ -1,4 +1,4 @@
-package com.somle.walmart.domain;
+package com.somle.walmart.model;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;

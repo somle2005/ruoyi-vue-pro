@@ -6,7 +6,7 @@ import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
-import com.somle.walmart.domain.*;
+import com.somle.walmart.model.*;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
@@ -53,6 +53,7 @@ public class WalmartClient {
         WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(dto.getShopName());
         WalmartShopAndTokenInfo walmartShopAndTokenInfo = walmartTokenHeadInfo.getWalmartShopAndTokenInfo();
         Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
+        tokenValues.put("Accept", "application/json");
         String endpoint = "/v3/items";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)

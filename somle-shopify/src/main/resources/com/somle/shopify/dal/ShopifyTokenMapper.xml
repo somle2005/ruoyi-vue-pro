@@ -6,10 +6,10 @@
       select `name` as shopName,
              access_token,
              domain
-      from erp_shop
-               join shopify_token on erp_shop.auth_id = shopify_token.id
-      where erp_shop.deleted = 0
-        and erp_shop.plat_name = 'Shopify'
+      from oms_shop
+               join shopify_token on oms_shop.auth_id = shopify_token.id
+      where oms_shop.deleted = 0
+        and oms_shop.plat_name = 'Shopify'
   </select>
 
 </mapper>

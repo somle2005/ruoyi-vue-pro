@@ -1,4 +1,4 @@
-package com.somle.walmart.domain;
+package com.somle.walmart.model;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;

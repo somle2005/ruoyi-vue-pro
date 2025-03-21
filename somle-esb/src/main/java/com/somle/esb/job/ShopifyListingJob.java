@@ -41,6 +41,7 @@ public class ShopifyListingJob implements JobHandler {
 
     @Override
     public synchronized String execute(String param) {
+
         if (!StringUtils.hasText(param)) {
             throw new RuntimeException("请输入店铺数组");
         }

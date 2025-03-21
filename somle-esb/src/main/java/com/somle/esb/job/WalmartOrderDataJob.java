@@ -2,7 +2,7 @@ package com.somle.esb.job;
 
 
 import com.somle.esb.model.OssData;
-import com.somle.walmart.domain.WalmartOrderReqVO;
+import com.somle.walmart.model.WalmartOrderReqVO;
 import com.somle.walmart.service.WalmartClient;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;

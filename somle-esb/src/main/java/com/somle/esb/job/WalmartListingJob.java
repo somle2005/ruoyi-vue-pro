@@ -8,8 +8,8 @@ import cn.iocoder.yudao.module.oms.model.entity.OmsShop;
 import cn.iocoder.yudao.module.oms.model.entity.OmsSku;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.somle.walmart.domain.WalmartAllItemsResVO;
-import com.somle.walmart.domain.WalmartGetAllItemsDTO;
+import com.somle.walmart.model.WalmartAllItemsResVO;
+import com.somle.walmart.model.WalmartGetAllItemsDTO;
 import com.somle.walmart.service.WalmartClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -92,7 +92,7 @@ public class WalmartListingJob implements JobHandler {
 
 
     private void saveOrUpdateSku(List<WalmartAllItemsResVO.ItemResponseDTO> itemDTOs, OmsShop OmsShop) {
-        ArrayList<WalmartAllItemsResVO.ItemResponseDTO> items = new ArrayList<>();
+        List<WalmartAllItemsResVO.ItemResponseDTO> items = new ArrayList<>();
         Map<String, List<WalmartAllItemsResVO.ItemResponseDTO>> skuMap = itemDTOs.stream().filter(e -> StringUtils.hasText(e.getSku())).collect(Collectors.groupingBy(WalmartAllItemsResVO.ItemResponseDTO::getSku));
         Set<String> allSkus = skuMap.keySet();
         for (String sku : allSkus) {

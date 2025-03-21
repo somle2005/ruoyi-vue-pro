@@ -1,4 +1,4 @@
-package com.somle.walmart.domain;
+package com.somle.walmart.model;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @create: 2025-03-20 14:26
  **/
 @Data
-public class WalmartShopAndTokenInfo {
+public class WalmartShopAndTokenInfo extends WalmartOmsShop{
 
     private Long tokenId;
     private String shopName;
