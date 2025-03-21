@@ -1,7 +1,7 @@
 package com.somle.amazon.service;
 
-import com.somle.amazon.repository.AmazonSpAuthRepository;
-import com.somle.amazon.repository.AmazonSpClientRepository;
+import com.somle.amazon.mapper.AmazonSpAuthRepository;
+import com.somle.amazon.mapper.AmazonSpClientRepository;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
