@@ -26,9 +26,10 @@ public class MyCollectionUtils {
         List<T> bMinusIntersection = new ArrayList<>(collectionB);
         bMinusIntersection.removeAll(intersection);
 
-        // 计算 并集
-        List<T> union = new ArrayList<>(collectionA);
-        union.addAll(collectionB);
+        // 计算 并集，并去重
+        Set<T> unionSet = new LinkedHashSet<>(collectionA);
+        unionSet.addAll(collectionB);
+        List<T> union = new ArrayList<>(unionSet);
 
         // 构建结果Map
         Map<String, List<T>> result = new HashMap<>();

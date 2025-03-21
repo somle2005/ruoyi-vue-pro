@@ -2,11 +2,14 @@ package cn.iocoder.yudao.module.oms.job;
 
 import cn.iocoder.yudao.framework.common.util.custom.MyExceptionUtil;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
+import cn.iocoder.yudao.module.oms.domain.dto.ErpSkuImageDto;
 import cn.iocoder.yudao.module.oms.domain.dto.ErpSkuVariantBridgeDto;
 import cn.iocoder.yudao.module.oms.domain.dto.ErpSkuVariantBridgeDto.ErpSkuVariantBridgeChildDto;
 import cn.iocoder.yudao.module.oms.domain.entity.ErpShop;
 import cn.iocoder.yudao.module.oms.domain.entity.ErpSku;
+import cn.iocoder.yudao.module.oms.domain.entity.ErpSkuImage;
 import cn.iocoder.yudao.module.oms.mapper.ErpShopMapper;
+import cn.iocoder.yudao.module.oms.service.ErpSkuImageService;
 import cn.iocoder.yudao.module.oms.service.ErpSkuService;
 import cn.iocoder.yudao.module.oms.service.ErpSkuVariantBridgeService;
 import com.alibaba.fastjson.JSON;
@@ -20,11 +23,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
@@ -94,11 +95,15 @@ public class ShopifyListingJob implements JobHandler {
     @Resource
     private ErpSkuService erpSkuService;
 
+    @Resource
+    private ErpSkuImageService erpSkuImageService;
+
     private void saveOrUpdateSku(List<RetrieveAListOfProductsVo.ProductsDTO> items, ErpShop erpShop) {
         List<ErpSku> doDBErpSkus = new ArrayList<>();
+        List<ErpSkuImageDto> erpSkuImageDtos = new ArrayList<>();
         for (RetrieveAListOfProductsVo.ProductsDTO parentItem : items) {
             //组装数据
-            assemblyData(erpShop, doDBErpSkus, parentItem);
+            assemblyData(erpShop, doDBErpSkus, parentItem, erpSkuImageDtos);
         }
         //批量插入或更新ErpSku
         List<ErpSku> allErpSkus = erpSkuService.insertOrUpdateErpSku(erpShop, doDBErpSkus);
@@ -106,6 +111,32 @@ public class ShopifyListingJob implements JobHandler {
         List<ErpSkuVariantBridgeDto> erpSkuVariantBridgeDtos = getErpSkuVariantBridgeDtos(erpShop, allErpSkus);
         //新增或者更新DB的产品父子关系
         erpSkuVariantBridgeService.insertOrUpdateErpSkuVariantBridge(erpShop.getName(), erpSkuVariantBridgeDtos);
+        //组装入参数据 图片入参
+        Map<String, ErpSku> allSkuMap = doDBErpSkus.stream().collect(Collectors.toMap(ErpSku::getSku, e -> e));
+        assembleImage(erpSkuImageDtos, allSkuMap);
+        //新增或者更新DB的图片
+        erpSkuImageService.insertOrUpdateErpSkuImage(erpShop, erpSkuImageDtos, allSkuMap);
+    }
+    private void assembleImage(List<ErpSkuImageDto> erpSkuImageDtos, Map<String, ErpSku> allSkuMap) {
+        for (ErpSkuImageDto erpSkuImageDto : erpSkuImageDtos) {
+            String sku = erpSkuImageDto.getSku();
+            ErpSku erpSku = allSkuMap.get(sku);
+            if (erpSku != null) {
+                Long id = erpSku.getId();
+                erpSkuImageDto.setSkuId(id);
+            }
+            List<ErpSkuImage> erpSkuImages = erpSkuImageDto.getErpSkuImages();
+            if (!CollectionUtils.isEmpty(erpSkuImages)){
+                for (ErpSkuImage erpSkuImage : erpSkuImages) {
+                    String imageDtoSku = erpSkuImage.getSku();
+                    ErpSku erpSkuImageDtoInner = allSkuMap.get(imageDtoSku);
+                    if (erpSkuImageDtoInner != null) {
+                        Long id = erpSkuImageDtoInner.getId();
+                        erpSkuImage.setSkuId(id);
+                    }
+                }
+            }
+        }
     }
 
     private List<ErpSkuVariantBridgeDto> getErpSkuVariantBridgeDtos(ErpShop erpShop, List<ErpSku> allErpSkus) {
@@ -141,11 +172,12 @@ public class ShopifyListingJob implements JobHandler {
         return erpSkuVariantBridgeDtos;
     }
 
-    private void assemblyData(ErpShop erpShop, List<ErpSku> doDBErpSkus, RetrieveAListOfProductsVo.ProductsDTO parentItem) {
+    private void assemblyData(ErpShop erpShop, List<ErpSku> doDBErpSkus, RetrieveAListOfProductsVo.ProductsDTO parentItem, List<ErpSkuImageDto> erpSkuImageDtos) {
         //处理父产品
         ErpSku parentErpSku = new ErpSku();
-        parentErpSku.setSku(parentItem.getSku());
-        parentErpSku.setSkuId(parentItem.getId());
+        String parentSku = parentItem.getSku();
+        parentErpSku.setSku(parentSku);
+        parentErpSku.setPlatSkuId(parentItem.getId());
         parentErpSku.setStoreId(erpShop.getId());
         parentErpSku.setStoreName(erpShop.getName());
         parentErpSku.setPlatId(erpShop.getPlatId());
@@ -195,12 +227,62 @@ public class ShopifyListingJob implements JobHandler {
         parentErpSku.setCreateTime(LocalDateTime.now());
         parentErpSku.setDeleted(0);
         doDBErpSkus.add(parentErpSku);
+
+        //图片信息
+        List<RetrieveAListOfProductsVo.ProductsDTO.ImagesDTO> images = parentItem.getImages();
+        Map<Long, RetrieveAListOfProductsVo.ProductsDTO.ImagesDTO> imagesIdMap = new HashMap<>();
+        List<ErpSkuImage> erpSkuImages = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(images)) {
+            imagesIdMap = images.stream().collect(Collectors.toMap(RetrieveAListOfProductsVo.ProductsDTO.ImagesDTO::getId, e -> e));
+            for (RetrieveAListOfProductsVo.ProductsDTO.ImagesDTO imagesDTO : images) {
+                Long id = imagesDTO.getId();
+                Integer position = imagesDTO.getPosition();
+                String createdAt = imagesDTO.getCreatedAt();
+                String updatedAt = imagesDTO.getUpdatedAt();
+                Integer width = imagesDTO.getWidth();
+                Integer height = imagesDTO.getHeight();
+                String src = imagesDTO.getSrc();
+                ErpSkuImage erpSkuImage = new ErpSkuImage();
+                // erpSkuImage.setSkuId(0L);
+                erpSkuImage.setStoreId(erpShop.getId());
+                erpSkuImage.setStoreName(erpShop.getName());
+                erpSkuImage.setPlatId(erpShop.getPlatId());
+                erpSkuImage.setPlatName(erpShop.getPlatName());
+                erpSkuImage.setSku(parentSku);
+                erpSkuImage.setPlatSrcId(id.toString());
+                erpSkuImage.setPosition(position);
+                erpSkuImage.setUrl(src);
+                erpSkuImage.setCreatedAt(createdAt);
+                erpSkuImage.setUpdatedAt(updatedAt);
+                erpSkuImage.setWidth(width);
+                erpSkuImage.setHeight(height);
+                erpSkuImage.setPatternType("parent");
+                Integer mainFlag = 0;
+                if (position != null && position == 1) {
+                    mainFlag = 1;
+                }
+                erpSkuImage.setMainFlag(mainFlag);
+                erpSkuImage.setCreator("admin");
+                erpSkuImage.setCreateTime(LocalDateTime.now());
+                erpSkuImage.setDeleted(0);
+                erpSkuImages.add(erpSkuImage);
+            }
+        }
+        ErpSkuImageDto erpSkuImageDto = new ErpSkuImageDto();
+        erpSkuImageDto.setStoreId(erpShop.getId());
+        erpSkuImageDto.setStoreName(erpShop.getName());
+        erpSkuImageDto.setPlatId(erpShop.getPlatId());
+        erpSkuImageDto.setPlatName(erpShop.getPlatName());
+        erpSkuImageDto.setSku(parentSku);
+        erpSkuImageDto.setErpSkuImages(erpSkuImages);
+        erpSkuImageDtos.add(erpSkuImageDto);
         //处理子产品
         if (!CollectionUtils.isEmpty(variants)) {
             for (RetrieveAListOfProductsVo.ProductsDTO.VariantsDTO childItem : variants) {
                 ErpSku childErpSku = new ErpSku();
-                childErpSku.setSku(childItem.getSku());
-                childErpSku.setSkuId(childItem.getId());
+                String childSku = childItem.getSku();
+                childErpSku.setSku(childSku);
+                childErpSku.setPlatSkuId(childItem.getId());
                 childErpSku.setStoreId(erpShop.getId());
                 childErpSku.setStoreName(erpShop.getName());
                 childErpSku.setPlatId(erpShop.getPlatId());
@@ -211,12 +293,40 @@ public class ShopifyListingJob implements JobHandler {
                 childErpSku.setBuyableStatus(buyableStatus);
                 childErpSku.setDiscoverableStatus(discoverableStatus);
                 childErpSku.setTitle(childItem.getTitle());
+                childErpSku.setPrice(new BigDecimal(childItem.getPrice()));
                 childErpSku.setWeight(childItem.getWeight());
                 childErpSku.setWeightUnit(childItem.getWeightUnit());
                 childErpSku.setBarcode(childItem.getBarcode());
                 childErpSku.setLabel(tags);
                 childErpSku.setDescribe(bodyHtml);
-                childErpSku.setMainImageUrl(mainImageUrl);
+                Long imageId = childItem.getImageId();
+                List<ErpSkuImage> childErpSkuImages = new ArrayList<>();
+                if (imageId != null) {
+                    RetrieveAListOfProductsVo.ProductsDTO.ImagesDTO imagesDTO = imagesIdMap.get(imageId);
+                    if (imagesDTO != null) {
+                        childErpSku.setMainImageUrl(imagesDTO.getSrc());
+                        ErpSkuImage erpSkuImage = new ErpSkuImage();
+                        // erpSkuImage.setSkuId(0L);
+                        erpSkuImage.setSku(childSku);
+                        erpSkuImage.setStoreId(erpShop.getId());
+                        erpSkuImage.setStoreName(erpShop.getName());
+                        erpSkuImage.setPlatId(erpShop.getPlatId());
+                        erpSkuImage.setPlatName(erpShop.getPlatName());
+                        erpSkuImage.setPlatSrcId(imagesDTO.getId().toString());
+                        erpSkuImage.setPosition(imagesDTO.getPosition());
+                        erpSkuImage.setUrl(imagesDTO.getSrc());
+                        erpSkuImage.setCreatedAt(imagesDTO.getCreatedAt());
+                        erpSkuImage.setUpdatedAt(imagesDTO.getUpdatedAt());
+                        erpSkuImage.setWidth(imagesDTO.getWidth());
+                        erpSkuImage.setHeight(imagesDTO.getHeight());
+                        erpSkuImage.setPatternType("child");
+                        erpSkuImage.setMainFlag(1);
+                        erpSkuImage.setCreator("admin");
+                        erpSkuImage.setCreateTime(LocalDateTime.now());
+                        erpSkuImage.setDeleted(0);
+                        childErpSkuImages.add(erpSkuImage);
+                    }
+                }
                 childErpSku.setCreatedAt(childItem.getCreatedAt());
                 childErpSku.setUpdatedAt(childItem.getUpdatedAt());
                 childErpSku.setListingTime(publishedAt);
@@ -234,6 +344,15 @@ public class ShopifyListingJob implements JobHandler {
                 childErpSku.setCreateTime(LocalDateTime.now());
                 childErpSku.setDeleted(0);
                 doDBErpSkus.add(childErpSku);
+
+                ErpSkuImageDto childErpSkuImageDto = new ErpSkuImageDto();
+                childErpSkuImageDto.setStoreId(erpShop.getId());
+                childErpSkuImageDto.setStoreName(erpShop.getName());
+                childErpSkuImageDto.setPlatId(erpShop.getPlatId());
+                childErpSkuImageDto.setPlatName(erpShop.getPlatName());
+                childErpSkuImageDto.setSku(childSku);
+                childErpSkuImageDto.setErpSkuImages(childErpSkuImages);
+                erpSkuImageDtos.add(childErpSkuImageDto);
             }
         }
     }

@@ -15,13 +15,14 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
-public class ErpSkuServiceImpl implements ErpSkuService{
+public class ErpSkuServiceImpl implements ErpSkuService {
 
     @Resource
     private ErpSkuMapper erpSkuMapper;
 
     /**
      * 批量插入或更新ErpSku
+     *
      * @param erpShop
      * @param doDBErpSkus 更新后的全部处理数据集合
      * @return
@@ -40,11 +41,13 @@ public class ErpSkuServiceImpl implements ErpSkuService{
         for (ErpSku dbErpSkus : doDBErpSkus) {
             String sku = dbErpSkus.getSku();
             ErpSku erpSku = existSkuIdMaps.get(sku);
-            if (erpSku == null) {
-                saveErpSkus.add(dbErpSkus);
-            } else if (!erpSku.getOriginalJson().equals(dbErpSkus.getOriginalJson())) {
+            if (erpSku != null) {
                 dbErpSkus.setId(erpSku.getId());
-                updateErpSkus.add(dbErpSkus);
+                if (!erpSku.getOriginalJson().equals(dbErpSkus.getOriginalJson())) {
+                    updateErpSkus.add(dbErpSkus);
+                }
+            } else {
+                saveErpSkus.add(dbErpSkus);
             }
         }
         if (!CollectionUtils.isEmpty(saveErpSkus)) {
@@ -53,7 +56,6 @@ public class ErpSkuServiceImpl implements ErpSkuService{
         if (!CollectionUtils.isEmpty(updateErpSkus)) {
             erpSkuMapper.updateById(updateErpSkus);
         }
-
         List<ErpSku> allErpSkus = new ArrayList<>();
         allErpSkus.addAll(saveErpSkus);
         allErpSkus.addAll(updateErpSkus);

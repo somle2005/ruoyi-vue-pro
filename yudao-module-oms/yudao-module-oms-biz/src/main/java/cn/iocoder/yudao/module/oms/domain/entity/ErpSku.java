@@ -29,10 +29,10 @@ public class ErpSku {
     private String sku;
 
     /**
-     * 平台skuId
+     * 平台的sku唯一Id
      */
-    @TableField(value = "sku_id")
-    private Long skuId;
+    @TableField(value = "plat_sku_id")
+    private Long platSkuId;
 
     /**
      * 店铺id
@@ -111,6 +111,12 @@ public class ErpSku {
      */
     @TableField(value = "title")
     private String title;
+
+    /**
+     * 价格
+     */
+    @TableField(value = "price")
+    private BigDecimal price;
 
     /**
      * 产品重量

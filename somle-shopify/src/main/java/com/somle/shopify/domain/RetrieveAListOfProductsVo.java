@@ -94,7 +94,7 @@ public class RetrieveAListOfProductsVo {
             private Integer inventoryQuantity;
             private Integer oldInventoryQuantity;
             private String adminGraphqlApiId;
-            private Object imageId;
+            private Long imageId;
 
             public String getSku() {
                 String finalSku = sku;

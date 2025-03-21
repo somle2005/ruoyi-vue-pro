@@ -23,7 +23,7 @@ public class ErpSkuVariantBridgeDto {
     private List<ErpSkuVariantBridgeChildDto> childrenS;
 
     @Data
-    public static class ErpSkuVariantBridgeChildDto{
+    public static class ErpSkuVariantBridgeChildDto {
         private Long childId;
         private String childSku;
     }
