@@ -24,7 +24,7 @@ import static cn.iocoder.yudao.framework.common.util.web.WebUtils.sendRequest;
 @Component
 public class ShopifyClient {
 
-    public OkHttpClient webClient;
+    public OkHttpClient webClient = new OkHttpClient();
 
     public Map<String, ShopifyToken> tokenMap = new HashMap();
 
