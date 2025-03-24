@@ -5,7 +5,7 @@ package cn.iocoder.yudao.framework.common.util.custom;
  * @author: LaoSan
  * @create: 2025-03-18 16:51
  **/
-public class HtmlEscapeUtil {
+public class MyHtmlEscapeUtil {
 
 
     /**

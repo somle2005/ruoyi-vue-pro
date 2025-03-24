@@ -5,14 +5,12 @@ import lombok.Data;
 /**
  * @description:
  * @author: LaoSan
- * @create: 2025-03-21 10:45
+ * @create: 2025-03-24 10:26
  **/
 @Data
-public class WalmartGetAllItemsDTO {
+public class WalmartSearchDTO {
 
-    private String nextCursor;
-
-    private Long limit;
+    private String gtin;
 
     private String shopName;
 

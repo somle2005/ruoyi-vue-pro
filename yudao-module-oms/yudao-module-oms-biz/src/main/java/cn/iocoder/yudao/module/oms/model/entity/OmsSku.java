@@ -32,7 +32,7 @@ public class OmsSku {
      * 平台的sku唯一Id
      */
     @TableField(value = "plat_sku_id")
-    private Long platSkuId;
+    private String platSkuId;
 
     /**
      * 店铺id
@@ -89,6 +89,12 @@ public class OmsSku {
     private String conditionType;
 
     /**
+     * 是否有库存0否1是
+     */
+    @TableField(value = "stock_status")
+    private Integer stockStatus;
+
+    /**
      * 是否可购买0否1是
      */
     @TableField(value = "buyable_status")
@@ -117,6 +123,13 @@ public class OmsSku {
      */
     @TableField(value = "price")
     private BigDecimal price;
+
+
+    /**
+     * 价格单位
+     */
+    @TableField(value = "price_unit")
+    private String priceUnit;
 
     /**
      * 产品重量
@@ -201,6 +214,19 @@ public class OmsSku {
      */
     @TableField(value = "vendor")
     private String vendor;
+
+
+    /**
+     * 客户评分
+     */
+    @TableField(value = "customer_rating")
+    private String customerRating;
+
+    /**
+     * 品牌
+     */
+    @TableField(value = "brand")
+    private String brand;
 
     /**
      * 变体的顺序号

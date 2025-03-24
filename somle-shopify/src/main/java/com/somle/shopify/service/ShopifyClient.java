@@ -18,6 +18,7 @@ import org.springframework.util.StringUtils;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 
 import static cn.iocoder.yudao.framework.common.util.web.WebUtils.sendRequest;
 
@@ -65,6 +66,15 @@ public class ShopifyClient {
             shopifyRetrieveAListOfProductsVo = JSON.parseObject(responseJson, ShopifyRetrieveAListOfProductsVO.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
+        }
+        Long sleepTime = dto.getSleepTime();
+        if (sleepTime != null) {
+            //防止限流
+            try {
+                TimeUnit.MILLISECONDS.sleep(sleepTime);
+            } catch (InterruptedException e) {
+                throw new RuntimeException(e);
+            }
         }
         return shopifyRetrieveAListOfProductsVo;
     }

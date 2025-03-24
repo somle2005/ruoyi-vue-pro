@@ -64,6 +64,7 @@ public class ShopifyListingJob implements JobHandler {
                         dto.setLimit(250L);
                         dto.setSince_id(lastId);
                         dto.setShopName(storeName);
+                        dto.setSleepTime(200L);
                         ShopifyRetrieveAListOfProductsVO shopifyRetrieveAListOfProductsVo = shopifyClient.retrieveAListOfProducts(dto);
                         List<ShopifyRetrieveAListOfProductsVO.ProductsDTO> items = shopifyRetrieveAListOfProductsVo.getProducts();
                         if (CollectionUtils.isEmpty(items)) {
@@ -126,7 +127,7 @@ public class ShopifyListingJob implements JobHandler {
                 OmsSku childOmsSku = new OmsSku();
                 String childSku = childItem.getSku();
                 childOmsSku.setSku(childSku);
-                childOmsSku.setPlatSkuId(childItem.getId());
+                childOmsSku.setPlatSkuId(childItem.getId().toString());
                 childOmsSku.setStoreId(OmsShop.getId());
                 childOmsSku.setStoreName(OmsShop.getName());
                 childOmsSku.setPlatId(OmsShop.getPlatId());

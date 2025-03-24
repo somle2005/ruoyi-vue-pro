@@ -19,4 +19,6 @@ public class ShopifyRetrieveAListOfProductsDTO {
 
     private Integer successCode;
 
+    private Long sleepTime;
+
 }

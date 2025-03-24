@@ -3,6 +3,7 @@ package com.somle.walmart.model;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -39,11 +40,13 @@ public class WalmartAllItemsResVO {
         private String variantGroupId;
         private VariantGroupInfoDTO variantGroupInfo;
 
+        private WalmartSearchResVO.ItemsDTO itemsDTO;
+
         @NoArgsConstructor
         @Data
         public static class PriceDTO {
             private String currency;
-            private Double amount;
+            private BigDecimal amount;
         }
 
         @NoArgsConstructor

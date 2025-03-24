@@ -1,6 +1,6 @@
 package com.somle.shopify.model;
 
-import cn.iocoder.yudao.framework.common.util.custom.HtmlEscapeUtil;
+import cn.iocoder.yudao.framework.common.util.custom.MyHtmlEscapeUtil;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.util.StringUtils;
@@ -43,7 +43,7 @@ public class ShopifyRetrieveAListOfProductsVO {
         private ImageDTO image;
 
         public String getBodyHtml() {
-            return HtmlEscapeUtil.escapeHtmlInTags(bodyHtml);
+            return MyHtmlEscapeUtil.escapeHtmlInTags(bodyHtml);
         }
 
         public String getSku() {

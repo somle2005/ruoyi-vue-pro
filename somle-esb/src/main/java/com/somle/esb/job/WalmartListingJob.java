@@ -10,6 +10,8 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.walmart.model.WalmartAllItemsResVO;
 import com.somle.walmart.model.WalmartGetAllItemsDTO;
+import com.somle.walmart.model.WalmartSearchDTO;
+import com.somle.walmart.model.WalmartSearchResVO;
 import com.somle.walmart.service.WalmartClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -19,7 +21,6 @@ import org.springframework.util.StringUtils;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 
@@ -69,14 +70,32 @@ public class WalmartListingJob implements JobHandler {
                         walmartGetAllItemsDto.setShopName(storeName);
                         walmartGetAllItemsDto.setSuccessCode(200);
                         WalmartAllItemsResVO walmartAllItemsResVO = walmartClient.getAllItems(walmartGetAllItemsDto);
-                        if (CollectionUtils.isEmpty(walmartAllItemsResVO.getItemResponse())) {
+                        List<WalmartAllItemsResVO.ItemResponseDTO> itemResponse = walmartAllItemsResVO.getItemResponse();
+                        if (CollectionUtils.isEmpty(itemResponse)) {
                             break;
                         }
+                        //查询详情接口
+                        WalmartSearchDTO walmartSearchDTO = new WalmartSearchDTO();
+                        String gtin = itemResponse.stream().map(e -> e.getGtin()).collect(Collectors.joining(","));
+                        walmartSearchDTO.setGtin(gtin);
+                        walmartSearchDTO.setShopName(storeName);
+                        walmartSearchDTO.setSuccessCode(200);
+                        walmartSearchDTO.setSleepTime(100L);
+                        WalmartSearchResVO walmartSearchResVO = walmartClient.searchItem(walmartSearchDTO);
+                        List<WalmartSearchResVO.ItemsDTO> items = walmartSearchResVO.getItems();
+                        if (!CollectionUtils.isEmpty(items)){
+                            Map<String, List<WalmartSearchResVO.ItemsDTO>> titleGroup = items.stream().collect(Collectors.groupingBy(WalmartSearchResVO.ItemsDTO::getTitle));
+                            for (WalmartAllItemsResVO.ItemResponseDTO itemResponseDTO : itemResponse) {
+                                List<WalmartSearchResVO.ItemsDTO> itemsDTOS = titleGroup.get(itemResponseDTO.getProductName());
+                                if (!CollectionUtils.isEmpty(itemsDTOS)){
+                                    WalmartSearchResVO.ItemsDTO itemsDTO = itemsDTOS.get(0);
+                                    itemResponseDTO.setItemsDTO(itemsDTO);
+                                }
+                            }
+                        }
                         //操作db，新增或者更新
-                        saveOrUpdateSku(walmartAllItemsResVO.getItemResponse(), OmsShop);
+                        saveOrUpdateSku(itemResponse, OmsShop);
                         nextCursor = walmartAllItemsResVO.getNextCursor();
-                        //防止限流
-                        TimeUnit.MILLISECONDS.sleep(200L);
                     }
                 } catch (Exception e) {
                     log.error("店铺名称{},出现异常", storeName, e);
@@ -116,41 +135,58 @@ public class WalmartListingJob implements JobHandler {
                 existId = existOmsSku.getId();
                 existOriginalJson = existOmsSku.getOriginalJson();
             }
-            OmsSku OmsSku = new OmsSku();
-            OmsSku.setPlatSkuCode(eachItem.getWpid());
-            OmsSku.setSku(eachItem.getSku());
-            OmsSku.setStoreId(OmsShop.getId());
-            OmsSku.setStoreName(OmsShop.getName());
-            OmsSku.setPlatId(OmsShop.getPlatId());
-            OmsSku.setPlatName(OmsShop.getPlatName());
-            OmsSku.setPlatShopCode(OmsShop.getPlatShopCode());
-            OmsSku.setConditionType(eachItem.getCondition());
-            if ("In_stock".equals(eachItem.getAvailability())) {
-                OmsSku.setBuyableStatus(1);
-                OmsSku.setDiscoverableStatus(1);
-                OmsSku.setPreorderStatus(0);
-            } else if ("Out_of_stock".equals(eachItem.getAvailability())) {
-                OmsSku.setBuyableStatus(0);
-                OmsSku.setDiscoverableStatus(0);
-                OmsSku.setPreorderStatus(0);
-            } else {
-                OmsSku.setBuyableStatus(0);
-                OmsSku.setDiscoverableStatus(1);
-                OmsSku.setPreorderStatus(1);
+            OmsSku omsSku = new OmsSku();
+            omsSku.setPlatSkuCode(eachItem.getWpid());
+            omsSku.setSku(eachItem.getSku());
+            omsSku.setStoreId(OmsShop.getId());
+            omsSku.setStoreName(OmsShop.getName());
+            omsSku.setPlatId(OmsShop.getPlatId());
+            omsSku.setPlatName(OmsShop.getPlatName());
+            omsSku.setPlatShopCode(OmsShop.getPlatShopCode());
+            omsSku.setConditionType(eachItem.getCondition());
+            String availability = eachItem.getAvailability();
+            if ("In_stock".equals(availability)){
+                omsSku.setStockStatus(1);
+            } else if ("Out_of_stock".equals(availability)) {
+                omsSku.setStockStatus(0);
+            } else if ("Preorder".equals(availability)) {
+                omsSku.setPreorderStatus(1);
             }
-            OmsSku.setUpc(eachItem.getUpc());
-            OmsSku.setGtin(eachItem.getGtin());
-            OmsSku.setTitle(eachItem.getProductName());
-            OmsSku.setProductType(eachItem.getProductType());
-            OmsSku.setCreator("admin");
-            OmsSku.setCreateTime(LocalDateTime.now());
-            OmsSku.setDeleted(0);
+            String publishedStatus = eachItem.getPublishedStatus();
+            if ("PUBLISHED".equals(publishedStatus)) {
+                omsSku.setDiscoverableStatus(1);
+            } else if ("UNPUBLISHED".equals(publishedStatus)) {
+                omsSku.setDiscoverableStatus(0);
+            }
+            WalmartAllItemsResVO.ItemResponseDTO.PriceDTO priceDTO = eachItem.getPrice();
+            if (priceDTO != null){
+                omsSku.setPrice(priceDTO.getAmount());
+                omsSku.setPriceUnit(priceDTO.getCurrency());
+            }
+            omsSku.setUpc(eachItem.getUpc());
+            omsSku.setGtin(eachItem.getGtin());
+            omsSku.setTitle(eachItem.getProductName());
+            omsSku.setProductType(eachItem.getProductType());
+            omsSku.setCreator("admin");
+            omsSku.setCreateTime(LocalDateTime.now());
+            omsSku.setDeleted(0);
+            WalmartSearchResVO.ItemsDTO itemsDTO = eachItem.getItemsDTO();
+            if (itemsDTO != null){
+                omsSku.setPlatSkuId(itemsDTO.getItemId());
+                List<WalmartSearchResVO.ItemsDTO.ImagesDTO> images = itemsDTO.getImages();
+                if (!CollectionUtils.isEmpty(images)){
+                    omsSku.setMainImageUrl(images.get(0).getUrl());
+                }
+                omsSku.setCustomerRating(itemsDTO.getCustomerRating());
+                omsSku.setDescribe(itemsDTO.getDescription());
+                omsSku.setBrand(itemsDTO.getBrand());
+            }
             String originalJson = JSON.toJSONString(eachItem);
-
+            omsSku.setId(existId);
             if (existId == null) {
-                saveOmsSkus.add(OmsSku);
+                saveOmsSkus.add(omsSku);
             } else if (!originalJson.equals(existOriginalJson)) {
-                updateOmsSkus.add(OmsSku);
+                updateOmsSkus.add(omsSku);
             }
         }
         if (!CollectionUtils.isEmpty(saveOmsSkus)) {
