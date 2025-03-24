@@ -84,6 +84,9 @@ public class CrmContractSaveReqVO {
     @Schema(description = "产品列表")
     private List<Product> products;
 
+    @Schema(description = "附件列表")
+    private List<String> fileUrls;
+
     @Schema(description = "产品列表")
     @Data
     @NoArgsConstructor

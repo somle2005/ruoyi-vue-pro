@@ -9,7 +9,7 @@ import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
-import cn.iocoder.yudao.module.bpm.api.task.BpmProcessInstanceApi;
+import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.crm.controller.admin.contract.vo.contract.CrmContractPageReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.contract.vo.contract.CrmContractSaveReqVO;
 import cn.iocoder.yudao.module.crm.controller.admin.contract.vo.contract.CrmContractTransferReqVO;
@@ -41,7 +41,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.Arrays;
@@ -361,7 +360,10 @@ public class CrmContractServiceImpl implements CrmContractService {
     @Override
     @CrmPermission(bizType = CrmBizTypeEnum.CRM_CONTRACT, bizId = "#id", level = CrmPermissionLevelEnum.READ)
     public CrmContractDO getContract(Long id) {
-        return contractMapper.selectById(id);
+        MPJLambdaWrapperX<CrmContractDO> wrapperX = new MPJLambdaWrapperX<CrmContractDO>()
+            .selectAll(CrmContractDO.class)
+            .eq(CrmContractDO::getId, id);
+        return contractMapper.selectJoinOne(CrmContractDO.class, wrapperX);
     }
 
     @Override

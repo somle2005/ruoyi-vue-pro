@@ -6,12 +6,14 @@ import cn.iocoder.yudao.module.crm.dal.dataobject.contact.CrmContactDO;
 import cn.iocoder.yudao.module.crm.dal.dataobject.customer.CrmCustomerDO;
 import cn.iocoder.yudao.module.crm.enums.common.CrmAuditStatusEnum;
 import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.extension.handlers.JacksonTypeHandler;
 import lombok.*;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * CRM 合同 DO
@@ -120,4 +122,9 @@ public class CrmContractDO extends BaseDO {
      */
     private String remark;
 
+    /**
+     * 附件列表
+     */
+    @TableField(typeHandler = JacksonTypeHandler.class)
+    private List<String> fileUrls;
 }
