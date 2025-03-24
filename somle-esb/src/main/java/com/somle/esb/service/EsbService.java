@@ -2,12 +2,19 @@ package com.somle.esb.service;
 
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import com.somle.esb.model.OssData;
+import com.somle.shopify.service.ShopifyClient;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
+
+import java.net.InetSocketAddress;
+import java.net.Proxy;
+import java.util.concurrent.CompletableFuture;
 
 
 @Slf4j
@@ -17,13 +24,44 @@ public class EsbService {
     @Autowired
     MessageChannel dataChannel;
 
+    @Autowired
+    ShopifyClient shopifyClient;
 
     @Autowired
     private ConfigApi configApi;
 
-
     @Autowired
     private ApplicationContext applicationContext;
+
+    @PostConstruct
+    private void init() {
+        CompletableFuture.runAsync(() -> {
+            try {
+                var proxyHost = configApi.getConfigValueByKey("proxy.host");
+                var proxyPort = Integer.valueOf(configApi.getConfigValueByKey("proxy.port"));
+                var proxyUsername = configApi.getConfigValueByKey("proxy.username");
+                var proxyPassword = configApi.getConfigValueByKey("proxy.password");
+
+                // Create a Proxy instance
+                Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
+
+                OkHttpClient client = new OkHttpClient.Builder()
+                    .proxy(proxy)
+                    .proxyAuthenticator((route, response) -> {
+                        String credential = okhttp3.Credentials.basic(proxyUsername, proxyPassword);
+                        return response.request().newBuilder()
+                            .header("Proxy-Authorization", credential)
+                            .build();
+                    })
+                    .build();
+
+                shopifyClient.webClient = client;
+                log.info("using proxy");
+            } catch (Exception e) {
+                log.error("not using proxy");
+            }
+        });
+    }
 
 
     public void printAllBeans() {

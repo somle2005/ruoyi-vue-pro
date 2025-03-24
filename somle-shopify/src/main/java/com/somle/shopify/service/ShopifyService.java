@@ -7,13 +7,10 @@ import com.somle.shopify.model.ShopifyToken;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.OkHttpClient;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import java.net.InetSocketAddress;
-import java.net.Proxy;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
@@ -36,28 +33,8 @@ public class ShopifyService {
     @PostConstruct
     public void init() {
         CompletableFuture.runAsync(() -> {
-            initClient();
             refreshToken();
         });
-    }
-
-    private void initClient() {
-        String proxyHost = "intra.somle.com";
-        Integer proxyPort = 55014;
-        String proxyUsername = "admin";
-        String proxyPassword = "sM234s,a.sm";
-        Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
-        OkHttpClient client = new OkHttpClient.Builder()
-            .proxy(proxy)
-            .proxyAuthenticator((route, response) -> {
-                String credential = okhttp3.Credentials.basic(proxyUsername, proxyPassword);
-                return response.request().newBuilder()
-                    .header("Proxy-Authorization", credential)
-                    .build();
-            })
-            .build();
-
-        shopifyClient.webClient = client;
     }
 
     @Scheduled(cron = "${threePartyPlatform.shopify.refreshToken.cron}")

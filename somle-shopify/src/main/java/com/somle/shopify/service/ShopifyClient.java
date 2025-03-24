@@ -24,7 +24,7 @@ import static cn.iocoder.yudao.framework.common.util.web.WebUtils.sendRequest;
 @Component
 public class ShopifyClient {
 
-    OkHttpClient webClient;
+    public OkHttpClient webClient;
 
     public Map<String, ShopifyToken> tokenMap = new HashMap();
 
@@ -83,7 +83,7 @@ public class ShopifyClient {
         ShopifyTokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(tokenHeadInfo.getShopifyToken().getDomain()+ endpoint)
+            .url(tokenHeadInfo.getShopifyToken().getDomain() + endpoint)
             .headers(tokenHeadInfo.getTokenValues())
             .build();
         String bodyString = sendRequest(request).body().string();
