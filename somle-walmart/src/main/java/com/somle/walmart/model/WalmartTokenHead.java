@@ -12,6 +12,6 @@ import java.util.Map;
  **/
 @Data
 public class WalmartTokenHead {
-    private WalmartShopAndTokenInfo walmartShopAndTokenInfo;
+    private WalmartToken walmartToken;
     private Map<String, String> tokenValues = new HashMap<>();
 }

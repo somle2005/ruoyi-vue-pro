@@ -1,8 +1,9 @@
 package com.somle.shopify.service;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
-import com.somle.shopify.model.ShopifyShopAndTokenInfo;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.shopify.dal.ShopifyTokenMapper;
+import com.somle.shopify.model.ShopifyToken;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -63,25 +64,27 @@ public class ShopifyService {
     public void refreshToken() {
         log.info("Shopify refreshToken start");
         //查询所有能认证的店铺
-        List<ShopifyShopAndTokenInfo> shopifyShopAndTokenInfos = shopifyTokenMapper.getShopAndTokenInfo();
-        if (!CollectionUtils.isEmpty(shopifyShopAndTokenInfos)) {
+        LambdaQueryWrapper<ShopifyToken> shopifyTokenLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        List<ShopifyToken> shopifyTokens = shopifyTokenMapper.selectList(shopifyTokenLambdaQueryWrapper);
+
+        if (!CollectionUtils.isEmpty(shopifyTokens)) {
             //循环调用 平台获取token接口
-            for (ShopifyShopAndTokenInfo shopifyShopAndTokenInfo : shopifyShopAndTokenInfos) {
-                applyPlatObtainToken(shopifyShopAndTokenInfo);
-                shopifyClient.tokenMap.put(shopifyShopAndTokenInfo.getShopName(), shopifyShopAndTokenInfo);
+            for (ShopifyToken shopifyToken : shopifyTokens) {
+                applyPlatObtainToken(shopifyToken);
+                shopifyClient.tokenMap.put(shopifyToken.getShopName(), shopifyToken);
             }
         }
         //把token更新入库,由于Shopify token 固定所以不进行
     }
 
-    private ShopifyShopAndTokenInfo applyPlatObtainToken(ShopifyShopAndTokenInfo shopifyShopAndTokenInfo) {
+    private ShopifyToken applyPlatObtainToken(ShopifyToken shopifyToken) {
         // 拿shopName 调用平台接口 目前 shopify token为固定
         String accessToken = null;
-        if ("Shopify_FIT_USA".equals(shopifyShopAndTokenInfo.getShopName())) {
-            accessToken = shopifyShopAndTokenInfo.getAccessToken();
+        if ("Shopify_FIT_USA".equals(shopifyToken.getShopName())) {
+            accessToken = shopifyToken.getAccessToken();
         }
-        shopifyShopAndTokenInfo.setAccessToken(accessToken);
-        return shopifyShopAndTokenInfo;
+        shopifyToken.setAccessToken(accessToken);
+        return shopifyToken;
     }
 
 }

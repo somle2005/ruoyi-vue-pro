@@ -12,6 +12,6 @@ import java.util.Map;
  **/
 @Data
 public class ShopifyTokenHead {
-    private ShopifyShopAndTokenInfo shopifyShopAndTokenInfo;
+    private ShopifyToken shopifyToken;
     private Map<String, String> tokenValues = new HashMap<>();
 }

@@ -30,25 +30,25 @@ import java.util.zip.ZipInputStream;
 public class WalmartClient {
 
     OkHttpClient webClient = new OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)  // 连接超时时间
-        .readTimeout(60, TimeUnit.SECONDS)     // 读取超时时间
-        .writeTimeout(60, TimeUnit.SECONDS)    // 写入超时时间
+        .connectTimeout(30, TimeUnit.SECONDS)
+        .readTimeout(60, TimeUnit.SECONDS)
+        .writeTimeout(60, TimeUnit.SECONDS)
         .build();
 
-    public Map<String, WalmartShopAndTokenInfo> tokenMap = new HashMap();
+    public Map<String, WalmartToken> tokenMap = new HashMap();
 
     private WalmartTokenHead getTokenHeadInfo(String storeName) {
         WalmartTokenHead walmartTokenHead = new WalmartTokenHead();
-        WalmartShopAndTokenInfo walmartShopAndTokenInfo = tokenMap.get(storeName);
-        if (walmartShopAndTokenInfo == null || !StringUtils.hasText(walmartShopAndTokenInfo.getAccessToken())
-            || !StringUtils.hasText(walmartShopAndTokenInfo.getDomain())) {
+        WalmartToken walmartToken = tokenMap.get(storeName);
+        if (walmartToken == null || !StringUtils.hasText(walmartToken.getAccessToken())
+            || !StringUtils.hasText(walmartToken.getDomain())) {
             throw new RuntimeException("accessToken is null");
         }
-        walmartTokenHead.setWalmartShopAndTokenInfo(walmartShopAndTokenInfo);
+        walmartTokenHead.setWalmartToken(walmartToken);
         Map<String, String> tokenValues = new HashMap<>();
-        tokenValues.put("WM_SVC.NAME", walmartShopAndTokenInfo.getSvcName());
-        tokenValues.put("WM_QOS.CORRELATION_ID", walmartShopAndTokenInfo.getCorrelationId());
-        tokenValues.put("WM_SEC.ACCESS_TOKEN", walmartShopAndTokenInfo.getAccessToken());
+        tokenValues.put("WM_SVC.NAME", walmartToken.getSvcName());
+        tokenValues.put("WM_QOS.CORRELATION_ID", walmartToken.getCorrelationId());
+        tokenValues.put("WM_SEC.ACCESS_TOKEN", walmartToken.getAccessToken());
         walmartTokenHead.setTokenValues(tokenValues);
         return walmartTokenHead;
     }
@@ -57,13 +57,13 @@ public class WalmartClient {
     public WalmartAllItemsResVO getAllItems(WalmartGetAllItemsDTO dto) {
         Integer successCode = dto.getSuccessCode();
         WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(dto.getShopName());
-        WalmartShopAndTokenInfo walmartShopAndTokenInfo = walmartTokenHeadInfo.getWalmartShopAndTokenInfo();
+        WalmartToken walmartToken = walmartTokenHeadInfo.getWalmartToken();
         Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         tokenValues.put("Accept", "application/json");
         String endpoint = "/v3/items";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(walmartShopAndTokenInfo.getDomain() + endpoint)
+            .url(walmartToken.getDomain() + endpoint)
             .queryParams(dto)
             .headers(tokenValues)
             .build();
@@ -99,7 +99,7 @@ public class WalmartClient {
         List<List<String>> gtinPartition = MyCollectionUtil.splitList(gtinList, 50);
         Integer successCode = dto.getSuccessCode();
         WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(dto.getShopName());
-        WalmartShopAndTokenInfo walmartShopAndTokenInfo = walmartTokenHeadInfo.getWalmartShopAndTokenInfo();
+        WalmartToken walmartToken = walmartTokenHeadInfo.getWalmartToken();
         Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         tokenValues.put("Accept", "application/json");
         String endpoint = "/v3/items/walmart/search";
@@ -107,7 +107,7 @@ public class WalmartClient {
             dto.setGtin(String.join(",", eachGtinPartition));
             RequestX request = RequestX.builder()
                 .requestMethod(RequestX.Method.GET)
-                .url(walmartShopAndTokenInfo.getDomain() + endpoint)
+                .url(walmartToken.getDomain() + endpoint)
                 .queryParams(dto)
                 .headers(tokenValues)
                 .build();
@@ -145,12 +145,12 @@ public class WalmartClient {
     @SneakyThrows
     public JSONObject getOrders(WalmartOrderReqVO vo) {
         WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(vo.getShopName());
-        WalmartShopAndTokenInfo walmartShopAndTokenInfo = walmartTokenHeadInfo.getWalmartShopAndTokenInfo();
+        WalmartToken walmartToken = walmartTokenHeadInfo.getWalmartToken();
         Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         String endpoint = "/v3/orders";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(walmartShopAndTokenInfo.getDomain() + endpoint)
+            .url(walmartToken.getDomain() + endpoint)
             .headers(tokenValues)
             .build();
         Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();
@@ -163,7 +163,7 @@ public class WalmartClient {
     public String getReconFile(LocalDate date, String shopName) {
         String dateStr = date.format(DateTimeFormatter.ofPattern("MMddyyyy"));
         WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(shopName);
-        WalmartShopAndTokenInfo walmartShopAndTokenInfo = walmartTokenHeadInfo.getWalmartShopAndTokenInfo();
+        WalmartToken walmartToken = walmartTokenHeadInfo.getWalmartToken();
         Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         String endpoint = "/v3/report/reconreport/availableReconFiles";
         WalmartGetReconFileReq walmartGetReconFileReq = new WalmartGetReconFileReq();
@@ -171,7 +171,7 @@ public class WalmartClient {
         walmartGetReconFileReq.setReportDate(dateStr);
         tokenValues.put("Accept", "application/octet-stream");
         RequestX request = RequestX.builder()
-            .url(walmartShopAndTokenInfo.getDomain() + endpoint)
+            .url(walmartToken.getDomain() + endpoint)
             .requestMethod(RequestX.Method.GET)
             .queryParams(walmartGetReconFileReq)
             .headers(tokenValues)

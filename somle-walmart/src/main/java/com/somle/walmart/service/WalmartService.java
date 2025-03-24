@@ -3,10 +3,9 @@ package com.somle.walmart.service;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import com.alibaba.fastjson.JSON;
-import com.somle.walmart.dal.WalmartShopAndTokenInfoMapper;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.walmart.dal.WalmartTokenMapper;
 import com.somle.walmart.model.WalmartAccessTokenRespVO;
-import com.somle.walmart.model.WalmartShopAndTokenInfo;
 import com.somle.walmart.model.WalmartToken;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -32,33 +31,31 @@ public class WalmartService {
     private WalmartTokenMapper walmartTokenMapper;
 
     @Resource
-    private WalmartShopAndTokenInfoMapper walmartShopAndTokenInfoMapper;
-
-    @Resource
     private WalmartClient walmartClient;
 
     @PostConstruct
     public void init() {
-        refreshToken();
         CompletableFuture.runAsync(() -> {
-
+            refreshToken();
         });
     }
     @Scheduled(cron = "${threePartyPlatform.walmart.refreshToken.cron}")
     public void refreshToken() {
         log.info("Walmart refreshToken start");
-        //查询所有能认证的店铺
-        List<WalmartShopAndTokenInfo> walmartShopAndTokenInfos = walmartShopAndTokenInfoMapper.getShopAndTokenInfo();
+        //查询所有能认证的店铺 WalmartTokenMapper
+        LambdaQueryWrapper<WalmartToken> walmartTokenLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        walmartTokenLambdaQueryWrapper.eq(WalmartToken::getType, "ORDINARY");
+        List<WalmartToken> walmartTokens = walmartTokenMapper.selectList(walmartTokenLambdaQueryWrapper);
         List<WalmartToken> updateWalmartTokens = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(walmartShopAndTokenInfos)) {
+        if (!CollectionUtils.isEmpty(walmartTokens)) {
             //循环调用 平台获取token接口
-            for (WalmartShopAndTokenInfo walmartShopAndTokenInfo : walmartShopAndTokenInfos) {
-                applyPlatObtainToken(walmartShopAndTokenInfo);
-                walmartClient.tokenMap.put(walmartShopAndTokenInfo.getShopName(), walmartShopAndTokenInfo);
-                if (StringUtils.hasText(walmartShopAndTokenInfo.getAccessToken())){
-                    WalmartToken walmartToken = new WalmartToken();
-                    walmartToken.setId(walmartShopAndTokenInfo.getTokenId());
-                    walmartToken.setAccessToken(walmartShopAndTokenInfo.getAccessToken());
+            for (WalmartToken walmartToken : walmartTokens) {
+                applyPlatObtainToken(walmartToken);
+                walmartClient.tokenMap.put(walmartToken.getShopName(), walmartToken);
+                if (StringUtils.hasText(walmartToken.getAccessToken())){
+                    WalmartToken walmartTokenUpdate = new WalmartToken();
+                    walmartTokenUpdate.setId(walmartToken.getId());
+                    walmartTokenUpdate.setAccessToken(walmartToken.getAccessToken());
                     updateWalmartTokens.add(walmartToken);
                 }
             }
@@ -69,32 +66,32 @@ public class WalmartService {
         }
     }
 
-    private WalmartShopAndTokenInfo applyPlatObtainToken(WalmartShopAndTokenInfo walmartShopAndTokenInfo) {
+    private WalmartToken applyPlatObtainToken(WalmartToken walmartToken) {
         // 拿shopName 调用平台接口 目前 shopify token为固定
-        String accessToken = getAccessToken(walmartShopAndTokenInfo);
-        walmartShopAndTokenInfo.setAccessToken(accessToken);
-        return walmartShopAndTokenInfo;
+        String accessToken = getAccessToken(walmartToken);
+        walmartToken.setAccessToken(accessToken);
+        return walmartToken;
     }
 
-    private String getAccessToken(WalmartShopAndTokenInfo walmartShopAndTokenInfo) {
+    private String getAccessToken(WalmartToken walmartToken) {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
         RequestBody body = RequestBody.create(mediaType, "grant_type=client_credentials");
         String endpoint = "/v3/token";
 
-        String str = walmartShopAndTokenInfo.getClientId() + ":" + walmartShopAndTokenInfo.getClientSecret();
+        String str = walmartToken.getClientId() + ":" + walmartToken.getClientSecret();
         String authorization = "Basic " + Base64.encodeBase64String(str.getBytes());
 
         Headers headers = new Headers.Builder()
-            .add("WM_QOS.CORRELATION_ID", walmartShopAndTokenInfo.getCorrelationId())
-            .add("WM_SVC.NAME", walmartShopAndTokenInfo.getSvcName())
+            .add("WM_QOS.CORRELATION_ID", walmartToken.getCorrelationId())
+            .add("WM_SVC.NAME", walmartToken.getSvcName())
             .add("Accept", "application/json")
             .add("Authorization", authorization)
             .build();
 
         Request request = new Request.Builder()
-            .url(walmartShopAndTokenInfo.getDomain() + endpoint)
+            .url(walmartToken.getDomain() + endpoint)
             .method("POST", body)
             .headers(headers)
             .build();

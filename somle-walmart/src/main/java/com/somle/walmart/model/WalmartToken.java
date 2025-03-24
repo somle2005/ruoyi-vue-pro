@@ -12,8 +12,17 @@ public class WalmartToken {
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 
+    @TableField(value = "shop_id")
+    private Integer shopId;
+
+    @TableField(value = "shop_name")
+    private String shopName;
+
     @TableField(value = "client_id")
     private String clientId;
+
+    @TableField(value = "type")
+    private String type;
 
     @TableField(value = "client_secret")
     private String clientSecret;
