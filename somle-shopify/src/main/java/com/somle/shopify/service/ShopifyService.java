@@ -2,7 +2,9 @@ package com.somle.shopify.service;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.somle.shopify.dal.InfraConfigMapper;
 import com.somle.shopify.dal.ShopifyTokenMapper;
+import com.somle.shopify.model.InfraConfig;
 import com.somle.shopify.model.ShopifyToken;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -15,7 +17,9 @@ import org.springframework.stereotype.Component;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 /**
  * @description:
@@ -33,6 +37,9 @@ public class ShopifyService {
     @Resource
     private ShopifyClient shopifyClient;
 
+    @Resource
+    InfraConfigMapper infraConfigMapper;
+
     @PostConstruct
     public void init() {
         CompletableFuture.runAsync(() -> {
@@ -42,10 +49,13 @@ public class ShopifyService {
     }
 
     private void initClient() {
-        String proxyHost = "intra.somle.com";
-        Integer proxyPort = 55014;
-        String proxyUsername = "admin";
-        String proxyPassword = "sM234s,a.sm";
+        LambdaQueryWrapper<InfraConfig> queryWrapper = new LambdaQueryWrapper<InfraConfig>().eq(InfraConfig::getCategory, "proxy");
+        List<InfraConfig> infraConfigs = infraConfigMapper.selectList(queryWrapper);
+        Map<String, String> keyMap = infraConfigs.stream().collect(Collectors.toMap(InfraConfig::getConfigKey, InfraConfig::getValue));
+        String proxyHost = keyMap.get("proxy.host");
+        Integer proxyPort = Integer.parseInt(keyMap.get("proxy.port"));
+        String proxyUsername = keyMap.get("proxy.username");
+        String proxyPassword = keyMap.get("proxy.password");
         Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
         OkHttpClient client = new OkHttpClient.Builder()
             .proxy(proxy)
