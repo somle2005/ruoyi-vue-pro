@@ -20,7 +20,6 @@ import org.springframework.util.StringUtils;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 //Shopify sku拉取
@@ -73,8 +72,6 @@ public class ShopifyListingJob implements JobHandler {
                         //操作db，新增或者更新
                         saveOrUpdateSku(items, OmsShop);
                         lastId = items.get(items.size() - 1).getId();
-                        //防止限流
-                        TimeUnit.MILLISECONDS.sleep(200L);
                     }
                 } catch (Exception e) {
                     log.error("店铺名称{},出现异常", storeName, e);

@@ -36,7 +36,7 @@ public class ShopifyService {
     public void init() {
         CompletableFuture.runAsync(() -> {
             initClient();
-            //refreshToken();
+            refreshToken();
         });
     }
 
@@ -78,6 +78,7 @@ public class ShopifyService {
         // 拿shopName 调用平台接口 目前 shopify token为固定
         String accessToken = null;
         if ("Shopify_FIT_USA".equals(shopifyShopAndTokenInfo.getShopName())) {
+            accessToken = shopifyShopAndTokenInfo.getAccessToken();
         }
         shopifyShopAndTokenInfo.setAccessToken(accessToken);
         return shopifyShopAndTokenInfo;
