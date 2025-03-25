@@ -32,7 +32,7 @@ import java.util.zip.ZipInputStream;
 public class WalmartClient {
 
     private OkHttpClient webClient;
-    private WalmartToken walmartToken;
+    private WalmartTokenDO walmartTokenDO;
     private Map<String, String> tokenValues;
 
     public WalmartAllItemsResVO getAllItems(WalmartGetAllItemsDTO dto) {
@@ -41,7 +41,7 @@ public class WalmartClient {
         String endpoint = "/v3/items";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(walmartToken.getDomain() + endpoint)
+            .url(walmartTokenDO.getDomain() + endpoint)
             .queryParams(dto)
             .headers(tokenValues)
             .build();
@@ -82,7 +82,7 @@ public class WalmartClient {
             dto.setGtin(String.join(",", eachGtinPartition));
             RequestX request = RequestX.builder()
                 .requestMethod(RequestX.Method.GET)
-                .url(walmartToken.getDomain() + endpoint)
+                .url(walmartTokenDO.getDomain() + endpoint)
                 .queryParams(dto)
                 .headers(tokenValues)
                 .build();
@@ -122,7 +122,7 @@ public class WalmartClient {
         String endpoint = "/v3/orders";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(walmartToken.getDomain() + endpoint)
+            .url(walmartTokenDO.getDomain() + endpoint)
             .headers(tokenValues)
             .build();
         Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();
@@ -140,7 +140,7 @@ public class WalmartClient {
         walmartGetReconFileReq.setReportDate(dateStr);
         tokenValues.put("Accept", "application/octet-stream");
         RequestX request = RequestX.builder()
-            .url(walmartToken.getDomain() + endpoint)
+            .url(walmartTokenDO.getDomain() + endpoint)
             .requestMethod(RequestX.Method.GET)
             .queryParams(walmartGetReconFileReq)
             .headers(tokenValues)

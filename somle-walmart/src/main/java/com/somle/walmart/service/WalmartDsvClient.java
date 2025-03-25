@@ -9,7 +9,7 @@ public class WalmartDsvClient extends WalmartClient{
 
 /*    private String shipNode;
 
-    public WalmartDsvClient(WalmartToken token, String shipNode) {
+    public WalmartDsvClient(WalmartTokenDO token, String shipNode) {
         super(token);
         this.shipNode = shipNode;
     }

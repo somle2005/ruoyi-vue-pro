@@ -11,7 +11,7 @@ import java.io.Serial;
 
 @Data
 @TableName(value = "walmart_token")
-public class WalmartToken extends BaseDO {
+public class WalmartTokenDO extends BaseDO {
 
     @Serial
     private static final long serialVersionUID = 8049104156152650780L;

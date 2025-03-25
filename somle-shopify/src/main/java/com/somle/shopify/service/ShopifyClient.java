@@ -7,7 +7,7 @@ import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
 import com.somle.shopify.model.ShopifyRetrieveAListOfProductsDTO;
 import com.somle.shopify.model.ShopifyRetrieveAListOfProductsVO;
-import com.somle.shopify.model.ShopifyToken;
+import com.somle.shopify.model.ShopifyTokenDO;
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
@@ -25,7 +25,7 @@ import static cn.iocoder.yudao.framework.common.util.web.WebUtils.sendRequest;
 public class ShopifyClient {
 
     private OkHttpClient webClient;
-    private ShopifyToken shopifyToken;
+    private ShopifyTokenDO shopifyTokenDO;
     private Map<String, String> tokenValues;
 
     public ShopifyRetrieveAListOfProductsVO retrieveAListOfProducts(ShopifyRetrieveAListOfProductsDTO dto) {
@@ -33,7 +33,7 @@ public class ShopifyClient {
         String endpoint = "/admin/api/2024-10/products.json";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(shopifyToken.getDomain() + endpoint)
+            .url(shopifyTokenDO.getDomain() + endpoint)
             .queryParams(dto)
             .headers(tokenValues)
             .build();
@@ -66,7 +66,7 @@ public class ShopifyClient {
         String endpoint = "/admin/api/2024-10/orders.json?status=any";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(shopifyToken.getDomain() + endpoint)
+            .url(shopifyTokenDO.getDomain() + endpoint)
             .headers(tokenValues)
             .build();
         String bodyString = sendRequest(request).body().string();
@@ -79,7 +79,7 @@ public class ShopifyClient {
         var endpoint = "/admin/api/2024-10/shopify_payments/payouts.json";
         var request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(shopifyToken.getDomain() + endpoint)
+            .url(shopifyTokenDO.getDomain() + endpoint)
             .headers(tokenValues)
             .build();
         var bodyString = sendRequest(request).body().string();

@@ -4,7 +4,7 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.shopify.dal.ShopifyTokenMapper;
-import com.somle.shopify.model.ShopifyToken;
+import com.somle.shopify.model.ShopifyTokenDO;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -54,33 +54,33 @@ public class ShopifyService {
     public void refreshToken() {
         log.info("Shopify refreshToken start");
         //查询所有能认证的店铺
-        LambdaQueryWrapper<ShopifyToken> shopifyTokenLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        List<ShopifyToken> shopifyTokens = shopifyTokenMapper.selectList(shopifyTokenLambdaQueryWrapper);
-        if (!CollectionUtils.isEmpty(shopifyTokens)) {
+        LambdaQueryWrapper<ShopifyTokenDO> shopifyTokenLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        List<ShopifyTokenDO> shopifyTokenDOS = shopifyTokenMapper.selectList(shopifyTokenLambdaQueryWrapper);
+        if (!CollectionUtils.isEmpty(shopifyTokenDOS)) {
             //循环调用 平台获取token接口
-            for (ShopifyToken shopifyToken : shopifyTokens) {
-                applyPlatObtainToken(shopifyToken);
+            for (ShopifyTokenDO shopifyTokenDO : shopifyTokenDOS) {
+                applyPlatObtainToken(shopifyTokenDO);
                 ShopifyClient shopifyClient = new ShopifyClient();
-                assembleClientInformation(shopifyToken, shopifyClient);
-                clientMap.put(shopifyToken.getId(), shopifyClient);
+                assembleClientInformation(shopifyTokenDO, shopifyClient);
+                clientMap.put(shopifyTokenDO.getId(), shopifyClient);
             }
         }
         //把token更新入库,由于Shopify token 固定所以不进行
     }
 
-    private void assembleClientInformation(ShopifyToken shopifyToken, ShopifyClient shopifyClient) {
+    private void assembleClientInformation(ShopifyTokenDO shopifyTokenDO, ShopifyClient shopifyClient) {
         Map<String, String> tokenValues = new HashMap<>();
-        tokenValues.put("X-Shopify-Access-Token", shopifyToken.getAccessToken());
-        shopifyClient.setShopifyToken(shopifyToken);
+        tokenValues.put("X-Shopify-Access-Token", shopifyTokenDO.getAccessToken());
+        shopifyClient.setShopifyTokenDO(shopifyTokenDO);
         shopifyClient.setTokenValues(tokenValues);
         shopifyClient.setWebClient(defaultClient);
     }
 
-    private ShopifyToken applyPlatObtainToken(ShopifyToken shopifyToken) {
+    private ShopifyTokenDO applyPlatObtainToken(ShopifyTokenDO shopifyTokenDO) {
         // 调用平台接口 目前 shopify token为固定
-        String accessToken = shopifyToken.getAccessToken();
-        shopifyToken.setAccessToken(accessToken);
-        return shopifyToken;
+        String accessToken = shopifyTokenDO.getAccessToken();
+        shopifyTokenDO.setAccessToken(accessToken);
+        return shopifyTokenDO;
     }
 
     /**

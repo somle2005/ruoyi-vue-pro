@@ -1,12 +1,12 @@
 package cn.iocoder.yudao.module.oms.service;
 
-import cn.iocoder.yudao.module.oms.model.entity.OmsShop;
-import cn.iocoder.yudao.module.oms.model.entity.OmsSku;
+import cn.iocoder.yudao.module.oms.model.entity.OmsShopDO;
+import cn.iocoder.yudao.module.oms.model.entity.OmsSkuDO;
 
 import java.util.List;
 
 public interface OmsSkuService {
 
-    List<OmsSku> insertOrUpdateOmsSku(OmsShop omsShop, List<OmsSku> doDBOmsSkus);
+    List<OmsSkuDO> insertOrUpdateOmsSku(OmsShopDO omsShopDO, List<OmsSkuDO> doDBOmsSkus);
 
 }

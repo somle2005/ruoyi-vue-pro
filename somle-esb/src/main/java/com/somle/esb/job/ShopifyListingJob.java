@@ -4,8 +4,8 @@ import cn.iocoder.yudao.framework.common.util.string.StrUtils;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.oms.dal.OmsShopMapper;
-import cn.iocoder.yudao.module.oms.model.entity.OmsShop;
-import cn.iocoder.yudao.module.oms.model.entity.OmsSku;
+import cn.iocoder.yudao.module.oms.model.entity.OmsShopDO;
+import cn.iocoder.yudao.module.oms.model.entity.OmsSkuDO;
 import cn.iocoder.yudao.module.oms.service.OmsSkuService;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -49,13 +49,13 @@ public class ShopifyListingJob implements JobHandler {
         List<String> storeNames = Arrays.asList(param.split(","));
         String errorMsg = "";
         if (!CollectionUtils.isEmpty(storeNames)) {
-            LambdaQueryWrapper<OmsShop> inWrapper = new LambdaQueryWrapper<OmsShop>().eq(OmsShop::getPlatName, "Shopify").eq(OmsShop::getDeleted, 0).in(OmsShop::getName, storeNames);
-            List<OmsShop> omsShops = omsShopMapper.selectList(inWrapper);
-            Map<String, OmsShop> nameMap = omsShops.stream().collect(Collectors.toMap(OmsShop::getName, e -> e));
+            LambdaQueryWrapper<OmsShopDO> inWrapper = new LambdaQueryWrapper<OmsShopDO>().eq(OmsShopDO::getPlatName, "Shopify").eq(OmsShopDO::getDeleted, 0).in(OmsShopDO::getName, storeNames);
+            List<OmsShopDO> omsShopDOS = omsShopMapper.selectList(inWrapper);
+            Map<String, OmsShopDO> nameMap = omsShopDOS.stream().collect(Collectors.toMap(OmsShopDO::getName, e -> e));
             for (String storeName : storeNames) {
                 try {
-                    OmsShop omsShop = nameMap.get(storeName);
-                    if (omsShop == null) {
+                    OmsShopDO omsShopDO = nameMap.get(storeName);
+                    if (omsShopDO == null) {
                         throw new RuntimeException("当前店铺名称不存在");
                     }
                     Long lastId = 1L;
@@ -65,13 +65,13 @@ public class ShopifyListingJob implements JobHandler {
                         dto.setLimit(250L);
                         dto.setSince_id(lastId);
                         dto.setSleepTime(200L);
-                        ShopifyRetrieveAListOfProductsVO shopifyRetrieveAListOfProductsVo = shopifyService.getClient(omsShop.getAuthId()).retrieveAListOfProducts(dto);
+                        ShopifyRetrieveAListOfProductsVO shopifyRetrieveAListOfProductsVo = shopifyService.getClient(omsShopDO.getAuthId()).retrieveAListOfProducts(dto);
                         List<ShopifyRetrieveAListOfProductsVO.ProductsDTO> items = shopifyRetrieveAListOfProductsVo.getProducts();
                         if (CollectionUtils.isEmpty(items)) {
                             break;
                         }
                         //操作db，新增或者更新
-                        saveOrUpdateSku(items, omsShop);
+                        saveOrUpdateSku(items, omsShopDO);
                         lastId = items.get(items.size() - 1).getId();
                     }
                 } catch (Exception e) {
@@ -86,17 +86,17 @@ public class ShopifyListingJob implements JobHandler {
         return "success";
     }
 
-    private void saveOrUpdateSku(List<ShopifyRetrieveAListOfProductsVO.ProductsDTO> items, OmsShop omsShop) {
-        List<OmsSku> doDBOmsSkus = new ArrayList<>();
+    private void saveOrUpdateSku(List<ShopifyRetrieveAListOfProductsVO.ProductsDTO> items, OmsShopDO omsShopDO) {
+        List<OmsSkuDO> doDBOmsSkus = new ArrayList<>();
         for (ShopifyRetrieveAListOfProductsVO.ProductsDTO parentItem : items) {
             //组装数据
-            assemblyData(omsShop, doDBOmsSkus, parentItem);
+            assemblyData(omsShopDO, doDBOmsSkus, parentItem);
         }
         //批量插入或更新OmsSku
-        omsSkuService.insertOrUpdateOmsSku(omsShop, doDBOmsSkus);
+        omsSkuService.insertOrUpdateOmsSku(omsShopDO, doDBOmsSkus);
     }
 
-    private void assemblyData(OmsShop omsShop, List<OmsSku> doDBOmsSkus, ShopifyRetrieveAListOfProductsVO.ProductsDTO parentItem) {
+    private void assemblyData(OmsShopDO omsShopDO, List<OmsSkuDO> doDBOmsSkus, ShopifyRetrieveAListOfProductsVO.ProductsDTO parentItem) {
         //获取父产品信息
         String productType = parentItem.getProductType();
         String status = parentItem.getStatus();
@@ -122,15 +122,15 @@ public class ShopifyListingJob implements JobHandler {
         //处理子产品
         if (!CollectionUtils.isEmpty(variants)) {
             for (ShopifyRetrieveAListOfProductsVO.ProductsDTO.VariantsDTO childItem : variants) {
-                OmsSku childOmsSku = new OmsSku();
+                OmsSkuDO childOmsSku = new OmsSkuDO();
                 String childSku = childItem.getSku();
                 childOmsSku.setSku(childSku);
                 childOmsSku.setPlatSkuId(childItem.getId().toString());
-                childOmsSku.setStoreId(omsShop.getId());
-                childOmsSku.setStoreName(omsShop.getName());
-                childOmsSku.setPlatId(omsShop.getPlatId());
-                childOmsSku.setPlatName(omsShop.getPlatName());
-                childOmsSku.setPlatShopCode(omsShop.getPlatShopCode());
+                childOmsSku.setStoreId(omsShopDO.getId());
+                childOmsSku.setStoreName(omsShopDO.getName());
+                childOmsSku.setPlatId(omsShopDO.getPlatId());
+                childOmsSku.setPlatName(omsShopDO.getPlatName());
+                childOmsSku.setPlatShopCode(omsShopDO.getPlatShopCode());
                 childOmsSku.setPatternType("child");
                 childOmsSku.setProductType(productType);
                 childOmsSku.setBuyableStatus(buyableStatus);

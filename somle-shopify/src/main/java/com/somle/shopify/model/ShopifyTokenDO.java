@@ -11,7 +11,7 @@ import java.io.Serial;
 
 @Data
 @TableName(value = "shopify_token")
-public class ShopifyToken extends BaseDO {
+public class ShopifyTokenDO extends BaseDO {
 
     @Serial
     private static final long serialVersionUID = 2142261931287687446L;

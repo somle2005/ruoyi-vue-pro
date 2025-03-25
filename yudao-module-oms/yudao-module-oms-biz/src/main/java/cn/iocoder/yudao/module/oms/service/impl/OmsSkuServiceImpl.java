@@ -1,8 +1,8 @@
 package cn.iocoder.yudao.module.oms.service.impl;
 
 import cn.iocoder.yudao.module.oms.dal.OmsSkuMapper;
-import cn.iocoder.yudao.module.oms.model.entity.OmsShop;
-import cn.iocoder.yudao.module.oms.model.entity.OmsSku;
+import cn.iocoder.yudao.module.oms.model.entity.OmsShopDO;
+import cn.iocoder.yudao.module.oms.model.entity.OmsSkuDO;
 import cn.iocoder.yudao.module.oms.service.OmsSkuService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.annotation.Resource;
@@ -23,24 +23,24 @@ public class OmsSkuServiceImpl implements OmsSkuService {
     /**
      * 批量插入或更新OmsSku
      *
-     * @param omsShop
+     * @param omsShopDO
      * @param doDBOmsSkus 更新后的全部处理数据集合
      * @return
      */
-    public List<OmsSku> insertOrUpdateOmsSku(OmsShop omsShop, List<OmsSku> doDBOmsSkus) {
-        List<String> allSkus = doDBOmsSkus.stream().map(OmsSku::getSku).distinct().collect(Collectors.toList());
-        LambdaQueryWrapper<OmsSku> existEq = new LambdaQueryWrapper<OmsSku>()
-            .in(OmsSku::getSku, allSkus)
-            .eq(OmsSku::getStoreName, omsShop.getName())
-            .eq(OmsSku::getDeleted, 0);
-        List<OmsSku> existSkus = omsSkuMapper.selectList(existEq);
-        Map<String, OmsSku> existSkuIdMaps = existSkus.stream().collect(Collectors.toMap(OmsSku::getSku, e -> e));
+    public List<OmsSkuDO> insertOrUpdateOmsSku(OmsShopDO omsShopDO, List<OmsSkuDO> doDBOmsSkus) {
+        List<String> allSkus = doDBOmsSkus.stream().map(OmsSkuDO::getSku).distinct().collect(Collectors.toList());
+        LambdaQueryWrapper<OmsSkuDO> existEq = new LambdaQueryWrapper<OmsSkuDO>()
+            .in(OmsSkuDO::getSku, allSkus)
+            .eq(OmsSkuDO::getStoreName, omsShopDO.getName())
+            .eq(OmsSkuDO::getDeleted, 0);
+        List<OmsSkuDO> existSkus = omsSkuMapper.selectList(existEq);
+        Map<String, OmsSkuDO> existSkuIdMaps = existSkus.stream().collect(Collectors.toMap(OmsSkuDO::getSku, e -> e));
 
-        List<OmsSku> saveOmsSkus = new ArrayList<>();
-        List<OmsSku> updateOmsSkus = new ArrayList<>();
-        for (OmsSku dbOmsSkus : doDBOmsSkus) {
+        List<OmsSkuDO> saveOmsSkus = new ArrayList<>();
+        List<OmsSkuDO> updateOmsSkus = new ArrayList<>();
+        for (OmsSkuDO dbOmsSkus : doDBOmsSkus) {
             String sku = dbOmsSkus.getSku();
-            OmsSku omsSku = existSkuIdMaps.get(sku);
+            OmsSkuDO omsSku = existSkuIdMaps.get(sku);
             if (omsSku != null) {
                 dbOmsSkus.setId(omsSku.getId());
                 if (!omsSku.getOriginalJson().equals(dbOmsSkus.getOriginalJson())) {
@@ -56,7 +56,7 @@ public class OmsSkuServiceImpl implements OmsSkuService {
         if (!CollectionUtils.isEmpty(updateOmsSkus)) {
             omsSkuMapper.updateById(updateOmsSkus);
         }
-        List<OmsSku> allOmsSkus = new ArrayList<>();
+        List<OmsSkuDO> allOmsSkus = new ArrayList<>();
         allOmsSkus.addAll(saveOmsSkus);
         allOmsSkus.addAll(updateOmsSkus);
         return allOmsSkus;

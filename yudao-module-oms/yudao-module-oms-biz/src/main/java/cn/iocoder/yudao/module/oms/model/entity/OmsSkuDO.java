@@ -16,7 +16,7 @@ import java.util.List;
  */
 @Data
 @TableName(value = "oms_sku")
-public class OmsSku extends BaseDO {
+public class OmsSkuDO extends BaseDO {
 
     @Serial
     private static final long serialVersionUID = 8827401549411225940L;
@@ -146,6 +146,51 @@ public class OmsSku extends BaseDO {
      */
     @TableField(value = "weight_unit")
     private String weightUnit;
+
+    /**
+     * 第二平台sku的唯一号,如fnSku
+     */
+    @TableField(value = "second_plat_sku_code")
+    private String secondPlatSkuCode;
+
+    /**
+     * 高度
+     */
+    @TableField(value = "height")
+    private BigDecimal height;
+
+    /**
+     * 高度单位
+     */
+    @TableField(value = "height_unit")
+    private String heightUnit;
+
+
+    /**
+     * 长度
+     */
+    @TableField(value = "length")
+    private BigDecimal length;
+
+
+    /**
+     * 长度单位
+     */
+    @TableField(value = "length_unit")
+    private String lengthUnit;
+
+
+    /**
+     * 宽度
+     */
+    @TableField(value = "width")
+    private BigDecimal width;
+
+    /**
+     * 宽度单位
+     */
+    @TableField(value = "width_unit")
+    private String widthUnit;
 
     /**
      * upc

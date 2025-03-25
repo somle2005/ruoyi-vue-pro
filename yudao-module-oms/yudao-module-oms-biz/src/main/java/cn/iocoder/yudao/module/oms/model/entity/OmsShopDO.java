@@ -14,7 +14,7 @@ import java.io.Serial;
  */
 @Data
 @TableName(value = "oms_shop")
-public class OmsShop extends BaseDO {
+public class OmsShopDO extends BaseDO {
 
     @Serial
     private static final long serialVersionUID = -4115052302108641698L;

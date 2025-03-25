@@ -7,7 +7,7 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.walmart.dal.WalmartTokenMapper;
 import com.somle.walmart.model.WalmartAccessTokenRespVO;
-import com.somle.walmart.model.WalmartToken;
+import com.somle.walmart.model.WalmartTokenDO;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -58,31 +58,31 @@ public class WalmartService {
     public void refreshToken() {
         log.info("Walmart refreshToken start");
         //查询全部的token账户
-        LambdaQueryWrapper<WalmartToken> walmartTokenLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        walmartTokenLambdaQueryWrapper.eq(WalmartToken::getType, "ORDINARY");
-        List<WalmartToken> walmartTokens = walmartTokenMapper.selectList(walmartTokenLambdaQueryWrapper);
-        List<WalmartToken> updateWalmartTokens = new ArrayList<>();
-        if (!CollectionUtils.isEmpty(walmartTokens)) {
+        LambdaQueryWrapper<WalmartTokenDO> walmartTokenLambdaQueryWrapper = new LambdaQueryWrapper<>();
+        walmartTokenLambdaQueryWrapper.eq(WalmartTokenDO::getType, "ORDINARY");
+        List<WalmartTokenDO> walmartTokenDOS = walmartTokenMapper.selectList(walmartTokenLambdaQueryWrapper);
+        List<WalmartTokenDO> updateWalmartTokenDOS = new ArrayList<>();
+        if (!CollectionUtils.isEmpty(walmartTokenDOS)) {
             //循环调用 平台获取token接口
-            for (WalmartToken walmartToken : walmartTokens) {
+            for (WalmartTokenDO walmartTokenDO : walmartTokenDOS) {
                 //调用平台接口获取token
-                applyPlatObtainToken(walmartToken);
+                applyPlatObtainToken(walmartTokenDO);
                 //把token信息封装在每个client里
                 WalmartClient walmartClient = new WalmartClient();
-                assembleClientInformation(walmartToken, walmartClient);
-                clientMap.put(walmartToken.getId(), walmartClient);
+                assembleClientInformation(walmartTokenDO, walmartClient);
+                clientMap.put(walmartTokenDO.getId(), walmartClient);
                 //加入更新数组
-                if (StringUtils.hasText(walmartToken.getAccessToken())) {
-                    WalmartToken walmartTokenUpdate = new WalmartToken();
-                    walmartTokenUpdate.setId(walmartToken.getId());
-                    walmartTokenUpdate.setAccessToken(walmartToken.getAccessToken());
-                    updateWalmartTokens.add(walmartToken);
+                if (StringUtils.hasText(walmartTokenDO.getAccessToken())) {
+                    WalmartTokenDO walmartTokenDOUpdate = new WalmartTokenDO();
+                    walmartTokenDOUpdate.setId(walmartTokenDO.getId());
+                    walmartTokenDOUpdate.setAccessToken(walmartTokenDO.getAccessToken());
+                    updateWalmartTokenDOS.add(walmartTokenDO);
                 }
             }
         }
         //把token更新入库
-        if (!CollectionUtils.isEmpty(updateWalmartTokens)) {
-            walmartTokenMapper.updateById(updateWalmartTokens);
+        if (!CollectionUtils.isEmpty(updateWalmartTokenDOS)) {
+            walmartTokenMapper.updateById(updateWalmartTokenDOS);
         }
     }
 
@@ -94,25 +94,25 @@ public class WalmartService {
         return walmartClient;
     }
 
-    private WalmartToken applyPlatObtainToken(WalmartToken walmartToken) {
+    private WalmartTokenDO applyPlatObtainToken(WalmartTokenDO walmartTokenDO) {
         OkHttpClient client = new OkHttpClient().newBuilder()
             .build();
         MediaType mediaType = MediaType.parse("application/x-www-form-urlencoded");
         RequestBody body = RequestBody.create(mediaType, "grant_type=client_credentials");
         String endpoint = "/v3/token";
 
-        String str = walmartToken.getClientId() + ":" + walmartToken.getClientSecret();
+        String str = walmartTokenDO.getClientId() + ":" + walmartTokenDO.getClientSecret();
         String authorization = "Basic " + Base64.encodeBase64String(str.getBytes());
 
         Headers headers = new Headers.Builder()
-            .add("WM_QOS.CORRELATION_ID", walmartToken.getCorrelationId())
-            .add("WM_SVC.NAME", walmartToken.getSvcName())
+            .add("WM_QOS.CORRELATION_ID", walmartTokenDO.getCorrelationId())
+            .add("WM_SVC.NAME", walmartTokenDO.getSvcName())
             .add("Accept", "application/json")
             .add("Authorization", authorization)
             .build();
 
         Request request = new Request.Builder()
-            .url(walmartToken.getDomain() + endpoint)
+            .url(walmartTokenDO.getDomain() + endpoint)
             .method("POST", body)
             .headers(headers)
             .build();
@@ -130,17 +130,17 @@ public class WalmartService {
             throw new RuntimeException(e);
         }
 
-        walmartToken.setAccessToken(accessToken);
-        return walmartToken;
+        walmartTokenDO.setAccessToken(accessToken);
+        return walmartTokenDO;
     }
 
-    private void assembleClientInformation(WalmartToken walmartToken, WalmartClient walmartClient) {
+    private void assembleClientInformation(WalmartTokenDO walmartTokenDO, WalmartClient walmartClient) {
         Map<String, String> tokenValues = new HashMap<>();
-        tokenValues.put("WM_SVC.NAME", walmartToken.getSvcName());
-        tokenValues.put("WM_QOS.CORRELATION_ID", walmartToken.getCorrelationId());
-        tokenValues.put("WM_SEC.ACCESS_TOKEN", walmartToken.getAccessToken());
+        tokenValues.put("WM_SVC.NAME", walmartTokenDO.getSvcName());
+        tokenValues.put("WM_QOS.CORRELATION_ID", walmartTokenDO.getCorrelationId());
+        tokenValues.put("WM_SEC.ACCESS_TOKEN", walmartTokenDO.getAccessToken());
         walmartClient.setTokenValues(tokenValues);
-        walmartClient.setWalmartToken(walmartToken);
+        walmartClient.setWalmartTokenDO(walmartTokenDO);
         walmartClient.setWebClient(defaultClient);
     }
 
