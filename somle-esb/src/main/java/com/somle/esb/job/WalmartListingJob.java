@@ -2,12 +2,15 @@ package com.somle.esb.job;
 
 import cn.iocoder.yudao.framework.common.util.string.StrUtils;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
+import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.oms.dal.OmsShopMapper;
 import cn.iocoder.yudao.module.oms.dal.OmsSkuMapper;
 import cn.iocoder.yudao.module.oms.model.entity.OmsShop;
 import cn.iocoder.yudao.module.oms.model.entity.OmsSku;
+import cn.iocoder.yudao.module.oms.service.OmsSkuService;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.somle.esb.enums.TenantId;
 import com.somle.walmart.model.WalmartAllItemsResVO;
 import com.somle.walmart.model.WalmartGetAllItemsDTO;
 import com.somle.walmart.model.WalmartSearchDTO;
@@ -21,7 +24,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -47,8 +49,12 @@ public class WalmartListingJob implements JobHandler {
     @Autowired(required = false)
     private WalmartService walmartService;
 
+    @Resource
+    OmsSkuService omsSkuService;
+
     @Override
     public synchronized String execute(String param) throws Exception {
+        TenantContextHolder.setTenantId(TenantId.DEFAULT.getId());
         if (!StringUtils.hasText(param)) {
             throw new RuntimeException("请输入店铺数组");
         }
@@ -103,11 +109,11 @@ public class WalmartListingJob implements JobHandler {
     }
 
     private void assemblyDetails(List<WalmartAllItemsResVO.ItemResponseDTO> itemResponse, List<WalmartSearchResVO.ItemsDTO> items) {
-        if (!CollectionUtils.isEmpty(items)){
+        if (!CollectionUtils.isEmpty(items)) {
             Map<String, List<WalmartSearchResVO.ItemsDTO>> titleGroup = items.stream().collect(Collectors.groupingBy(WalmartSearchResVO.ItemsDTO::getTitle));
             for (WalmartAllItemsResVO.ItemResponseDTO itemResponseDTO : itemResponse) {
                 List<WalmartSearchResVO.ItemsDTO> itemsDTOS = titleGroup.get(itemResponseDTO.getProductName());
-                if (!CollectionUtils.isEmpty(itemsDTOS)){
+                if (!CollectionUtils.isEmpty(itemsDTOS)) {
                     WalmartSearchResVO.ItemsDTO itemsDTO = itemsDTOS.get(0);
                     itemResponseDTO.setItemsDTO(itemsDTO);
                 }
@@ -116,7 +122,7 @@ public class WalmartListingJob implements JobHandler {
     }
 
 
-    private void saveOrUpdateSku(List<WalmartAllItemsResVO.ItemResponseDTO> itemDTOs, OmsShop OmsShop) {
+    private void saveOrUpdateSku(List<WalmartAllItemsResVO.ItemResponseDTO> itemDTOs, OmsShop omsShop) {
         List<WalmartAllItemsResVO.ItemResponseDTO> items = new ArrayList<>();
         Map<String, List<WalmartAllItemsResVO.ItemResponseDTO>> skuMap = itemDTOs.stream().filter(e -> StringUtils.hasText(e.getSku())).collect(Collectors.groupingBy(WalmartAllItemsResVO.ItemResponseDTO::getSku));
         Set<String> allSkus = skuMap.keySet();
@@ -127,31 +133,26 @@ public class WalmartListingJob implements JobHandler {
         if (CollectionUtils.isEmpty(items)) {
             return;
         }
-        LambdaQueryWrapper<OmsSku> existEq = new LambdaQueryWrapper<OmsSku>().in(OmsSku::getSku, allSkus).eq(OmsSku::getStoreName, OmsShop.getName()).eq(OmsSku::getDeleted, 0);
-        List<OmsSku> existSkus = omsSkuMapper.selectList(existEq);
-        Map<String, OmsSku> existSkuIdMaps = existSkus.stream().collect(Collectors.toMap(OmsSku::getSku, e -> e));
+        List<OmsSku> doDBOmsSkus = new ArrayList<>();
+        //组装数据
+        assemblyData(omsShop, items, doDBOmsSkus);
+        //批量插入或更新OmsSku
+        omsSkuService.insertOrUpdateOmsSku(omsShop, doDBOmsSkus);
+    }
 
-        List<OmsSku> saveOmsSkus = new ArrayList<>();
-        List<OmsSku> updateOmsSkus = new ArrayList<>();
+    private void assemblyData(OmsShop omsShop, List<WalmartAllItemsResVO.ItemResponseDTO> items, List<OmsSku> doDBOmsSkus) {
         for (WalmartAllItemsResVO.ItemResponseDTO eachItem : items) {
-            OmsSku existOmsSku = existSkuIdMaps.get(eachItem.getSku());
-            Long existId = null;
-            String existOriginalJson = null;
-            if (existOmsSku != null) {
-                existId = existOmsSku.getId();
-                existOriginalJson = existOmsSku.getOriginalJson();
-            }
             OmsSku omsSku = new OmsSku();
             omsSku.setPlatSkuCode(eachItem.getWpid());
             omsSku.setSku(eachItem.getSku());
-            omsSku.setStoreId(OmsShop.getId());
-            omsSku.setStoreName(OmsShop.getName());
-            omsSku.setPlatId(OmsShop.getPlatId());
-            omsSku.setPlatName(OmsShop.getPlatName());
-            omsSku.setPlatShopCode(OmsShop.getPlatShopCode());
+            omsSku.setStoreId(omsShop.getId());
+            omsSku.setStoreName(omsShop.getName());
+            omsSku.setPlatId(omsShop.getPlatId());
+            omsSku.setPlatName(omsShop.getPlatName());
+            omsSku.setPlatShopCode(omsShop.getPlatShopCode());
             omsSku.setConditionType(eachItem.getCondition());
             String availability = eachItem.getAvailability();
-            if ("In_stock".equals(availability)){
+            if ("In_stock".equals(availability)) {
                 omsSku.setStockStatus(1);
             } else if ("Out_of_stock".equals(availability)) {
                 omsSku.setStockStatus(0);
@@ -165,7 +166,7 @@ public class WalmartListingJob implements JobHandler {
                 omsSku.setDiscoverableStatus(0);
             }
             WalmartAllItemsResVO.ItemResponseDTO.PriceDTO priceDTO = eachItem.getPrice();
-            if (priceDTO != null){
+            if (priceDTO != null) {
                 omsSku.setPrice(priceDTO.getAmount());
                 omsSku.setPriceUnit(priceDTO.getCurrency());
             }
@@ -173,14 +174,11 @@ public class WalmartListingJob implements JobHandler {
             omsSku.setGtin(eachItem.getGtin());
             omsSku.setTitle(eachItem.getProductName());
             omsSku.setProductType(eachItem.getProductType());
-            omsSku.setCreator("admin");
-            omsSku.setCreateTime(LocalDateTime.now());
-            omsSku.setDeleted(0);
             WalmartSearchResVO.ItemsDTO itemsDTO = eachItem.getItemsDTO();
-            if (itemsDTO != null){
+            if (itemsDTO != null) {
                 omsSku.setPlatSkuId(itemsDTO.getItemId());
                 List<WalmartSearchResVO.ItemsDTO.ImagesDTO> images = itemsDTO.getImages();
-                if (!CollectionUtils.isEmpty(images)){
+                if (!CollectionUtils.isEmpty(images)) {
                     omsSku.setMainImageUrl(images.get(0).getUrl());
                 }
                 omsSku.setCustomerRating(itemsDTO.getCustomerRating());
@@ -188,18 +186,8 @@ public class WalmartListingJob implements JobHandler {
                 omsSku.setBrand(itemsDTO.getBrand());
             }
             String originalJson = JSON.toJSONString(eachItem);
-            omsSku.setId(existId);
-            if (existId == null) {
-                saveOmsSkus.add(omsSku);
-            } else if (!originalJson.equals(existOriginalJson)) {
-                updateOmsSkus.add(omsSku);
-            }
-        }
-        if (!CollectionUtils.isEmpty(saveOmsSkus)) {
-            omsSkuMapper.insert(saveOmsSkus);
-        }
-        if (!CollectionUtils.isEmpty(updateOmsSkus)) {
-            omsSkuMapper.updateById(updateOmsSkus);
+            omsSku.setOriginalJson(originalJson);
+            doDBOmsSkus.add(omsSku);
         }
     }
 }

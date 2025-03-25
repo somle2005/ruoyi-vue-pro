@@ -1,13 +1,14 @@
 package cn.iocoder.yudao.module.oms.model.entity;
 
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.io.Serial;
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -15,7 +16,10 @@ import java.util.List;
  */
 @Data
 @TableName(value = "oms_sku")
-public class OmsSku {
+public class OmsSku extends BaseDO {
+
+    @Serial
+    private static final long serialVersionUID = 8827401549411225940L;
     /**
      * 自增主键
      */
@@ -240,35 +244,6 @@ public class OmsSku {
     @TableField(value = "original_json")
     private String originalJson;
 
-    /**
-     * 创建者
-     */
-    @TableField(value = "creator")
-    private String creator;
-
-    /**
-     * 创建时间
-     */
-    @TableField(value = "create_time")
-    private LocalDateTime createTime;
-
-    /**
-     * 更新者
-     */
-    @TableField(value = "updater")
-    private String updater;
-
-    /**
-     * 更新时间
-     */
-    @TableField(value = "update_time")
-    private LocalDateTime updateTime;
-
-    /**
-     * 是否删除
-     */
-    @TableField(value = "deleted")
-    private Integer deleted;
 
     @TableField(exist = false)
     private List<String> childSkus;

@@ -1,14 +1,21 @@
 package com.somle.walmart.model;
 
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
+import java.io.Serial;
+
 @Data
 @TableName(value = "walmart_token")
-public class WalmartToken {
+public class WalmartToken extends BaseDO {
+
+    @Serial
+    private static final long serialVersionUID = 8049104156152650780L;
+
     @TableId(value = "id", type = IdType.AUTO)
     private Long id;
 

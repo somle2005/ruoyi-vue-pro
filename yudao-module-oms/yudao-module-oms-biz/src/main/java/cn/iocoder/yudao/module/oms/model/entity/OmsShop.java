@@ -1,19 +1,24 @@
 package cn.iocoder.yudao.module.oms.model.entity;
 
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
 
-import java.time.LocalDateTime;
+import java.io.Serial;
 
 /**
  * ERP 店铺表
  */
 @Data
 @TableName(value = "oms_shop")
-public class OmsShop {
+public class OmsShop extends BaseDO {
+
+    @Serial
+    private static final long serialVersionUID = -4115052302108641698L;
+
     /**
      * 店铺id
      */
@@ -104,33 +109,4 @@ public class OmsShop {
     @TableField(value = "original_json")
     private String originalJson;
 
-    /**
-     * 创建者
-     */
-    @TableField(value = "creator")
-    private String creator;
-
-    /**
-     * 创建时间
-     */
-    @TableField(value = "create_time")
-    private LocalDateTime createTime;
-
-    /**
-     * 更新者
-     */
-    @TableField(value = "updater")
-    private String updater;
-
-    /**
-     * 更新时间
-     */
-    @TableField(value = "update_time")
-    private LocalDateTime updateTime;
-
-    /**
-     * 是否删除
-     */
-    @TableField(value = "deleted")
-    private Integer deleted;
 }

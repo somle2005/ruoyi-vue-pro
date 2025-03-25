@@ -2,12 +2,14 @@ package com.somle.esb.job;
 
 import cn.iocoder.yudao.framework.common.util.string.StrUtils;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
+import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
 import cn.iocoder.yudao.module.oms.dal.OmsShopMapper;
 import cn.iocoder.yudao.module.oms.model.entity.OmsShop;
 import cn.iocoder.yudao.module.oms.model.entity.OmsSku;
 import cn.iocoder.yudao.module.oms.service.OmsSkuService;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+import com.somle.esb.enums.TenantId;
 import com.somle.shopify.model.ShopifyRetrieveAListOfProductsDTO;
 import com.somle.shopify.model.ShopifyRetrieveAListOfProductsVO;
 import com.somle.shopify.service.ShopifyService;
@@ -19,7 +21,6 @@ import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -41,7 +42,7 @@ public class ShopifyListingJob implements JobHandler {
 
     @Override
     public synchronized String execute(String param) {
-
+        TenantContextHolder.setTenantId(TenantId.DEFAULT.getId());
         if (!StringUtils.hasText(param)) {
             throw new RuntimeException("请输入店铺数组");
         }
@@ -85,18 +86,18 @@ public class ShopifyListingJob implements JobHandler {
         return "success";
     }
 
-    private void saveOrUpdateSku(List<ShopifyRetrieveAListOfProductsVO.ProductsDTO> items, OmsShop OmsShop) {
+    private void saveOrUpdateSku(List<ShopifyRetrieveAListOfProductsVO.ProductsDTO> items, OmsShop omsShop) {
         List<OmsSku> doDBOmsSkus = new ArrayList<>();
         for (ShopifyRetrieveAListOfProductsVO.ProductsDTO parentItem : items) {
             //组装数据
-            assemblyData(OmsShop, doDBOmsSkus, parentItem);
+            assemblyData(omsShop, doDBOmsSkus, parentItem);
         }
         //批量插入或更新OmsSku
-        omsSkuService.insertOrUpdateOmsSku(OmsShop, doDBOmsSkus);
+        omsSkuService.insertOrUpdateOmsSku(omsShop, doDBOmsSkus);
     }
 
-    private void assemblyData(OmsShop OmsShop, List<OmsSku> doDBOmsSkus, ShopifyRetrieveAListOfProductsVO.ProductsDTO parentItem) {
-        //处理父产品
+    private void assemblyData(OmsShop omsShop, List<OmsSku> doDBOmsSkus, ShopifyRetrieveAListOfProductsVO.ProductsDTO parentItem) {
+        //获取父产品信息
         String productType = parentItem.getProductType();
         String status = parentItem.getStatus();
         Integer buyableStatus = 0;
@@ -125,11 +126,11 @@ public class ShopifyListingJob implements JobHandler {
                 String childSku = childItem.getSku();
                 childOmsSku.setSku(childSku);
                 childOmsSku.setPlatSkuId(childItem.getId().toString());
-                childOmsSku.setStoreId(OmsShop.getId());
-                childOmsSku.setStoreName(OmsShop.getName());
-                childOmsSku.setPlatId(OmsShop.getPlatId());
-                childOmsSku.setPlatName(OmsShop.getPlatName());
-                childOmsSku.setPlatShopCode(OmsShop.getPlatShopCode());
+                childOmsSku.setStoreId(omsShop.getId());
+                childOmsSku.setStoreName(omsShop.getName());
+                childOmsSku.setPlatId(omsShop.getPlatId());
+                childOmsSku.setPlatName(omsShop.getPlatName());
+                childOmsSku.setPlatShopCode(omsShop.getPlatShopCode());
                 childOmsSku.setPatternType("child");
                 childOmsSku.setProductType(productType);
                 childOmsSku.setBuyableStatus(buyableStatus);
@@ -161,9 +162,6 @@ public class ShopifyListingJob implements JobHandler {
                 childOmsSku.setVendor(vendor);
                 childOmsSku.setVariantPosition(childItem.getPosition());
                 childOmsSku.setOriginalJson(originalJson);
-                childOmsSku.setCreator("admin");
-                childOmsSku.setCreateTime(LocalDateTime.now());
-                childOmsSku.setDeleted(0);
                 doDBOmsSkus.add(childOmsSku);
             }
         }

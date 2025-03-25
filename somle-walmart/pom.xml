@@ -28,11 +28,6 @@
             <artifactId>yudao-spring-boot-starter-mybatis</artifactId>
         </dependency>
 
-        <dependency>
-            <groupId>com.github.yulichang</groupId>
-            <artifactId>mybatis-plus-join-boot-starter</artifactId> <!-- MyBatis 联表查询 -->
-        </dependency>
-
     </dependencies>
 
 </project>
