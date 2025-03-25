@@ -84,16 +84,8 @@ public class WalmartListingJob implements JobHandler {
                         walmartSearchDTO.setSleepTime(100L);
                         WalmartSearchResVO walmartSearchResVO = client.searchItem(walmartSearchDTO);
                         List<WalmartSearchResVO.ItemsDTO> items = walmartSearchResVO.getItems();
-                        if (!CollectionUtils.isEmpty(items)){
-                            Map<String, List<WalmartSearchResVO.ItemsDTO>> titleGroup = items.stream().collect(Collectors.groupingBy(WalmartSearchResVO.ItemsDTO::getTitle));
-                            for (WalmartAllItemsResVO.ItemResponseDTO itemResponseDTO : itemResponse) {
-                                List<WalmartSearchResVO.ItemsDTO> itemsDTOS = titleGroup.get(itemResponseDTO.getProductName());
-                                if (!CollectionUtils.isEmpty(itemsDTOS)){
-                                    WalmartSearchResVO.ItemsDTO itemsDTO = itemsDTOS.get(0);
-                                    itemResponseDTO.setItemsDTO(itemsDTO);
-                                }
-                            }
-                        }
+                        //组装详细信息
+                        assemblyDetails(itemResponse, items);
                         //操作db，新增或者更新
                         saveOrUpdateSku(itemResponse, omsShop);
                         nextCursor = walmartAllItemsResVO.getNextCursor();
@@ -108,6 +100,19 @@ public class WalmartListingJob implements JobHandler {
             throw new RuntimeException(errorMsg);
         }
         return "success";
+    }
+
+    private void assemblyDetails(List<WalmartAllItemsResVO.ItemResponseDTO> itemResponse, List<WalmartSearchResVO.ItemsDTO> items) {
+        if (!CollectionUtils.isEmpty(items)){
+            Map<String, List<WalmartSearchResVO.ItemsDTO>> titleGroup = items.stream().collect(Collectors.groupingBy(WalmartSearchResVO.ItemsDTO::getTitle));
+            for (WalmartAllItemsResVO.ItemResponseDTO itemResponseDTO : itemResponse) {
+                List<WalmartSearchResVO.ItemsDTO> itemsDTOS = titleGroup.get(itemResponseDTO.getProductName());
+                if (!CollectionUtils.isEmpty(itemsDTOS)){
+                    WalmartSearchResVO.ItemsDTO itemsDTO = itemsDTOS.get(0);
+                    itemResponseDTO.setItemsDTO(itemsDTO);
+                }
+            }
+        }
     }
 
 
