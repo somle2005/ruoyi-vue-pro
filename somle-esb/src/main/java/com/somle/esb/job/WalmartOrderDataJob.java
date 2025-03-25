@@ -3,15 +3,15 @@ package com.somle.esb.job;
 
 import com.somle.esb.model.OssData;
 import com.somle.walmart.model.WalmartOrderReqVO;
-import com.somle.walmart.service.WalmartClient;
-import jakarta.annotation.Resource;
+import com.somle.walmart.service.WalmartService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class WalmartOrderDataJob extends WalmartDataJob {
 
-    @Resource
-    private WalmartClient walmartClient;
+    @Autowired(required = false)
+    private WalmartService walmartService;
 
     @Override
     public String execute(String param) throws Exception {
@@ -20,9 +20,8 @@ public class WalmartOrderDataJob extends WalmartDataJob {
         var vo = WalmartOrderReqVO.builder()
                 .createdStartDate(yesterdayFirstSecond)
                 .createdEndDate(yesterdayLastSecond)
-                .shopName("Walmart_FIT_USA")
                 .build();
-        var result = walmartClient.getOrders(vo);
+        var result = walmartService.getClient(1L).getOrders(vo);
         var data = OssData.builder()
                 .database(DATABASE)
                 .tableName("order")

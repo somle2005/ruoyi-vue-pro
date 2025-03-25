@@ -24,5 +24,4 @@ public class WalmartOrderReqVO {
     private String shippingProgramType; // Specifies the type of program. Allowed values: TWO_DAY, ONE_DAY.
     private String replacementInfo = "false"; // Default: "false". Provides attributes related to Replacement order if available.
     private String orderType; // Specifies if the order is REGULAR, REPLACEMENT, or PREORDER. Depends on replacementInfo=true.
-    private String shopName; // Specifies if the order is REGULAR, REPLACEMENT, or PREORDER. Depends on replacementInfo=true.
 }

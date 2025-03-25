@@ -2,21 +2,21 @@ package com.somle.esb.job;
 
 
 import com.somle.esb.model.OssData;
-import com.somle.walmart.service.WalmartClient;
-import jakarta.annotation.Resource;
+import com.somle.walmart.service.WalmartService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class WalmartReconReportDataJob extends WalmartDataJob {
 
-    @Resource
-    private WalmartClient walmartClient;
+    @Autowired(required = false)
+    private WalmartService walmartService;
 
     @Override
     public String execute(String param) throws Exception {
         setDate(param);
 
-        var result = walmartClient.getReconFile(yesterday,"Walmart_FIT_USA");
+        var result = walmartService.getClient(1L).getReconFile(yesterday);
         var data = OssData.builder()
                 .database(DATABASE)
                 .tableName("recon_report")

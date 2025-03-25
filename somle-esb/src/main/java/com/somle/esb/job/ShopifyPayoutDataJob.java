@@ -2,21 +2,20 @@ package com.somle.esb.job;
 
 
 import com.somle.esb.model.OssData;
-import com.somle.shopify.service.ShopifyClient;
-import jakarta.annotation.Resource;
+import com.somle.shopify.service.ShopifyService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 @Component
 public class ShopifyPayoutDataJob extends ShopifyDataJob {
 
-    @Resource
-    ShopifyClient shopifyClient;
+    @Autowired(required = false)
+    ShopifyService shopifyService;
 
     @Override
     public String execute(String param) throws Exception {
         setDate(param);
-
-        var result = shopifyClient.getPayouts("Shopify_FIT_USA");
+        var result = shopifyService.getClient(1L).getPayouts();
         var data = OssData.builder()
             .database(DATABASE)
             .tableName("payout")

@@ -13,8 +13,10 @@ import com.somle.walmart.model.WalmartGetAllItemsDTO;
 import com.somle.walmart.model.WalmartSearchDTO;
 import com.somle.walmart.model.WalmartSearchResVO;
 import com.somle.walmart.service.WalmartClient;
+import com.somle.walmart.service.WalmartService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -42,8 +44,8 @@ public class WalmartListingJob implements JobHandler {
     @Resource
     private OmsSkuMapper omsSkuMapper;
 
-    @Resource
-    private WalmartClient walmartClient;
+    @Autowired(required = false)
+    private WalmartService walmartService;
 
     @Override
     public synchronized String execute(String param) throws Exception {
@@ -54,22 +56,22 @@ public class WalmartListingJob implements JobHandler {
         String errorMsg = "";
         if (!CollectionUtils.isEmpty(storeNames)) {
             LambdaQueryWrapper<OmsShop> inWrapper = new LambdaQueryWrapper<OmsShop>().eq(OmsShop::getPlatName, "Walmart").eq(OmsShop::getDeleted, 0).in(OmsShop::getName, storeNames);
-            List<OmsShop> OmsShops = omsShopMapper.selectList(inWrapper);
-            Map<String, OmsShop> nameMap = OmsShops.stream().collect(Collectors.toMap(OmsShop::getName, e -> e));
+            List<OmsShop> omsShops = omsShopMapper.selectList(inWrapper);
+            Map<String, OmsShop> nameMap = omsShops.stream().collect(Collectors.toMap(OmsShop::getName, e -> e));
             for (String storeName : storeNames) {
                 try {
-                    OmsShop OmsShop = nameMap.get(storeName);
-                    if (OmsShop == null) {
+                    OmsShop omsShop = nameMap.get(storeName);
+                    if (omsShop == null) {
                         throw new RuntimeException("当前店铺名称不存在");
                     }
                     String nextCursor = "*";
                     while (true) {
+                        WalmartClient client = walmartService.getClient(omsShop.getAuthId());
                         WalmartGetAllItemsDTO walmartGetAllItemsDto = new WalmartGetAllItemsDTO();
                         walmartGetAllItemsDto.setNextCursor(nextCursor);
                         walmartGetAllItemsDto.setLimit(500L);
-                        walmartGetAllItemsDto.setShopName(storeName);
                         walmartGetAllItemsDto.setSuccessCode(200);
-                        WalmartAllItemsResVO walmartAllItemsResVO = walmartClient.getAllItems(walmartGetAllItemsDto);
+                        WalmartAllItemsResVO walmartAllItemsResVO = client.getAllItems(walmartGetAllItemsDto);
                         List<WalmartAllItemsResVO.ItemResponseDTO> itemResponse = walmartAllItemsResVO.getItemResponse();
                         if (CollectionUtils.isEmpty(itemResponse)) {
                             break;
@@ -78,10 +80,9 @@ public class WalmartListingJob implements JobHandler {
                         WalmartSearchDTO walmartSearchDTO = new WalmartSearchDTO();
                         String gtin = itemResponse.stream().map(e -> e.getGtin()).collect(Collectors.joining(","));
                         walmartSearchDTO.setGtin(gtin);
-                        walmartSearchDTO.setShopName(storeName);
                         walmartSearchDTO.setSuccessCode(200);
                         walmartSearchDTO.setSleepTime(100L);
-                        WalmartSearchResVO walmartSearchResVO = walmartClient.searchItem(walmartSearchDTO);
+                        WalmartSearchResVO walmartSearchResVO = client.searchItem(walmartSearchDTO);
                         List<WalmartSearchResVO.ItemsDTO> items = walmartSearchResVO.getItems();
                         if (!CollectionUtils.isEmpty(items)){
                             Map<String, List<WalmartSearchResVO.ItemsDTO>> titleGroup = items.stream().collect(Collectors.groupingBy(WalmartSearchResVO.ItemsDTO::getTitle));
@@ -94,7 +95,7 @@ public class WalmartListingJob implements JobHandler {
                             }
                         }
                         //操作db，新增或者更新
-                        saveOrUpdateSku(itemResponse, OmsShop);
+                        saveOrUpdateSku(itemResponse, omsShop);
                         nextCursor = walmartAllItemsResVO.getNextCursor();
                     }
                 } catch (Exception e) {

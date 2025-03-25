@@ -8,57 +8,35 @@ import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
 import com.somle.walmart.model.*;
+import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
-import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
-import org.springframework.util.StringUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 @Slf4j
-@Component
+@Data
 public class WalmartClient {
 
-    OkHttpClient webClient = new OkHttpClient.Builder()
-        .connectTimeout(30, TimeUnit.SECONDS)
-        .readTimeout(60, TimeUnit.SECONDS)
-        .writeTimeout(60, TimeUnit.SECONDS)
-        .build();
-
-    public Map<String, WalmartToken> tokenMap = new HashMap();
-
-    private WalmartTokenHead getTokenHeadInfo(String storeName) {
-        WalmartTokenHead walmartTokenHead = new WalmartTokenHead();
-        WalmartToken walmartToken = tokenMap.get(storeName);
-        if (walmartToken == null || !StringUtils.hasText(walmartToken.getAccessToken())
-            || !StringUtils.hasText(walmartToken.getDomain())) {
-            throw new RuntimeException("accessToken is null");
-        }
-        walmartTokenHead.setWalmartToken(walmartToken);
-        Map<String, String> tokenValues = new HashMap<>();
-        tokenValues.put("WM_SVC.NAME", walmartToken.getSvcName());
-        tokenValues.put("WM_QOS.CORRELATION_ID", walmartToken.getCorrelationId());
-        tokenValues.put("WM_SEC.ACCESS_TOKEN", walmartToken.getAccessToken());
-        walmartTokenHead.setTokenValues(tokenValues);
-        return walmartTokenHead;
-    }
-
+    private OkHttpClient webClient;
+    private WalmartToken walmartToken;
+    private Map<String, String> tokenValues;
 
     public WalmartAllItemsResVO getAllItems(WalmartGetAllItemsDTO dto) {
         Integer successCode = dto.getSuccessCode();
-        WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(dto.getShopName());
-        WalmartToken walmartToken = walmartTokenHeadInfo.getWalmartToken();
-        Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         tokenValues.put("Accept", "application/json");
         String endpoint = "/v3/items";
         RequestX request = RequestX.builder()
@@ -98,9 +76,6 @@ public class WalmartClient {
         List<String> gtinList = Arrays.asList(gtins.split(","));
         List<List<String>> gtinPartition = MyCollectionUtil.splitList(gtinList, 50);
         Integer successCode = dto.getSuccessCode();
-        WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(dto.getShopName());
-        WalmartToken walmartToken = walmartTokenHeadInfo.getWalmartToken();
-        Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         tokenValues.put("Accept", "application/json");
         String endpoint = "/v3/items/walmart/search";
         for (List<String> eachGtinPartition : gtinPartition) {
@@ -144,9 +119,6 @@ public class WalmartClient {
 
     @SneakyThrows
     public JSONObject getOrders(WalmartOrderReqVO vo) {
-        WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(vo.getShopName());
-        WalmartToken walmartToken = walmartTokenHeadInfo.getWalmartToken();
-        Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         String endpoint = "/v3/orders";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
@@ -160,11 +132,8 @@ public class WalmartClient {
     }
 
     @SneakyThrows
-    public String getReconFile(LocalDate date, String shopName) {
+    public String getReconFile(LocalDate date) {
         String dateStr = date.format(DateTimeFormatter.ofPattern("MMddyyyy"));
-        WalmartTokenHead walmartTokenHeadInfo = getTokenHeadInfo(shopName);
-        WalmartToken walmartToken = walmartTokenHeadInfo.getWalmartToken();
-        Map<String, String> tokenValues = walmartTokenHeadInfo.getTokenValues();
         String endpoint = "/v3/report/reconreport/availableReconFiles";
         WalmartGetReconFileReq walmartGetReconFileReq = new WalmartGetReconFileReq();
         walmartGetReconFileReq.setReportVersion("v1");

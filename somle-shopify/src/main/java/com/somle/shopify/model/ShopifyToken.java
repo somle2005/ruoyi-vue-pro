@@ -10,13 +10,7 @@ import lombok.Data;
 @TableName(value = "shopify_token")
 public class ShopifyToken {
     @TableId(value = "id", type = IdType.AUTO)
-    private Integer id;
-
-    @TableField(value = "shop_id")
-    private Integer shopId;
-
-    @TableField(value = "shop_name")
-    private String shopName;
+    private Long id;
 
     @TableField(value = "access_token")
     private String accessToken;

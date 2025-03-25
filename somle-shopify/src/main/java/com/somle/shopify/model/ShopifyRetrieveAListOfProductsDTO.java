@@ -15,8 +15,6 @@ public class ShopifyRetrieveAListOfProductsDTO {
 
     private Long limit;
 
-    private String shopName;
-
     private Integer successCode;
 
     private Long sleepTime;

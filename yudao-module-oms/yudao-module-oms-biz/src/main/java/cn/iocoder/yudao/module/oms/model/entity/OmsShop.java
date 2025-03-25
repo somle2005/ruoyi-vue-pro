@@ -96,7 +96,7 @@ public class OmsShop {
      * token表主键
      */
     @TableField(value = "auth_id")
-    private Integer authId;
+    private Long authId;
 
     /**
      * 原始json

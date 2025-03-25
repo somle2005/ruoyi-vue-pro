@@ -12,8 +12,6 @@ public class WalmartSearchDTO {
 
     private String gtin;
 
-    private String shopName;
-
     private Integer successCode;
 
     private Long sleepTime;

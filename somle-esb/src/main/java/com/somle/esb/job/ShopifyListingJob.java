@@ -10,9 +10,10 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.shopify.model.ShopifyRetrieveAListOfProductsDTO;
 import com.somle.shopify.model.ShopifyRetrieveAListOfProductsVO;
-import com.somle.shopify.service.ShopifyClient;
+import com.somle.shopify.service.ShopifyService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
@@ -29,8 +30,8 @@ import java.util.stream.Collectors;
 public class ShopifyListingJob implements JobHandler {
 
 
-    @Resource
-    private ShopifyClient shopifyClient;
+    @Autowired(required = false)
+    private ShopifyService shopifyService;
 
     @Resource
     private OmsShopMapper omsShopMapper;
@@ -48,12 +49,12 @@ public class ShopifyListingJob implements JobHandler {
         String errorMsg = "";
         if (!CollectionUtils.isEmpty(storeNames)) {
             LambdaQueryWrapper<OmsShop> inWrapper = new LambdaQueryWrapper<OmsShop>().eq(OmsShop::getPlatName, "Shopify").eq(OmsShop::getDeleted, 0).in(OmsShop::getName, storeNames);
-            List<OmsShop> OmsShops = omsShopMapper.selectList(inWrapper);
-            Map<String, OmsShop> nameMap = OmsShops.stream().collect(Collectors.toMap(OmsShop::getName, e -> e));
+            List<OmsShop> omsShops = omsShopMapper.selectList(inWrapper);
+            Map<String, OmsShop> nameMap = omsShops.stream().collect(Collectors.toMap(OmsShop::getName, e -> e));
             for (String storeName : storeNames) {
                 try {
-                    OmsShop OmsShop = nameMap.get(storeName);
-                    if (OmsShop == null) {
+                    OmsShop omsShop = nameMap.get(storeName);
+                    if (omsShop == null) {
                         throw new RuntimeException("当前店铺名称不存在");
                     }
                     Long lastId = 1L;
@@ -62,15 +63,14 @@ public class ShopifyListingJob implements JobHandler {
                         dto.setSuccessCode(200);
                         dto.setLimit(250L);
                         dto.setSince_id(lastId);
-                        dto.setShopName(storeName);
                         dto.setSleepTime(200L);
-                        ShopifyRetrieveAListOfProductsVO shopifyRetrieveAListOfProductsVo = shopifyClient.retrieveAListOfProducts(dto);
+                        ShopifyRetrieveAListOfProductsVO shopifyRetrieveAListOfProductsVo = shopifyService.getClient(omsShop.getAuthId()).retrieveAListOfProducts(dto);
                         List<ShopifyRetrieveAListOfProductsVO.ProductsDTO> items = shopifyRetrieveAListOfProductsVo.getProducts();
                         if (CollectionUtils.isEmpty(items)) {
                             break;
                         }
                         //操作db，新增或者更新
-                        saveOrUpdateSku(items, OmsShop);
+                        saveOrUpdateSku(items, omsShop);
                         lastId = items.get(items.size() - 1).getId();
                     }
                 } catch (Exception e) {

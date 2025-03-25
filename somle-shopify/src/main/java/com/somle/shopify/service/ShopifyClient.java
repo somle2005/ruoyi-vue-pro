@@ -5,15 +5,15 @@ import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
-import com.somle.shopify.model.*;
+import com.somle.shopify.model.ShopifyRetrieveAListOfProductsDTO;
+import com.somle.shopify.model.ShopifyRetrieveAListOfProductsVO;
+import com.somle.shopify.model.ShopifyToken;
+import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import okhttp3.Response;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
@@ -21,37 +21,21 @@ import static cn.iocoder.yudao.framework.common.util.web.WebUtils.sendRequest;
 
 // https://shopify.dev/docs/api/admin-rest/
 @Slf4j
-@Component
+@Data
 public class ShopifyClient {
 
-    public OkHttpClient webClient = new OkHttpClient();
-
-    public Map<String, ShopifyToken> tokenMap = new HashMap();
-
-    private ShopifyTokenHead getTokenHeadInfo(String storeName) {
-        ShopifyTokenHead tokenHead = new ShopifyTokenHead();
-        ShopifyToken shopifyToken = tokenMap.get(storeName);
-        if (shopifyToken == null || !StringUtils.hasText(shopifyToken.getAccessToken())
-            || !StringUtils.hasText(shopifyToken.getDomain())) {
-            throw new RuntimeException("accessToken is null");
-        }
-        tokenHead.setShopifyToken(shopifyToken);
-        Map<String, String> tokenValues = new HashMap<>();
-        tokenValues.put("X-Shopify-Access-Token", shopifyToken.getAccessToken());
-        tokenHead.setTokenValues(tokenValues);
-        return tokenHead;
-    }
+    private OkHttpClient webClient;
+    private ShopifyToken shopifyToken;
+    private Map<String, String> tokenValues;
 
     public ShopifyRetrieveAListOfProductsVO retrieveAListOfProducts(ShopifyRetrieveAListOfProductsDTO dto) {
         ShopifyRetrieveAListOfProductsVO shopifyRetrieveAListOfProductsVo = null;
-        String shopName = dto.getShopName();
-        ShopifyTokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
         String endpoint = "/admin/api/2024-10/products.json";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(tokenHeadInfo.getShopifyToken().getDomain() + endpoint)
+            .url(shopifyToken.getDomain() + endpoint)
             .queryParams(dto)
-            .headers(tokenHeadInfo.getTokenValues())
+            .headers(tokenValues)
             .build();
         Integer successCode = dto.getSuccessCode();
         try {
@@ -78,13 +62,12 @@ public class ShopifyClient {
 
 
     @SneakyThrows
-    public JSONObject getOrders(String shopName) {
+    public JSONObject getOrders() {
         String endpoint = "/admin/api/2024-10/orders.json?status=any";
-        ShopifyTokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(tokenHeadInfo.getShopifyToken().getDomain() + endpoint)
-            .headers(tokenHeadInfo.getTokenValues())
+            .url(shopifyToken.getDomain() + endpoint)
+            .headers(tokenValues)
             .build();
         String bodyString = sendRequest(request).body().string();
         JSONObject result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
@@ -92,13 +75,12 @@ public class ShopifyClient {
     }
 
     @SneakyThrows
-    public JSONObject getPayouts(String shopName) {
+    public JSONObject getPayouts() {
         var endpoint = "/admin/api/2024-10/shopify_payments/payouts.json";
-        ShopifyTokenHead tokenHeadInfo = getTokenHeadInfo(shopName);
         var request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
-            .url(tokenHeadInfo.getShopifyToken().getDomain() + endpoint)
-            .headers(tokenHeadInfo.getTokenValues())
+            .url(shopifyToken.getDomain() + endpoint)
+            .headers(tokenValues)
             .build();
         var bodyString = sendRequest(request).body().string();
         var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
