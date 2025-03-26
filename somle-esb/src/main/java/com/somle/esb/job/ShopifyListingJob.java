@@ -3,9 +3,9 @@ package com.somle.esb.job;
 import cn.iocoder.yudao.framework.common.util.string.StrUtils;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
 import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
-import cn.iocoder.yudao.module.oms.dal.OmsShopMapper;
-import cn.iocoder.yudao.module.oms.model.entity.OmsShopDO;
-import cn.iocoder.yudao.module.oms.model.entity.OmsSkuDO;
+import cn.iocoder.yudao.module.oms.repository.OmsShopRepository;
+import cn.iocoder.yudao.module.oms.model.OmsShopDO;
+import cn.iocoder.yudao.module.oms.model.OmsSkuDO;
 import cn.iocoder.yudao.module.oms.service.OmsSkuService;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -35,7 +35,7 @@ public class ShopifyListingJob implements JobHandler {
     private ShopifyService shopifyService;
 
     @Resource
-    private OmsShopMapper omsShopMapper;
+    private OmsShopRepository omsShopRepository;
 
     @Resource
     private OmsSkuService omsSkuService;
@@ -50,7 +50,7 @@ public class ShopifyListingJob implements JobHandler {
         String errorMsg = "";
         if (!CollectionUtils.isEmpty(storeNames)) {
             LambdaQueryWrapper<OmsShopDO> inWrapper = new LambdaQueryWrapper<OmsShopDO>().eq(OmsShopDO::getPlatName, "Shopify").eq(OmsShopDO::getDeleted, 0).in(OmsShopDO::getName, storeNames);
-            List<OmsShopDO> omsShopDOS = omsShopMapper.selectList(inWrapper);
+            List<OmsShopDO> omsShopDOS = omsShopRepository.selectList(inWrapper);
             Map<String, OmsShopDO> nameMap = omsShopDOS.stream().collect(Collectors.toMap(OmsShopDO::getName, e -> e));
             for (String storeName : storeNames) {
                 try {

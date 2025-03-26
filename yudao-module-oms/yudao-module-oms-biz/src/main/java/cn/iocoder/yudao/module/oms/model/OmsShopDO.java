@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.oms.model.entity;
+package cn.iocoder.yudao.module.oms.model;
 
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.IdType;

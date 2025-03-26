@@ -1,8 +1,8 @@
 package cn.iocoder.yudao.module.oms.service.impl;
 
-import cn.iocoder.yudao.module.oms.dal.OmsSkuMapper;
-import cn.iocoder.yudao.module.oms.model.entity.OmsShopDO;
-import cn.iocoder.yudao.module.oms.model.entity.OmsSkuDO;
+import cn.iocoder.yudao.module.oms.repository.OmsSkuRepository;
+import cn.iocoder.yudao.module.oms.model.OmsShopDO;
+import cn.iocoder.yudao.module.oms.model.OmsSkuDO;
 import cn.iocoder.yudao.module.oms.service.OmsSkuService;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import jakarta.annotation.Resource;
@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class OmsSkuServiceImpl implements OmsSkuService {
 
     @Resource
-    private OmsSkuMapper omsSkuMapper;
+    private OmsSkuRepository omsSkuRepository;
 
     /**
      * 批量插入或更新OmsSku
@@ -33,7 +33,7 @@ public class OmsSkuServiceImpl implements OmsSkuService {
             .in(OmsSkuDO::getSku, allSkus)
             .eq(OmsSkuDO::getStoreName, omsShopDO.getName())
             .eq(OmsSkuDO::getDeleted, 0);
-        List<OmsSkuDO> existSkus = omsSkuMapper.selectList(existEq);
+        List<OmsSkuDO> existSkus = omsSkuRepository.selectList(existEq);
         Map<String, OmsSkuDO> existSkuIdMaps = existSkus.stream().collect(Collectors.toMap(OmsSkuDO::getSku, e -> e));
 
         List<OmsSkuDO> saveOmsSkus = new ArrayList<>();
@@ -51,10 +51,10 @@ public class OmsSkuServiceImpl implements OmsSkuService {
             }
         }
         if (!CollectionUtils.isEmpty(saveOmsSkus)) {
-            omsSkuMapper.insert(saveOmsSkus);
+            omsSkuRepository.insert(saveOmsSkus);
         }
         if (!CollectionUtils.isEmpty(updateOmsSkus)) {
-            omsSkuMapper.updateById(updateOmsSkus);
+            omsSkuRepository.updateById(updateOmsSkus);
         }
         List<OmsSkuDO> allOmsSkus = new ArrayList<>();
         allOmsSkus.addAll(saveOmsSkus);
