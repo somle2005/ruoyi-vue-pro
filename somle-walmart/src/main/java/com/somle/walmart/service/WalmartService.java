@@ -1,11 +1,14 @@
 package com.somle.walmart.service;
 
 
+import cn.iocoder.yudao.framework.common.util.string.StrUtils;
+import com.somle.walmart.model.WalmartToken;
 import com.somle.walmart.repository.WalmartTokenRepository;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Service;
 
 
@@ -19,13 +22,16 @@ public class WalmartService {
 
     private WalmartClient client;
 
-    public WalmartClient getClient() {
+    public WalmartClient getClient(Long tokenId) {
+        if (tokenId == null) {
+            throw new RuntimeException("WalmartId不能为空");
+        }
         if (client == null) {
-            var token = tokenRepository.findAll().get(0);
-            if (token.getSvcName().equals("Walmart Marketplace")) {
-                client = new WalmartMarketplaceClient(token);
+            WalmartToken walmartToken = tokenRepository.findById(tokenId).get();
+            if (walmartToken.getSvcName().equals("Walmart Marketplace")) {
+                client = new WalmartMarketplaceClient(walmartToken);
             } else {
-                client = new WalmartDsvClient(token, "752076");
+                client = new WalmartDsvClient(walmartToken, walmartToken.getShipNode());
             }
         }
         return client;

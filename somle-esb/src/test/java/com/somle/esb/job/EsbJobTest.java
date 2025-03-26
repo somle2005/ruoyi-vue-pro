@@ -21,6 +21,7 @@ import com.somle.esb.converter.DingTalkToErpConverter;
 import com.somle.esb.converter.EccangToErpConverter;
 import com.somle.esb.converter.ErpToEccangConverter;
 import com.somle.esb.converter.ErpToKingdeeConverter;
+import com.somle.esb.job.common.SyncShopProductsJob;
 import com.somle.esb.service.AliyunService;
 import com.somle.esb.service.EsbMappingService;
 import com.somle.esb.service.EsbService;
@@ -40,39 +41,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Disabled
 @Import({
-    EsbService.class,
-    AliyunService.class,
-//    EsbMappingService.class,
-//    ErpService.class,
-//    EccangService.class,
-//    DingTalkService.class,
-//    KingdeeService.class,
-//    AmazonService.class,
-    ShopifyService.class,
-
-//    DeptServiceImpl.class,
-//    AdminUserServiceImpl.class,
-//    PostServiceImpl.class,
-//    RoleServiceImpl.class,
-//    MenuServiceImpl.class,
-//    TenantServiceImpl.class,
-//    PermissionServiceImpl.class,
-
-
-//    DingTalkToErpConverter.class,
-//    ErpToEccangConverter.class,
-//    ErpToKingdeeConverter.class,
-//    EccangToErpConverter.class,
-
-    ShopifyOrderDataJob.class,
-
-
-
-
-    YudaoSecurityAutoConfiguration.class,
-    SecurityAutoConfiguration.class,
-    IntegrationConfig.class,
-    QuartzAutoConfiguration.class,
     // MyBatis 配置类
     DataSourceAutoConfiguration.class,
     YudaoMybatisAutoConfiguration.class, //Enable DefaultDBFieldHandler
@@ -81,64 +49,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 })
 //@MapperScan("cn.iocoder.yudao.module.system.dal.mysql.dept")
 class EsbJobTest extends SomleBaseSpringTest {
-    @Resource
-    EsbService service;
-
-
-    @MockBean
-    EccangService eccangService;
-    @MockBean
-    DingTalkService dingTalkService;
-    @MockBean
-    KingdeeService kingdeeService;
-    @MockBean
-    AmazonService amazonService;
-    @MockBean
-    MatomoService matomoService;
-    @MockBean
-    AiService aiService;
-
-
-
-    @MockBean
-    DeptMapper deptMapper;
-    @MockBean
-    AdminUserService userService;
-    @MockBean
-    DeptService deptService;
-    @MockBean
-    PostService postService;
-    @MockBean
-    PermissionService permissionService;
-    @MockBean
-    PasswordEncoder passwordEncoder;
-    @MockBean
-    TenantService tenantService;
-    @MockBean
-    FileApi fileApi;
-    @MockBean
-    ConfigApi configApi;
-
-
-    @MockBean
-    EsbMappingService esbMappingService;
-    @MockBean
-    DingTalkToErpConverter dingTalkToErpConverter;
-    @MockBean
-    ErpToEccangConverter erpToEccangConverter;
-    @MockBean
-    ErpToKingdeeConverter erpToKingdeeConverter;
-    @MockBean
-    EccangToErpConverter eccangToErpConverter;
-
-
-    @Resource
-    ShopifyOrderDataJob shopifyOrderDataJob;
 
 
 
     @Test
     void testDataJob() throws Exception {
-        shopifyOrderDataJob.execute("2024-11-07");
+        SyncShopProductsJob syncShopProductsJob = new SyncShopProductsJob();
+        syncShopProductsJob.execute("Walmart-1549");
     }
 }

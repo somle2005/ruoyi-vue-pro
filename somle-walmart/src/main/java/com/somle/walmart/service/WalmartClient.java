@@ -1,22 +1,29 @@
 package com.somle.walmart.service;
 
 
+import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.util.io.IoUtils;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
-import com.somle.walmart.model.WalmartOrderReqVO;
+import com.alibaba.fastjson.JSON;
+import com.somle.walmart.model.reps.WalmartAllItemsRepsVO;
+import com.somle.walmart.model.req.WalmartAllItemsReqVO;
+import com.somle.walmart.model.req.WalmartOrderReqVO;
 import com.somle.walmart.model.WalmartToken;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.tomcat.util.codec.binary.Base64;
 import org.springframework.scheduling.annotation.Scheduled;
-
 import java.io.*;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -80,7 +87,7 @@ public abstract class WalmartClient {
         Response response = client.newCall(request).execute();
         var bodyString = response.body().string();
         log.info(bodyString);
-        var result = JsonUtils.parseObject(bodyString, JSONObject.class);
+        var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
         return result.getString("access_token");
     }
 
@@ -103,7 +110,7 @@ public abstract class WalmartClient {
                 .build();
         Response response = client.newCall(request).execute();
         var bodyString = response.body().string();
-        var result = JsonUtils.parseObject(bodyString, JSONObject.class);
+        var result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
         return result;
     }
 
@@ -187,6 +194,46 @@ public abstract class WalmartClient {
         Response response = client.newCall(request).execute();
         var bodyString = response.body().string();
         var result = JsonUtils.parseObject(bodyString, JSONObject.class);
+        return result;
+    }
+
+
+    /**
+     * @param walmartAllItemsReqVO 获取所有商品信息请求体
+     * @Author: gumaomao
+     * @Date: 2025/03/25
+     * @Description: 获取所有商品信息
+     * @return: @return {@link WalmartAllItemsRepsVO }
+     */
+    @SneakyThrows
+    public List<JSONObject> getAllProducts(WalmartAllItemsReqVO walmartAllItemsReqVO) {
+        OkHttpClient client = new OkHttpClient().newBuilder()
+            .build();
+        int offset = walmartAllItemsReqVO.getOffset();
+        int limit = walmartAllItemsReqVO.getLimit();
+        HttpUrl url = url("v3/items");
+        List<WalmartAllItemsRepsVO.ItemResponseDTO> allProducts = new ArrayList<>();
+        while (true) {
+            HttpUrl.Builder urlBuilder = url.newBuilder();
+            urlBuilder.addQueryParameter("offset", String.valueOf(offset));
+            urlBuilder.addQueryParameter("limit", String.valueOf(limit));
+            Request request = new Request.Builder()
+                .url(urlBuilder.build().toString())
+                .method("GET", null)
+                .headers(headers())
+                .build();
+            Response response = client.newCall(request).execute();
+            var bodyString = response.body().string();
+            WalmartAllItemsRepsVO walmartAllItemsResVO = JSON.parseObject(bodyString, WalmartAllItemsRepsVO.class);
+            if (CollUtil.isEmpty(walmartAllItemsResVO.getItemResponse())) {
+                break;
+            }
+            offset += limit;
+            //防止限流
+            TimeUnit.MILLISECONDS.sleep(200L);
+            allProducts.addAll(walmartAllItemsResVO.getItemResponse());
+        }
+        List<JSONObject> result = allProducts.stream().map(itemResponseDTO -> {return JsonUtilsX.toJSONObject(itemResponseDTO);}).collect(Collectors.toList());
         return result;
     }
 }

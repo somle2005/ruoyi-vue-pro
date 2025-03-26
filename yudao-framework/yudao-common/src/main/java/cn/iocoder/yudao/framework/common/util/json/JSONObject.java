@@ -5,9 +5,11 @@ package cn.iocoder.yudao.framework.common.util.json;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -33,6 +35,10 @@ public class JSONObject extends ObjectNode{
         this.setAll(other);
     }
 
+    public JSONObject(JsonNode other) {
+        super(JsonUtilsX.getNodeFactory());
+        other.fields().forEachRemaining(entry -> this.set(entry.getKey(), entry.getValue()));
+    }
 
     public List<Map.Entry<String, JsonNode>> entrySet() {
         return _children.entrySet().stream().toList();
@@ -62,6 +68,17 @@ public class JSONObject extends ObjectNode{
                 .filter(JsonNode::isInt) // Ensure the element is a text node
                 .map(JsonNode::asInt) // Extract text value
                 .collect(Collectors.toList()); // Collect into a list
+    }
+
+    public BigDecimal getBigDecimal(String fieldName) {
+        var value=this.get(fieldName);
+        if(value==null) {
+            return null;
+        }
+        if(value instanceof NullNode) {
+            return null;
+        }
+        return new BigDecimal(value.asText());
     }
 
     public JSONArray getJSONArray(String fieldName) {
@@ -96,4 +113,15 @@ public class JSONObject extends ObjectNode{
 //    public List<Map.Entry<String, JsonNode>> entrySet() {
 //        return ListUtil.toList(node.fields());
 //    }
+
+    public JSONObject getJSONObject(String fieldName) {
+        JsonNode value=this.get(fieldName);
+        if(value==null) {
+            return null;
+        }
+        if(value instanceof NullNode) {
+            return null;
+        }
+        return new JSONObject((ObjectNode) value);
+    }
 }

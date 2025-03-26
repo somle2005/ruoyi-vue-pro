@@ -1,4 +1,4 @@
-package com.somle.walmart.model;
+package com.somle.walmart.model.req;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
