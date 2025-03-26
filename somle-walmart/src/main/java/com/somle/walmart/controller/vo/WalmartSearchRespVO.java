@@ -1,4 +1,4 @@
-package com.somle.walmart.model;
+package com.somle.walmart.controller.vo;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.List;
  **/
 @NoArgsConstructor
 @Data
-public class WalmartSearchResVO {
+public class WalmartSearchRespVO {
 
     private List<ItemsDTO> items;
 

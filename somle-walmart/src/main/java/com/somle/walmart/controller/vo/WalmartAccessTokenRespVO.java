@@ -1,4 +1,4 @@
-package com.somle.walmart.model;
+package com.somle.walmart.controller.vo;
 
 import com.alibaba.fastjson.annotation.JSONField;
 import lombok.Data;

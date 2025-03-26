@@ -1,4 +1,4 @@
-package com.somle.walmart.model;
+package com.somle.walmart.controller.vo;
 
 import lombok.Builder;
 import lombok.Data;

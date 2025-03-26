@@ -1,4 +1,4 @@
-package com.somle.walmart.model;
+package com.somle.walmart.controller.vo;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @create: 2025-03-21 11:20
  **/
 @Data
-public class WalmartGetReconFileReq {
+public class WalmartGetReconFileReqVO {
 
     private String reportVersion;
     private String reportDate;

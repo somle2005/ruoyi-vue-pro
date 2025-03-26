@@ -1,4 +1,4 @@
-package com.somle.walmart.model;
+package com.somle.walmart.controller.vo;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @create: 2025-03-21 10:45
  **/
 @Data
-public class WalmartGetAllItemsDTO {
+public class WalmartGetAllItemsReqVO {
 
     private String nextCursor;
 

@@ -5,8 +5,8 @@ import cn.hutool.core.collection.CollectionUtil;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.somle.walmart.dal.WalmartTokenMapper;
-import com.somle.walmart.model.WalmartAccessTokenRespVO;
+import com.somle.walmart.repository.WalmartTokenRepository;
+import com.somle.walmart.controller.vo.WalmartAccessTokenRespVO;
 import com.somle.walmart.model.WalmartTokenDO;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -32,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 public class WalmartService {
 
     @Resource
-    private WalmartTokenMapper walmartTokenMapper;
+    private WalmartTokenRepository walmartTokenRepository;
 
     public Map<Long, WalmartClient> clientMap = new HashMap();
 
@@ -60,7 +60,7 @@ public class WalmartService {
         //查询全部的token账户
         LambdaQueryWrapper<WalmartTokenDO> walmartTokenLambdaQueryWrapper = new LambdaQueryWrapper<>();
         walmartTokenLambdaQueryWrapper.eq(WalmartTokenDO::getType, "ORDINARY");
-        List<WalmartTokenDO> walmartTokenDOS = walmartTokenMapper.selectList(walmartTokenLambdaQueryWrapper);
+        List<WalmartTokenDO> walmartTokenDOS = walmartTokenRepository.selectList(walmartTokenLambdaQueryWrapper);
         List<WalmartTokenDO> updateWalmartTokenDOS = new ArrayList<>();
         if (!CollectionUtils.isEmpty(walmartTokenDOS)) {
             //循环调用 平台获取token接口
@@ -82,7 +82,7 @@ public class WalmartService {
         }
         //把token更新入库
         if (!CollectionUtils.isEmpty(updateWalmartTokenDOS)) {
-            walmartTokenMapper.updateById(updateWalmartTokenDOS);
+            walmartTokenRepository.updateById(updateWalmartTokenDOS);
         }
     }
 

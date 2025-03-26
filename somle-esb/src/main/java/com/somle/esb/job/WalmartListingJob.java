@@ -10,10 +10,10 @@ import cn.iocoder.yudao.module.oms.service.OmsSkuService;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.esb.enums.TenantId;
-import com.somle.walmart.model.WalmartAllItemsResVO;
-import com.somle.walmart.model.WalmartGetAllItemsDTO;
-import com.somle.walmart.model.WalmartSearchDTO;
-import com.somle.walmart.model.WalmartSearchResVO;
+import com.somle.walmart.controller.vo.WalmartAllItemsRespVO;
+import com.somle.walmart.controller.vo.WalmartGetAllItemsReqVO;
+import com.somle.walmart.controller.vo.WalmartSearchReqVO;
+import com.somle.walmart.controller.vo.WalmartSearchRespVO;
 import com.somle.walmart.service.WalmartClient;
 import com.somle.walmart.service.WalmartService;
 import jakarta.annotation.Resource;
@@ -69,28 +69,28 @@ public class WalmartListingJob implements JobHandler {
                     String nextCursor = "*";
                     while (true) {
                         WalmartClient client = walmartService.getClient(omsShopDO.getAuthId());
-                        WalmartGetAllItemsDTO walmartGetAllItemsDto = new WalmartGetAllItemsDTO();
-                        walmartGetAllItemsDto.setNextCursor(nextCursor);
-                        walmartGetAllItemsDto.setLimit(500L);
-                        walmartGetAllItemsDto.setSuccessCode(200);
-                        WalmartAllItemsResVO walmartAllItemsResVO = client.getAllItems(walmartGetAllItemsDto);
-                        List<WalmartAllItemsResVO.ItemResponseDTO> itemResponse = walmartAllItemsResVO.getItemResponse();
+                        WalmartGetAllItemsReqVO walmartGetAllItemsReqVO = new WalmartGetAllItemsReqVO();
+                        walmartGetAllItemsReqVO.setNextCursor(nextCursor);
+                        walmartGetAllItemsReqVO.setLimit(500L);
+                        walmartGetAllItemsReqVO.setSuccessCode(200);
+                        WalmartAllItemsRespVO walmartAllItemsRespVO = client.getAllItems(walmartGetAllItemsReqVO);
+                        List<WalmartAllItemsRespVO.ItemResponseDTO> itemResponse = walmartAllItemsRespVO.getItemResponse();
                         if (CollectionUtils.isEmpty(itemResponse)) {
                             break;
                         }
                         //查询详情接口
-                        WalmartSearchDTO walmartSearchDTO = new WalmartSearchDTO();
+                        WalmartSearchReqVO walmartSearchReqVO = new WalmartSearchReqVO();
                         String gtin = itemResponse.stream().map(e -> e.getGtin()).collect(Collectors.joining(","));
-                        walmartSearchDTO.setGtin(gtin);
-                        walmartSearchDTO.setSuccessCode(200);
-                        walmartSearchDTO.setSleepTime(100L);
-                        WalmartSearchResVO walmartSearchResVO = client.searchItem(walmartSearchDTO);
-                        List<WalmartSearchResVO.ItemsDTO> items = walmartSearchResVO.getItems();
+                        walmartSearchReqVO.setGtin(gtin);
+                        walmartSearchReqVO.setSuccessCode(200);
+                        walmartSearchReqVO.setSleepTime(100L);
+                        WalmartSearchRespVO walmartSearchRespVO = client.searchItem(walmartSearchReqVO);
+                        List<WalmartSearchRespVO.ItemsDTO> items = walmartSearchRespVO.getItems();
                         //组装详细信息
                         assemblyDetails(itemResponse, items);
                         //操作db，新增或者更新
                         saveOrUpdateSku(itemResponse, omsShopDO);
-                        nextCursor = walmartAllItemsResVO.getNextCursor();
+                        nextCursor = walmartAllItemsRespVO.getNextCursor();
                     }
                 } catch (Exception e) {
                     log.error("店铺名称{},出现异常", storeName, e);
@@ -104,13 +104,13 @@ public class WalmartListingJob implements JobHandler {
         return "success";
     }
 
-    private void assemblyDetails(List<WalmartAllItemsResVO.ItemResponseDTO> itemResponse, List<WalmartSearchResVO.ItemsDTO> items) {
+    private void assemblyDetails(List<WalmartAllItemsRespVO.ItemResponseDTO> itemResponse, List<WalmartSearchRespVO.ItemsDTO> items) {
         if (!CollectionUtils.isEmpty(items)) {
-            Map<String, List<WalmartSearchResVO.ItemsDTO>> titleGroup = items.stream().collect(Collectors.groupingBy(WalmartSearchResVO.ItemsDTO::getTitle));
-            for (WalmartAllItemsResVO.ItemResponseDTO itemResponseDTO : itemResponse) {
-                List<WalmartSearchResVO.ItemsDTO> itemsDTOS = titleGroup.get(itemResponseDTO.getProductName());
+            Map<String, List<WalmartSearchRespVO.ItemsDTO>> titleGroup = items.stream().collect(Collectors.groupingBy(WalmartSearchRespVO.ItemsDTO::getTitle));
+            for (WalmartAllItemsRespVO.ItemResponseDTO itemResponseDTO : itemResponse) {
+                List<WalmartSearchRespVO.ItemsDTO> itemsDTOS = titleGroup.get(itemResponseDTO.getProductName());
                 if (!CollectionUtils.isEmpty(itemsDTOS)) {
-                    WalmartSearchResVO.ItemsDTO itemsDTO = itemsDTOS.get(0);
+                    WalmartSearchRespVO.ItemsDTO itemsDTO = itemsDTOS.get(0);
                     itemResponseDTO.setItemsDTO(itemsDTO);
                 }
             }
@@ -118,12 +118,12 @@ public class WalmartListingJob implements JobHandler {
     }
 
 
-    private void saveOrUpdateSku(List<WalmartAllItemsResVO.ItemResponseDTO> itemDTOs, OmsShopDO omsShopDO) {
-        List<WalmartAllItemsResVO.ItemResponseDTO> items = new ArrayList<>();
-        Map<String, List<WalmartAllItemsResVO.ItemResponseDTO>> skuMap = itemDTOs.stream().filter(e -> StringUtils.hasText(e.getSku())).collect(Collectors.groupingBy(WalmartAllItemsResVO.ItemResponseDTO::getSku));
+    private void saveOrUpdateSku(List<WalmartAllItemsRespVO.ItemResponseDTO> itemDTOs, OmsShopDO omsShopDO) {
+        List<WalmartAllItemsRespVO.ItemResponseDTO> items = new ArrayList<>();
+        Map<String, List<WalmartAllItemsRespVO.ItemResponseDTO>> skuMap = itemDTOs.stream().filter(e -> StringUtils.hasText(e.getSku())).collect(Collectors.groupingBy(WalmartAllItemsRespVO.ItemResponseDTO::getSku));
         Set<String> allSkus = skuMap.keySet();
         for (String sku : allSkus) {
-            WalmartAllItemsResVO.ItemResponseDTO OmsSku = skuMap.get(sku).get(0);
+            WalmartAllItemsRespVO.ItemResponseDTO OmsSku = skuMap.get(sku).get(0);
             items.add(OmsSku);
         }
         if (CollectionUtils.isEmpty(items)) {
@@ -136,8 +136,8 @@ public class WalmartListingJob implements JobHandler {
         omsSkuService.insertOrUpdateOmsSku(omsShopDO, doDBOmsSkus);
     }
 
-    private void assemblyData(OmsShopDO omsShopDO, List<WalmartAllItemsResVO.ItemResponseDTO> items, List<OmsSkuDO> doDBOmsSkus) {
-        for (WalmartAllItemsResVO.ItemResponseDTO eachItem : items) {
+    private void assemblyData(OmsShopDO omsShopDO, List<WalmartAllItemsRespVO.ItemResponseDTO> items, List<OmsSkuDO> doDBOmsSkus) {
+        for (WalmartAllItemsRespVO.ItemResponseDTO eachItem : items) {
             OmsSkuDO omsSku = new OmsSkuDO();
             omsSku.setPlatSkuCode(eachItem.getWpid());
             omsSku.setSku(eachItem.getSku());
@@ -161,7 +161,7 @@ public class WalmartListingJob implements JobHandler {
             } else if ("UNPUBLISHED".equals(publishedStatus)) {
                 omsSku.setDiscoverableStatus(0);
             }
-            WalmartAllItemsResVO.ItemResponseDTO.PriceDTO priceDTO = eachItem.getPrice();
+            WalmartAllItemsRespVO.ItemResponseDTO.PriceDTO priceDTO = eachItem.getPrice();
             if (priceDTO != null) {
                 omsSku.setPrice(priceDTO.getAmount());
                 omsSku.setPriceUnit(priceDTO.getCurrency());
@@ -170,10 +170,10 @@ public class WalmartListingJob implements JobHandler {
             omsSku.setGtin(eachItem.getGtin());
             omsSku.setTitle(eachItem.getProductName());
             omsSku.setProductType(eachItem.getProductType());
-            WalmartSearchResVO.ItemsDTO itemsDTO = eachItem.getItemsDTO();
+            WalmartSearchRespVO.ItemsDTO itemsDTO = eachItem.getItemsDTO();
             if (itemsDTO != null) {
                 omsSku.setPlatSkuId(itemsDTO.getItemId());
-                List<WalmartSearchResVO.ItemsDTO.ImagesDTO> images = itemsDTO.getImages();
+                List<WalmartSearchRespVO.ItemsDTO.ImagesDTO> images = itemsDTO.getImages();
                 if (!CollectionUtils.isEmpty(images)) {
                     omsSku.setMainImageUrl(images.get(0).getUrl());
                 }
