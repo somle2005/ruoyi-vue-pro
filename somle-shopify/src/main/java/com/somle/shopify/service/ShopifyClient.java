@@ -5,8 +5,8 @@ import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
-import com.somle.shopify.model.ShopifyRetrieveAListOfProductsDTO;
-import com.somle.shopify.model.ShopifyRetrieveAListOfProductsVO;
+import com.somle.shopify.controller.vo.ShopifyRetrieveAListOfProductsReqVO;
+import com.somle.shopify.controller.vo.ShopifyRetrieveAListOfProductsRespVO;
 import com.somle.shopify.model.ShopifyTokenDO;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -28,8 +28,8 @@ public class ShopifyClient {
     private ShopifyTokenDO shopifyTokenDO;
     private Map<String, String> tokenValues;
 
-    public ShopifyRetrieveAListOfProductsVO retrieveAListOfProducts(ShopifyRetrieveAListOfProductsDTO dto) {
-        ShopifyRetrieveAListOfProductsVO shopifyRetrieveAListOfProductsVo = null;
+    public ShopifyRetrieveAListOfProductsRespVO retrieveAListOfProducts(ShopifyRetrieveAListOfProductsReqVO dto) {
+        ShopifyRetrieveAListOfProductsRespVO shopifyRetrieveAListOfProductsRespVo = null;
         String endpoint = "/admin/api/2024-10/products.json";
         RequestX request = RequestX.builder()
             .requestMethod(RequestX.Method.GET)
@@ -44,7 +44,7 @@ public class ShopifyClient {
             if (!successCode.equals(response.code())) {
                 throw new RuntimeException(responseJson);
             }
-            shopifyRetrieveAListOfProductsVo = JSON.parseObject(responseJson, ShopifyRetrieveAListOfProductsVO.class);
+            shopifyRetrieveAListOfProductsRespVo = JSON.parseObject(responseJson, ShopifyRetrieveAListOfProductsRespVO.class);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -57,7 +57,7 @@ public class ShopifyClient {
                 throw new RuntimeException(e);
             }
         }
-        return shopifyRetrieveAListOfProductsVo;
+        return shopifyRetrieveAListOfProductsRespVo;
     }
 
 

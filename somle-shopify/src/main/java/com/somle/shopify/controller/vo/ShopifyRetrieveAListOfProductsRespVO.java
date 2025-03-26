@@ -1,4 +1,4 @@
-package com.somle.shopify.model;
+package com.somle.shopify.controller.vo;
 
 import cn.iocoder.yudao.framework.common.util.custom.MyHtmlEscapeUtil;
 import lombok.Data;
@@ -15,7 +15,7 @@ import java.util.List;
  **/
 @NoArgsConstructor
 @Data
-public class ShopifyRetrieveAListOfProductsVO {
+public class ShopifyRetrieveAListOfProductsRespVO {
 
     private List<ProductsDTO> products;
 

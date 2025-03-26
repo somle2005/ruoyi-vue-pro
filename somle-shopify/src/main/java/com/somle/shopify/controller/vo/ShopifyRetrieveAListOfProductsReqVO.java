@@ -1,4 +1,4 @@
-package com.somle.shopify.model;
+package com.somle.shopify.controller.vo;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import lombok.Data;
  * @create: 2025-03-18 15:04
  **/
 @Data
-public class ShopifyRetrieveAListOfProductsDTO {
+public class ShopifyRetrieveAListOfProductsReqVO {
 
 
     private Long since_id;

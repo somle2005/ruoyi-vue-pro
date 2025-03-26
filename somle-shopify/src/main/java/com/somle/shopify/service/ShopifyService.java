@@ -3,7 +3,7 @@ package com.somle.shopify.service;
 import cn.hutool.core.collection.CollectionUtil;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.somle.shopify.dal.ShopifyTokenMapper;
+import com.somle.shopify.repository.ShopifyTokenRepository;
 import com.somle.shopify.model.ShopifyTokenDO;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -29,7 +29,7 @@ import java.util.concurrent.CompletableFuture;
 public class ShopifyService {
 
     @Resource
-    private ShopifyTokenMapper shopifyTokenMapper;
+    private ShopifyTokenRepository shopifyTokenRepository;
 
     public Map<Long, ShopifyClient> clientMap = new HashMap();
 
@@ -55,7 +55,7 @@ public class ShopifyService {
         log.info("Shopify refreshToken start");
         //查询所有能认证的店铺
         LambdaQueryWrapper<ShopifyTokenDO> shopifyTokenLambdaQueryWrapper = new LambdaQueryWrapper<>();
-        List<ShopifyTokenDO> shopifyTokenDOS = shopifyTokenMapper.selectList(shopifyTokenLambdaQueryWrapper);
+        List<ShopifyTokenDO> shopifyTokenDOS = shopifyTokenRepository.selectList(shopifyTokenLambdaQueryWrapper);
         if (!CollectionUtils.isEmpty(shopifyTokenDOS)) {
             //循环调用 平台获取token接口
             for (ShopifyTokenDO shopifyTokenDO : shopifyTokenDOS) {

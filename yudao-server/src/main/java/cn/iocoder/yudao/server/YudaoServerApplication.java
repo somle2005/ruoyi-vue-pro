@@ -18,7 +18,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 @SuppressWarnings("SpringComponentScan") // 忽略 IDEA 无法识别 ${yudao.info.base-package}
 @SpringBootApplication(scanBasePackages = {"${yudao.info.base-package}.server", "${yudao.info.base-package}.module","com.somle"})
 @EnableJpaRepositories(basePackages = "com.somle")
-@MapperScan(basePackages = {"com.somle.shopify.dal","com.somle.walmart.dal"})
+@MapperScan(basePackages = {"com.somle.shopify.repository", "com.somle.walmart.repository"})
 @EntityScan(basePackages = "com.somle")
 public class YudaoServerApplication {
 

@@ -10,8 +10,8 @@ import cn.iocoder.yudao.module.oms.service.OmsSkuService;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.somle.esb.enums.TenantId;
-import com.somle.shopify.model.ShopifyRetrieveAListOfProductsDTO;
-import com.somle.shopify.model.ShopifyRetrieveAListOfProductsVO;
+import com.somle.shopify.controller.vo.ShopifyRetrieveAListOfProductsReqVO;
+import com.somle.shopify.controller.vo.ShopifyRetrieveAListOfProductsRespVO;
 import com.somle.shopify.service.ShopifyService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -60,13 +60,13 @@ public class ShopifyListingJob implements JobHandler {
                     }
                     Long lastId = 1L;
                     while (true) {
-                        ShopifyRetrieveAListOfProductsDTO dto = new ShopifyRetrieveAListOfProductsDTO();
+                        ShopifyRetrieveAListOfProductsReqVO dto = new ShopifyRetrieveAListOfProductsReqVO();
                         dto.setSuccessCode(200);
                         dto.setLimit(250L);
                         dto.setSince_id(lastId);
                         dto.setSleepTime(200L);
-                        ShopifyRetrieveAListOfProductsVO shopifyRetrieveAListOfProductsVo = shopifyService.getClient(omsShopDO.getAuthId()).retrieveAListOfProducts(dto);
-                        List<ShopifyRetrieveAListOfProductsVO.ProductsDTO> items = shopifyRetrieveAListOfProductsVo.getProducts();
+                        ShopifyRetrieveAListOfProductsRespVO shopifyRetrieveAListOfProductsRespVo = shopifyService.getClient(omsShopDO.getAuthId()).retrieveAListOfProducts(dto);
+                        List<ShopifyRetrieveAListOfProductsRespVO.ProductsDTO> items = shopifyRetrieveAListOfProductsRespVo.getProducts();
                         if (CollectionUtils.isEmpty(items)) {
                             break;
                         }
@@ -86,9 +86,9 @@ public class ShopifyListingJob implements JobHandler {
         return "success";
     }
 
-    private void saveOrUpdateSku(List<ShopifyRetrieveAListOfProductsVO.ProductsDTO> items, OmsShopDO omsShopDO) {
+    private void saveOrUpdateSku(List<ShopifyRetrieveAListOfProductsRespVO.ProductsDTO> items, OmsShopDO omsShopDO) {
         List<OmsSkuDO> doDBOmsSkus = new ArrayList<>();
-        for (ShopifyRetrieveAListOfProductsVO.ProductsDTO parentItem : items) {
+        for (ShopifyRetrieveAListOfProductsRespVO.ProductsDTO parentItem : items) {
             //组装数据
             assemblyData(omsShopDO, doDBOmsSkus, parentItem);
         }
@@ -96,7 +96,7 @@ public class ShopifyListingJob implements JobHandler {
         omsSkuService.insertOrUpdateOmsSku(omsShopDO, doDBOmsSkus);
     }
 
-    private void assemblyData(OmsShopDO omsShopDO, List<OmsSkuDO> doDBOmsSkus, ShopifyRetrieveAListOfProductsVO.ProductsDTO parentItem) {
+    private void assemblyData(OmsShopDO omsShopDO, List<OmsSkuDO> doDBOmsSkus, ShopifyRetrieveAListOfProductsRespVO.ProductsDTO parentItem) {
         //获取父产品信息
         String productType = parentItem.getProductType();
         String status = parentItem.getStatus();
@@ -113,15 +113,15 @@ public class ShopifyListingJob implements JobHandler {
         String bodyHtml = parentItem.getBodyHtml();
         String vendor = parentItem.getVendor();
         String originalJson = JSON.toJSONString(parentItem);
-        List<ShopifyRetrieveAListOfProductsVO.ProductsDTO.VariantsDTO> variants = parentItem.getVariants();
-        List<ShopifyRetrieveAListOfProductsVO.ProductsDTO.ImagesDTO> images = parentItem.getImages();
-        Map<Long, ShopifyRetrieveAListOfProductsVO.ProductsDTO.ImagesDTO> imagesIdMap = new HashMap<>();
+        List<ShopifyRetrieveAListOfProductsRespVO.ProductsDTO.VariantsDTO> variants = parentItem.getVariants();
+        List<ShopifyRetrieveAListOfProductsRespVO.ProductsDTO.ImagesDTO> images = parentItem.getImages();
+        Map<Long, ShopifyRetrieveAListOfProductsRespVO.ProductsDTO.ImagesDTO> imagesIdMap = new HashMap<>();
         if (!CollectionUtils.isEmpty(images)) {
-            imagesIdMap = images.stream().collect(Collectors.toMap(ShopifyRetrieveAListOfProductsVO.ProductsDTO.ImagesDTO::getId, e -> e));
+            imagesIdMap = images.stream().collect(Collectors.toMap(ShopifyRetrieveAListOfProductsRespVO.ProductsDTO.ImagesDTO::getId, e -> e));
         }
         //处理子产品
         if (!CollectionUtils.isEmpty(variants)) {
-            for (ShopifyRetrieveAListOfProductsVO.ProductsDTO.VariantsDTO childItem : variants) {
+            for (ShopifyRetrieveAListOfProductsRespVO.ProductsDTO.VariantsDTO childItem : variants) {
                 OmsSkuDO childOmsSku = new OmsSkuDO();
                 String childSku = childItem.getSku();
                 childOmsSku.setSku(childSku);
@@ -144,7 +144,7 @@ public class ShopifyListingJob implements JobHandler {
                 childOmsSku.setDescribe(bodyHtml);
                 Long imageId = childItem.getImageId();
                 if (imageId != null) {
-                    ShopifyRetrieveAListOfProductsVO.ProductsDTO.ImagesDTO imagesDTO = imagesIdMap.get(imageId);
+                    ShopifyRetrieveAListOfProductsRespVO.ProductsDTO.ImagesDTO imagesDTO = imagesIdMap.get(imageId);
                     if (imagesDTO != null) {
                         childOmsSku.setMainImageUrl(imagesDTO.getSrc());
                     }
