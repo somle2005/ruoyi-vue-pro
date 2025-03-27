@@ -1,8 +1,9 @@
-package com.somle.esb.job.common;
+package com.somle.esb.job.oms.shop;
 
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.json.JSONArray;
 import cn.iocoder.yudao.framework.common.util.string.CharSymbols;
+import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
 import cn.iocoder.yudao.module.oms.dal.dataobject.ErpShopProductDO;
 import cn.iocoder.yudao.module.oms.dal.dataobject.OmsShopDO;
 import cn.iocoder.yudao.module.oms.service.ErpShopProductService;
@@ -11,51 +12,38 @@ import com.alibaba.fastjson.JSONObject;
 import com.somle.esb.converter.shop.AbstractErpShopProfileConverter;
 import com.somle.esb.enums.SalesPlatform;
 import com.somle.esb.enums.ShopProfileType;
-import com.somle.esb.job.DataJob;
 import com.somle.esb.model.ShopProfileDTO;
 import com.somle.esb.platform.shop.ShopProfileClient;
 import jakarta.annotation.Resource;
-import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@Slf4j
+
 @Component
-public class SyncShopProductsJob extends DataJob {
+public class SyncShopProductsJob implements JobHandler {
 
 
     @Resource
-    private ApplicationContext applicationContext;
+    ApplicationContext applicationContext;
 
     @Resource
-    private ErpShopProductService shopProductService;
+    ErpShopProductService shopProductService;
 
     @Resource
-    private OmsShopService omsShopService;
-
+    OmsShopService omsShopService;
 
     @Override
     public String execute(String param) throws Exception {
-        OmsShopDO shopDO = omsShopService.getByPlatformShopUid(param);
-        SalesPlatform salesPlatform = null;
-        if ("WALMART".equals(shopDO.getPlatName())) {
-            salesPlatform = SalesPlatform.WALMART;
-        }
-
-        // 获得所有注册的 ShopProfileClient 类型的 Spring Bean
-        Map<String, ShopProfileClient> shopProfileClients = applicationContext.getBeansOfType(ShopProfileClient.class);
-        Map<SalesPlatform,ShopProfileClient> shopProfileClientMap=shopProfileClients.values().stream()
-            .collect(Collectors.toMap(t->t.getSalesPlatform(), t -> t));
-
-        List<JSONObject> productArray = shopProfileClientMap.get(salesPlatform).getProducts(shopDO.getPlatformShopUid(), shopDO.getRegionCode(), shopDO.getDomainName());
-        syncShopProducts(salesPlatform,shopDO,productArray);
-        return "sync product success!";
+        return "";
     }
+
 
     /**
      * 同步店铺商品信息

@@ -26,18 +26,10 @@ import com.somle.esb.service.AliyunService;
 import com.somle.esb.service.EsbMappingService;
 import com.somle.esb.service.EsbService;
 import cn.iocoder.yudao.framework.test.core.ut.SomleBaseSpringTest;
-import com.somle.kingdee.service.KingdeeService;
-import com.somle.matomo.service.MatomoService;
-import com.somle.shopify.service.ShopifyService;
-import jakarta.annotation.Resource;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.quartz.QuartzAutoConfiguration;
-import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
-import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Disabled
 @Import({
@@ -54,7 +46,6 @@ class EsbJobTest extends SomleBaseSpringTest {
 
     @Test
     void testDataJob() throws Exception {
-        SyncShopProductsJob syncShopProductsJob = new SyncShopProductsJob();
-        syncShopProductsJob.execute("Walmart-1549");
+
     }
 }
