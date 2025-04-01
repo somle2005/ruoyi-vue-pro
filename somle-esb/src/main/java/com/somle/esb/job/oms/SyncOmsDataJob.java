@@ -1,10 +1,10 @@
 package com.somle.esb.job.oms;
 
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
+import cn.iocoder.yudao.module.oms.enums.SalesPlatformEnum;
 import cn.iocoder.yudao.module.oms.service.OmsShopProductService;
 import cn.iocoder.yudao.module.oms.service.OmsShopService;
 import com.somle.esb.client.oms.SyncOmsClient;
-import com.somle.esb.enums.oms.SalesPlatformEnum;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

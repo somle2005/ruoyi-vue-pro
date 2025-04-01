@@ -1,7 +1,7 @@
 package com.somle.esb.model;
 
-import com.somle.esb.enums.oms.SalesPlatformEnum;
-import com.somle.esb.enums.oms.SyncOmsTypeEnum;
+import cn.iocoder.yudao.module.oms.enums.SalesPlatformEnum;
+import cn.iocoder.yudao.module.oms.enums.SyncOmsTypeEnum;
 import lombok.Data;
 
 

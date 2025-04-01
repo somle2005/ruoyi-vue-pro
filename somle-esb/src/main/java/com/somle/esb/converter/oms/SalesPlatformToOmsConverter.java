@@ -2,8 +2,8 @@ package com.somle.esb.converter.oms;
 
 import cn.iocoder.yudao.module.oms.dal.dataobject.OmsShopDO;
 import cn.iocoder.yudao.module.oms.dal.dataobject.OmsShopProductDO;
+import cn.iocoder.yudao.module.oms.enums.SalesPlatformEnum;
 import com.somle.esb.client.oms.SyncOmsClient;
-import com.somle.esb.enums.oms.SalesPlatformEnum;
 import com.somle.esb.model.OmsProfileDTO;
 
 import java.util.HashMap;

@@ -1,6 +1,6 @@
 package com.somle.esb.client.oms;
 
-import com.somle.esb.enums.oms.SalesPlatformEnum;
+import cn.iocoder.yudao.module.oms.enums.SalesPlatformEnum;
 import com.somle.shopify.model.ShopifyToken;
 import com.somle.shopify.model.reps.ShopifyProductRepsVO;
 import com.somle.shopify.model.reps.ShopifyShopRepsVO;
