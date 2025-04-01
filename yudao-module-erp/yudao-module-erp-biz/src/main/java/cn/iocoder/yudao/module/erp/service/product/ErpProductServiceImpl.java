@@ -9,8 +9,6 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
-import cn.iocoder.yudao.module.erp.api.logistic.customrule.ErpCustomRuleApi;
-import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
@@ -26,8 +24,12 @@ import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import cn.iocoder.yudao.module.tms.api.logistic.customrule.ErpCustomRuleApi;
+import cn.iocoder.yudao.module.tms.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import jakarta.annotation.Resource;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
@@ -41,7 +43,10 @@ import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
+import static cn.iocoder.yudao.module.erp.dal.redis.ErpRedisKeyConstants.PRODUCT;
+import static cn.iocoder.yudao.module.erp.dal.redis.ErpRedisKeyConstants.PRODUCT_LIST;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.USER_NOT_EXISTS;
 
@@ -89,6 +94,8 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
+    @CacheEvict(cacheNames = PRODUCT_LIST, allEntries = true)
+    @Transactional(rollbackFor = Exception.class)
     public Long createProduct(ErpProductSaveReqVO createReqVO) {
         //TODO 暂时编号不是系统自动生成，后续添加生成规则，流水号的递增由编号来判断，编号相同流水号便自增
         //校验是否存在相同的产品编码
@@ -126,12 +133,18 @@ public class ErpProductServiceImpl implements ErpProductService {
         ThrowUtil.ifSqlThrow(productMapper.insert(product), DB_INSERT_ERROR);
         this.syncProduct(product, false);
         // 返回
+        //创建产品的同时创建产品-海关分类表数据。
+
         return product.getId();
     }
 
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @Caching(evict = {
+        @CacheEvict(cacheNames = PRODUCT_LIST, allEntries = true),
+        @CacheEvict(cacheNames = PRODUCT, key = "#updateReqVO.id") //返回是null，暂时删除
+    })
     public void updateProduct(ErpProductSaveReqVO updateReqVO) {
         Long productId = updateReqVO.getId();
         // 校验存在
@@ -212,6 +225,10 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
+    @Caching(evict = {
+        @CacheEvict(cacheNames = PRODUCT_LIST, allEntries = true),
+        @CacheEvict(cacheNames = PRODUCT, key = "#id")
+    })
     public void deleteProduct(Long id) {
         // 校验存在
         validateProductExists(id);
@@ -221,6 +238,7 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
+    @Cacheable(cacheNames = PRODUCT_LIST, key = "#ids", unless = "#result == null")
     public List<ErpProductDO> validProductList(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
@@ -271,6 +289,7 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
+    @Cacheable(cacheNames = PRODUCT, key = "#id", unless = "#result == null")
     public ErpProductRespVO getProduct(Long id) {
         ErpProductDO erpProductDO = productMapper.selectById(id);
         ErpProductRespVO productRespVO = BeanUtils.toBean(erpProductDO, ErpProductRespVO.class);
@@ -287,19 +306,20 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
-    @Cacheable(cacheNames = "erpProductService_getProductVOListByStatus", key = "#status", unless = "#result == null")
+    @Cacheable(cacheNames = PRODUCT_LIST, key = "'VO'+#status", unless = "#result == null")
     public List<ErpProductRespVO> getProductVOListByStatus(Boolean status) {
         List<ErpProductDO> list = productMapper.selectListByStatus(status);
         return buildProductVOList(list);
     }
     @Override
-    @Cacheable(cacheNames = "erpProductService_getProductDTOListByStatus", key = "#status", unless = "#result == null")
+    @Cacheable(cacheNames = PRODUCT_LIST, key = "'DTO'+#status", unless = "#result == null")
     public List<ErpProductRespDTO> getProductDTOListByStatus(Boolean status) {
         List<ErpProductDO> erpProductDOs = productMapper.selectListByStatus(status);
         return buildProductDTOList(erpProductDOs);
     }
 
     @Override
+    @Cacheable(cacheNames = PRODUCT_LIST, key = "'VO'+#ids", unless = "#result == null")
     public List<ErpProductRespVO> getProductVOList(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
@@ -309,11 +329,16 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
+    @Cacheable(cacheNames = PRODUCT_LIST, key = "#ids", unless = "#result == null")
     public List<ErpProductDO> listProducts(Collection<Long> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
         return productMapper.selectBatchIds(ids);
     }
 
     @Override
+    @Cacheable(cacheNames = PRODUCT_LIST, key = "'VO'+#pageReqVO", unless = "#result == null")
     public PageResult<ErpProductRespVO> getProductVOPage(ErpProductPageReqVO pageReqVO) {
         PageResult<ErpProductDO> pageResult = productMapper.selectPage(pageReqVO);
         return new PageResult<>(buildProductVOList(pageResult.getList()), pageResult.getTotal());
@@ -474,5 +499,14 @@ public class ErpProductServiceImpl implements ErpProductService {
         Integer level = deptApi.getDeptLevel(deptId);
         //判断登记是否符合要求
         ThrowUtil.ifThrow(!levels.contains(level), DEPT_LEVEL_NOT_MATCH);
+    }
+
+    @Override
+    public List<Long> listProductIdByBarCode(String barCode) {
+        if (StrUtil.isBlank(barCode)) {
+            return Collections.emptyList();
+        }
+        productMapper.selectIdListByBarCode(barCode);
+        return List.of();
     }
 }

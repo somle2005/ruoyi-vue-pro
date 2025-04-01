@@ -11,6 +11,8 @@ import java.util.Map;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 
 public interface ErpProductApi {
+    //getProductDto方法
+    ErpProductDTO getProductDto(Long id);
     /**
      * 获得所有产品DTO，根据ids，如果ids为null返回所有
      */
@@ -49,4 +51,9 @@ public interface ErpProductApi {
      * @return 产品 DTO 列表
      */
     List<ErpProductRespDTO> getProductDTOListByStatus(Boolean status);
+
+    /**
+     * 根据barCode模糊查询productId集合
+     */
+    List<Long> listProductIdByBarCode(String barCode);
 }

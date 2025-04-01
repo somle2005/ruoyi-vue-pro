@@ -2,9 +2,8 @@ package com.somle.esb.handler;
 
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.erp.api.logistic.customrule.dto.ErpCustomRuleDTO;
-import cn.iocoder.yudao.module.erp.service.purchase.ErpSupplierProductService;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
+import cn.iocoder.yudao.module.tms.api.logistic.customrule.dto.ErpCustomRuleDTO;
 import com.somle.eccang.model.EccangProduct;
 import com.somle.eccang.service.EccangService;
 import com.somle.esb.converter.ErpToEccangConverter;
@@ -35,7 +34,7 @@ public class ErpCustomRuleHandler {
 
     private final KingdeeService kingdeeService;
     private final EccangService eccangService;
-    private final ErpSupplierProductService erpSupplierProductService;
+    //    private final ErpSupplierProductService erpSupplierProductService;
     private final ErpToEccangConverter erpToEccangConverter;
     private final ErpToKingdeeConverter erpToKingdeeConverter;
     private final DictDataApi dictDataApi;
