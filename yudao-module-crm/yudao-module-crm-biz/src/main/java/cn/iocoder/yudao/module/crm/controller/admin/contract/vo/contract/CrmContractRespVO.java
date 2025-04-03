@@ -6,7 +6,6 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -126,6 +125,9 @@ public class CrmContractRespVO {
 
     @Schema(description = "产品列表")
     private List<Product> products;
+
+    @Schema(description = "附件列表")
+    private List<String> fileUrls;
 
     @Schema(description = "产品列表")
     @Data
