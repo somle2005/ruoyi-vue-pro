@@ -39,7 +39,6 @@ public interface SrmPurchaseRequestMapper extends BaseMapperX<SrmPurchaseRequest
     //getBoWrapper
     default MPJLambdaWrapper<SrmPurchaseRequestDO> getBoWrapper(SrmPurchaseRequestPageReqVO reqVO) {
         return queryWrapper(reqVO)
-            .distinct()
             .innerJoin(SrmPurchaseRequestItemsDO.class, SrmPurchaseRequestItemsDO::getRequestId, SrmPurchaseRequestDO::getId,
                 on -> on.eqIfExists(SrmPurchaseRequestItemsDO::getProductId, reqVO.getProductId())
                     .likeIfExists(SrmPurchaseRequestItemsDO::getBarCode, reqVO.getBarCode())
@@ -47,7 +46,7 @@ public interface SrmPurchaseRequestMapper extends BaseMapperX<SrmPurchaseRequest
                     .likeIfExists(SrmPurchaseRequestItemsDO::getProductName, reqVO.getProductName())).selectAll(SrmPurchaseRequestItemsDO.class)
             .selectAsClass(SrmPurchaseRequestItemsDO.class, SrmPurchaseRequestBO.class);
     }
-
+//需要分页主表	主表单独查 + 子表用 IN 批量查
 //    default PageResult<SrmPurchaseRequestDO> selectPage(SrmPurchaseRequestPageReqVO reqVO) {
 //        return selectPage(reqVO, getBoWrapper(reqVO));
 //    }
