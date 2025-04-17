@@ -17,7 +17,9 @@ import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.http.HttpStatus;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.MessageChannel;
@@ -36,6 +38,8 @@ import java.util.Optional;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
+import static com.somle.eccang.dal.redis.RedisKeyConstants.*;
+
 @Slf4j
 @Service
 public class EccangService {
@@ -43,7 +47,7 @@ public class EccangService {
 
     private EccangToken token;
     private final int pageSize = 100;
-    private Limiter limiter = new Limiter(20);
+    private final Limiter limiter = new Limiter(20);
 
     @Autowired
     EccangTokenRepository tokenRepo;
@@ -51,7 +55,8 @@ public class EccangService {
     @Resource
     MessageChannel eccangSaleOutputChannel;
 
-
+    @Resource
+    private CacheManager cacheManager;
     @PostConstruct
     public void init() {
         token = tokenRepo.findAll().get(0);
@@ -318,6 +323,7 @@ public class EccangService {
         return getAllPage(JsonUtilsX.toJSONObject(orderParams), "getOrderList");
     }
 
+    @Cacheable(value = PRODUCT_SKU_CACHE, key = "#sku")
     public EccangProduct getProduct(String sku) {
         //需要返回箱规信息
         EccangProduct product = EccangProduct.builder()
@@ -361,6 +367,7 @@ public class EccangService {
         }
     }
 
+    @CacheEvict(value = PRODUCT_SKU_CACHE, key = "#product.productSku")
     public EccangPage addProduct(EccangProduct product) {
         return post("syncProduct", product);
     }
@@ -375,12 +382,18 @@ public class EccangService {
         if (!Objects.equals(code, "200")) {
             throw new RuntimeException("批量添加商品失败,原因：" + syncBatchProduct.getBizContentString());
         }
+        // 精确清除每个 productSku 对应的缓存
+        for (EccangProduct product : products) {
+            String sku = product.getProductSku();
+            Objects.requireNonNull(cacheManager.getCache(PRODUCT_SKU_CACHE)).evict(sku);
+        }
     }
 
     public Stream<EccangCategory> getCategories() {
         return list("categotyList", EccangCategory.class);
     }
 
+    @Cacheable(value = CATEGORY_CACHE, key = "'name:'+#name")
     public EccangCategory getCategoryByName(String name) {
         Stream<EccangCategory> eccangCategoryStream = getCategories().filter(n -> n.getPcName().equals(name));
         Optional<EccangCategory> first = eccangCategoryStream.findFirst();
@@ -394,6 +407,7 @@ public class EccangService {
      * @Date 9:30 2024/11/26
      * @Param [name]
      **/
+    @Cacheable(value = CATEGORY_CACHE, key = "'deptId:'+#deptId")
     public EccangCategory getCategoryByErpDeptId(String deptId) {
         List<EccangCategory> eccangCategories = getCategories().filter(n -> n.getPcNameEn().equals(deptId)).toList();
         if (eccangCategories.size() > 1) {
@@ -402,6 +416,7 @@ public class EccangService {
         return !eccangCategories.isEmpty() ? eccangCategories.get(0) : null;
     }
 
+    @Cacheable(value = CATEGORY_CACHE, key = "'nameEn:'+#nameEn")
     public EccangCategory getCategoryByNameEn(String nameEn) {
         return getCategories().filter(n -> n.getPcNameEn().equals(nameEn)).findFirst().get();
     }
@@ -410,6 +425,7 @@ public class EccangService {
         return list("getUserOrganizationAll", EccangOrganization.class);
     }
 
+    @Cacheable(value = ORGANIZATION_CACHE, key = "#nameEn")
     public EccangOrganization getOrganizationByNameEn(String nameEn) {
         log.debug("searching organization with name_en " + nameEn);
         Optional<EccangOrganization> first = getOrganizations().filter(n -> n.getNameEn().equals(nameEn)).findFirst();

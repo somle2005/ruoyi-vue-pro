@@ -51,18 +51,20 @@ public class DingtalkUserHandler {
             //根据昵称自动生成用户名
             erpUser.setUsername(dingTalkToErpConverter.generateUserName(nickname));
             if (erpUser.getId() != null) {
-                adminUserApi.updateUser(erpUser);
+                try {
+                    adminUserApi.updateUser(erpUser);
+                } catch (Exception e) {
+                    log.error("更新用户{}失败", erpUser, e);
+                }
             } else {
                 Long userId = adminUserApi.createUser(erpUser);
                 var mapping = mappingService.toMapping(dingTalkUser);
-                mapping
-                    .setInternalId(userId);
+                mapping.setInternalId(userId);
                 mappingService.save(mapping);
             }
         } finally {
             TenantContextHolder.clear();
         }
-
 
     }
 }
