@@ -206,15 +206,13 @@ public class ErpProductServiceImpl implements ErpProductService {
             }
             //获取创建人id
             Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
-            ErpProductDTO erpProductDTO = BeanUtils.toBean(productDO, ErpProductDTO.class);
-            erpProductDTO.setCreator(String.valueOf(loginUserId));
+            ErpProductDTO erpProductDTO = BeanUtils.toBean(productDO, ErpProductDTO.class, dto -> dto.setCreator(String.valueOf(loginUserId)));
             //同步数据
             erpProductChannel.send(MessageBuilder.withPayload(List.of(erpProductDTO)).build());
         } else {
             //获取创建人id
             Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
-            ErpProductDTO erpProductDTO = BeanUtils.toBean(productDO, ErpProductDTO.class);
-            erpProductDTO.setCreator(String.valueOf(loginUserId));
+            ErpProductDTO erpProductDTO = BeanUtils.toBean(productDO, ErpProductDTO.class, dto -> dto.setCreator(String.valueOf(loginUserId)));
             //同步数据
             erpProductChannel.send(MessageBuilder.withPayload(List.of(erpProductDTO)).build());
         }
