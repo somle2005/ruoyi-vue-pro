@@ -24,7 +24,7 @@ public class WmsInboundSimpleRespVO {
 
     @Schema(description = "单据号")
     @ExcelProperty("单据号")
-    private String no;
+    private String code;
 
     @Schema(description = "入库单类型 ; InboundType : 1-手工入库 , 2-采购入库", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @ExcelProperty("入库单类型")

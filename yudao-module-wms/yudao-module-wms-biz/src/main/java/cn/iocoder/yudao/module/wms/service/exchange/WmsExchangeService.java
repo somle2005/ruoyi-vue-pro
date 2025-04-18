@@ -1,11 +1,11 @@
 package cn.iocoder.yudao.module.wms.service.exchange;
 
-import java.util.*;
-import jakarta.validation.*;
-import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.*;
-import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.pojo.PageParam;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangePageReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeSaveReqVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
+import jakarta.validation.Valid;
+
 import java.util.List;
 
 /**
@@ -57,4 +57,6 @@ public interface WmsExchangeService {
      * 按 ID 集合查询 WmsExchangeDO
      */
     List<WmsExchangeDO> selectByIds(List<Long> idList);
+
+    WmsExchangeDO updateOutboundAuditStatus(Long id, Integer to);
 }

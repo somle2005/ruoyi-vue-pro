@@ -102,6 +102,9 @@ public class ExchangeTest extends BaseRestIntegrationTest {
             Integer quantity=0;
             while (true) {
                 fromBin =binList.get(random.nextInt(binList.size()));
+                if(fromBin.getSellableQty()==0) {
+                    continue;
+                }
                 quantity = random.nextInt(fromBin.getSellableQty());
                 if(quantity>0) {
                     break;

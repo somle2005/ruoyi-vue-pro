@@ -81,7 +81,7 @@ public class InboundStateMachineConfigure {
         builder.setFailCallback(InboundTransitionFailCallback.class);
 
         // 返回
-        return builder.build(InboundStateMachineConfigure.STATE_MACHINE_NAME,c->c.data().getAuditStatus());
+        return builder.build(InboundStateMachineConfigure.STATE_MACHINE_NAME,ctx -> ctx.data().getAuditStatus());
 
     }
 

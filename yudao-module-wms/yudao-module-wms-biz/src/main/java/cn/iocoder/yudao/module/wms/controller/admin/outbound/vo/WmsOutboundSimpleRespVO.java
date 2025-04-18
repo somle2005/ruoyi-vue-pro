@@ -24,7 +24,7 @@ public class WmsOutboundSimpleRespVO {
 
     @Schema(description = "单据号")
     @ExcelProperty("单据号")
-    private String no;
+    private String code;
 
     @Schema(description = "仓库ID", example = "16056")
     @ExcelProperty("仓库ID")

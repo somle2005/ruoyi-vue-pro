@@ -63,7 +63,7 @@ public class InventoryStateMachineConfigure {
         // 失败处理
         builder.setFailCallback(InventoryTransitionFailCallback.class);
 
-        return builder.build(InventoryStateMachineConfigure.STATE_MACHINE_NAME,c->c.data().getAuditStatus());
+        return builder.build(InventoryStateMachineConfigure.STATE_MACHINE_NAME,ctx -> ctx.data().getAuditStatus());
 
 
     }

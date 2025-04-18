@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangePageR
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.defective.WmsExchangeDefectiveDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.exchange.WmsExchangeMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.exchange.defective.WmsExchangeDefectiveMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
@@ -179,5 +180,13 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
             return List.of();
         }
         return exchangeMapper.selectByIds(idList);
+    }
+
+    @Override
+    public WmsExchangeDO updateOutboundAuditStatus(Long id, Integer status) {
+        WmsExchangeDO exchangeDO = validateExchangeExists(id);
+        exchangeDO.setAuditStatus(status);
+        exchangeMapper.updateById(exchangeDO);
+        return exchangeDO;
     }
 }
