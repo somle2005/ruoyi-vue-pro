@@ -67,7 +67,7 @@ public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
         STATE_MACHINE_MAP_CN.put(key, description);
     }
 
-    public void onFail(S sourceState, E event, C context) {
+    public void onFail(S sourceState, S targetState, E event, C context) {
         String stateMachineDesc = getStateMachineDescription(sourceState, context);
         String statusDesc = convertEventToDescription(sourceState);
 

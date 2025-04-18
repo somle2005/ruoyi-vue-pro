@@ -20,5 +20,7 @@ public interface ErrorCodeConstants {
     // ========== 海关分类子表 1-030-606-000 ==========
     ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS = new ErrorCode(1_030_606_001, "海关分类子表不存在");
     ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID = new ErrorCode(1_030_606_002, "所选产品中不存在海关分类数据");
-
+    // ========== 头程申请单 1_030_607_001 ==========
+    ErrorCode FIRST_MILE_REQUEST_NOT_EXISTS = new ErrorCode(1_030_607_001, "头程单不存在");
+    ErrorCode FIRST_MILE_REQUEST_ITEM_NOT_EXISTS = new ErrorCode(1_030_607_002, "头程单明细不存在");
 }

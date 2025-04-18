@@ -1,0 +1,86 @@
+package cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item;
+
+import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
+import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemBO;
+import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+
+/**
+ * 头程申请表明细 Mapper
+ *
+ * @author wdy
+ */
+@Mapper
+public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileRequestItemDO> {
+
+
+    default MPJLambdaWrapperX<TmsFirstMileRequestItemDO> buildWrapper(TmsFirstMileRequestItemPageReqVO vo) {
+        return new MPJLambdaWrapperX<TmsFirstMileRequestItemDO>()
+            .selectAll(TmsFirstMileRequestItemDO.class)
+            .eqIfPresent(TmsFirstMileRequestItemDO::getId, vo.getId())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getCreateTime, vo.getCreateTime())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getProductId, vo.getProductId())
+            .likeIfPresent(TmsFirstMileRequestItemDO::getFbaBarCode, vo.getFbaBarCode())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getQty, vo.getQty())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageLength, vo.getPackageLength())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageWidth, vo.getPackageWidth())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageHeight, vo.getPackageHeight())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageWeight, vo.getPackageWeight())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getVolume, vo.getVolume())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getOrderStatus, vo.getOrderStatus())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getOffStatus, vo.getOffStatus())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getOrderClosedQty, vo.getOrderClosedQty())
+            .orderByDesc(TmsFirstMileRequestItemDO::getId);
+    }
+
+    //buildBOWrapper(vo)
+    default MPJLambdaWrapperX<TmsFirstMileRequestItemDO> buildBOWrapper(TmsFirstMileRequestPageReqVO vo) {
+        return buildWrapper(vo.getItem())
+            .leftJoin(TmsFirstMileRequestDO.class, TmsFirstMileRequestDO::getId, TmsFirstMileRequestItemDO::getRequestId)
+            .selectAsClass(TmsFirstMileRequestDO.class, TmsFirstMileRequestItemBO.class)
+            .betweenIfPresent(TmsFirstMileRequestDO::getTotalWeight, vo.getTotalWeight())
+            .betweenIfPresent(TmsFirstMileRequestDO::getTotalVolume, vo.getTotalVolume())
+            //createTime
+            .betweenIfPresent(TmsFirstMileRequestDO::getCreateTime, vo.getCreateTime())
+            .eqIfPresent(TmsFirstMileRequestDO::getId, vo.getId())
+            .eqIfPresent(TmsFirstMileRequestDO::getCode, vo.getCode())
+            .eqIfPresent(TmsFirstMileRequestDO::getRequestUserId, vo.getRequestUserId())
+            .eqIfPresent(TmsFirstMileRequestDO::getRequestDeptId, vo.getRequestDeptId())
+            .eqIfPresent(TmsFirstMileRequestDO::getToWarehouseId, vo.getToWarehouseId())
+            .eqIfPresent(TmsFirstMileRequestDO::getAuditStatus, vo.getAuditStatus())
+            .eqIfPresent(TmsFirstMileRequestDO::getOrderStatus, vo.getOrderStatus())
+            .eqIfPresent(TmsFirstMileRequestDO::getOffStatus, vo.getOffStatus())
+            .orderByDesc(TmsFirstMileRequestDO::getId);
+    }
+
+    default PageResult<TmsFirstMileRequestItemBO> selectPageBO(TmsFirstMileRequestPageReqVO reqVO) {
+        //reqVO == null
+        if (reqVO == null) {
+            reqVO = new TmsFirstMileRequestPageReqVO();
+        }
+        if (reqVO.getItem() == null) {
+            reqVO.setItem(new TmsFirstMileRequestItemPageReqVO());
+        }
+        return selectJoinPage(reqVO, TmsFirstMileRequestItemBO.class, buildBOWrapper(reqVO).selectAssociation(TmsFirstMileRequestDO.class, TmsFirstMileRequestItemBO::getTmsFirstMileRequestDO));
+    }
+
+    default PageResult<TmsFirstMileRequestItemDO> selectPage(TmsFirstMileRequestItemPageReqVO reqVO) {
+        return selectPage(reqVO, buildWrapper(reqVO));
+    }
+
+    default List<TmsFirstMileRequestItemDO> selectListByRequestId(Long requestId) {
+        return selectList(TmsFirstMileRequestItemDO::getRequestId, requestId);
+    }
+
+    default int deleteByRequestId(Long requestId) {
+        return delete(TmsFirstMileRequestItemDO::getRequestId, requestId);
+    }
+
+}
