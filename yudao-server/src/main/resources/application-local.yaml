@@ -72,7 +72,7 @@ spring:
       password: uniplore # 密码，建议生产环境开启
   task:
     scheduling:
-      enabled: true
+      enabled: false
 
 --- #################### 定时任务相关配置 ####################
 # Quartz 配置项，对应 QuartzProperties 配置)
