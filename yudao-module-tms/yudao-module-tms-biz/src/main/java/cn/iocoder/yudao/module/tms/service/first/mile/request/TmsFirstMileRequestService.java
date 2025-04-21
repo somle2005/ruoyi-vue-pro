@@ -64,4 +64,11 @@ public interface TmsFirstMileRequestService {
      */
     List<TmsFirstMileRequestItemDO> getFirstMileRequestItemListByRequestId(Long requestId);
 
+    /**
+     * 提交审核
+     *
+     * @param ids 头程申请单ID列表
+     */
+    void submitAudit(List<Long> ids);
+
 }

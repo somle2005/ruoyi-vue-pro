@@ -36,6 +36,9 @@ public class TmsFirstMileRequestSaveReqVO {
     @NotNull(message = "目的仓ID不能为空")
     private Long toWarehouseId;
 
+    @Schema(description = "审核状态")
+    private Integer auditStatus;
+
 //    @Schema(description = "总重量（kg）")
 //    private BigDecimal totalWeight;
 //

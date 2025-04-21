@@ -80,7 +80,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private TmsFirstMileRequestDO validateFirstMileRequestExists(Long id) {
         TmsFirstMileRequestDO mileRequestDO = firstMileRequestMapper.selectById(id);
         if (mileRequestDO == null) {
-            throw exception(FIRST_MILE_REQUEST_NOT_EXISTS);
+            throw exception(FIRST_MILE_REQUEST_NOT_EXISTS, id);
         }
         return mileRequestDO;
     }
@@ -161,6 +161,15 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             boList.add(bo);
         }
         return boList;
+    }
+
+    @Override
+    public void submitAudit(List<Long> ids) {
+        //null
+        if (ids == null || ids.isEmpty()) {
+            throw exception(FIRST_MILE_REQUEST_NOT_EXISTS, ids);
+        }
+
     }
 
 }

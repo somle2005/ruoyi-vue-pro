@@ -12,6 +12,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.T
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSubmitAuditReqVO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -19,6 +20,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -124,6 +126,37 @@ public class TmsFirstMileRequestController {
         // 可根据业务需要批量保存或校验
         return success(true);
     }
+
+    @PutMapping("/submit-audit")
+    @Operation(summary = "提交审核")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:submit-audit')")
+    public CommonResult<Boolean> submitAudit(@Valid @RequestBody TmsFirstMileRequestSubmitAuditReqVO reqVO) {
+        firstMileRequestService.submitAudit(reqVO.getIds());
+        return success(true);
+    }
+
+    @PutMapping("/audit-status")
+    @Operation(summary = "审核/反审核")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:audit-status')")
+    public CommonResult<Boolean> audit(@RequestParam("id") Long id, @RequestParam("auditStatus") Integer auditStatus) {
+
+        // TODO: 根据auditStatus参数实现审核或反审核逻辑
+
+        return success(true);
+    }
+
+    @PostMapping("/merge")
+    @Operation(summary = "合并头程申请单")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:merge')")
+    public CommonResult<Boolean> mergeFirstMileRequest(@RequestBody List<Long> ids) {
+
+        // TODO: 实现合并头程申请单逻辑
+
+        return success(true);
+    }
+    //submitAudit 提交审核
+
+    //auditStatus 审核\反审核
 
     //TODO 合并头程申请单
 
