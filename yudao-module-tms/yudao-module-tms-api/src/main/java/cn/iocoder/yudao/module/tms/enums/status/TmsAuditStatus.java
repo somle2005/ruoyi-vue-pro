@@ -1,12 +1,11 @@
 package cn.iocoder.yudao.module.tms.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * TMS 审核状态枚举
@@ -17,13 +16,11 @@ import java.util.Map;
 @Getter
 public enum TmsAuditStatus implements ArrayValuable<Integer> {
 
-    // 1. 草稿阶段
+    // 草稿阶段
     DRAFT(1, "草稿"),
 
-    // 2. 审核流程
-    SUBMITTED(2, "已提交"), PENDING_REVIEW(3, "未审核"), UNDER_REVIEW(4, "审核中"), APPROVED(5, "已审核"), REJECTED(6, "审核不通过"), REVOKED(7, "审核撤销"),
-    ;
-
+    // 审核流程
+    SUBMITTED(2, "已提交"), PENDING_REVIEW(3, "未审核"), UNDER_REVIEW(4, "审核中"), APPROVED(5, "已审核"), REJECTED(6, "审核不通过"), REVOKED(7, "审核撤销");
     public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(TmsAuditStatus::getCode).toArray();
     private static final Map<Integer, TmsAuditStatus> STATUS_MAP = new HashMap<>();
 

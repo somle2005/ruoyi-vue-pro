@@ -1,12 +1,11 @@
 package cn.iocoder.yudao.module.tms.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
-
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
 /**
  * TMS 开关状态枚举
@@ -17,8 +16,11 @@ import java.util.Map;
 @Getter
 public enum TmsOffStatus implements ArrayValuable<Integer> {
 
-    OPEN(1, "开启"), CLOSED(2, "已关闭"), MANUAL_CLOSED(3, "手动关闭"),
-    ;
+    // TMS 开关状态枚举项
+    OPEN(1, "开启"),    // 开启状态
+    CLOSED(2, "已关闭"), // 已关闭状态
+    MANUAL_CLOSED(3, "手动关闭"); // 手动关闭状态
+
 
     public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(TmsOffStatus::getCode).toArray();
     private static final Map<Integer, TmsOffStatus> STATUS_MAP = new HashMap<>();

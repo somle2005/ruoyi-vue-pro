@@ -3,10 +3,10 @@ package cn.iocoder.yudao.module.tms.service.first.mile.request;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import jakarta.validation.Valid;
-
 import java.util.List;
 
 /**
@@ -54,7 +54,22 @@ public interface TmsFirstMileRequestService {
      */
     TmsFirstMileRequestBO getFirstMileRequestBO(Long id);
 
+    /**
+     * 货单头程申请单主表DO
+     */
+    TmsFirstMileRequestDO getFirstMileRequestDO(Long id);
+
+    /**
+     * 修改主单状态,3个状态 开关 订购 审核,3个入参。
+     */
+    TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer openStatus, Integer orderStatus, Integer auditStatus);
+
     // ==================== 子表（头程申请表明细） ====================
+
+    /**
+     * 修改子单状态，开关、订购
+     */
+    TmsFirstMileRequestItemDO updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus);   
 
     /**
      * 获得头程申请表明细列表
