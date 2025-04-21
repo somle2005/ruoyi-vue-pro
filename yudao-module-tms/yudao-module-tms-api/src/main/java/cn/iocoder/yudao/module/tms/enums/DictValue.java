@@ -8,5 +8,5 @@ import lombok.Getter;
 public enum DictValue {
     PRODUCT_MATERIAL("erp_product_material"),//, "产品材料"
     ;
-    String name;
+    final String name;
 }
