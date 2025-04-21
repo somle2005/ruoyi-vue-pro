@@ -143,12 +143,12 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer openStatus, Integer orderStatus, Integer auditStatus) {
+    public TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer offStatus, Integer orderStatus, Integer auditStatus) {
         // 获取头程申请单
         TmsFirstMileRequestDO requestDO = validateFirstMileRequestExists(id);
         // 更新状态字段
-        if(openStatus != null) {
-            requestDO.setOffStatus(openStatus);
+        if (offStatus != null) {
+            requestDO.setOffStatus(offStatus);
         }
         if(orderStatus != null) {
             requestDO.setOrderStatus(orderStatus);
@@ -235,7 +235,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         // 找出不存在的记录ID
         List<Long> existingIds = requestDOList.stream().map(TmsFirstMileRequestDO::getId).toList();
         List<Long> notExistIds = ids.stream().filter(id -> !existingIds.contains(id)).collect(Collectors.toList());
-        
+
         // 如果有不存在的记录，抛出异常
         if(!notExistIds.isEmpty()) {
             throw exception(FIRST_MILE_REQUEST_NOT_EXISTS, notExistIds);
@@ -313,5 +313,13 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         }
         firstMileRequest.setTotalWeight(totalWeight);
         firstMileRequest.setTotalVolume(totalVolume);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void switchTmsFirstMileOpenStatus(List<Long> itemIds, Boolean enable) {
+        if (itemIds == null || itemIds.isEmpty()) {
+        }
+
     }
 }

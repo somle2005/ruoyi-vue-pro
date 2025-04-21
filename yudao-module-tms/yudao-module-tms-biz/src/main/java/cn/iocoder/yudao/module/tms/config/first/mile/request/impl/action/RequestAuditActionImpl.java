@@ -13,7 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
-public class RequestActionAuditImpl implements Action<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> {
+public class RequestAuditActionImpl implements Action<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> {
 
     @Autowired
     TmsFirstMileRequestService firstMileRequestService;

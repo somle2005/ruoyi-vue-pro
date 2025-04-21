@@ -1,8 +1,5 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.request.impl.item;
 
-import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_ITEM_NOT_EXISTS;
-
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
@@ -11,6 +8,9 @@ import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileReques
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_ITEM_NOT_EXISTS;
 
 /**
  * 头程申请表明细 Service 实现类
@@ -50,14 +50,26 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
         firstMileRequestItemMapper.deleteById(id);
     }
 
-    private void validateFirstMileRequestItemExists(Long id) {
-        if (firstMileRequestItemMapper.selectById(id) == null) {
-            throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
-        }
+    public TmsFirstMileRequestItemDO validateFirstMileRequestItemExists(Long id) {
+        TmsFirstMileRequestItemDO tmsFirstMileRequestItemDO = firstMileRequestItemMapper.selectById(id);
+        if (tmsFirstMileRequestItemDO == null) throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
+        return tmsFirstMileRequestItemDO;
     }
 
     @Override
     public TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id) {
         return firstMileRequestItemMapper.selectById(id);
+    }
+
+    @Override
+    public void updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus) {
+        TmsFirstMileRequestItemDO firstMileRequestItemDO = validateFirstMileRequestItemExists(id);
+        if (openStatus != null) {
+            firstMileRequestItemDO.setOffStatus(openStatus);
+        }
+        if (orderStatus != null) {
+            firstMileRequestItemDO.setOrderStatus(orderStatus);
+        }
+        firstMileRequestItemMapper.updateById(firstMileRequestItemDO);
     }
 }

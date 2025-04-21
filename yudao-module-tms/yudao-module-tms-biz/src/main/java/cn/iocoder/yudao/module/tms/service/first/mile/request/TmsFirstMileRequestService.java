@@ -64,7 +64,7 @@ public interface TmsFirstMileRequestService {
     /**
      * 修改主单状态,3个状态 开关 订购 审核,3个入参。
      */
-    TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer openStatus, Integer orderStatus, Integer auditStatus);
+    TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer offStatus, Integer orderStatus, Integer auditStatus);
 
     // ==================== 子表（头程申请表明细） ====================
 
@@ -94,4 +94,9 @@ public interface TmsFirstMileRequestService {
      * @param req vo
      */
     void review(TmsFirstMileRequestAuditReqVO req);
+
+    /**
+     * 启用/关闭申请单子项，自动更新主表状态
+     */
+    void switchTmsFirstMileOpenStatus(List<Long> itemIds, Boolean enable);
 }

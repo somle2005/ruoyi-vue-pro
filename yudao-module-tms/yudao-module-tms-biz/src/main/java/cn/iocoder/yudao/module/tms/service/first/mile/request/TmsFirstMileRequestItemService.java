@@ -41,4 +41,15 @@ public interface TmsFirstMileRequestItemService {
      */
     TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id);
 
+    //valid
+    TmsFirstMileRequestItemDO validateFirstMileRequestItemExists(Long id);
+
+    /**
+     * 更新头程申请表明细状态
+     *
+     * @param id          头程申请表明细id
+     * @param openStatus  开关状态
+     * @param orderStatus 采购状态
+     */
+    void updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus);
 }
