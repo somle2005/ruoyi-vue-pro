@@ -1,0 +1,70 @@
+package cn.iocoder.yudao.module.tms.service.first.mile.request.item;
+
+import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
+import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
+import jakarta.annotation.Resource;
+import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
+
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_ITEM_NOT_EXISTS;
+
+/**
+ * 头程申请表明细 Service 实现类
+ *
+ * @author wdy
+ */
+@Service
+@Validated
+public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestItemService {
+
+    @Resource
+    private TmsFirstMileRequestItemMapper firstMileRequestItemMapper;
+
+    @Override
+    public Long createFirstMileRequestItem(TmsFirstMileRequestItemSaveReqVO createReqVO) {
+        // 插入
+        TmsFirstMileRequestItemDO firstMileRequestItem = BeanUtils.toBean(createReqVO, TmsFirstMileRequestItemDO.class);
+        firstMileRequestItemMapper.insert(firstMileRequestItem);
+        // 返回
+        return firstMileRequestItem.getId();
+    }
+
+    @Override
+    public void updateFirstMileRequestItem(TmsFirstMileRequestItemSaveReqVO updateReqVO) {
+        // 校验存在
+        validateFirstMileRequestItemExists(updateReqVO.getId());
+        // 更新
+        TmsFirstMileRequestItemDO updateObj = BeanUtils.toBean(updateReqVO, TmsFirstMileRequestItemDO.class);
+        firstMileRequestItemMapper.updateById(updateObj);
+    }
+
+    @Override
+    public void deleteFirstMileRequestItem(Long id) {
+        // 校验存在
+        validateFirstMileRequestItemExists(id);
+        // 删除
+        firstMileRequestItemMapper.deleteById(id);
+    }
+
+    private void validateFirstMileRequestItemExists(Long id) {
+        if (firstMileRequestItemMapper.selectById(id) == null) {
+            throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
+        }
+    }
+
+    @Override
+    public TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id) {
+        return firstMileRequestItemMapper.selectById(id);
+    }
+
+    @Override
+    public PageResult<TmsFirstMileRequestItemDO> getFirstMileRequestItemPage(TmsFirstMileRequestItemPageReqVO pageReqVO) {
+        return firstMileRequestItemMapper.selectPage(pageReqVO);
+    }
+
+}
