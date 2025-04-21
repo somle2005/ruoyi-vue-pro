@@ -15,6 +15,9 @@ import lombok.ToString;
 @ToString(callSuper = true)
 public class WmsPickupPendingPageReqVO extends PageParam {
 
+    /**
+     * 入库单编号
+     **/
     @Schema(description = "入库单编号", example = "29327")
     private String inboundCode;
 
