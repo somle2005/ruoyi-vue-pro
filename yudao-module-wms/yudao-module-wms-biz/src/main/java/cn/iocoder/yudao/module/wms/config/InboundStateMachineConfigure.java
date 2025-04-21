@@ -53,7 +53,7 @@ public class InboundStateMachineConfigure {
         builder.externalTransitions()
             .fromAmong(WmsInboundAuditStatus.DRAFT.getValue(),WmsInboundAuditStatus.REJECT.getValue(),WmsInboundAuditStatus.AUDITING.getValue())
             .to( WmsInboundAuditStatus.ABANDONED.getValue())
-            .on(WmsInboundAuditStatus.Event.REJECT)
+            .on(WmsInboundAuditStatus.Event.ABANDON)
             .handle(InboundAbandonTransitionHandler.class);
 
         // 同意

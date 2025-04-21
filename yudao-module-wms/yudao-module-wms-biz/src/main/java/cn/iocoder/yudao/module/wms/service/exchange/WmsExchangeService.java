@@ -1,9 +1,13 @@
 package cn.iocoder.yudao.module.wms.service.exchange;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangePageReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.defective.WmsExchangeDefectiveDO;
+import cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeAuditStatus;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -59,4 +63,10 @@ public interface WmsExchangeService {
     List<WmsExchangeDO> selectByIds(List<Long> idList);
 
     WmsExchangeDO updateOutboundAuditStatus(Long id, Integer to);
+
+    void approve(WmsExchangeAuditStatus.Event event, WmsApprovalReqVO approvalReqVO);
+
+    void finishExchange(WmsExchangeDO exchangeDO, List<WmsExchangeDefectiveDO> exchangeDefectiveDOList);
+
+    void assembleWarehouse(List<WmsExchangeRespVO> list);
 }

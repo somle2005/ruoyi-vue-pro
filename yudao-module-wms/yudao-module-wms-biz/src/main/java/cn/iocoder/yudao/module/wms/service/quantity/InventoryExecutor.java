@@ -139,7 +139,6 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
             executeInboundAndPickup(inventoryDO,new ArrayList<>(inboundItemSaveReqVOMap.values()),pickupItemSaveReqVOList);
         }
 
-
         // 如果有盘亏的货，执行出库
         if (!outboundItemSaveReqVOList.isEmpty()) {
             executeOutbound(inventoryDO,outboundItemSaveReqVOList);

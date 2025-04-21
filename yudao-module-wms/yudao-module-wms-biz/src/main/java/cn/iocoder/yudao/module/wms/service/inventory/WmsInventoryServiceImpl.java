@@ -304,7 +304,7 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     @Transactional(rollbackFor = Exception.class)
     public void approve(WmsInventoryAuditStatus.Event event, WmsApprovalReqVO approvalReqVO) {
         // 设置业务默认值
-        approvalReqVO.setBillType(WmsBillType.OUTBOUND.getValue());
+        approvalReqVO.setBillType(WmsBillType.INVENTORY.getValue());
         approvalReqVO.setStatusType(WmsOutboundAuditStatus.getType());
         // 获得业务对象
         WmsInventoryDO inventoryDO = validateInventoryExists(approvalReqVO.getBillId());

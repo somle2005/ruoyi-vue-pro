@@ -250,6 +250,9 @@ public interface ErrorCodeConstants {
     ErrorCode EXCHANGE_AUDIT_FAIL = new ErrorCode(2_001_023_009, "审核错误，当前换货单状态为%s，在%s状态时才允许%s");
     ErrorCode EXCHANGE_AUDIT_ERROR = new ErrorCode(2_001_023_010, "换货单审核错误");
 
+    ErrorCode EXCHANGE_DEFECTIVE_ITEM_NOT_EXISTS = new ErrorCode(2_001_023_011, "换货单审核错误");
+    ErrorCode EXCHANGE_QUANTITY_ERROR = new ErrorCode(2_001_023_010, "换货单审核错误");
+
     // ========== WMS_EXCHANGE_DEFECTIVE 良次换货详情表 2_001_024_000 ==========
     ErrorCode EXCHANGE_DEFECTIVE_NOT_EXISTS = new ErrorCode(2_001_024_001, "良次换货详情不存在");
     ErrorCode EXCHANGE_DEFECTIVE_EXISTS = new ErrorCode(2_001_024_002, "良次换货详情已存在");
