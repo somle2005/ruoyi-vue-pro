@@ -22,7 +22,7 @@ public class RequestActionAuditImpl implements Action<TmsAuditStatus, TmsEventEn
     @Transactional(rollbackFor = Exception.class)
     public void execute(TmsAuditStatus from, TmsAuditStatus to, TmsEventEnum event, TmsFirstMileRequestAuditReqVO context) {
 
-        TmsFirstMileRequestDO requestDO = firstMileRequestService.getFirstMileRequestDO(context.getRequestId());
+        TmsFirstMileRequestDO requestDO = firstMileRequestService.validateFirstMileRequestExists(context.getRequestId());
 
         requestDO.setAuditStatus(to.getCode());
         firstMileRequestService.updateFirstMileRequestStatus(requestDO.getId(), null, null, to.getCode());

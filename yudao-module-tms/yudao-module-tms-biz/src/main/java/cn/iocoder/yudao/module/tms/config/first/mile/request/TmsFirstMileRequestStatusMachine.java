@@ -1,7 +1,5 @@
 package cn.iocoder.yudao.module.tms.config.first.mile.request;
 
-import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE;
-
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
@@ -15,6 +13,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE;
+
 @Slf4j
 @Configuration
 @SuppressWarnings({"rawtypes", "unchecked"})
@@ -24,8 +24,6 @@ public class TmsFirstMileRequestStatusMachine {
     TmsBaseFailCallbackImpl TmsBaseFailCallbackImpl;
     @Resource
     RequestActionAuditImpl requestActionAuditImpl;
-
-
     @Bean(FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)
     public StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> getFirstMileRequestStateMachine() {
         StateMachineBuilder<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> builder = StateMachineBuilderFactory.create();

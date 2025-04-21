@@ -1,8 +1,5 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.request;
 
-import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
-import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-
 import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
@@ -12,11 +9,7 @@ import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestRespVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSubmitAuditReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,20 +18,17 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.stream.Collectors;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.multipart.MultipartFile;
+
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - 头程申请单")
 @RestController
@@ -97,9 +87,7 @@ public class TmsFirstMileRequestController {
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
 
         // 转换为响应对象
-        List<TmsFirstMileRequestRespVO> respVOList = pageBO.getList().stream()
-            .map(this::bindSingleResult)
-            .collect(Collectors.toList());
+        List<TmsFirstMileRequestRespVO> respVOList = pageBO.getList().stream().map(this::bindSingleResult).collect(Collectors.toList());
         // 创建结果对象
         PageResult<TmsFirstMileRequestRespVO> pageResultRespVO = new PageResult<>();
         pageResultRespVO.setTotal(pageBO.getTotal());
@@ -111,15 +99,13 @@ public class TmsFirstMileRequestController {
     @Operation(summary = "导出头程申请单 Excel")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportFirstMileRequestExcel(@Validated TmsFirstMileRequestPageReqVO pageReqVO,
-                                            HttpServletResponse response) throws IOException {
+    public void exportFirstMileRequestExcel(@Validated TmsFirstMileRequestPageReqVO pageReqVO, HttpServletResponse response)
+        throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         // 获取分页数据
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
         // 转换为响应对象列表
-        List<TmsFirstMileRequestRespVO> list = pageBO.getList().stream()
-            .map(this::bindSingleResult)
-            .collect(Collectors.toList());
+        List<TmsFirstMileRequestRespVO> list = pageBO.getList().stream().map(this::bindSingleResult).collect(Collectors.toList());
         // 导出 Excel
         ExcelUtils.write(response, "头程申请单.xls", "数据", TmsFirstMileRequestRespVO.class, list);
     }
@@ -127,8 +113,8 @@ public class TmsFirstMileRequestController {
     @PostMapping("/import-excel")
     @Operation(summary = "导入头程申请单 Excel")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:import')")
-    public CommonResult
-        <Boolean> importFirstMileRequestExcel(@RequestParam("file") MultipartFile file) throws Exception {
+    public CommonResult<Boolean> importFirstMileRequestExcel(@RequestParam("file") MultipartFile file)
+        throws Exception {
         List<TmsFirstMileRequestSaveReqVO> list = ExcelUtils.read(file, TmsFirstMileRequestSaveReqVO.class);
         // 可根据业务需要批量保存或校验
         return success(true);
@@ -146,9 +132,7 @@ public class TmsFirstMileRequestController {
     @Operation(summary = "审核/反审核")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:audit-status')")
     public CommonResult<Boolean> audit(TmsFirstMileRequestAuditReqVO reqVO) {
-
-        // TODO: 根据auditStatus参数实现审核或反审核逻辑
-
+        firstMileRequestService.review(reqVO);
         return success(true);
     }
 
@@ -161,15 +145,11 @@ public class TmsFirstMileRequestController {
 
         return success(true);
     }
-    //submitAudit 提交审核
-
-    //auditStatus 审核\反审核
 
     //TODO 合并头程申请单
 
     /**
-     * 将TmsFirstMileRequestBO转换为TmsFirstMileRequestRespVO
-     * 实现主表和子表数据的绑定
+     * 将TmsFirstMileRequestBO转换为TmsFirstMileRequestRespVO 实现主表和子表数据的绑定
      *
      * @param firstMileRequestBO 包含主表和子表数据的BO对象
      * @return 转换后的响应对象

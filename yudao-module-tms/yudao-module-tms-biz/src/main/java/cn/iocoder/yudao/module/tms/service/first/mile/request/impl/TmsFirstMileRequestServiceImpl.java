@@ -1,9 +1,5 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.request.impl;
 
-import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_NOT_EXISTS;
-import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE;
-
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
@@ -17,20 +13,24 @@ import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.TmsFirstMileRequ
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
+import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import jakarta.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_NOT_EXISTS;
+import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED;
+import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE;
 
 /**
  * 头程申请单 Service 实现类
@@ -56,9 +56,20 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         firstMileRequestMapper.insert(firstMileRequest);
 
         // 插入子表
-        createFirstMileRequestItemList(firstMileRequest.getId(), BeanUtils.toBean(vo.getFirstMileRequestItems(), TmsFirstMileRequestItemDO.class));
+        List<TmsFirstMileRequestItemDO> requestItemDOS = BeanUtils.toBean(vo.getFirstMileRequestItems(), TmsFirstMileRequestItemDO.class);
+        createFirstMileRequestItemList(firstMileRequest.getId(), requestItemDOS);
+        //初始化主子表状态
+        initMasterStatus(firstMileRequest);
+
         // 返回
         return firstMileRequest.getId();
+    }
+
+    private void initMasterStatus(TmsFirstMileRequestDO firstMileRequest) {
+        //审核
+        tmsFirstMileRequestStatusMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, TmsFirstMileRequestAuditReqVO.builder().requestId(firstMileRequest.getId()).build());
+        //开关
+        //采购
     }
 
     @Override
@@ -86,7 +97,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         deleteFirstMileRequestItemByRequestId(id);
     }
 
-    private TmsFirstMileRequestDO validateFirstMileRequestExists(Long id) {
+    @Override
+    public TmsFirstMileRequestDO validateFirstMileRequestExists(Long id) {
         TmsFirstMileRequestDO mileRequestDO = firstMileRequestMapper.selectById(id);
         if (mileRequestDO == null) {
             throw exception(FIRST_MILE_REQUEST_NOT_EXISTS, id);
@@ -117,12 +129,9 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         return BeanUtils.toBean(firstMileRequestDO, TmsFirstMileRequestBO.class).setItems(firstMileRequestItemDOList);
     }
 
-    @Override
-    public TmsFirstMileRequestDO getFirstMileRequestDO(Long id) {
-        return validateFirstMileRequestExists(id);
-    }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer openStatus, Integer orderStatus, Integer auditStatus) {
         // 获取头程申请单
         TmsFirstMileRequestDO requestDO = validateFirstMileRequestExists(id);
@@ -142,6 +151,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public TmsFirstMileRequestItemDO updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus) {
         return null;
     }
@@ -220,6 +230,12 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             throw exception(FIRST_MILE_REQUEST_NOT_EXISTS, notExistIds);
         }
 
+        //关闭状态不能提审
+        requestDOList.forEach(requestDO -> {
+            if (!Objects.equals(requestDO.getOffStatus(), TmsOffStatus.OPEN.getCode())) {
+                throw exception(FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED, requestDO.getCode(), TmsOffStatus.fromCode(requestDO.getOffStatus()).getDesc());
+            }
+        });
         // 批量执行状态转换
         for(TmsFirstMileRequestDO requestDO : requestDOList) {
             TmsFirstMileRequestAuditReqVO auditReqVO = TmsFirstMileRequestAuditReqVO.builder().requestId(requestDO.getId()).build();
@@ -227,4 +243,35 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         }
     }
 
+    @Override
+    public void review(TmsFirstMileRequestAuditReqVO req) {
+        // 检查参数是否为空
+        if (req == null || req.getRequestId() == null) {
+            throw exception(FIRST_MILE_REQUEST_NOT_EXISTS, req);
+        }
+
+        // 查询记录
+        TmsFirstMileRequestDO requestDO = firstMileRequestMapper.selectById(req.getRequestId());
+        if (requestDO == null) {
+            throw exception(FIRST_MILE_REQUEST_NOT_EXISTS, req.getRequestId());
+        }
+
+        // 关闭状态不能审核/反审核
+        if (!Objects.equals(requestDO.getOffStatus(), TmsOffStatus.OPEN.getCode())) {
+            throw exception(FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED, requestDO.getCode(),
+                TmsOffStatus.fromCode(requestDO.getOffStatus()).getDesc());
+        }
+
+        // 根据当前审核状态和操作类型，执行相应的状态转换
+        TmsAuditStatus currentStatus = TmsAuditStatus.fromCode(requestDO.getAuditStatus());
+
+        // 根据审核操作类型执行不同的状态转换
+        if (Boolean.TRUE.equals(req.getReviewed())) {
+            // 审核通过
+            tmsFirstMileRequestStatusMachine.fireEvent(currentStatus, TmsEventEnum.AGREE, req);
+        } else {
+            // 审核拒绝或反审核
+            tmsFirstMileRequestStatusMachine.fireEvent(currentStatus, TmsEventEnum.REJECT, req);
+        }
+    }
 }

@@ -1,12 +1,14 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.request;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import jakarta.validation.Valid;
+
 import java.util.List;
 
 /**
@@ -57,7 +59,7 @@ public interface TmsFirstMileRequestService {
     /**
      * 货单头程申请单主表DO
      */
-    TmsFirstMileRequestDO getFirstMileRequestDO(Long id);
+    TmsFirstMileRequestDO validateFirstMileRequestExists(Long id);
 
     /**
      * 修改主单状态,3个状态 开关 订购 审核,3个入参。
@@ -86,4 +88,10 @@ public interface TmsFirstMileRequestService {
      */
     void submitAudit(List<Long> ids);
 
+    /**
+     * 审核|反审核
+     *
+     * @param req vo
+     */
+    void review(TmsFirstMileRequestAuditReqVO req);
 }
