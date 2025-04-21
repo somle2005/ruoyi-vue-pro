@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -53,10 +54,14 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     public Long createFirstMileRequest(TmsFirstMileRequestSaveReqVO vo) {
         // 插入
         TmsFirstMileRequestDO firstMileRequest = BeanUtils.toBean(vo, TmsFirstMileRequestDO.class);
+
+        // 计算主表的总重量和总体积
+        List<TmsFirstMileRequestItemDO> requestItemDOS = BeanUtils.toBean(vo.getFirstMileRequestItems(), TmsFirstMileRequestItemDO.class);
+        calculateTotalWeightAndVolume(firstMileRequest, requestItemDOS);
+        
         firstMileRequestMapper.insert(firstMileRequest);
 
         // 插入子表
-        List<TmsFirstMileRequestItemDO> requestItemDOS = BeanUtils.toBean(vo.getFirstMileRequestItems(), TmsFirstMileRequestItemDO.class);
         createFirstMileRequestItemList(firstMileRequest.getId(), requestItemDOS);
         //初始化主子表状态
         initMasterStatus(firstMileRequest);
@@ -77,12 +82,18 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     public void updateFirstMileRequest(TmsFirstMileRequestSaveReqVO vo) {
         // 校验存在
         validateFirstMileRequestExists(vo.getId());
+
         // 更新
         TmsFirstMileRequestDO updateObj = BeanUtils.toBean(vo, TmsFirstMileRequestDO.class);
+
+        // 计算主表的总重量和总体积
+        List<TmsFirstMileRequestItemDO> requestItemDOS = BeanUtils.toBean(vo.getFirstMileRequestItems(), TmsFirstMileRequestItemDO.class);
+        calculateTotalWeightAndVolume(updateObj, requestItemDOS);
+        
         firstMileRequestMapper.updateById(updateObj);
 
         // 更新子表
-        updateFirstMileRequestItemList(vo.getId(), BeanUtils.toBean(vo.getFirstMileRequestItems(), TmsFirstMileRequestItemDO.class));
+        updateFirstMileRequestItemList(vo.getId(), requestItemDOS);
     }
 
     @Override
@@ -273,5 +284,34 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             // 审核拒绝或反审核
             tmsFirstMileRequestStatusMachine.fireEvent(currentStatus, TmsEventEnum.REJECT, req);
         }
+    }
+
+    /**
+     * 计算主表的总重量和总体积
+     *
+     * @param firstMileRequest 主表对象
+     * @param requestItemDOS   子表对象列表
+     */
+    private void calculateTotalWeightAndVolume(TmsFirstMileRequestDO firstMileRequest, List<TmsFirstMileRequestItemDO> requestItemDOS) {
+        if (requestItemDOS == null || requestItemDOS.isEmpty()) {
+            firstMileRequest.setTotalWeight(BigDecimal.ZERO);
+            firstMileRequest.setTotalVolume(BigDecimal.ZERO);
+            return;
+        }
+        // 计算总重量和总体积
+        BigDecimal totalWeight = BigDecimal.ZERO;
+        BigDecimal totalVolume = BigDecimal.ZERO;
+        for (TmsFirstMileRequestItemDO item : requestItemDOS) {
+            // 累加毛重
+            if (item.getPackageWeight() != null) {
+                totalWeight = totalWeight.add(item.getPackageWeight());
+            }
+            // 累加体积
+            if (item.getVolume() != null) {
+                totalVolume = totalVolume.add(item.getVolume());
+            }
+        }
+        firstMileRequest.setTotalWeight(totalWeight);
+        firstMileRequest.setTotalVolume(totalVolume);
     }
 }
