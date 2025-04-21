@@ -90,6 +90,10 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
             inboundItemService.updateById(BeanUtils.toBean(inboundItemVO, WmsInboundItemDO.class));
         }
 
+        // 更新入库单上架状态
+        inboundService.updateShelvingStatus(StreamX.from(inboundItemVOList).toSet(WmsInboundItemRespVO::getInboundId));
+
+
     }
 
 

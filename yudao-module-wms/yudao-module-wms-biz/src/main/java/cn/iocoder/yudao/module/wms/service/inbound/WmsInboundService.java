@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 入库单 Service 接口
@@ -110,4 +111,6 @@ public interface WmsInboundService {
     Map<Long, WmsInboundItemOwnershipDO> getInboundItemOwnershipMap(Long warehouseId, List<Long> productIds, boolean olderFirst);
 
     WmsInboundDO createForInventory(WmsInboundSaveReqVO inboundSaveReqVO);
+
+    void updateShelvingStatus(Set<Long> set);
 }

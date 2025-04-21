@@ -23,13 +23,14 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
 				.eqIfPresent(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())
 				.eqIfPresent(WmsInboundDO::getAuditStatus, reqVO.getAuditStatus())
 				.eqIfPresent(WmsInboundDO::getInboundStatus, reqVO.getInboundStatus())
-				.eqIfPresent(WmsInboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
-				.eqIfPresent(WmsInboundDO::getUpstreamBillCode, // .betweenIfPresent(WmsInboundDO::getArrivalPlanTime, reqVO.getArrivalPlanTime())
+				.eqIfPresent(WmsInboundDO::getUpstreamBillId, reqVO.getUpstreamBillId()).// .betweenIfPresent(WmsInboundDO::getArrivalPlanTime, reqVO.getArrivalPlanTime())
+        eqIfPresent(// .betweenIfPresent(WmsInboundDO::getArrivalPlanTime, reqVO.getArrivalPlanTime())
+        WmsInboundDO::getUpstreamBillCode, // .betweenIfPresent(WmsInboundDO::getArrivalPlanTime, reqVO.getArrivalPlanTime())
         reqVO.getUpstreamBillCode()).// .betweenIfPresent(WmsInboundDO::getArrivalPlanTime, reqVO.getArrivalPlanTime())
         eqIfPresent(// .betweenIfPresent(WmsInboundDO::getArrivalPlanTime, reqVO.getArrivalPlanTime())
-        WmsInboundDO::getUpstreamBillType, // .betweenIfPresent(WmsInboundDO::getArrivalPlanTime, reqVO.getArrivalPlanTime())
-        reqVO.getUpstreamBillType()).// .betweenIfPresent(WmsInboundDO::getArrivalActualTime, reqVO.getArrivalActualTime())
-        eqIfPresent(WmsInboundDO::getTraceNo, reqVO.getTraceNo())
+        WmsInboundDO::getUpstreamBillType, // .betweenIfPresent(WmsInboundDO::getArrivalActualTime, reqVO.getArrivalActualTime())
+        reqVO.getUpstreamBillType())
+				.eqIfPresent(WmsInboundDO::getTraceNo, reqVO.getTraceNo())
 				.eqIfPresent(WmsInboundDO::getShippingMethod, reqVO.getShippingMethod())
 				.eqIfPresent(WmsInboundDO::getCreatorComment, reqVO.getCreatorComment())
 				.eqIfPresent(WmsInboundDO::getInitAge, reqVO.getInitAge())
@@ -82,4 +83,4 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
         wrapper.eq(WmsInboundDO::getCode, code);
         return selectOne(wrapper);
     }
-}
+}

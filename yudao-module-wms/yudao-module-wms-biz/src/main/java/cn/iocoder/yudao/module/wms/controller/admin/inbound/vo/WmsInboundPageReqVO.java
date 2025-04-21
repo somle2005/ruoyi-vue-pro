@@ -13,7 +13,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : code,inbound_status,company_id,inbound_time,create_time,arrival_actual_time,audit_status,creator_comment,type,trace_no,upstream_bill_type,upstream_bill_id,init_age,shipping_method,upstream_bill_code,dept_id,warehouse_id,arrival_plan_time
+ * @table-fields : code,inbound_status,company_id,create_time,inbound_time,arrival_actual_time,audit_status,creator_comment,trace_no,type,upstream_bill_type,init_age,upstream_bill_id,shipping_method,upstream_bill_code,dept_id,arrival_plan_time,shelving_status,warehouse_id
  */
 @Schema(description = "管理后台 - 入库单分页 Request VO")
 @Data
@@ -78,4 +78,7 @@ public class WmsInboundPageReqVO extends PageParam {
 
     @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单", example = "")
     private Integer upstreamBillType;
+
+    @Schema(description = "上架状态", example = "")
+    private Integer shelvingStatus;
 }

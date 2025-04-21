@@ -228,7 +228,6 @@ public interface ErrorCodeConstants {
     ErrorCode INVENTORY_STATUS_PARSE_ERROR = new ErrorCode(2_001_021_009, "盘点审批状态转换错误");
     ErrorCode INVENTORY_AUDIT_ERROR = new ErrorCode(2_001_021_010, "盘点单审核错误");
 
-
     // ========== WMS_INVENTORY_BIN 库位盘点表 2_001_022_000 ==========
     ErrorCode INVENTORY_BIN_NOT_EXISTS = new ErrorCode(2_001_022_001, "库位盘点不存在");
     ErrorCode INVENTORY_BIN_EXISTS = new ErrorCode(2_001_022_002, "库位盘点已存在");
@@ -249,7 +248,6 @@ public interface ErrorCodeConstants {
     ErrorCode EXCHANGE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_023_008, "换货单不符合审批条件");
     ErrorCode EXCHANGE_AUDIT_FAIL = new ErrorCode(2_001_023_009, "审核错误，当前换货单状态为%s，在%s状态时才允许%s");
     ErrorCode EXCHANGE_AUDIT_ERROR = new ErrorCode(2_001_023_010, "换货单审核错误");
-
     ErrorCode EXCHANGE_DEFECTIVE_ITEM_NOT_EXISTS = new ErrorCode(2_001_023_011, "换货单审核错误");
     ErrorCode EXCHANGE_QUANTITY_ERROR = new ErrorCode(2_001_023_010, "换货单审核错误");
 
@@ -260,6 +258,4 @@ public interface ErrorCodeConstants {
     ErrorCode EXCHANGE_DEFECTIVE_CAN_NOT_EDIT = new ErrorCode(2_001_024_004, "良次换货详情不允许编辑");
     ErrorCode EXCHANGE_DEFECTIVE_CAN_NOT_DELETE = new ErrorCode(2_001_024_005, "良次换货详情不允许删除");
     ErrorCode EXCHANGE_DEFECTIVE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_024_006, "良次换货详情不符合审批条件");
-
-
-}
+}

@@ -288,7 +288,7 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
 
         if(withZone) {
             // 装配库区
-            List<Long> binIds= StreamX.from(list).toList(WmsStockBinRespVO::getBinId);
+            List<Long> binIds= StreamX.from(binVOList).toList(WmsWarehouseBinRespVO::getZoneId);
             List<WmsWarehouseZoneDO> warehouseZoneDOList = warehouseZoneService.selectByIds(binIds);
             Map<Long, WmsWarehouseZoneSimpleRespVO> warehouseZoneVOMap = StreamX.from(warehouseZoneDOList)
                 .toMap(WmsWarehouseZoneDO::getId, v-> BeanUtils.toBean(v, WmsWarehouseZoneSimpleRespVO.class));

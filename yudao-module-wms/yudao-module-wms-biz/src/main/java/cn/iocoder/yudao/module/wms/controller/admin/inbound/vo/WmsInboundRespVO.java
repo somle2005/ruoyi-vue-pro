@@ -14,7 +14,7 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,creator,code,inbound_status,company_id,inbound_time,create_time,arrival_actual_time,audit_status,creator_comment,type,trace_no,upstream_bill_type,updater,update_time,upstream_bill_id,init_age,shipping_method,id,upstream_bill_code,dept_id,warehouse_id,arrival_plan_time
+ * @table-fields : tenant_id,creator,code,inbound_status,company_id,create_time,inbound_time,arrival_actual_time,audit_status,creator_comment,trace_no,type,updater,upstream_bill_type,update_time,init_age,upstream_bill_id,shipping_method,id,upstream_bill_code,dept_id,arrival_plan_time,shelving_status,warehouse_id
  */
 @Schema(description = "管理后台 - 入库单 Response VO")
 @Data
@@ -136,6 +136,10 @@ public class WmsInboundRespVO {
     private String upstreamBillCode;
 
     @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单", example = "")
-    @ExcelProperty("WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单")
+    @ExcelProperty("WMS来源单据类型")
     private Integer upstreamBillType;
+
+    @Schema(description = "上架状态", example = "")
+    @ExcelProperty("上架状态")
+    private Integer shelvingStatus;
 }

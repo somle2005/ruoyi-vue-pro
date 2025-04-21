@@ -34,6 +34,7 @@ import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
 import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundShelvingStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundType;
 import cn.iocoder.yudao.module.wms.service.approval.history.WmsApprovalHistoryService;
@@ -43,12 +44,15 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_CAN_NOT_EDIT;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_PLAN_QTY_ERROR;
@@ -115,6 +119,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         createReqVO.setCode(no);
         createReqVO.setAuditStatus(WmsInboundAuditStatus.DRAFT.getValue());
         createReqVO.setInboundStatus(WmsInboundStatus.NONE.getValue());
+        createReqVO.setShelvingStatus(WmsInboundShelvingStatus.NONE.getValue());
         if (inboundMapper.getByCode(createReqVO.getCode()) != null) {
             throw exception(INBOUND_NO_DUPLICATE);
         }
@@ -283,7 +288,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
 
     @Transactional(rollbackFor = Exception.class)
     protected void fireEvent(WmsInboundAuditStatus.Event event, WmsApprovalReqVO approvalReqVO, WmsInboundDO inbound) {
-        TransitionContext<WmsInboundDO> ctx =  TransitionContext.from(inbound);
+        TransitionContext<WmsInboundDO> ctx = TransitionContext.from(inbound);
         ctx.setExtra(WmsConstants.APPROVAL_REQ_VO_KEY, approvalReqVO);
         // 触发事件
         inboundStateMachine.fireEvent(event, ctx);
@@ -446,5 +451,46 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         this.approve(WmsInboundAuditStatus.Event.AGREE, approvalReqVO);
         // 
         return this.getInbound(inbound.getId());
+    }
+
+    @Override
+    public void updateShelvingStatus(Set<Long> ids) {
+
+        for (Long id : ids) {
+
+            List<WmsInboundItemDO> inboundItemDOList = inboundItemMapper.selectByInboundId(id, Integer.MAX_VALUE);
+            Integer none = 0;
+            Integer part = 0;
+            Integer full = 0;
+            for (WmsInboundItemDO itemDO : inboundItemDOList) {
+                Integer actualQty = itemDO.getActualQty();
+                Integer shelvedQty = itemDO.getShelvedQty();
+                // 如果存在已上架数量不为0，部分上架
+                if (shelvedQty == 0) {
+                    none++;
+                }
+                if (shelvedQty >= actualQty) {
+                    full++;
+                }
+
+                if (shelvedQty > 0 && shelvedQty < actualQty) {
+                    part++;
+                }
+            }
+
+            WmsInboundDO inbound = this.getInbound(id);
+
+            if (none == inboundItemDOList.size()) {
+                inbound.setShelvingStatus(WmsInboundShelvingStatus.NONE.getValue());
+            } else if (full == inboundItemDOList.size()) {
+                inbound.setShelvingStatus(WmsInboundShelvingStatus.ALL.getValue());
+            } else {
+                inbound.setShelvingStatus(WmsInboundShelvingStatus.PARTLY.getValue());
+            }
+            inboundMapper.updateById(inbound);
+        }
+
+
+
     }
 }
