@@ -7,9 +7,12 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -18,6 +21,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +29,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
@@ -38,6 +43,8 @@ public class TmsFirstMileRequestController {
 
     @Resource
     private TmsFirstMileRequestService firstMileRequestService;
+    @Autowired
+    ErpProductApi erpProductApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程申请单")
@@ -157,10 +164,16 @@ public class TmsFirstMileRequestController {
     private TmsFirstMileRequestRespVO bindSingleResult(TmsFirstMileRequestBO firstMileRequestBO) {
         // 转换主表数据
         TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(firstMileRequestBO, TmsFirstMileRequestRespVO.class);
+        //list - productId
+        List<Long> productIds = firstMileRequestBO.getItems().stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList();
+        Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         // 设置子表数据
         if (firstMileRequestBO.getItems() != null) {
             List<TmsFirstMileRequestItemRespVO> items = firstMileRequestBO.getItems().stream()
-                .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class))
+                .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
+                    itemRespVO.setProduct(productMap.get(item.getProductId()))
+                        .setBarCode(productMap.get(item.getProductId()).getBarCode());
+                }))
                 .collect(Collectors.toList());
             respVO.setItems(items);
             // 设置明细数量
