@@ -68,5 +68,8 @@ public class TmsFirstMileRequestItemRespVO {
     @Schema(description = "已订购数")
     @ExcelProperty("已订购数")
     private Integer orderClosedQty;
-
+//
+//    //主表
+//    @Schema(description = "主表")
+//    private TmsFirstMileRequestRespVO tmsFirstMileRequestRespVO;
 }

@@ -1,7 +1,5 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.request.item;
 
-import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import jakarta.validation.Valid;
@@ -42,13 +40,5 @@ public interface TmsFirstMileRequestItemService {
      * @return 头程申请表明细
      */
     TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id);
-
-    /**
-     * 获得头程申请表明细分页
-     *
-     * @param pageReqVO 分页查询
-     * @return 头程申请表明细分页
-     */
-    PageResult<TmsFirstMileRequestItemDO> getFirstMileRequestItemPage(TmsFirstMileRequestItemPageReqVO pageReqVO);
 
 }

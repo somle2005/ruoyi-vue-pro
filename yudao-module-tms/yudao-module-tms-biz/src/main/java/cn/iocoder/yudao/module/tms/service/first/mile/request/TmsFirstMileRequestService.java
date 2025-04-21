@@ -3,8 +3,8 @@ package cn.iocoder.yudao.module.tms.service.first.mile.request;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -39,20 +39,20 @@ public interface TmsFirstMileRequestService {
     void deleteFirstMileRequest(Long id);
 
     /**
-     * 获得头程申请单
-     *
-     * @param id 编号
-     * @return 头程申请单
-     */
-    TmsFirstMileRequestDO getFirstMileRequest(Long id);
-
-    /**
-     * 获得头程申请单分页
+     * 获得头程申请单BO分页
      *
      * @param pageReqVO 分页查询
-     * @return 头程申请单分页
+     * @return 头程申请单BO分页
      */
-    PageResult<TmsFirstMileRequestDO> getFirstMileRequestPage(TmsFirstMileRequestPageReqVO pageReqVO);
+    PageResult<TmsFirstMileRequestBO> getFirstMileRequestBOPage(TmsFirstMileRequestPageReqVO pageReqVO);
+
+    /**
+     * 获得头程申请单BO
+     *
+     * @param id 主表编号
+     * @return 头程申请单BO
+     */
+    TmsFirstMileRequestBO getFirstMileRequestBO(Long id);
 
     // ==================== 子表（头程申请表明细） ====================
 

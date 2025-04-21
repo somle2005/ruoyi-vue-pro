@@ -1,8 +1,6 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.request.item;
 
-import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
@@ -61,10 +59,4 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
     public TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id) {
         return firstMileRequestItemMapper.selectById(id);
     }
-
-    @Override
-    public PageResult<TmsFirstMileRequestItemDO> getFirstMileRequestItemPage(TmsFirstMileRequestItemPageReqVO pageReqVO) {
-        return firstMileRequestItemMapper.selectPage(pageReqVO);
-    }
-
 }

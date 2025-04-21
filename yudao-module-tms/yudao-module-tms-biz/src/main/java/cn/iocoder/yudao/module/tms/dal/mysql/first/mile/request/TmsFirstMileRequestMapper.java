@@ -30,5 +30,4 @@ public interface TmsFirstMileRequestMapper extends BaseMapperX<TmsFirstMileReque
             .betweenIfPresent(TmsFirstMileRequestDO::getTotalVolume, reqVO.getTotalVolume())
             .orderByDesc(TmsFirstMileRequestDO::getId));
     }
-
 }

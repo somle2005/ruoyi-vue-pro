@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
@@ -47,6 +48,6 @@ public class TmsFirstMileRequestSaveReqVO {
     private Integer revision;
 
     @Schema(description = "头程申请表明细列表")
-    private List<TmsFirstMileRequestItemSaveReqVO> firstMileRequestItems;
+    private List<@Valid TmsFirstMileRequestItemSaveReqVO> firstMileRequestItems;
 
 }

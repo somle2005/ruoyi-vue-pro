@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo;
 
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,6 +8,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "管理后台 - 头程申请单 Response VO")
 @Data
@@ -57,4 +59,10 @@ public class TmsFirstMileRequestRespVO {
     @ExcelProperty("总体积（m³）")
     private BigDecimal totalVolume;
 
+    @Schema(description = "头程申请表明细列表")
+    @ExcelProperty("明细数量")
+    private Integer itemCount;
+
+    @Schema(description = "头程申请表明细列表")
+    private List<TmsFirstMileRequestItemRespVO> items;
 }

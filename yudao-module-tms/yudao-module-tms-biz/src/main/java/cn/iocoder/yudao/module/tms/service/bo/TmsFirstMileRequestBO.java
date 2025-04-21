@@ -4,9 +4,10 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMil
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import lombok.Data;
 
-@Data
-public class TmsFirstMileRequestItemBO extends TmsFirstMileRequestItemDO {
+import java.util.List;
 
-    //主表
-    private TmsFirstMileRequestDO tmsFirstMileRequestDO;
+@Data
+public class TmsFirstMileRequestBO extends TmsFirstMileRequestDO {
+    //1:N 主子表
+    private List<TmsFirstMileRequestItemDO> items;
 }
