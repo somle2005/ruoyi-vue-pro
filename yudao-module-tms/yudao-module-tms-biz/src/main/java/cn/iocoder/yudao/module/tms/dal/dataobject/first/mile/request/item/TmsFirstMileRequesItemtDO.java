@@ -21,7 +21,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TmsFirstMileRequestItemDO extends BaseDO {
+public class TmsFirstMileRequesItemtDO extends BaseDO {
 
     /**
      * 明细编号

@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.request;
 
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
 import jakarta.validation.Valid;
 
 /**
@@ -39,10 +39,10 @@ public interface TmsFirstMileRequestItemService {
      * @param id 编号
      * @return 头程申请表明细
      */
-    TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id);
+    TmsFirstMileRequesItemtDO getFirstMileRequestItem(Long id);
 
     //valid
-    TmsFirstMileRequestItemDO validateFirstMileRequestItemExists(Long id);
+    TmsFirstMileRequesItemtDO validateFirstMileRequestItemExists(Long id);
 
     /**
      * 更新头程申请表明细状态

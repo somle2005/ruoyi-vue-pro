@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.tms.config.first.mile.request.impl.action.item;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
@@ -12,14 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
-public class RequestItemOffActionImpl implements Action<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestItemDO> {
+public class RequestItemOffActionImpl implements Action<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> {
     @Autowired
     private TmsFirstMileRequestItemService tmsFirstMileRequestItemService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void execute(TmsAuditStatus from, TmsAuditStatus to, TmsEventEnum event, TmsFirstMileRequestItemDO context) {
-        TmsFirstMileRequestItemDO firstMileRequestItemDO = tmsFirstMileRequestItemService.validateFirstMileRequestItemExists(context.getId());
+    public void execute(TmsAuditStatus from, TmsAuditStatus to, TmsEventEnum event, TmsFirstMileRequesItemtDO context) {
+        TmsFirstMileRequesItemtDO firstMileRequestItemDO = tmsFirstMileRequestItemService.validateFirstMileRequestItemExists(context.getId());
 
         firstMileRequestItemDO.setOffStatus(to.getCode());
 

@@ -12,7 +12,7 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -143,6 +143,15 @@ public class TmsFirstMileRequestController {
         return success(true);
     }
 
+    //启用/关闭申请单子项
+    @PutMapping("/update-item-status")
+    @Operation(summary = "启用/禁用申请单子项")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:update-item-status')")
+    public CommonResult<Boolean> updateItemStatus(@Valid @RequestBody TmsFirstMileRequestItemOffReqVO reqVO) {
+        firstMileRequestService.switchTmsFirstMileOpenStatus(reqVO.getItemIds(), reqVO.getEnable());
+        return success(true);
+    }
+
     @PostMapping("/merge")
     @Operation(summary = "合并头程申请单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:merge')")
@@ -153,7 +162,6 @@ public class TmsFirstMileRequestController {
         return success(true);
     }
 
-    //TODO 合并头程申请单
 
     /**
      * 将TmsFirstMileRequestBO转换为TmsFirstMileRequestRespVO 实现主表和子表数据的绑定
@@ -165,7 +173,7 @@ public class TmsFirstMileRequestController {
         // 转换主表数据
         TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(firstMileRequestBO, TmsFirstMileRequestRespVO.class);
         //list - productId
-        List<Long> productIds = firstMileRequestBO.getItems().stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList();
+        List<Long> productIds = firstMileRequestBO.getItems().stream().map(TmsFirstMileRequesItemtDO::getProductId).distinct().toList();
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         // 设置子表数据
         if (firstMileRequestBO.getItems() != null) {

@@ -2,7 +2,7 @@ package cn.iocoder.yudao.module.tms.service.first.mile.request.impl.item;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
 import jakarta.annotation.Resource;
@@ -27,7 +27,7 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
     @Override
     public Long createFirstMileRequestItem(TmsFirstMileRequestItemSaveReqVO createReqVO) {
         // 插入
-        TmsFirstMileRequestItemDO firstMileRequestItem = BeanUtils.toBean(createReqVO, TmsFirstMileRequestItemDO.class);
+        TmsFirstMileRequesItemtDO firstMileRequestItem = BeanUtils.toBean(createReqVO, TmsFirstMileRequesItemtDO.class);
         firstMileRequestItemMapper.insert(firstMileRequestItem);
         // 返回
         return firstMileRequestItem.getId();
@@ -38,7 +38,7 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
         // 校验存在
         validateFirstMileRequestItemExists(updateReqVO.getId());
         // 更新
-        TmsFirstMileRequestItemDO updateObj = BeanUtils.toBean(updateReqVO, TmsFirstMileRequestItemDO.class);
+        TmsFirstMileRequesItemtDO updateObj = BeanUtils.toBean(updateReqVO, TmsFirstMileRequesItemtDO.class);
         firstMileRequestItemMapper.updateById(updateObj);
     }
 
@@ -50,20 +50,20 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
         firstMileRequestItemMapper.deleteById(id);
     }
 
-    public TmsFirstMileRequestItemDO validateFirstMileRequestItemExists(Long id) {
-        TmsFirstMileRequestItemDO tmsFirstMileRequestItemDO = firstMileRequestItemMapper.selectById(id);
+    public TmsFirstMileRequesItemtDO validateFirstMileRequestItemExists(Long id) {
+        TmsFirstMileRequesItemtDO tmsFirstMileRequestItemDO = firstMileRequestItemMapper.selectById(id);
         if (tmsFirstMileRequestItemDO == null) throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
         return tmsFirstMileRequestItemDO;
     }
 
     @Override
-    public TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id) {
+    public TmsFirstMileRequesItemtDO getFirstMileRequestItem(Long id) {
         return firstMileRequestItemMapper.selectById(id);
     }
 
     @Override
     public void updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus) {
-        TmsFirstMileRequestItemDO firstMileRequestItemDO = validateFirstMileRequestItemExists(id);
+        TmsFirstMileRequesItemtDO firstMileRequestItemDO = validateFirstMileRequestItemExists(id);
         if (openStatus != null) {
             firstMileRequestItemDO.setOffStatus(openStatus);
         }

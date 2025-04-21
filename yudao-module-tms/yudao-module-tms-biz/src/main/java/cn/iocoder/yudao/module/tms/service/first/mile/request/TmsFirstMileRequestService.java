@@ -4,8 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import jakarta.validation.Valid;
 
@@ -59,19 +58,19 @@ public interface TmsFirstMileRequestService {
     /**
      * 货单头程申请单主表DO
      */
-    TmsFirstMileRequestDO validateFirstMileRequestExists(Long id);
+    cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO validateFirstMileRequestExists(Long id);
 
     /**
      * 修改主单状态,3个状态 开关 订购 审核,3个入参。
      */
-    TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer offStatus, Integer orderStatus, Integer auditStatus);
+    cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer offStatus, Integer orderStatus, Integer auditStatus);
 
     // ==================== 子表（头程申请表明细） ====================
 
     /**
      * 修改子单状态，开关、订购
      */
-    TmsFirstMileRequestItemDO updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus);   
+    TmsFirstMileRequesItemtDO updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus);
 
     /**
      * 获得头程申请表明细列表
@@ -79,7 +78,7 @@ public interface TmsFirstMileRequestService {
      * @param requestId 所属申请单ID
      * @return 头程申请表明细列表
      */
-    List<TmsFirstMileRequestItemDO> getFirstMileRequestItemListByRequestId(Long requestId);
+    List<TmsFirstMileRequesItemtDO> getFirstMileRequestItemListByRequestId(Long requestId);
 
     /**
      * 提交审核

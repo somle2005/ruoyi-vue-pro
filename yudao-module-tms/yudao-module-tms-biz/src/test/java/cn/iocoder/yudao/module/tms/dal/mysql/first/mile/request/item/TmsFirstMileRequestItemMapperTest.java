@@ -4,7 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
-import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequesItemtItemBO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
@@ -18,8 +18,8 @@ class TmsFirstMileRequestItemMapperTest extends BaseDbUnitTest {
     void selectPageBO() {
         TmsFirstMileRequestPageReqVO vo = new TmsFirstMileRequestPageReqVO();
         vo.setItem(new TmsFirstMileRequestItemPageReqVO());
-        PageResult<TmsFirstMileRequestItemBO> result = tmsFirstMileRequestItemMapper.selectPageBO(vo);
-        for (TmsFirstMileRequestItemBO tmsFirstMileRequestItemBO : result.getList()) {
+        PageResult<TmsFirstMileRequesItemtItemBO> result = tmsFirstMileRequestItemMapper.selectPageBO(vo);
+        for (TmsFirstMileRequesItemtItemBO tmsFirstMileRequestItemBO : result.getList()) {
             log.info("{}", tmsFirstMileRequestItemBO);
         }
     }
