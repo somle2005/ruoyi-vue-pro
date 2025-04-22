@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.SrmP
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.*;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.*;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -14,15 +15,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.PURCHASE_REQUEST_NOT_EXISTS_BY_STATUS;
+import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.PURCHASE_REQUEST_NOT_EXISTS_BY_EVENT;
 
 //状态机基本异常回调
 @Component
+@Getter
 @Slf4j
-public class SrmBaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
+public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
 
     // 状态机描述Map
-    private static final Map<Map<Class<?>, Class<?>>, String> STATE_MACHINE_MAP_CN = new HashMap<>();
+    public static final Map<Map<Class<?>, Class<?>>, String> STATE_MACHINE_MAP_CN = new HashMap<>();
 
     static {
         // 采购申请主表状态机
@@ -75,7 +77,7 @@ public class SrmBaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
             context.getClass().getName());
         //        throw new IllegalArgumentException(msg);
         //        throw new ServiceException(msg);
-        throw exception(PURCHASE_REQUEST_NOT_EXISTS_BY_STATUS, stateMachineDesc, statusDesc, SrmEventEnum.valueOf(event.toString()).getDesc());
+        throw exception(PURCHASE_REQUEST_NOT_EXISTS_BY_EVENT, stateMachineDesc, statusDesc, SrmEventEnum.valueOf(event.toString()).getDesc());
     }
 
     private String getStateMachineDescription(S sourceState, C context) {

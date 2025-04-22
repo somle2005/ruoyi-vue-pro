@@ -30,7 +30,8 @@ import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.*;
-import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.*;
+import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE;
+import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE;
 
 /**
  * 头程申请单 Service 实现类
@@ -46,8 +47,6 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private final TmsFirstMileRequestItemMapper firstMileRequestItemMapper;
     @Resource(name = FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> tmsFirstMileRequestStatusMachine;
-    @Resource(name = FIRST_MILE_REQUEST_OFF_STATE_MACHINE)
-    private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> tmsFirstMileRequestOffStatusMachine;
     @Resource(name = FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
     private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> tmsFirstMileRequestItemOffStatusMachine;
 

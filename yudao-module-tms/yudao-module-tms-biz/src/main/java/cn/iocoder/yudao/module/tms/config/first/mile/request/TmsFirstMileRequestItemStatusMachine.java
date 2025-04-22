@@ -2,9 +2,9 @@ package cn.iocoder.yudao.module.tms.config.first.mile.request;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
+import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.tms.config.TmsBaseFailCallbackImpl;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
@@ -23,7 +23,7 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQU
 public class TmsFirstMileRequestItemStatusMachine {
 
     @Resource
-    TmsBaseFailCallbackImpl TmsBaseFailCallbackImpl;
+    FailCallback TmsBaseFailCallbackImpl;
     @Resource
     Action<TmsOffStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> requestItemOrderAction;
     @Resource

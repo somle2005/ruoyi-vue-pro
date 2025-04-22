@@ -4,12 +4,16 @@ import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.stereotype.Component;
 
 import java.lang.reflect.Method;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR;
 
+@Component
+@ConditionalOnMissingBean(FailCallback.class)
 @Slf4j
 public class TmsBaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
 

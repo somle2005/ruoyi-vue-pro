@@ -2,9 +2,9 @@ package cn.iocoder.yudao.module.tms.config.first.mile.request;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
+import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.tms.config.TmsBaseFailCallbackImpl;
 import cn.iocoder.yudao.module.tms.config.first.mile.request.impl.action.RequestAuditActionImpl;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
@@ -25,7 +25,7 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.*;
 public class TmsFirstMileRequestStatusMachine {
 
     @Resource
-    TmsBaseFailCallbackImpl TmsBaseFailCallbackImpl;
+    FailCallback TmsBaseFailCallbackImpl;
     @Resource
     RequestAuditActionImpl requestAuditActionImpl;
     @Bean(FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)
