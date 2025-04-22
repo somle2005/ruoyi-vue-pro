@@ -15,16 +15,16 @@ public interface TmsFirstMileRequestItemService {
     /**
      * 创建头程申请表明细
      *
-     * @param requestId 首公里申请单id
+     * @param requestId 头程申请单id
      * @param list      集合
      */
     void createFirstMileRequestItemList(Long requestId, List<TmsFirstMileRequestItemDO> list);
 
     /**
-     * 更新首公里申请单子表
+     * 更新头程申请单子表
      *
-     * @param requestId 首公里申请单id
-     * @param list 首公里申请单子表
+     * @param requestId 头程申请单id
+     * @param list 头程申请单子表
      */
     void updateFirstMileRequestItemList(Long requestId, List<TmsFirstMileRequestItemDO> list);
     /**

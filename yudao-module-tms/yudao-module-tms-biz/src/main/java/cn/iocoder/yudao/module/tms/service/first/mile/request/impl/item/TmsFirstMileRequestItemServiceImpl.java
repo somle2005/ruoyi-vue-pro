@@ -82,8 +82,8 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
         // 获取原有的子表数据
         List<TmsFirstMileRequestItemDO> oldList = firstMileRequestItemMapper.selectListByRequestId(requestId);
 
-        // 对比新旧数据，获取需要新增、更新、删除的数据
-        List<List<TmsFirstMileRequestItemDO>> diffedList = diffList(oldList, list, (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
+        List<List<TmsFirstMileRequestItemDO>> diffedList = diffList(oldList, list,
+            (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
 
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
             diffedList.get(0).forEach(item -> item.setRequestId(requestId));
@@ -94,12 +94,17 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
             firstMileRequestItemMapper.updateBatch(diffedList.get(1));
         }
         if (CollUtil.isNotEmpty(diffedList.get(2))) {
-            //
-            firstMileRequestItemMapper.deleteByIds(convertList(diffedList.get(2), TmsFirstMileRequestItemDO::getId));
-            //删除后、刷新主表状态
-//            tmsFirstMileRequestService
-            diffedList.get(2).forEach(item -> offStatusStatusMachine.fireEvent(TmsOffStatus.fromCode(item.getOffStatus()), TmsEventEnum.MANUAL_CLOSE, item));
-            diffedList.get(2).forEach(item -> orderStatusStatusMachine.fireEvent(TmsOffStatus.fromCode(item.getOffStatus()), TmsEventEnum.MANUAL_CLOSE, item));
+            // 获取要删除的ID列表
+            List<Long> deleteIds = convertList(diffedList.get(2), TmsFirstMileRequestItemDO::getId);
+            // 删除数据
+            firstMileRequestItemMapper.deleteByIds(deleteIds);
+            // 获取主表数据
+            TmsFirstMileRequestDO requestDO = tmsFirstMileRequestService.getFirstMileRequest(requestId);
+            if (requestDO != null) {
+                // 触发主表状态机事件
+                offStatusStatusMachine.fireEvent(TmsOffStatus.fromCode(requestDO.getOffStatus()), TmsEventEnum.MANUAL_CLOSE, requestDO);
+                orderStatusStatusMachine.fireEvent(TmsOrderStatus.fromCode(requestDO.getOrderStatus()), TmsEventEnum.ORDER_ADJUSTMENT, requestDO);
+            }
         }
     }
 
