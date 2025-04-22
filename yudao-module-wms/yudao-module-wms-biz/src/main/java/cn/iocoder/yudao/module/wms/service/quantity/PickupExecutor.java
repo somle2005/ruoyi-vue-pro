@@ -61,6 +61,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         WmsPickupDO pickup = context.getPickup();
         List<WmsPickupItemDO> wmsPickupItemDOList = context.getWmsPickupItemDOList();
         List<WmsInboundItemRespVO> inboundItemVOList = context.getInboundItemVOList();
+        inboundItemService.assembleProducts(inboundItemVOList);
         //
         Map<Long, WmsInboundItemRespVO> inboundItemVOMap = StreamX.from(inboundItemVOList).toMap(WmsInboundItemRespVO::getId);
         List<WmsInboundDO> inboundDOList = inboundService.selectByIds(StreamX.from(inboundItemVOList).toList(WmsInboundItemRespVO::getInboundId));

@@ -22,6 +22,7 @@ import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
+import cn.iocoder.yudao.module.wms.service.pickup.item.WmsPickupItemService;
 import cn.iocoder.yudao.module.wms.service.quantity.PickupExecutor;
 import cn.iocoder.yudao.module.wms.service.quantity.context.PickupContext;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
@@ -86,6 +87,10 @@ public class WmsPickupServiceImpl implements WmsPickupService {
     @Resource
     @Lazy
     private WmsWarehouseService warehouseService;
+
+    @Resource
+    @Lazy
+    private WmsPickupItemService pickupItemService;
 
     /**
      * @sign : E7A4B1135281D8DB
@@ -277,4 +282,4 @@ public class WmsPickupServiceImpl implements WmsPickupService {
     public void createForInventory(WmsPickupSaveReqVO pickupSaveReqVO) {
         this.createPickup(pickupSaveReqVO);
     }
-}
+}

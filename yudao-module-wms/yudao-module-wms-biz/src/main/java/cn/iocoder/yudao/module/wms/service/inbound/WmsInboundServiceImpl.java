@@ -44,7 +44,6 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -52,7 +51,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_CAN_NOT_EDIT;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_PLAN_QTY_ERROR;
@@ -455,9 +453,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
 
     @Override
     public void updateShelvingStatus(Set<Long> ids) {
-
         for (Long id : ids) {
-
             List<WmsInboundItemDO> inboundItemDOList = inboundItemMapper.selectByInboundId(id, Integer.MAX_VALUE);
             Integer none = 0;
             Integer part = 0;
@@ -472,14 +468,11 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                 if (shelvedQty >= actualQty) {
                     full++;
                 }
-
                 if (shelvedQty > 0 && shelvedQty < actualQty) {
                     part++;
                 }
             }
-
             WmsInboundDO inbound = this.getInbound(id);
-
             if (none == inboundItemDOList.size()) {
                 inbound.setShelvingStatus(WmsInboundShelvingStatus.NONE.getValue());
             } else if (full == inboundItemDOList.size()) {
@@ -489,8 +482,5 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             }
             inboundMapper.updateById(inbound);
         }
-
-
-
     }
 }

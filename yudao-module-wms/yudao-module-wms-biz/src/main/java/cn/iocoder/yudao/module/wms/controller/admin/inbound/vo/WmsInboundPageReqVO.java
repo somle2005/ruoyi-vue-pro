@@ -13,7 +13,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : code,inbound_status,company_id,create_time,inbound_time,arrival_actual_time,audit_status,creator_comment,trace_no,type,upstream_bill_type,init_age,upstream_bill_id,shipping_method,upstream_bill_code,dept_id,arrival_plan_time,shelving_status,warehouse_id
+ * @table-fields : code,inbound_status,company_id,create_time,inbound_time,arrival_actual_time,remark,audit_status,trace_no,type,upstream_bill_type,init_age,upstream_bill_id,shipping_method,upstream_bill_code,dept_id,arrival_plan_time,shelving_status,warehouse_id
  */
 @Schema(description = "管理后台 - 入库单分页 Request VO")
 @Data
@@ -32,9 +32,6 @@ public class WmsInboundPageReqVO extends PageParam {
 
     @Schema(description = "WMS运输方式 ; WmsShippingMethod : 0-海运 , 1-铁路 , 2-空运 , 3-集卡")
     private Integer shippingMethod;
-
-    @Schema(description = "特别说明，创建方专用")
-    private String creatorComment;
 
     @Schema(description = "初始库龄")
     private Integer initAge;
@@ -76,9 +73,12 @@ public class WmsInboundPageReqVO extends PageParam {
     @Schema(description = "来源单据号", example = "")
     private String upstreamBillCode;
 
-    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单", example = "")
+    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
     private Integer upstreamBillType;
 
-    @Schema(description = "上架状态", example = "")
+    @Schema(description = "WMS入库单上架状态 ; WmsInboundShelvingStatus : 1-未上架 , 2-部分上架 , 3-已上架", example = "")
     private Integer shelvingStatus;
+
+    @Schema(description = "特别说明，创建方专用", example = "")
+    private String remark;
 }

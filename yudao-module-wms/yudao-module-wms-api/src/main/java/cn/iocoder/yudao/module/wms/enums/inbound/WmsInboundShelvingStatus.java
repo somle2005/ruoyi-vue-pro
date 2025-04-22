@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 
 /**
- * 入库单类型
+ * 入库单上架状态
  **/
 @RequiredArgsConstructor
 @Getter

@@ -22,4 +22,11 @@ public class WmsPickupPendingPageReqVO extends PageParam {
     private String inboundCode;
 
 
+    /**
+     * 产品ID
+     **/
+    @Schema(description = "产品ID", example = "29327")
+    private Long productId;
+
+
 }

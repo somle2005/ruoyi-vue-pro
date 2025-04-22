@@ -70,6 +70,7 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
     default PageResult<WmsInboundItemQueryDO> getPickupPending(WmsPickupPendingPageReqVO reqVO) {
         MPJLambdaWrapperX<WmsInboundItemQueryDO> query = new MPJLambdaWrapperX<>();
         query.selectAll(WmsInboundItemDO.class).select(WmsInboundDO::getWarehouseId);
+        query.eqIfPresent(WmsInboundItemDO::getProductId, reqVO.getProductId());
         query.gt(WmsInboundItemDO::getActualQty, WmsInboundItemDO::getShelvedQty).innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId).likeIfExists(WmsInboundDO::getCode, reqVO.getInboundCode())
             .orderByDesc(WmsInboundItemDO::getId);
         return selectPage(reqVO, query);

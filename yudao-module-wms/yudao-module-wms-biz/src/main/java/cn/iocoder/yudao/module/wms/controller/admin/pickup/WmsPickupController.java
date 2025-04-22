@@ -99,6 +99,7 @@ public class WmsPickupController {
         // 
         pickupService.assembleWarehouse(Arrays.asList(pickupVO));
         pickupItemService.assembleProduct(pickupVO.getItemList());
+        pickupItemService.assembleInbound(pickupVO.getItemList());
         // 返回
         return success(pickupVO);
     }
@@ -134,4 +135,4 @@ public class WmsPickupController {
     // // 导出 Excel
     // ExcelUtils.write(response, "拣货单.xls", "数据", WmsPickupRespVO.class, BeanUtils.toBean(list, WmsPickupRespVO.class));
     // }
-}
+}
