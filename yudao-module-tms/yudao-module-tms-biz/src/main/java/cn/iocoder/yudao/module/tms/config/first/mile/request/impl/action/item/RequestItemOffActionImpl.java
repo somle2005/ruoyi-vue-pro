@@ -30,6 +30,7 @@ public class RequestItemOffActionImpl implements Action<TmsOffStatus, TmsEventEn
     private TmsFirstMileRequestService tmsFirstMileRequestService;
 
     @Resource(name = FIRST_MILE_REQUEST_OFF_STATE_MACHINE)
+    @Lazy
     private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> tmsFirstMileRequestOffStatusMachine;
 
     @Override

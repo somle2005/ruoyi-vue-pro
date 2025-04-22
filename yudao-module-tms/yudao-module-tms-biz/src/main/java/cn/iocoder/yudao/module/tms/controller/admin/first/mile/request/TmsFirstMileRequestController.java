@@ -152,6 +152,14 @@ public class TmsFirstMileRequestController {
         return success(true);
     }
 
+    //获取最新的单据编号
+    @GetMapping("/get-latest-no")
+    @Operation(summary = "获取最新的单据编号")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:get-latest-no')")
+    public CommonResult<String> getLatestNo() {
+        return success(firstMileRequestService.getLatestCode());
+    }
+
     @PostMapping("/merge")
     @Operation(summary = "合并头程申请单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:merge')")

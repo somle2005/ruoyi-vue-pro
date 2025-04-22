@@ -4,12 +4,14 @@ import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Pattern;
 import lombok.Data;
 
 import java.util.List;
+
+import static cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO.FIRST_MILE_REQUEST_NO_PREFIX;
 
 @Schema(description = "管理后台 - 头程申请单新增/修改 Request VO")
 @Data
@@ -21,7 +23,10 @@ public class TmsFirstMileRequestSaveReqVO {
     private Long id;
 
     @Schema(description = "单据编号", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "单据编号不能为空")
+    @Pattern(regexp = "^" + FIRST_MILE_REQUEST_NO_PREFIX + "-\\d{8}-\\d{6}$",
+             message = "单据编号格式不正确，正确格式如：" + FIRST_MILE_REQUEST_NO_PREFIX + "-20250108-000001")
+    @Pattern(regexp = "^" + FIRST_MILE_REQUEST_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$",
+             message = "单据编号格式不正确，注意后6位序号中不能以9开头,正确格式:" + FIRST_MILE_REQUEST_NO_PREFIX + "-20250108-000001")
     private String code;
 
     @Schema(description = "申请人ID", requiredMode = Schema.RequiredMode.REQUIRED)

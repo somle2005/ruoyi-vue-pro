@@ -104,4 +104,11 @@ public interface TmsFirstMileRequestService {
      * 启用/关闭申请单子项，自动更新主表状态
      */
     void switchTmsFirstMileOpenStatus(List<Long> itemIds, Boolean enable);
+
+    /**
+     * 获取最新的单号Code
+     *
+     * @return 单号Code
+     */
+    String getLatestCode();
 }

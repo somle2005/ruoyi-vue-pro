@@ -26,6 +26,7 @@ public class RequestItemOrderActionImpl implements Action<TmsOrderStatus, TmsEve
     @Autowired
     @Lazy
     private TmsFirstMileRequestService tmsFirstMileRequestService;
+
     @Resource(name = FIRST_MILE_REQUEST_PURCHASE_ORDER_STATE_MACHINE)
     private StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> stateMachine;
 

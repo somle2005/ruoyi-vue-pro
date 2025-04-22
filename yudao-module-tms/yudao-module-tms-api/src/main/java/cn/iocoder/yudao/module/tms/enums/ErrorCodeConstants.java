@@ -24,7 +24,10 @@ public interface ErrorCodeConstants {
     ErrorCode FIRST_MILE_REQUEST_NOT_EXISTS = new ErrorCode(1_030_670_001, "头程申请单(编号:{})不存在");
     ErrorCode FIRST_MILE_REQUEST_ITEM_NOT_EXISTS = new ErrorCode(1_030_670_002, "头程申请单(编号:{})明细不存在");
     ErrorCode FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED = new ErrorCode(1_030_670_003, "头程申请单({})状态为({})，不允许关闭");
-    ErrorCode FIRST_MILE_REQUEST_CODE_DUPLICATE = new ErrorCode(1_030_670_004, "头程申请单编号({})重复");
+    ErrorCode FIRST_MILE_REQUEST_CODE_DUPLICATE = new ErrorCode(1_030_670_004, "头程申请单编号({})已存在");
+    ErrorCode FIRST_MILE_REQUEST_CODE_GENERATE_FAIL = new ErrorCode(1_030_670_005, "头程申请单编号生成失败,大于999999");
+    //头程申请创建生成失败
+    ErrorCode FIRST_MILE_REQUEST_CREATE_FAIL = new ErrorCode(1_030_670_006, "头程申请单创建失败,大于999999");
 
     //状态机错误,无法在({})状态下触发({})事件，上下文：{}
     // ========== 状态机异常 1-030-900-000 ==========

@@ -12,9 +12,11 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMil
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.TmsFirstMileRequestMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
+import cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
+import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
@@ -30,9 +32,9 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO.FIRST_MILE_REQUEST_NO_PREFIX;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.*;
-import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE;
-import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE;
+import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.*;
 
 /**
  * 头程申请单 Service 实现类
@@ -46,10 +48,18 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     private final TmsFirstMileRequestMapper firstMileRequestMapper;
     private final TmsFirstMileRequestItemMapper firstMileRequestItemMapper;
+    private final TmsNoRedisDAO tmsNoRedisDAO;
+
     @Resource(name = FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> tmsFirstMileRequestStatusMachine;
+    @Resource(name = FIRST_MILE_REQUEST_OFF_STATE_MACHINE)
+    private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> offStatusStatusMachine;
+    @Resource(name = FIRST_MILE_REQUEST_PURCHASE_ORDER_STATE_MACHINE)
+    private StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> orderStatusStatusMachine;
     @Resource(name = FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
-    private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> tmsFirstMileRequestItemOffStatusMachine;
+    private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> offItemStatusMachine;
+    @Resource(name = FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE)
+    private StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> orderItemStatusMachine;
 
 
     @Override
@@ -64,6 +74,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
         //校验code是否和数据库的重复
         validCodeDuplicate(firstMileRequest);
+        firstMileRequest.setCode(firstMileRequest.getCode() == null ? tmsNoRedisDAO.generate(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CREATE_FAIL)
+                                                                    : firstMileRequest.getCode());
         firstMileRequestMapper.insert(firstMileRequest);
 
         // 插入子表
@@ -79,27 +91,29 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         ThrowUtil.ifThrow(firstMileRequestMapper.selectByNo(firstMileRequest.getCode()) != null, FIRST_MILE_REQUEST_CODE_DUPLICATE);
     }
 
-    private void initMasterStatus(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO firstMileRequest) {
+    private void initMasterStatus(TmsFirstMileRequestDO firstMileRequest) {
         //审核
         tmsFirstMileRequestStatusMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, TmsFirstMileRequestAuditReqVO.builder().requestId(firstMileRequest.getId()).build());
         //开关
+        offStatusStatusMachine.fireEvent(TmsOffStatus.OPEN, TmsEventEnum.OFF_INIT, firstMileRequest);
         //采购
+        orderStatusStatusMachine.fireEvent(TmsOrderStatus.OT_ORDERED, TmsEventEnum.ORDER_INIT, firstMileRequest);
     }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updateFirstMileRequest(TmsFirstMileRequestSaveReqVO vo) {
         // 校验存在
-        validateFirstMileRequestExists(vo.getId());
-
+        TmsFirstMileRequestDO oldDo = validateFirstMileRequestExists(vo.getId());
         TmsFirstMileRequestDO updateObj = BeanUtils.toBean(vo, TmsFirstMileRequestDO.class);
-        //校验code重复
-        validCodeDuplicate(updateObj);
-
+        if (!Objects.equals(oldDo.getCode(), vo.getCode())) {
+            //校验code重复
+            validCodeDuplicate(updateObj);
+        }
         // 计算主表的总重量和总体积
         List<TmsFirstMileRequesItemtDO> requestItemDOS = BeanUtils.toBean(vo.getFirstMileRequestItems(), TmsFirstMileRequesItemtDO.class);
         calculateTotalWeightAndVolume(updateObj, requestItemDOS);
-        
+
         firstMileRequestMapper.updateById(updateObj);
 
         // 更新子表
@@ -164,10 +178,10 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         if (offStatus != null) {
             requestDO.setOffStatus(offStatus);
         }
-        if(orderStatus != null) {
+        if (orderStatus != null) {
             requestDO.setOrderStatus(orderStatus);
         }
-        if(auditStatus != null) {
+        if (auditStatus != null) {
             requestDO.setAuditStatus(auditStatus);
         }
         // 执行更新
@@ -190,6 +204,15 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private void createFirstMileRequestItemList(Long requestId, List<TmsFirstMileRequesItemtDO> list) {
         list.forEach(o -> o.setRequestId(requestId));
         firstMileRequestItemMapper.insertBatch(list);
+        //初始化子表状态
+        initSlaveStatus(list);
+    }
+
+    private void initSlaveStatus(List<TmsFirstMileRequesItemtDO> list) {
+        for (TmsFirstMileRequesItemtDO item : list) {
+            orderItemStatusMachine.fireEvent(TmsOrderStatus.OT_ORDERED, TmsEventEnum.ORDER_INIT, item);
+            offItemStatusMachine.fireEvent(TmsOffStatus.OPEN, TmsEventEnum.OFF_INIT, item);
+        }
     }
 
     private void updateFirstMileRequestItemList(Long requestId, List<TmsFirstMileRequesItemtDO> list) {
@@ -244,14 +267,14 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         }
 
         // 查询所有记录
-        List<cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO> requestDOList = firstMileRequestMapper.selectByIds(ids);
+        List<TmsFirstMileRequestDO> requestDOList = firstMileRequestMapper.selectByIds(ids);
 
         // 找出不存在的记录ID
-        List<Long> existingIds = requestDOList.stream().map(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getId).toList();
+        List<Long> existingIds = requestDOList.stream().map(TmsFirstMileRequestDO::getId).toList();
         List<Long> notExistIds = ids.stream().filter(id -> !existingIds.contains(id)).collect(Collectors.toList());
 
         // 如果有不存在的记录，抛出异常
-        if(!notExistIds.isEmpty()) {
+        if (!notExistIds.isEmpty()) {
             throw exception(FIRST_MILE_REQUEST_NOT_EXISTS, notExistIds);
         }
 
@@ -262,7 +285,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             }
         });
         // 批量执行状态转换
-        for (cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO requestDO : requestDOList) {
+        for (TmsFirstMileRequestDO requestDO : requestDOList) {
             TmsFirstMileRequestAuditReqVO auditReqVO = TmsFirstMileRequestAuditReqVO.builder().requestId(requestDO.getId()).build();
             tmsFirstMileRequestStatusMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.SUBMIT_FOR_REVIEW, auditReqVO);
         }
@@ -300,7 +323,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
      * @param firstMileRequest 主表对象
      * @param requestItemDOS   子表对象列表
      */
-    private void calculateTotalWeightAndVolume(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO firstMileRequest, List<TmsFirstMileRequesItemtDO> requestItemDOS) {
+    private void calculateTotalWeightAndVolume(TmsFirstMileRequestDO firstMileRequest, List<TmsFirstMileRequesItemtDO> requestItemDOS) {
         if (requestItemDOS == null || requestItemDOS.isEmpty()) {
             firstMileRequest.setTotalWeight(BigDecimal.ZERO);
             firstMileRequest.setTotalVolume(BigDecimal.ZERO);
@@ -345,11 +368,16 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
         requestItemDOList.forEach(item -> {
             if (enable) {
-                tmsFirstMileRequestItemOffStatusMachine.fireEvent(TmsOffStatus.fromCode(item.getOffStatus()), TmsEventEnum.ACTIVATE, item);
+                offItemStatusMachine.fireEvent(TmsOffStatus.fromCode(item.getOffStatus()), TmsEventEnum.ACTIVATE, item);
             } else {
-                tmsFirstMileRequestItemOffStatusMachine.fireEvent(TmsOffStatus.fromCode(item.getOffStatus()), TmsEventEnum.MANUAL_CLOSE, item);
+                offItemStatusMachine.fireEvent(TmsOffStatus.fromCode(item.getOffStatus()), TmsEventEnum.MANUAL_CLOSE, item);
             }
         });
 
+    }
+
+    @Override
+    public String getLatestCode() {
+        return tmsNoRedisDAO.getMaxSerial(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CODE_GENERATE_FAIL);
     }
 }

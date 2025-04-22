@@ -17,7 +17,8 @@ import java.util.List;
 @Slf4j
 @Component
 public class RequestOrderActionImpl implements Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> {
-    @Autowired @Lazy
+    @Autowired
+    @Lazy
     private TmsFirstMileRequestService tmsFirstMileRequestService;
 
     @Override
