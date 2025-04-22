@@ -54,10 +54,6 @@ public class TmsFirstMileRequestStatusMachine {
 
     @Resource
     Action<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> requestOffActionImpl;
-    //订购
-    @Resource
-    Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> requestOrderActionImpl;
-
     @Bean(FIRST_MILE_REQUEST_OFF_STATE_MACHINE)
     public StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> getPurchaseRequestStateMachine() {
         StateMachineBuilder<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> builder = StateMachineBuilderFactory.create();
@@ -76,7 +72,11 @@ public class TmsFirstMileRequestStatusMachine {
         return builder.build(FIRST_MILE_REQUEST_OFF_STATE_MACHINE);
     }
 
-    @Bean(FIRST_MILE_REQUEST_PURCHASE_STATE_MACHINE)
+    //订购
+    @Resource
+    Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> requestOrderActionImpl;
+
+    @Bean(FIRST_MILE_REQUEST_PURCHASE_ORDER_STATE_MACHINE)
     public StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> buildTmsFirstMileRequestItemOrderStateMachine() {
         StateMachineBuilder<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> builder = StateMachineBuilderFactory.create();
         //初始化事件
@@ -88,6 +88,6 @@ public class TmsFirstMileRequestStatusMachine {
         //放弃订购
         builder.externalTransitions().fromAmong(TmsOrderStatus.PARTIALLY_ORDERED, TmsOrderStatus.OT_ORDERED).to(TmsOrderStatus.ORDER_FAILED).on(TmsEventEnum.ORDER_CANCEL).perform(requestOrderActionImpl);
         builder.setFailCallback(TmsBaseFailCallbackImpl);
-        return builder.build(FIRST_MILE_REQUEST_PURCHASE_STATE_MACHINE);
+        return builder.build(FIRST_MILE_REQUEST_PURCHASE_ORDER_STATE_MACHINE);
     }
 }

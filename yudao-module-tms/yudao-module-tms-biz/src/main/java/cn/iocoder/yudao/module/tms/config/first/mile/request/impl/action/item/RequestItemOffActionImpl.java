@@ -35,17 +35,20 @@ public class RequestItemOffActionImpl implements Action<TmsOffStatus, TmsEventEn
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void execute(TmsOffStatus from, TmsOffStatus to, TmsEventEnum event, TmsFirstMileRequesItemtDO context) {
-        TmsFirstMileRequesItemtDO firstMileRequestItemDO = tmsFirstMileRequestItemService.validateFirstMileRequestItemExists(context.getId());
 
-        firstMileRequestItemDO.setOffStatus(to.getCode());
 
-        tmsFirstMileRequestItemService.updateFirstMileRequestItemStatus(firstMileRequestItemDO.getId(), to.getCode(), null);
-
+        tmsFirstMileRequestItemService.updateFirstMileRequestItemStatus(context.getId(), to.getCode(), null);
+        //log
+        log.debug("更新采购申请单子表开关状态，ID: {}, 从状态: {}, 到状态: {}, 事件: {}",
+            context.getId(), from, to, event);
         //传递给主表状态机
         if (event != TmsEventEnum.OFF_INIT) {
+            TmsFirstMileRequesItemtDO firstMileRequestItemDO = tmsFirstMileRequestItemService.validateFirstMileRequestItemExists(context.getId());
             TmsFirstMileRequestDO mileRequest = tmsFirstMileRequestService.getFirstMileRequest(firstMileRequestItemDO.getRequestId());
+
             Optional.ofNullable(mileRequest).ifPresent(aDo -> tmsFirstMileRequestOffStatusMachine.fireEvent(TmsOffStatus.fromCode(aDo.getOffStatus()), event, aDo));
         }
+
     }
 
 

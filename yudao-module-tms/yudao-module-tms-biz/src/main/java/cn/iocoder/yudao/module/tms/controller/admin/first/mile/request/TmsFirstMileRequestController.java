@@ -178,11 +178,9 @@ public class TmsFirstMileRequestController {
         // 设置子表数据
         if (firstMileRequestBO.getItems() != null) {
             List<TmsFirstMileRequestItemRespVO> items = firstMileRequestBO.getItems().stream()
-                .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
-                    itemRespVO
-                        .setProduct(productMap.get(item.getProductId()))
-                        .setBarCode(productMap.get(item.getProductId()).getBarCode());
-                }))
+                .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> itemRespVO
+                    .setProduct(productMap.get(item.getProductId()))
+                    .setBarCode(productMap.get(item.getProductId()).getBarCode())))
                 .collect(Collectors.toList());
             respVO.setItems(items);
             // 设置明细数量
@@ -190,7 +188,6 @@ public class TmsFirstMileRequestController {
         } else {
             respVO.setItemCount(0);
         }
-
         return respVO;
     }
 
