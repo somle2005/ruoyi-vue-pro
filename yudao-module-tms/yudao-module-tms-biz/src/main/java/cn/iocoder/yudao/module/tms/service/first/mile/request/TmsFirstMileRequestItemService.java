@@ -1,8 +1,8 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.request;
 
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
-import jakarta.validation.Valid;
+
+import java.util.List;
 
 /**
  * 头程申请表明细 Service 接口
@@ -11,21 +11,22 @@ import jakarta.validation.Valid;
  */
 public interface TmsFirstMileRequestItemService {
 
+
     /**
      * 创建头程申请表明细
      *
-     * @param createReqVO 创建信息
-     * @return 编号
+     * @param requestId 首公里申请单id
+     * @param list      集合
      */
-    Long createFirstMileRequestItem(@Valid TmsFirstMileRequestItemSaveReqVO createReqVO);
+    void createFirstMileRequestItemList(Long requestId, List<TmsFirstMileRequestItemDO> list);
 
     /**
-     * 更新头程申请表明细
+     * 更新首公里申请单子表
      *
-     * @param updateReqVO 更新信息
+     * @param requestId 首公里申请单id
+     * @param list 首公里申请单子表
      */
-    void updateFirstMileRequestItem(@Valid TmsFirstMileRequestItemSaveReqVO updateReqVO);
-
+    void updateFirstMileRequestItemList(Long requestId, List<TmsFirstMileRequestItemDO> list);
     /**
      * 删除头程申请表明细
      *

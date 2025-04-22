@@ -20,6 +20,7 @@ import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
+import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +52,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private final TmsFirstMileRequestItemMapper firstMileRequestItemMapper;
     private final TmsNoRedisDAO tmsNoRedisDAO;
     private final ErpProductApi erpProductApi;
+    private final TmsFirstMileRequestItemService firstMileRequestItemService;
 
     @Resource(name = FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> tmsFirstMileRequestStatusMachine;
@@ -84,7 +86,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         firstMileRequestMapper.insert(firstMileRequest);
 
         // 插入子表
-        createFirstMileRequestItemList(firstMileRequest.getId(), requestItemDOS);
+        firstMileRequestItemService.createFirstMileRequestItemList(firstMileRequest.getId(), requestItemDOS);
         //初始化主子表状态
         initMasterStatus(firstMileRequest);
 
@@ -124,7 +126,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         firstMileRequestMapper.updateById(updateObj);
 
         // 更新子表
-        updateFirstMileRequestItemList(vo.getId(), requestItemDOS);
+        firstMileRequestItemService.updateFirstMileRequestItemList(vo.getId(), requestItemDOS);
     }
 
     @Override
@@ -208,25 +210,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         return firstMileRequestItemMapper.selectListByRequestId(requestId);
     }
 
-    private void createFirstMileRequestItemList(Long requestId, List<TmsFirstMileRequestItemDO> list) {
-        list.forEach(o -> o.setRequestId(requestId));
-        firstMileRequestItemMapper.insertBatch(list);
-        //初始化子表状态
-        initSlaveStatus(list);
-    }
 
-    private void initSlaveStatus(List<TmsFirstMileRequestItemDO> list) {
-        for (TmsFirstMileRequestItemDO item : list) {
-            orderItemStatusMachine.fireEvent(TmsOrderStatus.OT_ORDERED, TmsEventEnum.ORDER_INIT, item);
-            offItemStatusMachine.fireEvent(TmsOffStatus.OPEN, TmsEventEnum.OFF_INIT, item);
-        }
-    }
 
-    private void updateFirstMileRequestItemList(Long requestId, List<TmsFirstMileRequestItemDO> list) {
-        deleteFirstMileRequestItemByRequestId(requestId);
-        list.forEach(o -> o.setId(null).setUpdater(null).setUpdateTime(null)); // 解决更新情况下：1）id 冲突；2）updateTime 不更新
-        createFirstMileRequestItemList(requestId, list);
-    }
 
     private void deleteFirstMileRequestItemByRequestId(Long requestId) {
         firstMileRequestItemMapper.deleteById(requestId);

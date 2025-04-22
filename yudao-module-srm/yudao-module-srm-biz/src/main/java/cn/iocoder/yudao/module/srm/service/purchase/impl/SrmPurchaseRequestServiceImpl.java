@@ -326,6 +326,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
                 requestItemsDOStateMachine.fireEvent(SrmOffStatus.fromCode(itemsDO.getOffStatus()), SrmEventEnum.MANUAL_CLOSE, itemsDO);
             }
             erpPurchaseRequestItemsMapper.deleteByIds(convertList(diffList.get(2), SrmPurchaseRequestItemsDO::getId));
+            //TODO 触发其他状态改变
         }
     }
 
