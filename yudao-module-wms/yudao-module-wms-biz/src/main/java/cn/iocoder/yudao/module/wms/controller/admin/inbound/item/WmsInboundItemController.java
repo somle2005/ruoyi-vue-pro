@@ -1,21 +1,28 @@
 package cn.iocoder.yudao.module.wms.controller.admin.inbound.item;
 
+import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
+import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
+import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemExportVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsPickupPendingPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -26,7 +33,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_NOT_EXISTS;
@@ -155,14 +167,68 @@ public class WmsInboundItemController {
         // 返回
         return success(voPageResult);
     }
-    // @GetMapping("/export-excel")
-    // @Operation(summary = "导出入库单详情 Excel")
-    // @PreAuthorize("@ss.hasPermission('wms:inbound-item:export')")
-    // @ApiAccessLog(operateType = EXPORT)
-    // public void exportInboundItemExcel(@Valid WmsInboundItemPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
-    // pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-    // List<WmsInboundItemDO> list = inboundItemService.getInboundItemPage(pageReqVO).getList();
-    // // 导出 Excel
-    // ExcelUtils.write(response, "入库单详情.xls", "数据", WmsInboundItemRespVO.class, BeanUtils.toBean(list, WmsInboundItemRespVO.class));
-    // }
-}
+
+
+    @GetMapping("/export-excel")
+    @Operation(summary = "导出入库单详情 Excel")
+    @PreAuthorize("@ss.hasPermission('wms:inbound-item:export')")
+    @ApiAccessLog(operateType = EXPORT)
+    public void exportInboundItemExcel(@Valid WmsInboundItemPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
+
+        PageResult<WmsInboundItemQueryDO> doPageResult = inboundItemService.getInboundItemPage(pageReqVO);
+
+        List<WmsInboundItemQueryDO> distinct = StreamX.from(doPageResult.getList()).distinct(WmsInboundItemQueryDO::getId);
+        Map<Long,WmsInboundItemQueryDO> distinctMap= StreamX.from(distinct).toMap(WmsInboundItemQueryDO::getId);
+
+        List<WmsInboundItemDO> inboundItemDOS = inboundItemService.selectByInboundId(pageReqVO.getInboundId());
+
+        List<WmsInboundItemRespVO> inboundItemVOS = BeanUtils.toBean(inboundItemDOS, WmsInboundItemRespVO.class);
+        // 装配
+        inboundItemService.assembleDept(inboundItemVOS);
+        inboundItemService.assembleInbound(inboundItemVOS);
+        inboundItemService.assembleProducts(inboundItemVOS);
+        inboundItemVOS.forEach(item -> {
+            if(item.getInbound()!=null) {
+                item.setWarehouseId(item.getInbound().getWarehouseId());
+            }
+        });
+        inboundItemService.assembleWarehouse(inboundItemVOS);
+        inboundItemService.assembleCompany(inboundItemVOS);
+        // 转换
+        List<WmsInboundItemExportVO> exVOList = BeanUtils.toBean(inboundItemVOS, WmsInboundItemExportVO.class);
+        String inboundCode=null;
+        // 扁平化
+        Map<Long, WmsInboundItemExportVO> exportMap = StreamX.from(exVOList).toMap(WmsInboundItemExportVO::getId);
+        for (WmsInboundItemRespVO itemRespVO : inboundItemVOS) {
+            WmsInboundItemExportVO exportVO = exportMap.get(itemRespVO.getId());
+            if(exportVO==null) {
+                continue;
+            }
+            if(itemRespVO.getProduct()!=null) {
+                exportVO.setProductCode(itemRespVO.getProduct().getBarCode());
+                exportVO.setProductName(itemRespVO.getProduct().getName());
+            }
+            if(itemRespVO.getWarehouse()!=null) {
+                exportVO.setWarehouseName(itemRespVO.getWarehouse().getName());
+            }
+            if(itemRespVO.getInbound()!=null) {
+                exportVO.setInboundCode(itemRespVO.getInbound().getCode());
+            }
+            if(itemRespVO.getDept()!=null) {
+                exportVO.setDeptName(itemRespVO.getDept().getName());
+            }
+            WmsInboundStatus inboundStatus= WmsInboundStatus.parse(itemRespVO.getInboundStatus());
+            exportVO.setInboundStatusName(inboundStatus.getLabel());
+            WmsInboundItemQueryDO queryDO= distinctMap.get(itemRespVO.getId());
+            if(queryDO!=null) {
+                exportVO.setAge(queryDO.getAge());
+            }
+            inboundCode=exportVO.getInboundCode();
+        }
+
+
+        // 导出 Excel
+        ExcelUtils.write(response, "入库单详情-"+inboundCode+".xls", "数据", WmsInboundItemExportVO.class, exVOList);
+    }
+}

@@ -33,6 +33,7 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.select(AGE_EXPR+" as age");
 
         //
+        wrapper.distinct();
         wrapper.innerJoin(WmsInboundDO.class,WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId)
             .likeIfExists(WmsInboundDO::getCode, reqVO.getInboundNo())
             .eqIfExists(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())

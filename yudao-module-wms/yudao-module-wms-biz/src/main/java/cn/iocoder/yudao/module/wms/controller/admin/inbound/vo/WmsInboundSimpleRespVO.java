@@ -59,5 +59,9 @@ public class WmsInboundSimpleRespVO {
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
 
+    @Schema(description = "仓库ID", example = "23620")
+    @ExcelProperty("仓库ID")
+    private Long warehouseId;
+
 
 }

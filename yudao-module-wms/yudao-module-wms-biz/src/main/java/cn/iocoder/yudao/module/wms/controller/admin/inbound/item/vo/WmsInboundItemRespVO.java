@@ -121,7 +121,6 @@ public class WmsInboundItemRespVO {
     private Long deptId;
 
     @Schema(description = "部门", example = "")
-    @ExcelProperty("部门")
     private DeptSimpleRespVO dept;
 
     @Schema(description = "库存财务公司ID", example = "")
@@ -133,7 +132,6 @@ public class WmsInboundItemRespVO {
     private String remark;
 
     @Schema(description = "财务公司", example = "")
-    @ExcelProperty("财务公司")
     private FmsCompanySimpleRespVO company;
 
     @Schema(description = "来源详情ID", example = "")
