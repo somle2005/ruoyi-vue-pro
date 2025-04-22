@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.service.inbound.item;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemImportExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
@@ -91,4 +92,6 @@ public interface WmsInboundItemService {
     void assembleDept(List<WmsInboundItemRespVO> list);
 
     void assembleCompany(List<WmsInboundItemRespVO> list);
+
+    void assembleProductIds(List<WmsInboundItemImportExcelVO> impVOList);
 }

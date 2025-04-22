@@ -8,7 +8,7 @@ import lombok.Data;
 /**
  * @table-fields : tenant_id,outbound_available_qty,creator,inbound_status,company_id,create_time,plan_qty,shelved_qty,upstream_item_id,remark,latest_flow_id,updater,inbound_id,update_time,actual_qty,product_id,id,dept_id
  */
-@Schema(description = "管理后台 - 入库单详情 Response VO")
+@Schema(description = "管理后台 - 入库单详情 Export VO")
 @Data
 @ExcelIgnoreUnannotated
 public class WmsInboundItemExportVO {

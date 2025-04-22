@@ -10,13 +10,18 @@ import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemExportVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemImportExcelVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemImportVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsPickupPendingPageReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
+import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -24,6 +29,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -42,6 +48,7 @@ import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPOR
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_PRODUCT_NOT_EXISTS;
 
 @Tag(name = "入库单详情")
 @RestController
@@ -51,6 +58,10 @@ public class WmsInboundItemController {
 
     @Resource
     private WmsInboundItemService inboundItemService;
+
+    @Resource
+    @Lazy
+    private WmsInboundService inboundService;
 
     // /**
     // * @sign : FDA8F53584D62A17
@@ -230,5 +241,39 @@ public class WmsInboundItemController {
 
         // 导出 Excel
         ExcelUtils.write(response, "入库单详情-"+inboundCode+".xls", "数据", WmsInboundItemExportVO.class, exVOList);
+    }
+
+
+    @PostMapping("/import")
+    @Operation(summary = "导入详情")
+    @PreAuthorize("@ss.hasPermission('crm:inbound-item:import')")
+    public CommonResult<Boolean> importExcel(@Valid WmsInboundItemImportVO importReqVO) throws Exception {
+
+        List<WmsInboundItemImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsInboundItemImportExcelVO.class);
+        // 装配产品ID
+        inboundItemService.assembleProductIds(impVOList);
+
+        for (WmsInboundItemImportExcelVO importExcelVO : impVOList) {
+            if(importExcelVO.getProductId()==null) {
+                throw exception(INBOUND_ITEM_PRODUCT_NOT_EXISTS,importExcelVO.getProductCode());
+            }
+        }
+
+
+        List<WmsInboundItemSaveReqVO> saveReqVOList = BeanUtils.toBean(impVOList, WmsInboundItemSaveReqVO.class);
+
+
+        WmsInboundRespVO inbound = inboundService.getInboundWithItemList(importReqVO.getInboundId());
+        WmsInboundSaveReqVO saveReqVO = BeanUtils.toBean(inbound, WmsInboundSaveReqVO.class);
+        saveReqVO.setItemList(saveReqVOList);
+
+
+
+
+
+
+        inboundService.updateInbound(saveReqVO);
+
+        return success(true);
     }
 }

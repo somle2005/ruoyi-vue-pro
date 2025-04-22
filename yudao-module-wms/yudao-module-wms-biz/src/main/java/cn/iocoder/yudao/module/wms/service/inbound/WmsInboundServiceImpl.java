@@ -203,9 +203,15 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                 item.setActualQty(0);
             });
             // 保存详情
-            inboundItemMapper.insertBatch(toInsetList);
-            inboundItemMapper.updateBatch(toUpdateList);
-            inboundItemMapper.deleteBatchIds(toDeleteList);
+            if(!toInsetList.isEmpty()) {
+                inboundItemMapper.insertBatch(toInsetList);
+            }
+            if(!toUpdateList.isEmpty()) {
+                inboundItemMapper.updateBatch(toUpdateList);
+            }
+            if(!toDeleteList.isEmpty()) {
+                inboundItemMapper.deleteBatchIds(toDeleteList);
+            }
         }
         // 更新
         WmsInboundDO inbound = BeanUtils.toBean(updateReqVO, WmsInboundDO.class);
