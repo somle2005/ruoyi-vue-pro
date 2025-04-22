@@ -120,11 +120,17 @@ public class WmsExchangeDefectiveServiceImpl implements WmsExchangeDefectiveServ
         return exchangeDefectiveMapper.selectByIds(idList);
     }
 
+    /**
+     * 根据换货单ID查询换货详情
+     */
     @Override
     public List<WmsExchangeDefectiveDO> selectByExchangeId(Long id) {
         return exchangeDefectiveMapper.selectByExchangeId(id);
     }
 
+    /**
+     * 装配仓位
+     **/
     @Override
     public void assembleBins(List<WmsExchangeDefectiveRespVO> defectiveList) {
 
@@ -140,6 +146,9 @@ public class WmsExchangeDefectiveServiceImpl implements WmsExchangeDefectiveServ
 
     }
 
+    /**
+     * 装配产品
+     **/
     @Override
     public void assembleProduct(List<WmsExchangeDefectiveRespVO> defectiveList) {
         Map<Long, ErpProductDTO> productDTOMap = productApi.getProductMap(StreamX.from(defectiveList).map(WmsExchangeDefectiveRespVO::getProductId).toList());

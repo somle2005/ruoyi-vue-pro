@@ -167,6 +167,12 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         return inboundItem;
     }
 
+    /**
+     * 获得入库单详情
+     *
+     * @param id 编号
+     * @return 入库单详情
+     */
     @Override
     public WmsInboundItemDO getInboundItem(Long id) {
         return inboundItemMapper.selectById(id);
@@ -184,6 +190,11 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         return inboundItemMapper.selectByInboundId(inboundId, limit);
     }
 
+    /**
+     * 更新实际入库量
+     *
+     * @param updateReqVOList 更新信息
+     */
     @Override
     public void updateActualQuantity(List<WmsInboundItemSaveReqVO> updateReqVOList) {
         if (CollectionUtils.isEmpty(updateReqVOList)) {
@@ -218,6 +229,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         inboundItemMapper.updateBatch(inboundItemDOSInDB);
     }
 
+    /**
+     * 按 id 查询 WmsInboundItemDO
+     */
     @Override
     public List<WmsInboundItemDO> selectByIds(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
@@ -226,16 +240,25 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         return inboundItemMapper.selectByIds(ids);
     }
 
+    /**
+     * 更新 WmsInboundItemDO
+     */
     @Override
     public void updateById(WmsInboundItemDO inboundItemDO) {
         inboundItemMapper.updateById(inboundItemDO);
     }
 
+    /**
+     * 获取待上架清单
+     */
     @Override
     public PageResult<WmsInboundItemQueryDO> getPickupPending(WmsPickupPendingPageReqVO pageReqVO) {
         return inboundItemQueryMapper.getPickupPending(pageReqVO);
     }
 
+    /**
+     * 装配入库单
+     */
     @Override
     public void assembleInbound(List<WmsInboundItemRespVO> itemList) {
         List<WmsInboundDO> inboundDOList = inboundService.selectByIds(StreamX.from(itemList).toList(WmsInboundItemRespVO::getInboundId));
@@ -243,11 +266,17 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         StreamX.from(itemList).assemble(inboundMap, WmsInboundItemRespVO::getInboundId, WmsInboundItemRespVO::setInbound);
     }
 
+    /**
+     * 按仓库id和商品id查询
+     */
     @Override
     public List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId) {
         return inboundItemMapper.selectItemListHasAvailableQty(warehouseId, productId);
     }
 
+    /**
+     * 保存入库单详情
+     */
     @Override
     public void saveItems(List<WmsInboundItemDO> itemsToUpdate, List<WmsInboundItemFlowDO> inboundItemFlowList) {
         // 保存流水
@@ -261,6 +290,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         inboundItemMapper.updateBatch(itemsToUpdate);
     }
 
+    /**
+     * 装配仓库
+     */
     @Override
     public void assembleWarehouse(List<WmsInboundItemRespVO> list) {
         Map<Long, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsInboundItemRespVO::getWarehouseId));
@@ -268,6 +300,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         StreamX.from(list).assemble(warehouseVOMap, WmsInboundItemRespVO::getWarehouseId, WmsInboundItemRespVO::setWarehouse);
     }
 
+    /**
+     * 装配仓库货位
+     */
     @Override
     public void assembleWarehouseBin(List<WmsInboundItemRespVO> list) {
         List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(list).toList(WmsInboundItemRespVO::getBinId).stream().distinct().toList());
@@ -275,6 +310,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         StreamX.from(list).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsInboundItemRespVO::getBinId, WmsInboundItemRespVO::setBin);
     }
 
+    /**
+     * 装配产品
+     */
     @Override
     public void assembleProducts(List<WmsInboundItemRespVO> itemList) {
         Map<Long, ErpProductDTO> productDTOMap = productApi.getProductMap(StreamX.from(itemList).map(WmsInboundItemRespVO::getProductId).toList());
@@ -286,6 +324,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         StreamX.from(itemList).assemble(productVOMap, WmsInboundItemRespVO::getProductId, WmsInboundItemRespVO::setProduct);
     }
 
+    /**
+     * 装配部门
+     */
     @Override
     public void assembleDept(List<WmsInboundItemRespVO> list) {
         Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(StreamX.from(list).map(WmsInboundItemRespVO::getDeptId).toList());
@@ -297,6 +338,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         StreamX.from(list).assemble(deptVOMap, WmsInboundItemRespVO::getDeptId, WmsInboundItemRespVO::setDept);
     }
 
+    /**
+     * 装配公司
+     */
     @Override
     public void assembleCompany(List<WmsInboundItemRespVO> list) {
         Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(list).toList(WmsInboundItemRespVO::getCompanyId));
@@ -304,6 +348,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         StreamX.from(list).assemble(companyVOMap, WmsInboundItemRespVO::getCompanyId, WmsInboundItemRespVO::setCompany);
     }
 
+    /**
+     * 装配商品id
+     */
     @Override
     public void assembleProductIds(List<WmsInboundItemImportExcelVO> impVOList) {
         List<String> productCodes=StreamX.from(impVOList).toList(WmsInboundItemImportExcelVO::getProductCode);

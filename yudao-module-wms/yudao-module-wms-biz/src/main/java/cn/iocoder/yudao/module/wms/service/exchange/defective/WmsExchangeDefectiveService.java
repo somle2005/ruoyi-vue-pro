@@ -58,9 +58,18 @@ public interface WmsExchangeDefectiveService {
      */
     List<WmsExchangeDefectiveDO> selectByIds(List<Long> idList);
 
+    /**
+     * 根据换货单ID查询换货详情
+     */
     List<WmsExchangeDefectiveDO> selectByExchangeId(Long id);
 
+    /**
+     * 装配仓位
+     **/
     void assembleBins(List<WmsExchangeDefectiveRespVO> defectiveList);
 
+    /**
+     * 装配产品
+     **/
     void assembleProduct(List<WmsExchangeDefectiveRespVO> defectiveList);
 }

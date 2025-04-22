@@ -56,5 +56,12 @@ public interface WmsApprovalHistoryService {
      */
     PageResult<WmsApprovalHistoryDO> getApprovalHistoryPage(WmsApprovalHistoryPageReqVO pageReqVO);
 
+    /**
+     * 指定单据类型，返回按单据ID分组的审批历史
+     *
+     * @param wmsBillType 单据类型
+     * @param billIds 单据ID清单
+     * @return 审批历史分页
+     */
     Map<Long, List<WmsApprovalHistoryRespVO>> selectGroupedApprovalHistory(WmsBillType wmsBillType, List<Long> billIds);
 }

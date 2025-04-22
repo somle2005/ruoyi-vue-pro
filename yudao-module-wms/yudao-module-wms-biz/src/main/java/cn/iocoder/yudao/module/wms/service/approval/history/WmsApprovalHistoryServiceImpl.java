@@ -90,6 +90,13 @@ public class WmsApprovalHistoryServiceImpl implements WmsApprovalHistoryService 
         return approvalHistoryMapper.selectPage(pageReqVO);
     }
 
+    /**
+     * 指定单据类型，返回按单据ID分组的审批历史
+     *
+     * @param billType 单据类型
+     * @param billIds 单据ID清单
+     * @return 审批历史分页
+     */
     @Override
     public Map<Long, List<WmsApprovalHistoryRespVO>> selectGroupedApprovalHistory(WmsBillType billType, List<Long> billIds) {
         if(CollectionUtils.isEmpty(billIds)) {

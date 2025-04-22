@@ -200,14 +200,20 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
         return exchangeMapper.selectByIds(idList);
     }
 
+    /**
+     * 更新换货审批状态
+     **/
     @Override
-    public WmsExchangeDO updateOutboundAuditStatus(Long id, Integer status) {
+    public WmsExchangeDO updateExchangeAuditStatus(Long id, Integer status) {
         WmsExchangeDO exchangeDO = validateExchangeExists(id);
         exchangeDO.setAuditStatus(status);
         exchangeMapper.updateById(exchangeDO);
         return exchangeDO;
     }
 
+    /**
+     * 审批
+     **/
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void approve(WmsExchangeAuditStatus.Event event, WmsApprovalReqVO approvalReqVO) {
@@ -222,11 +228,17 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
         exchangeStateMachine.fireEvent(event, ctx);
     }
 
+    /**
+     * 完成换货
+     **/
     @Override
     public void finishExchange(WmsExchangeDO exchangeDO, List<WmsExchangeDefectiveDO> exchangeDefectiveDOList) {
          // 暂无实现逻辑
     }
 
+    /**
+     * 组装仓库
+     **/
     @Override
     public void assembleWarehouse(List<WmsExchangeRespVO> list) {
         Map<Long, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsExchangeRespVO::getWarehouseId));

@@ -62,11 +62,23 @@ public interface WmsExchangeService {
      */
     List<WmsExchangeDO> selectByIds(List<Long> idList);
 
-    WmsExchangeDO updateOutboundAuditStatus(Long id, Integer to);
+    /**
+     * 更新换货审批状态
+     **/
+    WmsExchangeDO updateExchangeAuditStatus(Long id, Integer to);
 
+    /**
+     * 审批
+     **/
     void approve(WmsExchangeAuditStatus.Event event, WmsApprovalReqVO approvalReqVO);
 
+    /**
+     * 完成换货
+     **/
     void finishExchange(WmsExchangeDO exchangeDO, List<WmsExchangeDefectiveDO> exchangeDefectiveDOList);
 
+    /**
+     * 组装仓库
+     **/
     void assembleWarehouse(List<WmsExchangeRespVO> list);
 }

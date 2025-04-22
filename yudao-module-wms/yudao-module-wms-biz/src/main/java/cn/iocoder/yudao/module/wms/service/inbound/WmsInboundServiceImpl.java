@@ -298,6 +298,12 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         inboundStateMachine.fireEvent(event, ctx);
     }
 
+    /**
+     * 获得入库单详情
+     *
+     * @param id 编号
+     * @return 入库单
+     */
     @Override
     public WmsInboundRespVO getInboundWithItemList(Long id) {
         // 查询数据
@@ -316,6 +322,11 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         return inboundVO;
     }
 
+    /**
+     * 完成入库单
+     *
+     * @param inboundRespVO 入库单
+     */
     @Override
     public void finishInbound(WmsInboundRespVO inboundRespVO) {
         // 校验本方法在事务中
@@ -364,6 +375,12 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         inboundMapper.updateById(inboundDO);
     }
 
+    /**
+     * 批量查询
+     *
+     * @param ids 入库单id集合
+     * @return 入库单集合
+     */
     @Override
     public List<WmsInboundDO> selectByIds(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
@@ -372,11 +389,22 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         return inboundMapper.selectByIds(ids);
     }
 
+    /**
+     * 获得入库单列表
+     *
+     * @param pageReqVO 查询条件
+     * @return 入库单列表
+     */
     @Override
     public List<WmsInboundDO> getSimpleList(WmsInboundPageReqVO pageReqVO) {
         return inboundMapper.getSimpleList(pageReqVO);
     }
 
+    /**
+     * 装配仓库信息
+     *
+     * @param list 入库单集合
+     */
     @Override
     public void assembleWarehouse(List<WmsInboundRespVO> list) {
         Map<Long, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsInboundRespVO::getWarehouseId));
@@ -384,6 +412,11 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         StreamX.from(list).assemble(warehouseVOMap, WmsInboundRespVO::getWarehouseId, WmsInboundRespVO::setWarehouse);
     }
 
+    /**
+     * 装配公司信息
+     *
+     * @param list 入库单集合
+     */
     @Override
     public void assembleCompany(List<WmsInboundRespVO> list) {
         Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(list).toList(WmsInboundRespVO::getCompanyId));
@@ -391,6 +424,11 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         StreamX.from(list).assemble(companyVOMap, WmsInboundRespVO::getCompanyId, WmsInboundRespVO::setCompany);
     }
 
+    /**
+     * 装配审批历史信息
+     *
+     * @param list 入库单集合
+     */
     @Override
     public void assembleApprovalHistory(List<WmsInboundRespVO> list) {
         Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(WmsBillType.INBOUND, StreamX.from(list).toList(WmsInboundRespVO::getId));
@@ -428,6 +466,9 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         return longListMap.get(productId);
     }
 
+    /**
+     * 创建盘点入库单
+     */
     @Override
     public WmsInboundDO createForInventory(WmsInboundSaveReqVO inboundSaveReqVO) {
         JdbcUtils.requireTransaction();
@@ -457,6 +498,9 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         return this.getInbound(inbound.getId());
     }
 
+    /**
+     * 更新上架状态
+     */
     @Override
     public void updateShelvingStatus(Set<Long> ids) {
         for (Long id : ids) {

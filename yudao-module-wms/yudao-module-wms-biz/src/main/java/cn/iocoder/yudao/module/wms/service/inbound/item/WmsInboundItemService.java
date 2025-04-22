@@ -69,29 +69,70 @@ public interface WmsInboundItemService {
         return selectByInboundId(inboundId, Integer.MAX_VALUE);
     }
 
+    /**
+     * 更新实际入库量
+     *
+     * @param updateReqVOList 更新信息
+     */
     void updateActualQuantity(List<WmsInboundItemSaveReqVO> updateReqVOList);
 
+    /**
+     * 按 id 查询 WmsInboundItemDO
+     */
     List<WmsInboundItemDO> selectByIds(List<Long> ids);
 
+    /**
+     * 更新 WmsInboundItemDO
+     */
     void updateById(WmsInboundItemDO inboundItemDO);
 
+    /**
+     * 获取待上架清单
+     */
     PageResult<WmsInboundItemQueryDO> getPickupPending(WmsPickupPendingPageReqVO pageReqVO);
 
+    /**
+     * 装配产品
+     */
     void assembleProducts(List<WmsInboundItemRespVO> itemList);
 
+    /**
+     * 装配入库单
+     */
     void assembleInbound(List<WmsInboundItemRespVO> itemList);
 
+    /**
+     * 按仓库id和商品id查询
+     */
     List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId);
 
+    /**
+     * 保存入库单详情
+     */
     void saveItems(List<WmsInboundItemDO> itemsToUpdate, List<WmsInboundItemFlowDO> inboundItemFlowList);
 
+    /**
+     * 装配仓库
+     */
     void assembleWarehouse(List<WmsInboundItemRespVO> list);
 
+    /**
+     * 装配仓库货位
+     */
     void assembleWarehouseBin(List<WmsInboundItemRespVO> list);
 
+    /**
+     * 装配部门
+     */
     void assembleDept(List<WmsInboundItemRespVO> list);
 
+    /**
+     * 装配公司
+     */
     void assembleCompany(List<WmsInboundItemRespVO> list);
 
+    /**
+     * 装配商品id
+     */
     void assembleProductIds(List<WmsInboundItemImportExcelVO> impVOList);
 }

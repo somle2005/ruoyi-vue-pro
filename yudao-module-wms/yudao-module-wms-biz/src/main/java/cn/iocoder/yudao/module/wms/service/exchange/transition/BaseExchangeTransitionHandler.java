@@ -29,7 +29,7 @@ public class BaseExchangeTransitionHandler extends ApprovalHistoryTransitionHand
         super.perform(from, to, event, context);
         WmsExchangeDO inboundDO = context.data();
         inboundDO.setAuditStatus(to);
-        inventoryService.updateOutboundAuditStatus(inboundDO.getId(),to);
+        inventoryService.updateExchangeAuditStatus(inboundDO.getId(),to);
     }
 
 }
