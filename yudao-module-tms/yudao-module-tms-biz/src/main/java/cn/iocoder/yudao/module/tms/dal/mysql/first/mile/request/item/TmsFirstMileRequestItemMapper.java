@@ -5,7 +5,7 @@ import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -18,34 +18,29 @@ import java.util.List;
  * @author wdy
  */
 @Mapper
-public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileRequesItemtDO> {
+public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileRequestItemDO> {
 
-    default MPJLambdaWrapperX<TmsFirstMileRequesItemtDO> buildWrapper(TmsFirstMileRequestItemPageReqVO vo) {
+    default MPJLambdaWrapperX<TmsFirstMileRequestItemDO> buildWrapper(TmsFirstMileRequestItemPageReqVO vo) {
         //vo == null
         if (vo == null) {
             vo = new TmsFirstMileRequestItemPageReqVO();
         }
-        return new MPJLambdaWrapperX<TmsFirstMileRequesItemtDO>()
-            .eqIfPresent(TmsFirstMileRequesItemtDO::getId, vo.getId())
-            .betweenIfPresent(TmsFirstMileRequesItemtDO::getCreateTime, vo.getCreateTime())
-            .eqIfPresent(TmsFirstMileRequesItemtDO::getProductId, vo.getProductId())
-            .likeIfPresent(TmsFirstMileRequesItemtDO::getFbaBarCode, vo.getFbaBarCode())
-            .eqIfPresent(TmsFirstMileRequesItemtDO::getQty, vo.getQty())
-            .betweenIfPresent(TmsFirstMileRequesItemtDO::getPackageLength, vo.getPackageLength())
-            .betweenIfPresent(TmsFirstMileRequesItemtDO::getPackageWidth, vo.getPackageWidth())
-            .betweenIfPresent(TmsFirstMileRequesItemtDO::getPackageHeight, vo.getPackageHeight())
-            .betweenIfPresent(TmsFirstMileRequesItemtDO::getPackageWeight, vo.getPackageWeight())
-            .betweenIfPresent(TmsFirstMileRequesItemtDO::getVolume, vo.getVolume())
-            .eqIfPresent(TmsFirstMileRequesItemtDO::getOrderStatus, vo.getOrderStatus())
-            .eqIfPresent(TmsFirstMileRequesItemtDO::getOffStatus, vo.getOffStatus())
-            .eqIfPresent(TmsFirstMileRequesItemtDO::getOrderClosedQty, vo.getOrderClosedQty())
-            .orderByDesc(TmsFirstMileRequesItemtDO::getId);
+        return new MPJLambdaWrapperX<TmsFirstMileRequestItemDO>().eqIfPresent(TmsFirstMileRequestItemDO::getId, vo.getId())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getCreateTime, vo.getCreateTime())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getProductId, vo.getProductId()).likeIfPresent(TmsFirstMileRequestItemDO::getFbaBarCode, vo.getFbaBarCode())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getQty, vo.getQty()).betweenIfPresent(TmsFirstMileRequestItemDO::getPackageLength, vo.getPackageLength())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageWidth, vo.getPackageWidth())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageHeight, vo.getPackageHeight())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageWeight, vo.getPackageWeight())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getVolume, vo.getVolume()).eqIfPresent(TmsFirstMileRequestItemDO::getOrderStatus, vo.getOrderStatus())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getOffStatus, vo.getOffStatus())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getOrderClosedQty, vo.getOrderClosedQty()).orderByDesc(TmsFirstMileRequestItemDO::getId);
     }
 
     //buildBOWrapper(vo)
-    default MPJLambdaWrapperX<TmsFirstMileRequesItemtDO> buildBOWrapper(TmsFirstMileRequestPageReqVO vo) {
-        return buildWrapper(vo.getItem())
-            .leftJoin(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO.class, cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getId, TmsFirstMileRequesItemtDO::getRequestId)
+    default MPJLambdaWrapperX<TmsFirstMileRequestItemDO> buildBOWrapper(TmsFirstMileRequestPageReqVO vo) {
+        return buildWrapper(vo.getItem()).leftJoin(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO.class,
+                cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getId, TmsFirstMileRequestItemDO::getRequestId)
             .betweenIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getCreateTime, vo.getCreateTime())
             .betweenIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getTotalWeight, vo.getTotalWeight())
             .betweenIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getTotalVolume, vo.getTotalVolume())
@@ -60,15 +55,15 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
             .orderByDesc(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getId);
     }
 
-    default List<TmsFirstMileRequesItemtDO> selectListByRequestId(Long requestId) {
-        return selectList(TmsFirstMileRequesItemtDO::getRequestId, requestId);
+    default List<TmsFirstMileRequestItemDO> selectListByRequestId(Long requestId) {
+        return selectList(TmsFirstMileRequestItemDO::getRequestId, requestId);
     }
 
-    default List<TmsFirstMileRequesItemtDO> selectListByRequestIds(List<Long> requestIds) {
+    default List<TmsFirstMileRequestItemDO> selectListByRequestIds(List<Long> requestIds) {
         if (requestIds == null || requestIds.isEmpty()) {
             return new ArrayList<>();
         }
-        return selectList(TmsFirstMileRequesItemtDO::getRequestId, requestIds);
+        return selectList(TmsFirstMileRequestItemDO::getRequestId, requestIds);
     }
 
     default PageResult<TmsFirstMileRequestItemItemBO> selectPageBO(TmsFirstMileRequestPageReqVO pageReqVO) {

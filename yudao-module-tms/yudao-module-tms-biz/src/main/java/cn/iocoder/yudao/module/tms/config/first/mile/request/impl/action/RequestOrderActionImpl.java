@@ -2,7 +2,7 @@ package cn.iocoder.yudao.module.tms.config.first.mile.request.impl.action;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
@@ -30,7 +30,7 @@ public class RequestOrderActionImpl implements Action<TmsOrderStatus, TmsEventEn
             return;
         }
 
-        List<TmsFirstMileRequesItemtDO> items = tmsFirstMileRequestService.getFirstMileRequestItemListByRequestId(context.getId());
+        List<TmsFirstMileRequestItemDO> items = tmsFirstMileRequestService.getFirstMileRequestItemListByRequestId(context.getId());
         if (items.isEmpty()) {
             log.error("采购申请单子表不存在，ID: {}", context.getId());
             return;
@@ -41,7 +41,7 @@ public class RequestOrderActionImpl implements Action<TmsOrderStatus, TmsEventEn
     /**
      * 根据子表状态更新主表状态
      */
-    private void updateMasterStatusByItems(Long requestId, List<TmsFirstMileRequesItemtDO> items) {
+    private void updateMasterStatusByItems(Long requestId, List<TmsFirstMileRequestItemDO> items) {
         // 判断子表状态
         boolean allUnordered = isAllMatchStatus(items, TmsOrderStatus.OT_ORDERED);
         boolean allOrdered = isAllMatchStatus(items, TmsOrderStatus.ORDERED);
@@ -66,14 +66,14 @@ public class RequestOrderActionImpl implements Action<TmsOrderStatus, TmsEventEn
     /**
      * 判断是否所有子表都匹配指定状态
      */
-    private boolean isAllMatchStatus(List<TmsFirstMileRequesItemtDO> items, TmsOrderStatus status) {
+    private boolean isAllMatchStatus(List<TmsFirstMileRequestItemDO> items, TmsOrderStatus status) {
         return items.stream().allMatch(item -> item.getOrderStatus() != null && item.getOrderStatus().equals(status.getCode()));
     }
 
     /**
      * 判断是否存在子表匹配指定状态
      */
-    private boolean isAnyMatchStatus(List<TmsFirstMileRequesItemtDO> items, TmsOrderStatus status) {
+    private boolean isAnyMatchStatus(List<TmsFirstMileRequestItemDO> items, TmsOrderStatus status) {
         return items.stream().anyMatch(item -> item.getOrderStatus() != null && item.getOrderStatus().equals(status.getCode()));
     }
 

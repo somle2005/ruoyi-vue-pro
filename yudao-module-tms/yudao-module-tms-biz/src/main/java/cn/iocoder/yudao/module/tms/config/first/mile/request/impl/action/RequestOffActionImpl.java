@@ -2,7 +2,7 @@ package cn.iocoder.yudao.module.tms.config.first.mile.request.impl.action;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
@@ -25,7 +25,7 @@ public class RequestOffActionImpl implements Action<TmsOffStatus, TmsEventEnum, 
     @Override
     public void execute(TmsOffStatus from, TmsOffStatus to, TmsEventEnum event, TmsFirstMileRequestDO context) {
         if (event != TmsEventEnum.OFF_INIT) {
-            List<TmsFirstMileRequesItemtDO> items = tmsFirstMileRequestService.getFirstMileRequestItemListByRequestId(context.getId());
+            List<TmsFirstMileRequestItemDO> items = tmsFirstMileRequestService.getFirstMileRequestItemListByRequestId(context.getId());
             if (items.isEmpty()) {
                 log.error("采购申请单子表不存在，ID: {}", context.getId());
                 return;
@@ -43,7 +43,7 @@ public class RequestOffActionImpl implements Action<TmsOffStatus, TmsEventEnum, 
      * @param requestId 主表ID
      * @param items     子表列表
      */
-    private void updateMasterStatus(Long requestId, List<TmsFirstMileRequesItemtDO> items) {
+    private void updateMasterStatus(Long requestId, List<TmsFirstMileRequestItemDO> items) {
         // 判断子表状态
         boolean allOpen = isAllMatchStatus(items, TmsOffStatus.OPEN);
         boolean allManualClosed = isAllMatchStatus(items, TmsOffStatus.MANUAL_CLOSED);
@@ -67,7 +67,7 @@ public class RequestOffActionImpl implements Action<TmsOffStatus, TmsEventEnum, 
     /**
      * 判断是否所有子表都匹配指定状态
      */
-    private boolean isAllMatchStatus(List<TmsFirstMileRequesItemtDO> items, TmsOffStatus status) {
+    private boolean isAllMatchStatus(List<TmsFirstMileRequestItemDO> items, TmsOffStatus status) {
         return items.stream()
             .allMatch(item -> item.getOffStatus() != null &&
                 item.getOffStatus().equals(status.getCode()));
@@ -76,7 +76,7 @@ public class RequestOffActionImpl implements Action<TmsOffStatus, TmsEventEnum, 
     /**
      * 判断是否存在子表匹配指定状态
      */
-    private boolean isAnyMatchStatus(List<TmsFirstMileRequesItemtDO> items, TmsOffStatus status) {
+    private boolean isAnyMatchStatus(List<TmsFirstMileRequestItemDO> items, TmsOffStatus status) {
         return items.stream()
             .anyMatch(item -> item.getOffStatus() != null &&
                 item.getOffStatus().equals(status.getCode()));

@@ -12,7 +12,7 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -181,15 +181,15 @@ public class TmsFirstMileRequestController {
         // 转换主表数据
         TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(firstMileRequestBO, TmsFirstMileRequestRespVO.class);
         //list - productId
-        List<Long> productIds = firstMileRequestBO.getItems().stream().map(TmsFirstMileRequesItemtDO::getProductId).distinct().toList();
+        List<Long> productIds = firstMileRequestBO.getItems().stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList();
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         // 设置子表数据
         if (firstMileRequestBO.getItems() != null) {
             List<TmsFirstMileRequestItemRespVO> items = firstMileRequestBO.getItems().stream()
-                .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> itemRespVO
-//                    .setProduct(productMap.get(item.getProductId()))
-                        .setBarCode(productMap.get(item.getProductId()).getBarCode())
-                        .setProductName(productMap.get(item.getProductId()).getName())
+                .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
+                        itemRespVO.setProductName(productMap.get(item.getProductId()).getName());
+                        itemRespVO.setBarCode(productMap.get(item.getProductId()).getBarCode());
+                    }
                 ))
                 .collect(Collectors.toList());
             respVO.setItems(items);

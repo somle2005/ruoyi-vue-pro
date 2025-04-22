@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.tms.config.first.mile.request.impl.action.item;
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
@@ -19,7 +19,7 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQU
 
 @Slf4j
 @Component
-public class RequestItemOrderActionImpl implements Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> {
+public class RequestItemOrderActionImpl implements Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> {
     @Autowired
     @Lazy
     private TmsFirstMileRequestItemService tmsFirstMileRequestItemService;
@@ -33,7 +33,7 @@ public class RequestItemOrderActionImpl implements Action<TmsOrderStatus, TmsEve
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void execute(TmsOrderStatus from, TmsOrderStatus to, TmsEventEnum event, TmsFirstMileRequesItemtDO context) {
+    public void execute(TmsOrderStatus from, TmsOrderStatus to, TmsEventEnum event, TmsFirstMileRequestItemDO context) {
         // 更新子表订单状态
         tmsFirstMileRequestItemService.updateFirstMileRequestItemStatus(context.getId(), null, to.getCode());
 

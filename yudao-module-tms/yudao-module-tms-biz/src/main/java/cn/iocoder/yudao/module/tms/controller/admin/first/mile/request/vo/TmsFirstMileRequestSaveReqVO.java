@@ -7,6 +7,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.util.List;
@@ -56,6 +57,7 @@ public class TmsFirstMileRequestSaveReqVO {
     private Integer revision;
 
     @Schema(description = "头程申请表明细列表")
-    private List<@Valid TmsFirstMileRequestItemSaveReqVO> firstMileRequestItems;
+    @Size(min = 1, message = "头程申请表明细列表至少有一个")
+    private List<@Valid TmsFirstMileRequestItemSaveReqVO> items;
 
 }

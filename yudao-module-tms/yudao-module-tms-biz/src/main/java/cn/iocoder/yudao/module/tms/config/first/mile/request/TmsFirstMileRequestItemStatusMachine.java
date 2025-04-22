@@ -5,7 +5,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
@@ -25,13 +25,13 @@ public class TmsFirstMileRequestItemStatusMachine {
     @Resource
     FailCallback TmsBaseFailCallbackImpl;
     @Resource
-    Action<TmsOffStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> requestItemOrderAction;
+    Action<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> requestItemOrderAction;
     @Resource
-    Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> requestItemOrderActionImpl;
+    Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> requestItemOrderActionImpl;
 
     @Bean(FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
-    public StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> buildTmsFirstMileRequestStateMachine() {
-        StateMachineBuilder<TmsOffStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> builder = StateMachineBuilderFactory.create();
+    public StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> buildTmsFirstMileRequestStateMachine() {
+        StateMachineBuilder<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> builder = StateMachineBuilderFactory.create();
         // 初始化状态
         builder.internalTransition().within(TmsOffStatus.OPEN).on(TmsEventEnum.OFF_INIT).perform(requestItemOrderAction);
         // 开启
@@ -48,8 +48,8 @@ public class TmsFirstMileRequestItemStatusMachine {
     }
 
     @Bean(FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE)
-    public StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> buildTmsFirstMileRequestItemOrderStateMachine() {
-        StateMachineBuilder<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequesItemtDO> builder = StateMachineBuilderFactory.create();
+    public StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> buildTmsFirstMileRequestItemOrderStateMachine() {
+        StateMachineBuilder<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> builder = StateMachineBuilderFactory.create();
         //初始化事件
         builder.internalTransition().within(TmsOrderStatus.OT_ORDERED).on(TmsEventEnum.ORDER_INIT).perform(requestItemOrderActionImpl);
         // 订购数量调整

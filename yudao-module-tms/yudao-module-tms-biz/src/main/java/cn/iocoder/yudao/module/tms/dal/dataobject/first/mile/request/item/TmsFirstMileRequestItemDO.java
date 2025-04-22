@@ -1,9 +1,10 @@
 package cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item;
 
-import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -21,7 +22,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TmsFirstMileRequesItemtDO extends BaseDO {
+public class TmsFirstMileRequestItemDO extends TenantBaseDO {
 
     /**
      * 明细编号
@@ -35,6 +36,7 @@ public class TmsFirstMileRequesItemtDO extends BaseDO {
     /**
      * 乐观锁
      */
+    @Version
     private Integer revision;
     /**
      * 产品id

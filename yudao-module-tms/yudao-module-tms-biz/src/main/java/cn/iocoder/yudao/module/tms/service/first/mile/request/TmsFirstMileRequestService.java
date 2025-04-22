@@ -5,7 +5,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFir
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import jakarta.validation.Valid;
 
@@ -76,7 +76,7 @@ public interface TmsFirstMileRequestService {
     /**
      * 修改子单状态，开关、订购
      */
-    TmsFirstMileRequesItemtDO updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus);
+    TmsFirstMileRequestItemDO updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus);
 
     /**
      * 获得头程申请表明细列表
@@ -84,7 +84,7 @@ public interface TmsFirstMileRequestService {
      * @param requestId 所属申请单ID
      * @return 头程申请表明细列表
      */
-    List<TmsFirstMileRequesItemtDO> getFirstMileRequestItemListByRequestId(Long requestId);
+    List<TmsFirstMileRequestItemDO> getFirstMileRequestItemListByRequestId(Long requestId);
 
     /**
      * 提交审核

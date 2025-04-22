@@ -11,5 +11,7 @@ public interface DictTypeConstants {
     //国家代码
     String COUNTRY_CODE = "country_code";
 
+    //审核状态(SRM、TMS)
+    String AUDIT_STATUS = "srm_audit_status";
 
 }

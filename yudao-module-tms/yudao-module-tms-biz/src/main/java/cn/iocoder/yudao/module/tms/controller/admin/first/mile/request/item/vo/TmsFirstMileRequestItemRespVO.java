@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -11,9 +12,10 @@ import java.time.LocalDateTime;
 @Schema(description = "管理后台 - 头程申请表明细 Response VO")
 @Data
 @ExcelIgnoreUnannotated
+@Accessors(chain = false)
 public class TmsFirstMileRequestItemRespVO {
 
-    @Schema(description = "明细编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "10617")
+    @Schema(description = "明细编号")
     @ExcelProperty("明细编号")
     private Long id;
 
@@ -21,19 +23,15 @@ public class TmsFirstMileRequestItemRespVO {
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
 
-    @Schema(description = "产品编码", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("产品编码")
-    private String code;
 
     @Schema(description = "产品id")
-    @ExcelProperty("产品id")
     private Long productId;
 
     @Schema(description = "FBA条码")
     @ExcelProperty("FBA条码")
     private String fbaBarCode;
 
-    @Schema(description = "申请数量", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "申请数量")
     @ExcelProperty("申请数量")
     private Integer qty;
 
@@ -74,6 +72,9 @@ public class TmsFirstMileRequestItemRespVO {
     //产品名称
     @ExcelProperty("产品名称")
     private String productName;
+
+    @Schema(description = "版本号")
+    private Integer revision;
 
 //    @Schema(description = "产品信息")
 //    @ExcelIgnore
