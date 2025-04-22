@@ -22,7 +22,7 @@ public interface ErrorCodeConstants {
     ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID = new ErrorCode(1_030_606_002, "所选产品中不存在海关分类数据");
     // ========== 头程申请单 1-030-670-000  ==========
     ErrorCode FIRST_MILE_REQUEST_NOT_EXISTS = new ErrorCode(1_030_670_001, "头程申请单(编号:{})不存在");
-    ErrorCode FIRST_MILE_REQUEST_ITEM_NOT_EXISTS = new ErrorCode(1_030_670_002, "头程申请单明细不存在");
+    ErrorCode FIRST_MILE_REQUEST_ITEM_NOT_EXISTS = new ErrorCode(1_030_670_002, "头程申请单(编号:{})明细不存在");
     ErrorCode FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED = new ErrorCode(1_030_670_003, "头程申请单({})状态为({})，不允许关闭");
 
     //状态机错误,无法在({})状态下触发({})事件，上下文：{}

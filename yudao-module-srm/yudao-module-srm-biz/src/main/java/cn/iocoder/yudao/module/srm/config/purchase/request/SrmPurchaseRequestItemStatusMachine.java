@@ -79,7 +79,7 @@ public class SrmPurchaseRequestItemStatusMachine {
 
 
     @Resource
-    ItemStorageActionImpl itemStorageActionImpl;
+    private ItemStorageActionImpl itemStorageActionImpl;
 
     @Bean(PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME)
     public StateMachine<SrmStorageStatus, SrmEventEnum, SrmInCountDTO> buildPurchaseOrderItemStorageStateMachine() {

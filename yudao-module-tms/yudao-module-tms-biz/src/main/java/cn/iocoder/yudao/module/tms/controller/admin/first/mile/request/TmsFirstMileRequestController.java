@@ -179,7 +179,8 @@ public class TmsFirstMileRequestController {
         if (firstMileRequestBO.getItems() != null) {
             List<TmsFirstMileRequestItemRespVO> items = firstMileRequestBO.getItems().stream()
                 .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
-                    itemRespVO.setProduct(productMap.get(item.getProductId()))
+                    itemRespVO
+                        .setProduct(productMap.get(item.getProductId()))
                         .setBarCode(productMap.get(item.getProductId()).getBarCode());
                 }))
                 .collect(Collectors.toList());

@@ -7,5 +7,11 @@ public interface TmsStateMachines {
     String FIRST_MILE_REQUEST_OFF_STATE_MACHINE = "firstMileRequestOff";
     //采购
     String FIRST_MILE_REQUEST_PURCHASE_STATE_MACHINE = "firstMileRequestPurchase";
+
+    //头程申请项
+    //开关
+    String FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE = "firstMileRequestItemOff";
+    //订购
+    String FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE = "firstMileRequestItemOrder";
 }
 

@@ -1,11 +1,12 @@
 package cn.iocoder.yudao.module.tms.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 
 /**
  * TMS 订单状态枚举
@@ -16,8 +17,10 @@ import lombok.RequiredArgsConstructor;
 @Getter
 public enum TmsOrderStatus implements ArrayValuable<Integer> {
 
-    DRAFT(1, "草稿"), PENDING_AUDIT(2, "待审核"), AUDIT_PASSED(3, "审核通过"), AUDIT_REJECTED(4, "审核拒绝"), IN_PROGRESS(5, "进行中"), COMPLETED(6, "已完成"),
-    CANCELLED(7, "已取消"),
+    OT_ORDERED(1, "未订购"),
+    ORDERED(2, "全部订购"),
+    PARTIALLY_ORDERED(3, "部分订购"),
+    ORDER_FAILED(4, "订购失败"),
     ;
 
     public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(TmsOrderStatus::getCode).toArray();

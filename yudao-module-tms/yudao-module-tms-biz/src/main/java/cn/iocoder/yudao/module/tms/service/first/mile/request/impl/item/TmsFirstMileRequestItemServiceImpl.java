@@ -50,9 +50,12 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
         firstMileRequestItemMapper.deleteById(id);
     }
 
+    @Override
     public TmsFirstMileRequesItemtDO validateFirstMileRequestItemExists(Long id) {
         TmsFirstMileRequesItemtDO tmsFirstMileRequestItemDO = firstMileRequestItemMapper.selectById(id);
-        if (tmsFirstMileRequestItemDO == null) throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
+        if (tmsFirstMileRequestItemDO == null) {
+            throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
+        }
         return tmsFirstMileRequestItemDO;
     }
 

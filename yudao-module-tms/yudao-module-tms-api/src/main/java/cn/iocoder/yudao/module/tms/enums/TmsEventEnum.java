@@ -9,7 +9,6 @@ public enum TmsEventEnum {
 
     // 关闭事件
     OFF_INIT("开关初始化"), ACTIVATE("开启"), MANUAL_CLOSE("手动关闭"), AUTO_CLOSE("自动关闭"), CANCEL_DELETE("关闭撤销"),
-    //    SELF_INSPECTION("申请单主子表开关自检"),
 
     // 订购事件
     ORDER_INIT("订购初始化"), ORDER_ADJUSTMENT("订购数量调整"), ORDER_CANCEL("放弃采购"),
