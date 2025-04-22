@@ -146,7 +146,7 @@ public class TmsFirstMileRequestController {
     //启用/关闭申请单子项
     @PutMapping("/update-item-status")
     @Operation(summary = "启用/禁用申请单子项")
-    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:update-item-status')")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:item-off')")
     public CommonResult<Boolean> updateItemStatus(@Valid @RequestBody TmsFirstMileRequestItemOffReqVO reqVO) {
         firstMileRequestService.switchTmsFirstMileOpenStatus(reqVO.getItemIds(), reqVO.getEnable());
         return success(true);
@@ -155,7 +155,7 @@ public class TmsFirstMileRequestController {
     //获取最新的单据编号
     @GetMapping("/get-latest-no")
     @Operation(summary = "获取最新的单据编号")
-    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:get-latest-no')")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:get-latest-code')")
     public CommonResult<String> getLatestNo() {
         return success(firstMileRequestService.getLatestCode());
     }

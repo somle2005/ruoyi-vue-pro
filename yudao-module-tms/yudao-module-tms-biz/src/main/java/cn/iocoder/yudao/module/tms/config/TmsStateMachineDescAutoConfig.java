@@ -25,5 +25,8 @@ public class TmsStateMachineDescAutoConfig implements StateMachineDescriptorRegi
         //头程申请项
         registry.add(TmsFirstMileRequesItemtDO.class, TmsOffStatus.class, "头程申请明细(开关)");
         registry.add(TmsFirstMileRequesItemtDO.class, TmsOrderStatus.class, "头程申请明细(订购)");
+
+        //头程单
+        registry.add(TmsFirstMileRequestDO.class, TmsAuditStatus.class, "头程申请单(审核)");
     }
 }
