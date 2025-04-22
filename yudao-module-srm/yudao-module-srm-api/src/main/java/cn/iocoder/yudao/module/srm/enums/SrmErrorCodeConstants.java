@@ -150,25 +150,6 @@ public interface SrmErrorCodeConstants {
     // ========== ERP 采购入库单 1-030-605-300 ==========
     // ========== ERP 采购退货单 1-030-606-300 ==========
     // ========== ERP 采购支付单 1-030-607-300 ==========
-
-    // ========== ERP 海关规则 1-030-608-000 ==========
-    ErrorCode CUSTOM_RULE_NOT_EXISTS = new ErrorCode(1_030_608_000, "ERP 海关规则不存在");
-    ErrorCode CUSTOM_RULE_PART_NULL = new ErrorCode(1_030_608_001, "集合中存在部分集合产品名称或供应商产品编码为空");
-    ErrorCode NO_REPEAT_OF_COUNTRY_CODE_AND_SUPPLIER_PRODUCT_CODE = new ErrorCode(1_030_608_002, "海关规则中，国家代码+供应商产品编码不能重复");
-    ErrorCode NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE = new ErrorCode(1_030_608_003, "海关规则中，产品编码+国家代码({})不能重复");
-
-    // ========== 海关分类 1-030-609-000 ==========
-    ErrorCode CUSTOM_RULE_CATEGORY_NOT_EXISTS = new ErrorCode(1_030_609_000, "海关分类不存在");
-
-    // ========== 海关分类子表 1-030-610-000 ==========
-    ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS = new ErrorCode(1_030_610_000, "海关分类子表不存在");
-    ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID = new ErrorCode(1_030_610_001, "所选产品中不存在海关分类数据");
-
-    // ========== Fms财务公司 1-030-611-000 ==========
-    ErrorCode FINANCE_SUBJECT_NOT_EXISTS = new ErrorCode(1_030_611_000, "Fms财务公司不存在");
-    // ========== 海关产品分类表1-030-607-000 ==========
-    ErrorCode CUSTOM_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_607_001, "海关产品分类表不存在");
-
     // ========== 付款条款  ==========
     ErrorCode PAYMENT_TERM_NOT_EXISTS = new ErrorCode(1_030_607_001, "付款条款不存在");
 
