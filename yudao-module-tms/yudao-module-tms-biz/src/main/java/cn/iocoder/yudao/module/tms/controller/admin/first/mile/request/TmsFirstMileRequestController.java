@@ -179,8 +179,10 @@ public class TmsFirstMileRequestController {
         if (firstMileRequestBO.getItems() != null) {
             List<TmsFirstMileRequestItemRespVO> items = firstMileRequestBO.getItems().stream()
                 .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> itemRespVO
-                    .setProduct(productMap.get(item.getProductId()))
-                    .setBarCode(productMap.get(item.getProductId()).getBarCode())))
+//                    .setProduct(productMap.get(item.getProductId()))
+                        .setBarCode(productMap.get(item.getProductId()).getBarCode())
+                        .setProductName(productMap.get(item.getProductId()).getName())
+                ))
                 .collect(Collectors.toList());
             respVO.setItems(items);
             // 设置明细数量

@@ -32,4 +32,7 @@ public interface TmsFirstMileRequestMapper extends BaseMapperX<TmsFirstMileReque
     }
 
 
+    default TmsFirstMileRequestDO selectByNo(String code) {
+        return selectOne(TmsFirstMileRequestDO::getCode, code);
+    }
 }

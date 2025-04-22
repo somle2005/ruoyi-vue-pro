@@ -1,7 +1,5 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo;
 
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -73,8 +71,11 @@ public class TmsFirstMileRequestItemRespVO {
 
     @ExcelProperty("产品SKU")
     private String barCode;
+    //产品名称
+    @ExcelProperty("产品名称")
+    private String productName;
 
-    @Schema(description = "产品信息")
-    @ExcelIgnore
-    private ErpProductDTO product;
+//    @Schema(description = "产品信息")
+//    @ExcelIgnore
+//    private ErpProductDTO product;
 }

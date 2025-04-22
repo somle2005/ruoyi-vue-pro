@@ -6,7 +6,7 @@ import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequesItemtDO;
-import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequesItemtItemBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.ArrayList;
@@ -71,7 +71,7 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
         return selectList(TmsFirstMileRequesItemtDO::getRequestId, requestIds);
     }
 
-    default PageResult<TmsFirstMileRequesItemtItemBO> selectPageBO(TmsFirstMileRequestPageReqVO pageReqVO) {
-        return selectJoinPage(pageReqVO, TmsFirstMileRequesItemtItemBO.class, buildBOWrapper(pageReqVO).selectAssociation(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO.class, TmsFirstMileRequesItemtItemBO::getTmsFirstMileRequestDO));
+    default PageResult<TmsFirstMileRequestItemItemBO> selectPageBO(TmsFirstMileRequestPageReqVO pageReqVO) {
+        return selectJoinPage(pageReqVO, TmsFirstMileRequestItemItemBO.class, buildBOWrapper(pageReqVO).selectAssociation(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO.class, TmsFirstMileRequestItemItemBO::getTmsFirstMileRequestDO));
     }
 }

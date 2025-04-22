@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.request.impl;
 
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
+import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
@@ -14,8 +15,8 @@ import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMil
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
-import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequesItemtItemBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -60,7 +61,9 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         // 计算主表的总重量和总体积
         List<TmsFirstMileRequesItemtDO> requestItemDOS = BeanUtils.toBean(vo.getFirstMileRequestItems(), TmsFirstMileRequesItemtDO.class);
         calculateTotalWeightAndVolume(firstMileRequest, requestItemDOS);
-        
+
+        //校验code是否和数据库的重复
+        validCodeDuplicate(firstMileRequest);
         firstMileRequestMapper.insert(firstMileRequest);
 
         // 插入子表
@@ -70,6 +73,10 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
         // 返回
         return firstMileRequest.getId();
+    }
+
+    private void validCodeDuplicate(TmsFirstMileRequestDO firstMileRequest) {
+        ThrowUtil.ifThrow(firstMileRequestMapper.selectByNo(firstMileRequest.getCode()) != null, FIRST_MILE_REQUEST_CODE_DUPLICATE);
     }
 
     private void initMasterStatus(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO firstMileRequest) {
@@ -85,8 +92,9 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         // 校验存在
         validateFirstMileRequestExists(vo.getId());
 
-        // 更新
         TmsFirstMileRequestDO updateObj = BeanUtils.toBean(vo, TmsFirstMileRequestDO.class);
+        //校验code重复
+        validCodeDuplicate(updateObj);
 
         // 计算主表的总重量和总体积
         List<TmsFirstMileRequesItemtDO> requestItemDOS = BeanUtils.toBean(vo.getFirstMileRequestItems(), TmsFirstMileRequesItemtDO.class);
@@ -122,7 +130,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Override
     public PageResult<TmsFirstMileRequestBO> getFirstMileRequestBOPage(TmsFirstMileRequestPageReqVO pageReqVO) {
         // 1. 获取子表分页数据
-        PageResult<TmsFirstMileRequesItemtItemBO> pageResult = firstMileRequestItemMapper.selectPageBO(pageReqVO);
+        PageResult<TmsFirstMileRequestItemItemBO> pageResult = firstMileRequestItemMapper.selectPageBO(pageReqVO);
         if (CollectionUtils.isEmpty(pageResult.getList())) {
             return new PageResult<>(Collections.emptyList(), 0L);
         }
@@ -201,12 +209,12 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
      * @param itemBOList 包含主表和子表数据的BO对象列表
      * @return 转换后的BO对象列表
      */
-    private List<TmsFirstMileRequestBO> bindBOList(List<TmsFirstMileRequesItemtItemBO> itemBOList) {
-        Map<Long, List<TmsFirstMileRequesItemtItemBO>> itemMap = itemBOList.stream()
+    private List<TmsFirstMileRequestBO> bindBOList(List<TmsFirstMileRequestItemItemBO> itemBOList) {
+        Map<Long, List<TmsFirstMileRequestItemItemBO>> itemMap = itemBOList.stream()
             .filter(item -> item.getTmsFirstMileRequestDO() != null)
             .collect(Collectors.groupingBy(item -> item.getTmsFirstMileRequestDO().getId()));
         List<TmsFirstMileRequestBO> boList = new ArrayList<>();
-        for (TmsFirstMileRequesItemtItemBO itemBO : itemBOList) {
+        for (TmsFirstMileRequestItemItemBO itemBO : itemBOList) {
             if (itemBO.getTmsFirstMileRequestDO() == null) {
                 continue;
             }

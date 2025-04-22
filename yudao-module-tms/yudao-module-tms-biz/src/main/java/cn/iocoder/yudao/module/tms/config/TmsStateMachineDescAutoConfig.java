@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @ConditionalOnBean(FailCallback.class)
 @RequiredArgsConstructor
-public class TmsStateMachineRegistrar implements StateMachineDescriptorRegistrar {
+public class TmsStateMachineDescAutoConfig implements StateMachineDescriptorRegistrar {
 
     @Override
     public void register(StateMachineDescriptorRegistry registry) {

@@ -24,6 +24,12 @@ import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.PURCHASE_R
 @Getter
 @Slf4j
 public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
+
+
+    // 状态机描述Map
+    public static Map<Map<Class<?>, Class<?>>, String> STATE_MACHINE_MAP_CN = new HashMap<>();
+
+
     static {
         // 采购申请 - 主表
         addStateMachine(SrmPurchaseRequestDO.class, SrmOffStatus.class, "采购申请 - 开关状态");
@@ -62,9 +68,6 @@ public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
 
     }
 
-
-    // 状态机描述Map
-    public static final Map<Map<Class<?>, Class<?>>, String> STATE_MACHINE_MAP_CN = new HashMap<>();
 
     @Autowired(required = false)
     public void setRegistrars(List<StateMachineDescriptorRegistrar> registrars) {
