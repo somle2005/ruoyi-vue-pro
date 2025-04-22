@@ -1,31 +1,20 @@
 package cn.iocoder.yudao.module.srm.config;
 
-import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.PURCHASE_REQUEST_NOT_EXISTS_BY_STATUS;
-
 import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.SrmPurchaseRequestAuditReqVO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.*;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
-import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
-import cn.iocoder.yudao.module.srm.enums.status.SrmExecutionStatus;
-import cn.iocoder.yudao.module.srm.enums.status.SrmOffStatus;
-import cn.iocoder.yudao.module.srm.enums.status.SrmOrderStatus;
-import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
-import cn.iocoder.yudao.module.srm.enums.status.SrmReturnStatus;
-import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
+import cn.iocoder.yudao.module.srm.enums.status.*;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Component;
+
 import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.stereotype.Component;
+
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.PURCHASE_REQUEST_NOT_EXISTS_BY_STATUS;
 
 //状态机基本异常回调
 @Component
@@ -107,7 +96,7 @@ public class SrmBaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
                 Method method = event.getClass().getMethod("getDesc");
                 return (String)method.invoke(event);
             } else {
-                log.warn("Unknown event type: " + event.getClass());
+                log.warn("Unknown event type: {}", event.getClass());
             }
         } catch (Exception e) {
             log.warn("Error while converting event to description", e);
