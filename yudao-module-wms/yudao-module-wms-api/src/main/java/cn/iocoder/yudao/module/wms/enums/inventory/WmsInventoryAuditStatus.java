@@ -21,6 +21,7 @@ public enum WmsInventoryAuditStatus implements ArrayValuable<Integer>, DictEnum 
     AUDITING(1, "待审批"),
     REJECT(2, "已驳回"),
     PASS(3, "已通过"),
+    ABANDONED(5, "作废"),
    ;
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(WmsInventoryAuditStatus::getValue).toArray(Integer[]::new);
@@ -93,7 +94,7 @@ public enum WmsInventoryAuditStatus implements ArrayValuable<Integer>, DictEnum 
 
     public static enum Event {
 
-        SUBMIT("提交审核"),AGREE("通过审核"), REJECT("拒绝审核");
+        SUBMIT("提交审核"),AGREE("通过审核"), REJECT("拒绝审核"),ABANDON("作废");
 
         @Getter
         private String label;

@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderF
 import cn.iocoder.yudao.framework.cola.statemachine.builder.TransitionContext;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.enums.inventory.WmsInventoryAuditStatus;
+import cn.iocoder.yudao.module.wms.service.inventory.transition.InventoryAbandonTransitionHandler;
 import cn.iocoder.yudao.module.wms.service.inventory.transition.InventoryAgreeTransitionHandler;
 import cn.iocoder.yudao.module.wms.service.inventory.transition.InventoryRejectTransitionHandler;
 import cn.iocoder.yudao.module.wms.service.inventory.transition.InventorySubmitTransitionHandler;
@@ -28,7 +29,7 @@ public class InventoryStateMachineConfigure {
      * 状态机名称
      **/
     public static final String STATE_MACHINE_NAME = "inventoryStateMachine";
-    
+
     /**
      * 创建与配置状态机
      **/
@@ -58,7 +59,12 @@ public class InventoryStateMachineConfigure {
             .on(WmsInventoryAuditStatus.Event.REJECT)
             .handle(InventoryRejectTransitionHandler.class);
 
-
+        // 废弃
+        builder.externalTransitions()
+            .fromAmong(WmsInventoryAuditStatus.DRAFT.getValue(),WmsInventoryAuditStatus.REJECT.getValue(),WmsInventoryAuditStatus.AUDITING.getValue())
+            .to( WmsInventoryAuditStatus.ABANDONED.getValue())
+            .on(WmsInventoryAuditStatus.Event.ABANDON)
+            .handle(InventoryAbandonTransitionHandler.class);
 
         // 失败处理
         builder.setFailCallback(InventoryTransitionFailCallback.class);
@@ -68,56 +74,6 @@ public class InventoryStateMachineConfigure {
 
     }
 
-//    /**
-//     * 创建与配置状态机
-//     **/
-//    @Bean(InventoryStateMachineConfigure.STATE_MACHINE_NAME)
-//    public StateMachineWrapper<Integer, WmsInventoryAuditStatus.Event, WmsInventoryDO> inboundActionStateMachine() {
-//        StateMachineWrapper<Integer, WmsInventoryAuditStatus.Event, WmsInventoryDO> wrapper = new StateMachineWrapper<>(STATE_MACHINE_NAME, WmsInventoryDO::getAuditStatus);
-//
-//        // 提交
-//        wrapper.bindExternals(
-//                // from
-//                new Integer[]{
-//                    WmsInventoryAuditStatus.DRAFT.getValue(),
-//                    WmsInventoryAuditStatus.REJECT.getValue()
-//                },
-//                // event
-//                WmsInventoryAuditStatus.Event.SUBMIT,
-//                // to
-//                WmsInventoryAuditStatus.AUDITING.getValue(),
-//                // handler
-//                InventorySubmitTransitionHandler.class
-//            )
-//            // 同意
-//            .bindExternal(
-//                // from
-//                WmsInventoryAuditStatus.AUDITING.getValue(),
-//                // event
-//                WmsInventoryAuditStatus.Event.AGREE,
-//                // to
-//                WmsInventoryAuditStatus.PASS.getValue(),
-//                // handler
-//                InventoryAgreeTransitionHandler.class
-//            )
-//            // 拒绝
-//            .bindExternal(
-//                // from
-//                WmsInventoryAuditStatus.AUDITING.getValue(),
-//                // event
-//                WmsInventoryAuditStatus.Event.REJECT,
-//                // to
-//                WmsInventoryAuditStatus.REJECT.getValue(),
-//                // handler
-//                InventoryRejectTransitionHandler.class
-//            )
-//            // 失败处理
-//            .setFailCallback(InventoryTransitionFailCallback.class)
-//        ;
-//
-//
-//        return wrapper;
-//    }
 
 
 

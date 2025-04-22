@@ -165,6 +165,14 @@ public class WmsInventoryController {
         return success(true);
     }
 
+    @PutMapping("/abandon")
+    @Operation(summary = "作废")
+    @PreAuthorize("@ss.hasPermission('wms:inventory:abandon')")
+    public CommonResult<Boolean> abandon(@RequestBody WmsApprovalReqVO approvalReqVO) {
+        inventoryService.approve(WmsInventoryAuditStatus.Event.ABANDON, approvalReqVO);
+        return success(true);
+    }
+
     @PutMapping("/reject")
     @Operation(summary = "驳回审批")
     @PreAuthorize("@ss.hasPermission('wms:inventory:reject')")
