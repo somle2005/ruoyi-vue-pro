@@ -26,7 +26,7 @@ public class TmsFirstMileRequestPageReqVO extends PageParam {
     private String code;
 
     @Schema(description = "申请人ID")
-    private Long requestUserId;
+    private Long requesterId;
 
     @Schema(description = "申请部门ID")
     private Long requestDeptId;

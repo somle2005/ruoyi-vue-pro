@@ -32,7 +32,7 @@ public class TmsFirstMileRequestSaveReqVO {
 
     @Schema(description = "申请人ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "申请人ID不能为空")
-    private Long requestUserId;
+    private Long requesterId;
 
     @Schema(description = "申请部门ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "申请部门ID不能为空")

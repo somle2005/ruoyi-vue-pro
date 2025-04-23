@@ -41,7 +41,7 @@ public class TmsFirstMileRequestDO extends TenantBaseDO {
     /**
      * 申请人ID
      */
-    private Long requestUserId;
+    private Long requesterId;
     /**
      * 申请部门ID
      */

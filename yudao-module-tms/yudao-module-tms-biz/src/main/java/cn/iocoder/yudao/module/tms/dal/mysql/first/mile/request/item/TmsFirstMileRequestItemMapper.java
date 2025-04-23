@@ -47,7 +47,7 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
             .betweenIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getTotalVolume, vo.getTotalVolume())
             .eqIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getId, vo.getId())
             .likeIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getCode, vo.getCode())
-            .eqIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getRequestUserId, vo.getRequestUserId())
+            .eqIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getRequesterId, vo.getRequesterId())
             .eqIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getRequestDeptId, vo.getRequestDeptId())
             .eqIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getToWarehouseId, vo.getToWarehouseId())
             .eqIfPresent(cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO::getAuditStatus, vo.getAuditStatus())
