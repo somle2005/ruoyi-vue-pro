@@ -14,4 +14,6 @@ public interface DictTypeConstants {
     //审核状态(SRM、TMS)
     String AUDIT_STATUS = "srm_audit_status";
 
+    //产品材料
+    String PRODUCT_MATERIAL = "erp_product_material";
 }
