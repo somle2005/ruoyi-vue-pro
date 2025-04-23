@@ -113,7 +113,7 @@ public class TmsFirstMileRequestController {
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
         // 转换为响应对象列表
         List<TmsFirstMileRequestRespVO> list = pageBO.getList().stream().map(this::bindSingleResult).collect(Collectors.toList());
-        // 导出 Excel
+        // 导出 Excel文件
         ExcelUtils.write(response, "头程申请单.xls", "数据", TmsFirstMileRequestRespVO.class, list);
     }
 

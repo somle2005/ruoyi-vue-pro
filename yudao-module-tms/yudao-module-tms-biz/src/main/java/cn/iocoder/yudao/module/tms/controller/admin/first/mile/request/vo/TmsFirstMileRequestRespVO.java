@@ -59,11 +59,13 @@ public class TmsFirstMileRequestRespVO {
     private Integer auditStatus;
 
     @Schema(description = "订购状态")
-    @ExcelProperty("订购状态")
+    @ExcelProperty(value = "订购状态", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.ORDER_STATUS)
     private Integer orderStatus;
 
     @Schema(description = "关闭状态")
-    @ExcelProperty("关闭状态")
+    @ExcelProperty(value = "关闭状态", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.OFF_STATUS)
     private Integer offStatus;
 
     @Schema(description = "总重量（kg）")
@@ -78,8 +80,6 @@ public class TmsFirstMileRequestRespVO {
     @ExcelProperty("明细数量")
     private Integer itemCount;
 
-    //version
-    //    @ExcelIgnore
     @Schema(description = "版本号")
     private Integer revision;
 

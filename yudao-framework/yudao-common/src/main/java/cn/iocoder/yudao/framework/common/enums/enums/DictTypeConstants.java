@@ -11,9 +11,13 @@ public interface DictTypeConstants {
     //国家代码
     String COUNTRY_CODE = "country_code";
 
-    //审核状态(SRM、TMS)
-    String AUDIT_STATUS = "srm_audit_status";
-
     //产品材料
     String PRODUCT_MATERIAL = "erp_product_material";
+
+    //审核状态(SRM、TMS)
+    String AUDIT_STATUS = "srm_audit_status";
+    //订购状态
+    String ORDER_STATUS = "srm_order_status";
+    //开关状态
+    String OFF_STATUS = "srm_off_status";
 }
