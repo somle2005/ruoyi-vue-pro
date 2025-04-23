@@ -4,11 +4,14 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.erp.api.stock.WmsWarehouseApi;
+import cn.iocoder.yudao.module.erp.api.stock.dto.ErpWarehouseDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
@@ -28,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -45,6 +49,8 @@ public class TmsFirstMileRequestController {
     private TmsFirstMileRequestService firstMileRequestService;
     @Autowired
     ErpProductApi erpProductApi;
+    @Autowired
+    WmsWarehouseApi wmsWarehouseApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程申请单")
@@ -113,7 +119,7 @@ public class TmsFirstMileRequestController {
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
         // 转换为响应对象列表
         List<TmsFirstMileRequestRespVO> list = pageBO.getList().stream().map(this::bindSingleResult).collect(Collectors.toList());
-        // 导出 Excel
+        // 导出 Excel文件
         ExcelUtils.write(response, "头程申请单.xls", "数据", TmsFirstMileRequestRespVO.class, list);
     }
 
@@ -178,17 +184,24 @@ public class TmsFirstMileRequestController {
      * @return 转换后的响应对象
      */
     private TmsFirstMileRequestRespVO bindSingleResult(TmsFirstMileRequestBO firstMileRequestBO) {
-        // 转换主表数据
-        TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(firstMileRequestBO, TmsFirstMileRequestRespVO.class);
         //list - productId
         List<Long> productIds = firstMileRequestBO.getItems().stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList();
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
+        Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(Collections.singleton(firstMileRequestBO.getToWarehouseId()));
+        //人员
+        // 转换主表数据
+        TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(firstMileRequestBO, TmsFirstMileRequestRespVO.class, respVO1 -> {
+            MapUtils.findAndThen(warehouseMap, firstMileRequestBO.getToWarehouseId(), warehouse -> respVO1.setToWarehouseName(warehouse.getName()));
+        });
         // 设置子表数据
         if (firstMileRequestBO.getItems() != null) {
             List<TmsFirstMileRequestItemRespVO> items = firstMileRequestBO.getItems().stream()
-                .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
-                        itemRespVO.setProductName(productMap.get(item.getProductId()).getName());
-                        itemRespVO.setBarCode(productMap.get(item.getProductId()).getBarCode());
+                .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class,
+                    itemRespVO -> {
+                        MapUtils.findAndThen(productMap, item.getProductId(), product -> {
+                            itemRespVO.setProductName(product.getBarCode());
+                            itemRespVO.setBarCode(product.getBarCode());
+                        });
                     }
                 ))
                 .collect(Collectors.toList());

@@ -1,5 +1,8 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo;
 
+import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
+import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
+import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,14 +18,13 @@ import java.time.LocalDateTime;
 @Accessors(chain = false)
 public class TmsFirstMileRequestItemRespVO {
 
-    @Schema(description = "明细编号")
-    @ExcelProperty("明细编号")
+    @Schema(description = "明细序号")
+    @ExcelProperty("明细序号")
     private Long id;
 
     @Schema(description = "创建时间")
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
-
 
     @Schema(description = "产品id")
     private Long productId;
@@ -56,11 +58,13 @@ public class TmsFirstMileRequestItemRespVO {
     private BigDecimal volume;
 
     @Schema(description = "订购状态")
-    @ExcelProperty("订购状态")
+    @ExcelProperty(value = "订购状态", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.ORDER_STATUS)
     private Integer orderStatus;
 
     @Schema(description = "关闭状态")
-    @ExcelProperty("关闭状态")
+    @ExcelProperty(value = "关闭状态", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.OFF_STATUS)
     private Integer offStatus;
 
     @Schema(description = "已订购数")
