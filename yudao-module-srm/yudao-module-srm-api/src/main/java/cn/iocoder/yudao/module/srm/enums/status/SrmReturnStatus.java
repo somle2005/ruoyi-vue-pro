@@ -12,11 +12,11 @@ import java.util.Map;
 @Getter
 public enum SrmReturnStatus implements ArrayValuable<Integer> {
     //未退款
-    NOT_RETURN(1, "未退款"),
+    NOT_RETURN(0, "未退款"),
     //已退款
-    RETURNED(2, "已退款"),
+    RETURNED(1, "已退款"),
     //部分退款
-    PART_RETURNED(3, "部分退款");
+    PART_RETURNED(2, "部分退款");
 
     public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(SrmReturnStatus::getCode).toArray();
     private static final Map<Integer, SrmReturnStatus> STATUS_MAP = new HashMap<>();

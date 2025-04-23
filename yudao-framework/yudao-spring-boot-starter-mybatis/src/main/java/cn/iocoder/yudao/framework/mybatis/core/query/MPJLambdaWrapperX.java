@@ -20,7 +20,7 @@ import java.util.function.Consumer;
  */
 public class MPJLambdaWrapperX<T> extends MPJLambdaWrapper<T> {
 
-    public <S> MPJLambdaWrapperX<T> likeIfPresent(SFunction<S, ?> column, String val) {
+    public MPJLambdaWrapperX<T> likeIfPresent(SFunction<T, ?> column, String val) {
         MPJWrappers.lambdaJoin().like(column, val);
         if (StringUtils.hasText(val)) {
             return (MPJLambdaWrapperX<T>) super.like(column, val);
@@ -42,8 +42,8 @@ public class MPJLambdaWrapperX<T> extends MPJLambdaWrapper<T> {
         return this;
     }
 
-    public <S> MPJLambdaWrapperX<T> eqIfPresent(SFunction<S, ?> column, Object val) {
-        if (val != null) {
+    public MPJLambdaWrapperX<T> eqIfPresent(SFunction<T, ?> column, Object val) {
+        if (ObjectUtil.isNotEmpty(val)) {
             return (MPJLambdaWrapperX<T>) super.eq(column, val);
         }
         return this;
@@ -84,37 +84,17 @@ public class MPJLambdaWrapperX<T> extends MPJLambdaWrapper<T> {
         return this;
     }
 
-    public <S> MPJLambdaWrapperX<T> betweenIfPresent(SFunction<S, ?> column, Object[] values) {
-        Object val1 = ArrayUtils.get(values, 0);
-        Object val2 = ArrayUtils.get(values, 1);
-        return betweenIfPresent(column, val1, val2);
-    }
-
-    public <S> MPJLambdaWrapperX<T> betweenIfPresent(SFunction<S, ?> column, Object val1, Object val2) {
+    public MPJLambdaWrapperX<T> betweenIfPresent(SFunction<T, ?> column, Object val1, Object val2) {
         if (val1 != null && val2 != null) {
             return (MPJLambdaWrapperX<T>) super.between(column, val1, val2);
         }
         if (val1 != null) {
-            return (MPJLambdaWrapperX<T>) super.ge(column, val1);
+            return (MPJLambdaWrapperX<T>) ge(column, val1);
         }
         if (val2 != null) {
-            return (MPJLambdaWrapperX<T>) super.le(column, val2);
+            return (MPJLambdaWrapperX<T>) le(column, val2);
         }
         return this;
-    }
-
-    public MPJLambdaWrapperX<T> betweenIfPresent(String sqlExpr, Object[] values) {
-        Object val1 = ArrayUtils.get(values, 0);
-        Object val2 = ArrayUtils.get(values, 1);
-        if(val1!=null && val2!=null) {
-            return (MPJLambdaWrapperX<T>) super.between(sqlExpr, val1, val2);
-        } else if(val1!=null) {
-            return (MPJLambdaWrapperX<T>) ge(sqlExpr, val1);
-        } else if(val2!=null) {
-            return (MPJLambdaWrapperX<T>) le(sqlExpr, val2);
-        } else {
-            return this;
-        }
     }
 
     public MPJLambdaWrapperX<T> betweenIfPresent(SFunction<T, ?> column, Object[] values) {
@@ -327,25 +307,6 @@ public class MPJLambdaWrapperX<T> extends MPJLambdaWrapper<T> {
     @Override
     public <S, X> MPJLambdaWrapperX<T> selectLen(SFunction<S, ?> column, SFunction<X, ?> alias) {
         super.selectLen(column, alias);
-        return this;
-    }
-
-    // ========== 关键重写：使 leftJoin 返回当前类型 this ==========
-    @Override
-    public <A, B> MPJLambdaWrapperX<T> leftJoin(Class<A> clazz, SFunction<A, ?> left, SFunction<B, ?> right) {
-        super.leftJoin(clazz, left, right);
-        return this;
-    }
-
-    @Override
-    public <A, B> MPJLambdaWrapperX<T> rightJoin(Class<A> clazz, SFunction<A, ?> left, SFunction<B, ?> right) {
-        super.rightJoin(clazz, left, right);
-        return this;
-    }
-
-    @Override
-    public <A, B> MPJLambdaWrapperX<T> innerJoin(Class<A> clazz, SFunction<A, ?> left, SFunction<B, ?> right) {
-        super.innerJoin(clazz, left, right);
         return this;
     }
 
