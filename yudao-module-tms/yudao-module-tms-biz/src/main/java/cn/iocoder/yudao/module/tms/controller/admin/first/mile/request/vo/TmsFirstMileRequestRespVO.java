@@ -32,7 +32,7 @@ public class TmsFirstMileRequestRespVO {
     private String code;
 
     @Schema(description = "申请人ID")
-    private Long requestUserId;
+    private Long requesterId;
 
     @Schema(description = "申请人名称")
     @ExcelProperty("申请人名称")

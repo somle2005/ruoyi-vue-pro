@@ -12,6 +12,8 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.stock.WmsWarehouseApi;
 import cn.iocoder.yudao.module.erp.api.stock.dto.ErpWarehouseDTO;
+import cn.iocoder.yudao.module.system.api.dept.DeptApi;
+import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
@@ -51,6 +53,8 @@ public class TmsFirstMileRequestController {
     ErpProductApi erpProductApi;
     @Autowired
     WmsWarehouseApi wmsWarehouseApi;
+    @Autowired
+    DeptApi deptApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程申请单")
@@ -88,8 +92,8 @@ public class TmsFirstMileRequestController {
             return success(null);
         }
         // 转换为响应对象
-        TmsFirstMileRequestRespVO respVO = bindSingleResult(firstMileRequestBO);
-        return success(respVO);
+        List<TmsFirstMileRequestRespVO> respVOList = bindListResult(Collections.singletonList(firstMileRequestBO));
+        return success(respVOList.get(0));
     }
 
     @PostMapping("/page")
@@ -100,7 +104,7 @@ public class TmsFirstMileRequestController {
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
 
         // 转换为响应对象
-        List<TmsFirstMileRequestRespVO> respVOList = pageBO.getList().stream().map(this::bindSingleResult).collect(Collectors.toList());
+        List<TmsFirstMileRequestRespVO> respVOList = bindListResult(pageBO.getList());
         // 创建结果对象
         PageResult<TmsFirstMileRequestRespVO> pageResultRespVO = new PageResult<>();
         pageResultRespVO.setTotal(pageBO.getTotal());
@@ -118,7 +122,7 @@ public class TmsFirstMileRequestController {
         // 获取分页数据
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
         // 转换为响应对象列表
-        List<TmsFirstMileRequestRespVO> list = pageBO.getList().stream().map(this::bindSingleResult).collect(Collectors.toList());
+        List<TmsFirstMileRequestRespVO> list = bindListResult(pageBO.getList());
         // 导出 Excel文件
         ExcelUtils.write(response, "头程申请单.xls", "数据", TmsFirstMileRequestRespVO.class, list);
     }
@@ -176,42 +180,51 @@ public class TmsFirstMileRequestController {
         return success(true);
     }
 
-
-    /**
-     * 将TmsFirstMileRequestBO转换为TmsFirstMileRequestRespVO 实现主表和子表数据的绑定
-     *
-     * @param firstMileRequestBO 包含主表和子表数据的BO对象
-     * @return 转换后的响应对象
-     */
-    private TmsFirstMileRequestRespVO bindSingleResult(TmsFirstMileRequestBO firstMileRequestBO) {
-        //list - productId
-        List<Long> productIds = firstMileRequestBO.getItems().stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList();
-        Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
-        Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(Collections.singleton(firstMileRequestBO.getToWarehouseId()));
-        //人员
-        // 转换主表数据
-        TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(firstMileRequestBO, TmsFirstMileRequestRespVO.class, respVO1 -> {
-            MapUtils.findAndThen(warehouseMap, firstMileRequestBO.getToWarehouseId(), warehouse -> respVO1.setToWarehouseName(warehouse.getName()));
-        });
-        // 设置子表数据
-        if (firstMileRequestBO.getItems() != null) {
-            List<TmsFirstMileRequestItemRespVO> items = firstMileRequestBO.getItems().stream()
-                .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class,
-                    itemRespVO -> {
-                        MapUtils.findAndThen(productMap, item.getProductId(), product -> {
-                            itemRespVO.setProductName(product.getBarCode());
-                            itemRespVO.setBarCode(product.getBarCode());
-                        });
-                    }
-                ))
-                .collect(Collectors.toList());
-            respVO.setItems(items);
-            // 设置明细数量
-            respVO.setItemCount(items.size());
-        } else {
-            respVO.setItemCount(0);
+    private List<TmsFirstMileRequestRespVO> bindListResult(List<TmsFirstMileRequestBO> firstMileRequestBOList) {
+        if (firstMileRequestBOList == null || firstMileRequestBOList.isEmpty()) {
+            return Collections.emptyList();
         }
-        return respVO;
+        List<Long> productIds = firstMileRequestBOList.stream()
+            .flatMap(bo -> bo.getItems().stream())
+            .map(TmsFirstMileRequestItemDO::getProductId)
+            .distinct()
+            .collect(Collectors.toList());
+        List<Long> warehouseIds = firstMileRequestBOList.stream()
+            .map(TmsFirstMileRequestBO::getToWarehouseId)
+            .distinct()
+            .collect(Collectors.toList());
+        Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(firstMileRequestBOList.stream()
+            .map(TmsFirstMileRequestBO::getRequestDeptId)
+            .distinct()
+            .collect(Collectors.toList()));
+
+        Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
+        Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(warehouseIds);
+
+        return firstMileRequestBOList.stream().map(bo -> {
+            TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRequestRespVO.class, respVO1 -> {
+                MapUtils.findAndThen(warehouseMap, bo.getToWarehouseId(), warehouse -> respVO1.setToWarehouseName(warehouse.getName()));
+                MapUtils.findAndThen(deptMap, bo.getRequestDeptId(), dept -> respVO1.setRequestDeptName(dept.getName()));
+            });
+            if (bo.getItems() != null) {
+                List<TmsFirstMileRequestItemRespVO> items = bo.getItems().stream()
+                    .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class,
+                        itemRespVO -> {
+                            MapUtils.findAndThen(productMap, item.getProductId(), product -> {
+                                itemRespVO.setProductName(product.getBarCode());
+                                itemRespVO.setBarCode(product.getBarCode());
+                            });
+                        }
+                    ))
+                    .collect(Collectors.toList());
+                respVO.setItems(items);
+                // 设置明细数量
+                respVO.setItemCount(items.size());
+            } else {
+                respVO.setItemCount(0);
+            }
+            return respVO;
+        }).collect(Collectors.toList());
     }
 
 }

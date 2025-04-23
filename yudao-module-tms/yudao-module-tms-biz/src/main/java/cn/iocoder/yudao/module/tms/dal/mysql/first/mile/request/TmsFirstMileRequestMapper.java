@@ -20,7 +20,7 @@ public interface TmsFirstMileRequestMapper extends BaseMapperX<TmsFirstMileReque
             .eqIfPresent(TmsFirstMileRequestDO::getId, reqVO.getId())
             .betweenIfPresent(TmsFirstMileRequestDO::getCreateTime, reqVO.getCreateTime())
             .likeIfPresent(TmsFirstMileRequestDO::getCode, reqVO.getCode())
-            .eqIfPresent(TmsFirstMileRequestDO::getRequestUserId, reqVO.getRequestUserId())
+            .eqIfPresent(TmsFirstMileRequestDO::getRequesterId, reqVO.getRequesterId())
             .eqIfPresent(TmsFirstMileRequestDO::getRequestDeptId, reqVO.getRequestDeptId())
             .eqIfPresent(TmsFirstMileRequestDO::getToWarehouseId, reqVO.getToWarehouseId())
             .eqIfPresent(TmsFirstMileRequestDO::getAuditStatus, reqVO.getAuditStatus())
