@@ -24,4 +24,11 @@ public interface TmsCustomProductMapper extends BaseMapperX<TmsCustomProductDO> 
             .orderByDesc(TmsCustomProductDO::getId));
     }
 
+
+    default boolean existsByProductIdAndCustomCategoryId(Long productId, Long customCategoryId) {
+        return selectCount(new LambdaQueryWrapperX<TmsCustomProductDO>()
+            .eq(TmsCustomProductDO::getProductId, productId)
+            .eq(TmsCustomProductDO::getCustomCategoryId, customCategoryId)) > 0;
+    }
+
 }

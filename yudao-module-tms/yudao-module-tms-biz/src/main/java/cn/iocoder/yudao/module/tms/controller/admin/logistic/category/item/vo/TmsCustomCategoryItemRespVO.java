@@ -1,5 +1,7 @@
 package cn.iocoder.yudao.module.tms.controller.admin.logistic.category.item.vo;
 
+import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
+import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,6 +9,8 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+
+import static cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants.COUNTRY_CODE;
 
 @Schema(description = "管理后台 - 海关分类子表 Response VO")
 @Data
@@ -22,7 +26,8 @@ public class TmsCustomCategoryItemRespVO {
 //    private Integer categoryId;
 
     @Schema(description = "国家-字典", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("国家-字典")
+    @ExcelProperty(value = "国家", converter = DictConvert.class)
+    @DictFormat(COUNTRY_CODE)
     private Integer countryCode;
 
     @Schema(description = "HS编码", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -1,7 +1,11 @@
 package cn.iocoder.yudao.module.tms.controller.admin.logistic.customrule.vo;
 
 
+import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
+import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
+import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.erp.enums.ErpDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fhs.core.trans.vo.VO;
@@ -19,17 +23,19 @@ import java.time.LocalDateTime;
 @ExcelIgnoreUnannotated
 public class TmsCustomRuleRespVO implements VO {
 
-    @Schema(description = "海关规则id", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("海关规则id")
+    @Schema(description = "海关规则id")
     private Long id;
 
-    @Schema(description = "国家编码", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("国家编码")
+    @Schema(description = "国家编码")
+    @ExcelProperty(value = "国家编码", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.COUNTRY_CODE)
     private Integer countryCode;
 
     @Schema(description = "产品id")
-    @ExcelProperty("产品id")
     private Long productId;
+
+    @ExcelProperty("产品sku")
+    private String barCode;
     /**
      * 产品实体类
      */
@@ -48,7 +54,8 @@ public class TmsCustomRuleRespVO implements VO {
     private Double declaredValue;
 
     @Schema(description = "申报金额币种")
-    @ExcelProperty("申报金额币种")
+    @ExcelProperty(value = "申报金额币种", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.CURRENCY_CODE)
     private Integer declaredValueCurrencyCode;
 
     @Schema(description = "税率")
@@ -60,10 +67,11 @@ public class TmsCustomRuleRespVO implements VO {
     private String hscode;
 
     @Schema(description = "物流属性")
-    @ExcelProperty("物流属性")
+    @ExcelProperty(value = "物流属性", converter = DictConvert.class)
+    @DictFormat(ErpDictTypeConstants.ERP_LOGISTIC_ATTRIBUTE)
     private Integer logisticAttribute;
 
-    @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "创建时间")
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
 

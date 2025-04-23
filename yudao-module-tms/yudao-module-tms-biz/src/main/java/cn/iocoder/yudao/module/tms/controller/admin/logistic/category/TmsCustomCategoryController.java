@@ -12,6 +12,7 @@ import cn.iocoder.yudao.module.system.api.dict.dto.DictDataRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
+import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.item.vo.TmsCustomCategoryExportRow;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.item.vo.TmsCustomCategoryItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.item.vo.TmsCustomCategoryItemSimpleRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.TmsCustomCategoryPageReqVO;
@@ -40,8 +41,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants.PRODUCT_MATERIAL;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-import static cn.iocoder.yudao.module.tms.enums.DictValue.PRODUCT_MATERIAL;
 
 @Tag(name = "管理后台 - 海关分类")
 @RestController
@@ -111,10 +112,9 @@ public class TmsCustomCategoryController {
     public void exportCustomRuleCategoryExcel(@Valid TmsCustomCategoryPageReqVO pageReqVO,
                                               HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<TmsCustomCategoryDO> list = customRuleCategoryService.getCustomRuleCategoryPage(pageReqVO).getList();
-        // 导出 Excel
-        ExcelUtils.write(response, "海关分类.xls", "数据", TmsCustomCategoryRespVO.class,
-            BeanUtils.toBean(BindingResult(list), TmsCustomCategoryRespVO.class));
+        List<TmsCustomCategoryBO> list = customRuleCategoryService.getCustomRuleCategoryPageBO(pageReqVO).getList();
+        List<TmsCustomCategoryExportRow> exportRows = convertToExportRowFromVO(BindingResult(list));
+        ExcelUtils.write(response, "海关分类.xls", "数据", TmsCustomCategoryExportRow.class, exportRows);
     }
 
     // ==================== 子表（海关分类子表） ====================
@@ -159,7 +159,7 @@ public class TmsCustomCategoryController {
         List<Long> ids = listDOs.stream().map(TmsCustomCategoryDO::getId).toList();
         Map<Long, List<TmsCustomCategoryItemDO>> itemMap = customRuleCategoryItemService.getCustomRuleCategoryItemMap(ids);
         //1 材料ids
-        List<DictDataRespDTO> dtoList = dictDataApi.getDictDataList(PRODUCT_MATERIAL.getName());
+        List<DictDataRespDTO> dtoList = dictDataApi.getDictDataList(PRODUCT_MATERIAL);
         //1.1 构造map  字典的value:字典的label
         Map<String, String> materialMap = dtoList.stream().collect(Collectors.toMap(DictDataRespDTO::getValue, DictDataRespDTO::getLabel));
         // 1.2 构造人员map
@@ -185,4 +185,36 @@ public class TmsCustomCategoryController {
 
         });
     }
+
+    private List<TmsCustomCategoryExportRow> convertToExportRowFromVO(List<TmsCustomCategoryRespVO> vos) {
+        List<TmsCustomCategoryExportRow> rows = new ArrayList<>();
+        for (TmsCustomCategoryRespVO vo : vos) {
+            List<TmsCustomCategoryItemRespVO> items = vo.getCustomRuleCategoryItems();
+            if (items == null || items.isEmpty()) {
+                rows.add(toBaseRow(vo));
+            } else {
+                for (TmsCustomCategoryItemRespVO item : items) {
+                    TmsCustomCategoryExportRow row = toBaseRow(vo);
+                    row.setItemId(item.getId());
+                    row.setCountryCode(item.getCountryCode());
+                    row.setHscode(item.getHscode());
+                    row.setTaxRate(item.getTaxRate());
+                    row.setItemCreateTime(item.getCreateTime());
+                    rows.add(row);
+                }
+            }
+        }
+        return rows;
+    }
+
+    private TmsCustomCategoryExportRow toBaseRow(TmsCustomCategoryRespVO vo) {
+        TmsCustomCategoryExportRow row = new TmsCustomCategoryExportRow();
+        row.setCategoryId(vo.getId());
+        row.setMaterial(vo.getMaterial());
+        row.setDeclaredType(vo.getDeclaredType());
+        row.setDeclaredTypeEn(vo.getDeclaredTypeEn());
+        row.setCreateTime(vo.getCreateTime());
+        return row;
+    }
+
 }

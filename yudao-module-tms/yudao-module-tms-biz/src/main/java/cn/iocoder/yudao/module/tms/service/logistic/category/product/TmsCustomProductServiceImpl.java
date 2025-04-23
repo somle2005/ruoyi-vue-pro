@@ -28,6 +28,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_PRODUCT_EXISTS;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_PRODUCT_NOT_EXISTS;
 import static cn.iocoder.yudao.module.tms.dal.redis.TmsRedisKeyConstants.TMS_CUSTOM_PRODUCT;
 import static cn.iocoder.yudao.module.tms.dal.redis.TmsRedisKeyConstants.TMS_CUSTOM_PRODUCT_LIST;
@@ -58,6 +59,8 @@ public class TmsCustomProductServiceImpl implements TmsCustomProductService {
         //校验存在
         //产品存在+分类存在
         validData(vo);
+        //校验产品+海关分类是否已经存在
+        validProductCustomRule(vo);
         // 插入
         TmsCustomProductDO customProduct = BeanUtils.toBean(vo, TmsCustomProductDO.class);
         customProductMapper.insert(customProduct);
@@ -66,17 +69,28 @@ public class TmsCustomProductServiceImpl implements TmsCustomProductService {
         return customProduct.getId();
     }
 
+    private void validProductCustomRule(TmsCustomProductSaveReqVO vo) {
+        if (customProductMapper.existsByProductIdAndCustomCategoryId(vo.getProductId(), vo.getCustomCategoryId())) {
+            throw exception(CUSTOM_PRODUCT_EXISTS);
+        }
+    }
+
     private void validData(TmsCustomProductSaveReqVO vo) {
         erpProductApi.validProductList(Collections.singletonList(vo.getProductId()));
         tmsCustomCategoryService.validCustomRuleCategory(Collections.singletonList(vo.getCustomCategoryId()));
     }
 
     @CacheEvict(value = TMS_CUSTOM_PRODUCT_LIST, allEntries = true)
-    @CachePut(value = TMS_CUSTOM_PRODUCT, key = "#vo.getId()")
+    @CachePut(value = TMS_CUSTOM_PRODUCT, key = "#vo.id")
     public TmsCustomProductDO updateCustomProduct(TmsCustomProductSaveReqVO vo) {
         validData(vo);
         // 校验存在
         validateCustomProductExists(vo.getId());
+        //判断产品id+海关规则id是否改变，改变就校验是否已存在
+        TmsCustomProductDO oldCustomProduct = customProductMapper.selectById(vo.getId());
+        if (!oldCustomProduct.getProductId().equals(vo.getProductId()) || !oldCustomProduct.getCustomCategoryId().equals(vo.getCustomCategoryId())) {
+            validProductCustomRule(vo);
+        }
         // 更新
         TmsCustomProductDO updateObj = BeanUtils.toBean(vo, TmsCustomProductDO.class);
         customProductMapper.updateById(updateObj);
@@ -128,10 +142,10 @@ public class TmsCustomProductServiceImpl implements TmsCustomProductService {
     }
 
     @Override
+    @Cacheable(value = TMS_CUSTOM_PRODUCT, key = "'productId:'+#productId", unless = "#result == null")
     public TmsCustomProductDO getCustomProductByProductId(Long productId) {
         //根据产品id查询海关产品分类表
-        TmsCustomProductDO customProduct = customProductMapper.selectOne(new LambdaQueryWrapper<TmsCustomProductDO>().eq(TmsCustomProductDO::getProductId, productId));
-        return customProduct;
+        return customProductMapper.selectOne(new LambdaQueryWrapper<TmsCustomProductDO>().eq(TmsCustomProductDO::getProductId, productId));
     }
 
     @Override

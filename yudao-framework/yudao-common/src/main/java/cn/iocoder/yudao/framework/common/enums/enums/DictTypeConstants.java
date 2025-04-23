@@ -10,6 +10,7 @@ public interface DictTypeConstants {
     String CURRENCY_CODE = "currency_code";
     //国家代码
     String COUNTRY_CODE = "country_code";
-
+    //产品材料
+    String PRODUCT_MATERIAL = "erp_product_material";
 
 }

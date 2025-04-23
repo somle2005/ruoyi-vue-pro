@@ -110,7 +110,7 @@ public class TmsCustomRuleController {
         PageResult<TmsCustomRuleBO> page = customRuleService.getCustomRuleBOPage(pageReqVO);
         List<TmsCustomRuleRespVO> voList = bindBOList(page.getList());
         // 导出 Excel
-        ExcelUtils.write(response, "ERP 海关规则.xls", "数据", TmsCustomRuleRespVO.class, voList);
+        ExcelUtils.write(response, "TMS 海关规则.xls", "数据", TmsCustomRuleRespVO.class, voList);
     }
 
 
@@ -122,6 +122,7 @@ public class TmsCustomRuleController {
         //2开始拼接
         return BeanUtils.toBean(list, TmsCustomRuleRespVO.class, vo -> {
             MapUtils.findAndThen(map, vo.getProductId(), vo::setProduct);//设置产品vo
+            MapUtils.findAndThen(map, vo.getProductId(), k -> vo.setBarCode(k.getBarCode()));
         });
     }
 

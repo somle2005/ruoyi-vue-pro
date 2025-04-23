@@ -37,8 +37,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants.PRODUCT_MATERIAL;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-import static cn.iocoder.yudao.module.tms.enums.DictValue.PRODUCT_MATERIAL;
 
 @Tag(name = "管理后台 - 海关产品分类表")
 @RestController
@@ -145,7 +145,7 @@ public class TmsCustomProductController {
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         Map<Long, TmsCustomCategoryDO> categoryMap = customCategoryService.getCustomRuleCategoryMap(categoryIds);
-        List<DictDataRespDTO> dtoList = dictDataApi.getDictDataList(PRODUCT_MATERIAL.getName());
+        List<DictDataRespDTO> dtoList = dictDataApi.getDictDataList(PRODUCT_MATERIAL);
         Map<String, String> materialMap = dtoList.stream().collect(Collectors.toMap(DictDataRespDTO::getValue, DictDataRespDTO::getLabel));
 
         return BeanUtils.toBean(oldList, TmsCustomProductRespVO.class, vo -> {

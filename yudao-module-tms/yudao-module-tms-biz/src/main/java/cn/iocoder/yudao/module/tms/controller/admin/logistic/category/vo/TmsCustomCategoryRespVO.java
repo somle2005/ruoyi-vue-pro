@@ -1,5 +1,7 @@
 package cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo;
 
+import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
+import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.item.vo.TmsCustomCategoryItemRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -10,6 +12,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import static cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants.PRODUCT_MATERIAL;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 @Schema(description = "管理后台 - 海关分类 Response VO")
@@ -17,12 +20,13 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @ExcelIgnoreUnannotated
 public class TmsCustomCategoryRespVO {
 
-    @Schema(description = "编号")
-    @ExcelProperty("编号")
+    @Schema(description = "序号")
+    @ExcelProperty("序号")
     private Long id;
 
     @Schema(description = "材质-字典")
-    @ExcelProperty("材质-字典")
+    @ExcelProperty(value = "材质", converter = DictConvert.class)
+    @DictFormat(PRODUCT_MATERIAL)
     private Integer material;
 
     @Schema(description = "报关品名")
@@ -34,7 +38,7 @@ public class TmsCustomCategoryRespVO {
     private String declaredTypeEn;
 
     @Schema(description = "材质对应string+报关品名")
-    @ExcelProperty("材质对应string+报关品名")
+    @ExcelProperty("材质+报关品名")
     private String combinedValue;
 
     //对应产品数量

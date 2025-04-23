@@ -14,15 +14,17 @@ import java.time.LocalDateTime;
 @ExcelIgnoreUnannotated
 public class TmsCustomProductRespVO {
     @Schema(description = "id")
-    @ExcelProperty("id")
+    @ExcelProperty("序号")
     private Long id;
 
-    @Schema(description = "产品id", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("产品id")
+    @Schema(description = "产品id")
     private Long productId;
+    //产品sku
+    @Schema(description = "产品sku")
+    @ExcelProperty("产品sku")
+    private String productSku;
 
-    @Schema(description = "海关分类id", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("海关分类id")
+    @Schema(description = "海关分类id")
     private Long customCategoryId;
 
     @Schema(description = "创建人")
@@ -45,7 +47,7 @@ public class TmsCustomProductRespVO {
     private ErpProductDTO product;
 
     @Schema(description = "材质对应string+报关品名")
-    @ExcelProperty("材质对应string+报关品名")
+    @ExcelProperty("材质,报关品名中文")
     private String combinedValue;
     @Schema(description = "海关分类信息")
     private TmsCustomCategoryDO customCategory;
