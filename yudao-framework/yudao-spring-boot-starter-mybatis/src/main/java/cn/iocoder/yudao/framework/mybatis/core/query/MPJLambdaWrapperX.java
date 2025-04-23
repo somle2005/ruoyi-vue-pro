@@ -49,7 +49,6 @@ public class MPJLambdaWrapperX<T> extends MPJLambdaWrapper<T> {
         return this;
     }
 
-
     public MPJLambdaWrapperX<T> neIfPresent(SFunction<T, ?> column, Object val) {
         if (ObjectUtil.isNotEmpty(val)) {
             return (MPJLambdaWrapperX<T>) super.ne(column, val);
@@ -104,6 +103,25 @@ public class MPJLambdaWrapperX<T> extends MPJLambdaWrapper<T> {
         return this;
     }
 
+    public MPJLambdaWrapperX<T> betweenIfPresent(String sqlExpr, Object[] values) {
+        Object val1 = ArrayUtils.get(values, 0);
+        Object val2 = ArrayUtils.get(values, 1);
+        if(val1!=null && val2!=null) {
+            return (MPJLambdaWrapperX<T>) super.between(sqlExpr, val1, val2);
+        } else if(val1!=null) {
+            return (MPJLambdaWrapperX<T>) ge(sqlExpr, val1);
+        } else if(val2!=null) {
+            return (MPJLambdaWrapperX<T>) le(sqlExpr, val2);
+        } else {
+            return this;
+        }
+    }
+
+    public MPJLambdaWrapperX<T> betweenIfPresent(SFunction<T, ?> column, Object[] values) {
+        Object val1 = ArrayUtils.get(values, 0);
+        Object val2 = ArrayUtils.get(values, 1);
+        return betweenIfPresent(column, val1, val2);
+    }
 
     // ========== 重写父类方法，方便链式调用 ==========
 
