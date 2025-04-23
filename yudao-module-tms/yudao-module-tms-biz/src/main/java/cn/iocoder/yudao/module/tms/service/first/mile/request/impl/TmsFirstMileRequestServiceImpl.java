@@ -62,8 +62,6 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> orderStatusStatusMachine;
     @Resource(name = FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
     private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> offItemStatusMachine;
-    @Resource(name = FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE)
-    private StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> orderItemStatusMachine;
 
 
     @Override
@@ -138,7 +136,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         firstMileRequestMapper.deleteById(id);
 
         // 删除子表
-        deleteFirstMileRequestItemByRequestId(id);
+        firstMileRequestItemService.deleteFirstMileRequestItemByRequestId(id);
     }
 
     @Override
@@ -210,12 +208,6 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         return firstMileRequestItemMapper.selectListByRequestId(requestId);
     }
 
-
-
-
-    private void deleteFirstMileRequestItemByRequestId(Long requestId) {
-        firstMileRequestItemMapper.deleteById(requestId);
-    }
 
     /**
      * 将List<TmsFirstMileRequestItemBO>转换为List<TmsFirstMileRequestBO>

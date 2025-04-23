@@ -2,8 +2,6 @@ package cn.iocoder.yudao.module.tms.service.first.mile.request.impl.item;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
-import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
@@ -51,14 +49,6 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
     @Resource(name = FIRST_MILE_REQUEST_PURCHASE_ORDER_STATE_MACHINE)
     private StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> orderStatusStatusMachine;
 
-    @Transactional(rollbackFor = Exception.class)
-    public Long createFirstMileRequestItem(TmsFirstMileRequestItemSaveReqVO createReqVO) {
-        // 插入
-        TmsFirstMileRequestItemDO firstMileRequestItem = BeanUtils.toBean(createReqVO, TmsFirstMileRequestItemDO.class);
-        firstMileRequestItemMapper.insert(firstMileRequestItem);
-        // 返回
-        return firstMileRequestItem.getId();
-    }
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -109,11 +99,18 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteFirstMileRequestItem(Long id) {
         // 校验存在
         validateFirstMileRequestItemExists(id);
         // 删除
         firstMileRequestItemMapper.deleteById(id);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void deleteFirstMileRequestItemByRequestId(Long requestId) {
+        firstMileRequestItemMapper.deleteByRequestId(requestId);
     }
 
     @Override

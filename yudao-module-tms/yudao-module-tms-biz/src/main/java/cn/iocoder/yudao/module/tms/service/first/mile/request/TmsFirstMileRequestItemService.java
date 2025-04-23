@@ -35,6 +35,11 @@ public interface TmsFirstMileRequestItemService {
     void deleteFirstMileRequestItem(Long id);
 
     /**
+     * 根据主单id，删除关联子表
+     */
+    void deleteFirstMileRequestItemByRequestId(Long requestId);
+
+    /**
      * 获得头程申请表明细
      *
      * @param id 编号
