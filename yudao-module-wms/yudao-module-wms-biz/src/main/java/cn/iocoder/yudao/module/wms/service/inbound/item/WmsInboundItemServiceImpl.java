@@ -39,14 +39,12 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_CAN_NOT_EDIT;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_ACTUAL_QTY_ERROR;
@@ -95,13 +93,10 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     private FmsCompanyApi companyApi;
 
     /**
-     * @sign : F55768BA65271F63
+     * @sign : 22513AF8FE74E202
      */
     @Override
     public WmsInboundItemDO createInboundItem(WmsInboundItemSaveReqVO createReqVO) {
-        if (inboundItemMapper.getByInboundIdAndProductId(createReqVO.getInboundId(), createReqVO.getProductId()) != null) {
-            throw exception(INBOUND_ITEM_INBOUND_ID_PRODUCT_ID_DUPLICATE);
-        }
         // 按 wms_inbound_item.inbound_id -> wms_inbound.id 的引用关系，校验存在性
         if (createReqVO.getInboundId() != null) {
             WmsInboundDO inbound = inboundService.getInbound(createReqVO.getInboundId());
@@ -117,15 +112,12 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     }
 
     /**
-     * @sign : 70F16E5A2203F0AA
+     * @sign : 7D86D27C4FFD8AFE
      */
     @Override
     public WmsInboundItemDO updateInboundItem(WmsInboundItemSaveReqVO updateReqVO) {
         // 校验存在
         WmsInboundItemDO exists = validateInboundItemExists(updateReqVO.getId());
-        if (!Objects.equals(updateReqVO.getId(), exists.getId()) && Objects.equals(updateReqVO.getInboundId(), exists.getInboundId()) && Objects.equals(updateReqVO.getProductId(), exists.getProductId())) {
-            throw exception(INBOUND_ITEM_INBOUND_ID_PRODUCT_ID_DUPLICATE);
-        }
         // 按 wms_inbound_item.inbound_id -> wms_inbound.id 的引用关系，校验存在性
         if (updateReqVO.getInboundId() != null) {
             WmsInboundDO inbound = inboundService.getInbound(updateReqVO.getInboundId());
@@ -141,17 +133,13 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     }
 
     /**
-     * @sign : EC9A13353E1B7B88
+     * @sign : 412E589DBBC092B4
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteInboundItem(Long id) {
         // 校验存在
         WmsInboundItemDO inboundItem = validateInboundItemExists(id);
-        // 唯一索引去重
-        inboundItem.setInboundId(inboundItemMapper.flagUKeyAsLogicDelete(inboundItem.getInboundId()));
-        inboundItem.setProductId(inboundItemMapper.flagUKeyAsLogicDelete(inboundItem.getProductId()));
-        inboundItemMapper.updateById(inboundItem);
         // 删除
         inboundItemMapper.deleteById(id);
     }
@@ -353,12 +341,12 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
      */
     @Override
     public void assembleProductIds(List<WmsInboundItemImportExcelVO> impVOList) {
-        List<String> productCodes=StreamX.from(impVOList).toList(WmsInboundItemImportExcelVO::getProductCode);
+        List<String> productCodes = StreamX.from(impVOList).toList(WmsInboundItemImportExcelVO::getProductCode);
         Map<String, ErpProductDTO> productMap = productApi.getProductMapByCode(productCodes);
-        StreamX.from(impVOList).assemble(productMap, WmsInboundItemImportExcelVO::getProductCode, (p,v)->{
-            if(v!=null) {
+        StreamX.from(impVOList).assemble(productMap, WmsInboundItemImportExcelVO::getProductCode, (p, v) -> {
+            if (v != null) {
                 p.setProductId(v.getId());
             }
         });
     }
-}
+}

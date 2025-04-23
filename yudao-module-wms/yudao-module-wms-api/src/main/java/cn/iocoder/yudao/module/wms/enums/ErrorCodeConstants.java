@@ -65,7 +65,6 @@ public interface ErrorCodeConstants {
     ErrorCode INBOUND_ITEM_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_005_010, "入库单详情不符合审批条件");
     ErrorCode INBOUND_ITEM_PRODUCT_NOT_EXISTS = new ErrorCode(2_001_005_011, "产品 %s 不存在");
 
-
     // ========== WMS_INBOUND_ITEM_FLOW 入库单库存详情扣减表 2_001_006_000 ==========
     ErrorCode INBOUND_ITEM_FLOW_NOT_EXISTS = new ErrorCode(2_001_006_001, "入库单库存详情扣减不存在");
     ErrorCode INBOUND_ITEM_FLOW_BE_REFERRED = new ErrorCode(2_001_006_002, "入库单库存详情扣减被引用");
@@ -99,6 +98,8 @@ public interface ErrorCodeConstants {
     ErrorCode STOCK_BIN_CAN_NOT_DELETE = new ErrorCode(2_001_009_005, "仓位库存不允许删除");
     ErrorCode STOCK_BIN_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_009_006, "仓位库存不符合审批条件");
     ErrorCode STOCK_BIN_NOT_ENOUGH = new ErrorCode(2_001_009_007, "仓位库存不足");
+    ErrorCode STOCK_BIN_AVAILABLE_QTY_NOT_ENOUGH = new ErrorCode(2_001_009_008, "%s 仓位的产品 %s 可用库存不足");
+    ErrorCode STOCK_BIN_SELLABLE_QTY_NOT_ENOUGH = new ErrorCode(2_001_009_008, "%s 仓位的产品 %s 可售库存不足");
 
     // ========== WMS_STOCK_OWNERSHIP 所有者库存表 2_001_010_000 ==========
     ErrorCode STOCK_OWNERSHIP_NOT_EXISTS = new ErrorCode(2_001_010_001, "所有者库存不存在");
@@ -260,4 +261,4 @@ public interface ErrorCodeConstants {
     ErrorCode EXCHANGE_DEFECTIVE_CAN_NOT_EDIT = new ErrorCode(2_001_024_004, "良次换货详情不允许编辑");
     ErrorCode EXCHANGE_DEFECTIVE_CAN_NOT_DELETE = new ErrorCode(2_001_024_005, "良次换货详情不允许删除");
     ErrorCode EXCHANGE_DEFECTIVE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_024_006, "良次换货详情不符合审批条件");
-}
+}

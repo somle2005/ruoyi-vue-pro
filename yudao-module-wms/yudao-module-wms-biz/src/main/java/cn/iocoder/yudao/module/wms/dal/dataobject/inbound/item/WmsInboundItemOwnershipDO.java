@@ -45,36 +45,15 @@ public class WmsInboundItemOwnershipDO extends BaseDO {
      */
     private LocalDateTime inboundTime;
 
-
-    /**
-     * 公司ID
-     */
-    private Long companyId;
-
     /**
      * 主单公司ID
      */
     private Long inboundCompanyId;
 
     /**
-     * 明细公司ID
-     */
-    private Long itemCompanyId;
-
-    /**
-     * 部门ID
-     */
-    private Long deptId;
-
-    /**
      * 主单部门ID
      */
     private Long inboundDeptId;
-
-    /**
-     * 明细部门ID
-     */
-    private Long itemDeptId;
 
 
 

@@ -37,8 +37,9 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.innerJoin(WmsInboundDO.class,WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId)
             .likeIfExists(WmsInboundDO::getCode, reqVO.getInboundNo())
             .eqIfExists(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())
-            .eqIfExists(WmsInboundDO::getDeptId, reqVO.getDeptId())
-            .eqIfExists(WmsInboundDO::getCompanyId, reqVO.getCompanyId());
+            //.eqIfExists(WmsInboundDO::getDeptId, reqVO.getDeptId())
+            //.eqIfExists(WmsInboundDO::getCompanyId, reqVO.getCompanyId())
+         ;
 
         wrapper.leftJoin(WmsPickupItemDO.class, WmsPickupItemDO::getInboundItemId, WmsInboundItemQueryDO::getId)
             .eqIfExists(WmsPickupItemDO::getBinId, reqVO.getBinId());
@@ -55,6 +56,8 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.betweenIfPresent(WmsInboundItemDO::getCreateTime, reqVO.getCreateTime());
 
         // 范围查询
+        wrapper.eqIfPresent(WmsInboundItemDO::getInboundCompanyId, reqVO.getInboundCompanyId());
+        wrapper.eqIfPresent(WmsInboundItemDO::getInboundDeptId, reqVO.getInboundDeptId());
         wrapper.betweenIfPresent(WmsInboundItemDO::getActualQty,reqVO.getActualQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getOutboundAvailableQty,reqVO.getOutboundAvailableQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getPlanQty,reqVO.getPlanQty());

@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.service.quantity;
 
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
@@ -8,10 +9,14 @@ import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundIt
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.item.vo.WmsPickupItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemOwnershipDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
@@ -21,6 +26,7 @@ import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundType;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
+import cn.iocoder.yudao.module.wms.service.outbound.item.WmsOutboundItemService;
 import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
 import cn.iocoder.yudao.module.wms.service.quantity.context.InventoryContext;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
@@ -34,6 +40,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_AVAILABLE_QTY_NOT_ENOUGH;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_SELLABLE_QTY_NOT_ENOUGH;
 
 /**
  * @author: LeeFJ
@@ -65,6 +76,10 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
     @Resource
     @Lazy
     private WmsOutboundService outboundService;
+
+    @Resource
+    @Lazy
+    private WmsOutboundItemService outboundItemService;
 
     @Resource
     @Lazy
@@ -120,8 +135,6 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
 
             // 如果盘亏，形成出库单
             if (deltaQty < 0) {
-
-
                 // 拣货单明细
                 WmsOutboundItemSaveReqVO outboundItemSaveReqVO = new WmsOutboundItemSaveReqVO();
                 outboundItemSaveReqVO.setProductId(inventoryBinDO.getProductId());
@@ -165,21 +178,21 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
                 inboundItemOwnershipDOMap.put(inboundItemSaveReqVO.getProductId(),inboundItemOwnershipDO);
             }
             // 求顶级部门
-            Long deptId=deptIdMap.get(inboundItemOwnershipDO.getDeptId());
+            Long deptId=deptIdMap.get(inboundItemOwnershipDO.getInboundDeptId());
             if(deptId==null) {
 
-                DeptRespDTO dept = deptApi.getDept(inboundItemOwnershipDO.getDeptId());
+                DeptRespDTO dept = deptApi.getDept(inboundItemOwnershipDO.getInboundDeptId());
                 int deptLevel = deptApi.getDeptLevel(dept.getId());
                 while (deptLevel > 2) {
                     dept = deptApi.getDept(dept.getParentId());
                     deptLevel = deptApi.getDeptLevel(dept.getId());
                 }
                 deptId = dept.getId();
-                deptIdMap.put(inboundItemOwnershipDO.getDeptId(),deptId);
+                deptIdMap.put(inboundItemOwnershipDO.getInboundDeptId(),deptId);
             }
 
             // 确定公司ID和部门ID
-            inboundItemSaveReqVO.setCompanyId(inboundItemOwnershipDO.getCompanyId());
+            inboundItemSaveReqVO.setCompanyId(inboundItemOwnershipDO.getInboundCompanyId());
             inboundItemSaveReqVO.setDeptId(deptId);
 
         }
@@ -220,9 +233,41 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
      **/
     private void executeOutbound(WmsInventoryDO inventoryDO, List<WmsOutboundItemSaveReqVO> outboundItemSaveReqVOList) {
 
+        List<WmsOutboundItemRespVO> outboundItemRespVOList = BeanUtils.toBean(outboundItemSaveReqVOList, WmsOutboundItemRespVO.class);
+        outboundItemRespVOList = StreamX.from(outboundItemRespVOList).distinct(WmsOutboundItemRespVO::getProductId);
+        outboundItemService.assembleProducts(outboundItemRespVOList);
+        Map<Long, WmsProductRespSimpleVO> productMap = StreamX.from(outboundItemRespVOList).toMap(WmsOutboundItemRespVO::getProductId,WmsOutboundItemRespVO::getProduct);
+
+        List<WmsWarehouseProductVO> wmsWarehouseProductList =  new ArrayList<>();
+        for (WmsOutboundItemSaveReqVO wmsWarehouseProductVO : outboundItemSaveReqVOList) {
+            wmsWarehouseProductList.add(WmsWarehouseProductVO.builder().warehouseId(inventoryDO.getWarehouseId()).productId(wmsWarehouseProductVO.getProductId()).build());
+        }
+
+        List<WmsStockBinRespVO> stockBinList = stockBinService.selectStockBinList(wmsWarehouseProductList, true);
+        Map<String, WmsStockBinRespVO> stockBinMap = StreamX.from(stockBinList).toMap(e -> makeStockKey(e.getBinId(), e.getProductId()));
+
         // 确定归属公司与部门
         Map<Long, WmsInboundItemOwnershipDO> inboundItemOwnershipDOMap = new HashMap<>();
         for (WmsOutboundItemSaveReqVO outboundItemSaveReqVO : outboundItemSaveReqVOList) {
+
+            WmsProductRespSimpleVO product = productMap.get(outboundItemSaveReqVO.getProductId());
+
+            WmsStockBinRespVO stockBin = stockBinMap.get(makeStockKey(outboundItemSaveReqVO.getBinId(), outboundItemSaveReqVO.getProductId()));
+            if(stockBin==null) {
+                throw exception(STOCK_BIN_NOT_EXISTS);
+            }
+
+            // 检查可用库存
+            if(outboundItemSaveReqVO.getPlanQty() > stockBin.getAvailableQty()) {
+                throw exception(STOCK_BIN_AVAILABLE_QTY_NOT_ENOUGH,stockBin.getBin().getName(),product.getBarCode());
+            }
+            // 检查可用库存
+            if(outboundItemSaveReqVO.getPlanQty() > stockBin.getSellableQty()) {
+                throw exception(STOCK_BIN_SELLABLE_QTY_NOT_ENOUGH,stockBin.getBin().getName(),product.getBarCode());
+            }
+
+
+
 
             WmsInboundItemOwnershipDO inboundItemOwnershipDO = inboundItemOwnershipDOMap.get(outboundItemSaveReqVO.getProductId());
             if(inboundItemOwnershipDO==null) {
@@ -231,8 +276,8 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
                 inboundItemOwnershipDOMap.put(outboundItemSaveReqVO.getProductId(),inboundItemOwnershipDO);
             }
 
-            outboundItemSaveReqVO.setCompanyId(inboundItemOwnershipDO.getCompanyId());
-            outboundItemSaveReqVO.setDeptId(inboundItemOwnershipDO.getDeptId());
+            outboundItemSaveReqVO.setCompanyId(inboundItemOwnershipDO.getInboundCompanyId());
+            outboundItemSaveReqVO.setDeptId(inboundItemOwnershipDO.getInboundDeptId());
         }
 
         // 创建出库单
@@ -250,6 +295,9 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
 
     }
 
+    private String makeStockKey(Long binId, Long productId) {
+        return binId + "_" + productId;
+    }
 
 
 }

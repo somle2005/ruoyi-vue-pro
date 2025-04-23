@@ -65,6 +65,8 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
             // 执行入库的原子操作
             WmsInboundStatus inboundStatus = inboundSingleItem(companyId, deptId, warehouseId, productId, item.getPlanQty(), item.getActualQty(), inboundRespVO.getId(), item.getId());
             item.setInboundStatus(inboundStatus.getValue());
+            item.setInboundCompanyId(companyId);
+            item.setInboundDeptId(deptId);
 
         }
         // 完成最终的入库

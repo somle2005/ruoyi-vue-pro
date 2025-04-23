@@ -44,6 +44,7 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,10 +52,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_CAN_NOT_EDIT;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_PLAN_QTY_ERROR;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_PRODUCT_ID_REPEATED;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_NOT_COMPLETE;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_NOT_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_NO_DUPLICATE;
@@ -146,10 +147,10 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                 toInsetList.add(BeanUtils.toBean(item, WmsInboundItemDO.class));
             });
             // 校验 toInsetList 中是否有重复的 productId
-            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInboundItemDO::getProductId);
-            if (isProductIdRepeated) {
-                throw exception(INBOUND_ITEM_PRODUCT_ID_REPEATED);
-            }
+            // boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInboundItemDO::getProductId);
+            // if (isProductIdRepeated) {
+            //    throw exception(INBOUND_ITEM_PRODUCT_ID_REPEATED);
+            // }
             inboundItemMapper.insertBatch(toInsetList);
         }
         // 返回
@@ -189,10 +190,10 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             finalList.addAll(toInsetList);
             finalList.addAll(toUpdateList);
             // 校验 toInsetList 中是否有重复的 productId
-            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInboundItemDO::getProductId);
-            if (isProductIdRepeated) {
-                throw exception(INBOUND_ITEM_PRODUCT_ID_REPEATED);
-            }
+            // boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInboundItemDO::getProductId);
+            // if (isProductIdRepeated) {
+            //     throw exception(INBOUND_ITEM_PRODUCT_ID_REPEATED);
+            // }
             // 设置归属
             finalList.forEach(item -> {
                 if (item.getPlanQty() == null || item.getPlanQty() <= 0) {

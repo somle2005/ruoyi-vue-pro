@@ -92,8 +92,8 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
                 if(inboundItemOwnership==null) {
                     throw exception(STOCK_OWNERSHIP_NOT_EXISTS);
                 }
-                deptId = inboundItemOwnership.getDeptId();
-                companyId = inboundItemOwnership.getCompanyId();
+                deptId = inboundItemOwnership.getInboundDeptId();
+                companyId = inboundItemOwnership.getInboundCompanyId();
             }
             // 抛出异常
             if (deptId == null || companyId == null) {
