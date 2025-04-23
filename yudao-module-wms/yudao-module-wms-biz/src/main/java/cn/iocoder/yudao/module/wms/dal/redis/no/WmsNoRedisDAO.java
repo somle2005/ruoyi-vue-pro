@@ -50,7 +50,7 @@ public class WmsNoRedisDAO {
     /**
      * 拣货单单据号前缀
      **/
-    public static final String PICKUP_NO_PREFIX = "PIUP";
+    public static final String PICKUP_NO_PREFIX = "PCUP";
 
     /**
      * 盘点单据号前缀

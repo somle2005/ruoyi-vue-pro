@@ -22,6 +22,7 @@ import org.apache.ibatis.annotations.Mapper;
 public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQueryDO> {
 
     String AGE_EXPR = "(DATEDIFF(NOW(),t1.inbound_time)+IFNULL(t1.init_age,0))";
+    String AGE_COL_EXPR = AGE_EXPR+" as age";
 
     default PageResult<WmsInboundItemQueryDO> selectPage(WmsInboundItemPageReqVO reqVO) {
 
@@ -30,7 +31,7 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.selectAll(WmsInboundItemDO.class);
         wrapper.select(WmsInboundDO::getWarehouseId);
         wrapper.select(WmsPickupItemDO::getBinId);
-        wrapper.select(AGE_EXPR+" as age");
+        wrapper.select(AGE_COL_EXPR);
 
         //
         wrapper.distinct();

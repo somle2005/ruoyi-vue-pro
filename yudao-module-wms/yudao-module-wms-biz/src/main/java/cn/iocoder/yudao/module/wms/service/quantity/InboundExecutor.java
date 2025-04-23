@@ -149,4 +149,11 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
     }
 
 
+    public static void setShelveAvailableQty(List<? extends WmsInboundItemRespVO> items) {
+        items.forEach(item -> {
+            item.setShelveAvailableQty(item.getActualQty() - item.getShelvedQty());
+        });
+    }
+
+
 }

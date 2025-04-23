@@ -4,14 +4,15 @@ import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleResp
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
-import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
@@ -30,9 +31,7 @@ public class WmsInboundItemRespVO {
     @ExcelProperty("仓库ID")
     private Long warehouseId;
 
-    @Schema(description = "仓位ID", example = "23620")
-    @ExcelProperty("仓位ID")
-    private Long binId;
+
 
     @Schema(description = "入库单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "29327")
     @ExcelProperty("入库单ID")
@@ -113,8 +112,6 @@ public class WmsInboundItemRespVO {
     @Schema(description = "仓库", example = "")
     private WmsWarehouseSimpleRespVO warehouse;
 
-    @Schema(description = "库位", example = "")
-    private WmsWarehouseBinRespVO bin;
 
     @Schema(description = "库存归属部门ID,由用户指定", example = "")
     @ExcelProperty("库存归属部门ID")
@@ -145,4 +142,14 @@ public class WmsInboundItemRespVO {
     @Schema(description = "入库的归属部门ID,由用户指定", example = "")
     @ExcelProperty("入库的归属部门ID,由用户指定")
     private Long inboundDeptId;
+
+    @Schema(description = "入库部门", example = "")
+    private DeptSimpleRespVO inboundDept;
+
+    @Schema(description = "入库财务公司", example = "")
+    private FmsCompanySimpleRespVO inboundCompany;
+
+
+
+
 }

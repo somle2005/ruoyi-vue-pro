@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundIt
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsPickupPendingPageReqVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemBinQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
@@ -94,12 +95,12 @@ public interface WmsInboundItemService {
     /**
      * 装配产品
      */
-    void assembleProducts(List<WmsInboundItemRespVO> itemList);
+    void assembleProducts(List<? extends WmsInboundItemRespVO> itemList);
 
     /**
      * 装配入库单
      */
-    void assembleInbound(List<WmsInboundItemRespVO> itemList);
+    void assembleInbound(List<? extends WmsInboundItemRespVO> itemList);
 
     /**
      * 按仓库id和商品id查询
@@ -114,7 +115,7 @@ public interface WmsInboundItemService {
     /**
      * 装配仓库
      */
-    void assembleWarehouse(List<WmsInboundItemRespVO> list);
+    void assembleWarehouse(List<? extends WmsInboundItemRespVO> list);
 
     /**
      * 装配仓库货位
@@ -124,15 +125,20 @@ public interface WmsInboundItemService {
     /**
      * 装配部门
      */
-    void assembleDept(List<WmsInboundItemRespVO> list);
+    void assembleDept(List<? extends WmsInboundItemRespVO> list);
 
     /**
      * 装配公司
      */
-    void assembleCompany(List<WmsInboundItemRespVO> list);
+    void assembleCompany(List<? extends WmsInboundItemRespVO> list);
 
     /**
      * 装配商品id
      */
     void assembleProductIds(List<WmsInboundItemImportExcelVO> impVOList);
+
+    /**
+     * 批次库存关联仓位查询
+     */
+    PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(@Valid WmsInboundItemPageReqVO pageReqVO);
 }

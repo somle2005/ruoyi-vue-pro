@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemQueryMapper.AGE_EXPR;
+import static cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemQueryMapper.AGE_COL_EXPR;
 
 /**
  * 入库单详情 Mapper
@@ -93,7 +93,7 @@ public interface WmsInboundItemOwnershipQueryMapper extends BaseMapperX<WmsInbou
         // 查询子表字段
         wrapper.select(WmsInboundDO::getWarehouseId);
         wrapper.select(WmsInboundDO::getInboundTime);
-        wrapper.select(AGE_EXPR+" as age");
+        wrapper.select(AGE_COL_EXPR);
 
 
         //
