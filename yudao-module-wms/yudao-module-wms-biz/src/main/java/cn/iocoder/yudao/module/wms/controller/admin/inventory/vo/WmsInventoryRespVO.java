@@ -72,4 +72,12 @@ public class WmsInventoryRespVO {
     @Schema(description = "创建者备注", example = "")
     @ExcelProperty("创建者备注")
     private String remark;
+
+    @Schema(description = "创建人姓名", example = "张三")
+    @ExcelProperty("创建人姓名")
+    private String creatorName;
+
+    @Schema(description = "更新人姓名", example = "李四")
+    @ExcelProperty("更新人姓名")
+    private String updaterName;
 }
