@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Consumer;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -307,7 +308,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         // 查询到对应的库位库存记录
         List<WmsStockBinDO> stockBinDOList = stockBinService.selectStockBinByIds(stockBinIds);
         Map<Long,WmsStockBinDO> stockBinDOMap = StreamX.from(stockBinDOList).toMap(WmsStockBinDO::getId);
-        List<Long> binIds = StreamX.from(stockBinDOList).toList(WmsStockBinDO::getBinId);
+        Set<Long> binIds = StreamX.from(stockBinDOList).toSet(WmsStockBinDO::getBinId);
         // 查询到库位记录
         List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(binIds);
         Map<Long,WmsWarehouseBinRespVO> binVOMap = StreamX.from(binDOList).toMap(WmsWarehouseBinDO::getId, binDO -> BeanUtils.toBean(binDO, WmsWarehouseBinRespVO.class));

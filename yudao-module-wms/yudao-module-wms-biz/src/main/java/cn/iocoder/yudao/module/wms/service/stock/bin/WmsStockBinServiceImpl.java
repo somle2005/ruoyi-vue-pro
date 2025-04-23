@@ -282,7 +282,7 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
 
     @Override
     public void assembleBin(List<WmsStockBinRespVO> list, boolean withZone) {
-        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(list).toList(WmsStockBinRespVO::getBinId).stream().distinct().toList());
+        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(list).toSet(WmsStockBinRespVO::getBinId));
         List<WmsWarehouseBinRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinRespVO.class);
         StreamX.from(list).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsStockBinRespVO::getBinId,WmsStockBinRespVO::setBin);
 

@@ -165,7 +165,7 @@ public class WmsPickupServiceImpl implements WmsPickupService {
         List<Long> inboundIdList = StreamX.from(inboundItemDOList).toList(WmsInboundItemDO::getInboundId);
         List<WmsInboundDO> inboundDOList = inboundService.selectByIds(inboundIdList);
         Set<Long> warehouseIdSetOfInboundItem = StreamX.from(inboundDOList).toSet(WmsInboundDO::getWarehouseId);
-        List<Long> binIdList = StreamX.from(toInsetList).toList(WmsPickupItemDO::getBinId);
+        Set<Long> binIdList = StreamX.from(toInsetList).toSet(WmsPickupItemDO::getBinId);
         List<WmsWarehouseBinDO> wmsWarehouseBinDOList = wmsWarehouseBinService.selectByIds(binIdList);
         Set<Long> warehouseIdSetOfBin = StreamX.from(wmsWarehouseBinDOList).toSet(WmsWarehouseBinDO::getWarehouseId);
         // 校验仓库

@@ -22,7 +22,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -138,7 +137,7 @@ public class WmsExchangeDefectiveServiceImpl implements WmsExchangeDefectiveServ
         binIds.addAll(StreamX.from(defectiveList).toList(WmsExchangeDefectiveRespVO::getFromBinId).stream().distinct().toList());
         binIds.addAll(StreamX.from(defectiveList).toList(WmsExchangeDefectiveRespVO::getToBinId).stream().distinct().toList());
 
-        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(new ArrayList<>(binIds));
+        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(binIds);
         List<WmsWarehouseBinRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinRespVO.class);
 
         StreamX.from(defectiveList).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsExchangeDefectiveRespVO::getFromBinId,WmsExchangeDefectiveRespVO::setFromBin);

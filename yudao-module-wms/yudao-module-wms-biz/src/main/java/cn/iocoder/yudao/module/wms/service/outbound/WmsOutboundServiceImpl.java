@@ -8,6 +8,8 @@ import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
@@ -47,12 +49,14 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_CAN_NOT_EDIT;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_CAN_NOT_EDIT;
@@ -62,8 +66,8 @@ import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_ITEM
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_NOT_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_NO_DUPLICATE;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_WAREHOUSE_ERROR;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_NOT_ENOUGH;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_PRODUCT_NOT_ENOUGH;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_PRODUCT_NOT_EXISTS;
 
 /**
  * 出库单 Service 实现类
@@ -107,6 +111,9 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
 
     @Resource
     private FmsCompanyApi companyApi;
+
+    @Resource
+    private ErpProductApi productApi;
 
     @Resource
     private WmsApprovalHistoryService approvalHistoryService;
@@ -153,7 +160,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     }
 
     private void processAndValidateForOutbound(WmsOutboundDO outboundDO, List<WmsOutboundItemDO> itemList) {
-        List<Long> binIdList = StreamX.from(itemList).toList(WmsOutboundItemDO::getBinId);
+        Set<Long> binIdList = StreamX.from(itemList).toSet(WmsOutboundItemDO::getBinId);
         List<WmsWarehouseBinDO> wmsWarehouseBinDOList = wmsWarehouseBinService.selectByIds(binIdList);
         Set<Long> warehouseIdSetOfBin = StreamX.from(wmsWarehouseBinDOList).toSet(WmsWarehouseBinDO::getWarehouseId);
         // 校验仓库
@@ -173,10 +180,12 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
                 stockBinDO = map.get(itemDO.getProductId());
             }
             if (stockBinDO == null) {
-                throw exception(STOCK_BIN_NOT_EXISTS);
+                ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
+                throw exception(STOCK_BIN_PRODUCT_NOT_EXISTS,productDto.getBarCode());
             }
             if (stockBinDO.getSellableQty() < itemDO.getPlanQty()) {
-                throw exception(STOCK_BIN_NOT_ENOUGH);
+                ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
+                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH,productDto.getBarCode());
             }
         }
     }
@@ -224,9 +233,15 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
                 item.setOutboundId(updateReqVO.getId());
             });
             // 保存详情
-            outboundItemMapper.insertBatch(toInsetList);
-            outboundItemMapper.updateBatch(toUpdateList);
-            outboundItemMapper.deleteBatchIds(toDeleteList);
+            if(!toInsetList.isEmpty()) {
+                outboundItemMapper.insertBatch(toInsetList);
+            }
+            if(!toUpdateList.isEmpty()) {
+                outboundItemMapper.updateBatch(toUpdateList);
+            }
+            if(!toDeleteList.isEmpty()) {
+                outboundItemMapper.deleteBatchIds(toDeleteList);
+            }
         }
         // 返回
         return outbound;

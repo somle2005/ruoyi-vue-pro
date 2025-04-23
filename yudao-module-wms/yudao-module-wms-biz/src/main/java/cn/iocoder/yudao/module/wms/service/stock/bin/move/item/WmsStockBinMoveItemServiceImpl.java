@@ -25,11 +25,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_ITEM_EXISTS;
@@ -146,9 +147,9 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
 
     @Override
     public void assembleBin(List<WmsStockBinMoveItemRespVO> stockBinMoveItemList) {
-        List<Long> ids=new ArrayList<>();
-        ids.addAll(StreamX.from(stockBinMoveItemList).toList(WmsStockBinMoveItemRespVO::getFromBinId).stream().distinct().toList());
-        ids.addAll(StreamX.from(stockBinMoveItemList).toList(WmsStockBinMoveItemRespVO::getToBinId).stream().distinct().toList());
+        Set<Long> ids=new HashSet<>();
+        ids.addAll(StreamX.from(stockBinMoveItemList).toSet(WmsStockBinMoveItemRespVO::getFromBinId));
+        ids.addAll(StreamX.from(stockBinMoveItemList).toSet(WmsStockBinMoveItemRespVO::getToBinId));
         List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(ids);
 
         List<WmsWarehouseBinRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinRespVO.class);

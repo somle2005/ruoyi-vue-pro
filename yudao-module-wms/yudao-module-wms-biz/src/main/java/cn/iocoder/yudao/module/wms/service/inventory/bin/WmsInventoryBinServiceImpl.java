@@ -159,7 +159,7 @@ public class WmsInventoryBinServiceImpl implements WmsInventoryBinService {
 
     @Override
     public void assembleBin(List<WmsInventoryBinRespVO> binItemList) {
-        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(binItemList).toList(WmsInventoryBinRespVO::getBinId).stream().distinct().toList());
+        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(binItemList).toSet(WmsInventoryBinRespVO::getBinId));
         List<WmsWarehouseBinRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinRespVO.class);
         StreamX.from(binItemList).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsInventoryBinRespVO::getBinId,WmsInventoryBinRespVO::setBin);
     }
