@@ -66,7 +66,7 @@ public class WmsInventoryBinRespVO {
     private WmsWarehouseBinRespVO bin;
 
     @Schema(description = "实际库存，实盘数量", example = "")
-    @ExcelProperty("实际库存，实盘数量")
+    @ExcelProperty("实际库存")
     private Integer actualQty;
 
     @Schema(description = "备注", example = "")

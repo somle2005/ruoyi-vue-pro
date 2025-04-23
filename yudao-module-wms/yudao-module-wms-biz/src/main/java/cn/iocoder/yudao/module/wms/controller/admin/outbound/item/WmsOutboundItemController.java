@@ -185,7 +185,7 @@ public class WmsOutboundItemController {
         }
 
         // 导出 Excel
-        ExcelUtils.write(response, "出库单详情.xls", "数据", WmsOutboundItemExportVO.class,expVoList);
+        ExcelUtils.write(response, "出库单详情-"+outboundDO.getCode()+".xls", "数据", WmsOutboundItemExportVO.class,expVoList);
     }
 
     @PostMapping("/import-excel")

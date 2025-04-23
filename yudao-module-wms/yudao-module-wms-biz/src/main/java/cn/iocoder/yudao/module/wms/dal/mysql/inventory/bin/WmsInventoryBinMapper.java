@@ -41,4 +41,4 @@ public interface WmsInventoryBinMapper extends BaseMapperX<WmsInventoryBinDO> {
     default List<WmsInventoryBinDO> selectByInventoryId(Long id) {
         return selectList(WmsInventoryBinDO::getInventoryId, id);
     }
-}
+}

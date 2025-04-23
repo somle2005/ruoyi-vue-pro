@@ -1,11 +1,8 @@
 package cn.iocoder.yudao.module.wms.controller.admin.inventory;
 
-import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
-import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinRespVO;
@@ -24,7 +21,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -38,11 +34,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_NOT_EXISTS;
@@ -148,16 +142,16 @@ public class WmsInventoryController {
         return success(voPageResult);
     }
 
-    @GetMapping("/export-excel")
-    @Operation(summary = "导出盘点 Excel")
-    @PreAuthorize("@ss.hasPermission('wms:inventory:export')")
-    @ApiAccessLog(operateType = EXPORT)
-    public void exportInventoryExcel(@Valid WmsInventoryPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
-        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<WmsInventoryDO> list = inventoryService.getInventoryPage(pageReqVO).getList();
-        // 导出 Excel
-        ExcelUtils.write(response, "盘点.xls", "数据", WmsInventoryRespVO.class, BeanUtils.toBean(list, WmsInventoryRespVO.class));
-    }
+//    @GetMapping("/export-excel")
+//    @Operation(summary = "导出盘点 Excel")
+//    @PreAuthorize("@ss.hasPermission('wms:inventory:export')")
+//    @ApiAccessLog(operateType = EXPORT)
+//    public void exportInventoryExcel(@Valid WmsInventoryPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+//        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
+//        List<WmsInventoryDO> list = inventoryService.getInventoryPage(pageReqVO).getList();
+//        // 导出 Excel
+//        ExcelUtils.write(response, "盘点.xls", "数据", WmsInventoryRespVO.class, BeanUtils.toBean(list, WmsInventoryRespVO.class));
+//    }
 
     @PutMapping("/submit")
     @Operation(summary = "提交审批")

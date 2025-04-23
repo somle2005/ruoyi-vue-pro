@@ -125,7 +125,7 @@ public class WmsInventoryTest extends BaseRestIntegrationTest {
             if(testProductIds1.size()<testProductIds1Count) {
                 testProductIds1.add(stockBinRespVO.getProductId());
             } else {
-                if(testProductIds2.size()<testProductIds2Count && stockBinRespVO.getAvailableQty()>0 & stockBinRespVO.getSellableQty()>0) {
+                if(!testProductIds1.contains(stockBinRespVO.getProductId())  && testProductIds2.size()<testProductIds2Count && stockBinRespVO.getAvailableQty()>0 & stockBinRespVO.getSellableQty()>0) {
                     testProductIds2.add(stockBinRespVO.getProductId());
                 }
             }

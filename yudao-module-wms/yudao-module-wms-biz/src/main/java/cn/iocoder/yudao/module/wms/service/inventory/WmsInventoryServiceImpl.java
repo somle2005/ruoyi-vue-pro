@@ -128,7 +128,7 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
         // 处理盘点的产品详情，保存预期库存
         List<WmsInventoryProductDO> inventoryProductDOList = inventoryProductMapper.selectByInventoryId(inventory.getId());
         List<WmsStockWarehouseDO> wmsStockWarehouseDOS = stockWarehouseService.selectByWarehouse(inventory.getWarehouseId());
-        Map<Long, WmsStockWarehouseDO> wmsStockWarehouseDOMap = StreamX.from(wmsStockWarehouseDOS).toMap(WmsStockWarehouseDO::getId);
+        Map<Long, WmsStockWarehouseDO> wmsStockWarehouseDOMap = StreamX.from(wmsStockWarehouseDOS).toMap(WmsStockWarehouseDO::getProductId);
         for (WmsInventoryProductDO inventoryProductDO : inventoryProductDOList) {
             WmsStockWarehouseDO wmsStockWarehouseDO = wmsStockWarehouseDOMap.get(inventoryProductDO.getProductId());
             if (wmsStockWarehouseDO == null) {
@@ -218,10 +218,18 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
                 }
                 item.setInventoryId(updateReqVO.getId());
             });
+
             // 保存详情
-            inventoryProductMapper.insertBatch(toInsetList);
-            inventoryProductMapper.updateBatch(toUpdateList);
-            inventoryProductMapper.deleteBatchIds(toDeleteList);
+            if(!toDeleteList.isEmpty()) {
+                inventoryProductMapper.deleteBatchIds(toDeleteList);
+            }
+            if(!toUpdateList.isEmpty()) {
+                inventoryProductMapper.updateBatch(toUpdateList);
+            }
+            if(!toInsetList.isEmpty()) {
+                inventoryProductMapper.insertBatch(toInsetList);
+            }
+
         }
         // 更新
         WmsInventoryDO inventory = BeanUtils.toBean(updateReqVO, WmsInventoryDO.class);
@@ -311,4 +319,4 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
         // 触发事件
         inventoryStateMachine.fireEvent(event, ctx);
     }
-}
+}

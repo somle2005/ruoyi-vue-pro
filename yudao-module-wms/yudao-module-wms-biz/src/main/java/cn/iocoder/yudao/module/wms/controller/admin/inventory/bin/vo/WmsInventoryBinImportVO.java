@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo;
+package cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo;
 
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -13,11 +13,11 @@ import org.springframework.web.multipart.MultipartFile;
 @Schema(description = "管理后台 - 入库单详情 Import VO")
 @Data
 @ExcelIgnoreUnannotated
-public class WmsOutboundItemImportVO {
+public class WmsInventoryBinImportVO {
 
 
-    @ExcelProperty("出库单ID")
-    public Long outboundId;
+    @ExcelProperty("盘点单ID")
+    public Long inventoryId;
 
 
     @Schema(description = "Excel 文件", requiredMode = Schema.RequiredMode.REQUIRED)
