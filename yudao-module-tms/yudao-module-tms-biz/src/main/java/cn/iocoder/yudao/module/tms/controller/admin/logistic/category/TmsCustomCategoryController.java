@@ -191,30 +191,20 @@ public class TmsCustomCategoryController {
         for (TmsCustomCategoryRespVO vo : vos) {
             List<TmsCustomCategoryItemRespVO> items = vo.getCustomRuleCategoryItems();
             if (items == null || items.isEmpty()) {
-                rows.add(toBaseRow(vo));
+                rows.add(BeanUtils.toBean(vo, TmsCustomCategoryExportRow.class));
             } else {
                 for (TmsCustomCategoryItemRespVO item : items) {
-                    TmsCustomCategoryExportRow row = toBaseRow(vo);
-                    row.setItemId(item.getId());
-                    row.setCountryCode(item.getCountryCode());
-                    row.setHscode(item.getHscode());
-                    row.setTaxRate(item.getTaxRate());
-                    row.setItemCreateTime(item.getCreateTime());
-                    rows.add(row);
+                    rows.add(BeanUtils.toBean(vo, TmsCustomCategoryExportRow.class, row -> {
+                        BeanUtils.copyProperties(item, row);
+                        row.setCategoryId(vo.getId());
+                        row.setItemId(item.getId());
+                        row.setItemCreateTime(item.getCreateTime());
+                    }));
                 }
             }
         }
         return rows;
     }
 
-    private TmsCustomCategoryExportRow toBaseRow(TmsCustomCategoryRespVO vo) {
-        TmsCustomCategoryExportRow row = new TmsCustomCategoryExportRow();
-        row.setCategoryId(vo.getId());
-        row.setMaterial(vo.getMaterial());
-        row.setDeclaredType(vo.getDeclaredType());
-        row.setDeclaredTypeEn(vo.getDeclaredTypeEn());
-        row.setCreateTime(vo.getCreateTime());
-        return row;
-    }
 
 }
