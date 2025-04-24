@@ -42,5 +42,7 @@ public interface ErrorCodeConstants {
     //头程单明细
     // ========== 出运订单费用明细 1_030_910_001 ==========
     ErrorCode FIRST_MILE_ITEM_NOT_EXISTS = new ErrorCode(1_030_670_009, "头程单明细不存在");
-
+    // ==========  出运跟踪信息表（由外部API更新）1_031_000_001 ==========
+    ErrorCode VESSEL_TRACKING_NOT_EXISTS = new ErrorCode(1_030_670_010, "出运跟踪信息表不存在");
+    ErrorCode VESSEL_TRACKING_LOG_NOT_EXISTS = new ErrorCode(1_030_670_011, "出运跟踪信息表日志不存在");
 }
