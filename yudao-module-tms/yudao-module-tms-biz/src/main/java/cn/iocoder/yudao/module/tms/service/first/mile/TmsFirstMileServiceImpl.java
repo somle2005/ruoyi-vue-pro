@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.tms.service.first.mile;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
@@ -11,6 +12,7 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileIt
 import cn.iocoder.yudao.module.tms.dal.mysql.fee.TmsFeeMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.TmsFirstMileMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item.TmsFirstMileItemMapper;
+import cn.iocoder.yudao.module.tms.enums.SourceTypeEnum;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import jakarta.annotation.Resource;
@@ -22,6 +24,8 @@ import java.util.Collections;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.diffList;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_NOT_EXISTS;
 
 /**
@@ -119,9 +123,29 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     }
 
     private void updateFirstMileItemList(Long firstMileId, List<TmsFirstMileItemDO> list) {
-        deleteFirstMileItemByFirstMileId(firstMileId);
-        list.forEach(o -> o.setId(null).setUpdater(null).setUpdateTime(null)); // 解决更新情况下：1）id 冲突；2）updateTime 不更新
-        createFirstMileItemList(firstMileId, list);
+        // 获取原有的子表数据
+        List<TmsFirstMileItemDO> oldList = firstMileItemMapper.selectListByFirstMileId(firstMileId);
+
+        // 使用diff方法比较新旧数据
+        List<List<TmsFirstMileItemDO>> diffedList = diffList(oldList, list,
+            (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
+
+        // 处理新增的数据
+        if (CollUtil.isNotEmpty(diffedList.get(0))) {
+            diffedList.get(0).forEach(item -> item.setFirstMileId(firstMileId));
+            firstMileItemMapper.insertBatch(diffedList.get(0));
+        }
+
+        // 处理更新的数据
+        if (CollUtil.isNotEmpty(diffedList.get(1))) {
+            firstMileItemMapper.updateBatch(diffedList.get(1));
+        }
+
+        // 处理删除的数据
+        if (CollUtil.isNotEmpty(diffedList.get(2))) {
+            List<Long> deleteIds = convertList(diffedList.get(2), TmsFirstMileItemDO::getId);
+            firstMileItemMapper.deleteByIds(deleteIds);
+        }
     }
 
     private void deleteFirstMileItemByFirstMileId(Long firstMileId) {
@@ -141,9 +165,36 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     }
 
     private void updateFeeList(Long sourceId, List<TmsFeeDO> list) {
-        deleteFeeBySourceId(sourceId);
-        list.forEach(o -> o.setId(null).setUpdater(null).setUpdateTime(null)); // 解决更新情况下：1）id 冲突；2）updateTime 不更新
-        createFeeList(sourceId, list);
+        // 获取原有的费用明细数据
+        List<TmsFeeDO> oldList = feeMapper.selectListBySourceId(sourceId);
+
+        // 使用diff方法比较新旧数据
+        List<List<TmsFeeDO>> diffedList = diffList(oldList, list,
+            (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
+
+        // 处理新增的数据
+        if (CollUtil.isNotEmpty(diffedList.get(0))) {
+            diffedList.get(0).forEach(item -> {
+                item.setSourceId(sourceId);
+                item.setSourceType(SourceTypeEnum.FIRST_MILE.getType());
+            });
+            feeMapper.insertBatch(diffedList.get(0));
+        }
+
+        // 处理更新的数据
+        if (CollUtil.isNotEmpty(diffedList.get(1))) {
+            diffedList.get(1).forEach(item -> {
+                item.setSourceId(sourceId);
+                item.setSourceType(SourceTypeEnum.FIRST_MILE.getType());
+            });
+            feeMapper.updateBatch(diffedList.get(1));
+        }
+
+        // 处理删除的数据
+        if (CollUtil.isNotEmpty(diffedList.get(2))) {
+            List<Long> deleteIds = convertList(diffedList.get(2), TmsFeeDO::getId);
+            feeMapper.deleteByIds(deleteIds);
+        }
     }
 
     private void deleteFeeBySourceId(Long sourceId) {
