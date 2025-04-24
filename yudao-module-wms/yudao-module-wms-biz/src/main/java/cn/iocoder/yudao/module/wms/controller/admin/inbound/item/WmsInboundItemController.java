@@ -268,7 +268,7 @@ public class WmsInboundItemController {
 
     @PostMapping("/import-excel")
     @Operation(summary = "导入详情")
-    @PreAuthorize("@ss.hasPermission('crm:inbound-item:import')")
+    @PreAuthorize("@ss.hasPermission('wms:inbound-item:import')")
     public CommonResult<Boolean> importExcel(@Valid WmsInboundItemImportVO importReqVO) throws Exception {
         List<WmsInboundItemImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsInboundItemImportExcelVO.class);
         // 装配产品ID

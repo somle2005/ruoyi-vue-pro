@@ -188,7 +188,7 @@ public class WmsInventoryBinController {
 
     @PostMapping("/import-excel")
     @Operation(summary = "导入盘点结果")
-    @PreAuthorize("@ss.hasPermission('crm:inbound-item:import')")
+    @PreAuthorize("@ss.hasPermission('wms:inbound-item:import')")
     public CommonResult<Boolean> importExcel(@Valid WmsInventoryBinImportVO importReqVO) throws Exception {
         WmsInventoryDO inventory = inventoryService.validateInventoryExists(importReqVO.getInventoryId());
         WmsInventoryAuditStatus inventoryAuditStatus= WmsInventoryAuditStatus.parse(inventory.getAuditStatus());

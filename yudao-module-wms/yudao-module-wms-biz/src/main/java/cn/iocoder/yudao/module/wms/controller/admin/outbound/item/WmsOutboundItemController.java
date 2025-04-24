@@ -47,9 +47,9 @@ import java.util.Set;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_ITEM_PRODUCT_NOT_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_ITEM_WAREHOUSE_BIN_ERROR;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_ITEM_WAREHOUSE_BIN_NOT_MATCH;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.PRODUCT_NOT_EXISTS;
 
 @Tag(name = "出库单详情")
 @RestController
@@ -190,7 +190,7 @@ public class WmsOutboundItemController {
 
     @PostMapping("/import-excel")
     @Operation(summary = "导入详情")
-    @PreAuthorize("@ss.hasPermission('crm:inbound-item:import')")
+    @PreAuthorize("@ss.hasPermission('wms:inbound-item:import')")
     public CommonResult<Boolean> importExcel(@Valid WmsOutboundItemImportVO importReqVO) throws Exception {
 
         WmsOutboundDO outboundDO = outboundService.validateOutboundExists(importReqVO.getOutboundId());
@@ -200,7 +200,7 @@ public class WmsOutboundItemController {
         outboundItemService.assembleProductIds(impVOList);
         for (WmsOutboundItemImportExcelVO importExcelVO : impVOList) {
             if (importExcelVO.getProductId() == null) {
-                throw exception(OUTBOUND_ITEM_PRODUCT_NOT_EXISTS, importExcelVO.getProductCode());
+                throw exception(PRODUCT_NOT_EXISTS, importExcelVO.getProductCode());
             }
         }
 

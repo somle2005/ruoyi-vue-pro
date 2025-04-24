@@ -1,11 +1,33 @@
 package cn.iocoder.yudao.module.wms.controller.admin.inventory.product;
 
+import cn.iocoder.yudao.framework.common.pojo.CommonResult;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryImportVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductImportExcelVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventorySaveReqVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
+import cn.iocoder.yudao.module.wms.enums.inventory.WmsInventoryAuditStatus;
+import cn.iocoder.yudao.module.wms.service.inventory.WmsInventoryService;
 import cn.iocoder.yudao.module.wms.service.inventory.product.WmsInventoryProductService;
+import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.ArrayList;
+import java.util.List;
+
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_CAN_NOT_EDIT;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.PRODUCT_NOT_EXISTS;
 
 @Tag(name = "库存盘点产品")
 @RestController
@@ -15,6 +37,10 @@ public class WmsInventoryProductController {
 
     @Resource
     private WmsInventoryProductService inventoryProductService;
+
+    @Resource
+    private WmsInventoryService inventoryService;
+
     // /**
     // * @sign : 3A7070C1BA316C44
     // */
@@ -85,4 +111,36 @@ public class WmsInventoryProductController {
     // // 导出 Excel
     // ExcelUtils.write(response, "库存盘点产品.xls", "数据", WmsInventoryProductRespVO.class, BeanUtils.toBean(list, WmsInventoryProductRespVO.class));
     // }
-}
+
+
+    @PostMapping("/import-excel")
+    @Operation(summary = "导入盘点产品")
+    @PreAuthorize("@ss.hasPermission('wms:inventory-product:import')")
+    public CommonResult<Boolean> importExcel(@Valid WmsInventoryImportVO importReqVO) throws Exception {
+
+        WmsInventoryDO inventoryDO = inventoryService.validateInventoryExists(importReqVO.getInventoryId());
+        // 校验状态
+        WmsInventoryAuditStatus inventoryAuditStatus= WmsInventoryAuditStatus.parse(inventoryDO.getAuditStatus());
+        if(!inventoryAuditStatus.matchAny(WmsInventoryAuditStatus.DRAFT,WmsInventoryAuditStatus.REJECT)) {
+            throw exception(INVENTORY_CAN_NOT_EDIT);
+        }
+        //
+        List<WmsInventoryProductImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsInventoryProductImportExcelVO.class);
+        WmsInventorySaveReqVO inventorySaveReqVO = BeanUtils.toBean(inventoryDO, WmsInventorySaveReqVO.class);
+        if(inventorySaveReqVO.getProductItemList()==null) {
+            inventorySaveReqVO.setProductItemList(new ArrayList<>());
+        }
+        // 校验产品ID
+        inventoryProductService.assembleProductIds(impVOList);
+        for (WmsInventoryProductImportExcelVO importExcelVO : impVOList) {
+            if (importExcelVO.getProductId() == null) {
+                throw exception(PRODUCT_NOT_EXISTS, importExcelVO.getProductCode());
+            }
+            inventorySaveReqVO.getProductItemList().add(BeanUtils.toBean(importExcelVO, WmsInventoryProductSaveReqVO.class));
+        }
+
+        inventoryService.updateInventory(inventorySaveReqVO);
+
+        return success(true);
+    }
+}

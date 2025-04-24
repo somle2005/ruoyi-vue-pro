@@ -35,11 +35,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-import java.util.Set;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_CAN_NOT_DELETE;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_CAN_NOT_EDIT;
@@ -147,16 +148,15 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
         }
         // 数据库里已经有的
         List<WmsInventoryBinDO> allInventoryBinDOListInDB = inventoryBinMapper.selectByInventoryId(inventory.getId());
-        Set<String> binProductIdSet = StreamX.from(allInventoryBinDOListInDB).toSet(e -> e.getBinId() + "-" + e.getProductId());
+        for (WmsInventoryBinDO inventoryBinDO : allInventoryBinDOListInDB) {
+            inventoryBinMapper.deleteAbsoluteById(inventoryBinDO.getId());
+        }
+
         // 仓位库存清单
         List<WmsStockBinRespVO> stockBinList = stockBinService.selectStockBinList(wmsWarehouseProductVOList, false);
         // 获得需要插入的部分：仓位库存里有，但数据库里没有的
         List<WmsInventoryBinDO> toInsertInventoryBinDOList = new ArrayList<>();
         for (WmsStockBinRespVO stockBinRespVO : stockBinList) {
-            // 已经存在的不需要加入清单
-            if (binProductIdSet.contains(stockBinRespVO.getBinId() + "-" + stockBinRespVO.getProductId())) {
-                continue;
-            }
             WmsInventoryBinDO inventoryBinDO = new WmsInventoryBinDO();
             inventoryBinDO.setInventoryId(inventory.getId());
             inventoryBinDO.setProductId(stockBinRespVO.getProductId());
@@ -165,17 +165,9 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
             inventoryBinDO.setActualQty(0);
             toInsertInventoryBinDOList.add(inventoryBinDO);
         }
-        // 需要删除的部分：数据库里有，但仓位库存里面没有的
-        List<WmsInventoryBinDO> toDeleteInventoryBinDOList = new ArrayList<>();
-        binProductIdSet = StreamX.from(stockBinList).toSet(e -> e.getBinId() + "-" + e.getProductId());
-        for (WmsInventoryBinDO stockBinRespVO : allInventoryBinDOListInDB) {
-            if (!binProductIdSet.contains(stockBinRespVO.getBinId() + "-" + stockBinRespVO.getProductId())) {
-                toDeleteInventoryBinDOList.add(stockBinRespVO);
-            }
-        }
-        // 保存库存盘点产品详情
+
         inventoryBinMapper.insertBatch(toInsertInventoryBinDOList);
-        inventoryBinMapper.deleteBatchIds(toDeleteInventoryBinDOList);
+
     }
 
     /**
@@ -221,7 +213,9 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
 
             // 保存详情
             if(!toDeleteList.isEmpty()) {
-                inventoryProductMapper.deleteBatchIds(toDeleteList);
+                for (WmsInventoryProductDO inventoryProductDO : toDeleteList) {
+                    inventoryProductMapper.deleteAbsoluteById(inventoryProductDO.getId());
+                }
             }
             if(!toUpdateList.isEmpty()) {
                 inventoryProductMapper.updateBatch(toUpdateList);

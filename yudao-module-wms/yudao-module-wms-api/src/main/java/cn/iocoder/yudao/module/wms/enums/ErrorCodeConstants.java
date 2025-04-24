@@ -252,7 +252,7 @@ public interface ErrorCodeConstants {
     ErrorCode INVENTORY_BIN_PRODUCT_NOT_ALLOWED = new ErrorCode(2_001_022_012, "库位盘单产品超出范围");
     ErrorCode INVENTORY_BIN_CAN_NOT_IMPORT = new ErrorCode(2_001_022_013, "不允许盘点导入结果");
     ErrorCode INVENTORY_BIN_MUST_IN_SAME_INVENTORY = new ErrorCode(2_001_022_014, "必须追加到同一个盘点单");
-    ErrorCode INVENTORY_BIN_CAN_NOT_APPEND = new ErrorCode(2_001_022_015, "不允许盘点导入结果");
+    ErrorCode INVENTORY_BIN_CAN_NOT_APPEND = new ErrorCode(2_001_022_015, "不允许导入盘点结果");
 
 
 
@@ -278,4 +278,7 @@ public interface ErrorCodeConstants {
     ErrorCode EXCHANGE_DEFECTIVE_CAN_NOT_EDIT = new ErrorCode(2_001_024_004, "良次换货详情不允许编辑");
     ErrorCode EXCHANGE_DEFECTIVE_CAN_NOT_DELETE = new ErrorCode(2_001_024_005, "良次换货详情不允许删除");
     ErrorCode EXCHANGE_DEFECTIVE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_024_006, "良次换货详情不符合审批条件");
+
+    // ========== WMS_PRODUCT 良次换货详情表 2_001_025_000 ==========
+    ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(2_001_025_001, "{} 产品不存在");
 }

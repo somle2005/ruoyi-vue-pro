@@ -49,7 +49,7 @@ public class WmsInventoryTest extends BaseRestIntegrationTest {
      **/
     private final int testProductIds2Count=3;
     private int test2QtyDelta(int i){
-        return -2;
+        return -1;
     };
 
 
