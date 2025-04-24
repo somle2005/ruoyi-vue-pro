@@ -8,9 +8,11 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePa
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * 头程单明细 Mapper
@@ -19,6 +21,7 @@ import java.util.List;
  */
 @Mapper
 public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> {
+    String EXISTS_FEE_SQL = "SELECT 1 FROM tms_fee f " + "WHERE f.first_mile_id = t.first_mile_id " + "AND f.fee_type = {0} " + "AND f.deleted = 0";
 
     //MPJLambdaWrapperX build
     default MPJLambdaWrapperX<TmsFirstMileItemDO> buildWrapper(TmsFirstMileItemPageReqVO vo) {
@@ -50,7 +53,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
     }
 
     //build BO wrapperX
-    default MPJLambdaWrapperX<TmsFirstMileItemDO> buildBOWrapper(TmsFirstMilePageReqVO vo) {
+    default MPJLambdaWrapper<TmsFirstMileItemDO> buildBOWrapper(TmsFirstMilePageReqVO vo) {
         if (vo == null) {
             vo = new TmsFirstMilePageReqVO();
         }
@@ -83,7 +86,10 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             .betweenIfPresent(TmsFirstMileDO::getOutboundTime, vo.getOutboundTime()) // 出库时间范围
             .eqIfPresent(TmsFirstMileDO::getInboundStatus, vo.getInboundStatus()) // 入库状态
             .betweenIfPresent(TmsFirstMileDO::getInboundTime, vo.getInboundTime()) // 入库时间范围
-            .orderByDesc(TmsFirstMileDO::getCreateTime);
+            .orderByDesc(TmsFirstMileDO::getCreateTime)
+            .orderByDesc(TmsFirstMileDO::getCreateTime)
+            .exists(vo.getFeePageReqVO() != null && vo.getFeePageReqVO().getCostType() != null, EXISTS_FEE_SQL, Objects.requireNonNull(vo.getFeePageReqVO()).getCostType())
+            ;
     }
 
     default PageResult<TmsFirstMileItemBO> selectPageBO(TmsFirstMilePageReqVO vo) {
