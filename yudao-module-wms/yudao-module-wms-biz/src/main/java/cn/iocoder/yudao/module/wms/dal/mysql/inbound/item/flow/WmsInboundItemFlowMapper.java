@@ -1,12 +1,13 @@
 package cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow;
 
-import java.util.*;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
+import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import org.apache.ibatis.annotations.Mapper;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.*;
+
+import java.util.List;
 
 /**
  * 入库单库存详情扣减 Mapper
@@ -21,9 +22,9 @@ public interface WmsInboundItemFlowMapper extends BaseMapperX<WmsInboundItemFlow
 				.eqIfPresent(WmsInboundItemFlowDO::getInboundId, reqVO.getInboundId())
 				.eqIfPresent(WmsInboundItemFlowDO::getInboundItemId, reqVO.getInboundItemId())
 				.eqIfPresent(WmsInboundItemFlowDO::getProductId, reqVO.getProductId())
-				.eqIfPresent(WmsInboundItemFlowDO::getOutboundId, reqVO.getOutboundId())
-				.eqIfPresent(WmsInboundItemFlowDO::getOutboundItemId, reqVO.getOutboundItemId())
-				.eqIfPresent(WmsInboundItemFlowDO::getOutboundQty, reqVO.getOutboundQty())
+                .eqIfPresent(WmsInboundItemFlowDO::getBillType, reqVO.getBillType())
+				.eqIfPresent(WmsInboundItemFlowDO::getBillId, reqVO.getBillId())
+				.eqIfPresent(WmsInboundItemFlowDO::getBillItemId, reqVO.getBillItemId())
 				.betweenIfPresent(WmsInboundItemFlowDO::getCreateTime, reqVO.getCreateTime())
 				.orderByDesc(WmsInboundItemFlowDO::getId));
     }
@@ -46,4 +47,4 @@ public interface WmsInboundItemFlowMapper extends BaseMapperX<WmsInboundItemFlow
     default List<WmsInboundItemFlowDO> selectByOutboundActionId(Long outboundActionId) {
         return selectList(new LambdaQueryWrapperX<WmsInboundItemFlowDO>().eq(WmsInboundItemFlowDO::getOutboundActionId, outboundActionId));
     }
-}
+}

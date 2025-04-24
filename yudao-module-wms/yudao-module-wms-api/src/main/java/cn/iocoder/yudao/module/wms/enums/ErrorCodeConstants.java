@@ -66,13 +66,13 @@ public interface ErrorCodeConstants {
     ErrorCode INBOUND_ITEM_PRODUCT_NOT_EXISTS = new ErrorCode(2_001_005_011, "产品 {} 不存在");
 
     // ========== WMS_INBOUND_ITEM_FLOW 入库单库存详情扣减表 2_001_006_000 ==========
-    ErrorCode INBOUND_ITEM_FLOW_NOT_EXISTS = new ErrorCode(2_001_006_001, "入库单库存详情扣减不存在");
-    ErrorCode INBOUND_ITEM_FLOW_BE_REFERRED = new ErrorCode(2_001_006_002, "入库单库存详情扣减被引用");
-    ErrorCode INBOUND_ITEM_FLOW_CAN_NOT_EDIT = new ErrorCode(2_001_006_003, "入库单库存详情扣减不允许编辑");
-    ErrorCode INBOUND_ITEM_FLOW_CAN_NOT_DELETE = new ErrorCode(2_001_006_004, "入库单库存详情扣减不允许删除");
-    ErrorCode INBOUND_ITEM_FLOW_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_006_005, "入库单库存详情扣减不符合审批条件");
+    ErrorCode INBOUND_ITEM_FLOW_NOT_EXISTS = new ErrorCode(2_001_006_001, "批次可用库存流水不存在");
+    ErrorCode INBOUND_ITEM_FLOW_BE_REFERRED = new ErrorCode(2_001_006_002, "批次可用库存流水被引用");
+    ErrorCode INBOUND_ITEM_FLOW_CAN_NOT_EDIT = new ErrorCode(2_001_006_003, "批次可用库存流水不允许编辑");
+    ErrorCode INBOUND_ITEM_FLOW_CAN_NOT_DELETE = new ErrorCode(2_001_006_004, "批次可用库存流水不允许删除");
+    ErrorCode INBOUND_ITEM_FLOW_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_006_005, "批次可用库存流水不符合审批条件");
     ErrorCode INBOUND_STATUS_PARSE_ERROR = new ErrorCode(2_001_006_006, "无法完成入库单状态转换");
-    ErrorCode INBOUND_ITEM_FLOW_EXISTS = new ErrorCode(2_001_006_007, "入库单库存详情扣减已存在");
+    ErrorCode INBOUND_ITEM_FLOW_EXISTS = new ErrorCode(2_001_006_007, "批次可用库存流水已存在");
 
     // ========== WMS_APPROVAL_HISTORY 审批历史表 2_001_007_000 ==========
     ErrorCode APPROVAL_HISTORY_NOT_EXISTS = new ErrorCode(2_001_007_001, "审批历史不存在");
@@ -119,6 +119,7 @@ public interface ErrorCodeConstants {
     ErrorCode STOCK_FLOW_CAN_NOT_EDIT = new ErrorCode(2_001_011_003, "库存流水不允许编辑");
     ErrorCode STOCK_FLOW_CAN_NOT_DELETE = new ErrorCode(2_001_011_004, "库存流水不允许删除");
     ErrorCode STOCK_FLOW_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_011_005, "库存流水不符合审批条件");
+    ErrorCode STOCK_FLOW_EXISTS = new ErrorCode(2_001_011_006, "库存流水已存在");
 
     // ========== WMS_PICKUP 拣货单 2_001_012_000 ==========
     ErrorCode PICKUP_NOT_EXISTS = new ErrorCode(2_001_012_001, "拣货单不存在");
@@ -194,15 +195,10 @@ public interface ErrorCodeConstants {
     ErrorCode STOCK_BIN_MOVE_ITEM_EXISTS = new ErrorCode(2_001_017_006, "库位移动详情已存在");
     ErrorCode STOCK_BIN_MOVE_ITEM_REPEATED = new ErrorCode(2_001_017_007, "库位移动详情重复");
     ErrorCode STOCK_BIN_MOVE_CAN_NOT_SAME_BIN = new ErrorCode(2_001_017_008, "调出仓位和调入仓位不可以相同");
-
     ErrorCode STOCK_BIN_MOVE_SINGLE_WAREHOUSE_ALLOW = new ErrorCode(2_001_017_009, "只允许使用一个仓库");
     ErrorCode STOCK_BIN_MOVE_ITEM_TO_BIN_ERROR = new ErrorCode(2_001_017_010, "调入仓位错误");
     ErrorCode STOCK_BIN_MOVE_ITEM_FROM_BIN_ERROR = new ErrorCode(2_001_017_011, "调出仓错误");
     ErrorCode STOCK_BIN_MOVE_ITEM_PRODUCT_ERROR = new ErrorCode(2_001_017_012, "{} 产品错误");
-
-
-
-
 
     // ========== WMS_STOCK_OWNERSHIP_MOVE 所有者库存移动表 2_001_018_000 ==========
     ErrorCode STOCK_OWNERSHIP_MOVE_NOT_EXISTS = new ErrorCode(2_001_018_001, "所有者库存移动不存在");
@@ -222,23 +218,12 @@ public interface ErrorCodeConstants {
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_019_006, "所有者库存移动详情不符合审批条件");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_EXISTS = new ErrorCode(2_001_019_007, "所有者库存移动详情已存在");
     ErrorCode STOCK_OWNERSHIP_MOVE_QUANTITY_ERROR = new ErrorCode(2_001_019_008, "所有者库存移动数量错误");
-
     ErrorCode STOCK_OWNERSHIP_MOVE_SINGLE_WAREHOUSE_ALLOW = new ErrorCode(2_001_019_009, "仅允许单个仓库");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_TO_COMPANY_ERROR = new ErrorCode(2_001_019_010, "调入公司错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_TO_DEPT_ERROR = new ErrorCode(2_001_019_011, "调入部门错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_FROM_COMPANY_ERROR = new ErrorCode(2_001_019_012, "调出公司错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_FROM_DEPT_ERROR = new ErrorCode(2_001_019_013, "调出部门错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_PRODUCT_ERROR = new ErrorCode(2_001_019_014, "产品错误");
-
-
-
-
-
-
-
-
-
-
 
     // ========== WMS_INVENTORY 盘点表 2_001_020_000 ==========
     ErrorCode INVENTORY_NOT_EXISTS = new ErrorCode(2_001_020_001, "盘点单不存在");
@@ -281,9 +266,6 @@ public interface ErrorCodeConstants {
     ErrorCode INVENTORY_BIN_MUST_IN_SAME_INVENTORY = new ErrorCode(2_001_022_014, "必须追加到同一个盘点单");
     ErrorCode INVENTORY_BIN_CAN_NOT_APPEND = new ErrorCode(2_001_022_015, "不允许导入盘点结果");
 
-
-
-
     // ========== WMS_EXCHANGE 换货单 2_001_023_000 ==========
     ErrorCode EXCHANGE_NOT_EXISTS = new ErrorCode(2_001_023_001, "换货单不存在");
     ErrorCode EXCHANGE_EXISTS = new ErrorCode(2_001_023_002, "换货单已存在");
@@ -308,4 +290,4 @@ public interface ErrorCodeConstants {
 
     // ========== WMS_PRODUCT 良次换货详情表 2_001_025_000 ==========
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(2_001_025_001, "{} 产品不存在");
-}
+}

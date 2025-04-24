@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.service.stock.flow;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
@@ -102,11 +103,8 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     @Lazy
     private WmsStockWarehouseService stockWarehouseService;
 
-
     @Resource
     private DeptApi deptApi;
-
-
 
     /**
      * @sign : 5CDC0A12A8B023F4
@@ -223,7 +221,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     /**
      * 创建仓位库存变化流水
      */
-    public void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId) {
+    public void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId,Long inboundItemFlowId) {
         createFor(reason, WmsStockType.BIN, direction, stockBinDO.getId(), stockBinDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
             // 采购计划量
             // stockFlowDO.setPurchasePlanQty(stockOwnershipDO.getPurchasePlanQty());
@@ -241,6 +239,8 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
             // stockFlowDO.setDefectiveQty(stockOwnershipDO.getDefectiveQty());
             // 待出库量
             stockFlowDO.setOutboundPendingQty(stockBinDO.getOutboundPendingQty());
+            // 库存批次的流水ID
+            stockFlowDO.setInboundItemFlowId(inboundItemFlowId);
         });
     }
 
@@ -286,7 +286,6 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         return stockFlowMapper.selectStockFlow(stockType, stockId);
     }
 
-
     @Override
     public void assembleProducts(List<WmsStockFlowRespVO> list) {
         Map<Long, ErpProductDTO> productDTOMap = productApi.getProductMap(StreamX.from(list).map(WmsStockFlowRespVO::getProductId).toList());
@@ -300,34 +299,29 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Override
     public void assembleWarehouse(List<WmsStockFlowRespVO> list) {
-
         Map<Long, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsStockFlowRespVO::getWarehouseId));
-        Map<Long, WmsWarehouseSimpleRespVO> warehouseVOMap = StreamX.from(warehouseDOMap.values())
-            .toMap(WmsWarehouseDO::getId, v -> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
-
+        Map<Long, WmsWarehouseSimpleRespVO> warehouseVOMap = StreamX.from(warehouseDOMap.values()).toMap(WmsWarehouseDO::getId, v -> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
         StreamX.from(list).assemble(warehouseVOMap, WmsStockFlowRespVO::getWarehouseId, WmsStockFlowRespVO::setWarehouse);
     }
 
     @Override
     public void assembleBin(List<WmsStockFlowRespVO> list) {
-
         // 过滤库位的动账流水
-        List<WmsStockFlowRespVO> binFlowList=StreamX.from(list).filter(v -> Objects.equals(WmsStockType.BIN.getValue(), v.getStockType())).toList();
+        List<WmsStockFlowRespVO> binFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockType.BIN.getValue(), v.getStockType())).toList();
         List<Long> stockBinIds = StreamX.from(binFlowList).toList(WmsStockFlowRespVO::getStockId).stream().distinct().toList();
         // 查询到对应的库位库存记录
         List<WmsStockBinDO> stockBinDOList = stockBinService.selectStockBinByIds(stockBinIds);
-        Map<Long,WmsStockBinDO> stockBinDOMap = StreamX.from(stockBinDOList).toMap(WmsStockBinDO::getId);
+        Map<Long, WmsStockBinDO> stockBinDOMap = StreamX.from(stockBinDOList).toMap(WmsStockBinDO::getId);
         Set<Long> binIds = StreamX.from(stockBinDOList).toSet(WmsStockBinDO::getBinId);
         // 查询到库位记录
         List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(binIds);
-        Map<Long,WmsWarehouseBinRespVO> binVOMap = StreamX.from(binDOList).toMap(WmsWarehouseBinDO::getId, binDO -> BeanUtils.toBean(binDO, WmsWarehouseBinRespVO.class));
-
+        Map<Long, WmsWarehouseBinRespVO> binVOMap = StreamX.from(binDOList).toMap(WmsWarehouseBinDO::getId, binDO -> BeanUtils.toBean(binDO, WmsWarehouseBinRespVO.class));
         // 循环库位的动账流水
         for (WmsStockFlowRespVO binRespVO : binFlowList) {
             // 找到流水对应的仓位库存记录
             WmsStockBinDO stockBinDO = stockBinDOMap.get(binRespVO.getStockId());
             // 通过仓位库存记录找到对应的仓位
-            WmsWarehouseBinRespVO binVO=binVOMap.get(stockBinDO.getBinId());
+            WmsWarehouseBinRespVO binVO = binVOMap.get(stockBinDO.getBinId());
             // 设置仓位
             binRespVO.setBin(binVO);
         }
@@ -335,32 +329,26 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Override
     public void assembleInbound(List<WmsStockFlowRespVO> list) {
-
-        List<WmsStockFlowRespVO> inboundFlowList=StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.INBOUND.getValue(), v.getReason())).toList();
+        List<WmsStockFlowRespVO> inboundFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.INBOUND.getValue(), v.getReason())).toList();
         List<WmsInboundDO> inboundDOList = inboundService.selectByIds(StreamX.from(inboundFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
         Map<Long, WmsInboundSimpleRespVO> inboundMap = StreamX.from(inboundDOList).toMap(WmsInboundDO::getId, inboundDO -> BeanUtils.toBean(inboundDO, WmsInboundSimpleRespVO.class));
         StreamX.from(inboundFlowList).assemble(inboundMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setInbound);
-
     }
 
     @Override
     public void assembleOutbound(List<WmsStockFlowRespVO> list) {
-
-        List<WmsStockFlowRespVO> outboundFlowList=StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.OUTBOUND_AGREE.getValue(), v.getReason())).toList();
+        List<WmsStockFlowRespVO> outboundFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.OUTBOUND_AGREE.getValue(), v.getReason())).toList();
         List<WmsOutboundDO> outboundDOList = outboundService.selectByIds(StreamX.from(outboundFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
         Map<Long, WmsInboundSimpleRespVO> outboundMap = StreamX.from(outboundDOList).toMap(WmsOutboundDO::getId, inboundDO -> BeanUtils.toBean(inboundDO, WmsInboundSimpleRespVO.class));
         StreamX.from(outboundFlowList).assemble(outboundMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setInbound);
-
     }
 
     @Override
     public void assemblePickup(List<WmsStockFlowRespVO> list) {
-
-        List<WmsStockFlowRespVO> pickupFlowList=StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.PICKUP.getValue(), v.getReason())).toList();
+        List<WmsStockFlowRespVO> pickupFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.PICKUP.getValue(), v.getReason())).toList();
         List<WmsPickupDO> pickupDOList = pickupService.selectByIds(StreamX.from(pickupFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
         Map<Long, WmsInboundSimpleRespVO> pickupMap = StreamX.from(pickupDOList).toMap(WmsPickupDO::getId, inboundDO -> BeanUtils.toBean(inboundDO, WmsInboundSimpleRespVO.class));
         StreamX.from(pickupFlowList).assemble(pickupMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setInbound);
-
     }
 
     @Override
@@ -370,40 +358,43 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
             wmsWarehouseProductVOList.add(WmsWarehouseProductVO.builder().warehouseId(flowRespVO.getWarehouseId()).productId(flowRespVO.getProductId()).build());
         }
         List<WmsStockWarehouseDO> stockWarehouseDOList = stockWarehouseService.selectStockWarehouse(wmsWarehouseProductVOList);
-        Map<String, WmsStockWarehouseSimpleVO> stockWarehouseDOMap = StreamX.from(stockWarehouseDOList).toMap(e->e.getProductId()+"-"+e.getWarehouseId(), e->BeanUtils.toBean(e,WmsStockWarehouseSimpleVO.class));
-        StreamX.from(list).assemble(stockWarehouseDOMap, e->e.getProductId()+"-"+e.getWarehouseId(), WmsStockFlowRespVO::setStockWarehouse);
+        Map<String, WmsStockWarehouseSimpleVO> stockWarehouseDOMap = StreamX.from(stockWarehouseDOList).toMap(e -> e.getProductId() + "-" + e.getWarehouseId(), e -> BeanUtils.toBean(e, WmsStockWarehouseSimpleVO.class));
+        StreamX.from(list).assemble(stockWarehouseDOMap, e -> e.getProductId() + "-" + e.getWarehouseId(), WmsStockFlowRespVO::setStockWarehouse);
     }
 
     @Override
     public void assembleCompanyAndDept(List<WmsStockFlowRespVO> list) {
-
-
         // 过滤所有者库存的动账流水
-        List<WmsStockFlowRespVO> ownershioFlowList=StreamX.from(list).filter(v -> Objects.equals(WmsStockType.OWNERSHIP.getValue(), v.getStockType())).toList();
+        List<WmsStockFlowRespVO> ownershioFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockType.OWNERSHIP.getValue(), v.getStockType())).toList();
         List<Long> stockOwnershipIds = StreamX.from(ownershioFlowList).toList(WmsStockFlowRespVO::getStockId).stream().distinct().toList();
         // 查询到对应的所有者库存记录
         List<WmsStockOwnershipDO> stockOwnershipDOList = stockOwnershipService.selectByIds(stockOwnershipIds);
-        Map<Long,WmsStockOwnershipDO> ownershipDOMap = StreamX.from(stockOwnershipDOList).toMap(WmsStockOwnershipDO::getId);
+        Map<Long, WmsStockOwnershipDO> ownershipDOMap = StreamX.from(stockOwnershipDOList).toMap(WmsStockOwnershipDO::getId);
         List<Long> companyIds = StreamX.from(stockOwnershipDOList).toList(WmsStockOwnershipDO::getCompanyId);
         List<Long> deptIds = StreamX.from(stockOwnershipDOList).toList(WmsStockOwnershipDO::getDeptId);
         // 查询到部门记录
         Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(deptIds);
         Map<Long, DeptSimpleRespVO> deptSimpleVOMap = BeanUtils.toBean(deptDTOMap, DeptSimpleRespVO.class);
-
         // 循环库位的动账流水
         for (WmsStockFlowRespVO binRespVO : ownershioFlowList) {
             // 找到流水对应的所有者库存记录
             WmsStockOwnershipDO stockOwnershipDO = ownershipDOMap.get(binRespVO.getStockId());
             // 通过所有者库存记录找到对应的部门
-            DeptSimpleRespVO deptVO=deptSimpleVOMap.get(stockOwnershipDO.getDeptId());
+            DeptSimpleRespVO deptVO = deptSimpleVOMap.get(stockOwnershipDO.getDeptId());
             // 设置仓位
             binRespVO.setDept(deptVO);
             // 通过所有者库存记录找到对应的财务公司
-            //todo 待东宇财务公司就绪
+            // todo 待东宇财务公司就绪
         }
-
-
     }
 
-
+    /**
+     * 按 ID 集合查询 WmsStockFlowDO
+     */
+    public List<WmsStockFlowDO> selectByIds(List<Long> idList) {
+        if (CollectionUtils.isEmpty(idList)) {
+            return List.of();
+        }
+        return stockFlowMapper.selectByIds(idList);
+    }
 }

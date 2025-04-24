@@ -12,6 +12,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
+import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
@@ -26,7 +27,13 @@ import java.util.List;
 import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_ACTUAL_QTY_ERROR;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_PICKUP_LEFT_QUANTITY_NOT_ENOUGH;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_NOT_ENOUGH;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_WAREHOUSE_NOT_ENOUGH;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_WAREHOUSE_NOT_EXISTS;
 
 /**
  * @author: LeeFJ
@@ -102,17 +109,17 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
      * 处理明细行
      **/
     private void processItem(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO) {
-        this.processStockBin(pickup, pickupItemDO, inboundDO, inboundItemVO);
+        Long flowId = this.processInboundItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
+        this.processStockBin(pickup, pickupItemDO, inboundDO, inboundItemVO,flowId);
         this.processStockWarehouseItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
         this.processStockOwnershipItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
-        this.processInboundItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
     }
 
 
     /**
      * 处理库存仓位
      **/
-    private void processStockBin(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO) {
+    private void processStockBin(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO,Long flowId) {
 
         JdbcUtils.requireTransaction();
         WmsStockBinDO stockBinDO = stockBinService.getStockBin(pickupItemDO.getBinId(), inboundItemVO.getProductId(), true);
@@ -124,13 +131,13 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         // 保存
         stockBinService.insertOrUpdate(stockBinDO);
         // 记录流水
-        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.IN, inboundItemVO.getProductId(), stockBinDO, pickupItemDO.getQty(), pickupItemDO.getPickupId(), pickupItemDO.getId());
+        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.IN, inboundItemVO.getProductId(), stockBinDO, pickupItemDO.getQty(), pickupItemDO.getPickupId(), pickupItemDO.getId(),flowId);
     }
 
     /**
      * 处理库存库位
      **/
-    private void processInboundItem(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO) {
+    private Long processInboundItem(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO) {
 
         Integer quantity = pickupItemDO.getQty();
 
@@ -153,10 +160,18 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         flowDO.setInboundId(inboundItemDO.getInboundId());
         flowDO.setInboundItemId(inboundItemDO.getId());
         flowDO.setProductId(inboundItemDO.getProductId());
-        flowDO.setOutboundQty(quantity);
-        flowDO.setOutboundId(-1L);
-        flowDO.setOutboundItemId(-1L);
+
+        flowDO.setBillType(WmsBillType.PICKUP.getValue());
+        flowDO.setBillId(pickup.getId());
+        flowDO.setBillItemId(pickupItemDO.getId());
+
+        flowDO.setDirection(WmsStockFlowDirection.IN.getValue());
+        flowDO.setOutboundAvailableDeltaQty(quantity);
+        flowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty());
+
         inboundItemFlowService.insert(flowDO);
+
+        return flowDO.getId();
 
     }
 

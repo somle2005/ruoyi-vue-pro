@@ -130,7 +130,7 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 保存
         stockBinService.insertOrUpdate(fromStockBinDO);
         // 记录流水
-        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.OUT, defectiveDO.getProductId(), fromStockBinDO , defectiveDO.getQty(), defectiveDO.getExchangeId(), defectiveDO.getId());
+        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.OUT, defectiveDO.getProductId(), fromStockBinDO , defectiveDO.getQty(), defectiveDO.getExchangeId(), defectiveDO.getId(),null);
 
 
         // 入方
@@ -142,7 +142,7 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 保存
         stockBinService.insertOrUpdate(toStockBinDO);
         // 记录流水
-        stockFlowService.createForStockBin(this.getReason(),WmsStockFlowDirection.IN, defectiveDO.getProductId(),toStockBinDO , defectiveDO.getQty(), defectiveDO.getExchangeId(), defectiveDO.getId());
+        stockFlowService.createForStockBin(this.getReason(),WmsStockFlowDirection.IN, defectiveDO.getProductId(),toStockBinDO , defectiveDO.getQty(), defectiveDO.getExchangeId(), defectiveDO.getId(),null);
     }
 
 

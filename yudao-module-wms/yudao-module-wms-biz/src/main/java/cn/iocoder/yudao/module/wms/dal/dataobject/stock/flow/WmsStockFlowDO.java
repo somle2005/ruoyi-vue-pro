@@ -12,7 +12,7 @@ import java.sql.Timestamp;
 /**
  * 库存流水 DO
  * @author 李方捷
- * @table-fields : reason,outbound_pending_qty,delta_qty,flow_time,next_flow_id,available_qty,purchase_transit_qty,stock_id,stock_type,product_id,shelving_pending_qty,id,reason_bill_id,return_transit_qty,sellable_qty,defective_qty,purchase_plan_qty,warehouse_id,direction,reason_item_id,prev_flow_id
+ * @table-fields : reason,outbound_pending_qty,delta_qty,flow_time,next_flow_id,available_qty,purchase_transit_qty,stock_id,stock_type,inbound_item_flow_id,product_id,shelving_pending_qty,id,reason_bill_id,return_transit_qty,sellable_qty,defective_qty,purchase_plan_qty,warehouse_id,direction,reason_item_id,prev_flow_id
  */
 @TableName("wms_stock_flow")
 // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
@@ -130,4 +130,9 @@ public class WmsStockFlowDO extends BaseDO {
      * 出入方向
      */
     private Integer direction;
+
+    /**
+     * 批次库存流水ID
+     */
+    private Long inboundItemFlowId;
 }

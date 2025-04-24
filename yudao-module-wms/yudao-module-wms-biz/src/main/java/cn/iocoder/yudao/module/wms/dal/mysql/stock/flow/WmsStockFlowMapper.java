@@ -8,7 +8,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPa
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
 import org.apache.ibatis.annotations.Mapper;
-
 import java.util.List;
 
 /**
@@ -20,56 +19,37 @@ import java.util.List;
 public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
 
     default PageResult<WmsStockFlowDO> selectPage(WmsStockFlowPageReqVO reqVO) {
-
-
         MPJLambdaWrapperX<WmsStockFlowDO> wrapper = new MPJLambdaWrapperX();
-
         // 库存分类的固定条件
         wrapper.eq(WmsStockFlowDO::getStockType, reqVO.getStockType());
         wrapper.in(WmsStockFlowDO::getReason, reqVO.getReason());
-
-
         // 连接产品视图
-        if(reqVO.getProductCode()!=null) {
-            wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockFlowDO::getProductId)
-                .likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode());
+        if (reqVO.getProductCode() != null) {
+            wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockFlowDO::getProductId).likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode());
         }
-
         wrapper.eqIfPresent(WmsStockFlowDO::getWarehouseId, reqVO.getWarehouseId());
         wrapper.eqIfPresent(WmsStockFlowDO::getDirection, reqVO.getDirection());
         wrapper.eqIfPresent(WmsStockFlowDO::getProductId, reqVO.getProductId());
-
-
-
-//        if(reqVO.getZoneId()!=null) {
-//            wrapper.innerJoin(WmsWarehouseBinDO.class, WmsWarehouseBinDO::getId, WmsStockBinDO::getBinId)
-//                .eqIfExists(WmsWarehouseBinDO::getZoneId, reqVO.getZoneId());
-//        }
-//        // 按仓库
-//        wrapper.eqIfPresent(WmsStockBinDO::getWarehouseId, reqVO.getWarehouseId())
-//            // 按产品ID
-//            .eqIfPresent(WmsStockBinDO::getProductId, reqVO.getProductId())
-//            .eqIfPresent(WmsStockBinDO::getBinId, reqVO.getBinId())
-//        ;
-
-
-        wrapper.betweenIfPresent(WmsStockFlowDO::getAvailableQty,reqVO.getAvailableQty());
-        wrapper.betweenIfPresent(WmsStockFlowDO::getDefectiveQty,reqVO.getDefectiveQty());
-        wrapper.betweenIfPresent(WmsStockFlowDO::getDeltaQty,reqVO.getDeltaQty());
-
-
-        wrapper.betweenIfPresent(WmsStockFlowDO::getOutboundPendingQty,reqVO.getOutboundPendingQty());
-        wrapper.betweenIfPresent(WmsStockFlowDO::getPurchasePlanQty,reqVO.getPurchasePlanQty());
-        wrapper.betweenIfPresent(WmsStockFlowDO::getPurchaseTransitQty,reqVO.getPurchaseTransitQty());
-
-        wrapper.betweenIfPresent(WmsStockFlowDO::getReturnTransitQty,reqVO.getReturnTransitQty());
-        wrapper.betweenIfPresent(WmsStockFlowDO::getSellableQty,reqVO.getSellableQty());
-        wrapper.betweenIfPresent(WmsStockFlowDO::getShelvingPendingQty,reqVO.getShelvingPendingQty());
-
+        // if(reqVO.getZoneId()!=null) {
+        // wrapper.innerJoin(WmsWarehouseBinDO.class, WmsWarehouseBinDO::getId, WmsStockBinDO::getBinId)
+        // .eqIfExists(WmsWarehouseBinDO::getZoneId, reqVO.getZoneId());
+        // }
+        // // 按仓库
+        // wrapper.eqIfPresent(WmsStockBinDO::getWarehouseId, reqVO.getWarehouseId())
+        // // 按产品ID
+        // .eqIfPresent(WmsStockBinDO::getProductId, reqVO.getProductId())
+        // .eqIfPresent(WmsStockBinDO::getBinId, reqVO.getBinId())
+        // ;
+        wrapper.betweenIfPresent(WmsStockFlowDO::getAvailableQty, reqVO.getAvailableQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getDefectiveQty, reqVO.getDefectiveQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getDeltaQty, reqVO.getDeltaQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getOutboundPendingQty, reqVO.getOutboundPendingQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getPurchasePlanQty, reqVO.getPurchasePlanQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getPurchaseTransitQty, reqVO.getPurchaseTransitQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getReturnTransitQty, reqVO.getReturnTransitQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getSellableQty, reqVO.getSellableQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getShelvingPendingQty, reqVO.getShelvingPendingQty());
         return selectPage(reqVO, wrapper);
-
-
-
     }
 
     /**
@@ -112,4 +92,4 @@ public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
     default List<WmsStockFlowDO> selectStockFlow(Long stockType, Long stockId) {
         return selectList(new LambdaQueryWrapperX<WmsStockFlowDO>().eq(WmsStockFlowDO::getStockType, stockType).eq(WmsStockFlowDO::getStockId, stockId));
     }
-}
+}

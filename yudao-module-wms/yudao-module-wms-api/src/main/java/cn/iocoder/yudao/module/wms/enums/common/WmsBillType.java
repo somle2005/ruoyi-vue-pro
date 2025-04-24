@@ -17,7 +17,9 @@ public enum WmsBillType implements ArrayValuable<Integer>, DictEnum {
     INBOUND(0, "入库单"),
     OUTBOUND(1, "出库单"),
     INVENTORY(2,"盘点单"),
-    EXCHANGE(3,"换货单");
+    EXCHANGE(3,"换货单"),
+    PICKUP(4,"上架单"),
+    ;
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(WmsBillType::getValue).toArray(Integer[]::new);
 

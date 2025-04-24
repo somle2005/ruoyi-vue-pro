@@ -131,7 +131,7 @@ public class BinMoveExecutor extends QuantityExecutor<BinMoveContext> {
         // 保存
         stockBinService.insertOrUpdate(fromStockBinDO);
         // 记录流水
-        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.OUT, binMoveItemDO.getProductId(), fromStockBinDO , binMoveItemDO.getQty(), binMoveItemDO.getBinMoveId(), binMoveItemDO.getId());
+        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.OUT, binMoveItemDO.getProductId(), fromStockBinDO , binMoveItemDO.getQty(), binMoveItemDO.getBinMoveId(), binMoveItemDO.getId(),null);
 
 
         // 入方
@@ -143,7 +143,7 @@ public class BinMoveExecutor extends QuantityExecutor<BinMoveContext> {
         // 保存
         stockBinService.insertOrUpdate(toStockBinDO);
         // 记录流水
-        stockFlowService.createForStockBin(this.getReason(),WmsStockFlowDirection.IN, binMoveItemDO.getProductId(),toStockBinDO , binMoveItemDO.getQty(), binMoveItemDO.getBinMoveId(), binMoveItemDO.getId());
+        stockFlowService.createForStockBin(this.getReason(),WmsStockFlowDirection.IN, binMoveItemDO.getProductId(),toStockBinDO , binMoveItemDO.getQty(), binMoveItemDO.getBinMoveId(), binMoveItemDO.getId(),null);
     }
 
 
