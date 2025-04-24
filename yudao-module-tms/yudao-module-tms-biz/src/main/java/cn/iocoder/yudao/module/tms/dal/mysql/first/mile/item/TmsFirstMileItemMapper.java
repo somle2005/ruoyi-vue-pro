@@ -88,10 +88,6 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         return selectJoinPage(vo, TmsFirstMileItemBO.class, buildBOWrapper(vo).selectAssociation(TmsFirstMileDO.class, TmsFirstMileItemBO::getTmsFirstMileDO));
     }
 
-//    default PageResult<TmsFirstMileItemDO> selectPage(TmsFirstMileItemPageReqVO reqVO) {
-//        return selectPage(reqVO, buildWrapper(reqVO));
-//    }
-
     default List<TmsFirstMileItemDO> selectListByFirstMileId(Long firstMileId) {
         return selectList(TmsFirstMileItemDO::getFirstMileId, firstMileId);
     }

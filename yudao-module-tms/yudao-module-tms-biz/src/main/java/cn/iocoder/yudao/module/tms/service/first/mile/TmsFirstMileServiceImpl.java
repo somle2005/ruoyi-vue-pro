@@ -4,17 +4,21 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.fee.TmsFeeMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.TmsFirstMileMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item.TmsFirstMileItemMapper;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Collections;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -88,9 +92,19 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         return firstMileMapper.selectById(id);
     }
 
+
     @Override
-    public PageResult<TmsFirstMileDO> getFirstMilePage(TmsFirstMilePageReqVO pageReqVO) {
-        return firstMileMapper.selectPage(pageReqVO);
+    public PageResult<TmsFirstMileBO> getFirstMileBOPage(TmsFirstMilePageReqVO pageReqVO) {
+        // 1. 获取明细分页数据（包含主表信息）
+        PageResult<TmsFirstMileItemBO> itemPageResult = firstMileItemMapper.selectPageBO(pageReqVO);
+        if (itemPageResult.getList().isEmpty()) {
+            return new PageResult<>(Collections.emptyList(), itemPageResult.getTotal());
+        }
+
+        // 2. 转换为BO列表
+        List<TmsFirstMileBO> firstMileBOList = TmsFirstMileConvert.convertBOList(itemPageResult.getList());
+
+        return new PageResult<>(firstMileBOList, itemPageResult.getTotal());
     }
 
     // ==================== 子表（头程单明细） ====================

@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSa
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -47,14 +48,14 @@ public interface TmsFirstMileService {
      */
     TmsFirstMileDO getFirstMile(Long id);
 
+
     /**
-     * 获得头程单分页
+     * 获得头程单分页BO
      *
      * @param pageReqVO 分页查询
      * @return 头程单分页
      */
-    PageResult<TmsFirstMileDO> getFirstMilePage(TmsFirstMilePageReqVO pageReqVO);
-
+    PageResult<TmsFirstMileBO> getFirstMileBOPage(TmsFirstMilePageReqVO pageReqVO);
     // ==================== 子表（头程单明细） ====================
 
     /**
