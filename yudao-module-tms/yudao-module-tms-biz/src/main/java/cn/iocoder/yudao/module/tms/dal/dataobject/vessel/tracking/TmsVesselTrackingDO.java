@@ -105,4 +105,8 @@ public class TmsVesselTrackingDO extends BaseDO {
      */
     private String containerNo;
 
+    /**
+     * 跟踪状态(字典)
+     */
+    private Integer trackingStatus;
 }
