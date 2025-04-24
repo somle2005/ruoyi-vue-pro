@@ -20,6 +20,7 @@ import com.github.yulichang.interfaces.MPJBaseJoin;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Param;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -188,5 +189,13 @@ public interface BaseMapperX<T> extends MPJBaseMapper<T> {
     default int delete(SFunction<T, ?> field, Object value) {
         return delete(new LambdaQueryWrapper<T>().eq(field, value));
     }
+
+    /**
+     * 物理删除
+     *
+     * @param id
+     * @return
+     */
+    int deleteAbsoluteById(Serializable id);
 
 }
