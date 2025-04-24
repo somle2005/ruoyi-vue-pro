@@ -10,6 +10,7 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
@@ -20,6 +21,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWareho
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.WmsPickupDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
@@ -33,6 +35,7 @@ import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockType;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
+import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsInboundItemFlowService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
@@ -102,6 +105,10 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     @Resource
     @Lazy
     private WmsStockWarehouseService stockWarehouseService;
+
+    @Resource
+    @Lazy
+    private WmsInboundItemFlowService inboundItemFlowService;
 
     @Resource
     private DeptApi deptApi;
@@ -396,5 +403,13 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
             return List.of();
         }
         return stockFlowMapper.selectByIds(idList);
+    }
+
+
+    @Override
+    public void assembleInboundItemFlow(List<WmsStockFlowRespVO> list) {
+        List<WmsInboundItemFlowDO> inboundItemFlowDOS = inboundItemFlowService.selectByIds(StreamX.from(list).toSet(WmsStockFlowRespVO::getInboundItemFlowId));
+        Map<Long, WmsInboundItemFlowSimpleVO> inboundItemFlowDOMap = StreamX.from(inboundItemFlowDOS).toMap(WmsInboundItemFlowDO::getId,e->BeanUtils.toBean(e, WmsInboundItemFlowSimpleVO.class));
+        StreamX.from(list).assemble(inboundItemFlowDOMap, WmsStockFlowRespVO::getInboundItemFlowId, WmsStockFlowRespVO::setInboundItemFlow);
     }
 }

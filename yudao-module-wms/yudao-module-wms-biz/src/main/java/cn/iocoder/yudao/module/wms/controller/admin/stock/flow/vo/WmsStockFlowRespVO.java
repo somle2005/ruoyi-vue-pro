@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo;
 
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupSimpleRespVO;
@@ -13,8 +14,10 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
@@ -166,4 +169,8 @@ public class WmsStockFlowRespVO {
     @Schema(description = "批次库存流水ID", example = "")
     @ExcelProperty("批次库存流水ID")
     private Long inboundItemFlowId;
+
+    @Schema(description = "批次库存流水", example = "")
+    @ExcelProperty("批次库存流水")
+    private WmsInboundItemFlowSimpleVO inboundItemFlow;
 }

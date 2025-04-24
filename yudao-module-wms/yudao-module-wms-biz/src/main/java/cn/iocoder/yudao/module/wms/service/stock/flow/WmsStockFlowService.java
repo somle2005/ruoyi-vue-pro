@@ -100,4 +100,6 @@ public interface WmsStockFlowService {
      * 按 ID 集合查询 WmsStockFlowDO
      */
     List<WmsStockFlowDO> selectByIds(List<Long> idList);
+
+    void assembleInboundItemFlow(List<WmsStockFlowRespVO> list);
 }

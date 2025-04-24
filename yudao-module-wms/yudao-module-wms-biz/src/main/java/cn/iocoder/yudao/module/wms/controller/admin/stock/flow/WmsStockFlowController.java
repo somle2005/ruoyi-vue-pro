@@ -3,7 +3,6 @@ package cn.iocoder.yudao.module.wms.controller.admin.stock.flow;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
@@ -23,7 +22,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.List;
+
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "库存流水")
@@ -108,6 +109,7 @@ public class WmsStockFlowController {
         pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.PICKUP.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
         CommonResult<PageResult<WmsStockFlowRespVO>> result = getStockFlowPage(pageReqVO);
         stockFlowService.assembleStockWarehouse(result.getData().getList());
+        stockFlowService.assembleInboundItemFlow(result.getData().getList());
         return result;
     }
 
@@ -132,4 +134,4 @@ public class WmsStockFlowController {
     // // 导出 Excel
     // ExcelUtils.write(response, "库存流水.xls", "数据", WmsStockFlowRespVO.class, BeanUtils.toBean(list, WmsStockFlowRespVO.class));
     // }
-}
+}
