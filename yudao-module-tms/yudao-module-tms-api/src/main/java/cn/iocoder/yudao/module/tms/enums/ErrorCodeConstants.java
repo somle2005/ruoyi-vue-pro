@@ -38,4 +38,9 @@ public interface ErrorCodeConstants {
 
     // ========== 出运订单费用明细 1_030_902_008 ==========
     ErrorCode FEE_NOT_EXISTS = new ErrorCode(1_030_670_008, "费用不存在");
+
+    //头程单明细
+    // ========== 出运订单费用明细 1_030_910_001 ==========
+    ErrorCode FIRST_MILE_ITEM_NOT_EXISTS = new ErrorCode(1_030_670_009, "头程单明细不存在");
+
 }

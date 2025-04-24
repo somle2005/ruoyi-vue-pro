@@ -1,0 +1,92 @@
+package cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo;
+
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.alibaba.excel.annotation.ExcelProperty;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
+
+@Schema(description = "管理后台 - 头程单明细 Response VO")
+@Data
+@ExcelIgnoreUnannotated
+public class TmsFirstMileItemRespVO {
+
+    @Schema(description = "创建人ID")
+    @ExcelProperty("创建人ID")
+    private Long creator;
+
+    @Schema(description = "创建时间")
+    @ExcelProperty("创建时间")
+    private LocalDateTime createTime;
+
+    @Schema(description = "更新人ID")
+    @ExcelProperty("更新人ID")
+    private Long updater;
+
+    @Schema(description = "更新时间")
+    @ExcelProperty("更新时间")
+    private LocalDateTime updateTime;
+
+    @Schema(description = "申请项ID")
+    @ExcelProperty("申请项ID")
+    private Integer requestItemId;
+
+    @Schema(description = "产品ID")
+    @ExcelProperty("产品ID")
+    private Integer productId;
+
+    @Schema(description = "箱数")
+    @ExcelProperty("箱数")
+    private Integer boxQty;
+
+    @Schema(description = "库存公司")
+    @ExcelProperty("库存公司")
+    private Long companyId;
+
+    @Schema(description = "库存归属部门ID")
+    @ExcelProperty("库存归属部门ID")
+    private Long deptId;
+
+    @Schema(description = "备注")
+    @ExcelProperty("备注")
+    private String remark;
+
+    @Schema(description = "实际发货数")
+    @ExcelProperty("实际发货数")
+    private Integer outboundClosedQty;
+
+    @Schema(description = "计划发货数")
+    @ExcelProperty("计划发货数")
+    private Integer outboundPlanQty;
+
+    @Schema(description = "已入库数量")
+    @ExcelProperty("已入库数量")
+    private Integer inboundClosedQty;
+
+    @Schema(description = "发出仓ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("发出仓ID")
+    private Long fromWarehouseId;
+
+    @Schema(description = "包装长（cm）")
+    @ExcelProperty("包装长（cm）")
+    private BigDecimal packageLength;
+
+    @Schema(description = "包装宽（cm）")
+    @ExcelProperty("包装宽（cm）")
+    private BigDecimal packageWidth;
+
+    @Schema(description = "包装高（cm）")
+    @ExcelProperty("包装高（cm）")
+    private BigDecimal packageHeight;
+
+    @Schema(description = "毛重（kg）")
+    @ExcelProperty("毛重（kg）")
+    private BigDecimal packageWeight;
+
+    @Schema(description = "体积（m³）")
+    @ExcelProperty("体积（m³）")
+    private BigDecimal volume;
+
+}
