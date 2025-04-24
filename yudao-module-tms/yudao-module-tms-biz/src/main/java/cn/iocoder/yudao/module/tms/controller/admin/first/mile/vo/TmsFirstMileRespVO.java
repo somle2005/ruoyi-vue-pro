@@ -1,6 +1,8 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
 
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemRespVO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.TmsVesselTrackingDO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -60,14 +62,14 @@ public class TmsFirstMileRespVO {
     private String ladingNo;
 
     @Schema(description = "柜型（字典）")
-    @ExcelProperty("柜型（字典）")
+    @ExcelProperty("柜型")
     private Integer cabinetType;
 
-    @Schema(description = "装柜日期", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "装柜日期")
     @ExcelProperty("装柜日期")
     private LocalDateTime packTime;
 
-    @Schema(description = "预计到货日期", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "预计到货日期")
     @ExcelProperty("预计到货日期")
     private LocalDateTime arrivePlanTime;
 
@@ -115,7 +117,12 @@ public class TmsFirstMileRespVO {
     @ExcelProperty("入库时间")
     private LocalDateTime inboundTime;
 
-    //多个明细List
     @Schema(description = "头程单明细")
     private List<TmsFirstMileItemRespVO> firstMileItemList;
+
+    @Schema(description = "费用明细")
+    private List<TmsFeeDO> fees;
+
+    @Schema(description = "最新跟踪信息")
+    private TmsVesselTrackingDO tracking;
 }

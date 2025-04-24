@@ -13,6 +13,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSa
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -78,7 +79,7 @@ public class TmsFirstMileController {
     @Operation(summary = "获得头程单分页")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
     public CommonResult<PageResult<TmsFirstMileRespVO>> getFirstMilePage(@Valid @RequestBody TmsFirstMilePageReqVO pageReqVO) {
-        PageResult<TmsFirstMileDO> pageResult = firstMileService.getFirstMilePage(pageReqVO);
+        PageResult<TmsFirstMileBO> pageResult = firstMileService.getFirstMileBOPage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, TmsFirstMileRespVO.class));
     }
 
@@ -88,7 +89,7 @@ public class TmsFirstMileController {
     @ApiAccessLog(operateType = EXPORT)
     public void exportFirstMileExcel(@Valid TmsFirstMilePageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<TmsFirstMileDO> list = firstMileService.getFirstMilePage(pageReqVO).getList();
+        List<TmsFirstMileBO> list = firstMileService.getFirstMileBOPage(pageReqVO).getList();
         // 导出 Excel
         ExcelUtils.write(response, "头程单.xls", "数据", TmsFirstMileRespVO.class, BeanUtils.toBean(list, TmsFirstMileRespVO.class));
     }
