@@ -18,24 +18,23 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @ToString(callSuper = true)
 public class TmsFeePageReqVO extends PageParam {
 
-    @Schema(description = "原单类型;出运订单、调拨单", example = "2")
+    @Schema(description = "原单类型;出运订单、调拨单")
     private String sourceType;
 
-    @Schema(description = "原单ID;出运订单ID、调拨单ID", example = "27529")
+    @Schema(description = "原单ID;出运订单ID、调拨单ID")
     private Long sourceId;
 
-    @Schema(description = "费用类型（如运输费、关税）;字典", example = "1")
+    @Schema(description = "费用类型（如运输费、关税）;字典")
     private Integer costType;
 
     @Schema(description = "金额")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private BigDecimal[] amount;
 
-    @Schema(description = "币种;名称（如 USD、CNY） 字典", example = "2")
-    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    @Schema(description = "币种;名称（如 USD、CNY） 字典")
     private Integer[] currencyType;
 
-    @Schema(description = "备注", example = "你猜")
+    @Schema(description = "备注")
     private String remark;
 
     @Schema(description = "乐观锁版本号")

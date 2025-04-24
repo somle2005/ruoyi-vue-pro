@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
 
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
+import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemPageReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
@@ -98,4 +99,8 @@ public class TmsFirstMilePageReqVO extends PageParam {
 
     @Schema(description = "头程单明细分页查询条件")
     private TmsFirstMileItemPageReqVO itemPageReqVO;
+
+    //费用明细
+    @Schema(description = "费用明细分页查询条件")
+    private TmsFeePageReqVO feePageReqVO;
 }

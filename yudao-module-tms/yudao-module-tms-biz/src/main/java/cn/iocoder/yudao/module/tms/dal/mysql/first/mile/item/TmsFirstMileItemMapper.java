@@ -87,6 +87,9 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
     }
 
     default PageResult<TmsFirstMileItemBO> selectPageBO(TmsFirstMilePageReqVO vo) {
+        if (vo == null) {
+            vo = new TmsFirstMilePageReqVO();
+        }
         return selectJoinPage(vo, TmsFirstMileItemBO.class, buildBOWrapper(vo).selectAssociation(TmsFirstMileDO.class, TmsFirstMileItemBO::getTmsFirstMileDO));
     }
 
