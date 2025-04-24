@@ -67,17 +67,17 @@ public class TmsFirstMileController {
 
     @GetMapping("/get")
     @Operation(summary = "获得头程单")
-    @Parameter(name = "id", description = "编号", required = true, example = "1024")
+    @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
     public CommonResult<TmsFirstMileRespVO> getFirstMile(@RequestParam("id") Long id) {
         TmsFirstMileDO firstMile = firstMileService.getFirstMile(id);
         return success(BeanUtils.toBean(firstMile, TmsFirstMileRespVO.class));
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得头程单分页")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
-    public CommonResult<PageResult<TmsFirstMileRespVO>> getFirstMilePage(@Valid TmsFirstMilePageReqVO pageReqVO) {
+    public CommonResult<PageResult<TmsFirstMileRespVO>> getFirstMilePage(@Valid @RequestBody TmsFirstMilePageReqVO pageReqVO) {
         PageResult<TmsFirstMileDO> pageResult = firstMileService.getFirstMilePage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, TmsFirstMileRespVO.class));
     }
@@ -86,25 +86,21 @@ public class TmsFirstMileController {
     @Operation(summary = "导出头程单 Excel")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportFirstMileExcel(@Valid TmsFirstMilePageReqVO pageReqVO,
-                                     HttpServletResponse response) throws IOException {
+    public void exportFirstMileExcel(@Valid TmsFirstMilePageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TmsFirstMileDO> list = firstMileService.getFirstMilePage(pageReqVO).getList();
         // 导出 Excel
-        ExcelUtils.write(response, "头程单.xls", "数据", TmsFirstMileRespVO.class,
-            BeanUtils.toBean(list, TmsFirstMileRespVO.class));
+        ExcelUtils.write(response, "头程单.xls", "数据", TmsFirstMileRespVO.class, BeanUtils.toBean(list, TmsFirstMileRespVO.class));
     }
 
     @PostMapping("/import-excel")
     @Operation(summary = "导入头程单 Excel")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:import')")
-    public CommonResult
-        <Boolean> importFirstMileExcel(@RequestParam("file") MultipartFile file) throws Exception {
+    public CommonResult<Boolean> importFirstMileExcel(@RequestParam("file") MultipartFile file) throws Exception {
         List<TmsFirstMileSaveReqVO> list = ExcelUtils.read(file, TmsFirstMileSaveReqVO.class);
         // 可根据业务需要批量保存或校验
         return success(true);
     }
-
 
     // ==================== 子表（头程单明细） ====================
 

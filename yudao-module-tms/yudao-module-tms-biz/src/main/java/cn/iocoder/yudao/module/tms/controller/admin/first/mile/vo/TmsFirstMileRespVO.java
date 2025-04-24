@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
 
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,6 +8,7 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "管理后台 - 头程单 Response VO")
 @Data
@@ -113,4 +115,7 @@ public class TmsFirstMileRespVO {
     @ExcelProperty("入库时间")
     private LocalDateTime inboundTime;
 
+    //多个明细List
+    @Schema(description = "头程单明细")
+    private List<TmsFirstMileItemRespVO> firstMileItemList;
 }

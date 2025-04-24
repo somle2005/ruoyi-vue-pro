@@ -109,8 +109,7 @@ public class TmsFirstMileRequestController {
     @Operation(summary = "导出头程申请单 Excel")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportFirstMileRequestExcel(@Validated TmsFirstMileRequestPageReqVO pageReqVO, HttpServletResponse response)
-        throws IOException {
+    public void exportFirstMileRequestExcel(@Validated TmsFirstMileRequestPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         // 获取分页数据
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
@@ -123,8 +122,7 @@ public class TmsFirstMileRequestController {
     @PostMapping("/import-excel")
     @Operation(summary = "导入头程申请单 Excel")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:import')")
-    public CommonResult<Boolean> importFirstMileRequestExcel(@RequestParam("file") MultipartFile file)
-        throws Exception {
+    public CommonResult<Boolean> importFirstMileRequestExcel(@RequestParam("file") MultipartFile file) throws Exception {
         List<TmsFirstMileRequestSaveReqVO> list = ExcelUtils.read(file, TmsFirstMileRequestSaveReqVO.class);
         // 可根据业务需要批量保存或校验
         return success(true);
@@ -177,19 +175,11 @@ public class TmsFirstMileRequestController {
         if (firstMileRequestBOList == null || firstMileRequestBOList.isEmpty()) {
             return Collections.emptyList();
         }
-        List<Long> productIds = firstMileRequestBOList.stream()
-            .flatMap(bo -> bo.getItems().stream())
-            .map(TmsFirstMileRequestItemDO::getProductId)
-            .distinct()
+        List<Long> productIds = firstMileRequestBOList.stream().flatMap(bo -> bo.getItems().stream()).map(TmsFirstMileRequestItemDO::getProductId).distinct()
             .collect(Collectors.toList());
-        List<Long> warehouseIds = firstMileRequestBOList.stream()
-            .map(TmsFirstMileRequestBO::getToWarehouseId)
-            .distinct()
-            .collect(Collectors.toList());
-        Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(firstMileRequestBOList.stream()
-            .map(TmsFirstMileRequestBO::getRequestDeptId)
-            .distinct()
-            .collect(Collectors.toList()));
+        List<Long> warehouseIds = firstMileRequestBOList.stream().map(TmsFirstMileRequestBO::getToWarehouseId).distinct().collect(Collectors.toList());
+        Map<Long, DeptRespDTO> deptMap =
+            deptApi.getDeptMap(firstMileRequestBOList.stream().map(TmsFirstMileRequestBO::getRequestDeptId).distinct().collect(Collectors.toList()));
 
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(warehouseIds);
@@ -200,16 +190,13 @@ public class TmsFirstMileRequestController {
                 MapUtils.findAndThen(deptMap, bo.getRequestDeptId(), dept -> respVO1.setRequestDeptName(dept.getName()));
             });
             if (bo.getItems() != null) {
-                List<TmsFirstMileRequestItemRespVO> items = bo.getItems().stream()
-                    .map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class,
-                        itemRespVO -> {
-                            MapUtils.findAndThen(productMap, item.getProductId(), product -> {
-                                itemRespVO.setProductName(product.getBarCode());
-                                itemRespVO.setBarCode(product.getBarCode());
-                            });
-                        }
-                    ))
-                    .collect(Collectors.toList());
+                List<TmsFirstMileRequestItemRespVO> items =
+                    bo.getItems().stream().map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
+                        MapUtils.findAndThen(productMap, item.getProductId(), product -> {
+                            itemRespVO.setProductName(product.getBarCode());
+                            itemRespVO.setBarCode(product.getBarCode());
+                        });
+                    })).collect(Collectors.toList());
                 respVO.setItems(items);
                 // 设置明细数量
                 respVO.setItemCount(items.size());
