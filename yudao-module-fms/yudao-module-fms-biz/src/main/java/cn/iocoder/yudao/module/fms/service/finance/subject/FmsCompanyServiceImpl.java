@@ -1,7 +1,9 @@
 package cn.iocoder.yudao.module.fms.service.finance.subject;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.fms.controller.admin.finance.subject.vo.FmsCompanyPageReqVO;
 import cn.iocoder.yudao.module.fms.controller.admin.finance.subject.vo.FmsCompanySaveReqVO;
 import cn.iocoder.yudao.module.fms.controller.admin.finance.subject.vo.FmsCompanySimpleRespVO;
@@ -15,6 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.FINANCE_SUBJECT_NOT_EXISTS;
@@ -90,7 +94,14 @@ public class FmsCompanyServiceImpl implements FmsCompanyService {
 
     @Override
     @Cacheable(value = FINANCE_SUBJECT_LIST, key = "'DO:'+#ids", unless = "#result == null")
-    public List<FmsCompanyDO> listCompany(List<Long> ids) {
+    public List<FmsCompanyDO> listCompany(Set<Long> ids) {
         return CompanyMapper.selectList(FmsCompanyDO::getId, ids);
+    }
+
+
+
+    @Override
+    public List<FmsCompanyDO> listCompanyByNames(Set<String> names) {
+        return CompanyMapper.selectList(FmsCompanyDO::getCompanyName, names);
     }
 }

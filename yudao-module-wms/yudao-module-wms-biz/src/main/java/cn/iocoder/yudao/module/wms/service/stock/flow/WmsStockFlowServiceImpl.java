@@ -14,6 +14,8 @@ import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimple
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
@@ -34,6 +36,7 @@ import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.stock.ownership.WmsStockOwnershipService;
+import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
 import jakarta.annotation.Resource;
@@ -42,6 +45,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -93,6 +97,11 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     @Resource
     @Lazy
     private WmsStockOwnershipService stockOwnershipService;
+
+    @Resource
+    @Lazy
+    private WmsStockWarehouseService stockWarehouseService;
+
 
     @Resource
     private DeptApi deptApi;
@@ -352,6 +361,17 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         Map<Long, WmsInboundSimpleRespVO> pickupMap = StreamX.from(pickupDOList).toMap(WmsPickupDO::getId, inboundDO -> BeanUtils.toBean(inboundDO, WmsInboundSimpleRespVO.class));
         StreamX.from(pickupFlowList).assemble(pickupMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setInbound);
 
+    }
+
+    @Override
+    public void assembleStockWarehouse(List<WmsStockFlowRespVO> list) {
+        List<WmsWarehouseProductVO> wmsWarehouseProductVOList = new ArrayList<>();
+        for (WmsStockFlowRespVO flowRespVO : list) {
+            wmsWarehouseProductVOList.add(WmsWarehouseProductVO.builder().warehouseId(flowRespVO.getWarehouseId()).productId(flowRespVO.getProductId()).build());
+        }
+        List<WmsStockWarehouseDO> stockWarehouseDOList = stockWarehouseService.selectStockWarehouse(wmsWarehouseProductVOList);
+        Map<String, WmsStockWarehouseSimpleVO> stockWarehouseDOMap = StreamX.from(stockWarehouseDOList).toMap(e->e.getProductId()+"-"+e.getWarehouseId(), e->BeanUtils.toBean(e,WmsStockWarehouseSimpleVO.class));
+        StreamX.from(list).assemble(stockWarehouseDOMap, e->e.getProductId()+"-"+e.getWarehouseId(), WmsStockFlowRespVO::setStockWarehouse);
     }
 
     @Override

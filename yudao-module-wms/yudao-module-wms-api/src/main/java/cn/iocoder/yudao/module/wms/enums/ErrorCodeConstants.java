@@ -193,6 +193,16 @@ public interface ErrorCodeConstants {
     ErrorCode STOCK_BIN_MOVE_ITEM_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_017_006, "库位移动详情不符合审批条件");
     ErrorCode STOCK_BIN_MOVE_ITEM_EXISTS = new ErrorCode(2_001_017_006, "库位移动详情已存在");
     ErrorCode STOCK_BIN_MOVE_ITEM_REPEATED = new ErrorCode(2_001_017_007, "库位移动详情重复");
+    ErrorCode STOCK_BIN_MOVE_CAN_NOT_SAME_BIN = new ErrorCode(2_001_017_008, "调出仓位和调入仓位不可以相同");
+
+    ErrorCode STOCK_BIN_MOVE_SINGLE_WAREHOUSE_ALLOW = new ErrorCode(2_001_017_009, "只允许使用一个仓库");
+    ErrorCode STOCK_BIN_MOVE_ITEM_TO_BIN_ERROR = new ErrorCode(2_001_017_010, "调入仓位错误");
+    ErrorCode STOCK_BIN_MOVE_ITEM_FROM_BIN_ERROR = new ErrorCode(2_001_017_011, "调出仓错误");
+    ErrorCode STOCK_BIN_MOVE_ITEM_PRODUCT_ERROR = new ErrorCode(2_001_017_012, "{} 产品错误");
+
+
+
+
 
     // ========== WMS_STOCK_OWNERSHIP_MOVE 所有者库存移动表 2_001_018_000 ==========
     ErrorCode STOCK_OWNERSHIP_MOVE_NOT_EXISTS = new ErrorCode(2_001_018_001, "所有者库存移动不存在");
@@ -212,6 +222,23 @@ public interface ErrorCodeConstants {
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_019_006, "所有者库存移动详情不符合审批条件");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_EXISTS = new ErrorCode(2_001_019_007, "所有者库存移动详情已存在");
     ErrorCode STOCK_OWNERSHIP_MOVE_QUANTITY_ERROR = new ErrorCode(2_001_019_008, "所有者库存移动数量错误");
+
+    ErrorCode STOCK_OWNERSHIP_MOVE_SINGLE_WAREHOUSE_ALLOW = new ErrorCode(2_001_019_009, "仅允许单个仓库");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_TO_COMPANY_ERROR = new ErrorCode(2_001_019_010, "调入公司错误");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_TO_DEPT_ERROR = new ErrorCode(2_001_019_011, "调入部门错误");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_FROM_COMPANY_ERROR = new ErrorCode(2_001_019_012, "调出公司错误");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_FROM_DEPT_ERROR = new ErrorCode(2_001_019_013, "调出部门错误");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_PRODUCT_ERROR = new ErrorCode(2_001_019_014, "产品错误");
+
+
+
+
+
+
+
+
+
+
 
     // ========== WMS_INVENTORY 盘点表 2_001_020_000 ==========
     ErrorCode INVENTORY_NOT_EXISTS = new ErrorCode(2_001_020_001, "盘点单不存在");

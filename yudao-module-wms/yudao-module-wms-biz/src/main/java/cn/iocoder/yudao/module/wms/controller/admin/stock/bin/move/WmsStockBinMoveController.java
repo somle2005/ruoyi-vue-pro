@@ -2,8 +2,13 @@ package cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move;
 
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryImportVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.item.vo.WmsStockBinMoveItemRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.item.vo.WmsStockBinMoveItemSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveImportExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMovePageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveSaveReqVO;
@@ -25,17 +30,26 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_ITEM_FROM_BIN_ERROR;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_ITEM_PRODUCT_ERROR;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_ITEM_TO_BIN_ERROR;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_SINGLE_WAREHOUSE_ALLOW;
 
 @Tag(name = "库位移动")
 @RestController
 @RequestMapping("/wms/stock-bin-move")
 @Validated
 public class WmsStockBinMoveController {
+
 
     @Resource()
     @Lazy()
@@ -122,4 +136,42 @@ public class WmsStockBinMoveController {
     // // 导出 Excel
     // ExcelUtils.write(response, "库位移动.xls", "数据", WmsStockBinMoveRespVO.class, BeanUtils.toBean(list, WmsStockBinMoveRespVO.class));
     // }
-}
+
+
+    @PostMapping("/import-excel")
+    @Operation(summary = "导入产品库位移动清单")
+    @PreAuthorize("@ss.hasPermission('wms:stock-bin-move:import')")
+    public CommonResult<Boolean> importExcel(@Valid WmsInventoryImportVO importReqVO) throws Exception {
+        //
+        List<WmsStockBinMoveImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsStockBinMoveImportExcelVO.class);
+        // 识别代码
+        stockBinMoveItemService.assembleWarehouseForImp(impVOList);
+        stockBinMoveItemService.assembleBinForImp(impVOList);
+        stockBinMoveItemService.assembleProductForImp(impVOList);
+
+        Set<Long> warehouseIds = StreamX.from(impVOList).filter(Objects::nonNull).toSet(WmsStockBinMoveImportExcelVO::getWarehouseId);
+        if(warehouseIds.size()!=1) {
+            throw exception(STOCK_BIN_MOVE_SINGLE_WAREHOUSE_ALLOW);
+        }
+        for (WmsStockBinMoveImportExcelVO excelVO : impVOList) {
+            if(excelVO.getToBinId()==null) {
+                throw exception(STOCK_BIN_MOVE_ITEM_TO_BIN_ERROR);
+            }
+            if(excelVO.getFromBinId()==null) {
+                throw exception(STOCK_BIN_MOVE_ITEM_FROM_BIN_ERROR);
+            }
+            if(excelVO.getProductId()==null) {
+                throw exception(STOCK_BIN_MOVE_ITEM_PRODUCT_ERROR,excelVO.getProductCode());
+            }
+        }
+
+        WmsStockBinMoveSaveReqVO saveReqVO = new WmsStockBinMoveSaveReqVO();
+        saveReqVO.setWarehouseId(warehouseIds.iterator().next());
+
+        saveReqVO.setItemList(BeanUtils.toBean(impVOList, WmsStockBinMoveItemSaveReqVO.class));
+
+        stockBinMoveService.createStockBinMove(saveReqVO);
+
+        return success(true);
+    }
+}

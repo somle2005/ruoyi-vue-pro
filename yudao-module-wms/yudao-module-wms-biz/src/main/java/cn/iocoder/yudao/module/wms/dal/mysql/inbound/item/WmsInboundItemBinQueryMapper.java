@@ -74,7 +74,8 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
 
         wrapper.betweenIfPresent(AGE_EXPR, reqVO.getAge());
 
-
+        wrapper.eqIfExists(WmsStockBinDO::getBinId, reqVO.getBinId());
+        wrapper.eqIfExists(WmsStockBinDO::getWarehouseId, reqVO.getWarehouseId());
 
 
         // 添加字段

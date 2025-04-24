@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.service.inbound.item;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemImportExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
@@ -120,7 +121,7 @@ public interface WmsInboundItemService {
     /**
      * 装配仓库货位
      */
-    void assembleWarehouseBin(List<WmsInboundItemRespVO> list);
+    void assembleWarehouseBin(List<WmsInboundItemBinRespVO> list);
 
     /**
      * 装配部门

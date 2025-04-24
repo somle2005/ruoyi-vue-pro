@@ -195,4 +195,13 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
         }
         return warehouseMapper.selectByIds(ids);
     }
+
+    @Override
+    public Map<String, WmsWarehouseDO> getWarehouseMapByCode(Set<String> codes) {
+        if(CollectionUtils.isEmpty(codes)) {
+            return Map.of();
+        }
+        List<WmsWarehouseDO> wmsWarehouseDOList = warehouseMapper.selectByCodes(codes);
+        return StreamX.from(wmsWarehouseDOList).toMap(WmsWarehouseDO::getCode);
+    }
 }

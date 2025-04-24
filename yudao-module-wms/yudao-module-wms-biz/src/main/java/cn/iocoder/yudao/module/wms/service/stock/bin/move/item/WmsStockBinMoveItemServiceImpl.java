@@ -10,13 +10,16 @@ import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimple
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.item.vo.WmsStockBinMoveItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.item.vo.WmsStockBinMoveItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.item.vo.WmsStockBinMoveItemSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveImportExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.move.WmsStockBinMoveDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.move.item.WmsStockBinMoveItemDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.bin.move.item.WmsStockBinMoveItemMapper;
 import cn.iocoder.yudao.module.wms.service.stock.bin.move.WmsStockBinMoveService;
+import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +54,10 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
     @Autowired
     @Lazy
     private WmsWarehouseBinService warehouseBinService;
+
+    @Autowired
+    @Lazy
+    private WmsWarehouseService warehouseService;
 
     @Autowired
     @Lazy
@@ -170,11 +177,60 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
 
     @Override
     public void assembleBinMove(List<WmsStockBinMoveItemRespVO> list) {
-        List<Long> ids=StreamX.from(list).toList(WmsStockBinMoveItemRespVO::getBinMoveId).stream().distinct().toList();
+        Set<Long> ids=StreamX.from(list).toSet(WmsStockBinMoveItemRespVO::getBinMoveId);
         List<WmsStockBinMoveDO> stockBinMoveDOS = stockBinMoveService.selectByIds(ids);
 
         List<WmsStockBinMoveSimpleRespVO> binMoveVOList = BeanUtils.toBean(stockBinMoveDOS, WmsStockBinMoveSimpleRespVO.class);
         StreamX.from(list).assemble(binMoveVOList, WmsStockBinMoveSimpleRespVO::getId, WmsStockBinMoveItemRespVO::getBinMoveId,WmsStockBinMoveItemRespVO::setBinMove);
+    }
+
+    @Override
+    public void assembleWarehouseForImp(List<WmsStockBinMoveImportExcelVO> impVOList) {
+        Map<String, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMapByCode(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getWarehouseCode));
+
+        StreamX.from(impVOList).assemble(warehouseDOMap, WmsStockBinMoveImportExcelVO::getWarehouseCode, (e, p)->{
+            if(p!=null) {
+                e.setWarehouseId(p.getId());
+            }
+        });
+    }
+
+    @Override
+    public void assembleBinForImp(List<WmsStockBinMoveImportExcelVO> impVOList) {
+
+        Set<Long> binIds=new HashSet<>();
+
+        binIds.addAll(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getFromBinId));
+        binIds.addAll(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getToBinId));
+        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(binIds);
+
+        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getId, WmsStockBinMoveImportExcelVO::getFromBinId,(e,p)->{
+            if (p!=null){
+                e.setFromBinId(p.getId());
+            }
+        });
+
+        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getId, WmsStockBinMoveImportExcelVO::getToBinId,(e,p)->{
+            if (p!=null){
+                e.setToBinId(p.getId());
+            }
+        });
+
+    }
+
+    @Override
+    public void assembleProductForImp(List<WmsStockBinMoveImportExcelVO> impVOList) {
+        Map<String, ErpProductDTO> productDTOMap = productApi.getProductMapByCode(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getProductCode));
+        Map<String, WmsProductRespSimpleVO> productVOMap = new HashMap<>();
+        for (ErpProductDTO productDTO : productDTOMap.values()) {
+            WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
+            productVOMap.put(productDTO.getBarCode(), productVO);
+        }
+        StreamX.from(impVOList).assemble(productVOMap, WmsStockBinMoveImportExcelVO::getProductCode,(e,p)->{
+            if (p!=null){
+                e.setProductId(p.getId());
+            }
+        });
     }
 
 

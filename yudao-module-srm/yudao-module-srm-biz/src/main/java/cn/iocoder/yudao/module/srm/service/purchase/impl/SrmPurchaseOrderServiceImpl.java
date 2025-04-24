@@ -721,7 +721,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             //2 模板word渲染数据
             List<SrmPurchaseOrderItemDO> itemDOS = purchaseOrderItemMapper.selectListByOrderId(orderDO.getId());
             Map<Long, FmsCompanyDTO> dtoMap =
-                convertMap(erpCompanyApi.validateCompany(List.of(reqVO.getPartyAId(), reqVO.getPartyBId())), FmsCompanyDTO::getId);
+                convertMap(erpCompanyApi.validateCompany(Set.of(reqVO.getPartyAId(), reqVO.getPartyBId())), FmsCompanyDTO::getId);
             SrmPurchaseOrderWordBO wordBO = SrmOrderConvert.INSTANCE.bindDataFormOrderItemDO(itemDOS, orderDO, reqVO, dtoMap);
             xwpfTemplate.render(wordBO);
             //3 转换pdf，返回响应

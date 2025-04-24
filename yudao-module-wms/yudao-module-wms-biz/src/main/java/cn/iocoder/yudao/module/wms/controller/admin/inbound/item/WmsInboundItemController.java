@@ -174,6 +174,7 @@ public class WmsInboundItemController {
         inboundItemService.assembleProducts(voPageResult.getList());
         inboundItemService.assembleWarehouse(voPageResult.getList());
         inboundItemService.assembleCompany(voPageResult.getList());
+        inboundItemService.assembleWarehouseBin(voPageResult.getList());
         // 填充入库单信息
         inboundItemService.assembleInbound(voPageResult.getList());
         //

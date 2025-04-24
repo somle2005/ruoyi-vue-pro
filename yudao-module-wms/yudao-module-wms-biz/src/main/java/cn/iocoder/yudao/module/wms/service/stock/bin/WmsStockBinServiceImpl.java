@@ -360,14 +360,8 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
             .toMap(WmsWarehouseDO::getId, v-> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
         StreamX.from(stockWarehouseVOList).assemble(warehouseVOMap, WmsStockWarehouseRespVO::getWarehouseId, WmsStockWarehouseRespVO::setWarehouse);
 
-
-
-
-
         // 仓库按产品分组
         Map<Long, List<WmsStockWarehouseRespVO>> stockWarehouseMap = StreamX.from(stockWarehouseVOList).groupBy(v->v.getProductId());
-
-
 
         // 装配仓库库存清单
         StreamX.from(list).assemble(stockWarehouseMap, WmsProductRespBinVO::getId, WmsProductRespBinVO::setStockWarehouseList);

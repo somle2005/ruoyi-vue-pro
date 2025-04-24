@@ -110,7 +110,9 @@ public class WmsStockFlowController {
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageBin(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.BIN.getValue());
         pageReqVO.setReason(new Integer[]{ WmsStockReason.INBOUND.getValue(), WmsStockReason.PICKUP.getValue(),WmsStockReason.OUTBOUND_AGREE.getValue() });
-        return getStockFlowPage(pageReqVO);
+        CommonResult<PageResult<WmsStockFlowRespVO>> result=getStockFlowPage(pageReqVO);
+        stockFlowService.assembleStockWarehouse(result.getData().getList());
+        return result;
     }
 
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPage(@Valid WmsStockFlowPageReqVO pageReqVO) {

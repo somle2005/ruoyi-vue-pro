@@ -2,8 +2,13 @@ package cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move;
 
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.item.vo.WmsStockOwnershipMoveItemRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.item.vo.WmsStockOwnershipMoveItemSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMoveImportExcelVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMoveImportVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMovePageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMoveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMoveSaveReqVO;
@@ -28,10 +33,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_ITEM_FROM_COMPANY_ERROR;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_ITEM_FROM_DEPT_ERROR;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_ITEM_PRODUCT_ERROR;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_ITEM_TO_COMPANY_ERROR;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_SINGLE_WAREHOUSE_ALLOW;
 
 @Tag(name = "所有者库存移动")
 @RestController
@@ -127,4 +139,51 @@ public class WmsStockOwnershipMoveController {
     // // 导出 Excel
     // ExcelUtils.write(response, "所有者库存移动.xls", "数据", WmsStockOwnershipMoveRespVO.class, BeanUtils.toBean(list, WmsStockOwnershipMoveRespVO.class));
     // }
+
+
+    @PostMapping("/import-excel")
+    @Operation(summary = "导入产品归属移动清单")
+    @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move:import')")
+    public CommonResult<Boolean> importExcel(@Valid WmsStockOwnershipMoveImportVO importReqVO) throws Exception {
+        //
+        List<WmsStockOwnershipMoveImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsStockOwnershipMoveImportExcelVO.class);
+        // 识别代码
+        stockOwnershipMoveItemService.assembleWarehouseForImp(impVOList);
+        stockOwnershipMoveItemService.assembleCompanyAndDeptForImp(impVOList);
+        stockOwnershipMoveItemService.assembleProductForImp(impVOList);
+
+        // 校验仓库ID
+        Set<Long> warehouseIds = StreamX.from(impVOList).filter(Objects::nonNull).toSet(WmsStockOwnershipMoveImportExcelVO::getWarehouseId);
+        if(warehouseIds.size()!=1) {
+            throw exception(STOCK_OWNERSHIP_MOVE_SINGLE_WAREHOUSE_ALLOW);
+        }
+        // 校验数据有效性
+        for (WmsStockOwnershipMoveImportExcelVO excelVO : impVOList) {
+            if(excelVO.getToCompanyId()==null) {
+                throw exception(STOCK_OWNERSHIP_MOVE_ITEM_TO_COMPANY_ERROR);
+            }
+            if(excelVO.getToDeptId()==null) {
+                throw exception(STOCK_OWNERSHIP_MOVE_ITEM_FROM_DEPT_ERROR);
+            }
+            if(excelVO.getFromCompanyId()==null) {
+                throw exception(STOCK_OWNERSHIP_MOVE_ITEM_FROM_COMPANY_ERROR);
+            }
+            if(excelVO.getFromDeptId()==null) {
+                throw exception(STOCK_OWNERSHIP_MOVE_ITEM_FROM_DEPT_ERROR);
+            }
+            if(excelVO.getProductId()==null) {
+                throw exception(STOCK_OWNERSHIP_MOVE_ITEM_PRODUCT_ERROR,excelVO.getProductCode());
+            }
+        }
+
+        WmsStockOwnershipMoveSaveReqVO saveReqVO = new WmsStockOwnershipMoveSaveReqVO();
+        saveReqVO.setWarehouseId(warehouseIds.iterator().next());
+
+        saveReqVO.setItemList(BeanUtils.toBean(impVOList, WmsStockOwnershipMoveItemSaveReqVO.class));
+
+        stockOwnershipMoveService.createStockOwnershipMove(saveReqVO);
+
+        return success(true);
+    }
+
 }

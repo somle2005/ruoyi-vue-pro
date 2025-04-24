@@ -65,4 +65,6 @@ public interface WmsWarehouseService {
     List<WmsWarehouseDO> getSimpleList(@Valid WmsWarehousePageReqVO pageReqVO);
 
     List<WmsWarehouseDO> selectByIds(List<Long> list);
+
+    Map<String, WmsWarehouseDO> getWarehouseMapByCode(Set<String> codes);
 }

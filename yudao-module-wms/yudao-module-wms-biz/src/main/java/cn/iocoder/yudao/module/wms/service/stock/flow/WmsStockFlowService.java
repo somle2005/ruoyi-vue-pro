@@ -93,4 +93,6 @@ public interface WmsStockFlowService {
     void assembleOutbound(List<WmsStockFlowRespVO> list);
 
     void assemblePickup(List<WmsStockFlowRespVO> list);
+
+    void assembleStockWarehouse(List<WmsStockFlowRespVO> list);
 }

@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
+import java.util.Set;
 
 /**
  * 仓库 Mapper
@@ -72,6 +73,12 @@ public interface WmsWarehouseMapper extends BaseMapperX<WmsWarehouseDO> {
         LambdaQueryWrapperX<WmsWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
         wrapper.likeIfPresent(WmsWarehouseDO::getCode, pageReqVO.getCode());
         wrapper.likeIfPresent(WmsWarehouseDO::getName, pageReqVO.getName());
+        return selectList(wrapper);
+    }
+
+    default List<WmsWarehouseDO> selectByCodes(Set<String> codes) {
+        LambdaQueryWrapperX<WmsWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
+        wrapper.in(WmsWarehouseDO::getCode, codes);
         return selectList(wrapper);
     }
 }

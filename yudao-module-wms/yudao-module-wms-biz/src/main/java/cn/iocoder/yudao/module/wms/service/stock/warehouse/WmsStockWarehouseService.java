@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehousePageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -70,4 +71,6 @@ public interface WmsStockWarehouseService {
     List<WmsStockWarehouseDO> selectByWarehouse(@NotNull(message = "仓库ID不能为空") Long warehouseId);
 
     List<WmsStockWarehouseDO> getByProductIds(Long warehouseId, List<Long> list);
+
+    List<WmsStockWarehouseDO> selectStockWarehouse(List<WmsWarehouseProductVO> wmsWarehouseProductVOList);
 }

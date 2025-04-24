@@ -262,4 +262,12 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
         }
         return stockWarehouseMapper.getByProductIds(warehouseId,productIds);
     }
+
+    @Override
+    public List<WmsStockWarehouseDO> selectStockWarehouse(List<WmsWarehouseProductVO> wmsWarehouseProductVOList) {
+        if(CollectionUtils.isEmpty(wmsWarehouseProductVOList)) {
+            return List.of();
+        }
+        return stockWarehouseMapper.selectStockWarehouse(wmsWarehouseProductVOList);
+    }
 }

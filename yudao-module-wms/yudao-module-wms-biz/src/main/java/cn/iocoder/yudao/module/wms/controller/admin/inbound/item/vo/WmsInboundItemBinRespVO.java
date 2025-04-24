@@ -16,7 +16,7 @@ public class WmsInboundItemBinRespVO extends WmsInboundItemRespVO {
      * 仓位ID
      */
     @Schema(description = "仓位ID", example = "")
-    private String binId;
+    private Long binId;
 
     /**
      * 仓位名称

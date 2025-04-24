@@ -319,7 +319,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
 
     @Override
     public void assembleCompany(List<WmsOutboundRespVO> list) {
-        Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(list).toList(WmsOutboundRespVO::getCompanyId));
+        Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(list).toSet(WmsOutboundRespVO::getCompanyId));
         Map<Long, FmsCompanySimpleRespVO> companyVOMap = StreamX.from(companyMap.values()).toMap(FmsCompanyDTO::getId, v -> BeanUtils.toBean(v, FmsCompanySimpleRespVO.class));
         StreamX.from(list).assemble(companyVOMap, WmsOutboundRespVO::getCompanyId, WmsOutboundRespVO::setCompany);
     }

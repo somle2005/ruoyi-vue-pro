@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleR
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
@@ -159,4 +160,8 @@ public class WmsStockFlowRespVO {
     @Schema(description = "更新人姓名", example = "李四")
     @ExcelProperty("更新人姓名")
     private String updaterName;
+
+    @Schema(description = "当前仓库库存", example = "{}")
+    @ExcelProperty("当前仓库库存")
+    private WmsStockWarehouseSimpleVO stockWarehouse;
 }
