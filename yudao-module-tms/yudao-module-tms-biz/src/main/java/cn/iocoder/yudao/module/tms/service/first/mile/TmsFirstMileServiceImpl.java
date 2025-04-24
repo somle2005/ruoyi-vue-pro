@@ -100,8 +100,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         if (itemPageResult.getList().isEmpty()) {
             return new PageResult<>(Collections.emptyList(), itemPageResult.getTotal());
         }
-
-        // 2. 转换为BO列表
+        // 2. 转换
         List<TmsFirstMileBO> firstMileBOList = TmsFirstMileConvert.convertBOList(itemPageResult.getList());
 
         return new PageResult<>(firstMileBOList, itemPageResult.getTotal());

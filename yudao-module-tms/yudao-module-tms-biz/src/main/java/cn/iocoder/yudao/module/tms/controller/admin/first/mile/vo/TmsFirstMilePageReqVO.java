@@ -15,6 +15,8 @@ import java.time.LocalDateTime;
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class TmsFirstMilePageReqVO extends PageParam {
+    @Schema(description = "id")
+    private Long id;
 
     @Schema(description = "创建时间")
     private LocalDateTime[] createTime;

@@ -30,11 +30,11 @@ public class TmsFirstMileConvert {
         // 转换为主表BO列表
         return itemMap.values().stream()
             .map(tmsFirstMileItemBOS -> {
-                TmsFirstMileItemBO firstItem = tmsFirstMileItemBOS.get(0);
-                return BeanUtils.toBean(firstItem.getTmsFirstMileDO(), TmsFirstMileBO.class,
-                    bo -> bo.setItems(BeanUtils.toBean(tmsFirstMileItemBOS, TmsFirstMileItemDO.class)));
+                // 获取第一个明细项的主表信息（同一主表ID下的所有明细项，其主表信息相同）
+                TmsFirstMileItemBO firstItem = tmsFirstMileItemBOS.stream().findFirst().orElseThrow(() -> new IllegalArgumentException("头程单明细列表不能为空"));
+                return BeanUtils.toBean(firstItem.getTmsFirstMileDO(), TmsFirstMileBO.class, bo -> bo.setItems(BeanUtils.toBean(tmsFirstMileItemBOS, TmsFirstMileItemDO.class)));
             })
-            .collect(Collectors.toList());
+            .toList();
     }
 
 } 

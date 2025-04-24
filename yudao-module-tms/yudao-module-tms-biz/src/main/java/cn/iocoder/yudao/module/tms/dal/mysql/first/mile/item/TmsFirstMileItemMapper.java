@@ -26,6 +26,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             vo = new TmsFirstMileItemPageReqVO();
         }
         return new MPJLambdaWrapperX<TmsFirstMileItemDO>()
+            .inIfPresent(TmsFirstMileItemDO::getId, vo.getId())
             .eqIfPresent(TmsFirstMileItemDO::getCreator, vo.getCreator())
             .betweenIfPresent(TmsFirstMileItemDO::getCreateTime, vo.getCreateTime())
             .eqIfPresent(TmsFirstMileItemDO::getUpdater, vo.getUpdater())
@@ -55,6 +56,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         }
         return buildWrapper(vo.getItemPageReqVO())
             .leftJoin(TmsFirstMileDO.class, TmsFirstMileDO::getId, TmsFirstMileItemDO::getFirstMileId)
+            .inIfPresent(TmsFirstMileDO::getId, vo.getId()) // 头程单IDs
             .betweenIfPresent(TmsFirstMileDO::getCreateTime, vo.getCreateTime()) // 创建时间范围
             .likeIfPresent(TmsFirstMileDO::getCode, vo.getCode()) // 单据编号
             .betweenIfPresent(TmsFirstMileDO::getBillTime, vo.getBillTime()) // 单据日期范围

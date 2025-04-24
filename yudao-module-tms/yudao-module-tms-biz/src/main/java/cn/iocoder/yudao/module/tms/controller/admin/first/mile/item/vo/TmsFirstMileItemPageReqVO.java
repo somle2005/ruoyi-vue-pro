@@ -11,6 +11,8 @@ import java.time.LocalDateTime;
 @Data
 @ToString(callSuper = true)
 public class TmsFirstMileItemPageReqVO {
+    @Schema(description = "id")
+    private Long id;
 
     @Schema(description = "创建人ID")
     private Long creator;
