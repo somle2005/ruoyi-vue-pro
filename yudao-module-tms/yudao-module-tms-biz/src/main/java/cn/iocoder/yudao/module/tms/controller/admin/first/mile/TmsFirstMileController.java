@@ -100,9 +100,7 @@ public class TmsFirstMileController {
     @PreAuthorize("@ss.hasPermission('tms:first-mile:import')")
     public CommonResult
         <Boolean> importFirstMileExcel(@RequestParam("file") MultipartFile file) throws Exception {
-        List
-            <TmsFirstMileSaveReqVO> list =
-            ExcelUtils.read(file, TmsFirstMileSaveReqVO.class);
+        List<TmsFirstMileSaveReqVO> list = ExcelUtils.read(file, TmsFirstMileSaveReqVO.class);
         // 可根据业务需要批量保存或校验
         return success(true);
     }
