@@ -23,9 +23,9 @@ import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileReques
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -45,16 +45,13 @@ import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 @RestController
 @RequestMapping("/tms/first-mile-request")
 @Validated
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TmsFirstMileRequestController {
 
-    @Resource
-    private TmsFirstMileRequestService firstMileRequestService;
-    @Autowired
-    ErpProductApi erpProductApi;
-    @Autowired
-    WmsWarehouseApi wmsWarehouseApi;
-    @Autowired
-    DeptApi deptApi;
+    private final TmsFirstMileRequestService firstMileRequestService;
+    private final ErpProductApi erpProductApi;
+    private final WmsWarehouseApi wmsWarehouseApi;
+    private final DeptApi deptApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程申请单")
@@ -86,7 +83,6 @@ public class TmsFirstMileRequestController {
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:query')")
     public CommonResult<TmsFirstMileRequestRespVO> getFirstMileRequest(@RequestParam("id") Long id) {
-        // 获取主表数据
         TmsFirstMileRequestBO firstMileRequestBO = firstMileRequestService.getFirstMileRequestBO(id);
         if (firstMileRequestBO == null) {
             return success(null);
@@ -100,10 +96,7 @@ public class TmsFirstMileRequestController {
     @Operation(summary = "获得头程申请单分页")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:query')")
     public CommonResult<PageResult<TmsFirstMileRequestRespVO>> getFirstMileRequestPage(@Validated @RequestBody TmsFirstMileRequestPageReqVO pageReqVO) {
-        // 获取BO分页数据
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
-
-        // 转换为响应对象
         List<TmsFirstMileRequestRespVO> respVOList = bindListResult(pageBO.getList());
         // 创建结果对象
         PageResult<TmsFirstMileRequestRespVO> pageResultRespVO = new PageResult<>();
