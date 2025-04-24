@@ -7,6 +7,8 @@ import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeePageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 出运订单费用明细 Mapper
  *
@@ -28,4 +30,11 @@ public interface TmsFeeMapper extends BaseMapperX<TmsFeeDO> {
             .orderByDesc(TmsFeeDO::getId));
     }
 
+    default List<TmsFeeDO> selectListBySourceId(Long sourceId) {
+        return selectList(TmsFeeDO::getSourceId, sourceId);
+    }
+
+    default int deleteBySourceId(Long sourceId) {
+        return delete(TmsFeeDO::getSourceId, sourceId);
+    }
 }

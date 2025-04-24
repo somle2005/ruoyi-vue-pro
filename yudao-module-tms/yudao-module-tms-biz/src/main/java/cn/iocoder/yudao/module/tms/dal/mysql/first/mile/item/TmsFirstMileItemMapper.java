@@ -7,6 +7,8 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstM
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 头程单明细 Mapper
  *
@@ -37,6 +39,14 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             .betweenIfPresent(TmsFirstMileItemDO::getPackageWeight, reqVO.getPackageWeight())
             .betweenIfPresent(TmsFirstMileItemDO::getVolume, reqVO.getVolume())
             .orderByDesc(TmsFirstMileItemDO::getId));
+    }
+
+    default List<TmsFirstMileItemDO> selectListByFirstMileId(Long firstMileId) {
+        return selectList(TmsFirstMileItemDO::getFirstMileId, firstMileId);
+    }
+
+    default int deleteByFirstMileId(Long firstMileId) {
+        return delete(TmsFirstMileItemDO::getFirstMileId, firstMileId);
     }
 
 }
