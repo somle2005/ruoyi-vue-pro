@@ -33,7 +33,7 @@ public interface ErrorCodeConstants {
     // ========== 状态机异常 1-030-900-000 ==========
     ErrorCode FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR = new ErrorCode(1_030_900_001, "({})状态下不能触发({})事件");
 
-    // ========== 出运订单费用明细 1_030_901_007==========
+    // ========== 头程单 1_030_901_007==========
     ErrorCode FIRST_MILE_NOT_EXISTS = new ErrorCode(1_030_670_007, "头程单不存在");
 
     // ========== 出运订单费用明细 1_030_902_008 ==========
