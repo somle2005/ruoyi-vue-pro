@@ -13,6 +13,7 @@ import org.apache.ibatis.annotations.Mapper;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * 仓库库存 Mapper
@@ -96,6 +97,12 @@ public interface WmsStockWarehouseMapper extends BaseMapperX<WmsStockWarehouseDO
             index+=2;
         }
         wrapper.apply("(warehouse_id, product_id) IN ("+ StrUtils.join(units,",")+")",params.toArray());
+        return selectList(wrapper);
+    }
+
+    default List<WmsStockWarehouseDO> selectByProductIds(Set<Long> productIds) {
+        LambdaQueryWrapperX<WmsStockWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
+        wrapper.in(WmsStockWarehouseDO::getProductId, productIds);
         return selectList(wrapper);
     }
 }

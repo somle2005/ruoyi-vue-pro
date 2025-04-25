@@ -9,13 +9,16 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehousePageReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseProductRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.warehouse.WmsStockWarehouseMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.stock.warehouse.WmsStockWarehouseProductMapper;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
@@ -47,6 +50,9 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
 
     @Resource
     private WmsStockWarehouseMapper stockWarehouseMapper;
+
+    @Resource
+    private WmsStockWarehouseProductMapper stockWarehouseProductMapper;
 
     @Resource
     @Lazy
@@ -269,5 +275,29 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
             return List.of();
         }
         return stockWarehouseMapper.selectStockWarehouse(wmsWarehouseProductVOList);
+    }
+
+    @Override
+    public PageResult<WmsStockWarehouseProductRespVO> getStockGroupedWarehousePage(WmsStockWarehousePageReqVO pageReqVO) {
+
+        PageResult<WmsProductDO> pageResult = stockWarehouseProductMapper.getStockGroupedWarehousePage(pageReqVO);
+
+        PageResult<WmsStockWarehouseProductRespVO> voPageResult = BeanUtils.toBean(pageResult, WmsStockWarehouseProductRespVO.class);
+
+
+        List<WmsStockWarehouseDO> list= stockWarehouseMapper.selectByProductIds(StreamX.from(pageResult.getList()).toSet(WmsProductDO::getId));
+        List<WmsStockWarehouseRespVO> voList = BeanUtils.toBean(list, WmsStockWarehouseRespVO.class);
+        this.assembleProducts(voList);
+        this.assembleWarehouse(voList);
+        this.assembleStockBin(voList);
+
+        Map<Long,List<WmsStockWarehouseRespVO>> map = StreamX.from(voList).groupBy(WmsStockWarehouseRespVO::getProductId);
+
+        StreamX.from(voPageResult.getList()).assemble(map, WmsStockWarehouseProductRespVO::getId,WmsStockWarehouseProductRespVO::setStockWarehouseList);
+        StreamX.from(voPageResult.getList()).assemble(pageResult.getList(),WmsProductDO::getId, WmsStockWarehouseProductRespVO::getId,(e,p)-> {
+            e.setProduct(BeanUtils.toBean(p, WmsProductRespSimpleVO.class));
+        });
+
+        return voPageResult;
     }
 }

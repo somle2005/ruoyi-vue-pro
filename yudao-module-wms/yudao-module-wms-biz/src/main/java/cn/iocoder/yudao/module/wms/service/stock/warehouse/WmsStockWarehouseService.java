@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.wms.service.stock.warehouse;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehousePageReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseProductRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
@@ -73,4 +74,6 @@ public interface WmsStockWarehouseService {
     List<WmsStockWarehouseDO> getByProductIds(Long warehouseId, List<Long> list);
 
     List<WmsStockWarehouseDO> selectStockWarehouse(List<WmsWarehouseProductVO> wmsWarehouseProductVOList);
+
+    PageResult<WmsStockWarehouseProductRespVO> getStockGroupedWarehousePage(@Valid WmsStockWarehousePageReqVO pageReqVO);
 }

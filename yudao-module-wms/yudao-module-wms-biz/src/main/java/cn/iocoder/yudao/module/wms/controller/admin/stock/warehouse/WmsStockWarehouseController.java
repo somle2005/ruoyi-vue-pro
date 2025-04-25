@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehousePageReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseProductRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
@@ -111,6 +112,35 @@ public class WmsStockWarehouseController {
         // 返回
         return success(voPageResult);
     }
+
+
+    /**
+     * @sign : 5473D7BBFDAEBB83
+     */
+    @PostMapping("/page-grouped")
+    @Operation(summary = "获得分组的仓库库存分页")
+    @PreAuthorize("@ss.hasPermission('wms:stock-warehouse:query')")
+    public CommonResult<PageResult<WmsStockWarehouseProductRespVO>> getStockGroupedWarehousePage(@Valid @RequestBody WmsStockWarehousePageReqVO pageReqVO) {
+        // 查询数据
+        PageResult<WmsStockWarehouseProductRespVO> doPageResult = stockWarehouseService.getStockGroupedWarehousePage(pageReqVO);
+//        // 转换
+//        PageResult<WmsStockWarehouseRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsStockWarehouseRespVO.class);
+//
+//
+//
+//        // 人员姓名填充
+//        AdminUserApi.inst().prepareFill(voPageResult.getList())
+//            .mapping(WmsStockWarehouseRespVO::getCreator, WmsStockWarehouseRespVO::setCreatorName)
+//            .mapping(WmsStockWarehouseRespVO::getUpdater, WmsStockWarehouseRespVO::setUpdaterName)
+//            .fill();
+//        stockWarehouseService.assembleProducts(voPageResult.getList());
+//        stockWarehouseService.assembleWarehouse(voPageResult.getList());
+//        stockWarehouseService.assembleStockBin(voPageResult.getList());
+        // 返回
+        return success(doPageResult);
+    }
+
+
     // @GetMapping("/export-excel")
     // @Operation(summary = "导出仓库库存 Excel")
     // @PreAuthorize("@ss.hasPermission('wms:stock-warehouse:export')")
