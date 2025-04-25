@@ -198,19 +198,19 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
     @Override
     public void assembleBinForImp(List<WmsStockBinMoveImportExcelVO> impVOList) {
 
-        Set<Long> binIds=new HashSet<>();
+        Set<String> binCodes=new HashSet<>();
 
-        binIds.addAll(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getFromBinId));
-        binIds.addAll(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getToBinId));
-        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(binIds);
+        binCodes.addAll(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getFromBinCode));
+        binCodes.addAll(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getToBinCode));
+        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByCodes(binCodes);
 
-        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getId, WmsStockBinMoveImportExcelVO::getFromBinId,(e,p)->{
+        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getCode, WmsStockBinMoveImportExcelVO::getFromBinCode,(e,p)->{
             if (p!=null){
                 e.setFromBinId(p.getId());
             }
         });
 
-        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getId, WmsStockBinMoveImportExcelVO::getToBinId,(e,p)->{
+        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getCode, WmsStockBinMoveImportExcelVO::getToBinCode,(e,p)->{
             if (p!=null){
                 e.setToBinId(p.getId());
             }

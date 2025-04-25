@@ -5,10 +5,10 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
-import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryImportVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.item.vo.WmsStockBinMoveItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.item.vo.WmsStockBinMoveItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveImportExcelVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveImportVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMovePageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveSaveReqVO;
@@ -141,7 +141,7 @@ public class WmsStockBinMoveController {
     @PostMapping("/import-excel")
     @Operation(summary = "导入产品库位移动清单")
     @PreAuthorize("@ss.hasPermission('wms:stock-bin-move:import')")
-    public CommonResult<Boolean> importExcel(@Valid WmsInventoryImportVO importReqVO) throws Exception {
+    public CommonResult<Boolean> importExcel(@Valid WmsStockBinMoveImportVO importReqVO) throws Exception {
         //
         List<WmsStockBinMoveImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsStockBinMoveImportExcelVO.class);
         // 识别代码

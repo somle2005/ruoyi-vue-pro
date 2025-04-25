@@ -142,4 +142,6 @@ public interface WmsInboundItemService {
      * 批次库存关联仓位查询
      */
     PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(@Valid WmsInboundItemPageReqVO pageReqVO);
+
+    void assembleStockWarehouse(List<? extends WmsInboundItemRespVO> list);
 }

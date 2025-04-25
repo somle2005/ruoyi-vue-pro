@@ -150,6 +150,7 @@ public class WmsInboundItemController {
         inboundItemService.assembleWarehouse(voPageResult.getList());
         // inboundItemService.assembleWarehouseBin(voPageResult.getList());
         inboundItemService.assembleCompany(voPageResult.getList());
+        inboundItemService.assembleStockWarehouse(voPageResult.getList());
         //
         InboundExecutor.setShelveAvailableQty(voPageResult.getList());
         // 返回
@@ -175,6 +176,7 @@ public class WmsInboundItemController {
         inboundItemService.assembleWarehouse(voPageResult.getList());
         inboundItemService.assembleCompany(voPageResult.getList());
         inboundItemService.assembleWarehouseBin(voPageResult.getList());
+        inboundItemService.assembleStockWarehouse(voPageResult.getList());
         // 填充入库单信息
         inboundItemService.assembleInbound(voPageResult.getList());
         //
@@ -199,6 +201,8 @@ public class WmsInboundItemController {
         inboundItemService.assembleInbound(voPageResult.getList());
         // 填充仓库信息
         inboundItemService.assembleWarehouse(voPageResult.getList());
+        //
+        inboundItemService.assembleStockWarehouse(voPageResult.getList());
         //
         InboundExecutor.setShelveAvailableQty(voPageResult.getList());
         // 人员姓名填充

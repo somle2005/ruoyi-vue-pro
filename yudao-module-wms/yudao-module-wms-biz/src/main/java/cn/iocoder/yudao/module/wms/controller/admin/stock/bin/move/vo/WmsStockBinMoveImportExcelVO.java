@@ -26,6 +26,7 @@ public class WmsStockBinMoveImportExcelVO {
 
     @ExcelProperty("产品代码")
     private String productCode;
+
     /**
      * 产品ID
      **/
@@ -38,11 +39,16 @@ public class WmsStockBinMoveImportExcelVO {
     @ExcelProperty("调入库位代码")
     private String toBinCode;
 
+    @ExcelProperty("移动数量")
+    private Integer qty;
+
     /**
      * 调出库位ID
      **/
     @ExcelIgnore
     private Long fromBinId;
+
+
 
     /**
      * 调入库ID
