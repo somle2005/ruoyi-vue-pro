@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.tms.controller.admin.fee.vo;
 
+import cn.iocoder.yudao.module.system.api.utils.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
@@ -10,17 +11,19 @@ import java.math.BigDecimal;
 @Data
 public class TmsFeeSaveReqVO {
 
-    @Schema(description = "主键ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "4931")
+    @Schema(description = "主键ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时，出运订单id不能为空")
+    @NotNull(groups = {Validation.OnCreate.class}, message = "创建时，出运订单id需为空")
     private Long id;
 
-    @Schema(description = "原单类型;出运订单、调拨单", example = "2")
+    @Schema(description = "原单类型;出运订单、调拨单")
     private String sourceType;
 
-    @Schema(description = "原单ID;出运订单ID、调拨单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "27529")
+    @Schema(description = "原单ID;出运订单ID、调拨单ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "原单ID不能为空")
     private Long sourceId;
 
-    @Schema(description = "费用类型（如运输费、关税）;字典", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    @Schema(description = "费用类型（如运输费、关税）;字典", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "费用类型不能为空")
     private Integer costType;
 
@@ -28,11 +31,14 @@ public class TmsFeeSaveReqVO {
     @NotNull(message = "金额不能为空")
     private BigDecimal amount;
 
-    @Schema(description = "币种;名称（如 USD、CNY） 字典", requiredMode = Schema.RequiredMode.REQUIRED, example = "2")
+    @Schema(description = "币种;名称（如 USD、CNY） 字典", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "币种;不能为空")
     private Integer currencyType;
 
-    @Schema(description = "备注", example = "你猜")
+    @Schema(description = "备注")
     private String remark;
 
+    @Schema(description = "版本号")
+    @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时版本号不能为空")
+    private Integer revision;
 }

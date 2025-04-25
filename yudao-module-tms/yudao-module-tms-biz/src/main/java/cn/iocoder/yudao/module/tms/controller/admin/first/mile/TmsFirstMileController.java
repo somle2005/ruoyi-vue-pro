@@ -13,7 +13,6 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileRe
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -102,16 +101,6 @@ public class TmsFirstMileController {
         List<TmsFirstMileSaveReqVO> list = ExcelUtils.read(file, TmsFirstMileSaveReqVO.class);
         // 可根据业务需要批量保存或校验
         return success(true);
-    }
-
-    // ==================== 子表（头程单明细） ====================
-
-    @GetMapping("/first-mile-item/list-by-first-mile-id")
-    @Operation(summary = "获得头程单明细列表")
-    @Parameter(name = "firstMileId", description = "头程主表ID")
-    @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
-    public CommonResult<List<TmsFirstMileItemDO>> getFirstMileItemListByFirstMileId(@RequestParam("firstMileId") Long firstMileId) {
-        return success(firstMileService.getFirstMileItemListByFirstMileId(firstMileId));
     }
 
     // ==================== 子表（出运订单费用明细） ====================

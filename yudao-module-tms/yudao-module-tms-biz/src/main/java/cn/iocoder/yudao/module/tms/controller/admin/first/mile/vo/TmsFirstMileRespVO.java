@@ -117,6 +117,9 @@ public class TmsFirstMileRespVO {
     @ExcelProperty("入库时间")
     private LocalDateTime inboundTime;
 
+    @Schema(description = "版本号")
+    private Integer revision;
+
     @Schema(description = "头程单明细")
     private List<TmsFirstMileItemRespVO> firstMileItemList;
 

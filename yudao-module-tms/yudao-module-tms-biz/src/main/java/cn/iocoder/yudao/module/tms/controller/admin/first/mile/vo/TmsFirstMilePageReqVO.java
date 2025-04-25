@@ -102,10 +102,6 @@ public class TmsFirstMilePageReqVO extends PageParam {
     @Schema(description = "头程单明细分页查询条件")
     private TmsFirstMileItemPageReqVO itemPageReqVO;
 
-    //费用明细
-//    @Schema(description = "费用明细分页查询条件")
-//    private TmsFeePageReqVO feePageReqVO;
-
     @Schema(description = "嵌套用 - 跟踪信息筛选 VO")
     private TmsVesselTrackingQueryVO trackingQueryVO;
 

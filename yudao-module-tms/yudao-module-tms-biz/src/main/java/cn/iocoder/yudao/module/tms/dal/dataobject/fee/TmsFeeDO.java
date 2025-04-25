@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -55,6 +56,7 @@ public class TmsFeeDO extends BaseDO {
     /**
      * 乐观锁版本号
      */
+    @Version
     private Integer revision;
 
 }

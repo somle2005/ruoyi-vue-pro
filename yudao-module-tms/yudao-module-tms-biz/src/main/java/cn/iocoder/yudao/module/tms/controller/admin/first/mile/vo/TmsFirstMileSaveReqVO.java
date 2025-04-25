@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
 
+import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -16,7 +17,8 @@ import java.util.List;
 public class TmsFirstMileSaveReqVO {
     //id
     @Schema(description = "id")
-    @NotNull(message = "id不能为空")
+    @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时，头程单id不能为空")
+    @NotNull(groups = {Validation.OnCreate.class}, message = "创建时，头程单id需为空")
     private Long id;
 
     @Schema(description = "编码", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -88,6 +90,10 @@ public class TmsFirstMileSaveReqVO {
 
     @Schema(description = "入库时间")
     private LocalDateTime inboundTime;
+
+    @Schema(description = "版本号")
+    @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时版本号不能为空")
+    private Integer revision;
 
     @Schema(description = "头程单明细列表")
     private List<TmsFirstMileItemSaveReqVO> firstMileItems;

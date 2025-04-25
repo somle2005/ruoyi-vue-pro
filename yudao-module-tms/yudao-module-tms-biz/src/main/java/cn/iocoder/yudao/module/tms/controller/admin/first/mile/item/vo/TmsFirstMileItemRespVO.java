@@ -65,7 +65,7 @@ public class TmsFirstMileItemRespVO {
     @ExcelProperty("已入库数量")
     private Integer inboundClosedQty;
 
-    @Schema(description = "发出仓ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "发出仓ID")
     @ExcelProperty("发出仓ID")
     private Long fromWarehouseId;
 
@@ -89,4 +89,6 @@ public class TmsFirstMileItemRespVO {
     @ExcelProperty("体积（m³）")
     private BigDecimal volume;
 
+    @Schema(description = "版本号")
+    private Integer revision;
 }
