@@ -1,6 +1,10 @@
 package cn.iocoder.yudao.module.tms.convert.first.mile;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
@@ -37,4 +41,43 @@ public class TmsFirstMileConvert {
             .toList();
     }
 
+    /**
+     * 将费用 DO 列表转换为 VO 列表
+     *
+     * @param feeList 费用 DO 列表
+     * @return 费用 VO 列表
+     */
+    public static List<TmsFeeRespVO> convertFeeList(List<TmsFeeDO> feeList) {
+        return BeanUtils.toBean(feeList, TmsFeeRespVO.class);
+    }
+
+    /**
+     * 将费用 VO 列表转换为 DO 列表
+     *
+     * @param feeList 费用 VO 列表
+     * @return 费用 DO 列表
+     */
+    public static List<TmsFeeDO> convertFeeListToDO(List<TmsFeeSaveReqVO> feeList) {
+        return BeanUtils.toBean(feeList, TmsFeeDO.class);
+    }
+
+    /**
+     * 将头程单明细 VO 列表转换为 DO 列表
+     *
+     * @param itemList 头程单明细 VO 列表
+     * @return 头程单明细 DO 列表
+     */
+    public static List<TmsFirstMileItemDO> convertItemList(List<TmsFirstMileItemSaveReqVO> itemList) {
+        return BeanUtils.toBean(itemList, TmsFirstMileItemDO.class);
+    }
+
+    /**
+     * 将头程单明细 DO 列表转换为 VO 列表
+     *
+     * @param itemList 头程单明细 DO 列表
+     * @return 头程单明细 VO 列表
+     */
+    public static List<TmsFirstMileItemSaveReqVO> convertItemListToVO(List<TmsFirstMileItemDO> itemList) {
+        return BeanUtils.toBean(itemList, TmsFirstMileItemSaveReqVO.class);
+    }
 } 

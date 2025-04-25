@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
@@ -27,7 +28,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_NOT_EXISTS;
 
 /**
@@ -112,7 +112,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        List<TmsFirstMileItemDO> itemList = BeanUtils.toBean(list, TmsFirstMileItemDO.class);
+        List<TmsFirstMileItemDO> itemList = TmsFirstMileConvert.convertItemList(list);
         itemList.forEach(item -> item.setFirstMileId(firstMileId));
         firstMileItemMapper.insertBatch(itemList);
     }
@@ -122,9 +122,11 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             return;
         }
         List<TmsFirstMileItemDO> oldList = firstMileItemMapper.selectListByFirstMileId(firstMileId);
-        List<TmsFirstMileItemDO> newList = BeanUtils.toBean(list, TmsFirstMileItemDO.class);
+        List<TmsFirstMileItemDO> newList = TmsFirstMileConvert.convertItemList(list);
+        
         List<List<TmsFirstMileItemDO>> diffedList = CollectionUtils.diffList(oldList, newList,
             (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
+
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
             diffedList.get(0).forEach(item -> item.setFirstMileId(firstMileId));
             firstMileItemMapper.insertBatch(diffedList.get(0));
@@ -145,8 +147,9 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     // ==================== 子表（出运订单费用明细） ====================
 
     @Override
-    public List<TmsFeeDO> getFeeListBySourceId(Long sourceId) {
-        return feeService.getFeeListBySourceId(sourceId, SourceTypeEnum.FIRST_MILE);
+    public List<TmsFeeRespVO> getFeeListBySourceId(Long sourceId) {
+        List<TmsFeeDO> feeList = feeService.getFeeListBySourceId(sourceId, SourceTypeEnum.FIRST_MILE);
+        return TmsFirstMileConvert.convertFeeList(feeList);
     }
 
     private void createFeeList(Long sourceId, List<TmsFeeSaveReqVO> list) {
@@ -161,10 +164,13 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        List<TmsFeeDO> oldList = getFeeListBySourceId(sourceId);
+        // 直接从 feeService 获取 DO 列表
+        List<TmsFeeDO> oldList = feeService.getFeeListBySourceId(sourceId, SourceTypeEnum.FIRST_MILE);
+        List<TmsFeeDO> newList = TmsFirstMileConvert.convertFeeListToDO(list);
 
-        List<List<TmsFeeDO>> diffedList = CollectionUtils.diffList(oldList, BeanUtils.toBean(list, TmsFeeDO.class),
+        List<List<TmsFeeDO>> diffedList = CollectionUtils.diffList(oldList, newList,
             Object::equals);
+
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
             diffedList.get(0).forEach(fee -> fee.setSourceId(sourceId));
             feeService.createFeeList(diffedList.get(0), SourceTypeEnum.FIRST_MILE);
@@ -174,17 +180,17 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             feeService.updateFeeList(diffedList.get(1), SourceTypeEnum.FIRST_MILE);
         }
         if (CollUtil.isNotEmpty(diffedList.get(2))) {
-            List<Long> deleteIds = convertList(diffedList.get(2), TmsFeeDO::getId);
+            List<Long> deleteIds = CollectionUtils.convertList(diffedList.get(2), TmsFeeDO::getId);
             feeService.deleteFeeList(deleteIds, SourceTypeEnum.FIRST_MILE);
         }
     }
 
     private void deleteFeeBySourceId(Long sourceId) {
-        List<TmsFeeDO> feeList = getFeeListBySourceId(sourceId);
+        List<TmsFeeRespVO> feeList = getFeeListBySourceId(sourceId);
         if (CollUtil.isEmpty(feeList)) {
             return;
         }
-        List<Long> deleteIds = CollectionUtils.convertList(feeList, TmsFeeDO::getId);
+        List<Long> deleteIds = CollectionUtils.convertList(feeList, TmsFeeRespVO::getId);
         feeService.deleteFeeList(deleteIds, SourceTypeEnum.FIRST_MILE);
     }
 

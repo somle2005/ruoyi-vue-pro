@@ -1,9 +1,9 @@
 package cn.iocoder.yudao.module.tms.service.first.mile;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
@@ -69,11 +69,11 @@ public interface TmsFirstMileService {
     // ==================== 子表（出运订单费用明细） ====================
 
     /**
-     * 获得出运订单费用明细列表
+     * 根据源ID获取费用列表
      *
-     * @param sourceId 原单ID;出运订单ID、调拨单ID
-     * @return 出运订单费用明细列表
+     * @param sourceId 源ID
+     * @return 费用列表
      */
-    List<TmsFeeDO> getFeeListBySourceId(Long sourceId);
+    List<TmsFeeRespVO> getFeeListBySourceId(Long sourceId);
 
 }
