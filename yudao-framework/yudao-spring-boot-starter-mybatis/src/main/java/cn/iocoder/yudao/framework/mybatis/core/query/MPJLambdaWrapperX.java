@@ -330,4 +330,22 @@ public class MPJLambdaWrapperX<T> extends MPJLambdaWrapper<T> {
         return this;
     }
 
+    // ========== 添加扩展 Join 支持 ext 函数式参数 ==========
+    public <A, B> MPJLambdaWrapperX<T> leftJoin(Class<A> clazz, SFunction<A, ?> left, SFunction<B, ?> right, Consumer<MPJLambdaWrapperX<T>> ext) {
+        super.leftJoin(clazz, left, right);
+        if (ext != null) ext.accept(this);
+        return this;
+    }
+
+    public <A, B> MPJLambdaWrapperX<T> rightJoin(Class<A> clazz, SFunction<A, ?> left, SFunction<B, ?> right, Consumer<MPJLambdaWrapperX<T>> ext) {
+        super.rightJoin(clazz, left, right);
+        if (ext != null) ext.accept(this);
+        return this;
+    }
+
+    public <A, B> MPJLambdaWrapperX<T> innerJoin(Class<A> clazz, SFunction<A, ?> left, SFunction<B, ?> right, Consumer<MPJLambdaWrapperX<T>> ext) {
+        super.innerJoin(clazz, left, right);
+        if (ext != null) ext.accept(this);
+        return this;
+    }
 }

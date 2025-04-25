@@ -7,6 +7,8 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstM
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.TmsVesselTrackingDO;
+import cn.iocoder.yudao.module.tms.enums.SourceTypeEnum;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -55,6 +57,9 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         if (vo == null) {
             vo = new TmsFirstMilePageReqVO();
         }
+        if (vo.getTrackingQueryVO() == null) {
+            vo.setTrackingQueryVO(new TmsFirstMilePageReqVO.TmsVesselTrackingQueryVO());
+        }
         return buildWrapper(vo.getItemPageReqVO())
             .leftJoin(TmsFirstMileDO.class, TmsFirstMileDO::getId, TmsFirstMileItemDO::getFirstMileId)
             .inIfPresent(TmsFirstMileDO::getId, vo.getId()) // 头程单IDs
@@ -85,7 +90,35 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             .eqIfPresent(TmsFirstMileDO::getInboundStatus, vo.getInboundStatus()) // 入库状态
             .betweenIfPresent(TmsFirstMileDO::getInboundTime, vo.getInboundTime()) // 入库时间范围
             .orderByDesc(TmsFirstMileDO::getCreateTime)
-            .orderByDesc(TmsFirstMileDO::getCreateTime)
+            //关联船运
+            .leftJoin(TmsVesselTrackingDO.class, TmsVesselTrackingDO::getUpstreamId, TmsFirstMileItemDO::getId, on -> {
+                on.eqIfPresent(TmsVesselTrackingDO::getUpstreamType, SourceTypeEnum.FIRST_MILE.getType());
+            })
+            // 时间
+            .betweenIfPresent(TmsVesselTrackingDO::getArriveEstimateTime, vo.getTrackingQueryVO().getArriveEstimateTime()) // 预计到达时间
+            .betweenIfPresent(TmsVesselTrackingDO::getDepartEstimateTime, vo.getTrackingQueryVO().getDepartEstimateTime()) // 预计离开时间
+            .betweenIfPresent(TmsVesselTrackingDO::getArriveActualTime, vo.getTrackingQueryVO().getArriveActualTime()) // 实际到达时间
+            .betweenIfPresent(TmsVesselTrackingDO::getDepartActualTime, vo.getTrackingQueryVO().getDepartActualTime()) // 实际离开时间
+            .betweenIfPresent(TmsVesselTrackingDO::getPickupTime, vo.getTrackingQueryVO().getPickupTime()) // 提货时间
+            .betweenIfPresent(TmsVesselTrackingDO::getReturnTime, vo.getTrackingQueryVO().getReturnTime()) // 还柜时间
+            // 同步
+            .eqIfPresent(TmsVesselTrackingDO::getApiSource, vo.getTrackingQueryVO().getApiSource()) // API来源
+            .betweenIfPresent(TmsVesselTrackingDO::getLastSyncTime, vo.getTrackingQueryVO().getLastSyncTime()) // 最后同步时间
+            .betweenIfPresent(TmsVesselTrackingDO::getCreateTime, vo.getCreateTime()) // 创建时间
+            // 港口
+            .eqIfPresent(TmsVesselTrackingDO::getTransitPort, vo.getTrackingQueryVO().getTransitPort()) // 中转港
+            .eqIfPresent(TmsVesselTrackingDO::getToPort, vo.getTrackingQueryVO().getToPort()) // 目的港
+            .eqIfPresent(TmsVesselTrackingDO::getFromPort, vo.getTrackingQueryVO().getFromPort()) // 起运港
+            // 承运
+            .eqIfPresent(TmsVesselTrackingDO::getCarrierCompanyId, vo.getTrackingQueryVO().getCarrierCompanyId()) // 承运公司ID
+            .eqIfPresent(TmsVesselTrackingDO::getVessel, vo.getTrackingQueryVO().getVessel()) // 船名
+            .eqIfPresent(TmsVesselTrackingDO::getVoyage, vo.getTrackingQueryVO().getVoyage()) // 航次
+            // 货代
+            .eqIfPresent(TmsVesselTrackingDO::getForwarderCompanyId, vo.getTrackingQueryVO().getForwarderCompanyId()) // 货代公司ID
+            .eqIfPresent(TmsVesselTrackingDO::getContainerNo, vo.getTrackingQueryVO().getContainerNo()) // 集装箱号
+            // 排序
+            .orderByDesc(TmsVesselTrackingDO::getCreateTime)
+
             ;
     }
 
@@ -93,7 +126,10 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         if (vo == null) {
             vo = new TmsFirstMilePageReqVO();
         }
-        return selectJoinPage(vo, TmsFirstMileItemBO.class, buildBOWrapper(vo).selectAssociation(TmsFirstMileDO.class, TmsFirstMileItemBO::getTmsFirstMileDO));
+        return selectJoinPage(vo, TmsFirstMileItemBO.class, buildBOWrapper(vo)
+            .selectAssociation(TmsFirstMileDO.class, TmsFirstMileItemBO::getTmsFirstMileDO)
+            .selectAssociation(TmsVesselTrackingDO.class, TmsFirstMileItemBO::getTmsVesselTrackingDO)
+        );
     }
 
     default List<TmsFirstMileItemDO> selectListByFirstMileId(Long firstMileId) {

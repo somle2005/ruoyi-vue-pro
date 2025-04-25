@@ -15,23 +15,43 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface TmsVesselTrackingMapper extends BaseMapperX<TmsVesselTrackingDO> {
 
-    default PageResult<TmsVesselTrackingDO> selectPage(TmsVesselTrackingPageReqVO reqVO) {
-        return selectPage(reqVO, new LambdaQueryWrapperX<TmsVesselTrackingDO>().eqIfPresent(TmsVesselTrackingDO::getId, reqVO.getId())
-            .eqIfPresent(TmsVesselTrackingDO::getUpstreamType, reqVO.getUpstreamType()).eqIfPresent(TmsVesselTrackingDO::getUpstreamId, reqVO.getUpstreamId())
-            .betweenIfPresent(TmsVesselTrackingDO::getArriveEstimateTime, reqVO.getArriveEstimateTime())
-            .betweenIfPresent(TmsVesselTrackingDO::getDepartEstimateTime, reqVO.getDepartEstimateTime())
-            .betweenIfPresent(TmsVesselTrackingDO::getArriveActualTime, reqVO.getArriveActualTime())
-            .betweenIfPresent(TmsVesselTrackingDO::getDepartActualTime, reqVO.getDepartActualTime())
-            .betweenIfPresent(TmsVesselTrackingDO::getPickupTime, reqVO.getPickupTime())
-            .betweenIfPresent(TmsVesselTrackingDO::getReturnTime, reqVO.getReturnTime()).eqIfPresent(TmsVesselTrackingDO::getApiSource, reqVO.getApiSource())
-            .betweenIfPresent(TmsVesselTrackingDO::getLastSyncTime, reqVO.getLastSyncTime()).eqIfPresent(TmsVesselTrackingDO::getRevision, reqVO.getRevision())
-            .betweenIfPresent(TmsVesselTrackingDO::getCreateTime, reqVO.getCreateTime())
-            .eqIfPresent(TmsVesselTrackingDO::getTransitPort, reqVO.getTransitPort()).eqIfPresent(TmsVesselTrackingDO::getToPort, reqVO.getToPort())
-            .eqIfPresent(TmsVesselTrackingDO::getFromPort, reqVO.getFromPort())
-            .eqIfPresent(TmsVesselTrackingDO::getCarrierCompanyId, reqVO.getCarrierCompanyId()).eqIfPresent(TmsVesselTrackingDO::getVessel, reqVO.getVessel())
-            .eqIfPresent(TmsVesselTrackingDO::getVoyage, reqVO.getVoyage())
-            .eqIfPresent(TmsVesselTrackingDO::getForwarderCompanyId, reqVO.getForwarderCompanyId())
-            .eqIfPresent(TmsVesselTrackingDO::getContainerNo, reqVO.getContainerNo()).orderByDesc(TmsVesselTrackingDO::getId));
+    default PageResult<TmsVesselTrackingDO> selectPage(TmsVesselTrackingPageReqVO vo) {
+        return selectPage(vo, new LambdaQueryWrapperX<TmsVesselTrackingDO>()
+            // 基础信息
+            .eqIfPresent(TmsVesselTrackingDO::getId, vo.getId()) // 主键ID
+            .eqIfPresent(TmsVesselTrackingDO::getUpstreamType, vo.getUpstreamType()) // 上游类型
+            .eqIfPresent(TmsVesselTrackingDO::getUpstreamId, vo.getUpstreamId()) // 上游ID
+
+            // 时间信息
+            .betweenIfPresent(TmsVesselTrackingDO::getArriveEstimateTime, vo.getArriveEstimateTime()) // 预计到达时间
+            .betweenIfPresent(TmsVesselTrackingDO::getDepartEstimateTime, vo.getDepartEstimateTime()) // 预计离开时间
+            .betweenIfPresent(TmsVesselTrackingDO::getArriveActualTime, vo.getArriveActualTime()) // 实际到达时间
+            .betweenIfPresent(TmsVesselTrackingDO::getDepartActualTime, vo.getDepartActualTime()) // 实际离开时间
+            .betweenIfPresent(TmsVesselTrackingDO::getPickupTime, vo.getPickupTime()) // 提货时间
+            .betweenIfPresent(TmsVesselTrackingDO::getReturnTime, vo.getReturnTime()) // 还柜时间
+
+            // 同步信息
+            .eqIfPresent(TmsVesselTrackingDO::getApiSource, vo.getApiSource()) // API来源
+            .betweenIfPresent(TmsVesselTrackingDO::getLastSyncTime, vo.getLastSyncTime()) // 最后同步时间
+            .eqIfPresent(TmsVesselTrackingDO::getRevision, vo.getRevision()) // 乐观锁版本号
+            .betweenIfPresent(TmsVesselTrackingDO::getCreateTime, vo.getCreateTime()) // 创建时间
+
+            // 港口信息
+            .eqIfPresent(TmsVesselTrackingDO::getTransitPort, vo.getTransitPort()) // 中转港
+            .eqIfPresent(TmsVesselTrackingDO::getToPort, vo.getToPort()) // 目的港
+            .eqIfPresent(TmsVesselTrackingDO::getFromPort, vo.getFromPort()) // 起运港
+
+            // 承运信息
+            .eqIfPresent(TmsVesselTrackingDO::getCarrierCompanyId, vo.getCarrierCompanyId()) // 承运公司ID
+            .eqIfPresent(TmsVesselTrackingDO::getVessel, vo.getVessel()) // 船名
+            .eqIfPresent(TmsVesselTrackingDO::getVoyage, vo.getVoyage()) // 航次
+
+            // 货代信息
+            .eqIfPresent(TmsVesselTrackingDO::getForwarderCompanyId, vo.getForwarderCompanyId()) // 货代公司ID
+            .eqIfPresent(TmsVesselTrackingDO::getContainerNo, vo.getContainerNo()) // 集装箱号
+
+            // 排序
+            .orderByDesc(TmsVesselTrackingDO::getCreateTime));
     }
 
 }
