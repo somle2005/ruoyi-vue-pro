@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
@@ -15,11 +16,13 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.TmsFirstMileMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item.TmsFirstMileItemMapper;
+import cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO;
 import cn.iocoder.yudao.module.tms.enums.SourceTypeEnum;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -28,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_CODE_GENERATE_FAIL;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_NOT_EXISTS;
 
 /**
@@ -37,22 +41,25 @@ import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_NO
  */
 @Service
 @Validated
+@RequiredArgsConstructor(onConstructor = @__(@Resource))
 public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
-    @Resource
-    private TmsFirstMileMapper firstMileMapper;
-    @Resource
-    private TmsFirstMileItemMapper firstMileItemMapper;
-    @Resource
-    private TmsFeeService feeService;
+    private final TmsFirstMileMapper firstMileMapper;
+    private final TmsFirstMileItemMapper firstMileItemMapper;
+    private final TmsFeeService feeService;
+    private final TmsNoRedisDAO noRedisDAO;
 
     @Override
+    @Idempotent
     @Transactional(rollbackFor = Exception.class)
     public Long createFirstMile(TmsFirstMileSaveReqVO createReqVO) {
         TmsFirstMileDO firstMile = BeanUtils.toBean(createReqVO, TmsFirstMileDO.class);
+        firstMile.setCode(firstMile.getCode() == null ? noRedisDAO.generate(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, FIRST_MILE_CODE_GENERATE_FAIL) : firstMile.getCode());
         firstMileMapper.insert(firstMile);
 
+        //头程明细
         createFirstMileItemList(firstMile.getId(), createReqVO.getFirstMileItems());
+        //费用
         createFeeList(firstMile.getId(), createReqVO.getFees());
         return firstMile.getId();
     }
@@ -123,9 +130,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         }
         List<TmsFirstMileItemDO> oldList = firstMileItemMapper.selectListByFirstMileId(firstMileId);
         List<TmsFirstMileItemDO> newList = TmsFirstMileConvert.convertItemList(list);
-        
-        List<List<TmsFirstMileItemDO>> diffedList = CollectionUtils.diffList(oldList, newList,
-            (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
+
+        List<List<TmsFirstMileItemDO>> diffedList = CollectionUtils.diffList(oldList, newList, (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
 
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
             diffedList.get(0).forEach(item -> item.setFirstMileId(firstMileId));
@@ -150,6 +156,10 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     public List<TmsFeeRespVO> getFeeListBySourceId(Long sourceId) {
         List<TmsFeeDO> feeList = feeService.getFeeListBySourceId(sourceId, SourceTypeEnum.FIRST_MILE);
         return TmsFirstMileConvert.convertFeeList(feeList);
+    }
+
+    private boolean validCodeDuplicate(String code) {
+        return firstMileMapper.selectByCode(code);
     }
 
     private void createFeeList(Long sourceId, List<TmsFeeSaveReqVO> list) {

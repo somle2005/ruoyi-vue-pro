@@ -6,7 +6,6 @@ import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
-import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
@@ -43,7 +42,6 @@ public class TmsFirstMileController {
 
     @PostMapping("/create")
     @Operation(summary = "创建头程单")
-    @Idempotent
     @PreAuthorize("@ss.hasPermission('tms:first-mile:create')")
     public CommonResult<Long> createFirstMile(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileSaveReqVO createReqVO) {
         return success(firstMileService.createFirstMile(createReqVO));

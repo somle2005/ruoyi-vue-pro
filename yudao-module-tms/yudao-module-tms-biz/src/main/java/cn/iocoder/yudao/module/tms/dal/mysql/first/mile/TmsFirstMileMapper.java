@@ -56,4 +56,7 @@ public interface TmsFirstMileMapper extends BaseMapperX<TmsFirstMileDO> {
         return selectPage(reqVO, buildWrapper(reqVO));
     }
 
+    default boolean selectByCode(String code) {
+        return selectCount(TmsFirstMileDO::getCode, code) > 0;
+    }
 }
