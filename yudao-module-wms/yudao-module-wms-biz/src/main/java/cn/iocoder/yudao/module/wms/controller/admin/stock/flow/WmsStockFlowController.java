@@ -99,9 +99,7 @@ public class WmsStockFlowController {
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageOwnership(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.OWNERSHIP.getValue());
         pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
-        CommonResult<PageResult<WmsStockFlowRespVO>> result = getStockFlowPage(pageReqVO);
-        stockFlowService.assembleCompanyAndDept(result.getData().getList());
-        return  result;
+        return getStockFlowPage(pageReqVO);
     }
 
     @PostMapping("/page-bin")
@@ -110,10 +108,7 @@ public class WmsStockFlowController {
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageBin(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.BIN.getValue());
         pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.PICKUP.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
-        CommonResult<PageResult<WmsStockFlowRespVO>> result = getStockFlowPage(pageReqVO);
-        stockFlowService.assembleStockWarehouse(result.getData().getList());
-        stockFlowService.assembleInboundItemFlow(result.getData().getList());
-        return result;
+        return getStockFlowPage(pageReqVO);
     }
 
     /**
@@ -131,7 +126,9 @@ public class WmsStockFlowController {
         stockFlowService.assembleInbound(voPageResult.getList());
         stockFlowService.assembleOutbound(voPageResult.getList());
         stockFlowService.assemblePickup(voPageResult.getList());
-
+        stockFlowService.assembleStockWarehouse(voPageResult.getList());
+        stockFlowService.assembleInboundItemFlow(voPageResult.getList());
+        stockFlowService.assembleCompanyAndDept(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
             .mapping(WmsStockFlowRespVO::getCreator, WmsStockFlowRespVO::setCreatorName)

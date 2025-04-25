@@ -225,6 +225,7 @@ public interface ErrorCodeConstants {
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_FROM_DEPT_ERROR = new ErrorCode(2_001_019_013, "调出部门错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_PRODUCT_ERROR = new ErrorCode(2_001_019_014, "产品错误");
 
+
     // ========== WMS_INVENTORY 盘点表 2_001_020_000 ==========
     ErrorCode INVENTORY_NOT_EXISTS = new ErrorCode(2_001_020_001, "盘点单不存在");
     ErrorCode INVENTORY_EXISTS = new ErrorCode(2_001_020_002, "盘点单已存在");
@@ -290,4 +291,4 @@ public interface ErrorCodeConstants {
 
     // ========== WMS_PRODUCT 良次换货详情表 2_001_025_000 ==========
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(2_001_025_001, "{} 产品不存在");
-}
+}

@@ -1,9 +1,7 @@
 package cn.iocoder.yudao.module.fms.service.finance.subject;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.fms.controller.admin.finance.subject.vo.FmsCompanyPageReqVO;
 import cn.iocoder.yudao.module.fms.controller.admin.finance.subject.vo.FmsCompanySaveReqVO;
 import cn.iocoder.yudao.module.fms.controller.admin.finance.subject.vo.FmsCompanySimpleRespVO;
@@ -17,7 +15,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -102,6 +99,6 @@ public class FmsCompanyServiceImpl implements FmsCompanyService {
 
     @Override
     public List<FmsCompanyDO> listCompanyByNames(Set<String> names) {
-        return CompanyMapper.selectList(FmsCompanyDO::getCompanyName, names);
+        return CompanyMapper.selectList(FmsCompanyDO::getName, names);
     }
 }

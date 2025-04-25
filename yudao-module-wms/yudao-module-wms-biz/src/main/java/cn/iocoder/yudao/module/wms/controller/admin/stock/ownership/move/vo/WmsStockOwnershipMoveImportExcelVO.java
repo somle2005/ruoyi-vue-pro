@@ -44,6 +44,9 @@ public class WmsStockOwnershipMoveImportExcelVO {
     @ExcelProperty("调入部门")
     private String toDeptName;
 
+    @ExcelProperty("移动数量")
+    private Integer qty;
+
     /**
      * 调出公司ID
      **/

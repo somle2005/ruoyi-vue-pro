@@ -226,7 +226,7 @@ public class WmsStockOwnershipMoveItemServiceImpl implements WmsStockOwnershipMo
         });
         StreamX.from(impVOList).assemble(deptDTOMap, WmsStockOwnershipMoveImportExcelVO::getToDeptName,(itm,dept)->{
             if(dept!=null) {
-                itm.setFromDeptId(dept.getId());
+                itm.setToDeptId(dept.getId());
             }
         });
 
@@ -249,7 +249,7 @@ public class WmsStockOwnershipMoveItemServiceImpl implements WmsStockOwnershipMo
 
         StreamX.from(impVOList).assemble(companyMap, WmsStockOwnershipMoveImportExcelVO::getToCompanyName,  (itm,com)->{
             if(com!=null) {
-                itm.setFromCompanyId(com.getId());
+                itm.setToCompanyId(com.getId());
             }
         });
 
