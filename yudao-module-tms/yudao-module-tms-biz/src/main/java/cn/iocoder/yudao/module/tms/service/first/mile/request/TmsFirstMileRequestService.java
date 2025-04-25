@@ -115,4 +115,12 @@ public interface TmsFirstMileRequestService {
      * @return 单号Code
      */
     String getLatestCode();
+
+    /**
+     * 合并头程申请单
+     *
+     * @param ids 头程申请单编号数组
+     * @return 合并后的头程单编号
+     */
+    Long mergeFirstMileRequest(List<Long> ids);
 }

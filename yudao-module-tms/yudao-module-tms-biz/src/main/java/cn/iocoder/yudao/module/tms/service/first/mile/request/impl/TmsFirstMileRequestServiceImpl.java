@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.request.TmsFirstMileRequestConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
@@ -20,6 +21,7 @@ import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
+import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import jakarta.annotation.Resource;
@@ -53,6 +55,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private final TmsNoRedisDAO tmsNoRedisDAO;
     private final ErpProductApi erpProductApi;
     private final TmsFirstMileRequestItemService firstMileRequestItemService;
+    private final TmsFirstMileService firstMileService;
 
     @Resource(name = FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> tmsFirstMileRequestStatusMachine;
@@ -361,5 +364,41 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Override
     public String getLatestCode() {
         return tmsNoRedisDAO.getMaxSerial(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CODE_GENERATE_FAIL);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long mergeFirstMileRequest(List<Long> ids) {
+        // 1. 校验头程申请单是否存在
+        List<TmsFirstMileRequestDO> requestList = firstMileRequestMapper.selectByIds(ids);
+        if (CollectionUtils.isEmpty(requestList)) {
+            throw exception(FIRST_MILE_REQUEST_NOT_EXISTS);
+        }
+
+        // 2. 校验头程申请单状态
+        requestList.forEach(request -> {
+            // 校验是否已关闭
+            if (!Objects.equals(request.getOffStatus(), TmsOffStatus.OPEN.getCode())) {
+                throw exception(FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED, request.getCode(), TmsOffStatus.fromCode(request.getOffStatus()).getDesc());
+            }
+            // 校验是否已审核
+            if (!Objects.equals(request.getAuditStatus(), TmsAuditStatus.APPROVED.getCode())) {
+                throw exception(FIRST_MILE_REQUEST_AUDIT_STATUS_NOT_ALLOWED, request.getCode(), TmsAuditStatus.fromCode(request.getAuditStatus()).getDesc());
+            }
+        });
+
+        // 3. 获取所有头程申请明细
+        List<TmsFirstMileRequestItemDO> itemList = firstMileRequestItemMapper.selectListByRequestIds(ids);
+        if (CollectionUtils.isEmpty(itemList)) {
+            throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
+        }
+
+        // 4. 创建头程单
+        TmsFirstMileSaveReqVO createReqVO = new TmsFirstMileSaveReqVO();
+        // 转换明细
+        createReqVO.setFirstMileItems(TmsFirstMileRequestConvert.convertToFirstMileItemList(itemList));
+
+        // 5. 创建头程单
+        return firstMileService.createFirstMile(createReqVO);
     }
 }

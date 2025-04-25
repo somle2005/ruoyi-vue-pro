@@ -17,10 +17,10 @@ public class TmsFirstMileItemSaveReqVO {
     private Long id;
 
     @Schema(description = "申请项ID")
-    private Integer requestItemId;
+    private Long requestItemId;
 
     @Schema(description = "产品ID")
-    private Integer productId;
+    private Long productId;
 
     @Schema(description = "箱数")
     private Integer boxQty;

@@ -28,6 +28,8 @@ public interface ErrorCodeConstants {
     ErrorCode FIRST_MILE_REQUEST_CODE_GENERATE_FAIL = new ErrorCode(1_030_670_005, "头程申请单编号生成失败,大于999999");
     //头程申请创建生成失败
     ErrorCode FIRST_MILE_REQUEST_CREATE_FAIL = new ErrorCode(1_030_670_006, "头程申请单创建失败,大于999999");
+    //FIRST_MILE_REQUEST_AUDIT_STATUS_NOT_ALLOWED
+    ErrorCode FIRST_MILE_REQUEST_AUDIT_STATUS_NOT_ALLOWED = new ErrorCode(1_030_670_006, "头程申请单({})状态为({})，不允许审核");
 
     //状态机错误,无法在({})状态下触发({})事件，上下文：{}
     // ========== 状态机异常 1-030-900-000 ==========

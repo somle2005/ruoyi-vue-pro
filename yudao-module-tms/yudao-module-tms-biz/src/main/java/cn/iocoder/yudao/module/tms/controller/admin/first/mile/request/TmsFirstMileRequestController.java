@@ -164,11 +164,8 @@ public class TmsFirstMileRequestController {
     @PostMapping("/merge")
     @Operation(summary = "合并头程申请单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:merge')")
-    public CommonResult<Boolean> mergeFirstMileRequest(@RequestBody List<Long> ids) {
-
-        // TODO: 实现合并头程申请单逻辑
-
-        return success(true);
+    public CommonResult<Long> mergeFirstMileRequest(@RequestBody List<Long> ids) {
+        return success(firstMileRequestService.mergeFirstMileRequest(ids));
     }
 
     private List<TmsFirstMileRequestRespVO> bindListResult(List<TmsFirstMileRequestBO> firstMileRequestBOList) {
