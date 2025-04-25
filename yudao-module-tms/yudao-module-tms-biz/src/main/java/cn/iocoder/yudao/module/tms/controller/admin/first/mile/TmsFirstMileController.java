@@ -7,6 +7,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
@@ -45,14 +46,14 @@ public class TmsFirstMileController {
     @Operation(summary = "创建头程单")
     @Idempotent
     @PreAuthorize("@ss.hasPermission('tms:first-mile:create')")
-    public CommonResult<Long> createFirstMile(@Valid @RequestBody TmsFirstMileSaveReqVO createReqVO) {
+    public CommonResult<Long> createFirstMile(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileSaveReqVO createReqVO) {
         return success(firstMileService.createFirstMile(createReqVO));
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新头程单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:update')")
-    public CommonResult<Boolean> updateFirstMile(@Valid @RequestBody TmsFirstMileSaveReqVO updateReqVO) {
+    public CommonResult<Boolean> updateFirstMile(@Validated(Validation.OnUpdate.class) @RequestBody TmsFirstMileSaveReqVO updateReqVO) {
         firstMileService.updateFirstMile(updateReqVO);
         return success(true);
     }
@@ -117,7 +118,7 @@ public class TmsFirstMileController {
 
     @GetMapping("/fee/list-by-source-id")
     @Operation(summary = "获得出运订单费用明细列表")
-    @Parameter(name = "sourceId", description = "原单ID;出运订单ID、调拨单ID")
+    @Parameter(name = "sourceId", description = "头程单ID")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
     public CommonResult<List<TmsFeeDO>> getFeeListBySourceId(@RequestParam("sourceId") Long sourceId) {
         return success(firstMileService.getFeeListBySourceId(sourceId));

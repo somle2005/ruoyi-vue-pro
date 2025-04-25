@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
@@ -27,7 +28,6 @@ import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertList;
-import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.diffList;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_NOT_EXISTS;
 
 /**
@@ -108,14 +108,22 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         return firstMileItemMapper.selectListByFirstMileId(firstMileId);
     }
 
-    private void createFirstMileItemList(Long firstMileId, List<TmsFirstMileItemDO> list) {
-        list.forEach(o -> o.setFirstMileId(firstMileId));
-        firstMileItemMapper.insertBatch(list);
+    private void createFirstMileItemList(Long firstMileId, List<TmsFirstMileItemSaveReqVO> list) {
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        List<TmsFirstMileItemDO> itemList = BeanUtils.toBean(list, TmsFirstMileItemDO.class);
+        itemList.forEach(item -> item.setFirstMileId(firstMileId));
+        firstMileItemMapper.insertBatch(itemList);
     }
 
-    private void updateFirstMileItemList(Long firstMileId, List<TmsFirstMileItemDO> list) {
+    private void updateFirstMileItemList(Long firstMileId, List<TmsFirstMileItemSaveReqVO> list) {
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
         List<TmsFirstMileItemDO> oldList = firstMileItemMapper.selectListByFirstMileId(firstMileId);
-        List<List<TmsFirstMileItemDO>> diffedList = diffList(oldList, list,
+        List<TmsFirstMileItemDO> newList = BeanUtils.toBean(list, TmsFirstMileItemDO.class);
+        List<List<TmsFirstMileItemDO>> diffedList = CollectionUtils.diffList(oldList, newList,
             (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
             diffedList.get(0).forEach(item -> item.setFirstMileId(firstMileId));
@@ -125,7 +133,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             firstMileItemMapper.updateBatch(diffedList.get(1));
         }
         if (CollUtil.isNotEmpty(diffedList.get(2))) {
-            List<Long> deleteIds = convertList(diffedList.get(2), TmsFirstMileItemDO::getId);
+            List<Long> deleteIds = CollectionUtils.convertList(diffedList.get(2), TmsFirstMileItemDO::getId);
             firstMileItemMapper.deleteByIds(deleteIds);
         }
     }
