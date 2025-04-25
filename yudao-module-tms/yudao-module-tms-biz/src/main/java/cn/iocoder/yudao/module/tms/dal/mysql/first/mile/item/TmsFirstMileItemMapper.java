@@ -12,7 +12,6 @@ import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
-import java.util.Objects;
 
 /**
  * 头程单明细 Mapper
@@ -21,7 +20,6 @@ import java.util.Objects;
  */
 @Mapper
 public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> {
-    String EXISTS_FEE_SQL = "SELECT 1 FROM tms_fee f " + "WHERE f.first_mile_id = t.first_mile_id " + "AND f.fee_type = {0} " + "AND f.deleted = 0";
 
     //MPJLambdaWrapperX build
     default MPJLambdaWrapperX<TmsFirstMileItemDO> buildWrapper(TmsFirstMileItemPageReqVO vo) {
@@ -88,7 +86,6 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             .betweenIfPresent(TmsFirstMileDO::getInboundTime, vo.getInboundTime()) // 入库时间范围
             .orderByDesc(TmsFirstMileDO::getCreateTime)
             .orderByDesc(TmsFirstMileDO::getCreateTime)
-            .exists(vo.getFeePageReqVO() != null && vo.getFeePageReqVO().getCostType() != null, EXISTS_FEE_SQL, Objects.requireNonNull(vo.getFeePageReqVO()).getCostType())
             ;
     }
 
