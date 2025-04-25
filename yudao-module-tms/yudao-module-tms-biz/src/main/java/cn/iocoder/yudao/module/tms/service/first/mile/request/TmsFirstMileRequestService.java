@@ -12,14 +12,14 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 /**
- * 头程申请单 Service 接口
+ * 头程单申请 Service 接口
  *
  * @author wdy
  */
 public interface TmsFirstMileRequestService {
 
     /**
-     * 创建头程申请单
+     * 创建头程单申请
      *
      * @param createReqVO 创建信息
      * @return 编号
@@ -27,18 +27,27 @@ public interface TmsFirstMileRequestService {
     Long createFirstMileRequest(@Valid TmsFirstMileRequestSaveReqVO createReqVO);
 
     /**
-     * 更新头程申请单
+     * 更新头程单申请
      *
      * @param updateReqVO 更新信息
      */
     void updateFirstMileRequest(@Valid TmsFirstMileRequestSaveReqVO updateReqVO);
 
     /**
-     * 删除头程申请单
+     * 删除头程单申请
      *
      * @param id 编号
      */
     void deleteFirstMileRequest(Long id);
+
+    /**
+     * 获得头程单申请
+     *
+     * @param id 编号
+     * @return 头程单申请
+     */
+    TmsFirstMileRequestDO getFirstMileRequest(Long id);
+
 
     /**
      * 获得头程申请单BO分页
@@ -55,11 +64,6 @@ public interface TmsFirstMileRequestService {
      * @return 头程申请单BO
      */
     TmsFirstMileRequestBO getFirstMileRequestBO(Long id);
-
-    /**
-     * 货单头程申请单主表DO
-     */
-    TmsFirstMileRequestDO getFirstMileRequest(Long id);
 
     /**
      * 货单头程申请单主表DO

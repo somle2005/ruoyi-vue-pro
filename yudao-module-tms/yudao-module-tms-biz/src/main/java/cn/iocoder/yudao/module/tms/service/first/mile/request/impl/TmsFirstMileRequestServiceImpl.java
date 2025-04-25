@@ -4,11 +4,11 @@ import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
-import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
+import cn.iocoder.yudao.module.tms.convert.first.mile.request.TmsFirstMileRequestConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.TmsFirstMileRequestMapper;
@@ -68,10 +68,10 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Transactional(rollbackFor = Exception.class)
     public Long createFirstMileRequest(TmsFirstMileRequestSaveReqVO vo) {
         // 插入
-        TmsFirstMileRequestDO firstMileRequest = BeanUtils.toBean(vo, TmsFirstMileRequestDO.class);
+        TmsFirstMileRequestDO firstMileRequest = TmsFirstMileRequestConvert.convert(vo);
 
         // 计算主表的总重量和总体积
-        List<TmsFirstMileRequestItemDO> requestItemDOS = BeanUtils.toBean(vo.getItems(), TmsFirstMileRequestItemDO.class);
+        List<TmsFirstMileRequestItemDO> requestItemDOS = TmsFirstMileRequestConvert.convertItemList(vo.getItems());
         calculateTotalWeightAndVolume(firstMileRequest, requestItemDOS);
 
         //校验code是否和数据库的重复
@@ -110,13 +110,13 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     public void updateFirstMileRequest(TmsFirstMileRequestSaveReqVO vo) {
         // 校验存在
         TmsFirstMileRequestDO oldDo = validateFirstMileRequestExists(vo.getId());
-        TmsFirstMileRequestDO updateObj = BeanUtils.toBean(vo, TmsFirstMileRequestDO.class);
+        TmsFirstMileRequestDO updateObj = TmsFirstMileRequestConvert.convert(vo);
         if (!Objects.equals(oldDo.getCode(), vo.getCode())) {
             //校验code重复
             validCodeDuplicate(updateObj);
         }
         // 计算主表的总重量和总体积
-        List<TmsFirstMileRequestItemDO> requestItemDOS = BeanUtils.toBean(vo.getItems(), TmsFirstMileRequestItemDO.class);
+        List<TmsFirstMileRequestItemDO> requestItemDOS = TmsFirstMileRequestConvert.convertItemList(vo.getItems());
         //校验产品是否存在
         erpProductApi.validProductList(requestItemDOS.stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList());
         calculateTotalWeightAndVolume(updateObj, requestItemDOS);
@@ -168,7 +168,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         // 查询子表
         List<TmsFirstMileRequestItemDO> firstMileRequestItemDOList = firstMileRequestItemMapper.selectListByRequestId(id);
         // 转换
-        return BeanUtils.toBean(firstMileRequestDO, TmsFirstMileRequestBO.class).setItems(firstMileRequestItemDOList);
+        return TmsFirstMileRequestConvert.convert(firstMileRequestDO, firstMileRequestItemDOList);
     }
 
     @Override
@@ -231,11 +231,10 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
                 continue;
             }
             // 转换主表数据
-            TmsFirstMileRequestBO bo = BeanUtils.toBean(itemBO.getTmsFirstMileRequestDO(), TmsFirstMileRequestBO.class);
-            // 设置子表数据
-            List<TmsFirstMileRequestItemDO> items = itemMap.get(requestId).stream().map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemDO.class))
-                .collect(Collectors.toList());
-            bo.setItems(items);
+            TmsFirstMileRequestBO bo = TmsFirstMileRequestConvert.convert(itemBO.getTmsFirstMileRequestDO(),
+                itemMap.get(requestId).stream()
+                    .map(TmsFirstMileRequestConvert::convertItem)
+                    .collect(Collectors.toList()));
             boList.add(bo);
         }
         return boList;

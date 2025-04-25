@@ -156,15 +156,15 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        list.forEach(fee -> fee.setSourceId(sourceId));
-        feeService.createFeeList(BeanUtils.toBean(list, TmsFeeDO.class), SourceTypeEnum.FIRST_MILE);
+        List<TmsFeeDO> feeList = TmsFirstMileConvert.convertFeeListToDO(list);
+        feeList.forEach(fee -> fee.setSourceId(sourceId));
+        feeService.createFeeList(feeList, SourceTypeEnum.FIRST_MILE);
     }
 
     private void updateFeeList(Long sourceId, List<TmsFeeSaveReqVO> list) {
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        // 直接从 feeService 获取 DO 列表
         List<TmsFeeDO> oldList = feeService.getFeeListBySourceId(sourceId, SourceTypeEnum.FIRST_MILE);
         List<TmsFeeDO> newList = TmsFirstMileConvert.convertFeeListToDO(list);
 
@@ -186,11 +186,11 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     }
 
     private void deleteFeeBySourceId(Long sourceId) {
-        List<TmsFeeRespVO> feeList = getFeeListBySourceId(sourceId);
+        List<TmsFeeDO> feeList = feeService.getFeeListBySourceId(sourceId, SourceTypeEnum.FIRST_MILE);
         if (CollUtil.isEmpty(feeList)) {
             return;
         }
-        List<Long> deleteIds = CollectionUtils.convertList(feeList, TmsFeeRespVO::getId);
+        List<Long> deleteIds = CollectionUtils.convertList(feeList, TmsFeeDO::getId);
         feeService.deleteFeeList(deleteIds, SourceTypeEnum.FIRST_MILE);
     }
 

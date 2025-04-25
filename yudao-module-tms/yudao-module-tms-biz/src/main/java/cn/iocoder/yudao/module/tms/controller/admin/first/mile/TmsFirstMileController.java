@@ -8,10 +8,10 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
+import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
@@ -109,7 +109,7 @@ public class TmsFirstMileController {
     @Operation(summary = "获得出运订单费用明细列表")
     @Parameter(name = "sourceId", description = "头程单ID")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
-    public CommonResult<List<TmsFeeDO>> getFeeListBySourceId(@RequestParam("sourceId") Long sourceId) {
+    public CommonResult<List<TmsFeeRespVO>> getFeeListBySourceId(@RequestParam("sourceId") Long sourceId) {
         return success(firstMileService.getFeeListBySourceId(sourceId));
     }
 

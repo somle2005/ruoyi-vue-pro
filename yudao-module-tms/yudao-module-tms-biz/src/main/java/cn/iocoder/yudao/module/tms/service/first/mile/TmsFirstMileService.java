@@ -48,7 +48,6 @@ public interface TmsFirstMileService {
      */
     TmsFirstMileDO getFirstMile(Long id);
 
-
     /**
      * 获得头程单分页BO
      *
@@ -56,6 +55,7 @@ public interface TmsFirstMileService {
      * @return 头程单分页
      */
     PageResult<TmsFirstMileBO> getFirstMileBOPage(TmsFirstMilePageReqVO pageReqVO);
+
     // ==================== 子表（头程单明细） ====================
 
     /**
@@ -75,5 +75,4 @@ public interface TmsFirstMileService {
      * @return 费用列表
      */
     List<TmsFeeRespVO> getFeeListBySourceId(Long sourceId);
-
 }
