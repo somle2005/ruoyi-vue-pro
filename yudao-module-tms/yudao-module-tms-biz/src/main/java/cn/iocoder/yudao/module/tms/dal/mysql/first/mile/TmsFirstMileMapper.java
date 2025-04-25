@@ -59,4 +59,8 @@ public interface TmsFirstMileMapper extends BaseMapperX<TmsFirstMileDO> {
     default boolean selectByCode(String code) {
         return selectCount(TmsFirstMileDO::getCode, code) > 0;
     }
+
+    default TmsFirstMileDO selectByCodeRaw(String code) {
+        return selectOne(TmsFirstMileDO::getCode, code);
+    }
 }

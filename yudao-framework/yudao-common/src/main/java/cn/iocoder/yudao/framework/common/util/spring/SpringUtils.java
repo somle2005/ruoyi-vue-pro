@@ -1,12 +1,16 @@
 package cn.iocoder.yudao.framework.common.util.spring;
 
 import cn.hutool.extra.spring.SpringUtil;
+import cn.iocoder.yudao.framework.common.exception.ErrorCode;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.aop.support.AopUtils;
 
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
  * Spring 工具类
@@ -139,4 +143,55 @@ public class SpringUtils extends SpringUtil  {
 //
 //    }
 
+    /**
+     * 通用的 code 生成器（支持用户输入、自定义前缀、唯一性校验）
+     *
+     * @param inputCode             用户输入的 code，允许为空
+     * @param generateFunc          编码生成逻辑（如 redis 自动生成）
+     * @param duplicateFunc         编码是否重复（返回 true 表示重复）
+     * @param duplicateErrorCode    如果用户输入重复，抛出的异常 code
+     * @param generateFailErrorCode 自动生成失败，抛出的异常 code
+     * @return 最终唯一的 code
+     */
+    public static String resolveCode(String inputCode, CodeGenerator generateFunc, Predicate<String> duplicateFunc, ErrorCode duplicateErrorCode, ErrorCode generateFailErrorCode) {
+        // maxTry 默认为 10,000 次
+        int maxTry = 10000;
+
+        return resolveCode(inputCode, generateFunc, duplicateFunc, maxTry, duplicateErrorCode, generateFailErrorCode);
+    }
+
+
+    /**
+     * 通用的 code 生成器（支持用户输入、自定义前缀、唯一性校验）
+     *
+     * @param inputCode             用户输入的 code，允许为空
+     * @param generateFunc          编码生成逻辑（如 redis 自动生成）
+     * @param duplicateFunc         编码是否重复（返回 true 表示重复）
+     * @param maxTry                自动生成尝试次数
+     * @param duplicateErrorCode    如果用户输入重复，抛出的异常 code
+     * @param generateFailErrorCode 自动生成失败，抛出的异常 code
+     * @return 最终唯一的 code
+     */
+    public static String resolveCode(String inputCode, CodeGenerator generateFunc, Predicate<String> duplicateFunc, int maxTry, ErrorCode duplicateErrorCode, ErrorCode generateFailErrorCode) {
+        if (inputCode != null) {
+            if (duplicateFunc.test(inputCode)) {
+                throw exception(duplicateErrorCode, inputCode);
+            }
+            return inputCode;
+        }
+
+        for (int i = 0; i < maxTry; i++) {
+            String code = generateFunc.generate();
+            if (!duplicateFunc.test(code)) {
+                return code;
+            }
+        }
+
+        throw exception(generateFailErrorCode, maxTry);
+    }
+
+    @FunctionalInterface
+    public interface CodeGenerator {
+        String generate();
+    }
 }

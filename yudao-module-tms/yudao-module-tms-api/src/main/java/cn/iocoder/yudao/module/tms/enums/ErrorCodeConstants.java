@@ -38,6 +38,9 @@ public interface ErrorCodeConstants {
     // ========== 头程单 1_030_901_007==========
     ErrorCode FIRST_MILE_NOT_EXISTS = new ErrorCode(1_030_670_007, "头程单不存在");
     ErrorCode FIRST_MILE_CODE_GENERATE_FAIL = new ErrorCode(1_030_670_008, "头程单编号生成失败,大于999999");
+    ErrorCode FIRST_MILE_CODE_DUPLICATE = new ErrorCode(1_030_670_009, "头程单编号({})已存在");
+    //系统多次尝试生成唯一编码失败
+    ErrorCode FIRST_MILE_CODE_GENERATE_FAIL_MAX_TRY = new ErrorCode(1_030_670_010, "头程单编号，生成失败，重复{}次");
 
     // ========== 出运订单费用明细 1_030_902_008 ==========
     ErrorCode FEE_NOT_EXISTS = new ErrorCode(1_030_670_008, "费用不存在");
