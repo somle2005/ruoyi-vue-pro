@@ -25,6 +25,12 @@ public class WmsInboundItemBinRespVO extends WmsInboundItemRespVO {
     private String binName;
 
     /**
+     * 库存类型
+     */
+    @Schema(description = "库存类型", example = "")
+    private Integer stockType;
+
+    /**
      * 仓位可用库存
      */
     @Schema(description = "仓位可用库存", example = "")

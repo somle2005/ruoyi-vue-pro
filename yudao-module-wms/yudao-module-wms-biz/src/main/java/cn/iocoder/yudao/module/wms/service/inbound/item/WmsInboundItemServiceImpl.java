@@ -29,6 +29,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQue
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.zone.WmsWarehouseZoneDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemBinQueryMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemQueryMapper;
@@ -38,6 +39,7 @@ import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
+import cn.iocoder.yudao.module.wms.service.warehouse.zone.WmsWarehouseZoneService;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -88,6 +90,10 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     @Resource
     @Lazy
     private WmsWarehouseService warehouseService;
+
+    @Resource
+    @Lazy
+    private WmsWarehouseZoneService warehouseZoneService;
 
     @Resource
     @Lazy
@@ -303,11 +309,21 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     public void assembleWarehouseBin(List<WmsInboundItemBinRespVO> list) {
         List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(list).toSet(WmsInboundItemBinRespVO::getBinId));
         List<WmsWarehouseBinRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinRespVO.class);
+        Set<Long> zoneIds = StreamX.from(binDOList).map(WmsWarehouseBinDO::getZoneId).toSet();
+        List<WmsWarehouseZoneDO> zoneDOList = warehouseZoneService.selectByIds(zoneIds);
+        Map<Long, WmsWarehouseZoneDO> zoneVOMap = StreamX.from(zoneDOList).toMap(WmsWarehouseZoneDO::getId);
         StreamX.from(list).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsInboundItemBinRespVO::getBinId,(e,v)->{
             if(v!=null) {
                 e.setBinName(v.getName());
+                WmsWarehouseZoneDO zoneDO=zoneVOMap.get(v.getZoneId());
+                if(zoneDO!=null) {
+                    e.setStockType(zoneDO.getStockType());
+                }
             }
         });
+
+
+
     }
 
     /**

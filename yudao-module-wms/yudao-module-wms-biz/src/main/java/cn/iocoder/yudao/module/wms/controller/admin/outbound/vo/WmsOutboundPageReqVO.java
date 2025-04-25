@@ -1,13 +1,14 @@
 package cn.iocoder.yudao.module.wms.controller.admin.outbound.vo;
 
-import lombok.*;
-import java.util.*;
-import io.swagger.v3.oas.annotations.media.Schema;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
-import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
-import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
@@ -40,6 +41,9 @@ public class WmsOutboundPageReqVO extends PageParam {
 
     @Schema(description = "库存财务公司ID", example = "")
     private Long companyId;
+
+    @Schema(description = "产品ID", example = "")
+    private Long productId;
 
     @Schema(description = "库存归属部门ID", example = "")
     private Long deptId;

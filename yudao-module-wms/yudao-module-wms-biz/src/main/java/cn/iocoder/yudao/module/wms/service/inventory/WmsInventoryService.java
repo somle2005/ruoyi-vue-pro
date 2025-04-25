@@ -67,4 +67,6 @@ public interface WmsInventoryService {
     void approve(WmsInventoryAuditStatus.Event event, WmsApprovalReqVO approvalReqVO);
 
     WmsInventoryDO validateInventoryExists(Long id);
+
+    void assembleApprovalHistory(List<WmsInventoryRespVO> list);
 }

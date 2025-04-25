@@ -111,9 +111,11 @@ public class WmsInventoryController {
         inventoryVO.setBinItemList(BeanUtils.toBean(inventoryBinList, WmsInventoryBinRespVO.class));
         // 装配
         inventoryService.assembleWarehouse(Arrays.asList(inventoryVO));
+        inventoryService.assembleApprovalHistory(Arrays.asList(inventoryVO));
         inventoryProductService.assembleProduct(inventoryVO.getProductItemList());
         inventoryBinService.assembleProduct(inventoryVO.getBinItemList());
         inventoryBinService.assembleBin(inventoryVO.getBinItemList());
+
         // 返回
         return success(inventoryVO);
     }
@@ -131,7 +133,7 @@ public class WmsInventoryController {
         PageResult<WmsInventoryRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsInventoryRespVO.class);
         // 装配
         inventoryService.assembleWarehouse(voPageResult.getList());
-
+        inventoryService.assembleApprovalHistory(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
             .mapping(WmsInventoryRespVO::getCreator, WmsInventoryRespVO::setCreatorName)

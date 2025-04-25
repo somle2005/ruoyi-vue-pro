@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.wms.controller.admin.inventory.vo;
 
+import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalHistoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
@@ -80,4 +81,7 @@ public class WmsInventoryRespVO {
     @Schema(description = "更新人姓名", example = "李四")
     @ExcelProperty("更新人姓名")
     private String updaterName;
+
+    @Schema(description = "审批历史", example = "")
+    List<WmsApprovalHistoryRespVO> approvalHistoryList;
 }

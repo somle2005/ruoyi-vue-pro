@@ -7,6 +7,7 @@ import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.wms.config.InventoryStateMachineConfigure;
+import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalHistoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
@@ -27,6 +28,7 @@ import cn.iocoder.yudao.module.wms.enums.WmsConstants;
 import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
 import cn.iocoder.yudao.module.wms.enums.inventory.WmsInventoryAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
+import cn.iocoder.yudao.module.wms.service.approval.history.WmsApprovalHistoryService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
@@ -80,6 +82,9 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     @Resource
     @Lazy
     private WmsWarehouseService warehouseService;
+
+    @Resource
+    private WmsApprovalHistoryService approvalHistoryService;
 
     @Resource(name = InventoryStateMachineConfigure.STATE_MACHINE_NAME)
     private StateMachine<Integer, WmsInventoryAuditStatus.Event, TransitionContext<WmsInventoryDO>> inventoryStateMachine;
@@ -312,5 +317,16 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
         ctx.setExtra(WmsConstants.APPROVAL_REQ_VO_KEY, approvalReqVO);
         // 触发事件
         inventoryStateMachine.fireEvent(event, ctx);
+    }
+
+    /**
+     * 装配审批历史信息
+     *
+     * @param list 入库单集合
+     */
+    @Override
+    public void assembleApprovalHistory(List<WmsInventoryRespVO> list) {
+        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(WmsBillType.INVENTORY, StreamX.from(list).toList(WmsInventoryRespVO::getId));
+        StreamX.from(list).assemble(groupedApprovalHistory, WmsInventoryRespVO::getId, WmsInventoryRespVO::setApprovalHistoryList);
     }
 }

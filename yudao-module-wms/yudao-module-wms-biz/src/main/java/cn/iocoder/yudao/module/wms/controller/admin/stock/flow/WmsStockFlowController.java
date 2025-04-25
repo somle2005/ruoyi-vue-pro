@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.wms.controller.admin.stock.flow;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
@@ -98,7 +99,9 @@ public class WmsStockFlowController {
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageOwnership(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.OWNERSHIP.getValue());
         pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
-        return getStockFlowPage(pageReqVO);
+        CommonResult<PageResult<WmsStockFlowRespVO>> result = getStockFlowPage(pageReqVO);
+        stockFlowService.assembleCompanyAndDept(result.getData().getList());
+        return  result;
     }
 
     @PostMapping("/page-bin")
@@ -121,6 +124,19 @@ public class WmsStockFlowController {
         PageResult<WmsStockFlowDO> doPageResult = stockFlowService.getStockFlowPage(pageReqVO);
         // 转换
         PageResult<WmsStockFlowRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsStockFlowRespVO.class);
+
+        stockFlowService.assembleProducts(voPageResult.getList());
+        stockFlowService.assembleBin(voPageResult.getList());
+        stockFlowService.assembleWarehouse(voPageResult.getList());
+        stockFlowService.assembleInbound(voPageResult.getList());
+        stockFlowService.assembleOutbound(voPageResult.getList());
+        stockFlowService.assemblePickup(voPageResult.getList());
+
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(voPageResult.getList())
+            .mapping(WmsStockFlowRespVO::getCreator, WmsStockFlowRespVO::setCreatorName)
+            .mapping(WmsStockFlowRespVO::getUpdater, WmsStockFlowRespVO::setUpdaterName)
+            .fill();
         // 返回
         return success(voPageResult);
     }

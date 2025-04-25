@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_BIN_ID_PRODUCT_ID_DUPLICATE;
@@ -288,7 +289,7 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
 
         if(withZone) {
             // 装配库区
-            List<Long> binIds= StreamX.from(binVOList).toList(WmsWarehouseBinRespVO::getZoneId);
+            Set<Long> binIds= StreamX.from(binVOList).toSet(WmsWarehouseBinRespVO::getZoneId);
             List<WmsWarehouseZoneDO> warehouseZoneDOList = warehouseZoneService.selectByIds(binIds);
             Map<Long, WmsWarehouseZoneSimpleRespVO> warehouseZoneVOMap = StreamX.from(warehouseZoneDOList)
                 .toMap(WmsWarehouseZoneDO::getId, v-> BeanUtils.toBean(v, WmsWarehouseZoneSimpleRespVO.class));
