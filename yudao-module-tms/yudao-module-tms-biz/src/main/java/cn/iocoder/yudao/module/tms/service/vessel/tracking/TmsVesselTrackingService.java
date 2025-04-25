@@ -9,7 +9,7 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.log.TmsVesselT
 import jakarta.validation.Valid;
 
 /**
- * 出运跟踪信息表（由外部API更新） Service 接口
+ * 出运跟踪信息表（由外部API更新，船） Service 接口
  *
  * @author wdy
  */

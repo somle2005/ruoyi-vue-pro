@@ -19,7 +19,7 @@ import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.VESSEL_TRACKI
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.VESSEL_TRACKING_NOT_EXISTS;
 
 /**
- * 出运跟踪信息表（由外部API更新） Service 实现类
+ * 出运跟踪信息表（由外部API更新，船） Service 实现类
  *
  * @author wdy
  */

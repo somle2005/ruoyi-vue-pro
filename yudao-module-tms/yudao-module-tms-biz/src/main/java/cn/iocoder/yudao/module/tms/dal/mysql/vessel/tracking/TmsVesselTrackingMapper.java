@@ -8,7 +8,7 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.TmsVesselTrack
 import org.apache.ibatis.annotations.Mapper;
 
 /**
- * 出运跟踪信息表（由外部API更新） Mapper
+ * 出运跟踪信息表（由外部API更新，船） Mapper
  *
  * @author wdy
  */

@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
 
-import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
+import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
@@ -93,6 +93,6 @@ public class TmsFirstMileSaveReqVO {
     private List<TmsFirstMileItemDO> firstMileItems;
 
     @Schema(description = "出运订单费用明细列表")
-    private List<TmsFeeDO> fees;
+    private List<TmsFeeSaveReqVO> fees;
 
 }

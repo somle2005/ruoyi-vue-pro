@@ -9,7 +9,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 /**
- * 出运跟踪信息表（由外部API更新） DO
+ * 出运跟踪信息表（由外部API更新，船） DO
  *
  * @author wdy
  */

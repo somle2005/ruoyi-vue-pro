@@ -17,11 +17,11 @@ public class TmsFeeSaveReqVO {
     private String sourceType;
 
     @Schema(description = "原单ID;出运订单ID、调拨单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "27529")
-    @NotNull(message = "原单ID;出运订单ID、调拨单ID不能为空")
+    @NotNull(message = "原单ID不能为空")
     private Long sourceId;
 
     @Schema(description = "费用类型（如运输费、关税）;字典", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @NotNull(message = "费用类型（如运输费、关税）;字典不能为空")
+    @NotNull(message = "费用类型不能为空")
     private Integer costType;
 
     @Schema(description = "金额", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -29,13 +29,10 @@ public class TmsFeeSaveReqVO {
     private BigDecimal amount;
 
     @Schema(description = "币种;名称（如 USD、CNY） 字典", requiredMode = Schema.RequiredMode.REQUIRED, example = "2")
-    @NotNull(message = "币种;名称（如 USD、CNY） 字典不能为空")
+    @NotNull(message = "币种;不能为空")
     private Integer currencyType;
 
     @Schema(description = "备注", example = "你猜")
     private String remark;
-
-    @Schema(description = "乐观锁版本号")
-    private Integer revision;
 
 }

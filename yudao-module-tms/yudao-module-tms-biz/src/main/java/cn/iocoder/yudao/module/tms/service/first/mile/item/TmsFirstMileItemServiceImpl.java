@@ -60,9 +60,5 @@ public class TmsFirstMileItemServiceImpl implements TmsFirstMileItemService {
         return firstMileItemMapper.selectById(id);
     }
 
-//    @Override
-//    public PageResult<TmsFirstMileItemDO> getFirstMileItemPage(TmsFirstMileItemPageReqVO pageReqVO) {
-//        return firstMileItemMapper.selectPage(pageReqVO);
-//    }
 
 }
