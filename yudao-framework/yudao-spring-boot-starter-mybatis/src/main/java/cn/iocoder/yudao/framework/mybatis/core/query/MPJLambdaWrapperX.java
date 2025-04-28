@@ -84,12 +84,6 @@ public class MPJLambdaWrapperX<T> extends MPJLambdaWrapper<T> {
         return this;
     }
 
-    public <S> MPJLambdaWrapperX<T> betweenIfPresent(SFunction<S, ?> column, Object[] values) {
-        Object val1 = ArrayUtils.get(values, 0);
-        Object val2 = ArrayUtils.get(values, 1);
-        return betweenIfPresent(column, val1, val2);
-    }
-
     public <S> MPJLambdaWrapperX<T> betweenIfPresent(SFunction<S, ?> column, Object val1, Object val2) {
         if (val1 != null && val2 != null) {
             return (MPJLambdaWrapperX<T>) super.between(column, val1, val2);
