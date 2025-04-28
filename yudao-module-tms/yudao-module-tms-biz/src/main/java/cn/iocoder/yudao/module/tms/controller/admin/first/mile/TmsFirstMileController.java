@@ -115,7 +115,7 @@ public class TmsFirstMileController {
         return success(firstMileService.getFeeListBySourceId(sourceId));
     }
 
-    @PostMapping("/submit-audit")
+    @PutMapping("/submit-audit")
     @Operation(summary = "提交头程单审核")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:audit')")
     public CommonResult<Boolean> submitAudit(@RequestBody List<Long> ids) {
