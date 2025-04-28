@@ -37,15 +37,6 @@ spring:
     driverClassName: com.mysql.cj.jdbc.Driver
     username: it003
     password: asivJssflioKK
-  #  datasource:
-  #    name: ruoyi-vue-pro
-  #    url: jdbc:h2:mem:testdb;MODE=MYSQL;DATABASE_TO_UPPER=false;NON_KEYWORDS=value; # MODE 使用 MySQL 模式；DATABASE_TO_UPPER 配置表和字段使用小写
-  #    driver-class-name: org.h2.Driver
-  #    username: sa
-  #    password:
-  #    druid:
-  #      async-init: true # 单元测试，异步初始化 Druid 连接池，提升启动速度
-  #      initial-size: 1 # 单元测试，配置为 1，提升启动速度
   #  sql:
   #    init:
   #      schema-locations: classpath:/sql/create_tables.sql
@@ -56,9 +47,12 @@ spring:
       host: 127.0.0.1 # 地址
       port: 16379 # 端口（单元测试，使用 16379 端口）
       database: 0 # 数据库索引
+  jpa:
+    hibernate:
+      ddl-auto: none
 
-#mybatis:
-#  lazy-initialization: true # 单元测试，设置 MyBatis Mapper 延迟加载，加速每个单元测试
+mybatis:
+  lazy-initialization: true # 单元测试，设置 MyBatis Mapper 延迟加载，加速每个单元测试
 
 --- #################### 定时任务相关配置 ####################
 
@@ -75,6 +69,11 @@ spring:
 # 芋道配置项，设置当前项目所有自定义的配置
 yudao:
   info:
-    base-package: cn.iocoder.yudao
+    base-package: cn.iocoder.yudao.module
 #somle:
 #  base-package: com.somle.amazon
+#  base-package: com.somle.esb
+
+kingdee:
+  outerInstanceIds:
+    - 94464631434776576
