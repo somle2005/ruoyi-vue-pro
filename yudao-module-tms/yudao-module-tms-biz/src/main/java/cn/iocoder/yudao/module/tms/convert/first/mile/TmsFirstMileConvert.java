@@ -1,10 +1,12 @@
 package cn.iocoder.yudao.module.tms.convert.first.mile;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
@@ -82,5 +84,25 @@ public class TmsFirstMileConvert {
      */
     public static List<TmsFirstMileItemSaveReqVO> convertItemListToVO(List<TmsFirstMileItemDO> itemList) {
         return BeanUtils.toBean(itemList, TmsFirstMileItemSaveReqVO.class);
+    }
+
+    /**
+     * 将 DO 转换为 DTO
+     *
+     * @param firstMile DO
+     * @return DTO
+     */
+    public static FistMileDTO convertDTO(TmsFirstMileDO firstMile) {
+        return BeanUtils.toBean(firstMile, FistMileDTO.class);
+    }
+
+    /**
+     * 将 DTO 转换为 DO
+     *
+     * @param dto DTO
+     * @return DO
+     */
+    public static TmsFirstMileDO convertDO(FistMileDTO dto) {
+        return BeanUtils.toBean(dto, TmsFirstMileDO.class);
     }
 } 

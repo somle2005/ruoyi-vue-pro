@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.first.mile;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
@@ -10,7 +11,6 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileIt
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import jakarta.validation.Valid;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -78,21 +78,6 @@ public interface TmsFirstMileService {
      * @param req vo
      */
     void review(TmsFirstMileAuditReqVO req);
-
-    /**
-     * 更新状态
-     *
-     * @param id             主表ID
-     * @param auditStatus
-     * @param auditMsg
-     * @param inboundStatus
-     * @param inboundTime
-     * @param outboundStatus
-     * @param outboundTime
-     * @return TmsFirstMileDO
-     */
-    TmsFirstMileDO updateStatus(Long id, Integer auditStatus, String auditMsg, Integer inboundStatus, LocalDateTime inboundTime, Integer outboundStatus,
-        LocalDateTime outboundTime);
     // ==================== 子表（头程单明细） ====================
 
     /**
@@ -112,4 +97,11 @@ public interface TmsFirstMileService {
      * @return 费用列表
      */
     List<TmsFeeRespVO> getFeeListBySourceId(Long sourceId);
+
+    /**
+     * 更新头程单状态
+     *
+     * @param fistMileDTO dto
+     */
+    void updateFirstMileStatus(FistMileDTO fistMileDTO);
 }

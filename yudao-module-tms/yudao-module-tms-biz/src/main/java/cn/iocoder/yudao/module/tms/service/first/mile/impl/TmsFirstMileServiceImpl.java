@@ -8,6 +8,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
@@ -196,39 +197,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, req);
         }
     }
-
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public TmsFirstMileDO updateStatus(Long id, Integer auditStatus, String auditMsg, Integer inboundStatus, LocalDateTime inboundTime, Integer outboundStatus,
-        LocalDateTime outboundTime) {
-        // 校验头程单是否存在
-        TmsFirstMileDO firstMile = validateFirstMileExists(id);
-
-        // 构建更新对象
-        TmsFirstMileDO updateObj = new TmsFirstMileDO();
-        updateObj.setId(id);
-        if (auditStatus != null) {
-            updateObj.setAuditStatus(auditStatus);
-            updateObj.setReviewComment(auditMsg);
-        }
-        if (inboundStatus != null) {
-            updateObj.setInboundStatus(inboundStatus);
-            updateObj.setInboundTime(inboundTime);
-        }
-        if (outboundStatus != null) {
-            updateObj.setOutboundStatus(outboundStatus);
-            updateObj.setOutboundTime(outboundTime);
-        }
-
-        // 执行更新
-        firstMileMapper.updateById(updateObj);
-
-        // 返回更新后的对象
-        return firstMileMapper.selectById(id);
-    }
-
     // ==================== 子表（头程单明细） ====================
-
     @Override
     public List<TmsFirstMileItemDO> getFirstMileItemListByFirstMileId(Long firstMileId) {
         return firstMileItemMapper.selectListByFirstMileId(firstMileId);
@@ -327,4 +296,15 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         feeService.deleteFeeList(deleteIds, SourceTypeEnum.FIRST_MILE);
     }
 
+    /**
+     * 更新头程单状态
+     *
+     * @param fistMileDTO dto
+     */
+    @Override
+    public void updateFirstMileStatus(FistMileDTO fistMileDTO) {
+        TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(fistMileDTO.getId());
+        TmsFirstMileDO firstMileDO = TmsFirstMileConvert.convertDO(fistMileDTO);
+        firstMileMapper.updateById(firstMileDO);
+    }
 }

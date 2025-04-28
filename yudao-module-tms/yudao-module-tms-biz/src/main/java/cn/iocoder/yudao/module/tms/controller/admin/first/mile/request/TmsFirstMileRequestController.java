@@ -17,6 +17,7 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
@@ -164,8 +165,8 @@ public class TmsFirstMileRequestController {
     @PostMapping("/merge")
     @Operation(summary = "合并头程申请单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:merge')")
-    public CommonResult<Long> mergeFirstMileRequest(@RequestBody List<Long> ids) {
-        return success(firstMileRequestService.mergeFirstMileRequest(ids));
+    public CommonResult<Long> mergeFirstMileRequest(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileSaveReqVO createReqVO) {
+        return success(firstMileRequestService.mergeFirstMileRequest(createReqVO));
     }
 
     private List<TmsFirstMileRequestRespVO> bindListResult(List<TmsFirstMileRequestBO> firstMileRequestBOList) {

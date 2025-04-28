@@ -75,7 +75,6 @@ public class TmsFirstMileRequestStatusMachine {
     //订购
     @Resource
     Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> requestOrderActionImpl;
-
     @Bean(FIRST_MILE_REQUEST_PURCHASE_ORDER_STATE_MACHINE)
     public StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> buildTmsFirstMileRequestItemOrderStateMachine() {
         StateMachineBuilder<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> builder = StateMachineBuilderFactory.create();

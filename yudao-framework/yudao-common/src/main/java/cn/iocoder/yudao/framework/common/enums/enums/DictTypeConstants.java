@@ -23,4 +23,6 @@ public interface DictTypeConstants {
 
     //货柜类型
     String CABINET_TYPE = "cabinet_type";
+    //费用类型
+    String FEE_TYPE = "fee_type";
 }

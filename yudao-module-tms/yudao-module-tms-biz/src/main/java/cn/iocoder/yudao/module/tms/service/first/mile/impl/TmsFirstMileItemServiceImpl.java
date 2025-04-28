@@ -6,7 +6,6 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileIt
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item.TmsFirstMileItemMapper;
 import cn.iocoder.yudao.module.tms.service.first.mile.item.TmsFirstMileItemService;
 import jakarta.annotation.Resource;
-import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -17,7 +16,7 @@ import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_IT
  *
  * @author wdy
  */
-@Service
+//@Service
 @Validated
 public class TmsFirstMileItemServiceImpl implements TmsFirstMileItemService {
 

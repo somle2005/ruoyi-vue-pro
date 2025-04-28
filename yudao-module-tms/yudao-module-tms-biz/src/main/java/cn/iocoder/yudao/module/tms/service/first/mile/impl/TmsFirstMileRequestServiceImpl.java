@@ -66,7 +66,6 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Resource(name = FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
     private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> offItemStatusMachine;
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createFirstMileRequest(TmsFirstMileRequestSaveReqVO vo) {
@@ -101,7 +100,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     private void initMasterStatus(TmsFirstMileRequestDO firstMileRequest) {
         //审核
-        tmsFirstMileRequestStatusMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, TmsFirstMileRequestAuditReqVO.builder().requestId(firstMileRequest.getId()).build());
+        tmsFirstMileRequestStatusMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT,
+            TmsFirstMileRequestAuditReqVO.builder().requestId(firstMileRequest.getId()).build());
         //开关
         offStatusStatusMachine.fireEvent(TmsOffStatus.OPEN, TmsEventEnum.OFF_INIT, firstMileRequest);
         //采购
@@ -212,17 +212,14 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         return firstMileRequestItemMapper.selectListByRequestId(requestId);
     }
 
-
     /**
-     * 将List<TmsFirstMileRequestItemBO>转换为List<TmsFirstMileRequestBO>
-     * 实现主表和子表数据的绑定
+     * 将List<TmsFirstMileRequestItemBO>转换为List<TmsFirstMileRequestBO> 实现主表和子表数据的绑定
      *
      * @param itemBOList 包含主表和子表数据的BO对象列表
      * @return 转换后的BO对象列表
      */
     private List<TmsFirstMileRequestBO> bindBOList(List<TmsFirstMileRequestItemItemBO> itemBOList) {
-        Map<Long, List<TmsFirstMileRequestItemItemBO>> itemMap = itemBOList.stream()
-            .filter(item -> item.getTmsFirstMileRequestDO() != null)
+        Map<Long, List<TmsFirstMileRequestItemItemBO>> itemMap = itemBOList.stream().filter(item -> item.getTmsFirstMileRequestDO() != null)
             .collect(Collectors.groupingBy(item -> item.getTmsFirstMileRequestDO().getId()));
         List<TmsFirstMileRequestBO> boList = new ArrayList<>();
         for (TmsFirstMileRequestItemItemBO itemBO : itemBOList) {
@@ -236,14 +233,11 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             }
             // 转换主表数据
             TmsFirstMileRequestBO bo = TmsFirstMileRequestConvert.convert(itemBO.getTmsFirstMileRequestDO(),
-                itemMap.get(requestId).stream()
-                    .map(TmsFirstMileRequestConvert::convertItem)
-                    .collect(Collectors.toList()));
+                itemMap.get(requestId).stream().map(TmsFirstMileRequestConvert::convertItem).collect(Collectors.toList()));
             boList.add(bo);
         }
         return boList;
     }
-
 
     @Override
     public void submitAudit(List<Long> ids) {
@@ -290,8 +284,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         }
         // 关闭状态不能审核/反审核
         if (!Objects.equals(requestDO.getOffStatus(), TmsOffStatus.OPEN.getCode())) {
-            throw exception(FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED, requestDO.getCode(),
-                TmsOffStatus.fromCode(requestDO.getOffStatus()).getDesc());
+            throw exception(FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED, requestDO.getCode(), TmsOffStatus.fromCode(requestDO.getOffStatus()).getDesc());
         }
         TmsAuditStatus currentStatus = TmsAuditStatus.fromCode(requestDO.getAuditStatus());
         if (Boolean.TRUE.equals(req.getReviewed())) {
@@ -369,37 +362,38 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long mergeFirstMileRequest(List<Long> ids) {
-        // 1. 校验头程申请单是否存在
-        List<TmsFirstMileRequestDO> requestList = firstMileRequestMapper.selectByIds(ids);
-        if (CollectionUtils.isEmpty(requestList)) {
-            throw exception(FIRST_MILE_REQUEST_NOT_EXISTS);
-        }
-
-        // 2. 校验头程申请单状态
-        requestList.forEach(request -> {
-            // 校验是否已关闭
-            if (!Objects.equals(request.getOffStatus(), TmsOffStatus.OPEN.getCode())) {
-                throw exception(FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED, request.getCode(), TmsOffStatus.fromCode(request.getOffStatus()).getDesc());
-            }
-            // 校验是否已审核
-            if (!Objects.equals(request.getAuditStatus(), TmsAuditStatus.APPROVED.getCode())) {
-                throw exception(FIRST_MILE_REQUEST_AUDIT_STATUS_NOT_ALLOWED, request.getCode(), TmsAuditStatus.fromCode(request.getAuditStatus()).getDesc());
-            }
-        });
-
-        // 3. 获取所有头程申请明细
-        List<TmsFirstMileRequestItemDO> itemList = firstMileRequestItemMapper.selectListByRequestIds(ids);
-        if (CollectionUtils.isEmpty(itemList)) {
-            throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
-        }
-
-        // 4. 创建头程单
-        TmsFirstMileSaveReqVO createReqVO = new TmsFirstMileSaveReqVO();
-        // 转换明细
-        createReqVO.setFirstMileItems(TmsFirstMileRequestConvert.convertToFirstMileItemList(itemList));
-
-        // 5. 创建头程单
+    public Long mergeFirstMileRequest(TmsFirstMileSaveReqVO createReqVO) {
         return firstMileService.createFirstMile(createReqVO);
+        //        // 1. 校验头程申请单是否存在
+        //        List<TmsFirstMileRequestDO> requestList = firstMileRequestMapper.selectByIds(ids);
+        //        if (CollectionUtils.isEmpty(requestList)) {
+        //            throw exception(FIRST_MILE_REQUEST_NOT_EXISTS);
+        //        }
+        //
+        //        // 2. 校验头程申请单状态
+        //        requestList.forEach(request -> {
+        //            // 校验是否已关闭
+        //            if (!Objects.equals(request.getOffStatus(), TmsOffStatus.OPEN.getCode())) {
+        //                throw exception(FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED, request.getCode(), TmsOffStatus.fromCode(request.getOffStatus()).getDesc());
+        //            }
+        //            // 校验是否已审核
+        //            if (!Objects.equals(request.getAuditStatus(), TmsAuditStatus.APPROVED.getCode())) {
+        //                throw exception(FIRST_MILE_REQUEST_AUDIT_STATUS_NOT_ALLOWED, request.getCode(), TmsAuditStatus.fromCode(request.getAuditStatus()).getDesc());
+        //            }
+        //        });
+        //
+        //        // 3. 获取所有头程申请明细
+        //        List<TmsFirstMileRequestItemDO> itemList = firstMileRequestItemMapper.selectListByRequestIds(ids);
+        //        if (CollectionUtils.isEmpty(itemList)) {
+        //            throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
+        //        }
+        //
+        //        // 4. 创建头程单
+        //        TmsFirstMileSaveReqVO createReqVO = new TmsFirstMileSaveReqVO();
+        //        // 转换明细
+        //        createReqVO.setFirstMileItems(TmsFirstMileRequestConvert.convertToFirstMileItemList(itemList));
+        //
+        //        // 5. 创建头程单
+        //        return firstMileService.createFirstMile(createReqVO);
     }
 }
