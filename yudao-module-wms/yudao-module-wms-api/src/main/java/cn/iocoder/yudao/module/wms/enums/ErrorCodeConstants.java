@@ -265,7 +265,7 @@ public interface ErrorCodeConstants {
     ErrorCode INVENTORY_BIN_PRODUCT_NOT_ALLOWED = new ErrorCode(2_001_022_012, "库位盘单产品超出范围");
     ErrorCode INVENTORY_BIN_CAN_NOT_IMPORT = new ErrorCode(2_001_022_013, "不允许盘点导入结果");
     ErrorCode INVENTORY_BIN_MUST_IN_SAME_INVENTORY = new ErrorCode(2_001_022_014, "必须追加到同一个盘点单");
-    ErrorCode INVENTORY_BIN_CAN_NOT_APPEND = new ErrorCode(2_001_022_015, "不允许导入盘点结果");
+    ErrorCode INVENTORY_BIN_CAN_NOT_APPEND = new ErrorCode(2_001_022_015, "当前盘点单为{}状态，不允许导入盘点结果");
 
     // ========== WMS_EXCHANGE 换货单 2_001_023_000 ==========
     ErrorCode EXCHANGE_NOT_EXISTS = new ErrorCode(2_001_023_001, "换货单不存在");

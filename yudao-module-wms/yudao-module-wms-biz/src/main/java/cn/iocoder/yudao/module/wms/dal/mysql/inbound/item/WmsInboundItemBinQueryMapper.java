@@ -33,6 +33,7 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
         // 入库单明细
         MPJLambdaWrapperX<WmsInboundItemBinQueryDO> wrapper = new MPJLambdaWrapperX();
         //
+        wrapper.distinct();
         wrapper.in(WmsInboundItemQueryDO::getInboundStatus, WmsInboundStatus.ALL.getValue(),WmsInboundStatus.PART.getValue());
 
         // 连接入库单

@@ -98,7 +98,7 @@ public class WmsInventoryBinServiceImpl implements WmsInventoryBinService {
         WmsInventoryAuditStatus inventoryAuditStatus= WmsInventoryAuditStatus.parse(inventoryDO.getAuditStatus());
         // 不允许追加
         if(inventoryAuditStatus!=WmsInventoryAuditStatus.AUDITING) {
-            throw exception(INVENTORY_BIN_CAN_NOT_APPEND);
+            throw exception(INVENTORY_BIN_CAN_NOT_APPEND,inventoryAuditStatus.getLabel());
         }
 
         // 校验仓位有效性
@@ -109,7 +109,7 @@ public class WmsInventoryBinServiceImpl implements WmsInventoryBinService {
             throw exception(INVENTORY_BIN_WAREHOUSE_BIN_ERROR);
         }
         Long warehouseId= warehouseIds.iterator().next();
-        if(Objects.equals(warehouseId,inventoryDO.getWarehouseId())) {
+        if(!Objects.equals(warehouseId,inventoryDO.getWarehouseId())) {
             throw exception(INVENTORY_BIN_WAREHOUSE_BIN_ERROR);
         }
 
