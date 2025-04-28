@@ -81,7 +81,7 @@ public class RequestOrderActionImpl implements Action<TmsOrderStatus, TmsEventEn
      * 更新主表状态
      */
     private void updateMasterStatus(Long requestId, TmsOrderStatus status) {
-        tmsFirstMileRequestService.updateFirstMileRequestStatus(requestId, null, status.getCode(), null);
+        tmsFirstMileRequestService.updateFirstMileRequestStatus(requestId, null, status.getCode(), null, null);
         log.debug("更新采购申请单订单状态，ID: {}, 状态: {}", requestId, status);
     }
 }

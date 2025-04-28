@@ -55,6 +55,10 @@ public class TmsFirstMileRequestDO extends TenantBaseDO {
      */
     private Integer auditStatus;
     /**
+     * 审核意见
+     */
+    private String reviewComment;
+    /**
      * 订购状态
      */
     private Integer orderStatus;

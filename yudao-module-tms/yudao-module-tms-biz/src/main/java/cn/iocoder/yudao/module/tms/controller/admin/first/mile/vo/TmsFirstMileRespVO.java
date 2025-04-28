@@ -1,5 +1,8 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
 
+import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
+import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
+import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemRespVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.TmsVesselTrackingDO;
@@ -62,7 +65,8 @@ public class TmsFirstMileRespVO {
     private String ladingNo;
 
     @Schema(description = "柜型（字典）")
-    @ExcelProperty("柜型")
+    @ExcelProperty(value = "柜型", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.CABINET_TYPE)
     private Integer cabinetType;
 
     @Schema(description = "装柜日期")

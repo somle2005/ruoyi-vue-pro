@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.tms.service.first.mile.request.impl;
+package cn.iocoder.yudao.module.tms.service.first.mile.impl;
 
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
@@ -181,7 +181,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer offStatus, Integer orderStatus, Integer auditStatus) {
+    public TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer offStatus, Integer orderStatus, Integer auditStatus, String auditMsg) {
         // 获取头程申请单
         TmsFirstMileRequestDO requestDO = validateFirstMileRequestExists(id);
         // 更新状态字段
@@ -193,6 +193,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         }
         if (auditStatus != null) {
             requestDO.setAuditStatus(auditStatus);
+            requestDO.setReviewComment(auditMsg);
         }
         // 执行更新
         firstMileRequestMapper.updateById(requestDO);

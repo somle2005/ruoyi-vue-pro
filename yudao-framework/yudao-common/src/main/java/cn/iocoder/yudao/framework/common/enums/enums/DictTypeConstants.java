@@ -20,4 +20,7 @@ public interface DictTypeConstants {
     String ORDER_STATUS = "srm_order_status";
     //开关状态
     String OFF_STATUS = "srm_off_status";
+
+    //货柜类型
+    String CABINET_TYPE = "cabinet_type";
 }

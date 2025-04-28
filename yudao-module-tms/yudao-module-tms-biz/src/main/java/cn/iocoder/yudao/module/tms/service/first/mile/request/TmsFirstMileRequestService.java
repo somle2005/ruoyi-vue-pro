@@ -71,9 +71,9 @@ public interface TmsFirstMileRequestService {
     TmsFirstMileRequestDO validateFirstMileRequestExists(Long id);
 
     /**
-     * 修改主单状态,3个状态 开关 订购 审核,3个入参。
+     * 修改主单状态,3个状态 开关 订购 审核,审核意见
      */
-    TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer offStatus, Integer orderStatus, Integer auditStatus);
+    TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer offStatus, Integer orderStatus, Integer auditStatus, String auditMsg);
 
     // ==================== 子表（头程申请表明细） ====================
 

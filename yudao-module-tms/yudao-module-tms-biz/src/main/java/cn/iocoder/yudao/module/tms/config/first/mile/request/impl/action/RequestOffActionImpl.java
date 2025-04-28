@@ -33,7 +33,7 @@ public class RequestOffActionImpl implements Action<TmsOffStatus, TmsEventEnum, 
             // 更新主表状态
             updateMasterStatus(context.getId(), items);
         } else {
-            tmsFirstMileRequestService.updateFirstMileRequestStatus(context.getId(), to.getCode(), null, null);
+            tmsFirstMileRequestService.updateFirstMileRequestStatus(context.getId(), to.getCode(), null, null, null);
         }
     }
 
@@ -86,6 +86,6 @@ public class RequestOffActionImpl implements Action<TmsOffStatus, TmsEventEnum, 
      * 更新主表状态
      */
     private void updateStatus(Long requestId, TmsOffStatus status) {
-        tmsFirstMileRequestService.updateFirstMileRequestStatus(requestId, status.getCode(), null, null);
+        tmsFirstMileRequestService.updateFirstMileRequestStatus(requestId, status.getCode(), null, null, null);
     }
 }

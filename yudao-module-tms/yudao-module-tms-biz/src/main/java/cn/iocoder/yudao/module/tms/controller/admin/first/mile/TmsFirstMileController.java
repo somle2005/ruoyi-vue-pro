@@ -8,6 +8,7 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
@@ -109,6 +110,29 @@ public class TmsFirstMileController {
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
     public CommonResult<List<TmsFeeRespVO>> getFeeListBySourceId(@RequestParam("sourceId") Long sourceId) {
         return success(firstMileService.getFeeListBySourceId(sourceId));
+    }
+
+    @PostMapping("/submit-audit")
+    @Operation(summary = "提交头程单审核")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile:audit')")
+    public CommonResult<Boolean> submitAudit(@RequestBody List<Long> ids) {
+        firstMileService.submitAudit(ids);
+        return success(true);
+    }
+
+    @PutMapping("/audit-status")
+    @Operation(summary = "审核/反审核")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile:audit')")
+    public CommonResult<Boolean> audit(@Validated @RequestBody TmsFirstMileAuditReqVO reqVO) {
+        firstMileService.review(reqVO);
+        return success(true);
+    }
+
+    @GetMapping("/get-latest-no")
+    @Operation(summary = "获取最新的单据编号")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
+    public CommonResult<String> getLatestNo() {
+        return success(firstMileService.getLatestCode());
     }
 
 }

@@ -2,7 +2,6 @@ package cn.iocoder.yudao.module.tms.config.first.mile.request.impl.action;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
@@ -20,13 +19,13 @@ public class RequestAuditActionImpl implements Action<TmsAuditStatus, TmsEventEn
     @Lazy
     TmsFirstMileRequestService firstMileRequestService;
 
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void execute(TmsAuditStatus from, TmsAuditStatus to, TmsEventEnum event, TmsFirstMileRequestAuditReqVO context) {
 
-        TmsFirstMileRequestDO requestDO = firstMileRequestService.validateFirstMileRequestExists(context.getRequestId());
+        firstMileRequestService.validateFirstMileRequestExists(context.getRequestId());
 
-        requestDO.setAuditStatus(to.getCode());
-        firstMileRequestService.updateFirstMileRequestStatus(requestDO.getId(), null, null, to.getCode());
+        firstMileRequestService.updateFirstMileRequestStatus(context.getRequestId(), null, null, to.getCode(), context.getReviewComment());
     }
 }

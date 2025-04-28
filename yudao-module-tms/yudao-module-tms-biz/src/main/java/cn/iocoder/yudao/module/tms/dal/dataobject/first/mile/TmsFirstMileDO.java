@@ -68,6 +68,10 @@ public class TmsFirstMileDO extends BaseDO {
      */
     private Integer auditStatus;
     /**
+     * 审核意见
+     */
+    private String reviewComment;
+    /**
      * 目的仓ID
      */
     private Long toWarehouseId;

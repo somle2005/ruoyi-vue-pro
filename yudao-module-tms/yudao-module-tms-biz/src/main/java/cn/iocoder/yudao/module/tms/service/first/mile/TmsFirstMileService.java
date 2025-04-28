@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.tms.service.first.mile;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
@@ -9,6 +10,7 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileIt
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import jakarta.validation.Valid;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -56,6 +58,41 @@ public interface TmsFirstMileService {
      */
     PageResult<TmsFirstMileBO> getFirstMileBOPage(TmsFirstMilePageReqVO pageReqVO);
 
+    /**
+     * 获取最新的单据编号
+     *
+     * @return 单据编号
+     */
+    String getLatestCode();
+
+    /**
+     * 提交审核
+     *
+     * @param ids 头程单IDs
+     */
+    void submitAudit(List<Long> ids);
+
+    /**
+     * 审核|反审核
+     *
+     * @param req vo
+     */
+    void review(TmsFirstMileAuditReqVO req);
+
+    /**
+     * 更新状态
+     *
+     * @param id             主表ID
+     * @param auditStatus
+     * @param auditMsg
+     * @param inboundStatus
+     * @param inboundTime
+     * @param outboundStatus
+     * @param outboundTime
+     * @return TmsFirstMileDO
+     */
+    TmsFirstMileDO updateStatus(Long id, Integer auditStatus, String auditMsg, Integer inboundStatus, LocalDateTime inboundTime, Integer outboundStatus,
+        LocalDateTime outboundTime);
     // ==================== 子表（头程单明细） ====================
 
     /**
