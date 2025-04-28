@@ -13,6 +13,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_ITEM_LIST_NOT_EMPTY;
+
 /**
  * 头程单 Convert
  *
@@ -35,7 +38,7 @@ public class TmsFirstMileConvert {
         return itemMap.values().stream()
             .map(tmsFirstMileItemBOS -> {
                 // 获取第一个明细项的主表信息（同一主表ID下的所有明细项，其主表信息相同）
-                TmsFirstMileItemBO firstItem = tmsFirstMileItemBOS.stream().findFirst().orElseThrow(() -> new IllegalArgumentException("头程单明细列表不能为空"));
+                TmsFirstMileItemBO firstItem = tmsFirstMileItemBOS.stream().findFirst().orElseThrow(() -> exception(FIRST_MILE_ITEM_LIST_NOT_EMPTY));
                 return BeanUtils.toBean(firstItem.getTmsFirstMileDO(), TmsFirstMileBO.class, bo -> bo.setItems(BeanUtils.toBean(tmsFirstMileItemBOS, TmsFirstMileItemDO.class)));
             })
             .toList();

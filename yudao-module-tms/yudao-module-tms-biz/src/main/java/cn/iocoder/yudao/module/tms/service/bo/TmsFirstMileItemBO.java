@@ -12,6 +12,6 @@ import lombok.Data;
 public class TmsFirstMileItemBO extends TmsFirstMileItemDO {
 
     private TmsFirstMileDO tmsFirstMileDO;
-    //物流信息 最新
+    //物流信息(船) 最新
     private TmsVesselTrackingDO tmsVesselTrackingDO;
 }

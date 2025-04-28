@@ -79,18 +79,6 @@ public class TmsFirstMileSaveReqVO {
     @Schema(description = "备注")
     private String remark;
 
-    @Schema(description = "发货状态")
-    private Integer outboundStatus;
-
-    @Schema(description = "出库时间")
-    private LocalDateTime outboundTime;
-
-    @Schema(description = "入库状态")
-    private Integer inboundStatus;
-
-    @Schema(description = "入库时间")
-    private LocalDateTime inboundTime;
-
     @Schema(description = "版本号")
     @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时版本号不能为空")
     private Integer revision;

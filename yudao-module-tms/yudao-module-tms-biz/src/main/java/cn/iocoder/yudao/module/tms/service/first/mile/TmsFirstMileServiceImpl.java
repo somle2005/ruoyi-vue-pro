@@ -1,10 +1,11 @@
 package cn.iocoder.yudao.module.tms.service.first.mile;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
@@ -22,14 +23,16 @@ import cn.iocoder.yudao.module.tms.enums.SourceTypeEnum;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
-import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.*;
@@ -41,7 +44,7 @@ import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.*;
  */
 @Service
 @Validated
-@RequiredArgsConstructor(onConstructor = @__(@Resource))
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     private final TmsFirstMileMapper firstMileMapper;
@@ -49,51 +52,64 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final TmsFeeService feeService;
     private final TmsNoRedisDAO noRedisDAO;
 
+    //校验code中间日期是否是当天
+    private static void validCodeDateIsToday(TmsFirstMileSaveReqVO vo) {
+        String[] parts = vo.getCode().split("-");
+        if (parts.length != 3) {
+            throw exception(FIRST_MILE_CODE_FORMAT_ERROR, vo.getCode());
+        }
+        String dateStr = parts[1];
+        String today = DateUtil.format(LocalDateTime.now(), DatePattern.PURE_DATE_PATTERN);
+        if (!dateStr.equals(today)) {
+            throw exception(FIRST_MILE_CODE_DATE_NOT_TODAY, dateStr);
+        }
+    }
+
     @Override
     @Idempotent
     @Transactional(rollbackFor = Exception.class)
-    public Long createFirstMile(TmsFirstMileSaveReqVO createReqVO) {
-        // 转换实体
-        TmsFirstMileDO firstMile = BeanUtils.toBean(createReqVO, TmsFirstMileDO.class);
+    public Long createFirstMile(TmsFirstMileSaveReqVO vo) {
+        if (vo.getCode() != null) {
+            validCodeDateIsToday(vo);
+            if (validCodeDuplicate(vo.getCode())) {
+                throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
+            }
+        } else {
+            vo.setCode(noRedisDAO.generate(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, FIRST_MILE_CODE_DUPLICATE));
+        }
 
-        // 设置头程编码（支持自定义或自动生成）
-        firstMile.setCode(SpringUtils.resolveCode(
-            firstMile.getCode(),
-            () -> noRedisDAO.generate(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, FIRST_MILE_CODE_GENERATE_FAIL),
-            this::validCodeDuplicate,
-            FIRST_MILE_CODE_DUPLICATE,
-            FIRST_MILE_CODE_GENERATE_FAIL_MAX_TRY
-        ));
-
-        // 保存主记录
+        TmsFirstMileDO firstMile = BeanUtils.toBean(vo, TmsFirstMileDO.class);
         firstMileMapper.insert(firstMile);
 
         Long firstMileId = firstMile.getId();
 
         // 保存头程明细
-        createFirstMileItemList(firstMileId, createReqVO.getFirstMileItems());
+        createFirstMileItemList(firstMileId, vo.getFirstMileItems());
 
         // 保存费用项
-        createFeeList(firstMileId, createReqVO.getFees());
+        createFeeList(firstMileId, vo.getFees());
 
         return firstMileId;
     }
 
-
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateFirstMile(TmsFirstMileSaveReqVO updateReqVO) {
-        validateFirstMileExists(updateReqVO.getId());
+    public void updateFirstMile(TmsFirstMileSaveReqVO vo) {
+        TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(vo.getId());
 
-        if (updateReqVO.getCode() != null && validCodeDuplicate(updateReqVO.getCode(), updateReqVO.getId())) {
-            throw exception(FIRST_MILE_CODE_DUPLICATE, updateReqVO.getCode());
+        //校验code
+        if (!Objects.equals(vo.getCode(), tmsFirstMileDO.getCode())) {
+            validCodeDateIsToday(vo);
+            if (validCodeDuplicate(vo.getCode(), vo.getId())) {
+                throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
+            }
         }
 
-        TmsFirstMileDO updateObj = BeanUtils.toBean(updateReqVO, TmsFirstMileDO.class);
+        TmsFirstMileDO updateObj = BeanUtils.toBean(vo, TmsFirstMileDO.class);
         firstMileMapper.updateById(updateObj);
 
-        updateFirstMileItemList(updateReqVO.getId(), updateReqVO.getFirstMileItems());
-        updateFeeList(updateReqVO.getId(), updateReqVO.getFees());
+        updateFirstMileItemList(vo.getId(), vo.getFirstMileItems());
+        updateFeeList(vo.getId(), vo.getFees());
     }
 
 
@@ -102,15 +118,18 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     public void deleteFirstMile(Long id) {
         validateFirstMileExists(id);
         firstMileMapper.deleteById(id);
-
+        //删明细
         deleteFirstMileItemByFirstMileId(id);
+        //删费用
         deleteFeeBySourceId(id);
     }
 
-    private void validateFirstMileExists(Long id) {
-        if (firstMileMapper.selectById(id) == null) {
+    private TmsFirstMileDO validateFirstMileExists(Long id) {
+        TmsFirstMileDO tmsFirstMileDO = firstMileMapper.selectById(id);
+        if (tmsFirstMileDO == null) {
             throw exception(FIRST_MILE_NOT_EXISTS);
         }
+        return tmsFirstMileDO;
     }
 
     @Override

@@ -37,9 +37,6 @@ public class TmsFirstMileItemSaveReqVO {
     @Schema(description = "计划发货数")
     private Integer outboundPlanQty;
 
-    @Schema(description = "已入库数量")
-    private Integer inboundClosedQty;
-
     @Schema(description = "发出仓ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "发出仓ID不能为空")
     private Long fromWarehouseId;

@@ -75,7 +75,7 @@ public class TmsFirstMileRequestRespVO {
     @ExcelProperty("总体积（m³）")
     private BigDecimal totalVolume;
 
-    @Schema(description = "头程申请表明细列表")
+    @Schema(description = "明细数量")
     @ExcelProperty("明细数量")
     private Integer itemCount;
 
