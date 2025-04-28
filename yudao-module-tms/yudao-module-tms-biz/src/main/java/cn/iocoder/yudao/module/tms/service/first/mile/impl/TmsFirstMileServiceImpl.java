@@ -303,7 +303,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
      */
     @Override
     public void updateFirstMileStatus(FistMileDTO fistMileDTO) {
-        TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(fistMileDTO.getId());
+        validateFirstMileExists(fistMileDTO.getId());
         TmsFirstMileDO firstMileDO = TmsFirstMileConvert.convertDO(fistMileDTO);
         firstMileMapper.updateById(firstMileDO);
     }

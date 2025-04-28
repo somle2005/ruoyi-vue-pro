@@ -189,12 +189,11 @@ public class TmsFirstMileRequestController {
             });
             if (bo.getItems() != null) {
                 List<TmsFirstMileRequestItemRespVO> items =
-                    bo.getItems().stream().map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
+                    bo.getItems().stream().map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO ->
                         MapUtils.findAndThen(productMap, item.getProductId(), product -> {
                             itemRespVO.setProductName(product.getBarCode());
                             itemRespVO.setBarCode(product.getBarCode());
-                        });
-                    })).collect(Collectors.toList());
+                        }))).collect(Collectors.toList());
                 respVO.setItems(items);
                 // 设置明细数量
                 respVO.setItemCount(items.size());

@@ -120,7 +120,7 @@ public interface TmsFirstMileRequestService {
     /**
      * 合并头程申请单
      *
-     * @param ids 头程申请单编号数组
+     * @param createReqVO vo
      * @return 合并后的头程单编号
      */
     Long mergeFirstMileRequest(TmsFirstMileSaveReqVO createReqVO);
