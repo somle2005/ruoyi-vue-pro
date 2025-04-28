@@ -5,7 +5,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileAuditReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import jakarta.annotation.Resource;

@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
+package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req;
 
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemPageReqVO;

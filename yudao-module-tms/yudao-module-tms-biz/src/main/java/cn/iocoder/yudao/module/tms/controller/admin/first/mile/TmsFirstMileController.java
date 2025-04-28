@@ -8,10 +8,12 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileAuditReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileRespVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileExcelVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileRespVO;
+import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
@@ -86,11 +88,12 @@ public class TmsFirstMileController {
     @Operation(summary = "导出头程单 Excel")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportFirstMileExcel(@Valid TmsFirstMilePageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+    public void exportExcel(@Valid TmsFirstMilePageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TmsFirstMileBO> list = firstMileService.getFirstMileBOPage(pageReqVO).getList();
         // 导出 Excel
-        ExcelUtils.write(response, "头程单.xls", "数据", TmsFirstMileRespVO.class, BeanUtils.toBean(list, TmsFirstMileRespVO.class));
+        List<TmsFirstMileExcelVO> excelList = TmsFirstMileConvert.convertExcelList(list);
+        ExcelUtils.write(response, "头程单.xlsx", "数据", TmsFirstMileExcelVO.class, excelList);
     }
 
     @PostMapping("/import-excel")

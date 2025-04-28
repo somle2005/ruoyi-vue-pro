@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
+package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req;
 
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;

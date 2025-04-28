@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.tms.config.first.mile.impl.action;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileAuditReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import lombok.extern.slf4j.Slf4j;

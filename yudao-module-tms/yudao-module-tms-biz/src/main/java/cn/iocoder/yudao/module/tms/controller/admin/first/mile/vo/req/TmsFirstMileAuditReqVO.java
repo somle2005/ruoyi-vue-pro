@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
+package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;

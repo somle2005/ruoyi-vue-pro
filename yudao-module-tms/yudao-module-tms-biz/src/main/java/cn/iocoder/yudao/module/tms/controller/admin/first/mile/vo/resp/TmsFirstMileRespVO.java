@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo;
+package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp;
 
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;

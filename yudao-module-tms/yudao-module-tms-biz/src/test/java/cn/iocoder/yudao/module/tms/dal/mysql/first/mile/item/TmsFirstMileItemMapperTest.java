@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemPageReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMilePageReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;

@@ -17,7 +17,7 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
