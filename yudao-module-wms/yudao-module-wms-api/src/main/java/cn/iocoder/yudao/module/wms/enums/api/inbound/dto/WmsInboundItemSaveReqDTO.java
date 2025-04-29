@@ -1,0 +1,39 @@
+package cn.iocoder.yudao.module.wms.enums.api.inbound.dto;
+
+import lombok.Data;
+
+
+@Data
+public class WmsInboundItemSaveReqDTO {
+
+    /**
+     * 主键
+     */
+    private Long productId;
+
+    /**
+     * 计划入库量
+     */
+    private Integer planQty;
+
+    /**
+     * 库存归属部门
+     **/
+    private Long deptId;
+
+    /**
+     * 库存财务公司ID
+     **/
+    private Long companyId;
+
+    /**
+     * 备注
+     **/
+    private String remark;
+
+    /**
+     * 来源详情ID
+     **/
+    private Long upstreamItemId;
+
+}

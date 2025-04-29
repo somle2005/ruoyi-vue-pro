@@ -1,0 +1,68 @@
+package cn.iocoder.yudao.module.wms.enums.api.outbound.dto;
+
+import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+
+@Data
+public class WmsOutboundSaveReqDTO {
+
+    /**
+     * 主键
+     **/
+    private Long id;
+
+    /**
+     * 仓库ID
+     **/
+    private Long warehouseId;
+
+    /**
+     * WMS出库单类型
+     **/
+    private Integer type;
+
+    /**
+     * 详情清单
+     **/
+    private List<WmsOutboundItemSaveReqDTO> itemList;
+
+
+    /**
+     * 库存财务公司ID
+     **/
+    private Long companyId;
+
+    /**
+     * 库存归属部门ID
+     **/
+    private Long deptId;
+
+    /**
+     * 出库时间
+     **/
+    private LocalDateTime outboundTime;
+
+
+    /**
+     * 备注
+     **/
+    private String remark;
+
+    /**
+     * 来源单据ID
+     **/
+    private Long upstreamBillId;
+
+    /**
+     * 来源单据号
+     **/
+    private String upstreamBillCode;
+
+    /**
+     * 来源单据类型
+     **/
+    private Integer upstreamBillType;
+}
