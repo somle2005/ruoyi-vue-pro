@@ -30,7 +30,7 @@ public class InboundTransitionFailCallback implements FailCallback<Integer, WmsI
             throw exception(INBOUND_STATUS_PARSE_ERROR);
         }
         if(to==null) {
-            throw exception(INBOUND_AUDIT_ERROR);
+            throw exception(INBOUND_AUDIT_ERROR,currStatus.getLabel());
         }
         WmsInboundAuditStatus toStatus = WmsInboundAuditStatus.parse(to);
         if (toStatus == null) {
