@@ -188,8 +188,7 @@ public class TmsFirstMileRequestController {
                 MapUtils.findAndThen(deptMap, bo.getRequestDeptId(), dept -> respVO1.setRequestDeptName(dept.getName()));
             });
             if (bo.getItems() != null) {
-                List<TmsFirstMileRequestItemRespVO> items =
-                    bo.getItems().stream().map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO ->
+                List<TmsFirstMileRequestItemRespVO> items = bo.getItems().stream().map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO ->
                         MapUtils.findAndThen(productMap, item.getProductId(), product -> {
                             itemRespVO.setProductName(product.getBarCode());
                             itemRespVO.setBarCode(product.getBarCode());

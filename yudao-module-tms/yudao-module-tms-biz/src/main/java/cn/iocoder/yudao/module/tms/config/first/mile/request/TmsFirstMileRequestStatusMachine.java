@@ -26,6 +26,7 @@ public class TmsFirstMileRequestStatusMachine {
 
     @Resource
     FailCallback TmsBaseFailCallbackImpl;
+
     @Resource
     RequestAuditActionImpl requestAuditActionImpl;
     @Bean(FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)

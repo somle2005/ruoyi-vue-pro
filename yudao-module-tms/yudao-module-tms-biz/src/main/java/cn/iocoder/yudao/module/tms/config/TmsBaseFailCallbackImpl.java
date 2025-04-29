@@ -1,13 +1,11 @@
 package cn.iocoder.yudao.module.tms.config;
 
 import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
-import cn.iocoder.yudao.framework.common.core.ArrayValuable;
+import cn.iocoder.yudao.framework.common.core.StatusValue;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.stereotype.Component;
-
-import java.lang.reflect.Method;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR;
@@ -27,9 +25,8 @@ public class TmsBaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
 
     public String convertEventToDescription(Object event) {
         try{
-            if(event instanceof ArrayValuable) {
-                Method method = event.getClass().getMethod("getDesc");
-                return (String) method.invoke(event);
+            if (event instanceof StatusValue) {
+                return ((StatusValue) event).getDesc();
             } else {
                 log.warn("Unknown event type: {}", event.getClass());
             }

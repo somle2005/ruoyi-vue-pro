@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
+import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +16,7 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @Getter
-public enum TmsAuditStatus implements ArrayValuable<Integer> {
+public enum TmsAuditStatus implements ArrayValuable<Integer>, StatusValue {
 
     // 1. 草稿阶段
     DRAFT(1, "草稿"),

@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
+import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -15,7 +16,7 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @Getter
-public enum TmsOrderStatus implements ArrayValuable<Integer> {
+public enum TmsOrderStatus implements ArrayValuable<Integer>, StatusValue {
 
     OT_ORDERED(1, "未订购"),
     ORDERED(2, "全部订购"),

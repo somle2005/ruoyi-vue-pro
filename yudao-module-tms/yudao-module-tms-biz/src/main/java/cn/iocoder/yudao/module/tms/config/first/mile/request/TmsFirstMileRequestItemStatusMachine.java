@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,11 +25,10 @@ public class TmsFirstMileRequestItemStatusMachine {
 
     @Resource
     FailCallback TmsBaseFailCallbackImpl;
-    @Resource
-    Action<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> requestItemOrderAction;
-    @Resource
-    Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> requestItemOrderActionImpl;
 
+
+    @Autowired
+    Action<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> requestItemOrderAction;
     @Bean(FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
     public StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> buildTmsFirstMileRequestStateMachine() {
         StateMachineBuilder<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> builder = StateMachineBuilderFactory.create();
@@ -47,6 +47,8 @@ public class TmsFirstMileRequestItemStatusMachine {
         return builder.build(FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE);
     }
 
+    @Autowired
+    Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> requestItemOrderActionImpl;
     @Bean(FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE)
     public StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> buildTmsFirstMileRequestItemOrderStateMachine() {
         StateMachineBuilder<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> builder = StateMachineBuilderFactory.create();
