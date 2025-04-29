@@ -291,6 +291,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             // 审核通过
             tmsFirstMileRequestStatusMachine.fireEvent(currentStatus, TmsEventEnum.AGREE, req);
         } else {
+            //如果存在对应头程单,则不允许
+          
             // 审核拒绝或反审核
             tmsFirstMileRequestStatusMachine.fireEvent(currentStatus, TmsEventEnum.REJECT, req);
         }

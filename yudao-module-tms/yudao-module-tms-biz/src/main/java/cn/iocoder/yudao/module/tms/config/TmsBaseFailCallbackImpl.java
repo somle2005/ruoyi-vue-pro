@@ -18,7 +18,7 @@ import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_RE
 public class TmsBaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
 
     @Override
-    public void onFail(S sourceState, E event, C context) {
+    public void onFail(S sourceState, S targetState, E event, C context) {
         String statusDesc = convertEventToDescription(sourceState);
         String eventDesc = TmsEventEnum.valueOf(event.toString()).getDesc();
         log.warn("无法在({})状态下触发({})事件，上下文：{}", statusDesc, eventDesc, context.getClass().getName());

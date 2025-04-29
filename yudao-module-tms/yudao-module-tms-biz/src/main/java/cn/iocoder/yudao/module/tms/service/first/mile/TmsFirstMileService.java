@@ -51,6 +51,10 @@ public interface TmsFirstMileService {
     TmsFirstMileDO getFirstMile(Long id);
 
     /**
+     * 获得头程单BO
+     */
+    TmsFirstMileBO getFirstMileBO(Long id);
+    /**
      * 获得头程单分页BO
      *
      * @param pageReqVO 分页查询

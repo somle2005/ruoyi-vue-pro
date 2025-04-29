@@ -132,6 +132,11 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         );
     }
 
+    //获得BO一个
+    default TmsFirstMileItemBO selectBOById(Long id) {
+        return selectJoinOne(TmsFirstMileItemBO.class, buildBOWrapper(new TmsFirstMilePageReqVO().setId(id)));
+    }
+
     default List<TmsFirstMileItemDO> selectListByFirstMileId(Long firstMileId) {
         return selectList(TmsFirstMileItemDO::getFirstMileId, firstMileId);
     }
@@ -140,4 +145,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         return delete(TmsFirstMileItemDO::getFirstMileId, firstMileId);
     }
 
+    default void selectListByRequestItemId(Long id) {
+        selectList(TmsFirstMileItemDO::getRequestItemId, id);
+    }
 }

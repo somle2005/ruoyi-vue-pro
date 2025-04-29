@@ -29,6 +29,7 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
+import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Resource(name = FIRST_MILE_AUDIT_STATE_MACHINE)
     StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileAuditReqVO> auditStateMachine;
+    @Autowired
+    private TmsFirstMileRequestService tmsFirstMileRequestService;
 
     //校验code中间日期是否是当天
     private static void validCodeDateIsToday(TmsFirstMileSaveReqVO vo) {
@@ -147,6 +150,17 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         return firstMileMapper.selectById(id);
     }
 
+    /**
+     * 获得头程单BO
+     *
+     * @param id 头程单id
+     */
+    @Override
+    public TmsFirstMileBO getFirstMileBO(Long id) {
+        TmsFirstMileItemBO tmsFirstMileItemBO = firstMileItemMapper.selectBOById(id);
+        return TmsFirstMileConvert.convertBO(tmsFirstMileItemBO);
+    }
+
     @Override
     public PageResult<TmsFirstMileBO> getFirstMileBOPage(TmsFirstMilePageReqVO pageReqVO) {
         PageResult<TmsFirstMileItemBO> itemPageResult = firstMileItemMapper.selectPageBO(pageReqVO);
@@ -194,6 +208,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         if (Boolean.TRUE.equals(req.getReviewed())) {
             auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.AGREE, req);
         } else {
+
             auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, req);
         }
     }

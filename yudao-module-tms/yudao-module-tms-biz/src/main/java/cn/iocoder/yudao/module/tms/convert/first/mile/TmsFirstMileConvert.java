@@ -49,6 +49,19 @@ public class TmsFirstMileConvert {
     }
 
     /**
+     * 将单个明细BO转换为BO对象
+     *
+     * @param itemBO 明细BO
+     * @return BO对象
+     */
+    public static TmsFirstMileBO convertBO(TmsFirstMileItemBO itemBO) {
+        return BeanUtils.toBean(itemBO.getTmsFirstMileDO(), TmsFirstMileBO.class,
+            bo -> bo.setItems(List.of(BeanUtils.toBean(itemBO, TmsFirstMileItemDO.class))));
+    }
+
+    //convertBO 单个
+
+    /**
      * 将费用 DO 列表转换为 VO 列表
      *
      * @param feeList 费用 DO 列表
