@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.wms.enums.common;
+package cn.iocoder.yudao.module.system.enums.somle;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import cn.iocoder.yudao.framework.common.enums.DictEnum;
@@ -12,7 +12,7 @@ import java.util.Arrays;
  **/
 @RequiredArgsConstructor
 @Getter
-public enum WmsBillType implements ArrayValuable<Integer>, DictEnum {
+public enum BillType implements ArrayValuable<Integer>, DictEnum {
 
     INBOUND(0, "入库单"),
     OUTBOUND(1, "出库单"),
@@ -21,7 +21,7 @@ public enum WmsBillType implements ArrayValuable<Integer>, DictEnum {
     PICKUP(4,"上架单"),
     ;
 
-    public static final Integer[] VALUES = Arrays.stream(values()).map(WmsBillType::getValue).toArray(Integer[]::new);
+    public static final Integer[] VALUES = Arrays.stream(values()).map(BillType::getValue).toArray(Integer[]::new);
 
 
     private final Integer value;
@@ -30,8 +30,8 @@ public enum WmsBillType implements ArrayValuable<Integer>, DictEnum {
     /**
      * 按 value 匹配枚举，name 优先
      **/
-    public static WmsBillType parse(Integer value) {
-        for (WmsBillType e : WmsBillType.values()) {
+    public static BillType parse(Integer value) {
+        for (BillType e : BillType.values()) {
             if(e.getValue().equals(value)) {
                 return e;
             }
@@ -42,13 +42,13 @@ public enum WmsBillType implements ArrayValuable<Integer>, DictEnum {
     /**
      * 按 name 或 label 匹配枚举，name 优先
      **/
-    public static WmsBillType parse(String nameOrLabel) {
-        for (WmsBillType e : WmsBillType.values()) {
+    public static BillType parse(String nameOrLabel) {
+        for (BillType e : BillType.values()) {
             if(e.name().equalsIgnoreCase(nameOrLabel)) {
                 return e;
             }
         }
-        for (WmsBillType e : WmsBillType.values()) {
+        for (BillType e : BillType.values()) {
             if(e.getLabel().equalsIgnoreCase(nameOrLabel)) {
                 return e;
             }

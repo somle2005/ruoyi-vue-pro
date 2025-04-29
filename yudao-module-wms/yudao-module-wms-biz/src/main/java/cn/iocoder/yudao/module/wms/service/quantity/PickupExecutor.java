@@ -12,7 +12,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
@@ -161,7 +161,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         flowDO.setInboundItemId(inboundItemDO.getId());
         flowDO.setProductId(inboundItemDO.getProductId());
 
-        flowDO.setBillType(WmsBillType.PICKUP.getValue());
+        flowDO.setBillType(BillType.PICKUP.getValue());
         flowDO.setBillId(pickup.getId());
         flowDO.setBillItemId(pickupItemDO.getId());
 

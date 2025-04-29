@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.wms.controller.admin.inbound.vo;
 import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.module.wms.enums.common.WmsShippingMethod;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -86,7 +86,7 @@ public class WmsInboundSaveReqVO {
     private String upstreamBillCode;
 
     @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
-    @InEnum(WmsBillType.class)
+    @InEnum(BillType.class)
     private Integer upstreamBillType;
 
     @Schema(description = "WMS入库单上架状态 ; WmsInboundShelvingStatus : 1-未上架 , 2-部分上架 , 3-已上架", example = "")

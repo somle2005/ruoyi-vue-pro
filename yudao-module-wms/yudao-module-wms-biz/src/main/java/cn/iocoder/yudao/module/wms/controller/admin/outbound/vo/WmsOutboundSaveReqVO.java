@@ -9,7 +9,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutbound
 import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
@@ -72,6 +72,6 @@ public class WmsOutboundSaveReqVO {
     private String upstreamBillCode;
 
     @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
-    @InEnum(WmsBillType.class)
+    @InEnum(BillType.class)
     private Integer upstreamBillType;
 }

@@ -19,7 +19,7 @@ import cn.iocoder.yudao.module.wms.dal.mysql.exchange.WmsExchangeMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.exchange.defective.WmsExchangeDefectiveMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeAuditStatus;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import jakarta.annotation.Resource;
@@ -218,7 +218,7 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
     @Transactional(rollbackFor = Exception.class)
     public void approve(WmsExchangeAuditStatus.Event event, WmsApprovalReqVO approvalReqVO) {
         // 设置业务默认值
-        approvalReqVO.setBillType(WmsBillType.EXCHANGE.getValue());
+        approvalReqVO.setBillType(BillType.EXCHANGE.getValue());
         approvalReqVO.setStatusType(WmsExchangeAuditStatus.getType());
         // 获得业务对象
         WmsExchangeDO exchangeDO = validateExchangeExists(approvalReqVO.getBillId());

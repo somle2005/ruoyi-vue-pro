@@ -9,7 +9,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundIt
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
@@ -168,7 +168,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setInboundItemId(itemDO.getId());
                 flowDO.setProductId(itemDO.getProductId());
 
-                flowDO.setBillType(WmsBillType.OUTBOUND.getValue());
+                flowDO.setBillType(BillType.OUTBOUND.getValue());
                 flowDO.setBillId(outboundRespVO.getId());
                 flowDO.setBillItemId(item.getId());
 
@@ -191,7 +191,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setInboundItemId(itemDO.getId());
                 flowDO.setProductId(itemDO.getProductId());
 
-                flowDO.setBillType(WmsBillType.OUTBOUND.getValue());
+                flowDO.setBillType(BillType.OUTBOUND.getValue());
                 flowDO.setBillId(outboundRespVO.getId());
                 flowDO.setBillItemId(item.getId());
 
@@ -215,7 +215,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setInboundItemId(itemDO.getId());
                 flowDO.setProductId(itemDO.getProductId());
 
-                flowDO.setBillType(WmsBillType.OUTBOUND.getValue());
+                flowDO.setBillType(BillType.OUTBOUND.getValue());
                 flowDO.setBillId(outboundRespVO.getId());
                 flowDO.setBillItemId(item.getId());
 

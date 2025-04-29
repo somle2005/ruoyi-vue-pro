@@ -25,7 +25,7 @@ import cn.iocoder.yudao.module.wms.dal.mysql.inventory.bin.WmsInventoryBinMapper
 import cn.iocoder.yudao.module.wms.dal.mysql.inventory.product.WmsInventoryProductMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.inventory.WmsInventoryAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.approval.history.WmsApprovalHistoryService;
@@ -309,7 +309,7 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     @Transactional(rollbackFor = Exception.class)
     public void approve(WmsInventoryAuditStatus.Event event, WmsApprovalReqVO approvalReqVO) {
         // 设置业务默认值
-        approvalReqVO.setBillType(WmsBillType.INVENTORY.getValue());
+        approvalReqVO.setBillType(BillType.INVENTORY.getValue());
         approvalReqVO.setStatusType(WmsOutboundAuditStatus.getType());
         // 获得业务对象
         WmsInventoryDO inventoryDO = validateInventoryExists(approvalReqVO.getBillId());
@@ -326,7 +326,7 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
      */
     @Override
     public void assembleApprovalHistory(List<WmsInventoryRespVO> list) {
-        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(WmsBillType.INVENTORY, StreamX.from(list).toList(WmsInventoryRespVO::getId));
+        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(BillType.INVENTORY, StreamX.from(list).toList(WmsInventoryRespVO::getId));
         StreamX.from(list).assemble(groupedApprovalHistory, WmsInventoryRespVO::getId, WmsInventoryRespVO::setApprovalHistoryList);
     }
 }
