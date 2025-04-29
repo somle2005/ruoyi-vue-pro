@@ -237,14 +237,6 @@ public interface ErrorCodeConstants {
     ErrorCode INVENTORY_CODE_DUPLICATE = new ErrorCode(2_001_020_008, "单据号已存在");
     ErrorCode INVENTORY_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_020_009, "盘点单不符合审批条件");
 
-    // ========== WMS_INVENTORY_PRODUCT 库存盘点产品表 2_001_021_000 ==========
-    ErrorCode INVENTORY_PRODUCT_NOT_EXISTS = new ErrorCode(2_001_021_001, "库存盘点产品不存在");
-    ErrorCode INVENTORY_PRODUCT_EXISTS = new ErrorCode(2_001_021_002, "库存盘点产品已存在");
-    ErrorCode INVENTORY_PRODUCT_INVENTORY_ID_PRODUCT_ID_DUPLICATE = new ErrorCode(2_001_021_003, "盘点结果单ID,产品ID已存在");
-    ErrorCode INVENTORY_PRODUCT_BE_REFERRED = new ErrorCode(2_001_021_004, "库存盘点产品被引用");
-    ErrorCode INVENTORY_PRODUCT_CAN_NOT_EDIT = new ErrorCode(2_001_021_005, "库存盘点产品不允许编辑");
-    ErrorCode INVENTORY_PRODUCT_CAN_NOT_DELETE = new ErrorCode(2_001_021_006, "库存盘点产品不允许删除");
-    ErrorCode INVENTORY_PRODUCT_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_021_007, "库存盘点产品不符合审批条件");
     ErrorCode INVENTORY_AUDIT_FAIL = new ErrorCode(2_001_021_008, "审核错误，当前出库单状态为{}，在{}状态时才允许{}");
     ErrorCode INVENTORY_STATUS_PARSE_ERROR = new ErrorCode(2_001_021_009, "盘点审批状态转换错误");
     ErrorCode INVENTORY_AUDIT_ERROR = new ErrorCode(2_001_021_010, "盘点单审核错误，当前审核状态{}");
@@ -252,7 +244,7 @@ public interface ErrorCodeConstants {
     // ========== WMS_INVENTORY_BIN 库位盘点表 2_001_022_000 ==========
     ErrorCode INVENTORY_BIN_NOT_EXISTS = new ErrorCode(2_001_022_001, "库位盘点不存在");
     ErrorCode INVENTORY_BIN_EXISTS = new ErrorCode(2_001_022_002, "库位盘点已存在");
-    ErrorCode INVENTORY_BIN_INVENTORY_ID_BIN_ID_PRODUCT_ID_DUPLICATE = new ErrorCode(2_001_022_003, "盘点结果单ID,仓位ID,产品ID已存在");
+    ErrorCode INVENTORY_BIN_DUPLICATE = new ErrorCode(2_001_022_003, "盘点条目重复");
     ErrorCode INVENTORY_BIN_INVENTORY_ID_DUPLICATE = new ErrorCode(2_001_022_003, "盘点单ID错误");
     ErrorCode INVENTORY_BIN_BE_REFERRED = new ErrorCode(2_001_022_004, "库位盘点被引用");
     ErrorCode INVENTORY_BIN_CAN_NOT_EDIT = new ErrorCode(2_001_022_005, "库位盘点不允许编辑");

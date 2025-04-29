@@ -23,6 +23,13 @@ public class WmsPickupPendingPageReqVO extends PageParam {
 
 
     /**
+     * 仓库ID
+     **/
+    @Schema(description = "仓库ID", example = "32")
+    private Long warehouseId;
+
+
+    /**
      * 产品ID
      **/
     @Schema(description = "产品ID", example = "29327")
