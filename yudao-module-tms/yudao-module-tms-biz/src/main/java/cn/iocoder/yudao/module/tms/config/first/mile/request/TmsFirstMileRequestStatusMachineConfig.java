@@ -22,7 +22,7 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.*;
 @Slf4j
 @Configuration
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class TmsFirstMileRequestStatusMachine {
+public class TmsFirstMileRequestStatusMachineConfig {
 
     @Resource
     FailCallback TmsBaseFailCallbackImpl;

@@ -21,7 +21,7 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQU
 @Slf4j
 @Configuration
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class TmsFirstMileRequestItemStatusMachine {
+public class TmsFirstMileRequestItemStatusMachineConfig {
 
     @Resource
     FailCallback TmsBaseFailCallbackImpl;
