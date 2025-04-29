@@ -64,6 +64,7 @@ public interface TmsFirstMileRequestItemService {
      * @param id          头程申请表明细id
      * @param openStatus  开关状态
      * @param orderStatus 采购状态
+     * @param closeQty 最终的已订购数量
      */
-    void updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus);
+    void updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus, Integer closeQty);
 }

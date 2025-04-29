@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 头程单申请 Service 接口
@@ -79,6 +80,11 @@ public interface TmsFirstMileRequestService {
     // ==================== 子表（头程申请表明细） ====================
 
     /**
+     * 通过itemID拿到DO
+     */
+    TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id);
+
+    /**
      * 修改子单状态，开关、订购
      */
     TmsFirstMileRequestItemDO updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus);
@@ -87,7 +93,7 @@ public interface TmsFirstMileRequestService {
      * 获得头程申请表明细列表
      *
      * @param requestId 所属申请单ID
-     * @return 头程申请表明细列表
+     * @return 头程申请表明细列表LIST
      */
     List<TmsFirstMileRequestItemDO> getFirstMileRequestItemListByRequestId(Long requestId);
 
@@ -124,4 +130,12 @@ public interface TmsFirstMileRequestService {
      * @return 合并后的头程单编号
      */
     Long mergeFirstMileRequest(TmsFirstMileSaveReqVO createReqVO);
+
+    /**
+     * 获取头程申请表明细列表MAP
+     *
+     * @param list ids
+     * @return map
+     */
+    Map<Long, TmsFirstMileRequestItemDO> getFirstMileRequestItemListMap(List<Long> list);
 }

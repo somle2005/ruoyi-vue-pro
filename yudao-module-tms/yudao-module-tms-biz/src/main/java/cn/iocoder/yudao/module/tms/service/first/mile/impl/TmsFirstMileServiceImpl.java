@@ -11,6 +11,7 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
+import cn.iocoder.yudao.module.tms.api.first.mile.request.FistMileRequestItemDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
@@ -21,18 +22,22 @@ import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.TmsFirstMileMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item.TmsFirstMileItemMapper;
 import cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
+import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
+import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -40,11 +45,13 @@ import org.springframework.validation.annotation.Validated;
 import java.time.LocalDateTime;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_AUDIT_STATE_MACHINE;
+import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE;
 
 /**
  * 头程单 Service 实现类
@@ -60,9 +67,14 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final TmsFirstMileItemMapper firstMileItemMapper;
     private final TmsFeeService feeService;
     private final TmsNoRedisDAO noRedisDAO;
+    @Autowired
+    @Lazy
+    TmsFirstMileRequestService tmsFirstMileRequestService;
 
     @Resource(name = FIRST_MILE_AUDIT_STATE_MACHINE)
     StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileAuditReqVO> auditStateMachine;
+    @Resource(name = FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE)
+    StateMachine<TmsOrderStatus, TmsEventEnum, FistMileRequestItemDTO> requestItemOrderStateMachine;
 
     //校验code中间日期是否是当天
     private static void validCodeDateIsToday(TmsFirstMileSaveReqVO vo) {
@@ -255,6 +267,27 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         List<TmsFirstMileItemDO> itemList = TmsFirstMileConvert.convertItemList(list);
         itemList.forEach(item -> item.setFirstMileId(firstMileId));
         firstMileItemMapper.insertBatch(itemList);
+        //item如果存在关联，则联动
+        syncClosedQty(itemList, true);
+    }
+
+    /**
+     * 同步订购数量 -> 头程申请项
+     *
+     * @param itemList TmsFirstMileItemDO
+     */
+    private void syncClosedQty(List<TmsFirstMileItemDO> itemList, Boolean isAdd) {
+        itemList.stream().filter(item -> item.getRequestItemId() != null).forEach(item -> {
+            //拿到申请itemDO
+            TmsFirstMileRequestItemDO firstMileRequestItemDO = tmsFirstMileRequestService.getFirstMileRequestItem(item.getRequestItemId());
+            FistMileRequestItemDTO dto = FistMileRequestItemDTO.builder().itemId(item.getRequestItemId()).qty(item.getQty()).build();
+            if (!isAdd) {
+                dto.setQty(-dto.getQty());//取反
+            }
+            requestItemOrderStateMachine.fireEvent(TmsOrderStatus.fromCode(firstMileRequestItemDO.getOrderStatus())
+                , TmsEventEnum.ORDER_ADJUSTMENT
+                , dto);
+        });
     }
 
     private void updateFirstMileItemList(Long firstMileId, List<TmsFirstMileItemSaveReqVO> list) {
@@ -269,12 +302,25 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
             diffedList.get(0).forEach(item -> item.setFirstMileId(firstMileId));
             firstMileItemMapper.insertBatch(diffedList.get(0));
+            syncClosedQty(diffedList.get(0), true);
         }
         if (CollUtil.isNotEmpty(diffedList.get(1))) {
+            //批量查询MAP
+            Map<Long, TmsFirstMileRequestItemDO> requestItemMap = tmsFirstMileRequestService.getFirstMileRequestItemListMap(
+                diffedList.get(1).stream().filter(item -> item.getRequestItemId() != null).distinct().map(TmsFirstMileItemDO::getRequestItemId).toList());
+            diffedList.get(1).stream().filter(item -> item.getRequestItemId() != null).forEach(item -> {
+                TmsFirstMileRequestItemDO oldItemDO = requestItemMap.get(item.getRequestItemId());
+                //变化的数量差
+                Integer changeQty = item.getQty() - oldItemDO.getQty();
+                requestItemOrderStateMachine.fireEvent(TmsOrderStatus.fromCode(oldItemDO.getOrderStatus())
+                    , TmsEventEnum.ORDER_ADJUSTMENT
+                    , FistMileRequestItemDTO.builder().itemId(item.getRequestItemId()).qty(changeQty).build());
+            });
             firstMileItemMapper.updateBatch(diffedList.get(1));
         }
         if (CollUtil.isNotEmpty(diffedList.get(2))) {
             List<Long> deleteIds = CollectionUtils.convertList(diffedList.get(2), TmsFirstMileItemDO::getId);
+            syncClosedQty(diffedList.get(2), false);
             firstMileItemMapper.deleteByIds(deleteIds);
         }
     }

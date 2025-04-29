@@ -36,6 +36,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             .betweenIfPresent(TmsFirstMileItemDO::getUpdateTime, vo.getUpdateTime())
             .eqIfPresent(TmsFirstMileItemDO::getRequestItemId, vo.getRequestItemId())
             .eqIfPresent(TmsFirstMileItemDO::getProductId, vo.getProductId())
+            .eqIfPresent(TmsFirstMileItemDO::getQty, vo.getQty())
             .betweenIfPresent(TmsFirstMileItemDO::getBoxQty, vo.getBoxQty())
             .eqIfPresent(TmsFirstMileItemDO::getCompanyId, vo.getCompanyId())
             .eqIfPresent(TmsFirstMileItemDO::getDeptId, vo.getDeptId())

@@ -139,13 +139,14 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
     }
 
     @Override
-    public void updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus) {
+    @Transactional(rollbackFor = Exception.class)
+    public void updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus, Integer closeQty) {
         TmsFirstMileRequestItemDO firstMileRequestItemDO = validateFirstMileRequestItemExists(id);
         if (openStatus != null) {
             firstMileRequestItemDO.setOffStatus(openStatus);
         }
         if (orderStatus != null) {
-            firstMileRequestItemDO.setOrderStatus(orderStatus);
+            firstMileRequestItemDO.setOrderStatus(orderStatus).setOrderClosedQty(closeQty);
         }
         firstMileRequestItemMapper.updateById(firstMileRequestItemDO);
     }

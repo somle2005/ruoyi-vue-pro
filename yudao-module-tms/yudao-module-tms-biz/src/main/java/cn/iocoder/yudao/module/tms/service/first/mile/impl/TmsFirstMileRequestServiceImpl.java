@@ -35,6 +35,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -216,6 +217,12 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         // 执行更新
         firstMileRequestMapper.updateById(requestDO);
         return requestDO;
+    }
+
+
+    @Override
+    public TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id) {
+        return firstMileRequestItemMapper.selectById(id);
     }
 
     @Override
@@ -431,5 +438,17 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         //
         //        // 5. 创建头程单
         //        return firstMileService.createFirstMile(createReqVO);
+    }
+
+    /**
+     * 获取头程申请表明细列表MAP
+     *
+     * @param list ids
+     * @return map
+     */
+    @Override
+    public Map<Long, TmsFirstMileRequestItemDO> getFirstMileRequestItemListMap(List<Long> list) {
+        List<TmsFirstMileRequestItemDO> requestItemDOList = firstMileRequestItemMapper.selectListByRequestIds(list);
+        return requestItemDOList.stream().collect(Collectors.toMap(TmsFirstMileRequestItemDO::getId, Function.identity()));
     }
 }

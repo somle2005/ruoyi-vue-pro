@@ -4,13 +4,13 @@ import lombok.Builder;
 import lombok.Data;
 
 /**
- * 头程申请数量变化DTO
+ * 头程主表数量变化DTO
  */
 @Data
 @Builder
-public class FistMileRequestItemDTO {
+public class FistMileRequestDTO {
     //id
-    private Long itemId;
-    //订购数量变动值
+    private Long id;
+    //订购数量
     private Integer qty;
 }

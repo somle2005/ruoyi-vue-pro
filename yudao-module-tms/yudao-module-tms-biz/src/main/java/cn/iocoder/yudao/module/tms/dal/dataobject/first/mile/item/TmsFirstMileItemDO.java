@@ -41,11 +41,15 @@ public class TmsFirstMileItemDO extends BaseDO {
     /**
      * 申请项ID
      */
-    private Integer requestItemId;
+    private Long requestItemId;
     /**
      * 产品ID
      */
-    private Integer productId;
+    private Long productId;
+    /**
+     * 件数
+     */
+    private Integer qty;
     /**
      * 箱数
      */

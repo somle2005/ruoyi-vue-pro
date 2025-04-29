@@ -31,11 +31,14 @@ public class TmsFirstMileItemRespVO {
 
     @Schema(description = "申请项ID")
     @ExcelProperty("申请项ID")
-    private Integer requestItemId;
+    private Long requestItemId;
 
     @Schema(description = "产品ID")
     @ExcelProperty("产品ID")
     private Integer productId;
+
+    @Schema(description = "件数")
+    private Integer qty;
 
     @Schema(description = "箱数")
     @ExcelProperty("箱数")

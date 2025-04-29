@@ -38,7 +38,7 @@ public class RequestItemOffActionImpl implements Action<TmsOffStatus, TmsEventEn
     public void execute(TmsOffStatus from, TmsOffStatus to, TmsEventEnum event, TmsFirstMileRequestItemDO context) {
 
 
-        tmsFirstMileRequestItemService.updateFirstMileRequestItemStatus(context.getId(), to.getCode(), null);
+        tmsFirstMileRequestItemService.updateFirstMileRequestItemStatus(context.getId(), to.getCode(), null, null);
         //log
         log.debug("更新采购申请单子表开关状态，ID: {}, 从状态: {}, 到状态: {}, 事件: {}",
             context.getId(), from, to, event);
