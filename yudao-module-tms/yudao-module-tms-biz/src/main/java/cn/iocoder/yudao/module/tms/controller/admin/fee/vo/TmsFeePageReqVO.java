@@ -19,7 +19,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 public class TmsFeePageReqVO extends PageParam {
 
     @Schema(description = "原单类型;出运订单、调拨单")
-    private String sourceType;
+    private Integer sourceType;
 
     @Schema(description = "原单ID;出运订单ID、调拨单ID")
     private Long sourceId;

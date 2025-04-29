@@ -22,7 +22,7 @@ public class TmsFeeRespVO {
 
     @Schema(description = "原单类型;出运订单、调拨单")
     @ExcelProperty("原单类型;出运订单、调拨单")
-    private String sourceType;
+    private Integer sourceType;
 
     @Schema(description = "原单ID;出运订单ID、调拨单ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("原单ID;出运订单ID、调拨单ID")

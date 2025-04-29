@@ -18,7 +18,7 @@ public class TmsVesselTrackingRespVO {
 
     @Schema(description = "上游单据类型;调拨单、头程单、退货单")
     @ExcelProperty("上游单据类型;调拨单、头程单、退货单")
-    private String upstreamType;
+    private Integer upstreamType;
 
     @Schema(description = "上游业务单ID，如调拨单ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("上游业务单ID，如调拨单ID")

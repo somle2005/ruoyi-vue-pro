@@ -31,7 +31,7 @@ public class TmsVesselTrackingDO extends BaseDO {
     /**
      * 上游单据类型;调拨单、头程单、退货单
      */
-    private String upstreamType;
+    private Integer upstreamType;
     /**
      * 上游业务单ID，如调拨单ID
      */

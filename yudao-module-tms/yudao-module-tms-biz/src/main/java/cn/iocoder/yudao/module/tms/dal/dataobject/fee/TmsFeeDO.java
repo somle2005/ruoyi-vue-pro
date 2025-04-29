@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.tms.dal.dataobject.fee;
 
-import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -22,7 +22,7 @@ import java.math.BigDecimal;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TmsFeeDO extends BaseDO {
+public class TmsFeeDO extends TenantBaseDO {
 
     /**
      * 主键ID
@@ -32,7 +32,7 @@ public class TmsFeeDO extends BaseDO {
     /**
      * 原单类型;出运订单、调拨单
      */
-    private String sourceType;
+    private Integer sourceType;
     /**
      * 原单ID;出运订单ID、调拨单ID
      */

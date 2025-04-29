@@ -13,7 +13,7 @@ public class TmsVesselTrackingSaveReqVO {
     private Long id;
 
     @Schema(description = "上游单据类型;调拨单、头程单、退货单")
-    private String upstreamType;
+    private Integer upstreamType;
 
     @Schema(description = "上游业务单ID，如调拨单ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "上游业务单ID，如调拨单ID不能为空")

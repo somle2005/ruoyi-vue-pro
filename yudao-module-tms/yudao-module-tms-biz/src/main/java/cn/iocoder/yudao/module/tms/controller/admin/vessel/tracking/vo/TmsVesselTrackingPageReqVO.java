@@ -21,7 +21,7 @@ public class TmsVesselTrackingPageReqVO extends PageParam {
     private Long id;
 
     @Schema(description = "上游单据类型;调拨单、头程单、退货单")
-    private String upstreamType;
+    private Integer upstreamType;
 
     @Schema(description = "上游业务单ID，如调拨单ID")
     private Long upstreamId;
