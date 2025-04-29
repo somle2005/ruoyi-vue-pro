@@ -2,16 +2,32 @@ package cn.iocoder.yudao.module.wms.service.exchange.defective;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectivePageReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectiveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectiveSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
+import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.defective.WmsExchangeDefectiveDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.exchange.defective.WmsExchangeDefectiveMapper;
+import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.EXCHANGE_DEFECTIVE_NOT_EXISTS;
 
@@ -26,6 +42,13 @@ public class WmsExchangeDefectiveServiceImpl implements WmsExchangeDefectiveServ
 
     @Resource
     private WmsExchangeDefectiveMapper exchangeDefectiveMapper;
+
+    @Resource
+    private ErpProductApi productApi;
+
+    @Autowired
+    @Lazy
+    private WmsWarehouseBinService warehouseBinService;
 
     /**
      * @sign : D8D21927B4E9471E
@@ -96,8 +119,43 @@ public class WmsExchangeDefectiveServiceImpl implements WmsExchangeDefectiveServ
         return exchangeDefectiveMapper.selectByIds(idList);
     }
 
+    /**
+     * 根据换货单ID查询换货详情
+     */
     @Override
     public List<WmsExchangeDefectiveDO> selectByExchangeId(Long id) {
         return exchangeDefectiveMapper.selectByExchangeId(id);
     }
-}
+
+    /**
+     * 装配仓位
+     **/
+    @Override
+    public void assembleBins(List<WmsExchangeDefectiveRespVO> defectiveList) {
+
+        Set<Long> binIds = new HashSet<>();
+        binIds.addAll(StreamX.from(defectiveList).toList(WmsExchangeDefectiveRespVO::getFromBinId).stream().distinct().toList());
+        binIds.addAll(StreamX.from(defectiveList).toList(WmsExchangeDefectiveRespVO::getToBinId).stream().distinct().toList());
+
+        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(binIds);
+        List<WmsWarehouseBinRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinRespVO.class);
+
+        StreamX.from(defectiveList).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsExchangeDefectiveRespVO::getFromBinId,WmsExchangeDefectiveRespVO::setFromBin);
+        StreamX.from(defectiveList).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsExchangeDefectiveRespVO::getToBinId,WmsExchangeDefectiveRespVO::setToBin);
+
+    }
+
+    /**
+     * 装配产品
+     **/
+    @Override
+    public void assembleProduct(List<WmsExchangeDefectiveRespVO> defectiveList) {
+        Map<Long, ErpProductDTO> productDTOMap = productApi.getProductMap(StreamX.from(defectiveList).map(WmsExchangeDefectiveRespVO::getProductId).toList());
+        Map<Long, WmsProductRespSimpleVO> productVOMap = new HashMap<>();
+        for (ErpProductDTO productDTO : productDTOMap.values()) {
+            WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
+            productVOMap.put(productDTO.getId(), productVO);
+        }
+        StreamX.from(defectiveList).assemble(productVOMap, WmsExchangeDefectiveRespVO::getProductId, WmsExchangeDefectiveRespVO::setProduct);
+    }
+}

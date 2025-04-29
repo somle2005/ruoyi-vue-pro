@@ -24,7 +24,7 @@ public class WmsInboundSimpleRespVO {
 
     @Schema(description = "单据号")
     @ExcelProperty("单据号")
-    private String no;
+    private String code;
 
     @Schema(description = "入库单类型 ; InboundType : 1-手工入库 , 2-采购入库", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @ExcelProperty("入库单类型")
@@ -58,6 +58,10 @@ public class WmsInboundSimpleRespVO {
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
+
+    @Schema(description = "仓库ID", example = "23620")
+    @ExcelProperty("仓库ID")
+    private Long warehouseId;
 
 
 }

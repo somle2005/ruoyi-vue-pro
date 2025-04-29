@@ -43,9 +43,12 @@ public class WmsStockBinClient extends RestClient {
         Assert.assertNotNull(result);
         Assert.assertTrue(result.isSuccess());
         Assert.assertNotNull(result.getData());
-        Assert.assertNotNull(result.getData());
+
 
         return result;
     }
+
+
+
 
 }

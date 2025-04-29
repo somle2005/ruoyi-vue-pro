@@ -8,7 +8,7 @@ import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 
 /**
- * @table-fields : outbound_available_qty,inbound_status,company_id,plan_qty,shelved_qty,upstream_item_id,remark,latest_flow_id,inbound_id,actual_qty,product_id,id,dept_id
+ * @table-fields : outbound_available_qty,inbound_status,company_id,plan_qty,shelved_qty,upstream_item_id,remark,inbound_dept_id,latest_flow_id,inbound_id,inbound_company_id,actual_qty,product_id,id,dept_id
  */
 @Schema(description = "管理后台 - 入库单详情新增/修改 Request VO")
 @Data
@@ -44,10 +44,10 @@ public class WmsInboundItemSaveReqVO {
     @Schema(description = "最新的流水ID", example = "")
     private Long latestFlowId;
 
-    @Schema(description = "库存归属部门ID", example = "")
+    @Schema(description = "库存归属部门ID,由用户指定", example = "")
     private Long deptId;
 
-    @Schema(description = "库存财务公司ID", example = "")
+    @Schema(description = "库存财务公司ID,由用户指定", example = "")
     private Long companyId;
 
     @Schema(description = "备注", example = "")
@@ -55,4 +55,10 @@ public class WmsInboundItemSaveReqVO {
 
     @Schema(description = "来源详情ID", example = "")
     private Long upstreamItemId;
+
+    @Schema(description = "入库的财务公司ID", example = "")
+    private Long inboundCompanyId;
+
+    @Schema(description = "入库的归属部门ID,由用户指定", example = "")
+    private Long inboundDeptId;
 }

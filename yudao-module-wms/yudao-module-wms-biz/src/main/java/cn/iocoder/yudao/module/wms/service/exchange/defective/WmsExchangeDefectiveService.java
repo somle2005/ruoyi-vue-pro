@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.wms.service.exchange.defective;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectivePageReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectiveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectiveSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.defective.WmsExchangeDefectiveDO;
 import jakarta.validation.Valid;
@@ -57,5 +58,18 @@ public interface WmsExchangeDefectiveService {
      */
     List<WmsExchangeDefectiveDO> selectByIds(List<Long> idList);
 
+    /**
+     * 根据换货单ID查询换货详情
+     */
     List<WmsExchangeDefectiveDO> selectByExchangeId(Long id);
+
+    /**
+     * 装配仓位
+     **/
+    void assembleBins(List<WmsExchangeDefectiveRespVO> defectiveList);
+
+    /**
+     * 装配产品
+     **/
+    void assembleProduct(List<WmsExchangeDefectiveRespVO> defectiveList);
 }

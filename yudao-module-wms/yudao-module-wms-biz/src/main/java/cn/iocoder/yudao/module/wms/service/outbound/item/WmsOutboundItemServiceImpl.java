@@ -6,7 +6,13 @@ import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinRespVO;
+import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
+import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.system.api.dept.DeptApi;
+import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
+import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemImportExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemSaveReqVO;
@@ -25,11 +31,13 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_CAN_NOT_EDIT;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_CAN_NOT_EDIT;
@@ -37,10 +45,6 @@ import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_ITEM
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_ITEM_NOT_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_ITEM_OUTBOUND_ID_DUPLICATE;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_ITEM_OUTBOUND_ID_PRODUCT_ID_DUPLICATE;
-import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 /**
  * 出库单详情 Service 实现类
@@ -63,6 +67,12 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
 
     @Resource
     private WmsWarehouseBinService warehouseBinService;
+
+    @Resource
+    private DeptApi deptApi;
+
+    @Resource
+    private FmsCompanyApi companyApi;
 
     /**
      * @sign : 07E3106EC549C08B
@@ -196,8 +206,37 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
 
     @Override
     public void assembleBin(List<WmsOutboundItemRespVO> itemList) {
-        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(itemList).toList(WmsOutboundItemRespVO::getBinId).stream().distinct().toList());
+        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(itemList).toSet(WmsOutboundItemRespVO::getBinId));
         List<WmsWarehouseBinRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinRespVO.class);
         StreamX.from(itemList).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsOutboundItemRespVO::getBinId, WmsOutboundItemRespVO::setBin);
     }
-}
+
+    @Override
+    public void assembleProductIds(List<WmsOutboundItemImportExcelVO> impVOList) {
+        List<String> productCodes = StreamX.from(impVOList).toList(WmsOutboundItemImportExcelVO::getProductCode);
+        Map<String, ErpProductDTO> productMap = productApi.getProductMapByCode(productCodes);
+        StreamX.from(impVOList).assemble(productMap, WmsOutboundItemImportExcelVO::getProductCode, (p, v) -> {
+            if (v != null) {
+                p.setProductId(v.getId());
+            }
+        });
+    }
+
+    @Override
+    public void assembleDept(List<WmsOutboundItemRespVO> voList) {
+        Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(StreamX.from(voList).map(WmsOutboundItemRespVO::getDeptId).toList());
+        Map<Long, DeptSimpleRespVO> deptVOMap = new HashMap<>();
+        for (DeptRespDTO productDTO : deptDTOMap.values()) {
+            DeptSimpleRespVO deptVO = BeanUtils.toBean(productDTO, DeptSimpleRespVO.class);
+            deptVOMap.put(productDTO.getId(), deptVO);
+        }
+        StreamX.from(voList).assemble(deptVOMap, WmsOutboundItemRespVO::getDeptId, WmsOutboundItemRespVO::setDept);
+    }
+
+    @Override
+    public void assembleCompany(List<WmsOutboundItemRespVO> voList) {
+        Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(voList).toSet(WmsOutboundItemRespVO::getCompanyId));
+        Map<Long, FmsCompanySimpleRespVO> companyVOMap = StreamX.from(companyMap.values()).toMap(FmsCompanyDTO::getId, v -> BeanUtils.toBean(v, FmsCompanySimpleRespVO.class));
+        StreamX.from(voList).assemble(companyVOMap, WmsOutboundItemRespVO::getCompanyId, WmsOutboundItemRespVO::setCompany);
+    }
+}

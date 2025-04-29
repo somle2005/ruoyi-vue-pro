@@ -19,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.WAREHOUSE_BIN_CODE_DUPLICATE;
@@ -161,7 +162,7 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
     }
 
     @Override
-    public List<WmsWarehouseBinDO> selectByIds(List<Long> ids) {
+    public List<WmsWarehouseBinDO> selectByIds(Set<Long> ids) {
         if(CollectionUtils.isEmpty(ids)) {
             return List.of();
         }
@@ -171,6 +172,14 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
     @Override
     public List<WmsWarehouseBinDO> getSimpleList(WmsWarehouseBinPageReqVO pageReqVO) {
         return warehouseBinMapper.getSimpleList(pageReqVO);
+    }
+
+    @Override
+    public List<WmsWarehouseBinDO> selectByCodes(Set<String> codes) {
+        if(CollectionUtils.isEmpty(codes)) {
+            return List.of();
+        }
+        return warehouseBinMapper.selectByCodes(codes);
     }
 
 

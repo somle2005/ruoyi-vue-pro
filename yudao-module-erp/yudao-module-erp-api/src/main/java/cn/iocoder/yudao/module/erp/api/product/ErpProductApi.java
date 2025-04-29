@@ -34,6 +34,29 @@ public interface ErpProductApi {
         return convertMap(listProducts(ids), ErpProductDTO::getId);
     }
 
+
+    /**
+     * 获得产品 DO Map
+     *
+     * @param codes 产品代码组
+     * @return 产品 DO Map
+     */
+    default Map<String, ErpProductDTO> getProductMapByCode(Collection<String> codes) {
+        if(CollectionUtils.isEmpty(codes)) {
+            return new HashMap<>();
+        }
+        return convertMap(listProductsByCodes(codes), ErpProductDTO::getBarCode);
+    }
+
+
+    /**
+     * 获得产品 DO 列表
+     *
+     * @param codes 产品代码组
+     * @return 产品 DO 列表
+     */
+    List<ErpProductDTO> listProductsByCodes(Collection<String> codes);
+
     /**
      * 获得产品 DO 列表
      *

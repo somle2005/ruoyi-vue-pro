@@ -9,7 +9,7 @@ import com.alibaba.excel.annotation.*;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,creator,outbound_qty,create_time,outbound_id,outbound_item_id,updater,inbound_id,outbound_action_id,update_time,product_id,id,inbound_item_id
+ * @table-fields : bill_id,tenant_id,outbound_available_qty,creator,create_time,updater,inbound_id,outbound_available_delta_qty,outbound_action_id,update_time,bill_item_id,product_id,bill_type,id,inbound_item_id,direction
  */
 @Schema(description = "管理后台 - 入库单库存详情扣减 Response VO")
 @Data
@@ -31,14 +31,6 @@ public class WmsInboundItemFlowRespVO {
     @Schema(description = "标准产品ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "30952")
     @ExcelProperty("标准产品ID")
     private Long productId;
-
-    @Schema(description = "出库单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "11015")
-    @ExcelProperty("出库单ID")
-    private Long outboundId;
-
-    @Schema(description = "出库单明细ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "28163")
-    @ExcelProperty("出库单明细ID")
-    private Long outboundItemId;
 
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("创建时间")
@@ -69,11 +61,31 @@ public class WmsInboundItemFlowRespVO {
     @ExcelProperty("更新者")
     private String updater;
 
-    @Schema(description = "变化的数量，出库量", example = "")
-    @ExcelProperty("变化的数量")
-    private Integer outboundQty;
-
     @Schema(description = "出库动作ID", example = "")
     @ExcelProperty("出库动作ID")
     private Long outboundActionId;
+
+    @Schema(description = "单据类型", example = "")
+    @ExcelProperty("单据类型")
+    private Integer billType;
+
+    @Schema(description = "出库单ID", example = "")
+    @ExcelProperty("出库单ID")
+    private Long billId;
+
+    @Schema(description = "出库单明细ID", example = "")
+    @ExcelProperty("出库单明细ID")
+    private Long billItemId;
+
+    @Schema(description = "出入方向", example = "")
+    @ExcelProperty("出入方向")
+    private Integer direction;
+
+    @Schema(description = "变化的数量，可出库量的变化量", example = "")
+    @ExcelProperty("变化的数量，可出库量的变化量")
+    private Integer outboundAvailableDeltaQty;
+
+    @Schema(description = "可出库量", example = "")
+    @ExcelProperty("可出库量")
+    private Integer outboundAvailableQty;
 }

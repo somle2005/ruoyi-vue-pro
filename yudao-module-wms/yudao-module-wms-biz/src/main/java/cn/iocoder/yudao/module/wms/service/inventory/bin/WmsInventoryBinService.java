@@ -4,9 +4,9 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinSaveReqVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.bin.WmsInventoryBinDO;
 import jakarta.validation.Valid;
-
 import java.util.List;
 
 /**
@@ -66,4 +66,11 @@ public interface WmsInventoryBinService {
     void assembleBin(List<WmsInventoryBinRespVO> binItemList);
 
     void updateActualQuantity(List<WmsInventoryBinSaveReqVO> updateReqVOList);
+
+    void saveInventoryBinList(WmsInventoryDO inventory, List<WmsInventoryBinDO> doList);
+
+    /**
+     * 追加盘点库位
+     **/
+    Boolean appendInventoryBin(@Valid List<WmsInventoryBinSaveReqVO> createReqVOList);
 }

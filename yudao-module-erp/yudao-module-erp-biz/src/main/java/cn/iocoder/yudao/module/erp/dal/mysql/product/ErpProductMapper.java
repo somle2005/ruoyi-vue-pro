@@ -9,6 +9,7 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -101,5 +102,16 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
             .like(ErpProductDO::getBarCode, barCode)
             .select(ErpProductDO::getId))
             .stream().map(ErpProductDO::getId).toList();
+    }
+
+    /**
+     * 根据条码(barCode)查询出id列表
+     *
+     * @param barCodes SKU（编码
+     * @return ErpProductDO 集合
+     */
+    default List<ErpProductDO> selectByCodes(Collection<String> barCodes){
+        return selectList(new LambdaQueryWrapperX<ErpProductDO>()
+            .in(ErpProductDO::getBarCode, barCodes));
     }
 }

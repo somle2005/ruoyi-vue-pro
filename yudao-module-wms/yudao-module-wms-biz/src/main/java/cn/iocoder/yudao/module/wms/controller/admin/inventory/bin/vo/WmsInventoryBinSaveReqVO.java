@@ -1,9 +1,8 @@
 package cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import java.util.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
  * @table-fields : actual_qty,bin_id,expected_qty,inventory_id,product_id,remark,id

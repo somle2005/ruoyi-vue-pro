@@ -32,8 +32,9 @@ import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsInboundItemFlo
 import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundShelvingStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundType;
 import cn.iocoder.yudao.module.wms.service.approval.history.WmsApprovalHistoryService;
@@ -43,16 +44,18 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_CAN_NOT_EDIT;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_PLAN_QTY_ERROR;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_PRODUCT_ID_REPEATED;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_NOT_COMPLETE;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_NOT_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_NO_DUPLICATE;
@@ -115,6 +118,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         createReqVO.setCode(no);
         createReqVO.setAuditStatus(WmsInboundAuditStatus.DRAFT.getValue());
         createReqVO.setInboundStatus(WmsInboundStatus.NONE.getValue());
+        createReqVO.setShelvingStatus(WmsInboundShelvingStatus.NONE.getValue());
         if (inboundMapper.getByCode(createReqVO.getCode()) != null) {
             throw exception(INBOUND_NO_DUPLICATE);
         }
@@ -143,10 +147,10 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                 toInsetList.add(BeanUtils.toBean(item, WmsInboundItemDO.class));
             });
             // 校验 toInsetList 中是否有重复的 productId
-            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInboundItemDO::getProductId);
-            if (isProductIdRepeated) {
-                throw exception(INBOUND_ITEM_PRODUCT_ID_REPEATED);
-            }
+            // boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInboundItemDO::getProductId);
+            // if (isProductIdRepeated) {
+            //    throw exception(INBOUND_ITEM_PRODUCT_ID_REPEATED);
+            // }
             inboundItemMapper.insertBatch(toInsetList);
         }
         // 返回
@@ -186,10 +190,10 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             finalList.addAll(toInsetList);
             finalList.addAll(toUpdateList);
             // 校验 toInsetList 中是否有重复的 productId
-            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInboundItemDO::getProductId);
-            if (isProductIdRepeated) {
-                throw exception(INBOUND_ITEM_PRODUCT_ID_REPEATED);
-            }
+            // boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInboundItemDO::getProductId);
+            // if (isProductIdRepeated) {
+            //     throw exception(INBOUND_ITEM_PRODUCT_ID_REPEATED);
+            // }
             // 设置归属
             finalList.forEach(item -> {
                 if (item.getPlanQty() == null || item.getPlanQty() <= 0) {
@@ -200,9 +204,15 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                 item.setActualQty(0);
             });
             // 保存详情
-            inboundItemMapper.insertBatch(toInsetList);
-            inboundItemMapper.updateBatch(toUpdateList);
-            inboundItemMapper.deleteBatchIds(toDeleteList);
+            if(!toInsetList.isEmpty()) {
+                inboundItemMapper.insertBatch(toInsetList);
+            }
+            if(!toUpdateList.isEmpty()) {
+                inboundItemMapper.updateBatch(toUpdateList);
+            }
+            if(!toDeleteList.isEmpty()) {
+                inboundItemMapper.deleteBatchIds(toDeleteList);
+            }
         }
         // 更新
         WmsInboundDO inbound = BeanUtils.toBean(updateReqVO, WmsInboundDO.class);
@@ -270,7 +280,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     @Override
     public void approve(WmsInboundAuditStatus.Event event, WmsApprovalReqVO approvalReqVO) {
         // 设置业务默认值
-        approvalReqVO.setBillType(WmsBillType.INBOUND.getValue());
+        approvalReqVO.setBillType(BillType.WMS_INBOUND.getValue());
         approvalReqVO.setStatusType(WmsInboundAuditStatus.getType());
         // 获得业务对象
         WmsInboundDO inbound = validateInboundExists(approvalReqVO.getBillId());
@@ -283,12 +293,18 @@ public class WmsInboundServiceImpl implements WmsInboundService {
 
     @Transactional(rollbackFor = Exception.class)
     protected void fireEvent(WmsInboundAuditStatus.Event event, WmsApprovalReqVO approvalReqVO, WmsInboundDO inbound) {
-        TransitionContext<WmsInboundDO> ctx =  TransitionContext.from(inbound);
+        TransitionContext<WmsInboundDO> ctx = TransitionContext.from(inbound);
         ctx.setExtra(WmsConstants.APPROVAL_REQ_VO_KEY, approvalReqVO);
         // 触发事件
         inboundStateMachine.fireEvent(event, ctx);
     }
 
+    /**
+     * 获得入库单详情
+     *
+     * @param id 编号
+     * @return 入库单
+     */
     @Override
     public WmsInboundRespVO getInboundWithItemList(Long id) {
         // 查询数据
@@ -307,6 +323,11 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         return inboundVO;
     }
 
+    /**
+     * 完成入库单
+     *
+     * @param inboundRespVO 入库单
+     */
     @Override
     public void finishInbound(WmsInboundRespVO inboundRespVO) {
         // 校验本方法在事务中
@@ -355,6 +376,12 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         inboundMapper.updateById(inboundDO);
     }
 
+    /**
+     * 批量查询
+     *
+     * @param ids 入库单id集合
+     * @return 入库单集合
+     */
     @Override
     public List<WmsInboundDO> selectByIds(List<Long> ids) {
         if (CollectionUtils.isEmpty(ids)) {
@@ -363,11 +390,22 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         return inboundMapper.selectByIds(ids);
     }
 
+    /**
+     * 获得入库单列表
+     *
+     * @param pageReqVO 查询条件
+     * @return 入库单列表
+     */
     @Override
     public List<WmsInboundDO> getSimpleList(WmsInboundPageReqVO pageReqVO) {
         return inboundMapper.getSimpleList(pageReqVO);
     }
 
+    /**
+     * 装配仓库信息
+     *
+     * @param list 入库单集合
+     */
     @Override
     public void assembleWarehouse(List<WmsInboundRespVO> list) {
         Map<Long, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsInboundRespVO::getWarehouseId));
@@ -375,16 +413,26 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         StreamX.from(list).assemble(warehouseVOMap, WmsInboundRespVO::getWarehouseId, WmsInboundRespVO::setWarehouse);
     }
 
+    /**
+     * 装配公司信息
+     *
+     * @param list 入库单集合
+     */
     @Override
     public void assembleCompany(List<WmsInboundRespVO> list) {
-        Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(list).toList(WmsInboundRespVO::getCompanyId));
+        Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(list).toSet(WmsInboundRespVO::getCompanyId));
         Map<Long, FmsCompanySimpleRespVO> companyVOMap = StreamX.from(companyMap.values()).toMap(FmsCompanyDTO::getId, v -> BeanUtils.toBean(v, FmsCompanySimpleRespVO.class));
         StreamX.from(list).assemble(companyVOMap, WmsInboundRespVO::getCompanyId, WmsInboundRespVO::setCompany);
     }
 
+    /**
+     * 装配审批历史信息
+     *
+     * @param list 入库单集合
+     */
     @Override
     public void assembleApprovalHistory(List<WmsInboundRespVO> list) {
-        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(WmsBillType.INBOUND, StreamX.from(list).toList(WmsInboundRespVO::getId));
+        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(BillType.WMS_INBOUND, StreamX.from(list).toList(WmsInboundRespVO::getId));
         StreamX.from(list).assemble(groupedApprovalHistory, WmsInboundRespVO::getId, WmsInboundRespVO::setApprovalHistoryList);
     }
 
@@ -419,6 +467,9 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         return longListMap.get(productId);
     }
 
+    /**
+     * 创建盘点入库单
+     */
     @Override
     public WmsInboundDO createForInventory(WmsInboundSaveReqVO inboundSaveReqVO) {
         JdbcUtils.requireTransaction();
@@ -426,7 +477,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         // 创建
         WmsInboundDO inbound = this.createInbound(inboundSaveReqVO);
         // 保存
-        inbound.setUpstreamBillType(WmsBillType.INVENTORY.getValue());
+        inbound.setUpstreamBillType(BillType.WMS_INVENTORY.getValue());
         inbound.setType(WmsInboundType.INVENTORY.getValue());
         inboundMapper.updateById(inbound);
         // 
@@ -446,5 +497,41 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         this.approve(WmsInboundAuditStatus.Event.AGREE, approvalReqVO);
         // 
         return this.getInbound(inbound.getId());
+    }
+
+    /**
+     * 更新上架状态
+     */
+    @Override
+    public void updateShelvingStatus(Set<Long> ids) {
+        for (Long id : ids) {
+            List<WmsInboundItemDO> inboundItemDOList = inboundItemMapper.selectByInboundId(id, Integer.MAX_VALUE);
+            Integer none = 0;
+            Integer part = 0;
+            Integer full = 0;
+            for (WmsInboundItemDO itemDO : inboundItemDOList) {
+                Integer actualQty = itemDO.getActualQty();
+                Integer shelvedQty = itemDO.getShelvedQty();
+                // 如果存在已上架数量不为0，部分上架
+                if (shelvedQty == 0) {
+                    none++;
+                }
+                if (shelvedQty >= actualQty) {
+                    full++;
+                }
+                if (shelvedQty > 0 && shelvedQty < actualQty) {
+                    part++;
+                }
+            }
+            WmsInboundDO inbound = this.getInbound(id);
+            if (none == inboundItemDOList.size()) {
+                inbound.setShelvingStatus(WmsInboundShelvingStatus.NONE.getValue());
+            } else if (full == inboundItemDOList.size()) {
+                inbound.setShelvingStatus(WmsInboundShelvingStatus.ALL.getValue());
+            } else {
+                inbound.setShelvingStatus(WmsInboundShelvingStatus.PARTLY.getValue());
+            }
+            inboundMapper.updateById(inbound);
+        }
     }
 }

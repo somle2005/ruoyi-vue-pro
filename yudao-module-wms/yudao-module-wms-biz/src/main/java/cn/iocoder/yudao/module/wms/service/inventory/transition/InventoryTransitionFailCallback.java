@@ -8,7 +8,7 @@ import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import org.springframework.stereotype.Component;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_AUDIT_ERROR;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_AUDIT_ERROR;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_AUDIT_FAIL;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_STATUS_PARSE_ERROR;
 
@@ -25,13 +25,13 @@ public class InventoryTransitionFailCallback implements FailCallback<Integer, Wm
     @Override
     public void onFail(Integer from, Integer to ,WmsInventoryAuditStatus.Event event, TransitionContext<WmsInventoryDO> context) {
         // 当前状态
-        WmsOutboundAuditStatus currStatus= WmsOutboundAuditStatus.parse(context.data().getAuditStatus());
+        WmsOutboundAuditStatus currStatus = WmsOutboundAuditStatus.parse(context.data().getAuditStatus());
         if (currStatus == null) {
             throw exception(INVENTORY_STATUS_PARSE_ERROR);
         }
 
         if(to==null) {
-            throw exception(INBOUND_AUDIT_ERROR);
+            throw exception(INVENTORY_AUDIT_ERROR,currStatus.getLabel());
         }
 
         WmsOutboundAuditStatus toAuditStatus = WmsOutboundAuditStatus.parse(to);

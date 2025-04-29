@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.item.vo.WmsStockOwnershipMoveItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.item.vo.WmsStockOwnershipMoveItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.item.vo.WmsStockOwnershipMoveItemSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMoveImportExcelVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.move.item.WmsStockOwnershipMoveItemDO;
 import jakarta.validation.Valid;
 
@@ -64,4 +65,10 @@ public interface WmsStockOwnershipMoveItemService {
     void assembleProduct(List<WmsStockOwnershipMoveItemRespVO> itemList);
 
     void assembleCompanyAndDept(List<WmsStockOwnershipMoveItemRespVO> itemList);
+
+    void assembleWarehouseForImp(List<WmsStockOwnershipMoveImportExcelVO> impVOList);
+
+    void assembleCompanyAndDeptForImp(List<WmsStockOwnershipMoveImportExcelVO> impVOList);
+
+    void assembleProductForImp(List<WmsStockOwnershipMoveImportExcelVO> impVOList);
 }

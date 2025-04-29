@@ -70,7 +70,7 @@ public class OutboundStateMachineConfigure {
         // 失败处理
         builder.setFailCallback(OutboundTransitionFailCallback.class);
 
-        return builder.build(OutboundStateMachineConfigure.STATE_MACHINE_NAME,c->c.data().getAuditStatus());
+        return builder.build(OutboundStateMachineConfigure.STATE_MACHINE_NAME,ctx -> ctx.data().getAuditStatus());
 
     }
 

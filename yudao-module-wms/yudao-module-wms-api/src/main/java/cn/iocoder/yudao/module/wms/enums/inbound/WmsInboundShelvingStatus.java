@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.wms.enums.common;
+package cn.iocoder.yudao.module.wms.enums.inbound;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import cn.iocoder.yudao.framework.common.enums.DictEnum;
@@ -8,17 +8,18 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 
 /**
- * 来源单据类型
+ * 入库单上架状态
  **/
 @RequiredArgsConstructor
 @Getter
-public enum WmsBillType implements ArrayValuable<Integer>, DictEnum {
+public enum WmsInboundShelvingStatus implements ArrayValuable<Integer>, DictEnum {
 
-    INBOUND(0, "入库单"),
-    OUTBOUND(1, "出库单"),
-    INVENTORY(2,"盘点单");
+    NONE(1, "未上架"),
+    PARTLY(2, "部分上架"),
+    ALL(3, "已上架"),
+   ;
 
-    public static final Integer[] VALUES = Arrays.stream(values()).map(WmsBillType::getValue).toArray(Integer[]::new);
+    public static final Integer[] VALUES = Arrays.stream(values()).map(WmsInboundShelvingStatus::getValue).toArray(Integer[]::new);
 
 
     private final Integer value;
@@ -27,8 +28,8 @@ public enum WmsBillType implements ArrayValuable<Integer>, DictEnum {
     /**
      * 按 value 匹配枚举，name 优先
      **/
-    public static WmsBillType parse(Integer value) {
-        for (WmsBillType e : WmsBillType.values()) {
+    public static WmsInboundShelvingStatus parse(Integer value) {
+        for (WmsInboundShelvingStatus e : WmsInboundShelvingStatus.values()) {
             if(e.getValue().equals(value)) {
                 return e;
             }
@@ -39,13 +40,13 @@ public enum WmsBillType implements ArrayValuable<Integer>, DictEnum {
     /**
      * 按 name 或 label 匹配枚举，name 优先
      **/
-    public static WmsBillType parse(String nameOrLabel) {
-        for (WmsBillType e : WmsBillType.values()) {
+    public static WmsInboundShelvingStatus parse(String nameOrLabel) {
+        for (WmsInboundShelvingStatus e : WmsInboundShelvingStatus.values()) {
             if(e.name().equalsIgnoreCase(nameOrLabel)) {
                 return e;
             }
         }
-        for (WmsBillType e : WmsBillType.values()) {
+        for (WmsInboundShelvingStatus e : WmsInboundShelvingStatus.values()) {
             if(e.getLabel().equalsIgnoreCase(nameOrLabel)) {
                 return e;
             }

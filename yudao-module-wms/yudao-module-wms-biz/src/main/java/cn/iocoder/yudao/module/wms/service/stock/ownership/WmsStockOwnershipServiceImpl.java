@@ -231,7 +231,7 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
 
     @Override
     public void assembleCompany(List<WmsStockOwnershipRespVO> list) {
-        Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(list).toList(WmsStockOwnershipRespVO::getCompanyId));
+        Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(list).toSet(WmsStockOwnershipRespVO::getCompanyId));
         Map<Long, FmsCompanySimpleRespVO> companyVOMap = StreamX.from(companyMap.values()).toMap(FmsCompanyDTO::getId, v -> BeanUtils.toBean(v, FmsCompanySimpleRespVO.class));
         StreamX.from(list).assemble(companyVOMap, WmsStockOwnershipRespVO::getCompanyId, WmsStockOwnershipRespVO::setCompany);
     }

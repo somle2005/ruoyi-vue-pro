@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.FINANCE_SUBJECT_NOT_EXISTS;
@@ -90,7 +91,14 @@ public class FmsCompanyServiceImpl implements FmsCompanyService {
 
     @Override
     @Cacheable(value = FINANCE_SUBJECT_LIST, key = "'DO:'+#ids", unless = "#result == null")
-    public List<FmsCompanyDO> listCompany(List<Long> ids) {
+    public List<FmsCompanyDO> listCompany(Set<Long> ids) {
         return CompanyMapper.selectList(FmsCompanyDO::getId, ids);
+    }
+
+
+
+    @Override
+    public List<FmsCompanyDO> listCompanyByNames(Set<String> names) {
+        return CompanyMapper.selectList(FmsCompanyDO::getName, names);
     }
 }

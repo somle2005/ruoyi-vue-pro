@@ -10,7 +10,7 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 /**
  * 盘点 DO
  * @author 李方捷
- * @table-fields : code,id,audit_status,creator_remark,warehouse_id
+ * @table-fields : code,remark,id,audit_status,warehouse_id
  */
 @TableName("wms_inventory")
 // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
@@ -40,12 +40,12 @@ public class WmsInventoryDO extends BaseDO {
     private Integer auditStatus;
 
     /**
-     * 创建者备注
-     */
-    private String creatorRemark;
-
-    /**
      * 单据号
      */
     private String code;
+
+    /**
+     * 创建者备注
+     */
+    private String remark;
 }

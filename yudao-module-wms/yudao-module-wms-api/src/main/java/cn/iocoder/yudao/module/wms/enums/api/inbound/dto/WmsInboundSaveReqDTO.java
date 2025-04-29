@@ -1,0 +1,91 @@
+package cn.iocoder.yudao.module.wms.enums.api.inbound.dto;
+
+import lombok.Data;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@Data
+public class WmsInboundSaveReqDTO {
+
+    /**
+     * WMS入库单类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单
+     **/
+    private Integer type;
+
+    /**
+     * 仓库ID
+     **/
+    private Long warehouseId;
+
+    /**
+     * 跟踪号
+     **/
+    private String traceNo;
+
+    /**
+     * WMS运输方式 ; WmsShippingMethod : 0-海运 , 1-铁路 , 2-空运 , 3-集卡
+     **/
+    private Integer shippingMethod;
+
+    /**
+     * 初始库龄
+     **/
+    private Integer initAge;
+
+    /**
+     * 详情清单
+     **/
+    private List<WmsInboundItemSaveReqDTO> itemList;
+
+
+    /**
+     * 库存财务公司ID
+     **/
+    private Long companyId;
+
+    /**
+     * 实际到货时间
+     **/
+    private LocalDateTime arrivalActualTime;
+
+    /**
+     * 预计到货时间
+     **/
+    private LocalDateTime arrivalPlanTime;
+
+    /**
+     * 入库时间
+     **/
+    private LocalDateTime inboundTime;
+
+    /**
+     * 库存归属部门ID
+     **/
+    private Long deptId;
+
+    /**
+     * 来源单据ID
+     **/
+    private Long upstreamBillId;
+
+    /**
+     * 来源单据号
+     **/
+    private String upstreamBillCode;
+
+    /**
+     * WMS来源单据类型
+     **/
+    private Integer upstreamBillType;
+
+    /**
+     * WMS入库单上架状态
+     **/
+    private Integer shelvingStatus;
+
+    /**
+     * 备注
+     **/
+    private String remark;
+}

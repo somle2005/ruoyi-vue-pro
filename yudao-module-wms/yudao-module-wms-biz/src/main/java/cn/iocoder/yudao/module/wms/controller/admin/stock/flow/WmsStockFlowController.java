@@ -23,9 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
-
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "库存流水")
@@ -88,10 +86,8 @@ public class WmsStockFlowController {
     @Operation(summary = "获得仓库库存流水分页")
     @PreAuthorize("@ss.hasPermission('wms:stock-flow:query')")
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageWarehouse(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
-
         pageReqVO.setStockType(WmsStockType.WAREHOUSE.getValue());
-        pageReqVO.setReason(new Integer[]{ WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
-
+        pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
         return getStockFlowPage(pageReqVO);
     }
 
@@ -100,7 +96,7 @@ public class WmsStockFlowController {
     @PreAuthorize("@ss.hasPermission('wms:stock-flow:query')")
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageOwnership(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.OWNERSHIP.getValue());
-        pageReqVO.setReason(new Integer[]{ WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
+        pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
         return getStockFlowPage(pageReqVO);
     }
 
@@ -109,36 +105,35 @@ public class WmsStockFlowController {
     @PreAuthorize("@ss.hasPermission('wms:stock-flow:query')")
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageBin(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.BIN.getValue());
-        pageReqVO.setReason(new Integer[]{ WmsStockReason.INBOUND.getValue(), WmsStockReason.PICKUP.getValue(),WmsStockReason.OUTBOUND_AGREE.getValue() });
+        pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.PICKUP.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
         return getStockFlowPage(pageReqVO);
     }
 
+    /**
+     * @sign : E223AB2DDEC0F1A8
+     */
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPage(@Valid WmsStockFlowPageReqVO pageReqVO) {
         // 查询数据
         PageResult<WmsStockFlowDO> doPageResult = stockFlowService.getStockFlowPage(pageReqVO);
         // 转换
         PageResult<WmsStockFlowRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsStockFlowRespVO.class);
-
-        // 装配模型
         stockFlowService.assembleProducts(voPageResult.getList());
-        stockFlowService.assembleWarehouse(voPageResult.getList());
         stockFlowService.assembleBin(voPageResult.getList());
-        stockFlowService.assembleCompanyAndDept(voPageResult.getList());
+        stockFlowService.assembleWarehouse(voPageResult.getList());
         stockFlowService.assembleInbound(voPageResult.getList());
         stockFlowService.assembleOutbound(voPageResult.getList());
         stockFlowService.assemblePickup(voPageResult.getList());
-
+        stockFlowService.assembleStockWarehouse(voPageResult.getList());
+        stockFlowService.assembleInboundItemFlow(voPageResult.getList());
+        stockFlowService.assembleCompanyAndDept(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
-            .mapping(WmsStockFlowRespVO::getCreator, WmsStockFlowRespVO::setCreatorName)
-            .mapping(WmsStockFlowRespVO::getUpdater, WmsStockFlowRespVO::setUpdaterName)
-            .fill();
-
-
+			.mapping(WmsStockFlowRespVO::getCreator, WmsStockFlowRespVO::setCreatorName)
+			.mapping(WmsStockFlowRespVO::getUpdater, WmsStockFlowRespVO::setUpdaterName)
+			.fill();
         // 返回
         return success(voPageResult);
     }
-
     // @GetMapping("/export-excel")
     // @Operation(summary = "导出库存流水 Excel")
     // @PreAuthorize("@ss.hasPermission('wms:stock-flow:export')")
@@ -149,4 +144,4 @@ public class WmsStockFlowController {
     // // 导出 Excel
     // ExcelUtils.write(response, "库存流水.xls", "数据", WmsStockFlowRespVO.class, BeanUtils.toBean(list, WmsStockFlowRespVO.class));
     // }
-}
+}

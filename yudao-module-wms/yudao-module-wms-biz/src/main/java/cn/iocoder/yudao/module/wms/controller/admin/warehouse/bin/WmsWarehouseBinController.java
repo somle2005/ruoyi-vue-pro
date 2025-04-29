@@ -140,7 +140,7 @@ public class WmsWarehouseBinController {
             b.setWarehouse(BeanUtils.toBean(w, WmsWarehouseSimpleRespVO.class));
         });
         // 装配库区
-        List<WmsWarehouseZoneDO> warehouseZoneDOList = warehouseZoneService.selectByIds(StreamX.from(voPageResult.getList()).toList(WmsWarehouseBinRespVO::getZoneId));
+        List<WmsWarehouseZoneDO> warehouseZoneDOList = warehouseZoneService.selectByIds(StreamX.from(voPageResult.getList()).toSet(WmsWarehouseBinRespVO::getZoneId));
         StreamX.from(voPageResult.getList()).assemble(warehouseZoneDOList, WmsWarehouseZoneDO::getId, WmsWarehouseBinRespVO::getZoneId, (b,w)->{
             b.setZone(BeanUtils.toBean(w, WmsWarehouseZoneSimpleRespVO.class));
         });

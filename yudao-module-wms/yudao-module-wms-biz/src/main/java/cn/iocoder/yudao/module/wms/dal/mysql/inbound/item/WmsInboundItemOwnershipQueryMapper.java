@@ -16,7 +16,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemQueryMapper.AGE_EXPR;
+import static cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemQueryMapper.AGE_COL_EXPR;
 
 /**
  * 入库单详情 Mapper
@@ -88,14 +88,12 @@ public interface WmsInboundItemOwnershipQueryMapper extends BaseMapperX<WmsInbou
         ;
         // 查询主表字段
         wrapper.select(WmsInboundItemDO::getProductId);
-        wrapper.selectAs(WmsInboundItemDO::getCompanyId,WmsInboundItemOwnershipDO::getInboundCompanyId);
-        wrapper.selectAs(WmsInboundItemDO::getDeptId,WmsInboundItemOwnershipDO::getInboundDeptId);
+        wrapper.select(WmsInboundItemDO::getInboundCompanyId);
+        wrapper.select(WmsInboundItemDO::getInboundDeptId);
         // 查询子表字段
         wrapper.select(WmsInboundDO::getWarehouseId);
-        wrapper.selectAs(WmsInboundDO::getCompanyId,WmsInboundItemOwnershipDO::getItemCompanyId);
-        wrapper.selectAs(WmsInboundDO::getDeptId,WmsInboundItemOwnershipDO::getItemDeptId);
         wrapper.select(WmsInboundDO::getInboundTime);
-        wrapper.select(AGE_EXPR+" as age");
+        wrapper.select(AGE_COL_EXPR);
 
 
         //
@@ -109,22 +107,7 @@ public interface WmsInboundItemOwnershipQueryMapper extends BaseMapperX<WmsInbou
             wrapper.orderByDesc(WmsInboundDO::getInboundTime);
         }
 
-
         List<WmsInboundItemOwnershipDO> list = selectList(wrapper);
-
-
-        for (WmsInboundItemOwnershipDO ownershipDO : list) {
-            // 优先使用详情表的公司字段字段
-            ownershipDO.setCompanyId(ownershipDO.getItemCompanyId());
-            if (ownershipDO.getCompanyId() == null) {
-                ownershipDO.setCompanyId(ownershipDO.getInboundCompanyId());
-            }
-            // 优先使用详情表的部门字段字段
-            ownershipDO.setDeptId(ownershipDO.getItemDeptId());
-            if (ownershipDO.getDeptId() == null) {
-                ownershipDO.setDeptId(ownershipDO.getInboundDeptId());
-            }
-        }
 
         return StreamX.from(list).groupBy(WmsInboundItemOwnershipDO::getProductId);
     }

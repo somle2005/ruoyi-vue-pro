@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductImportExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductSaveReqVO;
@@ -16,10 +17,12 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_PRODUCT_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_PRODUCT_NOT_EXISTS;
@@ -133,4 +136,15 @@ public class WmsInventoryProductServiceImpl implements WmsInventoryProductServic
         }
         StreamX.from(inventoryProductList).assemble(productVOMap, WmsInventoryProductRespVO::getProductId, WmsInventoryProductRespVO::setProduct);
     }
-}
+
+    @Override
+    public void assembleProductIds(List<WmsInventoryProductImportExcelVO> impVOList) {
+        List<String> productCodes = StreamX.from(impVOList).toList(WmsInventoryProductImportExcelVO::getProductCode);
+        Map<String, ErpProductDTO> productMap = productApi.getProductMapByCode(productCodes);
+        StreamX.from(impVOList).assemble(productMap, WmsInventoryProductImportExcelVO::getProductCode, (p, v) -> {
+            if (v != null) {
+                p.setProductId(v.getId());
+            }
+        });
+    }
+}

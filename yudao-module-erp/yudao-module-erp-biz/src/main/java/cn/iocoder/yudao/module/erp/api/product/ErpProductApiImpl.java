@@ -63,6 +63,15 @@ public class ErpProductApiImpl implements ErpProductApi {
     }
 
     @Override
+    public List<ErpProductDTO> listProductsByCodes(Collection<String> codes) {
+        if (CollUtil.isEmpty(codes)) {
+            return Collections.emptyList();
+        }
+        List<ErpProductDO> erpProductDOs = erpProductMapper.selectByCodes(codes);
+        return ErpProductConvert.INSTANCE.convert(erpProductDOs);
+    }
+
+    @Override
     public List<ErpProductDTO> listProducts(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();

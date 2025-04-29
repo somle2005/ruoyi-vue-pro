@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import jakarta.validation.Valid;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 入库单 Service 接口
@@ -69,20 +70,64 @@ public interface WmsInboundService {
      */
     List<WmsInboundDO> selectByWarehouseId(Long warehouseId, int limit);
 
+    /**
+     * 审批入库单
+     *
+     * @param event 审批事件
+     * @param approvalReqVO 审批信息
+     */
     void approve(WmsInboundAuditStatus.Event event, WmsApprovalReqVO approvalReqVO);
 
+    /**
+     * 获得入库单详情
+     *
+     * @param id 编号
+     * @return 入库单
+     */
     WmsInboundRespVO getInboundWithItemList(Long id);
 
+    /**
+     * 完成入库单
+     *
+     * @param inboundRespVO 入库单
+     */
     void finishInbound(WmsInboundRespVO inboundRespVO);
 
+    /**
+     * 批量查询
+     *
+     * @param ids 入库单id集合
+     * @return 入库单集合
+     */
     List<WmsInboundDO> selectByIds(List<Long> ids);
 
+    /**
+     * 获得入库单列表
+     *
+     * @param pageReqVO 查询条件
+     * @return 入库单列表
+     */
     List<WmsInboundDO> getSimpleList(@Valid WmsInboundPageReqVO pageReqVO);
 
+    /**
+     * 装配仓库信息
+     *
+     * @param list 入库单集合
+     */
     void assembleWarehouse(List<WmsInboundRespVO> list);
 
+    /**
+     * 装配公司信息
+     *
+     * @param list 入库单集合
+     */
     void assembleCompany(List<WmsInboundRespVO> list);
 
+    /**
+     * 装配审批历史信息
+     *
+     * @param list 入库单集合
+     */
     void assembleApprovalHistory(List<WmsInboundRespVO> list);
 
     /**
@@ -109,5 +154,13 @@ public interface WmsInboundService {
      */
     Map<Long, WmsInboundItemOwnershipDO> getInboundItemOwnershipMap(Long warehouseId, List<Long> productIds, boolean olderFirst);
 
+    /**
+     * 创建盘点入库单
+     */
     WmsInboundDO createForInventory(WmsInboundSaveReqVO inboundSaveReqVO);
+
+    /**
+     * 更新上架状态
+     */
+    void updateShelvingStatus(Set<Long> set);
 }

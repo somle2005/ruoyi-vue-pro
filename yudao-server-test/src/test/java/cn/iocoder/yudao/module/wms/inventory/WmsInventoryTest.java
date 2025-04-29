@@ -49,7 +49,7 @@ public class WmsInventoryTest extends BaseRestIntegrationTest {
      **/
     private final int testProductIds2Count=3;
     private int test2QtyDelta(int i){
-        return -2;
+        return -1;
     };
 
 
@@ -125,7 +125,7 @@ public class WmsInventoryTest extends BaseRestIntegrationTest {
             if(testProductIds1.size()<testProductIds1Count) {
                 testProductIds1.add(stockBinRespVO.getProductId());
             } else {
-                if(testProductIds2.size()<testProductIds2Count) {
+                if(!testProductIds1.contains(stockBinRespVO.getProductId())  && testProductIds2.size()<testProductIds2Count && stockBinRespVO.getAvailableQty()>0 & stockBinRespVO.getSellableQty()>0) {
                     testProductIds2.add(stockBinRespVO.getProductId());
                 }
             }

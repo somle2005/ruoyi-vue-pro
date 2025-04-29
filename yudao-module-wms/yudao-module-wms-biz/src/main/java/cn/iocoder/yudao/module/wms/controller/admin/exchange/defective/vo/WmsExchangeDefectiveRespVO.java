@@ -1,13 +1,15 @@
 package cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo;
 
+import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
+import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
+import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import java.util.*;
+import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
-import com.alibaba.excel.annotation.*;
-import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
-import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
@@ -34,9 +36,15 @@ public class WmsExchangeDefectiveRespVO {
     @ExcelProperty("源仓位ID")
     private Long fromBinId;
 
+    @Schema(description = "源仓位", example = "")
+    private WmsWarehouseBinRespVO fromBin;
+
     @Schema(description = "目的仓位ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "32001")
     @ExcelProperty("目的仓位ID")
     private Long toBinId;
+
+    @Schema(description = "目的仓位", example = "")
+    private WmsWarehouseBinRespVO toBin;
 
     @Schema(description = "换货量", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("换货量")

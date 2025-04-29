@@ -25,13 +25,15 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         // 连接产品视图
         wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockOwnershipDO::getProductId)
             .likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode())
-            .eqIfExists(WmsProductDO::getDeptId, reqVO.getDeptId());
+            // .eqIfExists(WmsProductDO::getDeptId, reqVO.getDeptId())
+        ;
         // 按仓库
         wrapper.eqIfPresent(WmsStockOwnershipDO::getWarehouseId, reqVO.getWarehouseId())
             // 按产品ID
             .eqIfPresent(WmsStockOwnershipDO::getProductId, reqVO.getProductId());
 
-
+        wrapper.eqIfPresent(WmsStockOwnershipDO::getCompanyId, reqVO.getCompanyId());
+        wrapper.eqIfPresent(WmsStockOwnershipDO::getDeptId, reqVO.getDeptId());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getCreateTime, reqVO.getCreateTime());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getAvailableQty,reqVO.getAvailableQty());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getOutboundPendingQty,reqVO.getOutboundPendingQty());

@@ -9,7 +9,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsAppro
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalHistorySaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.approval.history.WmsApprovalHistoryDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.approval.history.WmsApprovalHistoryMapper;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -90,8 +90,15 @@ public class WmsApprovalHistoryServiceImpl implements WmsApprovalHistoryService 
         return approvalHistoryMapper.selectPage(pageReqVO);
     }
 
+    /**
+     * 指定单据类型，返回按单据ID分组的审批历史
+     *
+     * @param billType 单据类型
+     * @param billIds 单据ID清单
+     * @return 审批历史分页
+     */
     @Override
-    public Map<Long, List<WmsApprovalHistoryRespVO>> selectGroupedApprovalHistory(WmsBillType billType, List<Long> billIds) {
+    public Map<Long, List<WmsApprovalHistoryRespVO>> selectGroupedApprovalHistory(BillType billType, List<Long> billIds) {
         if(CollectionUtils.isEmpty(billIds)) {
             return Map.of();
         }

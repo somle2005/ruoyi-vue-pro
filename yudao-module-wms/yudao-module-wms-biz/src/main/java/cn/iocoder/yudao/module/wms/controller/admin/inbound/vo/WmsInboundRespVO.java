@@ -14,7 +14,7 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,creator,code,inbound_status,company_id,inbound_time,create_time,arrival_actual_time,audit_status,creator_comment,type,trace_no,upstream_bill_type,updater,update_time,upstream_bill_id,init_age,shipping_method,id,upstream_bill_code,dept_id,warehouse_id,arrival_plan_time
+ * @table-fields : tenant_id,creator,code,inbound_status,company_id,create_time,inbound_time,arrival_actual_time,remark,audit_status,trace_no,type,updater,upstream_bill_type,update_time,init_age,upstream_bill_id,shipping_method,id,upstream_bill_code,dept_id,arrival_plan_time,shelving_status,warehouse_id
  */
 @Schema(description = "管理后台 - 入库单 Response VO")
 @Data
@@ -40,10 +40,6 @@ public class WmsInboundRespVO {
     @Schema(description = "WMS运输方式 ; WmsShippingMethod : 0-海运 , 1-铁路 , 2-空运 , 3-集卡")
     @ExcelProperty("WMS运输方式")
     private Integer shippingMethod;
-
-    @Schema(description = "特别说明，创建方专用")
-    @ExcelProperty("特别说明")
-    private String creatorComment;
 
     @Schema(description = "初始库龄")
     @ExcelProperty("初始库龄")
@@ -135,7 +131,15 @@ public class WmsInboundRespVO {
     @ExcelProperty("来源单据号")
     private String upstreamBillCode;
 
-    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单", example = "")
-    @ExcelProperty("WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单")
+    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
+    @ExcelProperty("WMS来源单据类型")
     private Integer upstreamBillType;
+
+    @Schema(description = "WMS入库单上架状态 ; WmsInboundShelvingStatus : 1-未上架 , 2-部分上架 , 3-已上架", example = "")
+    @ExcelProperty("WMS入库单上架状态")
+    private Integer shelvingStatus;
+
+    @Schema(description = "特别说明，创建方专用", example = "")
+    @ExcelProperty("特别说明，创建方专用")
+    private String remark;
 }

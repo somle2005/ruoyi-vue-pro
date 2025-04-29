@@ -9,14 +9,14 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutbound
 import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import org.springframework.format.annotation.DateTimeFormat;
 import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : code,company_id,remark,outbound_time,audit_status,creator_comment,type,upstream_bill_type,latest_outbound_action_id,outbound_status,upstream_bill_id,id,upstream_bill_code,dept_id,warehouse_id
+ * @table-fields : code,company_id,remark,audit_status,outbound_time,type,upstream_bill_type,latest_outbound_action_id,outbound_status,upstream_bill_id,id,upstream_bill_code,dept_id,warehouse_id
  */
 @Schema(description = "管理后台 - 出库单新增/修改 Request VO")
 @Data
@@ -38,9 +38,6 @@ public class WmsOutboundSaveReqVO {
     @Schema(description = "WMS出库单审批状态 ; WmsOutboundAuditStatus : 0-起草中 , 1-待审批 , 2-已驳回 , 3-已通过 , 4-已出库", example = "2")
     @InEnum(WmsOutboundAuditStatus.class)
     private Integer auditStatus;
-
-    @Schema(description = "特别说明，创建方专用")
-    private String creatorComment;
 
     @Schema(description = "详情清单", example = "")
     private List<WmsOutboundItemSaveReqVO> itemList;
@@ -74,6 +71,7 @@ public class WmsOutboundSaveReqVO {
     @Schema(description = "来源单据号", example = "")
     private String upstreamBillCode;
 
-    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单", example = "")
+    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
+    @InEnum(BillType.class)
     private Integer upstreamBillType;
 }

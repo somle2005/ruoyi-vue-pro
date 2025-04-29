@@ -98,6 +98,9 @@ public class WmsExchangeDefectiveController {
 			.mapping(WmsExchangeDefectiveRespVO::getCreator, WmsExchangeDefectiveRespVO::setCreatorName)
 			.mapping(WmsExchangeDefectiveRespVO::getCreator, WmsExchangeDefectiveRespVO::setUpdaterName)
 			.fill();
+        // 装配
+        exchangeDefectiveService.assembleBins(voPageResult.getList());
+        exchangeDefectiveService.assembleProduct(voPageResult.getList());
         // 返回
         return success(voPageResult);
     }
@@ -111,4 +114,4 @@ public class WmsExchangeDefectiveController {
     // // 导出 Excel
     // ExcelUtils.write(response, "良次换货详情.xls", "数据", WmsExchangeDefectiveRespVO.class, BeanUtils.toBean(list, WmsExchangeDefectiveRespVO.class));
     // }
-}
+}

@@ -76,7 +76,7 @@ public interface WmsStockFlowService {
     /**
      * 创建仓位库存变化流水
      */
-    void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId);
+    void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId, Long inboundItemFlowId);
 
     List<WmsStockFlowDO> selectStockFlow(Long stockType, Long stockId);
 
@@ -93,4 +93,13 @@ public interface WmsStockFlowService {
     void assembleOutbound(List<WmsStockFlowRespVO> list);
 
     void assemblePickup(List<WmsStockFlowRespVO> list);
+
+    void assembleStockWarehouse(List<WmsStockFlowRespVO> list);
+
+    /**
+     * 按 ID 集合查询 WmsStockFlowDO
+     */
+    List<WmsStockFlowDO> selectByIds(List<Long> idList);
+
+    void assembleInboundItemFlow(List<WmsStockFlowRespVO> list);
 }

@@ -10,7 +10,7 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 /**
  * 入库单库存详情扣减 DO
  * @author 李方捷
- * @table-fields : inbound_id,outbound_action_id,outbound_qty,product_id,id,inbound_item_id,outbound_id,outbound_item_id
+ * @table-fields : inbound_id,bill_id,outbound_available_delta_qty,outbound_available_qty,outbound_action_id,bill_item_id,product_id,bill_type,id,inbound_item_id,direction
  */
 @TableName("wms_inbound_item_flow")
 // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
@@ -45,22 +45,37 @@ public class WmsInboundItemFlowDO extends BaseDO {
     private Long productId;
 
     /**
+     * 出库动作ID
+     */
+    private Long outboundActionId;
+
+    /**
+     * 单据类型
+     */
+    private Integer billType;
+
+    /**
      * 出库单ID
      */
-    private Long outboundId;
+    private Long billId;
 
     /**
      * 出库单明细ID
      */
-    private Long outboundItemId;
+    private Long billItemId;
 
     /**
-     * 变化的数量，出库量
+     * 出入方向
      */
-    private Integer outboundQty;
+    private Integer direction;
 
     /**
-     * 出库动作ID
+     * 变化的数量，可出库量的变化量
      */
-    private Long outboundActionId;
+    private Integer outboundAvailableDeltaQty;
+
+    /**
+     * 可出库量
+     */
+    private Integer outboundAvailableQty;
 }

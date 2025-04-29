@@ -5,13 +5,17 @@ import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.item.vo.WmsPickupItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.item.vo.WmsPickupItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.item.vo.WmsPickupItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.pickup.item.WmsPickupItemMapper;
+import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import jakarta.annotation.Resource;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -37,6 +41,10 @@ public class WmsPickupItemServiceImpl implements WmsPickupItemService {
 
     @Resource
     private ErpProductApi productApi;
+
+    @Resource
+    @Lazy
+    private WmsInboundService inboundService;
     /**
      * @sign : B28631E68735E52E
      */
@@ -110,5 +118,12 @@ public class WmsPickupItemServiceImpl implements WmsPickupItemService {
             productVOMap.put(productDTO.getId(), productVO);
         }
         StreamX.from(itemList).assemble(productVOMap, WmsPickupItemRespVO::getProductId, WmsPickupItemRespVO::setProduct);
+    }
+
+    @Override
+    public void assembleInbound(List<WmsPickupItemRespVO> itemList) {
+        List<WmsInboundDO> inboundDOList = inboundService.selectByIds(StreamX.from(itemList).toList(WmsPickupItemRespVO::getInboundId));
+        Map<Long, WmsInboundSimpleRespVO> inboundMap = StreamX.from(inboundDOList).toMap(WmsInboundDO::getId, inboundDO -> BeanUtils.toBean(inboundDO, WmsInboundSimpleRespVO.class));
+        StreamX.from(itemList).assemble(inboundMap, WmsPickupItemRespVO::getInboundId, WmsPickupItemRespVO::setInbound);
     }
 }

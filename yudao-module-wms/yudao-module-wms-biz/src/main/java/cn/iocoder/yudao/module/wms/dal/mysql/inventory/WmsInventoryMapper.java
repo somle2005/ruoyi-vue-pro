@@ -21,7 +21,7 @@ public interface WmsInventoryMapper extends BaseMapperX<WmsInventoryDO> {
 				.eqIfPresent(WmsInventoryDO::getCode, reqVO.getCode())
 				.eqIfPresent(WmsInventoryDO::getWarehouseId, reqVO.getWarehouseId())
 				.eqIfPresent(WmsInventoryDO::getAuditStatus, reqVO.getAuditStatus())
-				.eqIfPresent(WmsInventoryDO::getCreatorRemark, reqVO.getCreatorRemark())
+				.eqIfPresent(WmsInventoryDO::getRemark, reqVO.getRemark())
 				.betweenIfPresent(WmsInventoryDO::getCreateTime, reqVO.getCreateTime())
 				.orderByDesc(WmsInventoryDO::getId));
     }

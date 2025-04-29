@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : inbound_id,outbound_action_id,outbound_qty,create_time,product_id,inbound_item_id,outbound_id,outbound_item_id
+ * @table-fields : inbound_id,bill_id,outbound_available_delta_qty,outbound_available_qty,outbound_action_id,bill_item_id,create_time,product_id,bill_type,inbound_item_id,direction
  */
 @Schema(description = "管理后台 - 入库单库存详情扣减分页 Request VO")
 @Data
@@ -26,19 +26,28 @@ public class WmsInboundItemFlowPageReqVO extends PageParam {
     @Schema(description = "标准产品ID", example = "30952")
     private Long productId;
 
-    @Schema(description = "出库单ID", example = "11015")
-    private Long outboundId;
-
-    @Schema(description = "出库单明细ID", example = "28163")
-    private Long outboundItemId;
-
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;
 
-    @Schema(description = "变化的数量，出库量", example = "")
-    private Integer outboundQty;
-
     @Schema(description = "出库动作ID", example = "")
     private Long outboundActionId;
+
+    @Schema(description = "单据类型", example = "")
+    private Integer billType;
+
+    @Schema(description = "出库单ID", example = "")
+    private Long billId;
+
+    @Schema(description = "出库单明细ID", example = "")
+    private Long billItemId;
+
+    @Schema(description = "出入方向", example = "")
+    private Integer direction;
+
+    @Schema(description = "变化的数量，可出库量的变化量", example = "")
+    private Integer outboundAvailableDeltaQty;
+
+    @Schema(description = "可出库量", example = "")
+    private Integer outboundAvailableQty;
 }

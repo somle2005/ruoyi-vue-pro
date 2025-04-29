@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.wms.controller.admin.inbound.vo;
 import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.module.wms.enums.common.WmsShippingMethod;
-import cn.iocoder.yudao.module.wms.enums.common.WmsBillType;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
@@ -15,9 +15,10 @@ import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import org.springframework.format.annotation.DateTimeFormat;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundShelvingStatus;
 
 /**
- * @table-fields : code,inbound_status,company_id,inbound_time,arrival_actual_time,audit_status,creator_comment,type,trace_no,upstream_bill_type,upstream_bill_id,init_age,shipping_method,id,upstream_bill_code,dept_id,warehouse_id,arrival_plan_time
+ * @table-fields : code,inbound_status,company_id,inbound_time,arrival_actual_time,remark,audit_status,trace_no,type,upstream_bill_type,init_age,upstream_bill_id,shipping_method,id,upstream_bill_code,dept_id,arrival_plan_time,shelving_status,warehouse_id
  */
 @Schema(description = "管理后台 - 入库单新增/修改 Request VO")
 @Data
@@ -42,9 +43,6 @@ public class WmsInboundSaveReqVO {
     @Schema(description = "WMS运输方式 ; WmsShippingMethod : 0-海运 , 1-铁路 , 2-空运 , 3-集卡")
     @InEnum(WmsShippingMethod.class)
     private Integer shippingMethod;
-
-    @Schema(description = "特别说明，创建方专用")
-    private String creatorComment;
 
     @Schema(description = "初始库龄")
     private Integer initAge;
@@ -87,6 +85,14 @@ public class WmsInboundSaveReqVO {
     @Schema(description = "来源单据号", example = "")
     private String upstreamBillCode;
 
-    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单", example = "")
+    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
+    @InEnum(BillType.class)
     private Integer upstreamBillType;
+
+    @Schema(description = "WMS入库单上架状态 ; WmsInboundShelvingStatus : 1-未上架 , 2-部分上架 , 3-已上架", example = "")
+    @InEnum(WmsInboundShelvingStatus.class)
+    private Integer shelvingStatus;
+
+    @Schema(description = "特别说明，创建方专用", example = "")
+    private String remark;
 }

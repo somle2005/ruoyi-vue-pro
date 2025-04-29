@@ -1,9 +1,10 @@
 package cn.iocoder.yudao.module.wms.exchange;
 
+import cn.hutool.core.lang.Assert;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectiveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectiveSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeSaveReqVO;
@@ -17,7 +18,6 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 
@@ -33,10 +33,79 @@ public class ExchangeTest extends BaseRestIntegrationTest {
     public void testExchange() {
 
         Map<Long, WmsExchangeDefectiveSaveReqVO> defectiveDOMap = generateDefectiveMap();
+
         WmsExchangeRespVO exchangeVO = createAndUpdate(defectiveDOMap);
+
+        submit(exchangeVO);
+
+        agree(exchangeVO);
+
         System.out.println();
 
     }
+
+
+    private void agree(WmsExchangeRespVO exchangeVO) {
+
+        Map<Long,Integer> fromBinQtyBeforeMap = new HashMap<>();
+        Map<Long,Integer> toBinQtyBeforeMap = new HashMap<>();
+        for (WmsExchangeDefectiveRespVO defectiveRespVO : exchangeVO.getDefectiveList()) {
+            //
+            CommonResult<List<WmsStockBinRespVO>> stockBinResult = this.wms().stockBinClient().getStockBin(exchangeVO.getWarehouseId(), defectiveRespVO.getFromBinId(), defectiveRespVO.getProductId());
+            fromBinQtyBeforeMap.put(defectiveRespVO.getProductId(), stockBinResult.getData().get(0).getAvailableQty());
+            //
+            stockBinResult = this.wms().stockBinClient().getStockBin(exchangeVO.getWarehouseId(), defectiveRespVO.getToBinId(), defectiveRespVO.getProductId());
+            if(stockBinResult.getData().isEmpty()) {
+                toBinQtyBeforeMap.put(defectiveRespVO.getProductId(),0);
+            } else {
+                toBinQtyBeforeMap.put(defectiveRespVO.getProductId(), stockBinResult.getData().get(0).getAvailableQty());
+            }
+        }
+
+
+        this.wms().exchangeClient().agree(exchangeVO.getId());
+
+        Map<Long,Integer> fromBinQtyAfterMap = new HashMap<>();
+        Map<Long,Integer> toBinQtyAfterMap = new HashMap<>();
+        for (WmsExchangeDefectiveRespVO defectiveRespVO : exchangeVO.getDefectiveList()) {
+            //
+            CommonResult<List<WmsStockBinRespVO>> stockBinResult = this.wms().stockBinClient().getStockBin(exchangeVO.getWarehouseId(), defectiveRespVO.getFromBinId(), defectiveRespVO.getProductId());
+            fromBinQtyAfterMap.put(defectiveRespVO.getProductId(), stockBinResult.getData().get(0).getAvailableQty());
+
+            //
+            stockBinResult = this.wms().stockBinClient().getStockBin(exchangeVO.getWarehouseId(), defectiveRespVO.getToBinId(), defectiveRespVO.getProductId());
+            if(stockBinResult.getData().isEmpty()) {
+                toBinQtyAfterMap.put(defectiveRespVO.getProductId(),0);
+            } else {
+                toBinQtyAfterMap.put(defectiveRespVO.getProductId(), stockBinResult.getData().get(0).getAvailableQty());
+            }
+        }
+
+
+        // 出方库存校验
+        for (WmsExchangeDefectiveRespVO defectiveRespVO : exchangeVO.getDefectiveList()) {
+            // 出方库存校验
+            Integer fromBinQtyBefore = fromBinQtyBeforeMap.get(defectiveRespVO.getProductId());
+            Integer fromBinQtyAfter = fromBinQtyAfterMap.get(defectiveRespVO.getProductId());
+            Assert.equals(fromBinQtyBefore-defectiveRespVO.getQty(),fromBinQtyAfter);
+
+            // 入方库存校验
+            Integer toBinQtyBefore = toBinQtyBeforeMap.get(defectiveRespVO.getProductId());
+            Integer toBinQtyAfter = toBinQtyAfterMap.get(defectiveRespVO.getProductId());
+            Assert.equals(toBinQtyBefore+defectiveRespVO.getQty(),toBinQtyAfter);
+        }
+
+
+
+
+
+    }
+
+
+    private void submit(WmsExchangeRespVO exchangeVO) {
+        this.wms().exchangeClient().submit(exchangeVO.getId());
+    }
+
 
     private WmsExchangeRespVO createAndUpdate(Map<Long, WmsExchangeDefectiveSaveReqVO> defectiveDOMap) {
 
@@ -56,79 +125,91 @@ public class ExchangeTest extends BaseRestIntegrationTest {
 
     }
 
+    /**
+     *
+     **/
     private Map<Long, WmsExchangeDefectiveSaveReqVO> generateDefectiveMap() {
 
         Map<Long, WmsExchangeDefectiveSaveReqVO> map = new HashMap<>();
 
-
         CommonResult<PageResult<WmsStockBinRespVO>> binListResult = this.wms().stockBinClient().getStockBinPage(this.warehouseId);
-        List<WmsStockBinRespVO> binList = binListResult.getData().getList();
+        List<WmsStockBinRespVO> allStockBinList = binListResult.getData().getList();
+        List<WmsStockBinRespVO> validBinList = allStockBinList.stream().filter(e -> e.getSellableQty() > 0 && e.getAvailableQty() > 0).toList();
 
-
-        List<ErpProductRespVO> productList = new ArrayList<>();
-        // 取300个产品
-        CommonResult<PageResult<ErpProductRespVO>> productPageResult = this.erp().productClient().getProductPage(10,1);
-        productList.addAll(productPageResult.getData().getList());
         Random random = new Random();
-        //
-        Integer productCount = random.nextInt(productList.size());
-        if(productCount<4) {
-            productCount=4;
+        Integer itemCount = random.nextInt(validBinList.size());
+        if(itemCount<4) {
+            itemCount=4;
         }
+        itemCount=2;
 
-
-        Set<Long> productIds = new HashSet<>();
-
-
+        Set<Long> binIds = new HashSet<>();
         Integer index=-1;
-        while (true) {
-            Long productId = null;
+        Integer loops=0;
+        for (int i = 0; i < itemCount; i++) {
+
+
+            // 获得 fromBin
+            Long binId = null;
+            WmsStockBinRespVO fromBin = null;
+            loops=0;
             while (true) {
-                index = random.nextInt(productList.size());
-                productId = productList.get(index).getId();
-                if (productIds.contains(productId)) {
+                loops++;
+                if(loops>64) {
+                    throw new RuntimeException("循环次数过多");
+                }
+                index = random.nextInt(validBinList.size());
+                binId = validBinList.get(index).getBinId();
+                if (binIds.contains(binId)) {
                     continue;
                 }
-                productIds.add(productId);
+                binIds.add(binId);
+                fromBin = validBinList.get(index);
                 break;
             }
-
 
 
             WmsExchangeDefectiveSaveReqVO itemVO=new WmsExchangeDefectiveSaveReqVO();
 
-            itemVO.setProductId(productId);
-            WmsStockBinRespVO fromBin =null;
-            Integer quantity=0;
-            while (true) {
-                fromBin =binList.get(random.nextInt(binList.size()));
-                quantity = random.nextInt(fromBin.getSellableQty());
-                if(quantity>0) {
-                    break;
+            itemVO.setProductId(fromBin.getProductId());
+            itemVO.setFromBinId(fromBin.getBinId());
+
+            // 设置数量
+            Integer qty = 0;
+            loops=0;
+            if(fromBin.getSellableQty()<=3) {
+                qty = 1;
+            } else {
+                while (qty == 0) {
+                    loops++;
+                    if (loops > 64) {
+                        throw new RuntimeException("循环次数过多");
+                    }
+                    qty = random.nextInt(fromBin.getSellableQty());
                 }
             }
+            itemVO.setQty(qty);
 
-            if(quantity>4) {
-                quantity=4;
-            }
-
-            itemVO.setFromBinId(fromBin.getId());
-            itemVO.setQty(quantity);
-
-            Long toBinId = null;
+            WmsStockBinRespVO toBin = null;
+            loops=0;
             while (true) {
-                toBinId = binList.get(random.nextInt(binList.size())).getId();
-                if(!Objects.equals(itemVO.getFromBinId(),toBinId)) {
-                    break;
+                loops++;
+                if(loops>64) {
+                    throw new RuntimeException("循环次数过多");
                 }
-            }
-            itemVO.setToBinId(toBinId);
-            //
-            map.put(productId,itemVO);
-
-            if(productIds.size()>productCount) {
+                index = random.nextInt(allStockBinList.size());
+                binId = allStockBinList.get(index).getBinId();
+                if (binIds.contains(binId)) {
+                    continue;
+                }
+                binIds.add(binId);
+                toBin = allStockBinList.get(index);
                 break;
             }
+
+            itemVO.setToBinId(toBin.getBinId());
+
+            map.put(binId, itemVO);
 
         }
 

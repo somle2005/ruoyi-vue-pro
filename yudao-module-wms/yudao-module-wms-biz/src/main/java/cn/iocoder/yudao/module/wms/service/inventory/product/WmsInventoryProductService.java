@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.service.inventory.product;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductImportExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductSaveReqVO;
@@ -61,4 +62,6 @@ public interface WmsInventoryProductService {
     List<WmsInventoryProductDO> selectByInventoryId(Long id);
 
     void assembleProduct(List<WmsInventoryProductRespVO> inventoryProductList);
+
+    void assembleProductIds(List<WmsInventoryProductImportExcelVO> impVOList);
 }

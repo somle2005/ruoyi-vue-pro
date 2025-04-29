@@ -1,5 +1,7 @@
 package cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo;
 
+import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
@@ -103,4 +105,11 @@ public class WmsOutboundItemRespVO {
     @Schema(description = "来源详情ID", example = "")
     @ExcelProperty("来源详情ID")
     private Long upstreamItemId;
+
+    @Schema(description = "部门", example = "")
+    private DeptSimpleRespVO dept;
+
+    @Schema(description = "财务公司", example = "")
+    @ExcelProperty("财务公司")
+    private FmsCompanySimpleRespVO company;
 }

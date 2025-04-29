@@ -57,4 +57,6 @@ public interface WmsPickupItemService {
     List<WmsPickupItemDO> selectByPickupId(Long id);
 
     void assembleProduct(List<WmsPickupItemRespVO> itemList);
+
+    void assembleInbound(List<WmsPickupItemRespVO> itemList);
 }

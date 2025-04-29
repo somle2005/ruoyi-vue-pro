@@ -47,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_BIN_ID_PRODUCT_ID_DUPLICATE;
@@ -282,13 +283,13 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
 
     @Override
     public void assembleBin(List<WmsStockBinRespVO> list, boolean withZone) {
-        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(list).toList(WmsStockBinRespVO::getBinId).stream().distinct().toList());
+        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(list).toSet(WmsStockBinRespVO::getBinId));
         List<WmsWarehouseBinRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinRespVO.class);
         StreamX.from(list).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsStockBinRespVO::getBinId,WmsStockBinRespVO::setBin);
 
         if(withZone) {
             // 装配库区
-            List<Long> binIds= StreamX.from(list).toList(WmsStockBinRespVO::getBinId);
+            Set<Long> binIds= StreamX.from(binVOList).toSet(WmsWarehouseBinRespVO::getZoneId);
             List<WmsWarehouseZoneDO> warehouseZoneDOList = warehouseZoneService.selectByIds(binIds);
             Map<Long, WmsWarehouseZoneSimpleRespVO> warehouseZoneVOMap = StreamX.from(warehouseZoneDOList)
                 .toMap(WmsWarehouseZoneDO::getId, v-> BeanUtils.toBean(v, WmsWarehouseZoneSimpleRespVO.class));
@@ -360,14 +361,8 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
             .toMap(WmsWarehouseDO::getId, v-> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
         StreamX.from(stockWarehouseVOList).assemble(warehouseVOMap, WmsStockWarehouseRespVO::getWarehouseId, WmsStockWarehouseRespVO::setWarehouse);
 
-
-
-
-
         // 仓库按产品分组
         Map<Long, List<WmsStockWarehouseRespVO>> stockWarehouseMap = StreamX.from(stockWarehouseVOList).groupBy(v->v.getProductId());
-
-
 
         // 装配仓库库存清单
         StreamX.from(list).assemble(stockWarehouseMap, WmsProductRespBinVO::getId, WmsProductRespBinVO::setStockWarehouseList);

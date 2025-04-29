@@ -22,6 +22,7 @@ import org.apache.ibatis.annotations.Mapper;
 public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQueryDO> {
 
     String AGE_EXPR = "(DATEDIFF(NOW(),t1.inbound_time)+IFNULL(t1.init_age,0))";
+    String AGE_COL_EXPR = AGE_EXPR+" as age";
 
     default PageResult<WmsInboundItemQueryDO> selectPage(WmsInboundItemPageReqVO reqVO) {
 
@@ -30,14 +31,16 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.selectAll(WmsInboundItemDO.class);
         wrapper.select(WmsInboundDO::getWarehouseId);
         wrapper.select(WmsPickupItemDO::getBinId);
-        wrapper.select(AGE_EXPR+" as age");
+        wrapper.select(AGE_COL_EXPR);
 
         //
+        wrapper.distinct();
         wrapper.innerJoin(WmsInboundDO.class,WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId)
             .likeIfExists(WmsInboundDO::getCode, reqVO.getInboundNo())
             .eqIfExists(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())
-            .eqIfExists(WmsInboundDO::getDeptId, reqVO.getDeptId())
-            .eqIfExists(WmsInboundDO::getCompanyId, reqVO.getCompanyId());
+            //.eqIfExists(WmsInboundDO::getDeptId, reqVO.getDeptId())
+            //.eqIfExists(WmsInboundDO::getCompanyId, reqVO.getCompanyId())
+         ;
 
         wrapper.leftJoin(WmsPickupItemDO.class, WmsPickupItemDO::getInboundItemId, WmsInboundItemQueryDO::getId)
             .eqIfExists(WmsPickupItemDO::getBinId, reqVO.getBinId());
@@ -54,6 +57,8 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.betweenIfPresent(WmsInboundItemDO::getCreateTime, reqVO.getCreateTime());
 
         // 范围查询
+        wrapper.eqIfPresent(WmsInboundItemDO::getInboundCompanyId, reqVO.getInboundCompanyId());
+        wrapper.eqIfPresent(WmsInboundItemDO::getInboundDeptId, reqVO.getInboundDeptId());
         wrapper.betweenIfPresent(WmsInboundItemDO::getActualQty,reqVO.getActualQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getOutboundAvailableQty,reqVO.getOutboundAvailableQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getPlanQty,reqVO.getPlanQty());
@@ -70,7 +75,8 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
     default PageResult<WmsInboundItemQueryDO> getPickupPending(WmsPickupPendingPageReqVO reqVO) {
         MPJLambdaWrapperX<WmsInboundItemQueryDO> query = new MPJLambdaWrapperX<>();
         query.selectAll(WmsInboundItemDO.class).select(WmsInboundDO::getWarehouseId);
-        query.gt(WmsInboundItemDO::getActualQty, WmsInboundItemDO::getShelvedQty).innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId).likeIfExists(WmsInboundDO::getCode, reqVO.getInboundNo())
+        query.eqIfPresent(WmsInboundItemDO::getProductId, reqVO.getProductId());
+        query.gt(WmsInboundItemDO::getActualQty, WmsInboundItemDO::getShelvedQty).innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId).likeIfExists(WmsInboundDO::getCode, reqVO.getInboundCode())
             .orderByDesc(WmsInboundItemDO::getId);
         return selectPage(reqVO, query);
     }

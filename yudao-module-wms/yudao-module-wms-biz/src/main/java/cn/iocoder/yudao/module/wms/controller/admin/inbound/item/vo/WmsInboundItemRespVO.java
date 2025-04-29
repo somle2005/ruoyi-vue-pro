@@ -4,18 +4,20 @@ import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleResp
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
-import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,outbound_available_qty,creator,inbound_status,company_id,create_time,plan_qty,shelved_qty,upstream_item_id,remark,latest_flow_id,updater,inbound_id,update_time,actual_qty,product_id,id,dept_id
+ * @table-fields : tenant_id,outbound_available_qty,creator,inbound_status,company_id,create_time,plan_qty,shelved_qty,upstream_item_id,remark,inbound_dept_id,latest_flow_id,updater,inbound_id,inbound_company_id,update_time,actual_qty,product_id,id,dept_id
  */
 @Schema(description = "管理后台 - 入库单详情 Response VO")
 @Data
@@ -30,9 +32,7 @@ public class WmsInboundItemRespVO {
     @ExcelProperty("仓库ID")
     private Long warehouseId;
 
-    @Schema(description = "仓位ID", example = "23620")
-    @ExcelProperty("仓位ID")
-    private Long binId;
+
 
     @Schema(description = "入库单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "29327")
     @ExcelProperty("入库单ID")
@@ -113,18 +113,15 @@ public class WmsInboundItemRespVO {
     @Schema(description = "仓库", example = "")
     private WmsWarehouseSimpleRespVO warehouse;
 
-    @Schema(description = "库位", example = "")
-    private WmsWarehouseBinRespVO bin;
 
-    @Schema(description = "库存归属部门ID", example = "")
+    @Schema(description = "库存归属部门ID,由用户指定", example = "")
     @ExcelProperty("库存归属部门ID")
     private Long deptId;
 
     @Schema(description = "部门", example = "")
-    @ExcelProperty("部门")
     private DeptSimpleRespVO dept;
 
-    @Schema(description = "库存财务公司ID", example = "")
+    @Schema(description = "库存财务公司ID,由用户指定", example = "")
     @ExcelProperty("库存财务公司ID")
     private Long companyId;
 
@@ -133,10 +130,29 @@ public class WmsInboundItemRespVO {
     private String remark;
 
     @Schema(description = "财务公司", example = "")
-    @ExcelProperty("财务公司")
     private FmsCompanySimpleRespVO company;
 
     @Schema(description = "来源详情ID", example = "")
     @ExcelProperty("来源详情ID")
     private Long upstreamItemId;
+
+    @Schema(description = "入库的财务公司ID", example = "")
+    @ExcelProperty("入库的财务公司ID")
+    private Long inboundCompanyId;
+
+    @Schema(description = "入库的归属部门ID,由用户指定", example = "")
+    @ExcelProperty("入库的归属部门ID,由用户指定")
+    private Long inboundDeptId;
+
+    @Schema(description = "入库部门", example = "")
+    private DeptSimpleRespVO inboundDept;
+
+    @Schema(description = "入库财务公司", example = "")
+    private FmsCompanySimpleRespVO inboundCompany;
+
+    @Schema(description = "当前仓库库存", example = "{}")
+    @ExcelProperty("当前仓库库存")
+    private WmsStockWarehouseSimpleVO stockWarehouse;
+
+
 }

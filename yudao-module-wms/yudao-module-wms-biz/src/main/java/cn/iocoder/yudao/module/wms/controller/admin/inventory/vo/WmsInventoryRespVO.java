@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.wms.controller.admin.inventory.vo;
 
+import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalHistoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
@@ -13,7 +14,7 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,creator,update_time,code,create_time,id,audit_status,creator_remark,warehouse_id,updater
+ * @table-fields : tenant_id,creator,update_time,code,create_time,remark,id,audit_status,warehouse_id,updater
  */
 @Schema(description = "管理后台 - 盘点 Response VO")
 @Data
@@ -28,7 +29,7 @@ public class WmsInventoryRespVO {
     @ExcelProperty("仓库ID")
     private Long warehouseId;
 
-    @Schema(description = "WMS盘点单审批状态 ; WmsInventoryAuditStatus : 0-起草中 , 1-待审批 , 2-已驳回 , 3-已通过", requiredMode = Schema.RequiredMode.REQUIRED, example = "2")
+    @Schema(description = "WMS盘点单审批状态 ; WmsInventoryAuditStatus : 0-起草中 , 1-待审批 , 2-已驳回 , 3-已通过 , 5-作废", requiredMode = Schema.RequiredMode.REQUIRED, example = "2")
     @ExcelProperty("WMS盘点单审批状态")
     private Integer auditStatus;
 
@@ -65,11 +66,22 @@ public class WmsInventoryRespVO {
     @ExcelProperty("仓库")
     private WmsWarehouseSimpleRespVO warehouse;
 
-    @Schema(description = "创建者备注", example = "")
-    @ExcelProperty("创建者备注")
-    private String creatorRemark;
-
     @Schema(description = "单据号", example = "")
     @ExcelProperty("单据号")
     private String code;
+
+    @Schema(description = "创建者备注", example = "")
+    @ExcelProperty("创建者备注")
+    private String remark;
+
+    @Schema(description = "创建人姓名", example = "张三")
+    @ExcelProperty("创建人姓名")
+    private String creatorName;
+
+    @Schema(description = "更新人姓名", example = "李四")
+    @ExcelProperty("更新人姓名")
+    private String updaterName;
+
+    @Schema(description = "审批历史", example = "")
+    List<WmsApprovalHistoryRespVO> approvalHistoryList;
 }

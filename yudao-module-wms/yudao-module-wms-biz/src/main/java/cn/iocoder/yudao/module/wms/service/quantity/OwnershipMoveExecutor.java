@@ -19,7 +19,6 @@ import java.util.List;
 import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_NOT_ENOUGH;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_ITEM_NOT_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_QUANTITY_ERROR;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_NOT_ENOUGH;
@@ -79,11 +78,10 @@ public class OwnershipMoveExecutor extends QuantityExecutor<OwnershipMoveContext
             }
             // 库存不足
             if(avaQty<ownershipMoveItemDO.getQty()) {
-                throw exception(STOCK_BIN_NOT_ENOUGH);
+                throw exception(STOCK_OWNERSHIP_NOT_ENOUGH);
             }
 
         }
-
 
         // 逐行处理
         for (WmsStockOwnershipMoveItemDO ownershipMoveItemDO : ownershipMoveItemDOList) {

@@ -49,6 +49,7 @@ public interface WmsInboundItemMapper extends BaseMapperX<WmsInboundItemDO> {
         query.eq(WmsInboundDO::getWarehouseId, warehouseId).eq(WmsInboundItemDO::getProductId, productId).gt(WmsInboundItemDO::getOutboundAvailableQty, 0).last("ORDER BY DATEDIFF(t1.inbound_time, now())+t1.init_age desc");
         return selectList(query);
     }
+
     // default PageResult<WmsInboundItemOwnershipDO> selectInboundItemOwnershipList(Long productId) {
     // 
     // 
@@ -73,4 +74,10 @@ public interface WmsInboundItemMapper extends BaseMapperX<WmsInboundItemDO> {
     // 
     // 
     // }
+    /**
+     * 按 inbound_id,product_id 查询 WmsInboundItemDO 清单
+     */
+    default List<WmsInboundItemDO> selectByInboundIdAndProductId(Long inboundId, Long productId) {
+        return selectList(new LambdaQueryWrapperX<WmsInboundItemDO>().eq(WmsInboundItemDO::getInboundId, inboundId).eq(WmsInboundItemDO::getProductId, productId));
+    }
 }

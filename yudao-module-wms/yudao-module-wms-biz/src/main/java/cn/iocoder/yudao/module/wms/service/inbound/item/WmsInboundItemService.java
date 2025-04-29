@@ -1,10 +1,13 @@
 package cn.iocoder.yudao.module.wms.service.inbound.item;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemBinRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemImportExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsPickupPendingPageReqVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemBinQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
@@ -68,27 +71,77 @@ public interface WmsInboundItemService {
         return selectByInboundId(inboundId, Integer.MAX_VALUE);
     }
 
+    /**
+     * 更新实际入库量
+     *
+     * @param updateReqVOList 更新信息
+     */
     void updateActualQuantity(List<WmsInboundItemSaveReqVO> updateReqVOList);
 
+    /**
+     * 按 id 查询 WmsInboundItemDO
+     */
     List<WmsInboundItemDO> selectByIds(List<Long> ids);
 
+    /**
+     * 更新 WmsInboundItemDO
+     */
     void updateById(WmsInboundItemDO inboundItemDO);
 
+    /**
+     * 获取待上架清单
+     */
     PageResult<WmsInboundItemQueryDO> getPickupPending(WmsPickupPendingPageReqVO pageReqVO);
 
-    void assembleProducts(List<WmsInboundItemRespVO> itemList);
+    /**
+     * 装配产品
+     */
+    void assembleProducts(List<? extends WmsInboundItemRespVO> itemList);
 
-    void assembleInbound(List<WmsInboundItemRespVO> itemList);
+    /**
+     * 装配入库单
+     */
+    void assembleInbound(List<? extends WmsInboundItemRespVO> itemList);
 
+    /**
+     * 按仓库id和商品id查询
+     */
     List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId);
 
+    /**
+     * 保存入库单详情
+     */
     void saveItems(List<WmsInboundItemDO> itemsToUpdate, List<WmsInboundItemFlowDO> inboundItemFlowList);
 
-    void assembleWarehouse(List<WmsInboundItemRespVO> list);
+    /**
+     * 装配仓库
+     */
+    void assembleWarehouse(List<? extends WmsInboundItemRespVO> list);
 
-    void assembleWarehouseBin(List<WmsInboundItemRespVO> list);
+    /**
+     * 装配仓库货位
+     */
+    void assembleWarehouseBin(List<WmsInboundItemBinRespVO> list);
 
-    void assembleDept(List<WmsInboundItemRespVO> list);
+    /**
+     * 装配部门
+     */
+    void assembleDept(List<? extends WmsInboundItemRespVO> list);
 
-    void assembleCompany(List<WmsInboundItemRespVO> list);
+    /**
+     * 装配公司
+     */
+    void assembleCompany(List<? extends WmsInboundItemRespVO> list);
+
+    /**
+     * 装配商品id
+     */
+    void assembleProductIds(List<WmsInboundItemImportExcelVO> impVOList);
+
+    /**
+     * 批次库存关联仓位查询
+     */
+    PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(@Valid WmsInboundItemPageReqVO pageReqVO);
+
+    void assembleStockWarehouse(List<? extends WmsInboundItemRespVO> list);
 }
