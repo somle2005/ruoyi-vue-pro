@@ -233,11 +233,11 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             if (req.getPass()) {
                 //通过
                 auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.AGREE, req);
+                //TODO api 生成出库单
             } else {
                 //不通过
                 auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, req);
             }
-            //TODO api 生成出库单
         } else {
             //TODO api 校验是否存在出库单，出库单是否删除了？报废了？
             //反审核
