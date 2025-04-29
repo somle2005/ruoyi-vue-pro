@@ -171,6 +171,7 @@ logging:
         yudao:
           module:
             srm: debug
+            oms: debug
           framework:
             template: debug
     root: info
