@@ -280,7 +280,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     @Override
     public void approve(WmsInboundAuditStatus.Event event, WmsApprovalReqVO approvalReqVO) {
         // 设置业务默认值
-        approvalReqVO.setBillType(BillType.INBOUND.getValue());
+        approvalReqVO.setBillType(BillType.WMS_INBOUND.getValue());
         approvalReqVO.setStatusType(WmsInboundAuditStatus.getType());
         // 获得业务对象
         WmsInboundDO inbound = validateInboundExists(approvalReqVO.getBillId());
@@ -432,7 +432,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      */
     @Override
     public void assembleApprovalHistory(List<WmsInboundRespVO> list) {
-        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(BillType.INBOUND, StreamX.from(list).toList(WmsInboundRespVO::getId));
+        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(BillType.WMS_INBOUND, StreamX.from(list).toList(WmsInboundRespVO::getId));
         StreamX.from(list).assemble(groupedApprovalHistory, WmsInboundRespVO::getId, WmsInboundRespVO::setApprovalHistoryList);
     }
 
@@ -477,7 +477,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         // 创建
         WmsInboundDO inbound = this.createInbound(inboundSaveReqVO);
         // 保存
-        inbound.setUpstreamBillType(BillType.INVENTORY.getValue());
+        inbound.setUpstreamBillType(BillType.WMS_INVENTORY.getValue());
         inbound.setType(WmsInboundType.INVENTORY.getValue());
         inboundMapper.updateById(inbound);
         // 

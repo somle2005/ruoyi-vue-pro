@@ -161,7 +161,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         flowDO.setInboundItemId(inboundItemDO.getId());
         flowDO.setProductId(inboundItemDO.getProductId());
 
-        flowDO.setBillType(BillType.PICKUP.getValue());
+        flowDO.setBillType(BillType.WMS_PICKUP.getValue());
         flowDO.setBillId(pickup.getId());
         flowDO.setBillItemId(pickupItemDO.getId());
 

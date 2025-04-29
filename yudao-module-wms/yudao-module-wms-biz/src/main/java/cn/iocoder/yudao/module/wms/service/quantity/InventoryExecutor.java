@@ -203,7 +203,7 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
         inboundSaveReqVO.setItemList(inboundItemSaveReqVOList);
         inboundSaveReqVO.setUpstreamBillId(inventoryDO.getId());
         inboundSaveReqVO.setUpstreamBillCode(inventoryDO.getCode());
-        inboundSaveReqVO.setUpstreamBillType(BillType.INVENTORY.getValue());
+        inboundSaveReqVO.setUpstreamBillType(BillType.WMS_INVENTORY.getValue());
         inboundSaveReqVO.setType(WmsInboundType.INVENTORY.getValue());
 
         // 执行入库
@@ -222,7 +222,7 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
         pickupSaveReqVO.setItemList(pickupItemSaveReqVOList);
         pickupSaveReqVO.setUpstreamBillId(inventoryDO.getId());
         pickupSaveReqVO.setUpstreamBillCode(inventoryDO.getCode());
-        pickupSaveReqVO.setUpstreamBillType(BillType.INVENTORY.getValue());
+        pickupSaveReqVO.setUpstreamBillType(BillType.WMS_INVENTORY.getValue());
         // 执行拣货
         pickupService.createForInventory(pickupSaveReqVO);
 
@@ -286,7 +286,7 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
         outboundSaveReqVO.setItemList(outboundItemSaveReqVOList);
         outboundSaveReqVO.setUpstreamBillId(inventoryDO.getId());
         outboundSaveReqVO.setUpstreamBillCode(inventoryDO.getCode());
-        outboundSaveReqVO.setUpstreamBillType(BillType.INVENTORY.getValue());
+        outboundSaveReqVO.setUpstreamBillType(BillType.WMS_INVENTORY.getValue());
 
 
 

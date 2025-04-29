@@ -324,7 +324,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
 
     @Override
     public void assembleApprovalHistory(List<WmsOutboundRespVO> list) {
-        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(BillType.OUTBOUND, StreamX.from(list).toList(WmsOutboundRespVO::getId));
+        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(BillType.WMS_OUTBOUND, StreamX.from(list).toList(WmsOutboundRespVO::getId));
         StreamX.from(list).assemble(groupedApprovalHistory, WmsOutboundRespVO::getId, WmsOutboundRespVO::setApprovalHistoryList);
     }
 
@@ -396,7 +396,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Override
     public void approve(WmsOutboundAuditStatus.Event event, WmsApprovalReqVO approvalReqVO) {
         // 设置业务默认值
-        approvalReqVO.setBillType(BillType.OUTBOUND.getValue());
+        approvalReqVO.setBillType(BillType.WMS_OUTBOUND.getValue());
         approvalReqVO.setStatusType(WmsOutboundAuditStatus.getType());
         // 获得业务对象
         WmsOutboundDO inbound = validateOutboundExists(approvalReqVO.getBillId());

@@ -309,7 +309,7 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     @Transactional(rollbackFor = Exception.class)
     public void approve(WmsInventoryAuditStatus.Event event, WmsApprovalReqVO approvalReqVO) {
         // 设置业务默认值
-        approvalReqVO.setBillType(BillType.INVENTORY.getValue());
+        approvalReqVO.setBillType(BillType.WMS_INVENTORY.getValue());
         approvalReqVO.setStatusType(WmsOutboundAuditStatus.getType());
         // 获得业务对象
         WmsInventoryDO inventoryDO = validateInventoryExists(approvalReqVO.getBillId());
@@ -326,7 +326,7 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
      */
     @Override
     public void assembleApprovalHistory(List<WmsInventoryRespVO> list) {
-        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(BillType.INVENTORY, StreamX.from(list).toList(WmsInventoryRespVO::getId));
+        Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(BillType.WMS_INVENTORY, StreamX.from(list).toList(WmsInventoryRespVO::getId));
         StreamX.from(list).assemble(groupedApprovalHistory, WmsInventoryRespVO::getId, WmsInventoryRespVO::setApprovalHistoryList);
     }
 }

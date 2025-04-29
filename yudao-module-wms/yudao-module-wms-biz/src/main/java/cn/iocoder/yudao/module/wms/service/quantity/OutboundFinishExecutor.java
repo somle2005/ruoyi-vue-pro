@@ -104,7 +104,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
             newFlowDO.setProductId(inboundItemDO.getProductId());
 
 
-            newFlowDO.setBillType(BillType.OUTBOUND.getValue());
+            newFlowDO.setBillType(BillType.WMS_OUTBOUND.getValue());
             newFlowDO.setBillId(outboundRespVO.getId());
             newFlowDO.setBillItemId(item.getId());
 

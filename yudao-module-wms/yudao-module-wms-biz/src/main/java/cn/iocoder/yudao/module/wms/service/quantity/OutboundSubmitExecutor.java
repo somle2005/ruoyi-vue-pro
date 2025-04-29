@@ -168,7 +168,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setInboundItemId(itemDO.getId());
                 flowDO.setProductId(itemDO.getProductId());
 
-                flowDO.setBillType(BillType.OUTBOUND.getValue());
+                flowDO.setBillType(BillType.WMS_OUTBOUND.getValue());
                 flowDO.setBillId(outboundRespVO.getId());
                 flowDO.setBillItemId(item.getId());
 
@@ -191,7 +191,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setInboundItemId(itemDO.getId());
                 flowDO.setProductId(itemDO.getProductId());
 
-                flowDO.setBillType(BillType.OUTBOUND.getValue());
+                flowDO.setBillType(BillType.WMS_OUTBOUND.getValue());
                 flowDO.setBillId(outboundRespVO.getId());
                 flowDO.setBillItemId(item.getId());
 
@@ -215,7 +215,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setInboundItemId(itemDO.getId());
                 flowDO.setProductId(itemDO.getProductId());
 
-                flowDO.setBillType(BillType.OUTBOUND.getValue());
+                flowDO.setBillType(BillType.WMS_OUTBOUND.getValue());
                 flowDO.setBillId(outboundRespVO.getId());
                 flowDO.setBillItemId(item.getId());
 

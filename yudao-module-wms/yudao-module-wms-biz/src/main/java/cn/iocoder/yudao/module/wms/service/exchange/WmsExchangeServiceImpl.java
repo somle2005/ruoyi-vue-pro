@@ -218,7 +218,7 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
     @Transactional(rollbackFor = Exception.class)
     public void approve(WmsExchangeAuditStatus.Event event, WmsApprovalReqVO approvalReqVO) {
         // 设置业务默认值
-        approvalReqVO.setBillType(BillType.EXCHANGE.getValue());
+        approvalReqVO.setBillType(BillType.WMS_EXCHANGE.getValue());
         approvalReqVO.setStatusType(WmsExchangeAuditStatus.getType());
         // 获得业务对象
         WmsExchangeDO exchangeDO = validateExchangeExists(approvalReqVO.getBillId());

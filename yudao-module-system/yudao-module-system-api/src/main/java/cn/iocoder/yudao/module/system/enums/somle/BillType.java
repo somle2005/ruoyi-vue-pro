@@ -8,17 +8,18 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 
 /**
- * 来源单据类型
+ * 单据类型
  **/
 @RequiredArgsConstructor
 @Getter
 public enum BillType implements ArrayValuable<Integer>, DictEnum {
 
-    INBOUND(0, "入库单"),
-    OUTBOUND(1, "出库单"),
-    INVENTORY(2,"盘点单"),
-    EXCHANGE(3,"换货单"),
-    PICKUP(4,"上架单"),
+    // WMS  编码段 0~100
+    WMS_INBOUND(0, "入库单"),
+    WMS_OUTBOUND(1, "出库单"),
+    WMS_INVENTORY(2,"盘点单"),
+    WMS_EXCHANGE(3,"换货单"),
+    WMS_PICKUP(4,"上架单"),
     ;
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(BillType::getValue).toArray(Integer[]::new);
