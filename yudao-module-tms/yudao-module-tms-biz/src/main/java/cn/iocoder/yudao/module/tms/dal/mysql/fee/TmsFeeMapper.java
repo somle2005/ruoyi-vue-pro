@@ -5,7 +5,6 @@ import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeePageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
-import cn.iocoder.yudao.module.tms.enums.SourceTypeEnum;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -44,10 +43,10 @@ public interface TmsFeeMapper extends BaseMapperX<TmsFeeDO> {
         return delete(TmsFeeDO::getSourceId, sourceId);
     }
 
-    default List<TmsFeeDO> selectListBySourceIdAndType(Long sourceId, SourceTypeEnum sourceType) {
+    default List<TmsFeeDO> selectListBySourceIdAndType(Long sourceId, Integer sourceType) {
         return selectList(new MPJLambdaWrapperX<TmsFeeDO>()
             .eq(TmsFeeDO::getSourceId, sourceId)
-            .eq(TmsFeeDO::getSourceType, sourceType.getType()));
+            .eq(TmsFeeDO::getSourceType, sourceType));
     }
 
     default List<Long> selectFirstMileIdsByFeePageReqVO(TmsFeePageReqVO reqVO) {
@@ -64,21 +63,21 @@ public interface TmsFeeMapper extends BaseMapperX<TmsFeeDO> {
             .collect(Collectors.toList());
     }
 
-    default TmsFeeDO selectByIdAndType(Long id, SourceTypeEnum sourceType) {
+    default TmsFeeDO selectByIdAndType(Long id, Integer sourceType) {
         return selectOne(new MPJLambdaWrapperX<TmsFeeDO>()
             .eq(TmsFeeDO::getId, id)
-            .eq(TmsFeeDO::getSourceType, sourceType.getType()));
+            .eq(TmsFeeDO::getSourceType, sourceType));
     }
 
-    default int deleteByIdAndType(Long id, SourceTypeEnum sourceType) {
+    default int deleteByIdAndType(Long id, Integer sourceType) {
         return delete(new MPJLambdaWrapperX<TmsFeeDO>()
             .eq(TmsFeeDO::getId, id)
-            .eq(TmsFeeDO::getSourceType, sourceType.getType()));
+            .eq(TmsFeeDO::getSourceType, sourceType));
     }
 
-    default int deleteBySourceIdAndType(Long sourceId, SourceTypeEnum sourceType) {
+    default int deleteBySourceIdAndType(Long sourceId, Integer sourceType) {
         return delete(new MPJLambdaWrapperX<TmsFeeDO>()
             .eq(TmsFeeDO::getSourceId, sourceId)
-            .eq(TmsFeeDO::getSourceType, sourceType.getType()));
+            .eq(TmsFeeDO::getSourceType, sourceType));
     }
 }

@@ -14,12 +14,17 @@ import java.util.Arrays;
 @Getter
 public enum BillType implements ArrayValuable<Integer>, DictEnum {
 
-    // WMS  编码段 0~100
+    // ========== WMS  编码段 0~100 ==========
     WMS_INBOUND(0, "入库单"),
     WMS_OUTBOUND(1, "出库单"),
     WMS_INVENTORY(2,"盘点单"),
     WMS_EXCHANGE(3,"换货单"),
     WMS_PICKUP(4,"上架单"),
+
+    // ========== TMS  编码段 100~200 ==========
+    TMS_FIRST_MILE(100, "头程单"),
+    TRANSFER(101, "调拨单"),
+    LAST_MILE(102, "尾程单"),
     ;
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(BillType::getValue).toArray(Integer[]::new);

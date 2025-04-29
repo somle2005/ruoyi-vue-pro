@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
@@ -23,7 +24,6 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileIt
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.TmsFirstMileMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item.TmsFirstMileItemMapper;
 import cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO;
-import cn.iocoder.yudao.module.tms.enums.SourceTypeEnum;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
@@ -287,7 +287,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Override
     public List<TmsFeeRespVO> getFeeListBySourceId(Long sourceId) {
-        List<TmsFeeDO> feeList = feeService.getFeeListBySourceId(sourceId, SourceTypeEnum.FIRST_MILE);
+        List<TmsFeeDO> feeList = feeService.getFeeListBySourceId(sourceId, BillType.TMS_FIRST_MILE.getValue());
         return TmsFirstMileConvert.convertFeeList(feeList);
     }
 
@@ -306,39 +306,39 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         }
         List<TmsFeeDO> feeList = TmsFirstMileConvert.convertFeeListToDO(list);
         feeList.forEach(fee -> fee.setSourceId(sourceId));
-        feeService.createFeeList(feeList, SourceTypeEnum.FIRST_MILE);
+        feeService.createFeeList(feeList, BillType.TMS_FIRST_MILE.getValue());
     }
 
     private void updateFeeList(Long sourceId, List<TmsFeeSaveReqVO> list) {
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        List<TmsFeeDO> oldList = feeService.getFeeListBySourceId(sourceId, SourceTypeEnum.FIRST_MILE);
+        List<TmsFeeDO> oldList = feeService.getFeeListBySourceId(sourceId, BillType.TMS_FIRST_MILE.getValue());
         List<TmsFeeDO> newList = TmsFirstMileConvert.convertFeeListToDO(list);
 
         List<List<TmsFeeDO>> diffedList = CollectionUtils.diffList(oldList, newList, Object::equals);
 
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
             diffedList.get(0).forEach(fee -> fee.setSourceId(sourceId));
-            feeService.createFeeList(diffedList.get(0), SourceTypeEnum.FIRST_MILE);
+            feeService.createFeeList(diffedList.get(0), BillType.TMS_FIRST_MILE.getValue());
         }
         if (CollUtil.isNotEmpty(diffedList.get(1))) {
             diffedList.get(1).forEach(fee -> fee.setSourceId(sourceId));
-            feeService.updateFeeList(diffedList.get(1), SourceTypeEnum.FIRST_MILE);
+            feeService.updateFeeList(diffedList.get(1), BillType.TMS_FIRST_MILE.getValue());
         }
         if (CollUtil.isNotEmpty(diffedList.get(2))) {
             List<Long> deleteIds = CollectionUtils.convertList(diffedList.get(2), TmsFeeDO::getId);
-            feeService.deleteFeeList(deleteIds, SourceTypeEnum.FIRST_MILE);
+            feeService.deleteFeeList(deleteIds, BillType.TMS_FIRST_MILE.getValue());
         }
     }
 
     private void deleteFeeBySourceId(Long sourceId) {
-        List<TmsFeeDO> feeList = feeService.getFeeListBySourceId(sourceId, SourceTypeEnum.FIRST_MILE);
+        List<TmsFeeDO> feeList = feeService.getFeeListBySourceId(sourceId, BillType.TMS_FIRST_MILE.getValue());
         if (CollUtil.isEmpty(feeList)) {
             return;
         }
         List<Long> deleteIds = CollectionUtils.convertList(feeList, TmsFeeDO::getId);
-        feeService.deleteFeeList(deleteIds, SourceTypeEnum.FIRST_MILE);
+        feeService.deleteFeeList(deleteIds, BillType.TMS_FIRST_MILE.getValue());
     }
 
     /**

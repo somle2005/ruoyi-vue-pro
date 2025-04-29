@@ -3,11 +3,11 @@ package cn.iocoder.yudao.module.tms.service.fee;
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.fee.TmsFeeMapper;
-import cn.iocoder.yudao.module.tms.enums.SourceTypeEnum;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -31,41 +31,41 @@ public class TmsFeeServiceImpl implements TmsFeeService {
     private TmsFeeMapper feeMapper;
 
     @Override
-    public Long createFee(TmsFeeSaveReqVO createReqVO, SourceTypeEnum sourceType) {
+    public Long createFee(TmsFeeSaveReqVO createReqVO, Integer sourceType) {
         // 插入
         TmsFeeDO fee = BeanUtils.toBean(createReqVO, TmsFeeDO.class);
-        fee.setSourceType(sourceType.getType());
+        fee.setSourceType(sourceType);
         feeMapper.insert(fee);
         // 返回
         return fee.getId();
     }
 
     @Override
-    public void updateFee(TmsFeeSaveReqVO updateReqVO, SourceTypeEnum sourceType) {
+    public void updateFee(TmsFeeSaveReqVO updateReqVO, Integer sourceType) {
         // 校验存在
         validateFeeExists(updateReqVO.getId(), sourceType);
         // 更新
         TmsFeeDO updateObj = BeanUtils.toBean(updateReqVO, TmsFeeDO.class);
-        updateObj.setSourceType(sourceType.getType());
+        updateObj.setSourceType(sourceType);
         feeMapper.updateById(updateObj);
     }
 
     @Override
-    public void deleteFee(Long id, SourceTypeEnum sourceType) {
+    public void deleteFee(Long id, Integer sourceType) {
         // 校验存在
         validateFeeExists(id, sourceType);
         // 删除
         feeMapper.deleteByIdAndType(id, sourceType);
     }
 
-    private void validateFeeExists(Long id, SourceTypeEnum sourceType) {
+    private void validateFeeExists(Long id, Integer sourceType) {
         if (feeMapper.selectByIdAndType(id, sourceType) == null) {
             throw exception(FEE_NOT_EXISTS);
         }
     }
 
     @Override
-    public TmsFeeDO getFee(Long id, SourceTypeEnum sourceType) {
+    public TmsFeeDO getFee(Long id, Integer sourceType) {
         return feeMapper.selectByIdAndType(id, sourceType);
     }
 
@@ -77,22 +77,22 @@ public class TmsFeeServiceImpl implements TmsFeeService {
     @Override
     public List<Long> selectFirstMileIdsByFeePageReqVO(TmsFeePageReqVO reqVO) {
         // 设置源类型为头程单
-        reqVO.setSourceType(SourceTypeEnum.FIRST_MILE.getType());
+        reqVO.setSourceType(BillType.TMS_FIRST_MILE.getValue());
         return feeMapper.selectFirstMileIdsByFeePageReqVO(reqVO);
     }
 
     @Override
-    public List<TmsFeeDO> getFeeListBySourceId(Long sourceId, SourceTypeEnum sourceType) {
+    public List<TmsFeeDO> getFeeListBySourceId(Long sourceId, Integer sourceType) {
         return feeMapper.selectListBySourceIdAndType(sourceId, sourceType);
     }
 
     @Override
-    public List<Long> createFeeList(List<TmsFeeDO> feeList, SourceTypeEnum sourceType) {
+    public List<Long> createFeeList(List<TmsFeeDO> feeList, Integer sourceType) {
         if (CollUtil.isEmpty(feeList)) {
             return Collections.emptyList();
         }
         // 设置源类型
-        feeList.forEach(fee -> fee.setSourceType(sourceType.getType()));
+        feeList.forEach(fee -> fee.setSourceType(sourceType));
         // 批量插入
         feeMapper.insertBatch(feeList);
         // 返回 ID 列表
@@ -100,20 +100,20 @@ public class TmsFeeServiceImpl implements TmsFeeService {
     }
 
     @Override
-    public void updateFeeList(List<TmsFeeDO> feeList, SourceTypeEnum sourceType) {
+    public void updateFeeList(List<TmsFeeDO> feeList, Integer sourceType) {
         if (CollUtil.isEmpty(feeList)) {
             return;
         }
         // 校验存在
         feeList.forEach(fee -> validateFeeExists(fee.getId(), sourceType));
         // 设置源类型
-        feeList.forEach(fee -> fee.setSourceType(sourceType.getType()));
+        feeList.forEach(fee -> fee.setSourceType(sourceType));
         // 批量更新
         feeMapper.updateBatch(feeList);
     }
 
     @Override
-    public void deleteFeeList(List<Long> ids, SourceTypeEnum sourceType) {
+    public void deleteFeeList(List<Long> ids, Integer sourceType) {
         if (CollUtil.isEmpty(ids)) {
             return;
         }

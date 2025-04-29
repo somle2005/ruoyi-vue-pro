@@ -4,7 +4,6 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
-import cn.iocoder.yudao.module.tms.enums.SourceTypeEnum;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -31,7 +30,7 @@ public interface TmsFeeService {
      * @param sourceType 源类型
      * @return 费用列表
      */
-    List<TmsFeeDO> getFeeListBySourceId(Long sourceId, SourceTypeEnum sourceType);
+    List<TmsFeeDO> getFeeListBySourceId(Long sourceId, Integer sourceType);
 
     /**
      * 创建出运订单费用明细
@@ -40,7 +39,7 @@ public interface TmsFeeService {
      * @param sourceType 源类型
      * @return 编号
      */
-    Long createFee(@Valid TmsFeeSaveReqVO createReqVO, SourceTypeEnum sourceType);
+    Long createFee(@Valid TmsFeeSaveReqVO createReqVO, Integer sourceType);
 
     /**
      * 更新出运订单费用明细
@@ -48,7 +47,7 @@ public interface TmsFeeService {
      * @param updateReqVO 更新信息
      * @param sourceType 源类型
      */
-    void updateFee(@Valid TmsFeeSaveReqVO updateReqVO, SourceTypeEnum sourceType);
+    void updateFee(@Valid TmsFeeSaveReqVO updateReqVO, Integer sourceType);
 
     /**
      * 删除出运订单费用明细
@@ -56,7 +55,7 @@ public interface TmsFeeService {
      * @param id 编号
      * @param sourceType 源类型
      */
-    void deleteFee(Long id, SourceTypeEnum sourceType);
+    void deleteFee(Long id, Integer sourceType);
 
     /**
      * 获得出运订单费用明细
@@ -65,7 +64,7 @@ public interface TmsFeeService {
      * @param sourceType 源类型
      * @return 出运订单费用明细
      */
-    TmsFeeDO getFee(Long id, SourceTypeEnum sourceType);
+    TmsFeeDO getFee(Long id, Integer sourceType);
 
     /**
      * 获得出运订单费用明细分页
@@ -82,7 +81,7 @@ public interface TmsFeeService {
      * @param sourceType 源类型
      * @return 编号列表
      */
-    List<Long> createFeeList(List<TmsFeeDO> feeList, SourceTypeEnum sourceType);
+    List<Long> createFeeList(List<TmsFeeDO> feeList, Integer sourceType);
 
     /**
      * 批量更新出运订单费用明细
@@ -90,7 +89,7 @@ public interface TmsFeeService {
      * @param feeList    更新信息列表
      * @param sourceType 源类型
      */
-    void updateFeeList(List<TmsFeeDO> feeList, SourceTypeEnum sourceType);
+    void updateFeeList(List<TmsFeeDO> feeList, Integer sourceType);
 
     /**
      * 批量删除出运订单费用明细
@@ -98,6 +97,6 @@ public interface TmsFeeService {
      * @param ids        编号列表
      * @param sourceType 源类型
      */
-    void deleteFeeList(List<Long> ids, SourceTypeEnum sourceType);
+    void deleteFeeList(List<Long> ids, Integer sourceType);
 
 }

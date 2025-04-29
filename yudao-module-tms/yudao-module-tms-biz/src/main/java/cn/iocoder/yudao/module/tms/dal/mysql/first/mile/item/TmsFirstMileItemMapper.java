@@ -3,12 +3,12 @@ package cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.TmsVesselTrackingDO;
-import cn.iocoder.yudao.module.tms.enums.SourceTypeEnum;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -92,7 +92,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             .orderByDesc(TmsFirstMileDO::getCreateTime)
             //关联船运
             .leftJoin(TmsVesselTrackingDO.class, TmsVesselTrackingDO::getUpstreamId, TmsFirstMileItemDO::getId, on -> {
-                on.eqIfPresent(TmsVesselTrackingDO::getUpstreamType, SourceTypeEnum.FIRST_MILE.getType());
+                on.eqIfPresent(TmsVesselTrackingDO::getUpstreamType, BillType.TMS_FIRST_MILE.getValue());
             })
             // 时间
             .betweenIfPresent(TmsVesselTrackingDO::getArriveEstimateTime, vo.getTrackingQueryVO().getArriveEstimateTime()) // 预计到达时间
