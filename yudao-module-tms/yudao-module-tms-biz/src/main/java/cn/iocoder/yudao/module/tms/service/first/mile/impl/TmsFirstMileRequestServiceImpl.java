@@ -68,8 +68,6 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Resource(name = FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
     private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> offItemStatusMachine;
     @Autowired
-    private TmsFirstMileRequestItemService tmsFirstMileRequestItemService;
-    @Autowired
     private TmsFirstMileService tmsFirstMileService;
 
     @Override
