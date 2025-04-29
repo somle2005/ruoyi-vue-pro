@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.tms.service.first.mile.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
+import cn.iocoder.yudao.module.tms.api.first.mile.request.FistMileRequestItemDTO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
@@ -42,7 +43,7 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
     @Resource(name = FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
     private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> offItemStatusMachine;
     @Resource(name = FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE)
-    private StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestItemDO> orderItemStatusMachine;
+    private StateMachine<TmsOrderStatus, TmsEventEnum, FistMileRequestItemDTO> orderItemStatusMachine;
     //
     @Resource(name = FIRST_MILE_REQUEST_OFF_STATE_MACHINE)
     private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> offStatusStatusMachine;
@@ -61,7 +62,7 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
 
     private void initSlaveStatus(List<TmsFirstMileRequestItemDO> list) {
         for (TmsFirstMileRequestItemDO item : list) {
-            orderItemStatusMachine.fireEvent(TmsOrderStatus.OT_ORDERED, TmsEventEnum.ORDER_INIT, item);
+            orderItemStatusMachine.fireEvent(TmsOrderStatus.OT_ORDERED, TmsEventEnum.ORDER_INIT, FistMileRequestItemDTO.builder().itemId(item.getId()).build());
             offItemStatusMachine.fireEvent(TmsOffStatus.OPEN, TmsEventEnum.OFF_INIT, item);
         }
     }
