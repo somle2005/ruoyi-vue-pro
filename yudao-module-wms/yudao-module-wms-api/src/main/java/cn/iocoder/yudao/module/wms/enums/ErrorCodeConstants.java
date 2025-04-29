@@ -237,6 +237,7 @@ public interface ErrorCodeConstants {
     ErrorCode INVENTORY_CODE_DUPLICATE = new ErrorCode(2_001_020_008, "单据号已存在");
     ErrorCode INVENTORY_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_020_009, "盘点单不符合审批条件");
 
+    // ========== WMS_INVENTORY 盘点表 2_001_021_000 ==========
     ErrorCode INVENTORY_AUDIT_FAIL = new ErrorCode(2_001_021_008, "审核错误，当前出库单状态为{}，在{}状态时才允许{}");
     ErrorCode INVENTORY_STATUS_PARSE_ERROR = new ErrorCode(2_001_021_009, "盘点审批状态转换错误");
     ErrorCode INVENTORY_AUDIT_ERROR = new ErrorCode(2_001_021_010, "盘点单审核错误，当前审核状态{}");
@@ -258,6 +259,8 @@ public interface ErrorCodeConstants {
     ErrorCode INVENTORY_BIN_CAN_NOT_IMPORT = new ErrorCode(2_001_022_013, "不允许盘点导入结果");
     ErrorCode INVENTORY_BIN_MUST_IN_SAME_INVENTORY = new ErrorCode(2_001_022_014, "必须追加到同一个盘点单");
     ErrorCode INVENTORY_BIN_CAN_NOT_APPEND = new ErrorCode(2_001_022_015, "当前盘点单为{}状态，不允许导入盘点结果");
+    ErrorCode INVENTORY_BIN_INVENTORY_ID_BIN_ID_PRODUCT_ID_DUPLICATE = new ErrorCode(2_001_022_016, "盘点结果单ID,仓位ID,产品ID已存在");
+    ErrorCode INVENTORY_BIN_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_022_017, "库位盘点不符合审批条件");
 
     // ========== WMS_EXCHANGE 换货单 2_001_023_000 ==========
     ErrorCode EXCHANGE_NOT_EXISTS = new ErrorCode(2_001_023_001, "换货单不存在");
@@ -283,4 +286,4 @@ public interface ErrorCodeConstants {
 
     // ========== WMS_PRODUCT 良次换货详情表 2_001_025_000 ==========
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(2_001_025_001, "{} 产品不存在");
-}
+}

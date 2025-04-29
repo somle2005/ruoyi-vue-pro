@@ -1,14 +1,17 @@
 package cn.iocoder.yudao.module.wms.inventory;
 
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
+import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventorySaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
 import cn.iocoder.yudao.test.BaseRestIntegrationTest;
 import cn.iocoder.yudao.test.Profile;
+import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -17,6 +20,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 
 /**
@@ -107,80 +111,97 @@ public class WmsInventoryTest extends BaseRestIntegrationTest {
      **/
     public WmsInventoryRespVO testInventoryCreateAndUpdate() {
 
-//
-//        // 确定测试的产品清单
-//        CommonResult<PageResult<WmsStockBinRespVO>> stockBinPageResult = this.wms().stockBinClient().getStockBinPage(warehouseId);
-//        if(stockBinPageResult.isError()) {
-//            System.err.println("缺少库存数据，无法继续测试");
-//            return null;
-//        }
-//
-//        List<WmsStockBinRespVO> stockBinList = stockBinPageResult.getData().getList();
-//
-//        for (WmsStockBinRespVO stockBinRespVO : stockBinList) {
-//            if(testProductIds1.size()<testProductIds1Count) {
-//                testProductIds1.add(stockBinRespVO.getProductId());
-//            } else {
-//                if(!testProductIds1.contains(stockBinRespVO.getProductId())  && testProductIds2.size()<testProductIds2Count && stockBinRespVO.getAvailableQty()>0 & stockBinRespVO.getSellableQty()>0) {
-//                    testProductIds2.add(stockBinRespVO.getProductId());
-//                }
-//            }
-//        }
-//
-//        WmsInventorySaveReqVO createReqVO = new WmsInventorySaveReqVO();
-//
-//        createReqVO.setWarehouseId(warehouseId);
-//
-//        List<WmsInventoryProductSaveReqVO> productSaveReqVOList = new ArrayList<>();
-//        for (Long testProductId : testProductIds1) {
-//            WmsInventoryProductSaveReqVO productSaveReqVO = new WmsInventoryProductSaveReqVO();
-//            productSaveReqVO.setProductId(testProductId);
-//            productSaveReqVOList.add(productSaveReqVO);
-//        }
-//        createReqVO.setProductItemList(productSaveReqVOList);
-//        CommonResult<Long> postResult=this.wms().inventoryClient().createInventory(createReqVO);
-//
-//        if(postResult.isError()) {
-//            Assert.assertTrue("创建盘点单失败",false);
-//        }
-//
-//        Long inventoryId = postResult.getData();
-//
-//        CommonResult<WmsInventoryRespVO> inventoryResult = this.wms().inventoryClient().getInventory(inventoryId);
-//
-//        WmsInventoryRespVO inventoryRespVO = inventoryResult.getData();
-//
-//
-//
-//
-//        WmsInventorySaveReqVO updateReqVO = BeanUtils.toBean(inventoryRespVO, WmsInventorySaveReqVO.class);
-//        updateReqVO.setBinItemList(null);
-//
-//        int i=0;
-//        while (i<testProductIds1RemoveCount && !updateReqVO.getProductItemList().isEmpty() ) {
-//            updateReqVO.getProductItemList().remove(0);
-//            i++;
-//        }
-//        for (Long testProductId : testProductIds2) {
-//            WmsInventoryProductSaveReqVO productSaveReqVO = new WmsInventoryProductSaveReqVO();
-//            productSaveReqVO.setProductId(testProductId);
-//            updateReqVO.getProductItemList().add(productSaveReqVO);
-//        }
-//        CommonResult<Boolean> updateResult = this.wms().inventoryClient().updateInventory(updateReqVO);
-//
-//        if(updateResult.isError()) {
-//            Assert.assertTrue("更新盘点单失败",false);
-//        }
-//
-//
-//        inventoryResult = this.wms().inventoryClient().getInventory(inventoryId);
-//
-//        inventoryRespVO = inventoryResult.getData();
-//
-//        return inventoryRespVO;
 
-        return null;
+        // 确定测试的产品清单
+        CommonResult<PageResult<WmsStockBinRespVO>> stockBinPageResult = this.wms().stockBinClient().getStockBinPage(warehouseId);
+        if(stockBinPageResult.isError()) {
+            System.err.println("缺少库存数据，无法继续测试");
+            return null;
+        }
+        
+        
+        List<WmsStockBinRespVO> stockBinList = stockBinPageResult.getData().getList().stream().filter(stockBinRespVO -> stockBinRespVO.getAvailableQty()>0 & stockBinRespVO.getSellableQty()>0).toList();
 
+        for (WmsStockBinRespVO stockBinRespVO : stockBinList) {
+            if(testProductIds1.size()<testProductIds1Count) {
+                testProductIds1.add(stockBinRespVO.getProductId());
+            } else {
+                if(!testProductIds1.contains(stockBinRespVO.getProductId())  && testProductIds2.size()<testProductIds2Count && stockBinRespVO.getAvailableQty()>0 & stockBinRespVO.getSellableQty()>0) {
+                    testProductIds2.add(stockBinRespVO.getProductId());
+                }
+            }
+        }
+        
+        Map<Long,List<WmsStockBinRespVO>> productBinMap = StreamX.from(stockBinList).groupBy(WmsStockBinRespVO::getProductId);
+        
+
+        WmsInventorySaveReqVO createReqVO = new WmsInventorySaveReqVO();
+
+        createReqVO.setWarehouseId(warehouseId);
+
+        List<WmsInventoryBinSaveReqVO> binSaveReqVOList = new ArrayList<>();
+        for (Long testProductId : testProductIds1) {
+            WmsInventoryBinSaveReqVO binSaveReqVO = new WmsInventoryBinSaveReqVO();
+            binSaveReqVO.setProductId(testProductId);
+            binSaveReqVO.setBinId(productBinMap.get(testProductId).get(0).getBinId());
+            binSaveReqVO.setExpectedQty(getQty(productBinMap.get(testProductId).get(0).getSellableQty()));
+            binSaveReqVOList.add(binSaveReqVO);
+        }
+        createReqVO.setBinItemList(binSaveReqVOList);
+        CommonResult<Long> postResult=this.wms().inventoryClient().createInventory(createReqVO);
+
+        if(postResult.isError()) {
+            Assert.assertTrue("创建盘点单失败",false);
+        }
+
+        Long inventoryId = postResult.getData();
+
+        CommonResult<WmsInventoryRespVO> inventoryResult = this.wms().inventoryClient().getInventory(inventoryId);
+
+        WmsInventoryRespVO inventoryRespVO = inventoryResult.getData();
+
+
+
+
+        WmsInventorySaveReqVO updateReqVO = BeanUtils.toBean(inventoryRespVO, WmsInventorySaveReqVO.class);
+
+        int i=0;
+        while (i<testProductIds1RemoveCount && !updateReqVO.getBinItemList().isEmpty() ) {
+            updateReqVO.getBinItemList().remove(0);
+            i++;
+        }
+        for (Long testProductId : testProductIds2) {
+            WmsInventoryBinSaveReqVO binSaveReqVO = new WmsInventoryBinSaveReqVO();
+            binSaveReqVO.setProductId(testProductId);
+            binSaveReqVO.setBinId(productBinMap.get(testProductId).get(0).getBinId());
+            binSaveReqVO.setExpectedQty(getQty(productBinMap.get(testProductId).get(0).getSellableQty()));
+            updateReqVO.getBinItemList().add(binSaveReqVO);
+        }
+        CommonResult<Boolean> updateResult = this.wms().inventoryClient().updateInventory(updateReqVO);
+
+        if(updateResult.isError()) {
+            Assert.assertTrue("更新盘点单失败",false);
+        }
+
+
+        inventoryResult = this.wms().inventoryClient().getInventory(inventoryId);
+
+        inventoryRespVO = inventoryResult.getData();
+
+        return inventoryRespVO;
+
+
+    }
+
+    private Integer getQty(Integer qty) {
+        if(qty==1) {
+            return 1;
+        }
+        qty= (new Random()).nextInt(qty);
+        if(qty<=0) {
+            qty=1;
+        }
+        return qty;
     }
 
     @Test

@@ -35,13 +35,11 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
@@ -79,17 +77,15 @@ public class WmsInventoryBinController {
     // public CommonResult<Long> createInventoryBin(@Valid @RequestBody WmsInventoryBinSaveReqVO createReqVO) {
     // return success(inventoryBinService.createInventoryBin(createReqVO).getId());
     // }
-
-
-     @PostMapping("/append")
-     @Operation(summary = "追加盘点库位")
-     @PreAuthorize("@ss.hasPermission('wms:inventory-bin:append')")
-     public CommonResult<Boolean> appendInventoryBin(@Valid @RequestBody List<WmsInventoryBinSaveReqVO> createReqVOList) {
-         if(Collections.isEmpty(createReqVOList)) {
-             throw exception(INVENTORY_BIN_NOT_EXISTS);
-         }
+    @PostMapping("/append")
+    @Operation(summary = "追加盘点库位")
+    @PreAuthorize("@ss.hasPermission('wms:inventory-bin:append')")
+    public CommonResult<Boolean> appendInventoryBin(@Valid @RequestBody List<WmsInventoryBinSaveReqVO> createReqVOList) {
+        if (Collections.isEmpty(createReqVOList)) {
+            throw exception(INVENTORY_BIN_NOT_EXISTS);
+        }
         return success(inventoryBinService.appendInventoryBin(createReqVOList));
-     }
+    }
 
     // 
     // /**
@@ -191,10 +187,10 @@ public class WmsInventoryBinController {
     @PreAuthorize("@ss.hasPermission('wms:inbound-item:import')")
     public CommonResult<Boolean> importExcel(@Valid WmsInventoryBinImportVO importReqVO) throws Exception {
         WmsInventoryDO inventory = inventoryService.validateInventoryExists(importReqVO.getInventoryId());
-        WmsInventoryAuditStatus inventoryAuditStatus= WmsInventoryAuditStatus.parse(inventory.getAuditStatus());
+        WmsInventoryAuditStatus inventoryAuditStatus = WmsInventoryAuditStatus.parse(inventory.getAuditStatus());
         // 不允许导入
-        if(inventoryAuditStatus!=WmsInventoryAuditStatus.AUDITING) {
-          throw exception(INVENTORY_BIN_CAN_NOT_IMPORT);
+        if (inventoryAuditStatus != WmsInventoryAuditStatus.AUDITING) {
+            throw exception(INVENTORY_BIN_CAN_NOT_IMPORT);
         }
         // 读取数据
         List<WmsInventoryBinExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsInventoryBinExcelVO.class);
@@ -202,8 +198,6 @@ public class WmsInventoryBinController {
         List<WmsWarehouseBinDO> binList = warehouseBinService.selectByCodes(StreamX.from(impVOList).toSet(WmsInventoryBinExcelVO::getBinCode));
         Map<String, WmsWarehouseBinDO> binMap = StreamX.from(binList).toMap(WmsWarehouseBinDO::getCode);
         Map<String, ErpProductDTO> productMap = productApi.getProductMapByCode(StreamX.from(impVOList).toSet(WmsInventoryBinExcelVO::getProductCode));
-
-
         // 装配仓位ID和产品ID
         for (WmsInventoryBinExcelVO excelVO : impVOList) {
             WmsWarehouseBinDO bin = binMap.get(excelVO.getBinCode());
@@ -214,12 +208,8 @@ public class WmsInventoryBinController {
             if (product != null) {
                 excelVO.setProductId(product.getId());
             }
-
         }
-
         List<WmsInventoryBinRespVO> voList = BeanUtils.toBean(impVOList, WmsInventoryBinRespVO.class);
-
-
         // 装配产品ID
         inventoryBinService.assembleBin(voList);
         inventoryBinService.assembleProduct(voList);
@@ -247,4 +237,4 @@ public class WmsInventoryBinController {
         inventoryBinService.saveInventoryBinList(inventory, doList);
         return success(true);
     }
-}
+}
