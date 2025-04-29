@@ -49,14 +49,12 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_CAN_NOT_EDIT;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_CAN_NOT_EDIT;
@@ -181,11 +179,11 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             }
             if (stockBinDO == null) {
                 ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
-                throw exception(STOCK_BIN_PRODUCT_NOT_EXISTS,productDto.getBarCode());
+                throw exception(STOCK_BIN_PRODUCT_NOT_EXISTS, productDto.getBarCode());
             }
             if (stockBinDO.getSellableQty() < itemDO.getPlanQty()) {
                 ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
-                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH,productDto.getBarCode());
+                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, productDto.getBarCode());
             }
         }
     }
@@ -233,13 +231,13 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
                 item.setOutboundId(updateReqVO.getId());
             });
             // 保存详情
-            if(!toInsetList.isEmpty()) {
+            if (!toInsetList.isEmpty()) {
                 outboundItemMapper.insertBatch(toInsetList);
             }
-            if(!toUpdateList.isEmpty()) {
+            if (!toUpdateList.isEmpty()) {
                 outboundItemMapper.updateBatch(toUpdateList);
             }
-            if(!toDeleteList.isEmpty()) {
+            if (!toDeleteList.isEmpty()) {
                 outboundItemMapper.deleteBatchIds(toDeleteList);
             }
         }
@@ -344,9 +342,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         // 拉取明细
         List<WmsOutboundItemDO> outboundItemDOS = outboundItemService.selectByOutboundId(outbound.getId());
         // 设置实际出库量
-        StreamX.from(outboundItemDOS).assemble(outboundSaveReqVO.getItemList(),
-            itm->itm.getProductId()+"-"+itm.getBinId(),
-            itm->itm.getProductId()+"-"+itm.getBinId(), (a, b) -> {
+        StreamX.from(outboundItemDOS).assemble(outboundSaveReqVO.getItemList(), itm -> itm.getProductId() + "-" + itm.getBinId(), itm -> itm.getProductId() + "-" + itm.getBinId(), (a, b) -> {
             a.setActualQty(b.getActualQty());
         });
         // 保存实际入库量
@@ -418,4 +414,4 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         // 触发事件
         outboundStateMachine.fireEvent(event, ctx);
     }
-}
+}

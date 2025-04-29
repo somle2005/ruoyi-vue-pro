@@ -76,7 +76,7 @@ public interface WmsStockFlowService {
     /**
      * 创建仓位库存变化流水
      */
-    void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId,Long inboundItemFlowId);
+    void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId, Long inboundItemFlowId);
 
     List<WmsStockFlowDO> selectStockFlow(Long stockType, Long stockId);
 

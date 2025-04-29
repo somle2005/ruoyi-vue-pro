@@ -9,7 +9,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWareho
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
-
 import java.util.List;
 
 /**
@@ -76,4 +75,9 @@ public interface WmsStockWarehouseService {
     List<WmsStockWarehouseDO> selectStockWarehouse(List<WmsWarehouseProductVO> wmsWarehouseProductVOList);
 
     PageResult<WmsStockWarehouseProductRespVO> getStockGroupedWarehousePage(@Valid WmsStockWarehousePageReqVO pageReqVO);
+
+    /**
+     * 按 ID 集合查询 WmsStockWarehouseDO
+     */
+    List<WmsStockWarehouseDO> selectByIds(List<Long> idList);
 }

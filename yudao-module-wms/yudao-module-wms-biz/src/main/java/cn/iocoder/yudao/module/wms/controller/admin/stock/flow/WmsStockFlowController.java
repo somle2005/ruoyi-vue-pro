@@ -23,9 +23,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.List;
-
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "库存流水")
@@ -119,7 +117,6 @@ public class WmsStockFlowController {
         PageResult<WmsStockFlowDO> doPageResult = stockFlowService.getStockFlowPage(pageReqVO);
         // 转换
         PageResult<WmsStockFlowRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsStockFlowRespVO.class);
-
         stockFlowService.assembleProducts(voPageResult.getList());
         stockFlowService.assembleBin(voPageResult.getList());
         stockFlowService.assembleWarehouse(voPageResult.getList());
@@ -131,9 +128,9 @@ public class WmsStockFlowController {
         stockFlowService.assembleCompanyAndDept(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
-            .mapping(WmsStockFlowRespVO::getCreator, WmsStockFlowRespVO::setCreatorName)
-            .mapping(WmsStockFlowRespVO::getUpdater, WmsStockFlowRespVO::setUpdaterName)
-            .fill();
+			.mapping(WmsStockFlowRespVO::getCreator, WmsStockFlowRespVO::setCreatorName)
+			.mapping(WmsStockFlowRespVO::getUpdater, WmsStockFlowRespVO::setUpdaterName)
+			.fill();
         // 返回
         return success(voPageResult);
     }
@@ -147,4 +144,4 @@ public class WmsStockFlowController {
     // // 导出 Excel
     // ExcelUtils.write(response, "库存流水.xls", "数据", WmsStockFlowRespVO.class, BeanUtils.toBean(list, WmsStockFlowRespVO.class));
     // }
-}
+}

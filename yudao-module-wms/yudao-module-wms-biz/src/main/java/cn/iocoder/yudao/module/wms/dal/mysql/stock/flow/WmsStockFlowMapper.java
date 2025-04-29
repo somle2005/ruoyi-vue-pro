@@ -44,8 +44,8 @@ public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
         wrapper.betweenIfPresent(WmsStockFlowDO::getDefectiveQty, reqVO.getDefectiveQty());
         wrapper.betweenIfPresent(WmsStockFlowDO::getDeltaQty, reqVO.getDeltaQty());
         wrapper.betweenIfPresent(WmsStockFlowDO::getOutboundPendingQty, reqVO.getOutboundPendingQty());
-        wrapper.betweenIfPresent(WmsStockFlowDO::getPurchasePlanQty, reqVO.getPurchasePlanQty());
-        wrapper.betweenIfPresent(WmsStockFlowDO::getPurchaseTransitQty, reqVO.getPurchaseTransitQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getTransitQty, reqVO.getTransitQty());
+        wrapper.betweenIfPresent(WmsStockFlowDO::getMakePendingQty, reqVO.getMakePendingQty());
         wrapper.betweenIfPresent(WmsStockFlowDO::getReturnTransitQty, reqVO.getReturnTransitQty());
         wrapper.betweenIfPresent(WmsStockFlowDO::getSellableQty, reqVO.getSellableQty());
         wrapper.betweenIfPresent(WmsStockFlowDO::getShelvingPendingQty, reqVO.getShelvingPendingQty());
@@ -92,4 +92,4 @@ public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
     default List<WmsStockFlowDO> selectStockFlow(Long stockType, Long stockId) {
         return selectList(new LambdaQueryWrapperX<WmsStockFlowDO>().eq(WmsStockFlowDO::getStockType, stockType).eq(WmsStockFlowDO::getStockId, stockId));
     }
-}
+}

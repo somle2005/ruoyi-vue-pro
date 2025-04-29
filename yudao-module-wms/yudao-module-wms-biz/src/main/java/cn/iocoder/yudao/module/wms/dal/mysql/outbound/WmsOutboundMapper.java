@@ -17,27 +17,24 @@ import java.util.List;
 public interface WmsOutboundMapper extends BaseMapperX<WmsOutboundDO> {
 
     static final String PRODUCT_ID_EXISTS_SQL = "select 1 from wms_outbound_item oi where oi.outbound_id=wms_outbound.id and oi.product_id = {0}";
-    default PageResult<WmsOutboundDO> selectPage(WmsOutboundPageReqVO reqVO) {
 
-        LambdaQueryWrapperX<WmsOutboundDO>  wrapperX =  new LambdaQueryWrapperX<>();
-        if(reqVO.getProductId()!=null) {
-            wrapperX.exists(PRODUCT_ID_EXISTS_SQL,reqVO.getProductId());
+    default PageResult<WmsOutboundDO> selectPage(WmsOutboundPageReqVO reqVO) {
+        LambdaQueryWrapperX<WmsOutboundDO> wrapperX = new LambdaQueryWrapperX<>();
+        if (reqVO.getProductId() != null) {
+            wrapperX.exists(PRODUCT_ID_EXISTS_SQL, reqVO.getProductId());
         }
         wrapperX.eqIfPresent(WmsOutboundDO::getCode, reqVO.getCode())
-            .eqIfPresent(WmsOutboundDO::getWarehouseId, reqVO.getWarehouseId())
-            .eqIfPresent(WmsOutboundDO::getType, reqVO.getType())
-            .eqIfPresent(WmsOutboundDO::getOutboundStatus, reqVO.getOutboundStatus())
-            .eqIfPresent(WmsOutboundDO::getAuditStatus, reqVO.getAuditStatus())
-            .eqIfPresent(WmsOutboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
-            .eqIfPresent(WmsOutboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
-            .eqIfPresent(WmsOutboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
-            .eqIfPresent(WmsOutboundDO::getCreatorComment, reqVO.getCreatorComment())
-            .betweenIfPresent(WmsOutboundDO::getCreateTime, reqVO.getCreateTime())
-            .orderByDesc(WmsOutboundDO::getId);
-
+				.eqIfPresent(WmsOutboundDO::getWarehouseId, reqVO.getWarehouseId())
+				.eqIfPresent(WmsOutboundDO::getType, reqVO.getType())
+				.eqIfPresent(WmsOutboundDO::getOutboundStatus, reqVO.getOutboundStatus())
+				.eqIfPresent(WmsOutboundDO::getAuditStatus, reqVO.getAuditStatus())
+				.eqIfPresent(WmsOutboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
+				.eqIfPresent(WmsOutboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
+				.eqIfPresent(WmsOutboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
+				.eqIfPresent(WmsOutboundDO::getRemark, reqVO.getRemark())
+				.betweenIfPresent(WmsOutboundDO::getCreateTime, reqVO.getCreateTime())
+				.orderByDesc(WmsOutboundDO::getId);
         return selectPage(reqVO, wrapperX);
-
-
     }
 
     /**

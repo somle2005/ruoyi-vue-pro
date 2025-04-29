@@ -6,7 +6,7 @@ import java.util.*;
 import jakarta.validation.constraints.*;
 
 /**
- * @table-fields : outbound_pending_qty,product_id,shelving_pending_qty,available_qty,purchase_transit_qty,id,defective_qty,return_transit_qty,sellable_qty,purchase_plan_qty,warehouse_id
+ * @table-fields : outbound_pending_qty,product_id,transit_qty,shelving_pending_qty,available_qty,id,defective_qty,make_pending_qty,return_transit_qty,sellable_qty,warehouse_id
  */
 @Schema(description = "管理后台 - 仓库库存新增/修改 Request VO")
 @Data
@@ -32,12 +32,6 @@ public class WmsStockWarehouseSaveReqVO {
     @Schema(description = "待出库量", example = "")
     private Integer outboundPendingQty;
 
-    @Schema(description = "采购计划量", example = "")
-    private Integer purchasePlanQty;
-
-    @Schema(description = "采购在途量", example = "")
-    private Integer purchaseTransitQty;
-
     @Schema(description = "退件在途数量", example = "")
     private Integer returnTransitQty;
 
@@ -46,4 +40,10 @@ public class WmsStockWarehouseSaveReqVO {
 
     @Schema(description = "待上架数量，上架是指从拣货区上架到货架", example = "")
     private Integer shelvingPendingQty;
+
+    @Schema(description = "在途量", example = "")
+    private Integer transitQty;
+
+    @Schema(description = "在制数量", example = "")
+    private Integer makePendingQty;
 }

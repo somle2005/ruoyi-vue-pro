@@ -47,7 +47,6 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -56,7 +55,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_FLOW_NOT_EXISTS;
 
@@ -182,10 +180,10 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
      */
     public void createForStockWarehouse(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockWarehouseDO stockWarehouseDO, Integer quantity, Long reasonId, Long reasonItemId) {
         createFor(reason, WmsStockType.WAREHOUSE, direction, stockWarehouseDO.getId(), stockWarehouseDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
-            // 采购计划量
-            stockFlowDO.setPurchasePlanQty(stockWarehouseDO.getPurchasePlanQty());
-            // 采购在途量
-            stockFlowDO.setPurchaseTransitQty(stockWarehouseDO.getPurchaseTransitQty());
+            // 在制量
+            stockFlowDO.setMakePendingQty(stockWarehouseDO.getMakePendingQty());
+            // 在途量
+            stockFlowDO.setTransitQty(stockWarehouseDO.getTransitQty());
             // 退货在途量
             stockFlowDO.setReturnTransitQty(stockWarehouseDO.getReturnTransitQty());
             // 可售量，未被单据占用的良品数量
@@ -228,7 +226,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     /**
      * 创建仓位库存变化流水
      */
-    public void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId,Long inboundItemFlowId) {
+    public void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId, Long inboundItemFlowId) {
         createFor(reason, WmsStockType.BIN, direction, stockBinDO.getId(), stockBinDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
             // 采购计划量
             // stockFlowDO.setPurchasePlanQty(stockOwnershipDO.getPurchasePlanQty());
@@ -405,11 +403,10 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         return stockFlowMapper.selectByIds(idList);
     }
 
-
     @Override
     public void assembleInboundItemFlow(List<WmsStockFlowRespVO> list) {
         List<WmsInboundItemFlowDO> inboundItemFlowDOS = inboundItemFlowService.selectByIds(StreamX.from(list).toSet(WmsStockFlowRespVO::getInboundItemFlowId));
-        Map<Long, WmsInboundItemFlowSimpleVO> inboundItemFlowDOMap = StreamX.from(inboundItemFlowDOS).toMap(WmsInboundItemFlowDO::getId,e->BeanUtils.toBean(e, WmsInboundItemFlowSimpleVO.class));
+        Map<Long, WmsInboundItemFlowSimpleVO> inboundItemFlowDOMap = StreamX.from(inboundItemFlowDOS).toMap(WmsInboundItemFlowDO::getId, e -> BeanUtils.toBean(e, WmsInboundItemFlowSimpleVO.class));
         StreamX.from(list).assemble(inboundItemFlowDOMap, WmsStockFlowRespVO::getInboundItemFlowId, WmsStockFlowRespVO::setInboundItemFlow);
     }
 }

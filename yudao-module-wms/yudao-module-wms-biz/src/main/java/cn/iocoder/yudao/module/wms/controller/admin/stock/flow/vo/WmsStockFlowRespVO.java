@@ -14,14 +14,12 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
-
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,reason,outbound_pending_qty,delta_qty,updater,update_time,product_id,shelving_pending_qty,id,reason_bill_id,defective_qty,purchase_plan_qty,direction,creator,create_time,flow_time,next_flow_id,available_qty,purchase_transit_qty,stock_id,stock_type,inbound_item_flow_id,return_transit_qty,sellable_qty,warehouse_id,reason_item_id,prev_flow_id
+ * @table-fields : tenant_id,reason,outbound_pending_qty,delta_qty,make_pending_qty,updater,update_time,product_id,shelving_pending_qty,id,reason_bill_id,defective_qty,direction,creator,create_time,flow_time,transit_qty,available_qty,next_flow_id,stock_id,stock_type,inbound_item_flow_id,return_transit_qty,sellable_qty,prev_flow_id,reason_item_id,warehouse_id
  */
 @Schema(description = "管理后台 - 库存流水 Response VO")
 @Data
@@ -118,14 +116,6 @@ public class WmsStockFlowRespVO {
     @ExcelProperty("待出库量")
     private Integer outboundPendingQty;
 
-    @Schema(description = "采购计划量", example = "")
-    @ExcelProperty("采购计划量")
-    private Integer purchasePlanQty;
-
-    @Schema(description = "采购在途量", example = "")
-    @ExcelProperty("采购在途量")
-    private Integer purchaseTransitQty;
-
     @Schema(description = "退件在途数量", example = "")
     @ExcelProperty("退件在途数量")
     private Integer returnTransitQty;
@@ -173,4 +163,12 @@ public class WmsStockFlowRespVO {
     @Schema(description = "批次库存流水", example = "")
     @ExcelProperty("批次库存流水")
     private WmsInboundItemFlowSimpleVO inboundItemFlow;
+
+    @Schema(description = "在制数量", example = "")
+    @ExcelProperty("在制数量")
+    private Integer makePendingQty;
+
+    @Schema(description = "在途量", example = "")
+    @ExcelProperty("在途量")
+    private Integer transitQty;
 }

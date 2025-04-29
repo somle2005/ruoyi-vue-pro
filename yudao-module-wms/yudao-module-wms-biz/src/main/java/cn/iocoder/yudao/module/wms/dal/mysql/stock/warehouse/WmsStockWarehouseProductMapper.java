@@ -36,8 +36,8 @@ public interface WmsStockWarehouseProductMapper extends BaseMapperX<WmsProductDO
         .between(WmsStockWarehouseDO::getAvailableQty,getMin(reqVO.getAvailableQty()),getMax(reqVO.getAvailableQty()))
         .between(WmsStockWarehouseDO::getDefectiveQty,getMin(reqVO.getDefectiveQty()),getMax(reqVO.getDefectiveQty()))
         .between(WmsStockWarehouseDO::getOutboundPendingQty,getMin(reqVO.getOutboundPendingQty()),getMax(reqVO.getOutboundPendingQty()))
-        .between(WmsStockWarehouseDO::getPurchasePlanQty,getMin(reqVO.getPurchasePlanQty()),getMax(reqVO.getPurchasePlanQty()))
-        .between(WmsStockWarehouseDO::getPurchaseTransitQty,getMin(reqVO.getPurchaseTransitQty()),getMax(reqVO.getPurchaseTransitQty()))
+        .between(WmsStockWarehouseDO::getMakePendingQty,getMin(reqVO.getMakePendingQty()),getMax(reqVO.getMakePendingQty()))
+        .between(WmsStockWarehouseDO::getTransitQty,getMin(reqVO.getTransitQty()),getMax(reqVO.getTransitQty()))
         .between(WmsStockWarehouseDO::getReturnTransitQty,getMin(reqVO.getReturnTransitQty()),getMax(reqVO.getReturnTransitQty()))
         .between(WmsStockWarehouseDO::getSellableQty,getMin(reqVO.getSellableQty()),getMax(reqVO.getSellableQty()))
         .between(WmsStockWarehouseDO::getShelvingPendingQty,getMin(reqVO.getShelvingPendingQty()),getMax(reqVO.getShelvingPendingQty()));
