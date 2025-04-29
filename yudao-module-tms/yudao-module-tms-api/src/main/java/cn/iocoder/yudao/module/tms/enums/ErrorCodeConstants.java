@@ -28,9 +28,12 @@ public interface ErrorCodeConstants {
     ErrorCode FIRST_MILE_REQUEST_CODE_GENERATE_FAIL = new ErrorCode(1_030_670_005, "头程申请单编号生成失败,大于999999");
     //头程申请创建生成失败
     ErrorCode FIRST_MILE_REQUEST_CREATE_FAIL = new ErrorCode(1_030_670_006, "头程申请单创建失败,大于999999");
-    //FIRST_MILE_REQUEST_AUDIT_STATUS_NOT_ALLOWED
     ErrorCode FIRST_MILE_REQUEST_AUDIT_STATUS_NOT_ALLOWED = new ErrorCode(1_030_670_006, "头程申请单({})状态为({})，不允许审核");
-
+    ErrorCode FIRST_MILE_REQUEST_ITEM_RELATION_NOT_ALLOWED = new ErrorCode(1_030_670_007, "无法反审核，头程申请单存在关联头程单明细,序号:{}");
+    ErrorCode FIRST_MILE_REQUEST_DELETE_FAIL_STATUS_ERROR = new ErrorCode(1_030_670_007, "无法删除，头程申请单存在关联头程单明细,序号:{}");
+    ErrorCode FIRST_MILE_REQUEST_UPDATE_FAIL_STATUS_ERROR = new ErrorCode(1_030_670_008, "头程申请单({})已关闭，不允许修改");
+    ErrorCode FIRST_MILE_REQUEST_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_670_009, "头程申请单({})状态为({})，不允许修改");
+    ErrorCode FIRST_MILE_REQUEST_DELETED_FAIL_APPROVE = new ErrorCode(1_030_670_009, "头程申请单({})状态为({})，不允许删除");
     //状态机错误,无法在({})状态下触发({})事件，上下文：{}
     // ========== 状态机异常 1-030-900-000 ==========
     ErrorCode FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR = new ErrorCode(1_030_900_001, "({})状态下不能触发({})事件");
@@ -44,6 +47,9 @@ public interface ErrorCodeConstants {
     ErrorCode FIRST_MILE_CODE_GENERATE_FAIL_MAX_TRY = new ErrorCode(1_030_670_010, "头程单编号，生成失败，重复{}次");
     ErrorCode FIRST_MILE_CODE_FORMAT_ERROR = new ErrorCode(1_030_670_012, "头程单({})编号格式错误");
     ErrorCode FIRST_MILE_ITEM_LIST_NOT_EMPTY = new ErrorCode(1_030_670_013, "头程单明细列表不能为空");
+    ErrorCode FIRST_MILE_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_670_014, "头程单({})状态为({})，不允许修改");
+    ErrorCode FIRST_MILE_DELETE_FAIL_APPROVE = new ErrorCode(1_030_670_015, "头程单({})状态为({})，不允许删除");
+
     // ========== 出运订单费用明细 1_030_902_008 ==========
     ErrorCode FEE_NOT_EXISTS = new ErrorCode(1_030_670_008, "费用不存在");
 

@@ -127,6 +127,17 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
         return firstMileRequestItemMapper.selectById(id);
     }
 
+    /**
+     * 通过关联id获得头程申请单
+     *
+     * @param id 关联申请项id
+     * @return 头程申请单
+     */
+    @Override
+    public List<TmsFirstMileRequestItemDO> getFirstMileRequestItemListByRequestId(Long id) {
+        return firstMileRequestItemMapper.selectListByRequestId(id);
+    }
+
     @Override
     public void updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus) {
         TmsFirstMileRequestItemDO firstMileRequestItemDO = validateFirstMileRequestItemExists(id);

@@ -73,6 +73,14 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
             buildBOWrapper(pageReqVO).selectAssociation(TmsFirstMileRequestDO.class, TmsFirstMileRequestItemItemBO::getTmsFirstMileRequestDO));
     }
 
+    /**
+     * @param id 头程申请单ID
+     * @return 头程申请单明细
+     */
+    default TmsFirstMileRequestItemItemBO selectBOById(Long id) {
+        return selectJoinOne(TmsFirstMileRequestItemItemBO.class, buildBOWrapper(new TmsFirstMileRequestPageReqVO().setId(id)));
+    }
+
     default void deleteByRequestId(Long requestId) {
         LambdaQueryWrapperX<TmsFirstMileRequestItemDO> wrapperX = new LambdaQueryWrapperX<TmsFirstMileRequestItemDO>().eq(TmsFirstMileRequestItemDO::getRequestId, requestId);
         delete(wrapperX);

@@ -145,7 +145,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         return delete(TmsFirstMileItemDO::getFirstMileId, firstMileId);
     }
 
-    default void selectListByRequestItemId(Long id) {
-        selectList(TmsFirstMileItemDO::getRequestItemId, id);
+    default List<TmsFirstMileItemDO> selectListByRequestItemId(Long id) {
+        return selectList(TmsFirstMileItemDO::getRequestItemId, id);
     }
 }

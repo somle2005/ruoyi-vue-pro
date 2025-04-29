@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.impl;
 
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
+import cn.iocoder.yudao.framework.common.exception.ErrorCode;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
@@ -10,6 +11,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFir
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.request.TmsFirstMileRequestConvert;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.TmsFirstMileRequestMapper;
@@ -65,6 +67,10 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> orderStatusStatusMachine;
     @Resource(name = FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
     private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> offItemStatusMachine;
+    @Autowired
+    private TmsFirstMileRequestItemService tmsFirstMileRequestItemService;
+    @Autowired
+    private TmsFirstMileService tmsFirstMileService;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -118,6 +124,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             //校验code重复
             validCodeDuplicate(updateObj);
         }
+        statusCheckForUpdate(oldDo, FIRST_MILE_REQUEST_UPDATE_FAIL_APPROVE);
+
         // 计算主表的总重量和总体积
         List<TmsFirstMileRequestItemDO> requestItemDOS = TmsFirstMileRequestConvert.convertItemList(vo.getItems());
         //校验产品是否存在
@@ -130,11 +138,23 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         firstMileRequestItemService.updateFirstMileRequestItemList(vo.getId(), requestItemDOS);
     }
 
+    //判断当前状态是否可以更新
+    private void statusCheckForUpdate(TmsFirstMileRequestDO oldDo, ErrorCode errorCode) {
+        //1.1 已审核->e
+        ThrowUtil.ifThrow(oldDo.getAuditStatus().equals(TmsAuditStatus.APPROVED.getCode()), errorCode, oldDo.getCode(),
+            TmsAuditStatus.fromCode(oldDo.getAuditStatus()).getDesc());
+        //1.2 未开启->e
+        ThrowUtil.ifThrow(!oldDo.getOffStatus().equals(TmsOffStatus.OPEN.getCode()), errorCode, oldDo.getCode(),
+            TmsOffStatus.fromCode(oldDo.getOffStatus()).getDesc());
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteFirstMileRequest(Long id) {
-        // 校验存在
-        validateFirstMileRequestExists(id);
+        // 校验存在+状态
+        statusCheckForUpdate(validateFirstMileRequestExists(id), FIRST_MILE_REQUEST_DELETED_FAIL_APPROVE);
+        // 手动关闭所有行状态
+        validHasFirstMileItem(id, FIRST_MILE_REQUEST_DELETE_FAIL_STATUS_ERROR);
         // 删除
         firstMileRequestMapper.deleteById(id);
 
@@ -291,11 +311,27 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             // 审核通过
             tmsFirstMileRequestStatusMachine.fireEvent(currentStatus, TmsEventEnum.AGREE, req);
         } else {
-            //如果存在对应头程单,则不允许
-          
+            //如果存在对应头程明细关联,则不允许反审核
+            validHasFirstMileItem(req.getRequestId(), FIRST_MILE_REQUEST_ITEM_RELATION_NOT_ALLOWED);
             // 审核拒绝或反审核
             tmsFirstMileRequestStatusMachine.fireEvent(currentStatus, TmsEventEnum.REJECT, req);
         }
+    }
+
+    /**
+     * 验证头程单申请单ID是否存在关联头程明细
+     *
+     * @param requestId 头程申请单ID
+     */
+    private void validHasFirstMileItem(Long requestId, ErrorCode errorCode) {
+        List<TmsFirstMileRequestItemDO> tmsFirstMileRequestItemDOS = firstMileRequestItemMapper.selectListByRequestId(requestId);
+        tmsFirstMileRequestItemDOS.forEach(item -> {
+            //  判断是否存在关联
+            List<TmsFirstMileItemDO> firstMileItemDOList = tmsFirstMileService.getFirstMileItemListByRequestItemId(item.getId());
+            if (firstMileItemDOList != null && !firstMileItemDOList.isEmpty()) {
+                throw exception(errorCode, item.getId());
+            }
+        });
     }
 
     /**

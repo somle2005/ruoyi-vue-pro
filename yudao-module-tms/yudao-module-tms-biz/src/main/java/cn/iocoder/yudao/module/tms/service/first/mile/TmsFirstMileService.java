@@ -92,6 +92,11 @@ public interface TmsFirstMileService {
      */
     List<TmsFirstMileItemDO> getFirstMileItemListByFirstMileId(Long firstMileId);
 
+    /**
+     * 通过申请项ID获得 头程明细列表
+     */
+    List<TmsFirstMileItemDO> getFirstMileItemListByRequestItemId(Long requestItemId);
+
     // ==================== 子表（出运订单费用明细） ====================
 
     /**

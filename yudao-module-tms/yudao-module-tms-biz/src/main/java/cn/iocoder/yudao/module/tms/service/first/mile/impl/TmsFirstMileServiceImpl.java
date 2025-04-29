@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
+import cn.iocoder.yudao.framework.common.exception.ErrorCode;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
@@ -29,7 +30,6 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
-import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,8 +63,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Resource(name = FIRST_MILE_AUDIT_STATE_MACHINE)
     StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileAuditReqVO> auditStateMachine;
-    @Autowired
-    private TmsFirstMileRequestService tmsFirstMileRequestService;
 
     //校验code中间日期是否是当天
     private static void validCodeDateIsToday(TmsFirstMileSaveReqVO vo) {
@@ -119,6 +117,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             }
         }
 
+        statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_UPDATE_FAIL_APPROVE);
+
         TmsFirstMileDO updateObj = BeanUtils.toBean(vo, TmsFirstMileDO.class);
         firstMileMapper.updateById(updateObj);
 
@@ -126,10 +126,22 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         updateFeeList(vo.getId(), vo.getFees());
     }
 
+    //草稿+审核不通过才能修改
+    private void statusCheckForEdit(TmsFirstMileDO tmsFirstMileDO, ErrorCode errorCode) {
+        // 只有草稿状态或审核不通过状态才能修改
+        if (tmsFirstMileDO.getAuditStatus() != null) {
+            // 如果不是草稿状态或审核不通过状态，则抛出异常
+            if (!TmsAuditStatus.DRAFT.getCode().equals(tmsFirstMileDO.getAuditStatus())
+                && !TmsAuditStatus.REJECTED.getCode().equals(tmsFirstMileDO.getAuditStatus())) {
+                throw exception(errorCode, tmsFirstMileDO.getCode(), TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()).getDesc());
+            }
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteFirstMile(Long id) {
-        validateFirstMileExists(id);
+        statusCheckForEdit(validateFirstMileExists(id), FIRST_MILE_DELETE_FAIL_APPROVE);
         firstMileMapper.deleteById(id);
         //删明细
         deleteFirstMileItemByFirstMileId(id);
@@ -206,16 +218,34 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     public void review(TmsFirstMileAuditReqVO req) {
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(req.getId());
         if (Boolean.TRUE.equals(req.getReviewed())) {
-            auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.AGREE, req);
+            if (req.getPass()) {
+                //通过
+                auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.AGREE, req);
+            } else {
+                //不通过
+                auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, req);
+            }
+            //TODO api 生成出库单
         } else {
-
-            auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, req);
+            //TODO api 校验是否存在出库单，出库单是否删除了？报废了？
+            //反审核
+            auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.WITHDRAW_REVIEW, req);
         }
     }
     // ==================== 子表（头程单明细） ====================
     @Override
     public List<TmsFirstMileItemDO> getFirstMileItemListByFirstMileId(Long firstMileId) {
         return firstMileItemMapper.selectListByFirstMileId(firstMileId);
+    }
+
+    /**
+     * 通过申请项ID获得 头程明细列表
+     *
+     * @param requestItemId 申请项ID
+     */
+    @Override
+    public List<TmsFirstMileItemDO> getFirstMileItemListByRequestItemId(Long requestItemId) {
+        return firstMileItemMapper.selectListByRequestItemId(requestItemId);
     }
 
     private void createFirstMileItemList(Long firstMileId, List<TmsFirstMileItemSaveReqVO> list) {

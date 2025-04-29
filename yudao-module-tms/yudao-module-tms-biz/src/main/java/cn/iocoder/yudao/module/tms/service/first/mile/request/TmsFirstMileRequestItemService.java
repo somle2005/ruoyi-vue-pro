@@ -47,6 +47,14 @@ public interface TmsFirstMileRequestItemService {
      */
     TmsFirstMileRequestItemDO getFirstMileRequestItem(Long id);
 
+    /**
+     * 通过关联id获得头程申请单
+     *
+     * @param id 关联申请项id
+     * @return 头程申请单
+     */
+    List<TmsFirstMileRequestItemDO> getFirstMileRequestItemListByRequestId(Long id);
+
     //valid
     TmsFirstMileRequestItemDO validateFirstMileRequestItemExists(Long id);
 
