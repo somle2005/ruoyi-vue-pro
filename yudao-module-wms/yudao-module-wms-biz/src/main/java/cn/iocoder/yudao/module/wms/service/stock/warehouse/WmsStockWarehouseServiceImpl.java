@@ -274,6 +274,9 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
     @Override
     public PageResult<WmsStockWarehouseProductRespVO> getStockGroupedWarehousePage(WmsStockWarehousePageReqVO pageReqVO) {
         PageResult<WmsProductDO> pageResult = stockWarehouseProductMapper.getStockGroupedWarehousePage(pageReqVO);
+        if(pageResult.getList().isEmpty()) {
+            return new PageResult<>();
+        }
         PageResult<WmsStockWarehouseProductRespVO> voPageResult = BeanUtils.toBean(pageResult, WmsStockWarehouseProductRespVO.class);
         List<WmsStockWarehouseDO> list = stockWarehouseMapper.selectByProductIds(StreamX.from(pageResult.getList()).toSet(WmsProductDO::getId));
         List<WmsStockWarehouseRespVO> voList = BeanUtils.toBean(list, WmsStockWarehouseRespVO.class);

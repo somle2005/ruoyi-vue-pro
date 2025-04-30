@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,6 +14,8 @@ import lombok.Data;
 @ExcelIgnoreUnannotated
 public class WmsStockWarehouseExcelVO {
 
+    @ExcelIgnore
+    private Long id;
 
     @ExcelProperty("仓库")
     private String warehouseName;
@@ -29,8 +32,8 @@ public class WmsStockWarehouseExcelVO {
     @ExcelProperty("待出库量")
     private Integer outboundPendingQty;
 
-    @ExcelProperty("采购计划量")
-    private Integer purchasePlanQty;
+    @ExcelProperty("在制量")
+    private Integer makePendingQty;
 
     @ExcelProperty("在途量")
     private Integer transitQty;

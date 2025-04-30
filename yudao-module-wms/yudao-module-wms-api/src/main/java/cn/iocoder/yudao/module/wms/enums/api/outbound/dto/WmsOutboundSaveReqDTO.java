@@ -2,7 +2,6 @@ package cn.iocoder.yudao.module.wms.enums.api.outbound.dto;
 
 import lombok.Data;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 
@@ -39,12 +38,6 @@ public class WmsOutboundSaveReqDTO {
      * 库存归属部门ID
      **/
     private Long deptId;
-
-    /**
-     * 出库时间
-     **/
-    private LocalDateTime outboundTime;
-
 
     /**
      * 备注

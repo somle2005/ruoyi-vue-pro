@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -144,15 +145,19 @@ public class WmsStockWarehouseController {
         return success(doPageResult);
     }
 
-    @GetMapping("/export-excel")
+    @PostMapping("/export-excel")
     @Operation(summary = "导出仓库库存 Excel")
     @PreAuthorize("@ss.hasPermission('wms:stock-warehouse:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportStockWarehouseExcel(@Valid WmsStockWarehousePageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+    public void exportStockWarehouseExcel(@Valid @RequestBody WmsStockWarehousePageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<WmsStockWarehouseRespVO> list = this.getStockWarehousePage(pageReqVO).getData().getList();
         List<WmsStockWarehouseExcelVO> excelVOList = BeanUtils.toBean(list, WmsStockWarehouseExcelVO.class);
+        StreamX.from(excelVOList).assemble(list,WmsStockWarehouseRespVO::getId,WmsStockWarehouseExcelVO::getId,(ex,rs)->{
+            ex.setWarehouseName(rs.getWarehouse().getName());
+            ex.setProductCode(rs.getProduct().getBarCode());
+        });
         // 导出 Excel
         ExcelUtils.write(response, "仓库库存.xls", "数据", WmsStockWarehouseExcelVO.class, excelVOList);
     }
-}
+}

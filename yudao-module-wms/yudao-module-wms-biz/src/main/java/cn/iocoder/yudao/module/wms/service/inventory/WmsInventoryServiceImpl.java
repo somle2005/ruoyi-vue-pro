@@ -6,26 +6,21 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.config.InventoryStateMachineConfigure;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalHistoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventorySaveReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.bin.WmsInventoryBinDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.product.WmsInventoryProductDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.inventory.WmsInventoryMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inventory.bin.WmsInventoryBinMapper;
-import cn.iocoder.yudao.module.wms.dal.mysql.inventory.product.WmsInventoryProductMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
-import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.inventory.WmsInventoryAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.approval.history.WmsApprovalHistoryService;
@@ -39,16 +34,18 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_DUPLICATE;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_CAN_NOT_DELETE;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_CAN_NOT_EDIT;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_NOT_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_NO_DUPLICATE;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_PRODUCT_EXISTS;
 
 /**
  * 盘点 Service 实现类
@@ -63,9 +60,6 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     @Lazy
     private WmsInventoryBinMapper inventoryBinMapper;
 
-    @Resource
-    @Lazy
-    private WmsInventoryProductMapper inventoryProductMapper;
 
     @Resource
     private WmsNoRedisDAO noRedisDAO;
@@ -107,73 +101,28 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
         WmsInventoryDO inventory = BeanUtils.toBean(createReqVO, WmsInventoryDO.class);
         inventoryMapper.insert(inventory);
         // 保存库存盘点产品详情
-        List<WmsInventoryProductDO> toInsetList = new ArrayList<>();
-        if (createReqVO.getProductItemList() != null) {
-            StreamX.from(createReqVO.getProductItemList()).filter(Objects::nonNull).forEach(item -> {
-                item.setId(null);
+        List<WmsInventoryBinDO> toInsetList = new ArrayList<>();
+        Set<String> keys = new HashSet<>();
+        if (createReqVO.getBinItemList() != null) {
+            StreamX.from(createReqVO.getBinItemList()).filter(Objects::nonNull).forEach(item -> {
+                keys.add(item.getProductId()+"-"+item.getBinId());
+                WmsInventoryBinDO inventoryBinDO = BeanUtils.toBean(item, WmsInventoryBinDO.class);
+                inventoryBinDO.setId(null);
                 // 设置归属
-                item.setInventoryId(inventory.getId());
-                item.setExpectedQty(0);
-                item.setActualQty(0);
-                toInsetList.add(BeanUtils.toBean(item, WmsInventoryProductDO.class));
+                inventoryBinDO.setInventoryId(inventory.getId());
+                inventoryBinDO.setActualQty(0);
+                toInsetList.add(inventoryBinDO);
             });
-            // 校验 toInsetList 中是否有重复的 productId
-            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInventoryProductDO::getProductId);
-            if (isProductIdRepeated) {
-                throw exception(INVENTORY_PRODUCT_EXISTS);
+            // 校验
+            if (keys.size()!= toInsetList.size()) {
+                throw exception(INVENTORY_BIN_DUPLICATE);
             }
-            inventoryProductMapper.insertBatch(toInsetList);
+            inventoryBinMapper.insertBatch(toInsetList);
         }
-        // 保存盘点的其它详情信息
-        this.saveInventoryExtra(inventory);
         // 返回
         return inventory;
     }
 
-    private void saveInventoryExtra(WmsInventoryDO inventory) {
-        // 处理盘点的产品详情，保存预期库存
-        List<WmsInventoryProductDO> inventoryProductDOList = inventoryProductMapper.selectByInventoryId(inventory.getId());
-        List<WmsStockWarehouseDO> wmsStockWarehouseDOS = stockWarehouseService.selectByWarehouse(inventory.getWarehouseId());
-        Map<Long, WmsStockWarehouseDO> wmsStockWarehouseDOMap = StreamX.from(wmsStockWarehouseDOS).toMap(WmsStockWarehouseDO::getProductId);
-        for (WmsInventoryProductDO inventoryProductDO : inventoryProductDOList) {
-            WmsStockWarehouseDO wmsStockWarehouseDO = wmsStockWarehouseDOMap.get(inventoryProductDO.getProductId());
-            if (wmsStockWarehouseDO == null) {
-                inventoryProductDO.setExpectedQty(0);
-            } else {
-                inventoryProductDO.setExpectedQty(wmsStockWarehouseDO.getAvailableQty());
-            }
-        }
-        if (!CollectionUtils.isEmpty(inventoryProductDOList)) {
-            inventoryProductMapper.updateBatch(inventoryProductDOList);
-        }
-        // 分解库存到仓位
-        List<WmsWarehouseProductVO> wmsWarehouseProductVOList = new ArrayList<>();
-        for (WmsInventoryProductDO inventoryProductDO : inventoryProductDOList) {
-            wmsWarehouseProductVOList.add(WmsWarehouseProductVO.builder().warehouseId(inventory.getWarehouseId()).productId(inventoryProductDO.getProductId()).build());
-        }
-        // 数据库里已经有的
-        List<WmsInventoryBinDO> allInventoryBinDOListInDB = inventoryBinMapper.selectByInventoryId(inventory.getId());
-        for (WmsInventoryBinDO inventoryBinDO : allInventoryBinDOListInDB) {
-            inventoryBinMapper.deleteAbsoluteById(inventoryBinDO.getId());
-        }
-
-        // 仓位库存清单
-        List<WmsStockBinRespVO> stockBinList = stockBinService.selectStockBinList(wmsWarehouseProductVOList, false);
-        // 获得需要插入的部分：仓位库存里有，但数据库里没有的
-        List<WmsInventoryBinDO> toInsertInventoryBinDOList = new ArrayList<>();
-        for (WmsStockBinRespVO stockBinRespVO : stockBinList) {
-            WmsInventoryBinDO inventoryBinDO = new WmsInventoryBinDO();
-            inventoryBinDO.setInventoryId(inventory.getId());
-            inventoryBinDO.setProductId(stockBinRespVO.getProductId());
-            inventoryBinDO.setBinId(stockBinRespVO.getBinId());
-            inventoryBinDO.setExpectedQty(stockBinRespVO.getAvailableQty());
-            inventoryBinDO.setActualQty(0);
-            toInsertInventoryBinDOList.add(inventoryBinDO);
-        }
-
-        inventoryBinMapper.insertBatch(toInsertInventoryBinDOList);
-
-    }
 
     /**
      * @sign : 2710B20EC7D9E031
@@ -190,51 +139,35 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
         }
         // 单据号不允许被修改
         updateReqVO.setCode(exists.getCode());
+
+        // 全部删除
+        List<WmsInventoryBinDO> inventoryBinDOList = inventoryBinMapper.selectByInventoryId(updateReqVO.getId());
+        for (WmsInventoryBinDO inventoryBinDO : inventoryBinDOList) {
+            inventoryBinMapper.deleteAbsoluteById(inventoryBinDO.getId());
+        }
+
         // 保存库存盘点产品详情
-        if (updateReqVO.getProductItemList() != null) {
-            List<WmsInventoryProductDO> existsInDB = inventoryProductMapper.selectByInventoryId(updateReqVO.getId());
-            StreamX.CompareResult<WmsInventoryProductDO> compareResult = StreamX.compare(existsInDB, BeanUtils.toBean(updateReqVO.getProductItemList(), WmsInventoryProductDO.class), WmsInventoryProductDO::getId);
-            List<WmsInventoryProductDO> toInsetList = compareResult.getTargetMoreThanBaseList();
-            List<WmsInventoryProductDO> toUpdateList = compareResult.getIntersectionList();
-            List<WmsInventoryProductDO> toDeleteList = compareResult.getBaseMoreThanTargetList();
-            List<WmsInventoryProductDO> finalList = new ArrayList<>();
-            finalList.addAll(toInsetList);
-            finalList.addAll(toUpdateList);
-            // 校验 toInsetList 中是否有重复的 productId
-            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsInventoryProductDO::getProductId);
-            if (isProductIdRepeated) {
-                throw exception(INVENTORY_PRODUCT_EXISTS);
-            }
-            // 设置归属
-            finalList.forEach(item -> {
-                if (item.getExpectedQty() == null) {
-                    item.setExpectedQty(0);
-                }
-                if (item.getActualQty() == null) {
-                    item.setActualQty(0);
-                }
-                item.setInventoryId(updateReqVO.getId());
+        List<WmsInventoryBinDO> toInsetList = new ArrayList<>();
+        Set<String> keys = new HashSet<>();
+        if (updateReqVO.getBinItemList() != null) {
+            StreamX.from(updateReqVO.getBinItemList()).filter(Objects::nonNull).forEach(item -> {
+                keys.add(item.getProductId()+"-"+item.getBinId());
+                WmsInventoryBinDO inventoryBinDO = BeanUtils.toBean(item, WmsInventoryBinDO.class);
+                inventoryBinDO.setId(null);
+                // 设置归属
+                inventoryBinDO.setInventoryId(exists.getId());
+                inventoryBinDO.setActualQty(0);
+                toInsetList.add(inventoryBinDO);
             });
-
-            // 保存详情
-            if(!toDeleteList.isEmpty()) {
-                for (WmsInventoryProductDO inventoryProductDO : toDeleteList) {
-                    inventoryProductMapper.deleteAbsoluteById(inventoryProductDO.getId());
-                }
+            // 校验
+            if (keys.size()!= toInsetList.size()) {
+                throw exception(INVENTORY_BIN_DUPLICATE);
             }
-            if(!toUpdateList.isEmpty()) {
-                inventoryProductMapper.updateBatch(toUpdateList);
-            }
-            if(!toInsetList.isEmpty()) {
-                inventoryProductMapper.insertBatch(toInsetList);
-            }
-
+            inventoryBinMapper.insertBatch(toInsetList);
         }
         // 更新
         WmsInventoryDO inventory = BeanUtils.toBean(updateReqVO, WmsInventoryDO.class);
         inventoryMapper.updateById(inventory);
-        // 保存盘点的其它详情信息
-        this.saveInventoryExtra(inventory);
         // 返回
         return inventory;
     }

@@ -71,6 +71,6 @@ public interface WmsInventoryBinService {
 
     /**
      * 追加盘点库位
-     **/
+     */
     Boolean appendInventoryBin(@Valid List<WmsInventoryBinSaveReqVO> createReqVOList);
 }

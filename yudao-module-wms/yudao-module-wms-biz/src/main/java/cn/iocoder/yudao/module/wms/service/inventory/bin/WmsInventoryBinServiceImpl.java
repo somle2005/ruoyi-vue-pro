@@ -24,14 +24,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_CAN_NOT_APPEND;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_EXISTS;
@@ -66,8 +64,6 @@ public class WmsInventoryBinServiceImpl implements WmsInventoryBinService {
     @Lazy
     private WmsInventoryService inventoryService;
 
-
-
     /**
      * @sign : DE344227D83E204E
      */
@@ -85,52 +81,46 @@ public class WmsInventoryBinServiceImpl implements WmsInventoryBinService {
 
     @Override
     public Boolean appendInventoryBin(List<WmsInventoryBinSaveReqVO> createReqVOList) {
-
         List<WmsInventoryBinDO> doList = BeanUtils.toBean(createReqVOList, WmsInventoryBinDO.class);
-
         // 确认是否传入了有效的盘点单ID
         Set<Long> inventoryIds = StreamX.from(createReqVOList).toSet(WmsInventoryBinSaveReqVO::getInventoryId);
-        if(inventoryIds.size()!=1) {
+        if (inventoryIds.size() != 1) {
             throw exception(INVENTORY_BIN_MUST_IN_SAME_INVENTORY);
         }
         Long inventoryId = inventoryIds.iterator().next();
         WmsInventoryDO inventoryDO = inventoryService.validateInventoryExists(inventoryId);
-        WmsInventoryAuditStatus inventoryAuditStatus= WmsInventoryAuditStatus.parse(inventoryDO.getAuditStatus());
+        WmsInventoryAuditStatus inventoryAuditStatus = WmsInventoryAuditStatus.parse(inventoryDO.getAuditStatus());
         // 不允许追加
-        if(inventoryAuditStatus!=WmsInventoryAuditStatus.AUDITING) {
-            throw exception(INVENTORY_BIN_CAN_NOT_APPEND,inventoryAuditStatus.getLabel());
+        if (inventoryAuditStatus != WmsInventoryAuditStatus.AUDITING) {
+            throw exception(INVENTORY_BIN_CAN_NOT_APPEND, inventoryAuditStatus.getLabel());
         }
-
         // 校验仓位有效性
         List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(createReqVOList).toSet(WmsInventoryBinSaveReqVO::getBinId));
         Map<Long, WmsWarehouseBinDO> binDOMap = StreamX.from(binDOList).toMap(WmsWarehouseBinDO::getId);
-        Set<Long> warehouseIds= StreamX.from(binDOList).toSet(WmsWarehouseBinDO::getWarehouseId);
-        if(warehouseIds.size()!=1) {
+        Set<Long> warehouseIds = StreamX.from(binDOList).toSet(WmsWarehouseBinDO::getWarehouseId);
+        if (warehouseIds.size() != 1) {
             throw exception(INVENTORY_BIN_WAREHOUSE_BIN_ERROR);
         }
-        Long warehouseId= warehouseIds.iterator().next();
-        if(!Objects.equals(warehouseId,inventoryDO.getWarehouseId())) {
+        Long warehouseId = warehouseIds.iterator().next();
+        if (!Objects.equals(warehouseId, inventoryDO.getWarehouseId())) {
             throw exception(INVENTORY_BIN_WAREHOUSE_BIN_ERROR);
         }
-
-
-
         // 准备数据检查存在性
         List<WmsInventoryBinDO> dosInDB = inventoryBinMapper.selectByInventoryId(inventoryId);
-        Map<String, WmsInventoryBinDO> dosInDBMap = StreamX.from(dosInDB).toMap(e->e.getBinId()+"-"+e.getProductId());
+        Map<String, WmsInventoryBinDO> dosInDBMap = StreamX.from(dosInDB).toMap(e -> e.getBinId() + "-" + e.getProductId());
         // 原始产品范围
-        Set<Long> productIds= StreamX.from(dosInDB).toSet(WmsInventoryBinDO::getProductId);
+        Set<Long> productIds = StreamX.from(dosInDB).toSet(WmsInventoryBinDO::getProductId);
         for (WmsInventoryBinDO saveDO : doList) {
-            if(!productIds.contains(saveDO.getProductId())) {
+            if (!productIds.contains(saveDO.getProductId())) {
                 throw exception(INVENTORY_BIN_PRODUCT_NOT_ALLOWED);
             }
             // 校验仓位ID有效性
-            WmsWarehouseBinDO binDO= binDOMap.get(saveDO.getBinId());
-            if(binDO==null) {
+            WmsWarehouseBinDO binDO = binDOMap.get(saveDO.getBinId());
+            if (binDO == null) {
                 throw exception(INVENTORY_BIN_WAREHOUSE_BIN_ERROR);
             }
-            WmsInventoryBinDO dbDO= dosInDBMap.get(saveDO.getBinId()+"-"+saveDO.getProductId());
-            if(dbDO!=null) {
+            WmsInventoryBinDO dbDO = dosInDBMap.get(saveDO.getBinId() + "-" + saveDO.getProductId());
+            if (dbDO != null) {
                 throw exception(INVENTORY_BIN_EXISTS);
             }
         }
@@ -258,29 +248,26 @@ public class WmsInventoryBinServiceImpl implements WmsInventoryBinService {
 
     /**
      * 保存导入的盘点结果
-     **/
+     */
     @Override
     public void saveInventoryBinList(WmsInventoryDO inventory, List<WmsInventoryBinDO> impDOList) {
-
         List<WmsInventoryBinDO> dosInDB = inventoryBinMapper.selectByInventoryId(inventory.getId());
         Map<Long, WmsInventoryBinDO> dosInDBMap = StreamX.from(dosInDB).toMap(WmsInventoryBinDO::getId);
         List<WmsInventoryBinDO> insertList = new ArrayList<>();
         List<WmsInventoryBinDO> updateList = new ArrayList<>();
-
         // 原始产品范围
-        Set<Long> productIds= StreamX.from(dosInDB).toSet(WmsInventoryBinDO::getProductId);
-
+        Set<Long> productIds = StreamX.from(dosInDB).toSet(WmsInventoryBinDO::getProductId);
         // 循环导入的清单
         for (WmsInventoryBinDO impDO : impDOList) {
             WmsInventoryBinDO doInDB = dosInDBMap.get(impDO.getId());
-            if(doInDB!=null) {
+            if (doInDB != null) {
                 // 如果在数据库中存在，则更新
                 doInDB.setActualQty(impDO.getActualQty());
                 doInDB.setRemark(impDO.getRemark());
                 updateList.add(doInDB);
             } else {
                 // 超出原始产品范围时，提示错误
-                if(!productIds.contains(impDO.getProductId())) {
+                if (!productIds.contains(impDO.getProductId())) {
                     throw exception(INVENTORY_BIN_PRODUCT_NOT_ALLOWED);
                 }
                 // 如果不存在就插入
@@ -288,16 +275,12 @@ public class WmsInventoryBinServiceImpl implements WmsInventoryBinService {
                 impDO.setInventoryId(inventory.getId());
                 insertList.add(impDO);
             }
-
         }
-
-        if(!insertList.isEmpty()) {
+        if (!insertList.isEmpty()) {
             inventoryBinMapper.insertBatch(insertList);
         }
-        if(!updateList.isEmpty()) {
+        if (!updateList.isEmpty()) {
             inventoryBinMapper.updateBatch(updateList);
         }
     }
-
-
-}
+}

@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveR
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import jakarta.validation.Valid;
+
 import java.util.List;
 
 /**
@@ -78,4 +79,6 @@ public interface WmsOutboundService {
     void assembleApprovalHistory(List<WmsOutboundRespVO> list);
 
     WmsOutboundDO createForInventory(WmsOutboundSaveReqVO outboundSaveReqVO);
+
+    List<WmsOutboundDO> getOutboundList(Integer upstreamBillType, Long upstreamBillId);
 }

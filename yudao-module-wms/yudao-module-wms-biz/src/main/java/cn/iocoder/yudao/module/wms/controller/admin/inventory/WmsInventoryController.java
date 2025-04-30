@@ -6,17 +6,14 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryBinRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inventory.product.vo.WmsInventoryProductRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventorySaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.bin.WmsInventoryBinDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.product.WmsInventoryProductDO;
 import cn.iocoder.yudao.module.wms.enums.inventory.WmsInventoryAuditStatus;
 import cn.iocoder.yudao.module.wms.service.inventory.WmsInventoryService;
 import cn.iocoder.yudao.module.wms.service.inventory.bin.WmsInventoryBinService;
-import cn.iocoder.yudao.module.wms.service.inventory.product.WmsInventoryProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,9 +48,6 @@ public class WmsInventoryController {
     @Lazy()
     private WmsInventoryBinService inventoryBinService;
 
-    @Resource()
-    @Lazy()
-    private WmsInventoryProductService inventoryProductService;
 
     @Resource
     private WmsInventoryService inventoryService;
@@ -103,16 +97,12 @@ public class WmsInventoryController {
         }
         // 转换
         WmsInventoryRespVO inventoryVO = BeanUtils.toBean(inventory, WmsInventoryRespVO.class);
-        // 组装库存盘点产品
-        List<WmsInventoryProductDO> inventoryProductList = inventoryProductService.selectByInventoryId(inventoryVO.getId());
-        inventoryVO.setProductItemList(BeanUtils.toBean(inventoryProductList, WmsInventoryProductRespVO.class));
         // 组装库位盘点
         List<WmsInventoryBinDO> inventoryBinList = inventoryBinService.selectByInventoryId(inventoryVO.getId());
         inventoryVO.setBinItemList(BeanUtils.toBean(inventoryBinList, WmsInventoryBinRespVO.class));
         // 装配
         inventoryService.assembleWarehouse(Arrays.asList(inventoryVO));
         inventoryService.assembleApprovalHistory(Arrays.asList(inventoryVO));
-        inventoryProductService.assembleProduct(inventoryVO.getProductItemList());
         inventoryBinService.assembleProduct(inventoryVO.getBinItemList());
         inventoryBinService.assembleBin(inventoryVO.getBinItemList());
 

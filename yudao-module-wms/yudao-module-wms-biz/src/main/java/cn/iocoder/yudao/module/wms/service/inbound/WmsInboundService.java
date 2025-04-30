@@ -9,6 +9,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemOwnershipDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,4 +164,6 @@ public interface WmsInboundService {
      * 更新上架状态
      */
     void updateShelvingStatus(Set<Long> set);
+
+    List<WmsInboundDO> getInboundList(Integer upstreamBillType, Long upstreamBillId);
 }
