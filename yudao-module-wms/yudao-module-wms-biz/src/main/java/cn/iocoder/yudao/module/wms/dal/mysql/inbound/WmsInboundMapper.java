@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import org.apache.ibatis.annotations.Mapper;
+
 import java.util.List;
 
 /**
@@ -78,5 +79,12 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
         LambdaQueryWrapperX<WmsInboundDO> wrapper = new LambdaQueryWrapperX<>();
         wrapper.eq(WmsInboundDO::getCode, code);
         return selectOne(wrapper);
+    }
+
+    default List<WmsInboundDO> getInboundList(Integer upstreamBillType, Long upstreamBillId) {
+        LambdaQueryWrapperX<WmsInboundDO> wrapper = new LambdaQueryWrapperX<>();
+        wrapper.eq(WmsInboundDO::getUpstreamBillId, upstreamBillId);
+        wrapper.eq(WmsInboundDO::getUpstreamBillType, upstreamBillType);
+        return selectList(wrapper);
     }
 }

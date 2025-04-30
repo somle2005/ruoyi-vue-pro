@@ -1,6 +1,9 @@
 package cn.iocoder.yudao.module.wms.enums.api.outbound;
 
+import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundDTO;
 import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundSaveReqDTO;
+
+import java.util.List;
 
 /**
  * @author: LeeFJ
@@ -16,5 +19,22 @@ public interface WmsOutboundApi {
      * @return 出库单ID
      */
     Long createOutbound(WmsOutboundSaveReqDTO createReqDTO);
+
+    /**
+     * 按 ID 查询出库单
+     *
+     * @param id 出库单更新请求
+     * @return WmsInboundDTO
+     */
+    WmsOutboundDTO getOutbound(Long id);
+
+    /**
+     * 按 上游单据类型 和 上游单据ID 查询出库单
+     *
+     * @param upstreamBillType 出库单类型
+     * @param upstreamBillId 上游单号
+     * @return WmsInboundDTO
+     */
+    List<WmsOutboundDTO> getOutboundList(Integer upstreamBillType, Long upstreamBillId);
 
 }

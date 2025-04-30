@@ -534,4 +534,9 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             inboundMapper.updateById(inbound);
         }
     }
+
+    @Override
+    public List<WmsInboundDO> getInboundList(Integer upstreamBillType, Long upstreamBillId) {
+        return inboundMapper.getInboundList(upstreamBillType,upstreamBillId);
+    }
 }
