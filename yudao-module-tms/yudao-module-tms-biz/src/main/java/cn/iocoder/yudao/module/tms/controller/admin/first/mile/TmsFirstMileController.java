@@ -1,35 +1,42 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
+import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileExcelVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
@@ -40,8 +47,10 @@ import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 @Validated
 public class TmsFirstMileController {
 
-    @Resource
+    @Autowired
     private TmsFirstMileService firstMileService;
+    @Autowired
+    private AdminUserApi adminUserApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程单")
@@ -144,6 +153,63 @@ public class TmsFirstMileController {
 
 
     private List<TmsFirstMileRespVO> bindResult(List<TmsFirstMileBO> beans) {
-        return null;
+        if (CollUtil.isEmpty(beans)) {
+            return Collections.emptyList();
+        }
+        // 收集所有创建人和更新人ID
+        Set<Long> userIds = beans.stream()
+            .flatMap(bo -> Stream.concat(
+                Stream.of(bo.getCreator(), bo.getUpdater()),
+                Stream.concat(
+                    bo.getItems() == null ? Stream.empty() :
+                        bo.getItems().stream().flatMap(item -> Stream.of(item.getCreator(), item.getUpdater())),
+                    bo.getFees() == null ? Stream.empty() :
+                        bo.getFees().stream().flatMap(fee -> Stream.of(fee.getCreator(), fee.getUpdater()))
+                )
+            ))
+            .filter(Objects::nonNull)
+            .map(this::safeParseLong)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        // 获取用户Map
+        Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
+
+        return beans.stream().map(bo -> {
+            TmsFirstMileRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRespVO.class);
+            // 设置创建人和更新人
+            MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO.setCreator(user.getNickname()));
+            MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO.setUpdater(user.getNickname()));
+
+            // 设置明细项
+            if (CollUtil.isNotEmpty(bo.getItems())) {
+                List<TmsFirstMileItemRespVO> items = bo.getItems().stream().map(item -> {
+                    TmsFirstMileItemRespVO itemRespVO = BeanUtils.toBean(item, TmsFirstMileItemRespVO.class);
+                    // 设置明细的创建人和更新人
+                    MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> itemRespVO.setCreator(user.getNickname()));
+                    MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> itemRespVO.setUpdater(user.getNickname()));
+                    return itemRespVO;
+                }).collect(Collectors.toList());
+                respVO.setFirstMileItemList(items);
+            }
+            // 设置费用信息
+            if (CollUtil.isNotEmpty(bo.getFees())) {
+                respVO.setFees(TmsFirstMileConvert.convertFeeList(bo.getFees()));
+                MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO.setUpdater(user.getNickname()));
+                MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO.setCreator(user.getNickname()));
+            }
+            // 设置最新跟踪信息
+            if (bo.getTracking() != null) {
+                respVO.setTracking(BeanUtils.toBean(bo.getTracking(), TmsVesselTrackingRespVO.class));
+            }
+            return respVO;
+        }).toList();
+    }
+
+    private Long safeParseLong(String value) {
+        try {
+            return Optional.ofNullable(value).map(Long::parseLong).orElse(null);
+        } catch (NumberFormatException e) {
+            return null;
+        }
     }
 }
