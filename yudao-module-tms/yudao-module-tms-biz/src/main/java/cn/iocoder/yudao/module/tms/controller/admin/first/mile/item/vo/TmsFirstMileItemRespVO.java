@@ -7,28 +7,11 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Schema(description = "管理后台 - 头程单明细 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class TmsFirstMileItemRespVO extends BaseVO {
-
-    @Schema(description = "创建人ID")
-    @ExcelProperty("创建人ID")
-    private Long creator;
-
-    @Schema(description = "创建时间")
-    @ExcelProperty("创建时间")
-    private LocalDateTime createTime;
-
-    @Schema(description = "更新人ID")
-    @ExcelProperty("更新人ID")
-    private Long updater;
-
-    @Schema(description = "更新时间")
-    @ExcelProperty("更新时间")
-    private LocalDateTime updateTime;
 
     @Schema(description = "申请项ID")
     @ExcelProperty("申请项ID")

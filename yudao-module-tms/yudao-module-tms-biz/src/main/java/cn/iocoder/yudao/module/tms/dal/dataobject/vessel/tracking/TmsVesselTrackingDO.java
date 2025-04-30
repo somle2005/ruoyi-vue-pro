@@ -1,9 +1,10 @@
 package cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking;
 
-import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.*;
 
 import java.time.LocalDateTime;
@@ -21,7 +22,7 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class TmsVesselTrackingDO extends BaseDO {
+public class TmsVesselTrackingDO extends TenantBaseDO {
 
     /**
      * 主键ID
@@ -71,6 +72,7 @@ public class TmsVesselTrackingDO extends BaseDO {
     /**
      * 乐观锁
      */
+    @Version
     private Integer revision;
     /**
      * 中转港（字典）
