@@ -10,7 +10,6 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFir
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -22,9 +21,9 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQU
 @Slf4j
 @Configuration
 @SuppressWarnings({"rawtypes", "unchecked"})
-public class TmsFirstMileRequestItemStatusMachineConfig {
+public class TmsFirstMileRequestItemStatusMachine {
 
-    @Resource
+    @Autowired
     FailCallback TmsBaseFailCallbackImpl;
 
 

@@ -17,4 +17,7 @@ public interface WmsOutboundApi {
      */
     Long createOutbound(WmsOutboundSaveReqDTO createReqDTO);
 
+    /**
+     * 根据原单类型+ID查询对应出库单
+     */
 }

@@ -1,6 +1,8 @@
 package cn.iocoder.yudao.module.tms.convert.first.mile;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
@@ -12,6 +14,8 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
+import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundItemSaveReqDTO;
+import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundSaveReqDTO;
 
 import java.util.List;
 import java.util.Map;
@@ -143,5 +147,29 @@ public class TmsFirstMileConvert {
             }
             return vo;
         }).toList();
+    }
+
+    /**
+     * 出库单转换
+     */
+    public static WmsOutboundSaveReqDTO convertOutbound(TmsFirstMileBO firstMileBO) {
+        WmsOutboundSaveReqDTO dto = new WmsOutboundSaveReqDTO();
+        dto.setUpstreamBillId(firstMileBO.getId());
+        dto.setUpstreamBillCode(firstMileBO.getCode());
+        dto.setType(BillType.TMS_FIRST_MILE.getValue());
+        //子项映射，upstreamItemId是item的id
+        // 设置明细项
+        if (CollUtil.isNotEmpty(firstMileBO.getItems())) {
+            List<WmsOutboundItemSaveReqDTO> items = firstMileBO.getItems().stream()
+                .map(item -> {
+                    WmsOutboundItemSaveReqDTO itemDTO = new WmsOutboundItemSaveReqDTO();
+                    itemDTO.setUpstreamItemId(item.getId());
+                    itemDTO.setProductId(item.getProductId());
+//                        itemDTO.setRemark(item.getRemark());
+                    return itemDTO;
+                }).collect(Collectors.toList());
+            dto.setItemList(items);
+        }
+        return dto;
     }
 } 

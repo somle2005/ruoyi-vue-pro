@@ -10,7 +10,7 @@ import lombok.Data;
 public class TmsFirstMileAuditReqVO {
 
     @NotNull(message = "头程ID不能为空")
-    @Schema(description = "头程ID集合")
+    @Schema(description = "头程主表ID")
     private Long id;
 
     // 审核/反审核

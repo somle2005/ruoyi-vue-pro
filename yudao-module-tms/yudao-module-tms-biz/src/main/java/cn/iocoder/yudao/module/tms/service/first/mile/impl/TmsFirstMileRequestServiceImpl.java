@@ -6,6 +6,9 @@ import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.stock.WmsWarehouseApi;
+import cn.iocoder.yudao.module.system.api.dept.DeptApi;
+import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
@@ -59,6 +62,9 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private final ErpProductApi erpProductApi;
     private final TmsFirstMileRequestItemService firstMileRequestItemService;
     private final TmsFirstMileService firstMileService;
+    private final AdminUserApi adminUserApi;
+    private final DeptApi deptApi;
+    private final WmsWarehouseApi wmsWarehouseApi;
 
     @Resource(name = FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> tmsFirstMileRequestStatusMachine;
@@ -87,9 +93,12 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
                                                                     : firstMileRequest.getCode());
         //校验产品是否存在
         erpProductApi.validProductList(requestItemDOS.stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList());
-        //TODO 校验人+部门+仓库是否合法
-        firstMileRequestMapper.insert(firstMileRequest);
+        // 校验人+部门+仓库是否合法
+        adminUserApi.validateUser(firstMileRequest.getRequesterId());
+        deptApi.validateDeptList(Collections.singleton(firstMileRequest.getRequestDeptId()));
+        wmsWarehouseApi.validWarehouseList(Collections.singleton(firstMileRequest.getToWarehouseId()));
 
+        firstMileRequestMapper.insert(firstMileRequest);
         // 插入子表
         firstMileRequestItemService.createFirstMileRequestItemList(firstMileRequest.getId(), requestItemDOS);
         //初始化主子表状态
@@ -122,6 +131,15 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         if (!Objects.equals(oldDo.getCode(), vo.getCode())) {
             //校验code重复
             validCodeDuplicate(updateObj);
+        }
+        if (!Objects.equals(vo.getRequesterId(), oldDo.getRequesterId())) {
+            adminUserApi.validateUser(vo.getRequesterId());
+        }
+        if (!Objects.equals(vo.getRequestDeptId(), oldDo.getRequestDeptId())) {
+            deptApi.validateDeptList(Collections.singleton(vo.getRequestDeptId()));
+        }
+        if (!Objects.equals(vo.getToWarehouseId(), oldDo.getToWarehouseId())) {
+            wmsWarehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
         }
         statusCheckForUpdate(oldDo, FIRST_MILE_REQUEST_UPDATE_FAIL_APPROVE);
 
@@ -265,6 +283,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void submitAudit(List<Long> ids) {
         // 检查参数是否为空
         if (ids == null || ids.isEmpty()) {
@@ -297,6 +316,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void review(TmsFirstMileRequestAuditReqVO req) {
         // 检查参数是否为空
         if (req == null || req.getRequestId() == null) {

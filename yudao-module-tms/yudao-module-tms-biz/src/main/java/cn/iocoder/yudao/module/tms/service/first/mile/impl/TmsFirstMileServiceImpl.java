@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.erp.api.stock.WmsWarehouseApi;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.api.first.mile.request.FistMileRequestItemDTO;
@@ -34,6 +35,7 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
+import cn.iocoder.yudao.module.wms.enums.api.outbound.WmsOutboundApi;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,6 +69,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final TmsFirstMileItemMapper firstMileItemMapper;
     private final TmsFeeService feeService;
     private final TmsNoRedisDAO noRedisDAO;
+    private final WmsOutboundApi wmsOutboundApi;
+    private final WmsWarehouseApi warehouseApi;
     @Autowired
     @Lazy
     TmsFirstMileRequestService tmsFirstMileRequestService;
@@ -93,6 +97,9 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Idempotent
     @Transactional(rollbackFor = Exception.class)
     public Long createFirstMile(TmsFirstMileSaveReqVO vo) {
+        //1.0 校验
+        warehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
+
         if (vo.getCode() != null) {
             validCodeDateIsToday(vo);
             if (validCodeDuplicate(vo.getCode())) {
@@ -116,28 +123,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         return firstMileId;
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateFirstMile(TmsFirstMileSaveReqVO vo) {
-        TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(vo.getId());
-
-        //校验code
-        if (!Objects.equals(vo.getCode(), tmsFirstMileDO.getCode())) {
-            validCodeDateIsToday(vo);
-            if (validCodeDuplicate(vo.getCode(), vo.getId())) {
-                throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
-            }
-        }
-
-        statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_UPDATE_FAIL_APPROVE);
-
-        TmsFirstMileDO updateObj = BeanUtils.toBean(vo, TmsFirstMileDO.class);
-        firstMileMapper.updateById(updateObj);
-
-        updateFirstMileItemList(vo.getId(), vo.getFirstMileItems());
-        updateFeeList(vo.getId(), vo.getFees());
-    }
-
     //草稿+审核不通过才能修改
     private void statusCheckForEdit(TmsFirstMileDO tmsFirstMileDO, ErrorCode errorCode) {
         // 只有草稿状态或审核不通过状态才能修改
@@ -150,6 +135,28 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateFirstMile(TmsFirstMileSaveReqVO vo) {
+        TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(vo.getId());
+
+        //校验code
+        if (!Objects.equals(vo.getCode(), tmsFirstMileDO.getCode())) {
+            validCodeDateIsToday(vo);
+            if (validCodeDuplicate(vo.getCode(), vo.getId())) {
+                throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
+            }
+        }
+        //校验申请人
+
+        statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_UPDATE_FAIL_APPROVE);
+
+        TmsFirstMileDO updateObj = BeanUtils.toBean(vo, TmsFirstMileDO.class);
+        firstMileMapper.updateById(updateObj);
+
+        updateFirstMileItemList(vo.getId(), vo.getFirstMileItems());
+        updateFeeList(vo.getId(), vo.getFees());
+    }
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteFirstMile(Long id) {
@@ -202,6 +209,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void submitAudit(List<Long> ids) {
         // 检查参数是否为空
         if (ids == null || ids.isEmpty()) {
@@ -227,13 +235,16 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void review(TmsFirstMileAuditReqVO req) {
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(req.getId());
         if (Boolean.TRUE.equals(req.getReviewed())) {
             if (req.getPass()) {
-                //通过
+                //1. 通过
                 auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.AGREE, req);
-                //TODO api 生成出库单
+                //2. 生成对应出库单
+//                TmsFirstMileBO tmsFirstMileBO = getFirstMileBO(req.getId());
+//                wmsOutboundApi.createOutbound(TmsFirstMileConvert.convertOutbound(tmsFirstMileBO));
             } else {
                 //不通过
                 auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, req);
