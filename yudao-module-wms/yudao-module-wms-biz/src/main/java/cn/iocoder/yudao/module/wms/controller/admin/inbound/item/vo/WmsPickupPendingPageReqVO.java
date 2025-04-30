@@ -21,6 +21,12 @@ public class WmsPickupPendingPageReqVO extends PageParam {
     @Schema(description = "入库单编号", example = "29327")
     private String inboundCode;
 
+    /**
+     * 入库状态
+     **/
+    @Schema(description = "入库状态", example = "0/1")
+    private String inboundStatus;
+
 
     /**
      * 仓库ID

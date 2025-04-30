@@ -81,7 +81,8 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         // 按仓库ID查询
         if(reqVO.getWarehouseId()!=null) {
             query.innerJoin(WmsInboundDO.class,WmsInboundDO::getId,WmsInboundItemQueryDO::getInboundId)
-                .eq(WmsInboundDO::getWarehouseId,reqVO.getWarehouseId());
+                .eq(WmsInboundDO::getWarehouseId,reqVO.getWarehouseId())
+                .eqIfExists(WmsInboundDO::getInboundStatus, reqVO.getInboundStatus());
         }
         return selectPage(reqVO, query);
     }

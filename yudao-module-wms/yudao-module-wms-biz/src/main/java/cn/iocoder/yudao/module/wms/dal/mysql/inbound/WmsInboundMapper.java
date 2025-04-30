@@ -17,22 +17,32 @@ import java.util.List;
 @Mapper
 public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
 
+    static final String PRODUCT_EXISTS_SQL = "select 1 from wms_inbound_item pi where pi.inbound_id=wms_inbound.id and pi.product_id={0}";
+
     default PageResult<WmsInboundDO> selectPage(WmsInboundPageReqVO reqVO) {
-        return selectPage(reqVO, new LambdaQueryWrapperX<WmsInboundDO>()
-				.eqIfPresent(WmsInboundDO::getCode, reqVO.getCode())
-				.eqIfPresent(WmsInboundDO::getType, reqVO.getType())
-				.eqIfPresent(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())
-				.eqIfPresent(WmsInboundDO::getAuditStatus, reqVO.getAuditStatus())
-				.eqIfPresent(WmsInboundDO::getInboundStatus, reqVO.getInboundStatus())
-				.eqIfPresent(WmsInboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
-				.eqIfPresent(WmsInboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
-				.eqIfPresent(WmsInboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
-				.eqIfPresent(WmsInboundDO::getTraceNo, reqVO.getTraceNo())
-				.eqIfPresent(WmsInboundDO::getShippingMethod, reqVO.getShippingMethod())
-				.likeIfPresent(WmsInboundDO::getRemark, reqVO.getRemark())
-				.eqIfPresent(WmsInboundDO::getInitAge, reqVO.getInitAge())
-				.betweenIfPresent(WmsInboundDO::getCreateTime, reqVO.getCreateTime())
-				.orderByDesc(WmsInboundDO::getId));
+
+        LambdaQueryWrapperX query = new LambdaQueryWrapperX<WmsInboundDO>()
+            .eqIfPresent(WmsInboundDO::getCode, reqVO.getCode())
+            .eqIfPresent(WmsInboundDO::getType, reqVO.getType())
+            .eqIfPresent(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())
+            .eqIfPresent(WmsInboundDO::getAuditStatus, reqVO.getAuditStatus())
+            .eqIfPresent(WmsInboundDO::getInboundStatus, reqVO.getInboundStatus())
+            .eqIfPresent(WmsInboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
+            .eqIfPresent(WmsInboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
+            .eqIfPresent(WmsInboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
+            .eqIfPresent(WmsInboundDO::getTraceNo, reqVO.getTraceNo())
+            .eqIfPresent(WmsInboundDO::getShippingMethod, reqVO.getShippingMethod())
+            .likeIfPresent(WmsInboundDO::getRemark, reqVO.getRemark())
+            .eqIfPresent(WmsInboundDO::getInitAge, reqVO.getInitAge())
+            .betweenIfPresent(WmsInboundDO::getCreateTime, reqVO.getCreateTime())
+            .orderByDesc(WmsInboundDO::getId);
+
+        if(reqVO.getProductId()!=null) {
+            query.exists(PRODUCT_EXISTS_SQL,reqVO.getProductId());
+        }
+
+
+        return selectPage(reqVO, query);
     }
 
     /**
