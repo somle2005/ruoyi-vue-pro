@@ -126,6 +126,9 @@ public class WmsStockFlowController {
         stockFlowService.assembleStockWarehouse(voPageResult.getList());
         stockFlowService.assembleInboundItemFlow(voPageResult.getList());
         stockFlowService.assembleCompanyAndDept(voPageResult.getList());
+        stockFlowService.assembleInventory(voPageResult.getList());
+        stockFlowService.assembleBinMove(voPageResult.getList());
+        stockFlowService.assembleOwnershipMove(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
 			.mapping(WmsStockFlowRespVO::getCreator, WmsStockFlowRespVO::setCreatorName)
@@ -144,4 +147,4 @@ public class WmsStockFlowController {
     // // 导出 Excel
     // ExcelUtils.write(response, "库存流水.xls", "数据", WmsStockFlowRespVO.class, BeanUtils.toBean(list, WmsStockFlowRespVO.class));
     // }
-}
+}

@@ -63,5 +63,9 @@ public class WmsInboundSimpleRespVO {
     @ExcelProperty("仓库ID")
     private Long warehouseId;
 
+    @Schema(description = "WMS入库状态 ; WmsInboundStatus : 0-未入库 , 1-部分入库 , 2-已入库", example = "")
+    @ExcelProperty("WMS入库状态")
+    private Integer inboundStatus;
+
 
 }

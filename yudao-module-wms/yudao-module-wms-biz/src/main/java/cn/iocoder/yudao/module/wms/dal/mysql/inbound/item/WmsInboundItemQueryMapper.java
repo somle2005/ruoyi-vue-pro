@@ -22,7 +22,8 @@ import org.apache.ibatis.annotations.Mapper;
 public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQueryDO> {
 
     String AGE_EXPR = "(DATEDIFF(NOW(),t1.inbound_time)+IFNULL(t1.init_age,0))";
-    String AGE_COL_EXPR = AGE_EXPR+" as age";
+    String AGE_COL = "age";
+    String AGE_COL_EXPR = AGE_EXPR+" as "+AGE_COL;
 
     default PageResult<WmsInboundItemQueryDO> selectPage(WmsInboundItemPageReqVO reqVO) {
 
@@ -64,7 +65,7 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.betweenIfPresent(WmsInboundItemDO::getPlanQty,reqVO.getPlanQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getShelvedQty,reqVO.getShelvedQty());
 
-        wrapper.betweenIfPresent(AGE_EXPR, reqVO.getAge());
+        wrapper.betweenIfPresent(AGE_COL, reqVO.getAge());
 
         return selectPage(reqVO, wrapper);
 

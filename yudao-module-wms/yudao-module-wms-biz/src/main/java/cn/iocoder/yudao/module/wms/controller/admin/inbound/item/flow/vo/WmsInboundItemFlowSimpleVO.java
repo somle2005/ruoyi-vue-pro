@@ -17,7 +17,9 @@ public class WmsInboundItemFlowSimpleVO {
     @ExcelProperty("主键")
     private Long id;
 
-
+    @Schema(description = "入库单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "23778")
+    @ExcelProperty("入库单ID")
+    private Long inboundId;
 
     @Schema(description = "单据类型", example = "")
     @ExcelProperty("单据类型")
@@ -42,4 +44,15 @@ public class WmsInboundItemFlowSimpleVO {
     @Schema(description = "可出库量", example = "")
     @ExcelProperty("可出库量")
     private Integer outboundAvailableQty;
+
+    @Schema(description = "可上架量", example = "")
+    private Integer shelveAvailableQty;
+
+    @Schema(description = "实际入库量", example = "")
+    @ExcelProperty("实际入库量")
+    private Integer actualQty;
+
+    @Schema(description = "已上架量，已经拣货到仓位的库存量", example = "")
+    @ExcelProperty("已上架量，已经拣货到仓位的库存量")
+    private Integer shelvedQty;
 }

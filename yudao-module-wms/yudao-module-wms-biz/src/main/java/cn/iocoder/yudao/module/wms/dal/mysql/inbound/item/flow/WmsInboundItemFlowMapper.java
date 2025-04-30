@@ -6,7 +6,6 @@ import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import org.apache.ibatis.annotations.Mapper;
-
 import java.util.List;
 
 /**
@@ -22,7 +21,7 @@ public interface WmsInboundItemFlowMapper extends BaseMapperX<WmsInboundItemFlow
 				.eqIfPresent(WmsInboundItemFlowDO::getInboundId, reqVO.getInboundId())
 				.eqIfPresent(WmsInboundItemFlowDO::getInboundItemId, reqVO.getInboundItemId())
 				.eqIfPresent(WmsInboundItemFlowDO::getProductId, reqVO.getProductId())
-                .eqIfPresent(WmsInboundItemFlowDO::getBillType, reqVO.getBillType())
+				.eqIfPresent(WmsInboundItemFlowDO::getBillType, reqVO.getBillType())
 				.eqIfPresent(WmsInboundItemFlowDO::getBillId, reqVO.getBillId())
 				.eqIfPresent(WmsInboundItemFlowDO::getBillItemId, reqVO.getBillItemId())
 				.betweenIfPresent(WmsInboundItemFlowDO::getCreateTime, reqVO.getCreateTime())
@@ -47,4 +46,4 @@ public interface WmsInboundItemFlowMapper extends BaseMapperX<WmsInboundItemFlow
     default List<WmsInboundItemFlowDO> selectByOutboundActionId(Long outboundActionId) {
         return selectList(new LambdaQueryWrapperX<WmsInboundItemFlowDO>().eq(WmsInboundItemFlowDO::getOutboundActionId, outboundActionId));
     }
-}
+}
