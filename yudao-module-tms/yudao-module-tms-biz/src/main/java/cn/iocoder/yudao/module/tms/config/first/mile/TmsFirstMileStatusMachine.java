@@ -8,8 +8,8 @@ import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderF
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -20,9 +20,9 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_AUDI
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TmsFirstMileStatusMachine {
 
-    @Resource
-    FailCallback TmsBaseFailCallbackImpl;
-    @Resource
+    @Autowired
+    FailCallback tmsFailCallbackImpl;
+    @Autowired
     Action<TmsAuditStatus, TmsEventEnum, TmsFirstMileAuditReqVO> requestAuditActionImpl;
 
     @Bean(FIRST_MILE_AUDIT_STATE_MACHINE)
@@ -45,7 +45,7 @@ public class TmsFirstMileStatusMachine {
         // 反审核
         builder.externalTransition().from(TmsAuditStatus.APPROVED).to(TmsAuditStatus.REVOKED).on(TmsEventEnum.WITHDRAW_REVIEW).perform(requestAuditActionImpl);
 
-        builder.setFailCallback(TmsBaseFailCallbackImpl);
+        builder.setFailCallback(tmsFailCallbackImpl);
 
         return builder.build(FIRST_MILE_AUDIT_STATE_MACHINE);
     }

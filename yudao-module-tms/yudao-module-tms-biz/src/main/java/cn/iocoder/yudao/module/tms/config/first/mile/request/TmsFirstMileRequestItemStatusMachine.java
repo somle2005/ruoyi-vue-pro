@@ -24,7 +24,7 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQU
 public class TmsFirstMileRequestItemStatusMachine {
 
     @Autowired
-    FailCallback TmsBaseFailCallbackImpl;
+    FailCallback tmsFailCallbackImpl;
 
 
     @Autowired
@@ -43,7 +43,7 @@ public class TmsFirstMileRequestItemStatusMachine {
         //撤销关闭
         builder.externalTransitions().fromAmong(TmsOffStatus.MANUAL_CLOSED, TmsOffStatus.CLOSED).to(TmsOffStatus.OPEN).on(TmsEventEnum.CANCEL_DELETE).perform(requestItemOrderAction);
 
-        builder.setFailCallback(TmsBaseFailCallbackImpl);
+        builder.setFailCallback(tmsFailCallbackImpl);
         return builder.build(FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE);
     }
 
@@ -60,7 +60,7 @@ public class TmsFirstMileRequestItemStatusMachine {
 
         //放弃订购
         builder.externalTransitions().fromAmong(TmsOrderStatus.PARTIALLY_ORDERED, TmsOrderStatus.OT_ORDERED).to(TmsOrderStatus.ORDER_FAILED).on(TmsEventEnum.ORDER_CANCEL).perform(requestItemOrderActionImpl);
-        builder.setFailCallback(TmsBaseFailCallbackImpl);
+        builder.setFailCallback(tmsFailCallbackImpl);
         return builder.build(FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE);
     }
 }

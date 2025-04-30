@@ -150,7 +150,7 @@ public class TmsFirstMileConvert {
     }
 
     /**
-     * 出库单转换
+     * 出库单转换 BO -> WmsOutboundSaveReqDTO
      */
     public static WmsOutboundSaveReqDTO convertOutbound(TmsFirstMileBO firstMileBO) {
         WmsOutboundSaveReqDTO dto = new WmsOutboundSaveReqDTO();

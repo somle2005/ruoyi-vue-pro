@@ -5,15 +5,14 @@ import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.tms.config.first.mile.request.impl.action.RequestAuditActionImpl;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -24,11 +23,17 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class TmsFirstMileRequestStatusMachine {
 
-    @Resource
-    FailCallback TmsBaseFailCallbackImpl;
+    @Autowired
+    FailCallback tmsFailCallbackImpl;
 
-    @Resource
-    RequestAuditActionImpl requestAuditActionImpl;
+    @Autowired
+    Action<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> requestAuditActionImpl;
+    @Autowired
+    Action<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> requestOffActionImpl;
+    //订购
+    @Autowired
+    Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> requestOrderActionImpl;
+
     @Bean(FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)
     public StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> getFirstMileRequestStateMachine() {
         StateMachineBuilder<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> builder = StateMachineBuilderFactory.create();
@@ -48,13 +53,11 @@ public class TmsFirstMileRequestStatusMachine {
         // 反审核
         builder.externalTransition().from(TmsAuditStatus.APPROVED).to(TmsAuditStatus.REVOKED).on(TmsEventEnum.WITHDRAW_REVIEW).perform(requestAuditActionImpl);
 
-        builder.setFailCallback(TmsBaseFailCallbackImpl);
+        builder.setFailCallback(tmsFailCallbackImpl);
 
         return builder.build(FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE);
     }
 
-    @Resource
-    Action<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> requestOffActionImpl;
     @Bean(FIRST_MILE_REQUEST_OFF_STATE_MACHINE)
     public StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> getPurchaseRequestStateMachine() {
         StateMachineBuilder<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestDO> builder = StateMachineBuilderFactory.create();
@@ -69,13 +72,10 @@ public class TmsFirstMileRequestStatusMachine {
         //撤销关闭
         builder.externalTransitions().fromAmong(TmsOffStatus.MANUAL_CLOSED, TmsOffStatus.CLOSED).to(TmsOffStatus.OPEN).on(TmsEventEnum.CANCEL_DELETE).perform(requestOffActionImpl);
 
-        builder.setFailCallback(TmsBaseFailCallbackImpl);
+        builder.setFailCallback(tmsFailCallbackImpl);
         return builder.build(FIRST_MILE_REQUEST_OFF_STATE_MACHINE);
     }
 
-    //订购
-    @Resource
-    Action<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> requestOrderActionImpl;
     @Bean(FIRST_MILE_REQUEST_PURCHASE_ORDER_STATE_MACHINE)
     public StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> buildTmsFirstMileRequestItemOrderStateMachine() {
         StateMachineBuilder<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> builder = StateMachineBuilderFactory.create();
@@ -87,7 +87,7 @@ public class TmsFirstMileRequestStatusMachine {
 
         //放弃订购
         builder.externalTransitions().fromAmong(TmsOrderStatus.PARTIALLY_ORDERED, TmsOrderStatus.OT_ORDERED).to(TmsOrderStatus.ORDER_FAILED).on(TmsEventEnum.ORDER_CANCEL).perform(requestOrderActionImpl);
-        builder.setFailCallback(TmsBaseFailCallbackImpl);
+        builder.setFailCallback(tmsFailCallbackImpl);
         return builder.build(FIRST_MILE_REQUEST_PURCHASE_ORDER_STATE_MACHINE);
     }
 }
