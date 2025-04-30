@@ -189,8 +189,7 @@ public class TmsFirstMileRequestController {
             .filter(Objects::nonNull)
             .map(this::safeParseLong)
             .collect(Collectors.toSet());
-        Map<Long, DeptRespDTO> deptMap =
-            deptApi.getDeptMap(firstMileRequestBOList.stream().map(TmsFirstMileRequestBO::getRequestDeptId).distinct().collect(Collectors.toList()));
+        Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(firstMileRequestBOList.stream().map(TmsFirstMileRequestBO::getRequestDeptId).distinct().collect(Collectors.toList()));
         // 获取用户Map
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);

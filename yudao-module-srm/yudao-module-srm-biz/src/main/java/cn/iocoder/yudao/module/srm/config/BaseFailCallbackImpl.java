@@ -70,7 +70,9 @@ public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
 
     @Autowired(required = false)
     public void setRegistrars(List<StateMachineDescriptorRegistrar> registrars) {
-        if (registrars == null) return;
+        if (registrars == null) {
+            return;
+        }
         for (StateMachineDescriptorRegistrar registrar : registrars) {
             registrar.register(BaseFailCallbackImpl::addStateMachine);
         }

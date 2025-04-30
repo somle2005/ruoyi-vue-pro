@@ -22,9 +22,7 @@ public class FirstMileAuditActionImpl implements Action<TmsAuditStatus, TmsEvent
     public void execute(TmsAuditStatus from, TmsAuditStatus to, TmsEventEnum event, TmsFirstMileAuditReqVO context) {
 
         TmsFirstMileDO firstMileDO = tmsFirstMileService.getFirstMile(context.getId());
-        FistMileDTO dto = BeanUtils.toBean(firstMileDO, FistMileDTO.class, fistMileDTO -> {
-            fistMileDTO.setAuditStatus(to.getCode());
-        });
+        FistMileDTO dto = BeanUtils.toBean(firstMileDO, FistMileDTO.class, fistMileDTO -> fistMileDTO.setAuditStatus(to.getCode()));
         if (event == TmsEventEnum.AGREE || event == TmsEventEnum.REJECT) {
             //审核通过?不通过，需要有审核意见
             dto.setReviewComment(context.getReviewComment());
