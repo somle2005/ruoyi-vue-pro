@@ -14,6 +14,8 @@ import cn.iocoder.yudao.module.erp.api.stock.WmsWarehouseApi;
 import cn.iocoder.yudao.module.erp.api.stock.dto.ErpWarehouseDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
+import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
@@ -34,10 +36,9 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
@@ -53,6 +54,7 @@ public class TmsFirstMileRequestController {
     private final ErpProductApi erpProductApi;
     private final WmsWarehouseApi wmsWarehouseApi;
     private final DeptApi deptApi;
+    private final AdminUserApi adminUserApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程申请单")
@@ -176,9 +178,21 @@ public class TmsFirstMileRequestController {
         List<Long> productIds = firstMileRequestBOList.stream().flatMap(bo -> bo.getItems().stream()).map(TmsFirstMileRequestItemDO::getProductId).distinct()
             .collect(Collectors.toList());
         List<Long> warehouseIds = firstMileRequestBOList.stream().map(TmsFirstMileRequestBO::getToWarehouseId).distinct().collect(Collectors.toList());
+        //创建更新人，主子表
+        // 收集所有创建人和更新人ID
+        Set<Long> userIds = firstMileRequestBOList.stream()
+            .flatMap(bo -> Stream.concat(
+                Stream.of(bo.getCreator(), bo.getUpdater()),
+                bo.getItems() == null ? Stream.empty() :
+                    bo.getItems().stream().flatMap(item -> Stream.of(item.getCreator(), item.getUpdater()))
+            ))
+            .filter(Objects::nonNull)
+            .map(this::safeParseLong)
+            .collect(Collectors.toSet());
         Map<Long, DeptRespDTO> deptMap =
             deptApi.getDeptMap(firstMileRequestBOList.stream().map(TmsFirstMileRequestBO::getRequestDeptId).distinct().collect(Collectors.toList()));
-
+        // 获取用户Map
+        Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(warehouseIds);
 
@@ -186,6 +200,8 @@ public class TmsFirstMileRequestController {
             TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRequestRespVO.class, respVO1 -> {
                 MapUtils.findAndThen(warehouseMap, bo.getToWarehouseId(), warehouse -> respVO1.setToWarehouseName(warehouse.getName()));
                 MapUtils.findAndThen(deptMap, bo.getRequestDeptId(), dept -> respVO1.setRequestDeptName(dept.getName()));
+                MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO1.setCreator(user.getNickname()));
+                MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO1.setUpdater(user.getNickname()));
             });
             if (bo.getItems() != null) {
                 List<TmsFirstMileRequestItemRespVO> items = bo.getItems().stream().map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO ->
@@ -193,6 +209,8 @@ public class TmsFirstMileRequestController {
                             itemRespVO.setProductName(product.getBarCode());
                             itemRespVO.setBarCode(product.getBarCode());
                         }))).collect(Collectors.toList());
+                MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO.setCreator(user.getNickname()));
+                MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO.setUpdater(user.getNickname()));
                 respVO.setItems(items);
                 // 设置明细数量
                 respVO.setItemCount(items.size());
@@ -203,4 +221,11 @@ public class TmsFirstMileRequestController {
         }).collect(Collectors.toList());
     }
 
+    private Long safeParseLong(String value) {
+        try {
+            return Optional.ofNullable(value).map(Long::parseLong).orElse(null);
+        } catch (NumberFormatException e) {
+            return null;
+        }
+    }
 }

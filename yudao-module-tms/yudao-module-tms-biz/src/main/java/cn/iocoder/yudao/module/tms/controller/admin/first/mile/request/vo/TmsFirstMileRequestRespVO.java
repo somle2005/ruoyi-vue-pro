@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo;
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -11,21 +12,16 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Schema(description = "管理后台 - 头程申请单 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 @Accessors(chain = false)
-public class TmsFirstMileRequestRespVO {
+public class TmsFirstMileRequestRespVO extends BaseVO {
 
     @Schema(description = "主单编号")
     private Long id;
-
-    @Schema(description = "创建时间")
-    @ExcelProperty("创建时间")
-    private LocalDateTime createTime;
 
     @Schema(description = "单据编码")
     @ExcelProperty("编码")

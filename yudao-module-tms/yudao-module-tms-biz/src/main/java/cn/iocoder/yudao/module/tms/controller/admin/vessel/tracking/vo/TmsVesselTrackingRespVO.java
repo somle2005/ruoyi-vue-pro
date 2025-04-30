@@ -57,12 +57,14 @@ public class TmsVesselTrackingRespVO {
     private LocalDateTime lastSyncTime;
 
     @Schema(description = "乐观锁")
-    @ExcelProperty("乐观锁")
     private Integer revision;
 
     @Schema(description = "创建时间")
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
+
+    @Schema(description = "最后更新时间")
+    private LocalDateTime updateTime;
 
     @Schema(description = "中转港（字典）")
     @ExcelProperty("中转港（字典）")

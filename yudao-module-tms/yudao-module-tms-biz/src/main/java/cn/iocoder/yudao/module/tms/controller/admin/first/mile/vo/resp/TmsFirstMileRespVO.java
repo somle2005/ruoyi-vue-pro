@@ -3,9 +3,10 @@ package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp;
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
+import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemRespVO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.TmsVesselTrackingDO;
+import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -18,7 +19,7 @@ import java.util.List;
 @Schema(description = "管理后台 - 头程单 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class TmsFirstMileRespVO {
+public class TmsFirstMileRespVO extends BaseVO {
 
     @Schema(description = "创建时间")
     @ExcelProperty("创建时间")
@@ -128,8 +129,8 @@ public class TmsFirstMileRespVO {
     private List<TmsFirstMileItemRespVO> firstMileItemList;
 
     @Schema(description = "费用明细")
-    private List<TmsFeeDO> fees;
+    private List<TmsFeeRespVO> fees;
 
     @Schema(description = "最新跟踪信息")
-    private TmsVesselTrackingDO tracking;
+    private TmsVesselTrackingRespVO tracking;
 }

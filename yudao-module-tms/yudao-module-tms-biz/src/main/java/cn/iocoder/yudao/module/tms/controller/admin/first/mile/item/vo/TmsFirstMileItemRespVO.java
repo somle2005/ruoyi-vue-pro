@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo;
 
+import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @Schema(description = "管理后台 - 头程单明细 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class TmsFirstMileItemRespVO {
+public class TmsFirstMileItemRespVO extends BaseVO {
 
     @Schema(description = "创建人ID")
     @ExcelProperty("创建人ID")

@@ -14,7 +14,6 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMi
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileExcelVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileRespVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -29,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
@@ -72,8 +72,12 @@ public class TmsFirstMileController {
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
     public CommonResult<TmsFirstMileRespVO> getFirstMile(@RequestParam("id") Long id) {
-        TmsFirstMileDO firstMile = firstMileService.getFirstMile(id);
-        return success(BeanUtils.toBean(firstMile, TmsFirstMileRespVO.class));
+        TmsFirstMileBO firstMile = firstMileService.getFirstMileBO(id);
+        List<TmsFirstMileRespVO> mileRespVOS = bindResult(Collections.singletonList(firstMile));
+        if (mileRespVOS == null || mileRespVOS.isEmpty()) {
+            return success(null);
+        }
+        return success(mileRespVOS.get(0));
     }
 
     @PostMapping("/page")
@@ -138,4 +142,8 @@ public class TmsFirstMileController {
         return success(firstMileService.getLatestCode());
     }
 
+
+    private List<TmsFirstMileRespVO> bindResult(List<TmsFirstMileBO> beans) {
+        return null;
+    }
 }

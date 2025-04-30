@@ -3,18 +3,18 @@ package cn.iocoder.yudao.module.tms.controller.admin.fee.vo;
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Schema(description = "管理后台 - 出运订单费用明细 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class TmsFeeRespVO {
+public class TmsFeeRespVO extends BaseVO {
 
     @Schema(description = "主键ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("主键ID")
@@ -46,11 +46,5 @@ public class TmsFeeRespVO {
     private String remark;
 
     @Schema(description = "乐观锁版本号")
-    @ExcelProperty("乐观锁版本号")
     private Integer revision;
-
-    @Schema(description = "创建时间")
-    @ExcelProperty("创建时间")
-    private LocalDateTime createTime;
-
 }

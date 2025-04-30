@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo;
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -10,21 +11,16 @@ import lombok.Data;
 import lombok.experimental.Accessors;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 
 @Schema(description = "管理后台 - 头程申请表明细 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 @Accessors(chain = false)
-public class TmsFirstMileRequestItemRespVO {
+public class TmsFirstMileRequestItemRespVO extends BaseVO {
 
-    @Schema(description = "明细序号")
-    @ExcelProperty("明细序号")
+    @Schema(description = "明细编号")
+    @ExcelProperty("明细编号")
     private Long id;
-
-    @Schema(description = "创建时间")
-    @ExcelProperty("创建时间")
-    private LocalDateTime createTime;
 
     @Schema(description = "产品id")
     private Long productId;
@@ -71,9 +67,11 @@ public class TmsFirstMileRequestItemRespVO {
     @ExcelProperty("已订购数")
     private Integer orderClosedQty;
 
+    @Schema(description = "产品SKU")
     @ExcelProperty("产品SKU")
     private String barCode;
-    //产品名称
+
+    @Schema(description = "产品名称")
     @ExcelProperty("产品名称")
     private String productName;
 
