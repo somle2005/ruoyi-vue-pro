@@ -18,6 +18,10 @@ public class FistMileDTO {
      * 审核状态
      */
     private Integer auditStatus;
+    /**
+     * 审核意见
+     */
+    private String reviewComment;
 
     /**
      * 实际送仓时间
