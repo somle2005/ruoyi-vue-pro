@@ -35,7 +35,6 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
-import cn.iocoder.yudao.module.wms.enums.api.outbound.WmsOutboundApi;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -69,7 +68,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final TmsFirstMileItemMapper firstMileItemMapper;
     private final TmsFeeService feeService;
     private final TmsNoRedisDAO noRedisDAO;
-    private final WmsOutboundApi wmsOutboundApi;
     private final WmsWarehouseApi warehouseApi;
     @Autowired
     @Lazy

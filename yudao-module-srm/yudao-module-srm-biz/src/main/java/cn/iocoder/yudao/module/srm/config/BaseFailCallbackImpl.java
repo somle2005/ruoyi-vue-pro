@@ -9,6 +9,7 @@ import cn.iocoder.yudao.module.srm.enums.status.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
@@ -18,8 +19,9 @@ import java.util.Map;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.PURCHASE_REQUEST_NOT_EXISTS_BY_EVENT;
 
-//状态机基本异常回调
+//状态机基本异常回调，兜底策略
 @Component
+@Primary
 @Getter
 @Slf4j
 public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {

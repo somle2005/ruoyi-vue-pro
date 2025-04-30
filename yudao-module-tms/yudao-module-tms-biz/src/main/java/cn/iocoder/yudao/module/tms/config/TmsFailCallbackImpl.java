@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR;
 
 /**
- * TMS 状态机统一失败回调实现类
+ * TMS 状态机统一失败回调实现类，基本回调失效的兜底
  * 用于在状态机事件无法触发时，记录异常信息并抛出业务异常。
  */
 @Component

@@ -10,6 +10,7 @@ import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 @Slf4j
@@ -17,6 +18,7 @@ import org.springframework.stereotype.Component;
 public class FirstMileAuditActionImpl implements Action<TmsAuditStatus, TmsEventEnum, TmsFirstMileAuditReqVO> {
 
     @Autowired
+    @Lazy
     TmsFirstMileService tmsFirstMileService;
     @Override
     public void execute(TmsAuditStatus from, TmsAuditStatus to, TmsEventEnum event, TmsFirstMileAuditReqVO context) {
