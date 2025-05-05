@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.service.purchase.bo;
+package cn.iocoder.yudao.module.srm.service.purchase.bo.order;
 
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;

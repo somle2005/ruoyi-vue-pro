@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.service.purchase.bo;
+package cn.iocoder.yudao.module.srm.service.purchase.bo.order.word;
 
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import lombok.Data;
