@@ -7,7 +7,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.builder.TransitionContext;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundAgreeTransitionHandler;
-import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundExecuteTransitionHandler;
+import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundFinishTransitionHandler;
 import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundRejectTransitionHandler;
 import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundSubmitTransitionHandler;
 import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundTransitionFailCallback;
@@ -65,7 +65,7 @@ public class OutboundStateMachineConfigure {
             .from(WmsOutboundAuditStatus.PASS.getValue())
             .to(WmsOutboundAuditStatus.FINISHED.getValue())
             .on(WmsOutboundAuditStatus.Event.FINISH)
-            .handle(OutboundExecuteTransitionHandler.class);
+            .handle(OutboundFinishTransitionHandler.class);
 
         // 失败处理
         builder.setFailCallback(OutboundTransitionFailCallback.class);
