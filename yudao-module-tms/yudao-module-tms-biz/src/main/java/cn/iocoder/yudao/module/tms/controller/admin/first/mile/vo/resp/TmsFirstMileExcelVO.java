@@ -1,12 +1,10 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp;
 
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.excel.TmsFirstMileItemExcelVO;
 import com.alibaba.excel.annotation.ExcelProperty;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.List;
 
 /**
  * 头程单 Excel VO
@@ -48,6 +46,9 @@ public class TmsFirstMileExcelVO {
     @ExcelProperty("货物数量")
     private Integer cargoQuantity;
 
+    @ExcelProperty("货物价值")
+    private BigDecimal cargoValue;
+
     @ExcelProperty("货物重量(kg)")
     private BigDecimal cargoWeight;
 
@@ -62,10 +63,6 @@ public class TmsFirstMileExcelVO {
 
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
-
-    // 子表信息
-    @ExcelProperty("明细行信息")
-    private List<TmsFirstMileItemExcelVO> items;
 
     // 最新跟踪信息
     @ExcelProperty("最新跟踪时间")

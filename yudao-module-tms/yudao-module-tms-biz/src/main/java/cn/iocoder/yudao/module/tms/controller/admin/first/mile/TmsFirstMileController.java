@@ -161,10 +161,8 @@ public class TmsFirstMileController {
             .flatMap(bo -> Stream.concat(
                 Stream.of(bo.getCreator(), bo.getUpdater()),
                 Stream.concat(
-                    bo.getItems() == null ? Stream.empty() :
-                        bo.getItems().stream().flatMap(item -> Stream.of(item.getCreator(), item.getUpdater())),
-                    bo.getFees() == null ? Stream.empty() :
-                        bo.getFees().stream().flatMap(fee -> Stream.of(fee.getCreator(), fee.getUpdater()))
+                    bo.getItems() == null ? Stream.empty() : bo.getItems().stream().flatMap(item -> Stream.of(item.getCreator(), item.getUpdater())),
+                    bo.getFees() == null ? Stream.empty() : bo.getFees().stream().flatMap(fee -> Stream.of(fee.getCreator(), fee.getUpdater()))
                 )
             ))
             .filter(Objects::nonNull)
