@@ -30,12 +30,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_ITEM_FROM_BIN_ERROR;
@@ -49,7 +47,6 @@ import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOV
 @RequestMapping("/wms/stock-bin-move")
 @Validated
 public class WmsStockBinMoveController {
-
 
     @Resource()
     @Lazy()
@@ -126,6 +123,7 @@ public class WmsStockBinMoveController {
         // 返回
         return success(voPageResult);
     }
+
     // @GetMapping("/export-excel")
     // @Operation(summary = "导出库位移动 Excel")
     // @PreAuthorize("@ss.hasPermission('wms:stock-bin-move:export')")
@@ -136,42 +134,35 @@ public class WmsStockBinMoveController {
     // // 导出 Excel
     // ExcelUtils.write(response, "库位移动.xls", "数据", WmsStockBinMoveRespVO.class, BeanUtils.toBean(list, WmsStockBinMoveRespVO.class));
     // }
-
-
     @PostMapping("/import-excel")
     @Operation(summary = "导入产品库位移动清单")
     @PreAuthorize("@ss.hasPermission('wms:stock-bin-move:import')")
     public CommonResult<Boolean> importExcel(@Valid WmsStockBinMoveImportVO importReqVO) throws Exception {
-        //
+        // 
         List<WmsStockBinMoveImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsStockBinMoveImportExcelVO.class);
         // 识别代码
         stockBinMoveItemService.assembleWarehouseForImp(impVOList);
         stockBinMoveItemService.assembleBinForImp(impVOList);
         stockBinMoveItemService.assembleProductForImp(impVOList);
-
         Set<Long> warehouseIds = StreamX.from(impVOList).filter(Objects::nonNull).toSet(WmsStockBinMoveImportExcelVO::getWarehouseId);
-        if(warehouseIds.size()!=1) {
+        if (warehouseIds.size() != 1) {
             throw exception(STOCK_BIN_MOVE_SINGLE_WAREHOUSE_ALLOW);
         }
         for (WmsStockBinMoveImportExcelVO excelVO : impVOList) {
-            if(excelVO.getToBinId()==null) {
+            if (excelVO.getToBinId() == null) {
                 throw exception(STOCK_BIN_MOVE_ITEM_TO_BIN_ERROR);
             }
-            if(excelVO.getFromBinId()==null) {
+            if (excelVO.getFromBinId() == null) {
                 throw exception(STOCK_BIN_MOVE_ITEM_FROM_BIN_ERROR);
             }
-            if(excelVO.getProductId()==null) {
-                throw exception(STOCK_BIN_MOVE_ITEM_PRODUCT_ERROR,excelVO.getProductCode());
+            if (excelVO.getProductId() == null) {
+                throw exception(STOCK_BIN_MOVE_ITEM_PRODUCT_ERROR, excelVO.getProductCode());
             }
         }
-
         WmsStockBinMoveSaveReqVO saveReqVO = new WmsStockBinMoveSaveReqVO();
         saveReqVO.setWarehouseId(warehouseIds.iterator().next());
-
         saveReqVO.setItemList(BeanUtils.toBean(impVOList, WmsStockBinMoveItemSaveReqVO.class));
-
         stockBinMoveService.createStockBinMove(saveReqVO);
-
         return success(true);
     }
-}
+}

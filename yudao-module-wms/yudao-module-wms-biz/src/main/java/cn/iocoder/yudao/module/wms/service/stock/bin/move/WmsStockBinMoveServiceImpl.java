@@ -25,14 +25,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_CAN_NOT_SAME_BIN;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_ITEM_REPEATED;
@@ -99,7 +97,7 @@ public class WmsStockBinMoveServiceImpl implements WmsStockBinMoveService {
                 item.setId(null);
                 // 设置归属
                 item.setBinMoveId(stockBinMove.getId());
-                if(Objects.equals(item.getToBinId(), item.getFromBinId())){
+                if (Objects.equals(item.getToBinId(), item.getFromBinId())) {
                     throw exception(STOCK_BIN_MOVE_CAN_NOT_SAME_BIN);
                 }
                 toInsetList.add(BeanUtils.toBean(item, WmsStockBinMoveItemDO.class));
@@ -111,7 +109,6 @@ public class WmsStockBinMoveServiceImpl implements WmsStockBinMoveService {
             if (uniqueKeys.size() != toInsetList.size()) {
                 throw exception(STOCK_BIN_MOVE_ITEM_REPEATED);
             }
-
             stockBinMoveItemMapper.insertBatch(toInsetList);
         }
         // 重新读取DO
@@ -126,50 +123,49 @@ public class WmsStockBinMoveServiceImpl implements WmsStockBinMoveService {
         return stockBinMove;
     }
 
-//    /**
-//     * @sign : CF76F2A3D4230C8A
-//     */
-//    @Override
-//    @Transactional(rollbackFor = Exception.class)
-//    public WmsStockBinMoveDO updateStockBinMove(WmsStockBinMoveSaveReqVO updateReqVO) {
-//        // 校验存在
-//        WmsStockBinMoveDO exists = validateStockBinMoveExists(updateReqVO.getId());
-//        // 单据号不允许被修改
-//        updateReqVO.setNo(exists.getNo());
-//        // 保存库位移动详情详情
-//        if (updateReqVO.getItemList() != null) {
-//            List<WmsStockBinMoveItemDO> existsInDB = stockBinMoveItemMapper.selectByBinMoveId(updateReqVO.getId());
-//            StreamX.CompareResult<WmsStockBinMoveItemDO> compareResult = StreamX.compare(existsInDB, BeanUtils.toBean(updateReqVO.getItemList(), WmsStockBinMoveItemDO.class), WmsStockBinMoveItemDO::getId);
-//            List<WmsStockBinMoveItemDO> toInsetList = compareResult.getTargetMoreThanBaseList();
-//            List<WmsStockBinMoveItemDO> toUpdateList = compareResult.getIntersectionList();
-//            List<WmsStockBinMoveItemDO> toDeleteList = compareResult.getBaseMoreThanTargetList();
-//            List<WmsStockBinMoveItemDO> finalList = new ArrayList<>();
-//            finalList.addAll(toInsetList);
-//            finalList.addAll(toUpdateList);
-//            // 校验 toInsetList 中是否有重复的 productId
-//            Set<String> uniqueKeys = StreamX.from(finalList).toSet(itm -> {
-//                return StrUtils.join(Arrays.asList(itm.getProductId(), itm.getFromBinId(), itm.getToBinId()));
-//            });
-//            // 校验有重复的清单
-//            if (uniqueKeys.size() != toInsetList.size()) {
-//                throw exception(STOCK_BIN_MOVE_ITEM_REPEATED);
-//            }
-//            // 设置归属
-//            finalList.forEach(item -> {
-//                item.setBinMoveId(updateReqVO.getId());
-//            });
-//            // 保存详情
-//            stockBinMoveItemMapper.insertBatch(toInsetList);
-//            stockBinMoveItemMapper.updateBatch(toUpdateList);
-//            stockBinMoveItemMapper.deleteBatchIds(toDeleteList);
-//        }
-//        // 更新
-//        WmsStockBinMoveDO stockBinMove = BeanUtils.toBean(updateReqVO, WmsStockBinMoveDO.class);
-//        stockBinMoveMapper.updateById(stockBinMove);
-//        // 返回
-//        return stockBinMove;
-//    }
-
+    // /**
+    // * @sign : CF76F2A3D4230C8A
+    // */
+    // @Override
+    // @Transactional(rollbackFor = Exception.class)
+    // public WmsStockBinMoveDO updateStockBinMove(WmsStockBinMoveSaveReqVO updateReqVO) {
+    // // 校验存在
+    // WmsStockBinMoveDO exists = validateStockBinMoveExists(updateReqVO.getId());
+    // // 单据号不允许被修改
+    // updateReqVO.setNo(exists.getNo());
+    // // 保存库位移动详情详情
+    // if (updateReqVO.getItemList() != null) {
+    // List<WmsStockBinMoveItemDO> existsInDB = stockBinMoveItemMapper.selectByBinMoveId(updateReqVO.getId());
+    // StreamX.CompareResult<WmsStockBinMoveItemDO> compareResult = StreamX.compare(existsInDB, BeanUtils.toBean(updateReqVO.getItemList(), WmsStockBinMoveItemDO.class), WmsStockBinMoveItemDO::getId);
+    // List<WmsStockBinMoveItemDO> toInsetList = compareResult.getTargetMoreThanBaseList();
+    // List<WmsStockBinMoveItemDO> toUpdateList = compareResult.getIntersectionList();
+    // List<WmsStockBinMoveItemDO> toDeleteList = compareResult.getBaseMoreThanTargetList();
+    // List<WmsStockBinMoveItemDO> finalList = new ArrayList<>();
+    // finalList.addAll(toInsetList);
+    // finalList.addAll(toUpdateList);
+    // // 校验 toInsetList 中是否有重复的 productId
+    // Set<String> uniqueKeys = StreamX.from(finalList).toSet(itm -> {
+    // return StrUtils.join(Arrays.asList(itm.getProductId(), itm.getFromBinId(), itm.getToBinId()));
+    // });
+    // // 校验有重复的清单
+    // if (uniqueKeys.size() != toInsetList.size()) {
+    // throw exception(STOCK_BIN_MOVE_ITEM_REPEATED);
+    // }
+    // // 设置归属
+    // finalList.forEach(item -> {
+    // item.setBinMoveId(updateReqVO.getId());
+    // });
+    // // 保存详情
+    // stockBinMoveItemMapper.insertBatch(toInsetList);
+    // stockBinMoveItemMapper.updateBatch(toUpdateList);
+    // stockBinMoveItemMapper.deleteBatchIds(toDeleteList);
+    // }
+    // // 更新
+    // WmsStockBinMoveDO stockBinMove = BeanUtils.toBean(updateReqVO, WmsStockBinMoveDO.class);
+    // stockBinMoveMapper.updateById(stockBinMove);
+    // // 返回
+    // return stockBinMove;
+    // }
     /**
      * @sign : D02CAA96D65F5B67
      */
@@ -238,4 +234,14 @@ public class WmsStockBinMoveServiceImpl implements WmsStockBinMoveService {
         Map<Long, WmsWarehouseSimpleRespVO> warehouseVOMap = StreamX.from(warehouseDOMap.values()).toMap(WmsWarehouseDO::getId, v -> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
         StreamX.from(list).assemble(warehouseVOMap, WmsStockBinMoveRespVO::getWarehouseId, WmsStockBinMoveRespVO::setWarehouse);
     }
-}
+
+    /**
+     * 按 ID 集合查询 WmsStockBinMoveDO
+     */
+    public List<WmsStockBinMoveDO> selectByIds(List<Long> idList) {
+        if (CollectionUtils.isEmpty(idList)) {
+            return List.of();
+        }
+        return stockBinMoveMapper.selectByIds(idList);
+    }
+}

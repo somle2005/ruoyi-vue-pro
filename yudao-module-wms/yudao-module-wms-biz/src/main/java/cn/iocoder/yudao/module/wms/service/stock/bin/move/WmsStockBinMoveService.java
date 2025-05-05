@@ -7,7 +7,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBi
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.move.WmsStockBinMoveDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.move.item.WmsStockBinMoveItemDO;
 import jakarta.validation.Valid;
-
 import java.util.List;
 import java.util.Set;
 
@@ -32,7 +31,6 @@ public interface WmsStockBinMoveService {
      * @param updateReqVO 更新信息
      */
     // WmsStockBinMoveDO updateStockBinMove(@Valid WmsStockBinMoveSaveReqVO updateReqVO);
-
     /**
      * 删除库位移动
      *
@@ -72,4 +70,9 @@ public interface WmsStockBinMoveService {
     void finishMove(WmsStockBinMoveDO binMoveDO, List<WmsStockBinMoveItemDO> binMoveItemDOList);
 
     void assembleWarehouse(List<WmsStockBinMoveRespVO> list);
+
+    /**
+     * 按 ID 集合查询 WmsStockBinMoveDO
+     */
+    List<WmsStockBinMoveDO> selectByIds(List<Long> idList);
 }
