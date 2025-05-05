@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.dal.dataobject.purchase.bo;
+package cn.iocoder.yudao.module.srm.service.purchase.bo;
 
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import lombok.Data;
