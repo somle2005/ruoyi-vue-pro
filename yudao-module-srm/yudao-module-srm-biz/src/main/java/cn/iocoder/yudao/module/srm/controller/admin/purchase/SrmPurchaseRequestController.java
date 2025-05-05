@@ -24,6 +24,7 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestIte
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.req.SrmPurchaseRequestBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -154,6 +155,7 @@ public class SrmPurchaseRequestController {
     @PreAuthorize("@ss.hasPermission('srm:purchase-request:query')")
     public CommonResult<PageResult<SrmPurchaseRequestRespVO>> getPurchaseRequestPage(@Valid SrmPurchaseRequestPageReqVO pageReqVO) {
         PageResult<SrmPurchaseRequestDO> pageResult = srmPurchaseRequestService.getPurchaseRequestPage(pageReqVO);
+        PageResult<SrmPurchaseRequestBO> purchaseRequestItemBOPage = srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO);
         return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
     }
 

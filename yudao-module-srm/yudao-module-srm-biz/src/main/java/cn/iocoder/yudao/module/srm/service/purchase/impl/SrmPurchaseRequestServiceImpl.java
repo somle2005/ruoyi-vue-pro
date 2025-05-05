@@ -15,6 +15,7 @@ import cn.iocoder.yudao.module.srm.api.purchase.SrmOrderCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.SrmPurchaseOrderSaveReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.*;
 import cn.iocoder.yudao.module.srm.convert.purchase.SrmOrderConvert;
+import cn.iocoder.yudao.module.srm.convert.purchase.SrmPurchaseRequestItemsConvert;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
@@ -30,6 +31,7 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.req.SrmPurchaseRequestBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.req.SrmPurchaseRequestItemsBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import jakarta.annotation.Resource;
@@ -509,9 +511,14 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
 
     @Override
     public PageResult<SrmPurchaseRequestBO> getPurchaseRequestItemBOPage(SrmPurchaseRequestPageReqVO pageReqVO) {
-        erpPurchaseRequestItemsMapper.selectPageBO(pageReqVO);
+        // 1. 查询分页数据
+        PageResult<SrmPurchaseRequestItemsBO> requestItemsBOPageResult = erpPurchaseRequestItemsMapper.selectPageBO(pageReqVO);
 
-        return null;
+        // 2. 转换为目标BO
+        List<SrmPurchaseRequestBO> purchaseRequestBOList = SrmPurchaseRequestItemsConvert.INSTANCE.convertList(requestItemsBOPageResult.getList());
+        
+        // 3. 返回分页结果
+        return new PageResult<>(purchaseRequestBOList, requestItemsBOPageResult.getTotal());
     }
 
     @Override

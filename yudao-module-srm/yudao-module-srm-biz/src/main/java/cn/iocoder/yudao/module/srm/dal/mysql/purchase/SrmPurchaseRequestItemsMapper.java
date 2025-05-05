@@ -59,7 +59,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
         return selectJoinPage(
             req,
             SrmPurchaseRequestItemsBO.class,
-            buildBOWrapper(req).selectAssociation(SrmPurchaseRequestItemsDO.class, SrmPurchaseRequestItemsBO::getPurchaseRequestDO)
+            buildBOWrapper(req).selectAssociation(SrmPurchaseRequestItemsDO.class, SrmPurchaseRequestItemsBO::getPurchaseRequest)
         );
     }
 
