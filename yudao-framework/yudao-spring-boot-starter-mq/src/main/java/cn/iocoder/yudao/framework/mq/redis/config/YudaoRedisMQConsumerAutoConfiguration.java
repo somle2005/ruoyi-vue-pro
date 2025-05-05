@@ -41,8 +41,6 @@ import java.util.Properties;
 @EnableScheduling // 启用定时任务，用于 RedisPendingMessageResendJob 重发消息
 @AutoConfiguration(after = YudaoRedisAutoConfiguration.class)
 public class YudaoRedisMQConsumerAutoConfiguration {
-    @Value("${spring.task.scheduling.enabled}")
-    private boolean taskSchedulingEnabled;
 
     /**
      * 创建 Redis Pub/Sub 广播消费的容器
