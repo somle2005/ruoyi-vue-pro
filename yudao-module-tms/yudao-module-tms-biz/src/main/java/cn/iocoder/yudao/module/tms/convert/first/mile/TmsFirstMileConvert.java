@@ -7,7 +7,6 @@ import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.excel.TmsFirstMileItemExcelVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileExcelVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
@@ -135,15 +134,13 @@ public class TmsFirstMileConvert {
         return list.stream().map(bo -> {
             TmsFirstMileExcelVO vo = BeanUtils.toBean(bo, TmsFirstMileExcelVO.class);
             // 转换子表信息
-            if (bo.getItems() != null) {
-                vo.setItems(BeanUtils.toBean(bo.getItems(), TmsFirstMileItemExcelVO.class));
-            }
+//            if (bo.getItems() != null) {
+//                vo.setItems(BeanUtils.toBean(bo.getItems(), TmsFirstMileItemExcelVO.class));
+//            }
             // 设置最新跟踪信息
             if (bo.getTracking() != null) {
                 vo.setLatestTrackTime(bo.getTracking().getLastSyncTime());
                 vo.setLatestTrackStatus(bo.getTracking().getTrackingStatus());
-                //                vo.setLatestTrackDescription(bo.getLatestTrack().getDescription());
-                //                vo.setLatestTrackLocation(bo.getLatestTrack().getLocation());
             }
             return vo;
         }).toList();
