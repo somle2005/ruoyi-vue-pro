@@ -23,8 +23,8 @@ public enum BillType implements ArrayValuable<Integer>, DictEnum {
 
     // ========== TMS  编码段 100~200 ==========
     TMS_FIRST_MILE(100, "头程单"),
-    TRANSFER(101, "调拨单"),
-    LAST_MILE(102, "尾程单"),
+    TMS_TRANSFER(101, "调拨单"),
+    TMS_LAST_MILE(102, "尾程单"),
     ;
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(BillType::getValue).toArray(Integer[]::new);
