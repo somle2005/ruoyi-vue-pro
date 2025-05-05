@@ -48,13 +48,11 @@ public interface SrmPurchaseRequestService {
     SrmPurchaseRequestDO getPurchaseRequest(Long id);
 
     /**
-     * 获得ERP采购申请单分页
-     *
-     * @param pageReqVO 分页查询
-     * @return ERP采购申请单分页
+     * 获得ERP采购申请单
+     * @param id 主表ID
+     * @return SrmPurchaseRequestBO
      */
-    PageResult<SrmPurchaseRequestDO> getPurchaseRequestPage(SrmPurchaseRequestPageReqVO pageReqVO);
-
+    SrmPurchaseRequestBO getPurchaseRequestBO(Long id);
     /**
      * 获得采购申请单项分页
      *

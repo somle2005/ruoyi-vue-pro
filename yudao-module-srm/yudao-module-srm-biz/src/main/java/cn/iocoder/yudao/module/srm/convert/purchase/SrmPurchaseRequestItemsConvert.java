@@ -8,7 +8,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 import org.springframework.beans.BeanUtils;
 
-import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -28,9 +28,8 @@ public interface SrmPurchaseRequestItemsConvert {
      */
     default List<SrmPurchaseRequestBO> convertList(List<SrmPurchaseRequestItemsBO> itemsBOList) {
         if (CollUtil.isEmpty(itemsBOList)) {
-            return new ArrayList<>();
+            return Collections.emptyList();
         }
-
         // 按主表ID分组，收集子项
         Map<Long, List<SrmPurchaseRequestItemsDO>> itemsMap = itemsBOList.stream()
                 .collect(Collectors.groupingBy(
@@ -49,5 +48,27 @@ public interface SrmPurchaseRequestItemsConvert {
                     return requestBO;
                 })
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * 将单个ItemsBO转换为PurchaseRequestBO
+     *
+     * @param itemsBO 采购申请项BO
+     * @return 采购申请BO
+     */
+    default SrmPurchaseRequestBO convertBO(SrmPurchaseRequestItemsBO itemsBO) {
+        if (itemsBO == null || itemsBO.getPurchaseRequest() == null) {
+            return null;
+        }
+        // 1. 创建BO对象
+        SrmPurchaseRequestBO bo = new SrmPurchaseRequestBO();
+
+        // 2. 复制主表属性
+        BeanUtils.copyProperties(itemsBO.getPurchaseRequest(), bo);
+
+        // 3. 设置子表列表（当前子表）
+        bo.setItems(Collections.singletonList(itemsBO));
+
+        return bo;
     }
 }

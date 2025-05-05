@@ -55,6 +55,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
             ;
     }
 
+    //分页查询
     default PageResult<SrmPurchaseRequestItemsBO> selectPageBO(SrmPurchaseRequestPageReqVO req) {
         return selectJoinPage(
             req,

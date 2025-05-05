@@ -142,11 +142,11 @@ public class SrmPurchaseRequestController {
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('srm:purchase-request:query')")
     public CommonResult<SrmPurchaseRequestRespVO> getPurchaseRequest(@RequestParam("id") Long id) {
-        SrmPurchaseRequestDO purchaseRequest = srmPurchaseRequestService.getPurchaseRequest(id);
-        if (purchaseRequest == null) {
+        SrmPurchaseRequestBO purchaseRequestBO = srmPurchaseRequestService.getPurchaseRequestBO(id);
+        if (purchaseRequestBO == null) {
             return success(null);
         }
-        List<SrmPurchaseRequestRespVO> vos = bindList(Collections.singletonList(purchaseRequest));
+        List<SrmPurchaseRequestRespVO> vos = bindList(Collections.singletonList(purchaseRequestBO));
         return success(vos.get(0));
     }
 
@@ -154,8 +154,7 @@ public class SrmPurchaseRequestController {
     @Operation(summary = "获得ERP采购申请单分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-request:query')")
     public CommonResult<PageResult<SrmPurchaseRequestRespVO>> getPurchaseRequestPage(@Valid SrmPurchaseRequestPageReqVO pageReqVO) {
-        PageResult<SrmPurchaseRequestDO> pageResult = srmPurchaseRequestService.getPurchaseRequestPage(pageReqVO);
-        PageResult<SrmPurchaseRequestBO> purchaseRequestItemBOPage = srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO);
+        PageResult<SrmPurchaseRequestBO> pageResult = srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO);
         return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
     }
 
@@ -165,39 +164,36 @@ public class SrmPurchaseRequestController {
     @ApiAccessLog(operateType = EXPORT)
     public void exportPurchaseRequestExcel(@Valid SrmPurchaseRequestPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<SrmPurchaseRequestRespVO> list = bindList(srmPurchaseRequestService.getPurchaseRequestPage(pageReqVO).getList());
+        List<SrmPurchaseRequestRespVO> list = bindList(srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO).getList());
         // 导出 Excel
         ExcelUtils.write(response, "ERP采购申请单.xls", "数据", SrmPurchaseRequestRespVO.class, list);
     }
 
-    private List<SrmPurchaseRequestRespVO> bindList(List<SrmPurchaseRequestDO> oldList) {
+    private List<SrmPurchaseRequestRespVO> bindList(List<SrmPurchaseRequestBO> oldList) {
         if (CollUtil.isEmpty(oldList)) {
             return Collections.emptyList();
         }
         // 1.1 申请单-产品项
-        List<SrmPurchaseRequestItemsDO> purchaseRequestItemList =
-            srmPurchaseRequestService.getPurchaseRequestItemListByOrderIds(convertSet(oldList, SrmPurchaseRequestDO::getId));
-        Map<Long, List<SrmPurchaseRequestItemsDO>> purchaseRequestItemMap = convertMultiMap(purchaseRequestItemList, SrmPurchaseRequestItemsDO::getRequestId);
+        List<SrmPurchaseRequestItemsDO> items = oldList.stream().flatMap(purchaseRequest -> purchaseRequest.getItems().stream()).toList();
+        Map<Long, List<SrmPurchaseRequestItemsDO>> purchaseRequestItemMap = convertMultiMap(items, SrmPurchaseRequestItemsDO::getRequestId);
         // 1.2 产品信息
-        Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(convertSet(purchaseRequestItemList, SrmPurchaseRequestItemsDO::getProductId));
+        Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(convertSet(items, SrmPurchaseRequestItemsDO::getProductId));
         //1.3 获取用户信息
         Set<Long> userIds = Stream.concat(oldList.stream().flatMap(purchaseRequest -> Stream.of(purchaseRequest.getApplicantId(),//申请人
                 purchaseRequest.getAuditorId(),//审核者
-                safeParseLong(purchaseRequest.getCreator()), safeParseLong(purchaseRequest.getUpdater()))), purchaseRequestItemList.stream()
+                        safeParseLong(purchaseRequest.getCreator()), safeParseLong(purchaseRequest.getUpdater()))), items.stream()
                 .flatMap(purchaseRequestItem -> Stream.of(safeParseLong(purchaseRequestItem.getCreator()), safeParseLong(purchaseRequestItem.getUpdater()))))
             .distinct().filter(Objects::nonNull).collect(Collectors.toSet());
         //1.3.1 获取所有用户
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
         //1.4 仓库信息
-        Map<Long, ErpWarehouseDTO> warehouseMap =
-            wmsWarehouseApi.getWarehouseMap(convertSet(purchaseRequestItemList, SrmPurchaseRequestItemsDO::getWarehouseId));
+        Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(convertSet(items, SrmPurchaseRequestItemsDO::getWarehouseId));
         //1.4 部门信息
         Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(convertSet(oldList, SrmPurchaseRequestDO::getApplicationDeptId));
         //1.5 供应商信息
         Map<Long, SrmSupplierDO> supplierMap = srmSupplierService.getSupplierMap(convertSet(oldList, SrmPurchaseRequestDO::getSupplierId));
         //1.6 收集单位id map，从product里面
-        Map<Long, ErpProductUnitDTO> unitMap =
-            erpProductUnitApi.getProductUnitMap(productMap.values().stream().map(ErpProductDTO::getUnitId).collect(Collectors.toSet()));
+        Map<Long, ErpProductUnitDTO> unitMap = erpProductUnitApi.getProductUnitMap(productMap.values().stream().map(ErpProductDTO::getUnitId).collect(Collectors.toSet()));
         //2 开始拼接
         return BeanUtils.toBean(oldList, SrmPurchaseRequestRespVO.class, purchaseRequest -> {
             //2.1 申请单填充

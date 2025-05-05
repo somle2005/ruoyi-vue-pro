@@ -36,6 +36,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.SrmPurchaseOrderBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.SrmPurchaseOrderItemBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.SrmPurchaseOrderWordBO;
 import com.aspose.words.Document;
@@ -563,18 +564,21 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     }
 
     @Override
-    public PageResult<SrmPurchaseOrderItemBO> getPurchaseOrderPageBO(SrmPurchaseOrderPageReqVO pageReqVO) {
-        return purchaseOrderItemMapper.selectErpPurchaseOrderItemBOPage(pageReqVO);
+    public PageResult<SrmPurchaseOrderBO> getPurchaseOrderPageBO(SrmPurchaseOrderPageReqVO pageReqVO) {
+        PageResult<SrmPurchaseOrderItemBO> orderItemBOPage = purchaseOrderItemMapper.selectErpPurchaseOrderItemBOPage(pageReqVO);
+        return null;
     }
 
     @Override
-    public SrmPurchaseOrderItemBO getPurchaseOrderBO(Long id) {
-        return purchaseOrderItemMapper.selectErpPurchaseOrderItemBOById(id);
+    public SrmPurchaseOrderBO getPurchaseOrderBO(Long id) {
+        purchaseOrderItemMapper.selectErpPurchaseOrderItemBOById(id);
+        return null;
     }
 
     @Override
-    public List<SrmPurchaseOrderItemBO> getPurchaseOrderBOList(SrmPurchaseOrderPageReqVO pageReqVO) {
-        return purchaseOrderItemMapper.selectErpPurchaseOrderItemBOS(pageReqVO);
+    public List<SrmPurchaseOrderBO> getPurchaseOrderBOList(SrmPurchaseOrderPageReqVO pageReqVO) {
+        purchaseOrderItemMapper.selectErpPurchaseOrderItemBOS(pageReqVO);
+        return null;
     }
 
     @Override

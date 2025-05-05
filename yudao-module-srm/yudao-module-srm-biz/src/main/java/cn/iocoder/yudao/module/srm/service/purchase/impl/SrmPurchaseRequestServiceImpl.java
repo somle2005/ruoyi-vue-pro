@@ -505,8 +505,15 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     }
 
     @Override
-    public PageResult<SrmPurchaseRequestDO> getPurchaseRequestPage(SrmPurchaseRequestPageReqVO pageReqVO) {
-        return srmPurchaseRequestMapper.selectPage(pageReqVO);
+    public SrmPurchaseRequestBO getPurchaseRequestBO(Long id) {
+        //查主表
+        SrmPurchaseRequestDO srmPurchaseRequestDO = srmPurchaseRequestMapper.selectById(id);
+        //查子表
+        List<SrmPurchaseRequestItemsDO> itemsDOS = erpPurchaseRequestItemsMapper.selectListByRequestId(id);
+        //转换 SrmPurchaseRequestBO
+        return BeanUtils.toBean(srmPurchaseRequestDO, SrmPurchaseRequestBO.class, bo -> {
+            bo.setItems(itemsDOS);
+        });
     }
 
     @Override

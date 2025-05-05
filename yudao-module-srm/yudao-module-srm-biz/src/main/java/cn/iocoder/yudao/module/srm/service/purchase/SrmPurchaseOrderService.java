@@ -4,15 +4,14 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.*;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
-import cn.iocoder.yudao.module.srm.service.purchase.bo.SrmPurchaseOrderItemBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.SrmPurchaseOrderBO;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.math.BigDecimal;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
@@ -99,24 +98,34 @@ public interface SrmPurchaseOrderService {
     /**
      * 获得采购订单分页BO，一个订单项+对应订单
      */
-    PageResult<SrmPurchaseOrderItemBO> getPurchaseOrderPageBO(SrmPurchaseOrderPageReqVO pageReqVO);
+    PageResult<SrmPurchaseOrderBO> getPurchaseOrderPageBO(SrmPurchaseOrderPageReqVO pageReqVO);
 
     /**
      * 获得采购订单BO集合，一个订单项+对应订单
      */
-    List<SrmPurchaseOrderItemBO> getPurchaseOrderBOList(SrmPurchaseOrderPageReqVO pageReqVO);
+    List<SrmPurchaseOrderBO> getPurchaseOrderBOList(SrmPurchaseOrderPageReqVO pageReqVO);
 
     /**
      * 获得采购订单BO，一个订单项+对应订单
      */
-    SrmPurchaseOrderItemBO getPurchaseOrderBO(Long id);
+    SrmPurchaseOrderBO getPurchaseOrderBO(Long id);
 
     /**
      * 根据订单id获得订单map
      */
     default Map<Long, SrmPurchaseOrderDO> getPurchaseOrderMap(Collection<Long> orderIds) {
-        return this.getPurchaseOrderList(orderIds).stream().collect(Collectors.toMap(SrmPurchaseOrderDO::getId, v -> v));
+        if (orderIds == null || orderIds.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        Collection<SrmPurchaseOrderDO> orderList = this.getPurchaseOrderList(orderIds);
+        if (orderList == null || orderList.isEmpty()) {
+            return Collections.emptyMap();
+        }
+        return orderList.stream()
+                .filter(Objects::nonNull) // 防止列表里有null
+                .collect(Collectors.toMap(SrmPurchaseOrderDO::getId, Function.identity(), (a, b) -> a));//合并函数防止冲突key
     }
+
 
     /**
      * 根据id 获得订单集合
