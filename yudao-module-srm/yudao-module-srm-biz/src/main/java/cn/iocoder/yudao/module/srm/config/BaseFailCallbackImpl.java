@@ -8,12 +8,10 @@ import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.*;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -70,15 +68,15 @@ public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
     }
 
 
-    @Autowired(required = false)
-    public void setRegistrars(List<StateMachineDescriptorRegistrar> registrars) {
-        if (registrars == null) {
-            return;
-        }
-        for (StateMachineDescriptorRegistrar registrar : registrars) {
-            registrar.register(BaseFailCallbackImpl::addStateMachine);
-        }
-    }
+//    @Autowired(required = false)
+//    public void setRegistrars(List<StateMachineDescriptorRegistrar> registrars) {
+//        if (registrars == null) {
+//            return;
+//        }
+//        for (StateMachineDescriptorRegistrar registrar : registrars) {
+//            registrar.register(BaseFailCallbackImpl::addStateMachine);
+//        }
+//    }
 
     private static void addStateMachine(Class<?> contextClass, Class<?> stateClass, String description) {
         Map<Class<?>, Class<?>> key = new HashMap<>();
@@ -107,7 +105,7 @@ public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
         return STATE_MACHINE_MAP_CN.getOrDefault(key, "");
     }
 
-    public String convertEventToDescription(Object event) {
+    private String convertEventToDescription(Object event) {
         try {
             // 判断event是否为ArrayValuable的实例
             if (event instanceof StatusValue) {
@@ -120,7 +118,6 @@ public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
         }
         return null;
     }
-
 
 }
 
