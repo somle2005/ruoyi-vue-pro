@@ -1,0 +1,70 @@
+package cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo;
+
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+import java.time.LocalDateTime;
+
+@Schema(description = "管理后台 - 出运跟踪信息表（由外部API更新）新增/修改 Request VO")
+@Data
+public class TmsVesselTrackingSaveReqVO {
+    @Schema(description = "id")
+    private Long id;
+
+    @Schema(description = "上游单据类型;调拨单、头程单、退货单")
+    private Integer upstreamType;
+
+    @Schema(description = "上游业务单ID，如调拨单ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @NotNull(message = "上游业务单ID，如调拨单ID不能为空")
+    private Long upstreamId;
+
+    @Schema(description = "预计到港时间（ETA）")
+    private LocalDateTime arriveEstimateTime;
+
+    @Schema(description = "预计离港时间（ETD）")
+    private LocalDateTime departEstimateTime;
+
+    @Schema(description = "实际到港时间（ATA）")
+    private LocalDateTime arriveActualTime;
+
+    @Schema(description = "实际离港时间（ATD）")
+    private LocalDateTime departActualTime;
+
+    @Schema(description = "提柜时间")
+    private LocalDateTime pickupTime;
+
+    @Schema(description = "还柜时间")
+    private LocalDateTime returnTime;
+
+    @Schema(description = "数据来源（API渠道标识）")
+    private String apiSource;
+
+    @Schema(description = "乐观锁")
+    private Integer revision;
+
+    @Schema(description = "中转港（字典）")
+    private Integer transitPort;
+
+    @Schema(description = "目的港（字典）")
+    private Integer toPort;
+
+    @Schema(description = "装运港（字典）")
+    private Integer fromPort;
+
+    @Schema(description = "船公司（供应商id）")
+    private Long carrierCompanyId;
+
+    @Schema(description = "船名")
+    private String vessel;
+
+    @Schema(description = "航次")
+    private String voyage;
+
+    @Schema(description = "货代公司(供应商ID)")
+    private Integer forwarderCompanyId;
+
+    @Schema(description = "箱号")
+    private String containerNo;
+
+}

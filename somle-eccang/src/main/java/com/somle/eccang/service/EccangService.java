@@ -45,7 +45,7 @@ public class EccangService {
 
     private EccangToken token;
     private final int pageSize = 100;
-    private Limiter limiter = new Limiter(20);
+    private final Limiter limiter = new Limiter(20);
 
     @Autowired
     EccangTokenRepository tokenRepo;
@@ -298,19 +298,16 @@ public class EccangService {
 
     public Stream<EccangPage> getOrderArchivePages(EccangOrderVO orderParams, Integer year) {
         orderParams.setYear(year);
-        Stream<EccangPage> stream;
         try {
-            stream = getOrderUnarchivePages(orderParams);
+            return getOrderUnarchivePages(orderParams);
         } catch (EccangResponseException e) {
-            for (EccangResponse.EccangError eccangError : e.getEccangError()) {
-                if (eccangError.getErrorCode().equals("10001")) {
-                    log.info("当前{}年不存在归档信息,跳过", year);
-                    return Stream.empty();//跳过
-                }
+            boolean noArchive = e.getEccangError().stream().anyMatch(err -> "10001".equals(err.getErrorCode()));
+            if (noArchive) {
+                log.info("当前{}年不存在归档信息, 跳过", year);
+                return Stream.empty();
             }
             throw e;
         }
-        return stream;
     }
 
 

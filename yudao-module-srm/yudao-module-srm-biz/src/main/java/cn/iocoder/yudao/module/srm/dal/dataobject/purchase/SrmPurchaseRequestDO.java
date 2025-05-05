@@ -92,5 +92,4 @@ public class SrmPurchaseRequestDO extends TenantBaseDO {
      */
     private Integer inStatus;
 
-
 }

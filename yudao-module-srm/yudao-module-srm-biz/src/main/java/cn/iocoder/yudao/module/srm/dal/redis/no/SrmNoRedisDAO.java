@@ -111,7 +111,7 @@ public class SrmNoRedisDAO {
      * 手动设置序号时，同时更新 Redis 的值为最大值
      *
      * @param prefix       前缀
-     * @param fullSerialNo 全部流水号，例如说 "PO-20211009-000001"
+     * @param fullSerialNo 全部流水号，例如说 "CGDD-20250109-000001"
      */
     public void setManualSerial(String prefix, String fullSerialNo) {
         try {

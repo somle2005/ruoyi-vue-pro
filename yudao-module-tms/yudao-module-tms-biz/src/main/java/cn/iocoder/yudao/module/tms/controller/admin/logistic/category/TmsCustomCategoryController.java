@@ -40,8 +40,8 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants.PRODUCT_MATERIAL;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-import static cn.iocoder.yudao.module.tms.enums.DictValue.PRODUCT_MATERIAL;
 
 @Tag(name = "管理后台 - 海关分类")
 @RestController
@@ -159,7 +159,7 @@ public class TmsCustomCategoryController {
         List<Long> ids = listDOs.stream().map(TmsCustomCategoryDO::getId).toList();
         Map<Long, List<TmsCustomCategoryItemDO>> itemMap = customRuleCategoryItemService.getCustomRuleCategoryItemMap(ids);
         //1 材料ids
-        List<DictDataRespDTO> dtoList = dictDataApi.getDictDataList(PRODUCT_MATERIAL.getName());
+        List<DictDataRespDTO> dtoList = dictDataApi.getDictDataList(PRODUCT_MATERIAL);
         //1.1 构造map  字典的value:字典的label
         Map<String, String> materialMap = dtoList.stream().collect(Collectors.toMap(DictDataRespDTO::getValue, DictDataRespDTO::getLabel));
         // 1.2 构造人员map

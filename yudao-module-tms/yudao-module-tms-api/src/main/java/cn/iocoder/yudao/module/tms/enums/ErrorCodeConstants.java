@@ -20,5 +20,43 @@ public interface ErrorCodeConstants {
     // ========== 海关分类子表 1-030-606-000 ==========
     ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS = new ErrorCode(1_030_606_001, "海关分类子表不存在");
     ErrorCode CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID = new ErrorCode(1_030_606_002, "所选产品中不存在海关分类数据");
+    // ========== 头程申请单 1-030-670-000  ==========
+    ErrorCode FIRST_MILE_REQUEST_NOT_EXISTS = new ErrorCode(1_030_670_001, "头程申请单(编号:{})不存在");
+    ErrorCode FIRST_MILE_REQUEST_ITEM_NOT_EXISTS = new ErrorCode(1_030_670_002, "头程申请单(编号:{})明细不存在");
+    ErrorCode FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED = new ErrorCode(1_030_670_003, "头程申请单({})状态为({})，不允许关闭");
+    ErrorCode FIRST_MILE_REQUEST_CODE_DUPLICATE = new ErrorCode(1_030_670_004, "头程申请单编号({})已存在");
+    ErrorCode FIRST_MILE_REQUEST_CODE_GENERATE_FAIL = new ErrorCode(1_030_670_005, "头程申请单编号生成失败,大于999999");
+    //头程申请创建生成失败
+    ErrorCode FIRST_MILE_REQUEST_CREATE_FAIL = new ErrorCode(1_030_670_006, "头程申请单创建失败,大于999999");
+    ErrorCode FIRST_MILE_REQUEST_AUDIT_STATUS_NOT_ALLOWED = new ErrorCode(1_030_670_006, "头程申请单({})状态为({})，不允许审核");
+    ErrorCode FIRST_MILE_REQUEST_ITEM_RELATION_NOT_ALLOWED = new ErrorCode(1_030_670_007, "无法反审核，头程申请单存在关联头程单明细,序号:{}");
+    ErrorCode FIRST_MILE_REQUEST_DELETE_FAIL_STATUS_ERROR = new ErrorCode(1_030_670_007, "无法删除，头程申请单存在关联头程单明细,序号:{}");
+    ErrorCode FIRST_MILE_REQUEST_UPDATE_FAIL_STATUS_ERROR = new ErrorCode(1_030_670_008, "头程申请单({})已关闭，不允许修改");
+    ErrorCode FIRST_MILE_REQUEST_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_670_009, "头程申请单({})状态为({})，不允许修改");
+    ErrorCode FIRST_MILE_REQUEST_DELETED_FAIL_APPROVE = new ErrorCode(1_030_670_009, "头程申请单({})状态为({})，不允许删除");
+    //状态机错误,无法在({})状态下触发({})事件，上下文：{}
+    // ========== 状态机异常 1-030-900-000 ==========
+    ErrorCode FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR = new ErrorCode(1_030_900_001, "({})状态下不能触发({})事件");
 
+    // ========== 头程单 1_030_901_007==========
+    ErrorCode FIRST_MILE_NOT_EXISTS = new ErrorCode(1_030_670_007, "头程单不存在");
+    ErrorCode FIRST_MILE_ID_NOT_EXISTS = new ErrorCode(1_030_670_008, "头程单ID({})不存在");
+    ErrorCode FIRST_MILE_CODE_GENERATE_FAIL = new ErrorCode(1_030_670_008, "头程单编号生成失败,大于999999");
+    ErrorCode FIRST_MILE_CODE_DUPLICATE = new ErrorCode(1_030_670_009, "头程单编号({})已存在");
+    ErrorCode FIRST_MILE_CODE_DATE_NOT_TODAY = new ErrorCode(1_030_670_011, "头程单({})编号日期必须是当天");
+    ErrorCode FIRST_MILE_CODE_GENERATE_FAIL_MAX_TRY = new ErrorCode(1_030_670_010, "头程单编号，生成失败，重复{}次");
+    ErrorCode FIRST_MILE_CODE_FORMAT_ERROR = new ErrorCode(1_030_670_012, "头程单({})编号格式错误");
+    ErrorCode FIRST_MILE_ITEM_LIST_NOT_EMPTY = new ErrorCode(1_030_670_013, "头程单明细列表不能为空");
+    ErrorCode FIRST_MILE_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_670_014, "头程单({})状态为({})，不允许修改");
+    ErrorCode FIRST_MILE_DELETE_FAIL_APPROVE = new ErrorCode(1_030_670_015, "头程单({})状态为({})，不允许删除");
+
+    // ========== 出运订单费用明细 1_030_902_008 ==========
+    ErrorCode FEE_NOT_EXISTS = new ErrorCode(1_030_670_008, "费用不存在");
+
+    //头程单明细
+    // ========== 出运订单费用明细 1_030_910_001 ==========
+    ErrorCode FIRST_MILE_ITEM_NOT_EXISTS = new ErrorCode(1_030_670_009, "头程单明细不存在");
+    // ==========  出运跟踪信息表（由外部API更新）1_031_000_001 ==========
+    ErrorCode VESSEL_TRACKING_NOT_EXISTS = new ErrorCode(1_030_670_010, "出运跟踪信息表不存在");
+    ErrorCode VESSEL_TRACKING_LOG_NOT_EXISTS = new ErrorCode(1_030_670_011, "出运跟踪信息表日志不存在");
 }

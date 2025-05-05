@@ -1,5 +1,8 @@
 package cn.iocoder.yudao.module.srm.config.purchase.in.impl.action;
 
+import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
+import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
+
 import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
@@ -10,14 +13,10 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInMapper;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import jakarta.annotation.Resource;
+import java.time.LocalDateTime;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
-
-import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
-import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils.getLoginUserId;
 
 @Slf4j
 @Component
@@ -29,7 +28,7 @@ public class InAuditActionImpl implements Action<SrmAuditStatus, SrmEventEnum, S
     private SrmPurchaseInItemMapper itemsMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void execute(SrmAuditStatus from, SrmAuditStatus to, SrmEventEnum event, SrmPurchaseInAuditReqVO req) {
         SrmPurchaseInDO data = mapper.selectById(req.getInId());
         //        List<SrmPurchaseInItemDO> itemDOS = itemsMapper.selectListByInId(req.getInId());

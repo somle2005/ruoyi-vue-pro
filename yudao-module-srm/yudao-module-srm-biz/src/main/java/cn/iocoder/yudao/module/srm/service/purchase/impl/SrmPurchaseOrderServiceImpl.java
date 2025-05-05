@@ -25,7 +25,6 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.bo.SrmPurchaseOrderItemBO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInItemMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderItemMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderMapper;
@@ -37,7 +36,9 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
-import cn.iocoder.yudao.module.srm.service.purchase.bo.SrmPurchaseOrderWordBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderWordBO;
 import com.aspose.words.Document;
 import com.aspose.words.SaveFormat;
 import com.deepoove.poi.XWPFTemplate;
@@ -563,18 +564,36 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     }
 
     @Override
-    public PageResult<SrmPurchaseOrderItemBO> getPurchaseOrderPageBO(SrmPurchaseOrderPageReqVO pageReqVO) {
-        return purchaseOrderItemMapper.selectErpPurchaseOrderItemBOPage(pageReqVO);
+    public PageResult<SrmPurchaseOrderBO> getPurchaseOrderPageBO(SrmPurchaseOrderPageReqVO pageReqVO) {
+        PageResult<SrmPurchaseOrderItemBO> orderItemBOPage = purchaseOrderItemMapper.selectErpPurchaseOrderItemBOPage(pageReqVO);
+        // convert
+        List<SrmPurchaseOrderBO> orderBOS = SrmOrderConvert.INSTANCE.convertToSrmPurchaseOrderBOList(orderItemBOPage.getList());
+
+        return new PageResult<>(orderBOS, orderItemBOPage.getTotal());
     }
 
     @Override
-    public SrmPurchaseOrderItemBO getPurchaseOrderBO(Long id) {
-        return purchaseOrderItemMapper.selectErpPurchaseOrderItemBOById(id);
+    public SrmPurchaseOrderBO getPurchaseOrderBO(Long id) {
+        //主表
+        SrmPurchaseOrderDO srmPurchaseOrderDO = validatePurchaseOrder(id);
+        //子表
+        List<SrmPurchaseOrderItemDO> srmPurchaseOrderItemDOS = purchaseOrderItemMapper.selectListByOrderId(id);
+        //convert
+        return BeanUtils.toBean(srmPurchaseOrderDO, SrmPurchaseOrderBO.class, p -> p.setSrmPurchaseOrderItemDOS(srmPurchaseOrderItemDOS));
     }
 
+    /**
+     * 查询采购订单列表。
+     * 数据量后期会很大，待优化(缓存+并行convert)
+     *
+     * @param pageReqVO 分页查询条件，复用一下暂时
+     * @return 采购订单列表
+     */
     @Override
-    public List<SrmPurchaseOrderItemBO> getPurchaseOrderBOList(SrmPurchaseOrderPageReqVO pageReqVO) {
-        return purchaseOrderItemMapper.selectErpPurchaseOrderItemBOS(pageReqVO);
+    public List<SrmPurchaseOrderBO> getPurchaseOrderBOList(SrmPurchaseOrderPageReqVO pageReqVO) {
+        List<SrmPurchaseOrderItemBO> srmPurchaseOrderItemBOS = purchaseOrderItemMapper.selectErpPurchaseOrderItemBOS(pageReqVO);
+        //
+        return SrmOrderConvert.INSTANCE.convertToSrmPurchaseOrderBOList(srmPurchaseOrderItemBOS);
     }
 
     @Override

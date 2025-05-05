@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.srm.convert.purchase;
 
 import cn.hutool.core.bean.BeanUtil;
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateUtil;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
@@ -10,14 +11,18 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.SrmP
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
-import cn.iocoder.yudao.module.srm.service.purchase.bo.SrmPurchaseOrderItemWordBO;
-import cn.iocoder.yudao.module.srm.service.purchase.bo.SrmPurchaseOrderWordBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderItemWordBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderWordBO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import java.math.RoundingMode;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -64,7 +69,7 @@ public interface SrmOrderConvert {
     }
 
     /**
-     * 合同渲染BO用
+     * 合同word 渲染BO用
      */
     default SrmPurchaseOrderWordBO bindDataFormOrderItemDO(List<SrmPurchaseOrderItemDO> itemDOS, SrmPurchaseOrderDO orderDO,
                                                            SrmPurchaseOrderGenerateContractReqVO vo, Map<Long, FmsCompanyDTO> dtoMap) {
@@ -97,5 +102,38 @@ public interface SrmOrderConvert {
             //付款条款
             peek.setPaymentTerms(vo.getPaymentTerms());
         });
+    }
+
+    /**
+     * 采购订单项BO -> 采购订单BO
+     *
+     * @param itemBOList 采购订单项BO集合
+     * @return 采购订单BO集合
+     */
+    default List<SrmPurchaseOrderBO> convertToSrmPurchaseOrderBOList(List<SrmPurchaseOrderItemBO> itemBOList) {
+        if (itemBOList == null) {
+            return Collections.emptyList();
+        }
+        //订单ID : 订单项s
+        Map<Long, List<SrmPurchaseOrderItemBO>> orderIdMap = itemBOList.stream().collect(Collectors.groupingBy(SrmPurchaseOrderItemBO::getOrderId));
+
+        // 转换为订单BO列表
+        return orderIdMap.values().stream().map(orderItems -> {
+            if (CollUtil.isEmpty(orderItems)) {
+                return null;
+            }
+
+            SrmPurchaseOrderBO orderBO = new SrmPurchaseOrderBO();
+            // 获取第一个子项来设置主表信息
+            SrmPurchaseOrderItemBO firstItem = orderItems.get(0);
+            if (firstItem.getSrmPurchaseOrderDO() == null) {
+                return null;
+            }
+            // 设置主表基本信息
+            BeanUtils.copyProperties(firstItem.getSrmPurchaseOrderDO(), orderBO);
+            // 设置子表信息
+            orderBO.setSrmPurchaseOrderItemDOS(BeanUtils.toBean(orderItems, SrmPurchaseOrderItemDO.class));
+            return orderBO;
+        }).filter(Objects::nonNull).collect(Collectors.toList());
     }
 }

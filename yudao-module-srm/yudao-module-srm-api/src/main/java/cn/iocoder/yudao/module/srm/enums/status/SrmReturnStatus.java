@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.srm.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
+import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -10,7 +11,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter
-public enum SrmReturnStatus implements ArrayValuable<Integer> {
+public enum SrmReturnStatus implements ArrayValuable<Integer>, StatusValue {
     //未退款
     NOT_RETURN(0, "未退款"),
     //已退款

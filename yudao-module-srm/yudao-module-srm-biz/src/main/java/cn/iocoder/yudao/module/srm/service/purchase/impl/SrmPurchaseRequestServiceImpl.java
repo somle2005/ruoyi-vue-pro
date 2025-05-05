@@ -15,6 +15,7 @@ import cn.iocoder.yudao.module.srm.api.purchase.SrmOrderCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.SrmPurchaseOrderSaveReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.*;
 import cn.iocoder.yudao.module.srm.convert.purchase.SrmOrderConvert;
+import cn.iocoder.yudao.module.srm.convert.purchase.SrmPurchaseRequestItemsConvert;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
@@ -29,6 +30,8 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmOrderStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.req.SrmPurchaseRequestBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.req.SrmPurchaseRequestItemsBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import jakarta.annotation.Resource;
@@ -326,6 +329,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
                 requestItemsDOStateMachine.fireEvent(SrmOffStatus.fromCode(itemsDO.getOffStatus()), SrmEventEnum.MANUAL_CLOSE, itemsDO);
             }
             erpPurchaseRequestItemsMapper.deleteByIds(convertList(diffList.get(2), SrmPurchaseRequestItemsDO::getId));
+            //TODO 触发其他状态改变
         }
     }
 
@@ -404,7 +408,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         } else {
             if (itemIds != null && !itemIds.isEmpty()) {
                 // 批量处理采购订单子项状态
-                List<SrmPurchaseRequestItemsDO> itemsDOList = validatePurchaseRequestItems(itemIds);
+                List<SrmPurchaseRequestItemsDO> itemsDOList = validItemIdsExist(itemIds);
                 //            if(!enable) {
                 //                //验证不存在订单。则可以关闭
                 //                Set<Long> requestDoIds = itemsDOList.stream().map(SrmPurchaseRequestItemsDO::getRequestId).collect(Collectors.toSet());
@@ -487,26 +491,11 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             return Collections.emptyList();
         }
         //批量查询 比较
-        List<SrmPurchaseRequestItemsDO> itemsDOS = erpPurchaseRequestItemsMapper.selectBatchIds(itemIds);
+        List<SrmPurchaseRequestItemsDO> itemsDOS = erpPurchaseRequestItemsMapper.selectByIds(itemIds);
         if (itemsDOS.size() != itemIds.size()) {
             throw exception(PURCHASE_REQUEST_ITEM_NOT_EXISTS,
                 CollUtil.subtract(itemIds, CollUtil.newArrayList(itemsDOS.stream().map(SrmPurchaseRequestItemsDO::getId).collect(Collectors.toSet()))));
         }
-        return itemsDOS;
-    }
-
-    //校验子项是否存在,入参Collect<Long> ids
-    @Override
-    public List<SrmPurchaseRequestItemsDO> validatePurchaseRequestItems(Collection<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
-            return Collections.emptyList();
-        }
-        List<SrmPurchaseRequestItemsDO> itemsDOS = erpPurchaseRequestItemsMapper.selectBatchIds(ids);
-        if (itemsDOS.size() != ids.size()) {
-            throw exception(PURCHASE_REQUEST_ITEM_NOT_EXISTS,
-                CollUtil.subtract(ids, CollUtil.newArrayList(itemsDOS.stream().map(SrmPurchaseRequestItemsDO::getId).collect(Collectors.toSet()))));
-        }
-        //校验是否和ids数量一直，报错未对应的订单项
         return itemsDOS;
     }
 
@@ -516,8 +505,27 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     }
 
     @Override
-    public PageResult<SrmPurchaseRequestDO> getPurchaseRequestPage(SrmPurchaseRequestPageReqVO pageReqVO) {
-        return srmPurchaseRequestMapper.selectPage(pageReqVO);
+    public SrmPurchaseRequestBO getPurchaseRequestBO(Long id) {
+        //查主表
+        SrmPurchaseRequestDO srmPurchaseRequestDO = srmPurchaseRequestMapper.selectById(id);
+        //查子表
+        List<SrmPurchaseRequestItemsDO> itemsDOS = erpPurchaseRequestItemsMapper.selectListByRequestId(id);
+        //转换 SrmPurchaseRequestBO
+        return BeanUtils.toBean(srmPurchaseRequestDO, SrmPurchaseRequestBO.class, bo -> {
+            bo.setItems(itemsDOS);
+        });
+    }
+
+    @Override
+    public PageResult<SrmPurchaseRequestBO> getPurchaseRequestItemBOPage(SrmPurchaseRequestPageReqVO pageReqVO) {
+        // 1. 查询分页数据
+        PageResult<SrmPurchaseRequestItemsBO> requestItemsBOPageResult = erpPurchaseRequestItemsMapper.selectPageBO(pageReqVO);
+
+        // 2. 转换为目标BO
+        List<SrmPurchaseRequestBO> purchaseRequestBOList = SrmPurchaseRequestItemsConvert.INSTANCE.convertList(requestItemsBOPageResult.getList());
+        
+        // 3. 返回分页结果
+        return new PageResult<>(purchaseRequestBOList, requestItemsBOPageResult.getTotal());
     }
 
     @Override

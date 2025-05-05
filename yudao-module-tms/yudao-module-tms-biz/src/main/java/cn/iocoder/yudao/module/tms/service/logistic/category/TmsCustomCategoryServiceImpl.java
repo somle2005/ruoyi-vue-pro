@@ -29,9 +29,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import static cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants.PRODUCT_MATERIAL;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
-import static cn.iocoder.yudao.module.tms.enums.DictValue.PRODUCT_MATERIAL;
 
 /**
  * 海关分类 Service 实现类
@@ -56,7 +56,7 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
     @Transactional(rollbackFor = Exception.class)
     public Long createCustomRuleCategory(TmsCustomCategorySaveReqVO createReqVO) {
         //材质-字典校验
-        dictDataApi.validateDictDataList(PRODUCT_MATERIAL.getName(), List.of(String.valueOf(createReqVO.getMaterial())));
+        dictDataApi.validateDictDataList(PRODUCT_MATERIAL, List.of(String.valueOf(createReqVO.getMaterial())));
         validateCustomRuleCategoryNotExists(createReqVO);
         // 插入
         TmsCustomCategoryDO customRuleCategory = TmsCustomCategoryConvert.INSTANCE.convert(createReqVO);
@@ -89,7 +89,7 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
         Long categoryId = updateReqVO.getId();
         validateCustomRuleCategoryExists(categoryId);
         //材质-字典校验
-        dictDataApi.validateDictDataList(PRODUCT_MATERIAL.getName(), List.of(String.valueOf(updateReqVO.getMaterial())));
+        dictDataApi.validateDictDataList(PRODUCT_MATERIAL, List.of(String.valueOf(updateReqVO.getMaterial())));
         // 更新
         TmsCustomCategoryDO updateObj = BeanUtils.toBean(updateReqVO, TmsCustomCategoryDO.class);
         customRuleCategoryMapper.updateById(updateObj);
