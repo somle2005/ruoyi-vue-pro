@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.erp.controller.admin.sale.vo.customer;
 
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.module.system.enums.DictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -49,7 +50,7 @@ public class ErpCustomerRespVO {
 
     @Schema(description = "开启状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @ExcelProperty(value = "开启状态", converter = DictConvert.class)
-    @DictFormat("common_status") // TODO 代码优化：建议设置到对应的 ErpDictTypeConstants 枚举类中
+    @DictFormat(DictTypeConstants.COMMON_STATUS)
     private Integer status;
 
     @Schema(description = "排序", requiredMode = Schema.RequiredMode.REQUIRED, example = "10")

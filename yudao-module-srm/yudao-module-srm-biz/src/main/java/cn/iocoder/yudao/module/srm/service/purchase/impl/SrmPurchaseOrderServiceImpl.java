@@ -376,7 +376,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             for (SrmPurchaseOrderItemDO orderItemDO : diffList.get(0)) {
                 deleteSyncLogic(orderItemDO);
             }
-            purchaseOrderItemMapper.deleteBatchIds(convertList(diffList.get(2), SrmPurchaseOrderItemDO::getId));
+            purchaseOrderItemMapper.deleteByIds(convertList(diffList.get(2), SrmPurchaseOrderItemDO::getId));
         }
     }
 
@@ -526,7 +526,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        List<SrmPurchaseOrderItemDO> purchaseOrderItems = purchaseOrderItemMapper.selectBatchIds(ids);
+        List<SrmPurchaseOrderItemDO> purchaseOrderItems = purchaseOrderItemMapper.selectByIds(ids);
         //校验是否和ids数量一直，报错未对应的订单项
         if (purchaseOrderItems.size() != ids.size()) {
             throw exception(PURCHASE_ORDER_ITEM_NOT_EXISTS,
@@ -556,11 +556,6 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             throw exception(PURCHASE_ORDER_NOT_APPROVE, purchaseOrder.getNo());
         }
         return purchaseOrder;
-    }
-
-    @Override
-    public PageResult<SrmPurchaseOrderDO> getPurchaseOrderPage(SrmPurchaseOrderPageReqVO pageReqVO) {
-        return purchaseOrderMapper.selectPage(pageReqVO);
     }
 
     @Override
@@ -651,10 +646,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             throw exception(PURCHASE_ORDER_NOT_EXISTS);
         }
         // 2. 触发事件
-        orderDOS.forEach(orderDO -> {
-            auditMachine.fireEvent(SrmAuditStatus.fromCode(orderDO.getAuditStatus()), SrmEventEnum.SUBMIT_FOR_REVIEW,
-                SrmPurchaseOrderAuditReqVO.builder().orderIds(Collections.singletonList(orderDO.getId())).build());
-        });
+        orderDOS.forEach(orderDO ->
+                auditMachine.fireEvent(SrmAuditStatus.fromCode(orderDO.getAuditStatus()), SrmEventEnum.SUBMIT_FOR_REVIEW,
+                        SrmPurchaseOrderAuditReqVO.builder().orderIds(Collections.singletonList(orderDO.getId())).build()));
     }
 
     @Override
@@ -717,10 +711,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         List<Long> itemIds = reqVO.getItems().stream().map(SrmPurchaseOrderMergeReqVO.item::getItemId).collect(Collectors.toList());
         List<SrmPurchaseOrderItemDO> orderItemDOS = purchaseOrderItemMapper.selectListByItemIds(itemIds);
         //转换
-        SrmPurchaseInSaveReqVO vo = BeanUtils.toBean(reqVO, SrmPurchaseInSaveReqVO.class, saveReqVO -> {
-            saveReqVO.setNo(null).setItems(SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS)).setId(null)
-                .setInTime(LocalDateTime.now());
-        });
+        SrmPurchaseInSaveReqVO vo = BeanUtils.toBean(reqVO, SrmPurchaseInSaveReqVO.class, saveReqVO ->
+                saveReqVO.setNo(null).setItems(SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS)).setId(null)
+                        .setInTime(LocalDateTime.now()));
         //service持久化
         Long purchaseIn = purchaseInService.createPurchaseIn(vo);
         //修改采购单项的source = 合并入库

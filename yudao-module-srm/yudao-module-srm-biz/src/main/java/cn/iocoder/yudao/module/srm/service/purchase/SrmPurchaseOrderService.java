@@ -88,14 +88,6 @@ public interface SrmPurchaseOrderService {
     SrmPurchaseOrderDO validatePurchaseOrder(Long id);
 
     /**
-     * 获得采购订单分页
-     *
-     * @param pageReqVO 分页查询
-     * @return 采购订单分页
-     */
-    PageResult<SrmPurchaseOrderDO> getPurchaseOrderPage(SrmPurchaseOrderPageReqVO pageReqVO);
-
-    /**
      * 获得采购订单分页BO，一个订单项+对应订单
      */
     PageResult<SrmPurchaseOrderBO> getPurchaseOrderPageBO(SrmPurchaseOrderPageReqVO pageReqVO);
@@ -144,7 +136,6 @@ public interface SrmPurchaseOrderService {
      * 根据订单项id获得订单map
      */
     default Map<Long, SrmPurchaseOrderDO> getPurchaseOrderItemMap(Collection<Long> itemIds) {
-        //TODO 可以优化批量
         return this.getPurchaseOrderItemList(itemIds).stream()
             .collect(Collectors.toMap(SrmPurchaseOrderItemDO::getId, v -> getPurchaseOrderByItemId(v.getId())));
     }
