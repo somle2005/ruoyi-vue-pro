@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : ownership_move_id,from_dept_id,create_time,product_id,qty,from_company_id,to_company_id,to_dept_id
+ * @table-fields : ownership_move_id,from_dept_id,create_time,product_id,qty,from_company_id,remark,to_company_id,to_dept_id
  */
 @Schema(description = "管理后台 - 所有者库存移动详情分页 Request VO")
 @Data
@@ -41,4 +41,7 @@ public class WmsStockOwnershipMoveItemPageReqVO extends PageParam {
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;
+
+    @Schema(description = "备注", example = "")
+    private String remark;
 }

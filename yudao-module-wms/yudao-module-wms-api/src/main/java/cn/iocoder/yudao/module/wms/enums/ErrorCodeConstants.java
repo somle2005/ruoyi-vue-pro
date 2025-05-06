@@ -227,6 +227,7 @@ public interface ErrorCodeConstants {
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_FROM_COMPANY_ERROR = new ErrorCode(2_001_019_012, "调出公司错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_FROM_DEPT_ERROR = new ErrorCode(2_001_019_013, "调出部门错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_PRODUCT_ERROR = new ErrorCode(2_001_019_014, "产品错误");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_OWNERSHIP_MOVE_ID_PRODUCT_ID_FROM_COMPANY_ID_FROM_DEPT_ID_TO_COMPANY_ID_TO_DEPT_ID_DUPLICATE = new ErrorCode(2_001_019_015, "所有者移动表ID,产品ID,调出财务公司ID,调出部门ID,调入财务公司ID,调入部门ID已存在");
 
     // ========== WMS_INVENTORY 盘点表 2_001_020_000 ==========
     ErrorCode INVENTORY_NOT_EXISTS = new ErrorCode(2_001_020_001, "盘点单不存在");

@@ -10,7 +10,7 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 /**
  * 所有者库存移动详情 DO
  * @author 李方捷
- * @table-fields : ownership_move_id,from_dept_id,product_id,qty,from_company_id,id,to_company_id,to_dept_id
+ * @table-fields : ownership_move_id,from_dept_id,product_id,qty,from_company_id,remark,id,to_company_id,to_dept_id
  */
 @TableName("wms_stock_ownership_move_item")
 // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
@@ -63,4 +63,9 @@ public class WmsStockOwnershipMoveItemDO extends BaseDO {
      * 移动数量
      */
     private Integer qty;
+
+    /**
+     * 备注
+     */
+    private String remark;
 }

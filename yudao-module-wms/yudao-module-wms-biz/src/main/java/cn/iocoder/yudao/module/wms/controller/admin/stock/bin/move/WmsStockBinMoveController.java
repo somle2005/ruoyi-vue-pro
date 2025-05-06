@@ -137,7 +137,7 @@ public class WmsStockBinMoveController {
     @PostMapping("/import-excel")
     @Operation(summary = "导入产品库位移动清单")
     @PreAuthorize("@ss.hasPermission('wms:stock-bin-move:import')")
-    public CommonResult<Boolean> importExcel(@Valid WmsStockBinMoveImportVO importReqVO) throws Exception {
+    public CommonResult<Boolean> importExcel(@Valid @RequestBody WmsStockBinMoveImportVO importReqVO) throws Exception {
         // 
         List<WmsStockBinMoveImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsStockBinMoveImportExcelVO.class);
         // 识别代码
@@ -165,4 +165,4 @@ public class WmsStockBinMoveController {
         stockBinMoveService.createStockBinMove(saveReqVO);
         return success(true);
     }
-}
+}
