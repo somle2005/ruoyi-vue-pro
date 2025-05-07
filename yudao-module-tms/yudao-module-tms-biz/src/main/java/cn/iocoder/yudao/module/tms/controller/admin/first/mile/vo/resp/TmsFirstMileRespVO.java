@@ -67,7 +67,7 @@ public class TmsFirstMileRespVO extends BaseVO {
 
     @Schema(description = "柜型（字典）")
     @ExcelProperty(value = "柜型", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.CABINET_TYPE)
+    @DictFormat(DictTypeConstants.TMS_CABINET_TYPE)
     private Integer cabinetType;
 
     @Schema(description = "装柜日期")

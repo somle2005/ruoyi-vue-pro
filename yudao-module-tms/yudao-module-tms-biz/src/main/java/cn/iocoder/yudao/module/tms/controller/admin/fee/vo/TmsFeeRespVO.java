@@ -30,7 +30,7 @@ public class TmsFeeRespVO extends BaseVO {
 
     @Schema(description = "费用类型", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty(value = "费用类型", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.FEE_TYPE)
+    @DictFormat(DictTypeConstants.TMS_FEE_TYPE)
     private Integer costType;
 
     @Schema(description = "金额", requiredMode = Schema.RequiredMode.REQUIRED)

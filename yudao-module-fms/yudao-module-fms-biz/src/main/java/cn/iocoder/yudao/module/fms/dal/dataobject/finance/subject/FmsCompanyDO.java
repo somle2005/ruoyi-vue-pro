@@ -32,7 +32,7 @@ public class FmsCompanyDO extends BaseDO {
      */
     private Integer revision;
     /**
-     * 主体名称
+     * 公司名称
      */
     private String name;
     /**

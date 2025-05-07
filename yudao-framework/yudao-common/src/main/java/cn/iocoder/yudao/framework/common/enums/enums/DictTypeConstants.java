@@ -22,7 +22,7 @@ public interface DictTypeConstants {
     String OFF_STATUS = "srm_off_status";
 
     //货柜类型
-    String CABINET_TYPE = "cabinet_type";
+    String TMS_CABINET_TYPE = "cabinet_type";
     //费用类型
-    String FEE_TYPE = "fee_type";
+    String TMS_FEE_TYPE = "fee_type";
 }
