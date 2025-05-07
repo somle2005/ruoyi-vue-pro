@@ -11,6 +11,9 @@ public interface DictTypeConstants {
     //国家代码
     String COUNTRY_CODE = "country_code";
 
+    //开启状态，布尔值
+    String COMMON_BOOLEAN_STATUS = "common_boolean_status";
+
     //产品材料
     String PRODUCT_MATERIAL = "erp_product_material";
 
