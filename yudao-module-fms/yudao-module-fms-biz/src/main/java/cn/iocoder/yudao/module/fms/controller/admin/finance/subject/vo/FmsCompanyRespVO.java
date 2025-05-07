@@ -39,6 +39,14 @@ public class FmsCompanyRespVO {
     @ExcelProperty("主体名称")
     private String name;
 
+    @Schema(description = "公司名称（英文）", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("公司名称（英文）")
+    private String nameEn;
+
+    @Schema(description = "公司简称", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("公司简称")
+    private String abbr;
+
     @Schema(description = "联系人")
     @ExcelProperty("联系人")
     private String contact;
@@ -66,6 +74,10 @@ public class FmsCompanyRespVO {
     @Schema(description = "公司地址")
     @ExcelProperty("公司地址")
     private String companyAddress;
+
+    @Schema(description = "公司地址（英文）")
+    @ExcelProperty("公司地址（英文）")
+    private String companyAddressEn;
 
     @Schema(description = "备注")
     @ExcelProperty("备注")
