@@ -66,17 +66,17 @@ public class TmsVesselTrackingRespVO {
     @Schema(description = "最后更新时间")
     private LocalDateTime updateTime;
 
-    @Schema(description = "中转港（字典）")
-    @ExcelProperty("中转港（字典）")
-    private Integer transitPort;
+    @Schema(description = "中转港")
+    @ExcelProperty("中转港")
+    private Long transitPort;
 
-    @Schema(description = "目的港（字典）")
-    @ExcelProperty("目的港（字典）")
-    private Integer toPort;
+    @Schema(description = "目的港")
+    @ExcelProperty("目的港")
+    private Long toPort;
 
-    @Schema(description = "装运港（字典）")
-    @ExcelProperty("装运港（字典）")
-    private Integer fromPort;
+    @Schema(description = "装运港")
+    @ExcelProperty("装运港")
+    private Long fromPort;
 
     @Schema(description = "船公司（供应商id）")
     @ExcelProperty("船公司（供应商id）")

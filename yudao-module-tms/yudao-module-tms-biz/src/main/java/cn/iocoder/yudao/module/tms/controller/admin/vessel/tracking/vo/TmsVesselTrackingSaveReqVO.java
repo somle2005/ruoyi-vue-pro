@@ -43,14 +43,14 @@ public class TmsVesselTrackingSaveReqVO {
     @Schema(description = "乐观锁")
     private Integer revision;
 
-    @Schema(description = "中转港（字典）")
-    private Integer transitPort;
+    @Schema(description = "中转港")
+    private Long transitPort;
 
-    @Schema(description = "目的港（字典）")
-    private Integer toPort;
+    @Schema(description = "目的港")
+    private Long toPort;
 
-    @Schema(description = "装运港（字典）")
-    private Integer fromPort;
+    @Schema(description = "装运港")
+    private Long fromPort;
 
     @Schema(description = "船公司（供应商id）")
     private Long carrierCompanyId;

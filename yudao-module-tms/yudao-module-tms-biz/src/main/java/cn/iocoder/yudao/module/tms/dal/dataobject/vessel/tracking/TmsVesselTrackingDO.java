@@ -75,17 +75,17 @@ public class TmsVesselTrackingDO extends TenantBaseDO {
     @Version
     private Integer revision;
     /**
-     * 中转港（字典）
+     * 中转港
      */
-    private Integer transitPort;
+    private Long transitPort;
     /**
-     * 目的港（字典）
+     * 目的港
      */
-    private Integer toPort;
+    private Long toPort;
     /**
-     * 装运港（字典）
+     * 装运港
      */
-    private Integer fromPort;
+    private Long fromPort;
     /**
      * 船公司（供应商id）
      */
