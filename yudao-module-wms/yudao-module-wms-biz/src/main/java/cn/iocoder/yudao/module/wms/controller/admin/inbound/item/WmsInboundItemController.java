@@ -214,11 +214,11 @@ public class WmsInboundItemController {
         return success(voPageResult);
     }
 
-    @GetMapping("/export-excel")
+    @PostMapping("/export-excel")
     @Operation(summary = "导出入库单详情 Excel")
     @PreAuthorize("@ss.hasPermission('wms:inbound-item:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportInboundItemExcel(@Valid WmsInboundItemPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+    public void exportInboundItemExcel(@Valid @RequestBody WmsInboundItemPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<WmsInboundItemQueryDO> doPageResult = inboundItemService.getInboundItemPage(pageReqVO);
         List<WmsInboundItemQueryDO> distinct = StreamX.from(doPageResult.getList()).distinct(WmsInboundItemQueryDO::getId);
