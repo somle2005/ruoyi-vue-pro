@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,creator,update_time,actual_qty,create_time,bin_id,expected_qty,inventory_id,product_id,remark,id,updater
+ * @table-fields : tenant_id,creator,create_time,bin_id,inventory_id,remark,updater,update_time,actual_qty,expected_qty,product_id,id,status
  */
 @Schema(description = "管理后台 - 库位盘点 Response VO")
 @Data
@@ -69,7 +69,23 @@ public class WmsInventoryBinRespVO {
     @ExcelProperty("实际库存")
     private Integer actualQty;
 
+    @Schema(description = "差异量", example = "")
+    @ExcelProperty("差异量")
+    private Integer deltaQty;
+
     @Schema(description = "备注", example = "")
     @ExcelProperty("备注")
     private String remark;
+
+    @Schema(description = "盘点状态", example = "")
+    @ExcelProperty("盘点状态")
+    private Integer status;
+
+    @Schema(description = "创建人姓名", example = "张三")
+    @ExcelProperty("创建人姓名")
+    private String creatorName;
+
+    @Schema(description = "更新人姓名", example = "李四")
+    @ExcelProperty("更新人姓名")
+    private String updaterName;
 }

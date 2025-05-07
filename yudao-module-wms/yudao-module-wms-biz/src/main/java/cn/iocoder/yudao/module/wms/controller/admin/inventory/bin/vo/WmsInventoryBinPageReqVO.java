@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : actual_qty,create_time,bin_id,expected_qty,inventory_id,product_id,remark
+ * @table-fields : actual_qty,create_time,bin_id,expected_qty,inventory_id,product_id,remark,status
  */
 @Schema(description = "管理后台 - 库位盘点分页 Request VO")
 @Data
@@ -38,4 +38,7 @@ public class WmsInventoryBinPageReqVO extends PageParam {
 
     @Schema(description = "备注", example = "")
     private String remark;
+
+    @Schema(description = "盘点状态", example = "")
+    private Integer status;
 }

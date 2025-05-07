@@ -5,7 +5,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
- * @table-fields : actual_qty,bin_id,expected_qty,inventory_id,product_id,remark,id
+ * @table-fields : actual_qty,bin_id,expected_qty,inventory_id,product_id,remark,id,status
  */
 @Schema(description = "管理后台 - 库位盘点新增/修改 Request VO")
 @Data
@@ -34,4 +34,7 @@ public class WmsInventoryBinSaveReqVO {
 
     @Schema(description = "备注", example = "")
     private String remark;
+
+    @Schema(description = "盘点状态", example = "")
+    private Integer status;
 }

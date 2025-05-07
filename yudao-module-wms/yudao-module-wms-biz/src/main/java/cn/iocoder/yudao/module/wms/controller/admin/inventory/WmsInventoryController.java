@@ -106,6 +106,21 @@ public class WmsInventoryController {
         inventoryBinService.assembleProduct(inventoryVO.getBinItemList());
         inventoryBinService.assembleBin(inventoryVO.getBinItemList());
 
+        for (WmsInventoryBinRespVO inventoryBinRespVO : inventoryVO.getBinItemList()) {
+            inventoryBinRespVO.setDeltaQty(Math.abs(inventoryBinRespVO.getActualQty()-inventoryBinRespVO.getExpectedQty()));
+        }
+
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(List.of(inventoryVO))
+            .mapping(WmsInventoryRespVO::getCreator, WmsInventoryRespVO::setCreatorName)
+            .mapping(WmsInventoryRespVO::getUpdater, WmsInventoryRespVO::setUpdaterName)
+            .fill();
+
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(inventoryVO.getBinItemList())
+            .mapping(WmsInventoryBinRespVO::getCreator, WmsInventoryBinRespVO::setCreatorName)
+            .mapping(WmsInventoryBinRespVO::getUpdater, WmsInventoryBinRespVO::setUpdaterName)
+            .fill();
         // 返回
         return success(inventoryVO);
     }
