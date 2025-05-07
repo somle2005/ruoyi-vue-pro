@@ -144,4 +144,6 @@ public interface WmsInboundItemService {
     PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(@Valid WmsInboundItemPageReqVO pageReqVO);
 
     void assembleStockWarehouse(List<? extends WmsInboundItemRespVO> list);
+
+    void assembleStockType(List<WmsInboundItemRespVO> list);
 }

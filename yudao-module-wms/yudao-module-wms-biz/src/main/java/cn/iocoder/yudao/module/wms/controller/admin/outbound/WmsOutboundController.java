@@ -172,6 +172,14 @@ public class WmsOutboundController {
         return success(true);
     }
 
+    @PutMapping("/abandon")
+    @Operation(summary = "废弃审批")
+    @PreAuthorize("@ss.hasPermission('wms:outbound:abandon')")
+    public CommonResult<Boolean> abandon(@RequestBody WmsApprovalReqVO approvalReqVO) {
+        outboundService.approve(WmsOutboundAuditStatus.Event.ABANDON, approvalReqVO);
+        return success(true);
+    }
+
     @PutMapping("/finish")
     @Operation(summary = "完成出库")
     @PreAuthorize("@ss.hasPermission('wms:outbound:finish')")
@@ -179,4 +187,4 @@ public class WmsOutboundController {
         outboundService.approve(WmsOutboundAuditStatus.Event.FINISH, approvalReqVO);
         return success(true);
     }
-}
+}

@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderF
 import cn.iocoder.yudao.framework.cola.statemachine.builder.TransitionContext;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
+import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundAbandonTransitionHandler;
 import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundAgreeTransitionHandler;
 import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundFinishTransitionHandler;
 import cn.iocoder.yudao.module.wms.service.outbound.transition.OutboundRejectTransitionHandler;
@@ -45,6 +46,14 @@ public class OutboundStateMachineConfigure {
             .to(WmsOutboundAuditStatus.AUDITING.getValue())
             .on(WmsOutboundAuditStatus.Event.SUBMIT)
             .handle(OutboundSubmitTransitionHandler.class);
+
+
+        // 废弃
+        builder.externalTransitions()
+            .fromAmong(WmsOutboundAuditStatus.DRAFT.getValue(),WmsOutboundAuditStatus.REJECT.getValue(),WmsOutboundAuditStatus.AUDITING.getValue())
+            .to( WmsOutboundAuditStatus.ABANDONED.getValue())
+            .on(WmsOutboundAuditStatus.Event.ABANDON)
+            .handle(OutboundAbandonTransitionHandler.class);
 
         // 同意
         builder.externalTransition()

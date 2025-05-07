@@ -160,6 +160,7 @@ public interface ErrorCodeConstants {
     ErrorCode OUTBOUND_ITEM_PRODUCT_NOT_EXISTS = new ErrorCode(2_001_014_011, "出库单详情产品不存在");
     ErrorCode OUTBOUND_ITEM_WAREHOUSE_BIN_ERROR = new ErrorCode(2_001_014_013, "出库单详情仓位错误");
     ErrorCode OUTBOUND_ITEM_WAREHOUSE_BIN_NOT_MATCH = new ErrorCode(2_001_014_014, "出库单详情仓位与仓库不匹配");
+    ErrorCode OUTBOUND_ABANDON_NOT_ALLOWED = new ErrorCode(2_001_014_015, "出库单不允许废弃");
 
     // ========== WMS_OUTBOUND 出库单 2_001_015_000 ==========
     ErrorCode OUTBOUND_NOT_EXISTS = new ErrorCode(2_001_015_001, "出库单不存在");
@@ -289,4 +290,4 @@ public interface ErrorCodeConstants {
 
     // ========== WMS_PRODUCT 良次换货详情表 2_001_025_000 ==========
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(2_001_025_001, "{} 产品不存在");
-}
+}
