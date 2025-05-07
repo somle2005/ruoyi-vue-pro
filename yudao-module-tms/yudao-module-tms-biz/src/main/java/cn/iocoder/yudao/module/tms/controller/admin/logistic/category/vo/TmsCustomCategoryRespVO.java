@@ -33,6 +33,14 @@ public class TmsCustomCategoryRespVO {
     @ExcelProperty("英文品名")
     private String declaredTypeEn;
 
+    @Schema(description = "用途描述", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("用途描述")
+    private String customsPurpose;
+
+    @Schema(description = "报关材质描述", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("报关材质描述")
+    private String customsMaterial;
+
     @Schema(description = "材质对应string+报关品名")
     @ExcelProperty("材质对应string+报关品名")
     private String combinedValue;
