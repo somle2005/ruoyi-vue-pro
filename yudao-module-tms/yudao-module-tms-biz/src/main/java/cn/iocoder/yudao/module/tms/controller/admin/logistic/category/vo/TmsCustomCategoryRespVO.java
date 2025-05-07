@@ -50,6 +50,11 @@ public class TmsCustomCategoryRespVO {
     @ExcelProperty("对应产品数量")
     private Long productCount;
 
+    //明细行数量
+    @Schema(description = "明细行个数")
+    @ExcelProperty("明细行个数")
+    private Integer itemCount;
+
     @Schema(description = "创建时间")
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
