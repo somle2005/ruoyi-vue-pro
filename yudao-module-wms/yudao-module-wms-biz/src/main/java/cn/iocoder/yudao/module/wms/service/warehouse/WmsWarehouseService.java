@@ -67,4 +67,6 @@ public interface WmsWarehouseService {
     List<WmsWarehouseDO> selectByIds(List<Long> list);
 
     Map<String, WmsWarehouseDO> getWarehouseMapByCode(Set<String> codes);
+
+    WmsWarehouseDO validateWarehouseExists(Long id);
 }

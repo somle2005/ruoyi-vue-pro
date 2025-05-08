@@ -6,13 +6,18 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.config.InventoryStateMachineConfigure;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalHistoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryProductExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventorySaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.bin.WmsInventoryBinDO;
@@ -79,6 +84,9 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
 
     @Resource
     private WmsApprovalHistoryService approvalHistoryService;
+
+    @Resource
+    private ErpProductApi productApi;
 
     @Resource(name = InventoryStateMachineConfigure.STATE_MACHINE_NAME)
     private StateMachine<Integer, WmsInventoryAuditStatus.Event, TransitionContext<WmsInventoryDO>> inventoryStateMachine;
@@ -261,5 +269,24 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     public void assembleApprovalHistory(List<WmsInventoryRespVO> list) {
         Map<Long, List<WmsApprovalHistoryRespVO>> groupedApprovalHistory = approvalHistoryService.selectGroupedApprovalHistory(BillType.WMS_INVENTORY, StreamX.from(list).toList(WmsInventoryRespVO::getId));
         StreamX.from(list).assemble(groupedApprovalHistory, WmsInventoryRespVO::getId, WmsInventoryRespVO::setApprovalHistoryList);
+    }
+
+    @Override
+    public List<WmsStockBinRespVO> parseProductExcel(WmsWarehouseDO wmsWarehouseDO, List<WmsInventoryProductExcelVO> impVOList) {
+
+        Map<String, ErpProductDTO> productMapByCode = productApi.getProductMapByCode(StreamX.from(impVOList).toSet(WmsInventoryProductExcelVO::getProductCode));
+        StreamX.from(impVOList).assemble(productMapByCode, WmsInventoryProductExcelVO::getProductCode, (p,v)->{
+            if (v != null) {
+                p.setProductId(v.getId());
+            }
+        });
+
+        List<WmsWarehouseProductVO> wmsWarehouseProductVOS = new ArrayList<>();
+        for (WmsInventoryProductExcelVO excelVO : impVOList) {
+             wmsWarehouseProductVOS.add(WmsWarehouseProductVO.builder().productId(excelVO.getProductId()).warehouseId(wmsWarehouseDO.getId()).build());
+        }
+
+        return stockBinService.selectStockBinList(wmsWarehouseProductVOS, true);
+
     }
 }

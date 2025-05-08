@@ -149,7 +149,7 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
     /**
      * @sign : 8F00B204E9800998
      */
-    private WmsWarehouseDO validateWarehouseExists(Long id) {
+    public WmsWarehouseDO validateWarehouseExists(Long id) {
         WmsWarehouseDO warehouse = warehouseMapper.selectById(id);
         if (warehouse == null) {
             throw exception(WAREHOUSE_NOT_EXISTS);
