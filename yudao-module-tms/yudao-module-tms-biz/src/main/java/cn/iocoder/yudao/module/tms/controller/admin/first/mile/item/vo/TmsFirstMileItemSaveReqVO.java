@@ -59,6 +59,9 @@ public class TmsFirstMileItemSaveReqVO {
     @Schema(description = "体积（m³）")
     private BigDecimal volume;
 
+    @Schema(description = "销售公司ID")
+    private Long salesCompanyId;
+
     @Schema(description = "版本号")
     @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时版本号不能为空")
     private Integer revision;

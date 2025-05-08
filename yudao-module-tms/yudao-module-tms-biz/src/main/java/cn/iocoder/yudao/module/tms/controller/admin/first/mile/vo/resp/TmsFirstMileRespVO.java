@@ -46,20 +46,27 @@ public class TmsFirstMileRespVO extends BaseVO {
     private BigDecimal balance;
 
     @Schema(description = "审核人")
-    @ExcelProperty("审核人")
-    private Integer auditorId;
+    private Long auditorId;
+
+    @Schema(description = "审核人名称")
+    @ExcelProperty("审核人名称")
+    private String auditorName;
 
     @Schema(description = "审核时间")
     @ExcelProperty("审核时间")
     private LocalDateTime auditTime;
 
     @Schema(description = "审核状态")
-    @ExcelProperty("审核状态")
+    @ExcelProperty(value = "审核状态", converter = DictConvert.class)
+    @DictFormat(DictTypeConstants.AUDIT_STATUS)
     private Integer auditStatus;
 
     @Schema(description = "目的仓ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("目的仓ID")
     private Long toWarehouseId;
+
+    @Schema(description = "目的仓名称")
+    @ExcelProperty("目的仓名称")
+    private String toWarehouseName;
 
     @Schema(description = "提单号")
     @ExcelProperty("提单号")
@@ -121,6 +128,20 @@ public class TmsFirstMileRespVO extends BaseVO {
     @Schema(description = "入库时间")
     @ExcelProperty("入库时间")
     private LocalDateTime inboundTime;
+
+    @Schema(description = "出口公司ID")
+    private Long exportCompanyId;
+
+    @Schema(description = "出口公司简称")
+    @ExcelProperty("出口公司简称")
+    private String exportCompanyShortName;
+
+    @Schema(description = "中转公司ID")
+    private Long transitCompanyId;
+
+    @Schema(description = "中转公司简称")
+    @ExcelProperty("中转公司简称")
+    private String transitCompanyShortName;
 
     @Schema(description = "版本号")
     private Integer revision;

@@ -83,4 +83,8 @@ public class TmsFirstMileRequestItemDO extends TenantBaseDO {
      */
     private Integer orderClosedQty;
 
+    /**
+     * 销售公司ID
+     */
+    private Long salesCompanyId;
 }

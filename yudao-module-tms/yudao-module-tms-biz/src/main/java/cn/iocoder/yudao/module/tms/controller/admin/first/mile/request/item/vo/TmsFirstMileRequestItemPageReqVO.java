@@ -54,4 +54,6 @@ public class TmsFirstMileRequestItemPageReqVO {
     @Schema(description = "已订购数")
     private Integer orderClosedQty;
 
+    @Schema(description = "销售公司ID")
+    private Long salesCompanyId;
 }

@@ -18,6 +18,7 @@ import java.math.BigDecimal;
 @Accessors(chain = false)
 public class TmsFirstMileRequestItemRespVO extends BaseVO {
 
+
     @Schema(description = "明细编号")
     @ExcelProperty("明细编号")
     private Long id;
@@ -74,6 +75,13 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
     @Schema(description = "产品名称")
     @ExcelProperty("产品名称")
     private String productName;
+
+    @Schema(description = "销售公司ID")
+    private Long salesCompanyId;
+
+    @Schema(description = "销售公司名称")
+    @ExcelProperty("销售公司名称")
+    private String salesCompanyName;
 
     @Schema(description = "版本号")
     private Integer revision;

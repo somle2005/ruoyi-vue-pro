@@ -21,6 +21,9 @@ public class TmsFirstMilePageReqVO extends PageParam {
     @Schema(description = "id")
     private Long id;
 
+    @Schema(description = "销售公司ID")
+    private Long salesCompanyId;
+
     @Schema(description = "创建时间")
     private LocalDateTime[] createTime;
 
@@ -40,7 +43,7 @@ public class TmsFirstMilePageReqVO extends PageParam {
     private BigDecimal balance;
 
     @Schema(description = "审核人")
-    private Integer auditorId;
+    private Long auditorId;
 
     @Schema(description = "审核时间")
     private LocalDateTime[] auditTime;

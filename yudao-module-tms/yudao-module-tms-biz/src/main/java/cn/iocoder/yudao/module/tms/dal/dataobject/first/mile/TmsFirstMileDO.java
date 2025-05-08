@@ -58,7 +58,7 @@ public class TmsFirstMileDO extends TenantBaseDO {
     /**
      * 审核人
      */
-    private Integer auditorId;
+    private Long auditorId;
     /**
      * 审核时间
      */
@@ -139,5 +139,12 @@ public class TmsFirstMileDO extends TenantBaseDO {
      * 入库时间
      */
     private LocalDateTime inboundTime;
-
+    /**
+     * 出口公司ID
+     */
+    private Long exportCompanyId;
+    /**
+     * 中转公司ID
+     */
+    private Long transitCompanyId;
 }

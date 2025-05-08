@@ -12,6 +12,8 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.stock.WmsWarehouseApi;
 import cn.iocoder.yudao.module.erp.api.stock.dto.ErpWarehouseDTO;
+import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
+import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -55,6 +57,7 @@ public class TmsFirstMileRequestController {
     private final WmsWarehouseApi wmsWarehouseApi;
     private final DeptApi deptApi;
     private final AdminUserApi adminUserApi;
+    private final FmsCompanyApi fmsCompanyApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程申请单")
@@ -194,6 +197,8 @@ public class TmsFirstMileRequestController {
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(warehouseIds);
+        Map<Long, FmsCompanyDTO> dtoMap = fmsCompanyApi.getCompanyMap(firstMileRequestBOList.stream()
+            .flatMap(bo -> bo.getItems().stream().map(TmsFirstMileRequestItemDO::getSalesCompanyId)).collect(Collectors.toSet()));
 
         return firstMileRequestBOList.stream().map(bo -> {
             TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRequestRespVO.class, respVO1 -> {
@@ -203,13 +208,18 @@ public class TmsFirstMileRequestController {
                 MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO1.setUpdater(user.getNickname()));
             });
             if (bo.getItems() != null) {
-                List<TmsFirstMileRequestItemRespVO> items = bo.getItems().stream().map(item -> BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO ->
-                        MapUtils.findAndThen(productMap, item.getProductId(), product -> {
-                            itemRespVO.setProductName(product.getBarCode());
-                            itemRespVO.setBarCode(product.getBarCode());
-                        }))).collect(Collectors.toList());
+                List<TmsFirstMileRequestItemRespVO> items = bo.getItems().stream().map(item ->
+                    BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
+                            MapUtils.findAndThen(productMap, item.getProductId(), product -> {
+                                itemRespVO.setProductName(product.getBarCode());
+                                itemRespVO.setBarCode(product.getBarCode());
+                            });
+                            MapUtils.findAndThen(dtoMap, item.getSalesCompanyId(), company -> itemRespVO.setSalesCompanyName(company.getName()));
+                        }
+                    )).collect(Collectors.toList());
                 MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO.setCreator(user.getNickname()));
                 MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO.setUpdater(user.getNickname()));
+
                 respVO.setItems(items);
                 // 设置明细数量
                 respVO.setItemCount(items.size());

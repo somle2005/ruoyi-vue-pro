@@ -102,5 +102,8 @@ public class TmsFirstMileItemDO extends TenantBaseDO {
      * 体积（m³）
      */
     private BigDecimal volume;
-
+    /**
+     * 销售公司ID
+     */
+    private Long salesCompanyId;
 }

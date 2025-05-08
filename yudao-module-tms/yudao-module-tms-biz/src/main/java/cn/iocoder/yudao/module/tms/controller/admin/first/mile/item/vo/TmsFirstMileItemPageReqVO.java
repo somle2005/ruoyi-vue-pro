@@ -30,7 +30,7 @@ public class TmsFirstMileItemPageReqVO {
     private Long requestItemId;
 
     @Schema(description = "产品ID")
-    private Integer productId;
+    private Long productId;
 
     @Schema(description = "件数")
     private Integer qty;
@@ -73,5 +73,8 @@ public class TmsFirstMileItemPageReqVO {
 
     @Schema(description = "体积（m³）")
     private BigDecimal[] volume;
+
+    @Schema(description = "销售公司ID")
+    private Long salesCompanyId;
 
 }

@@ -18,10 +18,15 @@ public class TmsFirstMileItemRespVO extends BaseVO {
     private Long requestItemId;
 
     @Schema(description = "产品ID")
-    @ExcelProperty("产品ID")
-    private Integer productId;
+    private Long productId;
+
+    //产品名称
+    @Schema(description = "产品名称")
+    @ExcelProperty("产品名称")
+    private String productName;
 
     @Schema(description = "件数")
+    @ExcelProperty("件数")
     private Integer qty;
 
     @Schema(description = "箱数")
@@ -29,12 +34,20 @@ public class TmsFirstMileItemRespVO extends BaseVO {
     private Integer boxQty;
 
     @Schema(description = "库存公司")
-    @ExcelProperty("库存公司")
     private Long companyId;
 
+    //库存公司名称
+    @Schema(description = "库存公司名称")
+    @ExcelProperty("库存公司名称")
+    private String companyName;
+
     @Schema(description = "库存归属部门ID")
-    @ExcelProperty("库存归属部门ID")
     private Long deptId;
+
+    //库存归属部门名称
+    @Schema(description = "库存归属部门名称")
+    @ExcelProperty("库存归属部门名称")
+    private String deptName;
 
     @Schema(description = "备注")
     @ExcelProperty("备注")
@@ -53,8 +66,11 @@ public class TmsFirstMileItemRespVO extends BaseVO {
     private Integer inboundClosedQty;
 
     @Schema(description = "发出仓ID")
-    @ExcelProperty("发出仓ID")
     private Long fromWarehouseId;
+
+    @Schema(description = "发出仓名称")
+    @ExcelProperty("发出仓名称")
+    private String fromWarehouseName;
 
     @Schema(description = "包装长（cm）")
     @ExcelProperty("包装长（cm）")
@@ -75,6 +91,13 @@ public class TmsFirstMileItemRespVO extends BaseVO {
     @Schema(description = "体积（m³）")
     @ExcelProperty("体积（m³）")
     private BigDecimal volume;
+
+    @Schema(description = "销售公司ID")
+    private Long salesCompanyId;
+
+    @Schema(description = "销售公司名称")
+    @ExcelProperty("销售公司名称")
+    private String salesCompanyName;
 
     @Schema(description = "版本号")
     private Integer revision;

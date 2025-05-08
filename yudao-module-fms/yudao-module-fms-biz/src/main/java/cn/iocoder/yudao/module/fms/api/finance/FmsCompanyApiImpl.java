@@ -38,8 +38,7 @@ public class FmsCompanyApiImpl implements FmsCompanyApi {
 
     @Override
     public List<FmsCompanyDTO> getCompanyList(Set<Long> ids) {
-        List<FmsCompanyDTO> dtoList = BeanUtils.toBean(subjectService.listCompany(ids), FmsCompanyDTO.class);
-        return dtoList;
+        return BeanUtils.toBean(subjectService.listCompany(ids), FmsCompanyDTO.class);
     }
 
     @Override

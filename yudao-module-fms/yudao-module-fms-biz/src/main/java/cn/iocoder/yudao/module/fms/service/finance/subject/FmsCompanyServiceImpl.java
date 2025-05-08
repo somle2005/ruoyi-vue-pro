@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -72,6 +73,9 @@ public class FmsCompanyServiceImpl implements FmsCompanyService {
 
     @Override
     public FmsCompanyDO getCompany(Long id) {
+        if (id == null) {
+            return null;
+        }
         return CompanyMapper.selectById(id);
     }
 
@@ -92,6 +96,9 @@ public class FmsCompanyServiceImpl implements FmsCompanyService {
     @Override
     @Cacheable(value = FINANCE_SUBJECT_LIST, key = "'DO:'+#ids", unless = "#result == null")
     public List<FmsCompanyDO> listCompany(Set<Long> ids) {
+        if (ids.isEmpty()) {
+            return new ArrayList<>();
+        }
         return CompanyMapper.selectList(FmsCompanyDO::getId, ids);
     }
 
@@ -99,6 +106,9 @@ public class FmsCompanyServiceImpl implements FmsCompanyService {
 
     @Override
     public List<FmsCompanyDO> listCompanyByNames(Set<String> names) {
+        if (names.isEmpty()) {
+            return new ArrayList<>();
+        }
         return CompanyMapper.selectList(FmsCompanyDO::getName, names);
     }
 }

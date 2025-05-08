@@ -46,4 +46,7 @@ public class TmsFirstMileRequestItemSaveReqVO {
     @NotNull(groups = Validation.OnUpdate.class, message = "版本号更新时不能为空")
     @Null(groups = Validation.OnCreate.class, message = "版本号新增需为空")
     private Integer revision;
+
+    @Schema(description = "销售公司ID")
+    private Long salesCompanyId;
 }

@@ -8,6 +8,14 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.erp.api.stock.WmsWarehouseApi;
+import cn.iocoder.yudao.module.erp.api.stock.dto.ErpWarehouseDTO;
+import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
+import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.system.api.dept.DeptApi;
+import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
@@ -20,6 +28,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstM
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +36,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -45,12 +55,16 @@ import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 @RestController
 @RequestMapping("/tms/first-mile")
 @Validated
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TmsFirstMileController {
 
-    @Autowired
-    private TmsFirstMileService firstMileService;
-    @Autowired
-    private AdminUserApi adminUserApi;
+    private final TmsFirstMileService firstMileService;
+    private final AdminUserApi adminUserApi;
+    private final FmsCompanyApi fmsCompanyApi;
+    private final ErpProductApi erpProductApi;
+    private final WmsWarehouseApi wmsWarehouseApi;
+    private final DeptApi deptApi;
+
 
     @PostMapping("/create")
     @Operation(summary = "创建头程单")
@@ -159,7 +173,7 @@ public class TmsFirstMileController {
         // 收集所有创建人和更新人ID
         Set<Long> userIds = beans.stream()
             .flatMap(bo -> Stream.concat(
-                Stream.of(bo.getCreator(), bo.getUpdater()),
+                Stream.of(bo.getCreator(), bo.getUpdater(), bo.getAuditorId().toString()),
                 Stream.concat(
                     bo.getItems() == null ? Stream.empty() : bo.getItems().stream().flatMap(item -> Stream.of(item.getCreator(), item.getUpdater())),
                     bo.getFees() == null ? Stream.empty() : bo.getFees().stream().flatMap(fee -> Stream.of(fee.getCreator(), fee.getUpdater()))
@@ -169,22 +183,61 @@ public class TmsFirstMileController {
             .map(this::safeParseLong)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
-        // 获取用户Map
+        //用户
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
+        //公司
+        Set<Long> companyIds = beans.stream().flatMap(bo -> Stream.concat(Stream.of(bo.getExportCompanyId(), bo.getTransitCompanyId()), Stream.concat(
+                bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getCompanyId),
+                bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getSalesCompanyId))))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        Map<Long, FmsCompanyDTO> companyMap = fmsCompanyApi.getCompanyMap(companyIds);
+        //产品
+        Set<Long> productIds = beans.stream().flatMap(bo -> bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getProductId))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+        Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
+        //库存
+        //部门
+        Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(beans.stream()
+            .flatMap(bo -> bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getDeptId)).collect(Collectors.toSet()));
+        //仓库
+        Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(beans.stream()
+            .flatMap(bo -> Stream.concat(
+                bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getFromWarehouseId),
+                bo.getToWarehouseId() == null ? Stream.empty() : Stream.of(bo.getToWarehouseId())
+            ))
+            .collect(Collectors.toSet()));
 
         return beans.stream().map(bo -> {
             TmsFirstMileRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRespVO.class);
-            // 设置创建人和更新人
+            //创建人和更新人
             MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO.setCreator(user.getNickname()));
             MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO.setUpdater(user.getNickname()));
+            MapUtils.findAndThen(userMap, bo.getAuditorId(), user -> respVO.setAuditorName(user.getNickname()));
+            //公司
+            MapUtils.findAndThen(companyMap, bo.getExportCompanyId(), company -> respVO.setExportCompanyShortName(company.getAbbr()));
+            MapUtils.findAndThen(companyMap, bo.getTransitCompanyId(), company -> respVO.setTransitCompanyShortName(company.getAbbr()));
+            //仓库
+            MapUtils.findAndThen(warehouseMap, bo.getToWarehouseId(), warehouse -> respVO.setToWarehouseName(warehouse.getName()));
 
             // 设置明细项
             if (CollUtil.isNotEmpty(bo.getItems())) {
                 List<TmsFirstMileItemRespVO> items = bo.getItems().stream().map(item -> {
                     TmsFirstMileItemRespVO itemRespVO = BeanUtils.toBean(item, TmsFirstMileItemRespVO.class);
-                    // 设置明细的创建人和更新人
+                    //创建人和更新人
                     MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> itemRespVO.setCreator(user.getNickname()));
                     MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> itemRespVO.setUpdater(user.getNickname()));
+                    //销售公司
+                    MapUtils.findAndThen(companyMap, item.getCompanyId(), company -> itemRespVO.setCompanyName(company.getAbbr()));
+                    MapUtils.findAndThen(companyMap, item.getSalesCompanyId(), company -> itemRespVO.setSalesCompanyName(company.getAbbr()));
+                    //产品
+                    MapUtils.findAndThen(productMap, item.getProductId(), product -> itemRespVO.setProductName(product.getBarCode()));
+                    //部门
+                    MapUtils.findAndThen(deptMap, item.getDeptId(), dept -> itemRespVO.setDeptName(dept.getName()));
+                    //仓库
+                    MapUtils.findAndThen(warehouseMap, item.getFromWarehouseId(), warehouse -> itemRespVO.setFromWarehouseName(warehouse.getName()));
+
                     return itemRespVO;
                 }).collect(Collectors.toList());
                 respVO.setFirstMileItemList(items);

@@ -51,6 +51,10 @@ public class TmsFirstMileSaveReqVO {
     @NotNull(message = "装柜日期不能为空")
     private LocalDateTime packTime;
 
+    @Schema(description = "销售公司ID")
+    @NotNull(message = "销售公司不能为空")
+    private Long salesCompanyId;
+
     @Schema(description = "预计到货日期", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "预计到货日期不能为空")
     private LocalDateTime arrivePlanTime;

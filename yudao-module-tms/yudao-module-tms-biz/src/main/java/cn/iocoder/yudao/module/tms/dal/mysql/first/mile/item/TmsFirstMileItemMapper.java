@@ -50,6 +50,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             .betweenIfPresent(TmsFirstMileItemDO::getPackageHeight, vo.getPackageHeight())
             .betweenIfPresent(TmsFirstMileItemDO::getPackageWeight, vo.getPackageWeight())
             .betweenIfPresent(TmsFirstMileItemDO::getVolume, vo.getVolume())
+            .eqIfPresent(TmsFirstMileItemDO::getSalesCompanyId, vo.getSalesCompanyId())
             .orderByDesc(TmsFirstMileItemDO::getCreateTime);
     }
 
