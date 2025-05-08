@@ -18,6 +18,9 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @ToString(callSuper = true)
 public class SrmPurchaseOrderPageReqVO extends PageParam {
 
+    @Schema(description = "采购单编号")
+    private String no;
+
     @Schema(description = "采购状态")
     private Integer status;
 
@@ -26,10 +29,6 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
 
     @Schema(description = "结算账户编号")
     private Long accountId;
-
-    @Schema(description = "采购时间")
-    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime[] orderTime;
 
     @Schema(description = "合计数量")
     private BigDecimal totalCount;

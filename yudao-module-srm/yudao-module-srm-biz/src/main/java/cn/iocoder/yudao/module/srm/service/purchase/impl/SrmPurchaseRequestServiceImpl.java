@@ -284,8 +284,12 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
 
     //判断当前状态是否可以更新
     private void updateStatusCheck(SrmPurchaseRequestDO requestDO, List<Long> itemIds) {
-        //1.1 判断已审核
-        ThrowUtil.ifThrow(requestDO.getAuditStatus().equals(SrmAuditStatus.APPROVED.getCode()), PURCHASE_REQUEST_UPDATE_FAIL_APPROVE, requestDO.getNo());
+        //1.1 不处于草稿、审核不通过、审核撤销 状态->e
+        ThrowUtil.ifThrow(
+            !requestDO.getAuditStatus().equals(SrmAuditStatus.DRAFT.getCode()) && !requestDO.getAuditStatus()
+                .equals(SrmAuditStatus.REJECTED.getCode()) && !requestDO.getAuditStatus()
+                .equals(SrmAuditStatus.REVOKED.getCode()), PURCHASE_REQUEST_UPDATE_FAIL_APPROVE,
+            SrmAuditStatus.fromCode(requestDO.getAuditStatus()).getDesc(), requestDO.getNo());
         //1.2 判断已关闭
         ThrowUtil.ifThrow(requestDO.getOffStatus().equals(SrmOffStatus.CLOSED.getCode()), PURCHASE_REQUEST_CLOSED, requestDO.getNo());
         //1.3 判断已手动关闭

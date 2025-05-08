@@ -246,13 +246,14 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
      * @param purchaseOrder purchaseOrder
      */
     private static void updateStatusCheck(SrmPurchaseOrderDO purchaseOrder) {
-        //判断主单是 未通过、草稿
-        if (!SrmAuditStatus.DRAFT.getCode()
-            .equals(purchaseOrder.getAuditStatus()) || !SrmAuditStatus.REJECTED.getCode()
-            .equals(purchaseOrder.getAuditStatus())) {
-            throw exception(PURCHASE_ORDER_UPDATE_FAIL_APPROVE, purchaseOrder.getNo());
-        }
-        //主单是开启状态
+        //1.1 不处于草稿、审核不通过、审核撤销 状态->e
+        ThrowUtil.ifThrow(
+            !SrmAuditStatus.DRAFT.getCode().equals(purchaseOrder.getAuditStatus()) && !SrmAuditStatus.REJECTED.getCode()
+                .equals(purchaseOrder.getAuditStatus()) && !SrmAuditStatus.REVOKED.getCode()
+                .equals(purchaseOrder.getAuditStatus()), PURCHASE_ORDER_UPDATE_FAIL_APPROVE, purchaseOrder.getNo(),
+            SrmAuditStatus.fromCode(purchaseOrder.getAuditStatus()).getDesc());
+
+        //2.0 非开启 -> e
         ThrowUtil.ifThrow(!SrmOffStatus.OPEN.getCode().equals(purchaseOrder.getOffStatus()), PURCHASE_ORDER_UPDATE_FAIL_OFF, purchaseOrder.getNo());
     }
 
@@ -581,7 +582,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     public SrmPurchaseOrderBO getPurchaseOrderBO(Long id) {
         //主表
-        SrmPurchaseOrderDO srmPurchaseOrderDO = validatePurchaseOrder(id);
+        SrmPurchaseOrderDO srmPurchaseOrderDO = validatePurchaseOrderExists(id);
         //子表
         List<SrmPurchaseOrderItemDO> srmPurchaseOrderItemDOS = purchaseOrderItemMapper.selectListByOrderId(id);
         //convert
