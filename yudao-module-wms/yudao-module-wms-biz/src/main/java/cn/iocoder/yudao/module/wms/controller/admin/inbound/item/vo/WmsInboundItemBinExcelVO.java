@@ -1,6 +1,8 @@
 package cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
+import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -10,64 +12,101 @@ import lombok.Data;
 @Schema(description = "管理后台 - 入库单详情 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class WmsInboundItemBinRespVO extends WmsInboundItemRespVO {
-
+public class WmsInboundItemBinExcelVO {
 
     private Integer lineNumber;
+
+    /**
+     * 入库明细ID
+     */
+    @ExcelIgnore
+    private Long id;
+
     /**
      * 仓位ID
      */
-    @Schema(description = "仓位ID", example = "")
+    @ExcelIgnore
     private Long binId;
+
+    @ExcelProperty("公司")
+    private String companyName;
+
+    @ExcelProperty("部门")
+    private String deptName;
+
+    @ExcelProperty("仓库")
+    private String warehouseName;
 
     /**
      * 仓位名称
      */
-    @Schema(description = "仓位名称", example = "")
+    @ExcelProperty("仓位")
     private String binName;
+
+    @ExcelProperty("SKU")
+    private String productCode;
+
+    @ExcelProperty("库龄")
+    private Integer age;
 
     /**
      * 库存类型
      */
     @Schema(description = "库存类型", example = "")
-    private Integer stockType;
+    private String stockTypeLabel;
+
+    @ExcelProperty("计划入库量")
+    private Integer planQty;
+
+    @ExcelProperty("实际入库量")
+    private Integer actualQty;
+
+    @ExcelProperty("已上架量")
+    private Integer shelvedQty;
+
+    @Schema(description = "可上架量", example = "")
+    private Integer shelveAvailableQty;
+
+    @ExcelProperty("批次剩余库存")
+    private Integer outboundAvailableQty;
 
     /**
      * 仓位可用库存
      */
-    @Schema(description = "仓位可用库存", example = "")
+    @ExcelProperty("仓位可用库存")
     private Integer binAvailableQty;
+
     /**
      * 仓位可售库存
      */
-    @Schema(description = "仓位可售库存", example = "")
+    @ExcelProperty("仓位可用库存")
     private Integer binSellableQty;
+
     /**
      * 仓位待出库库存
      */
-    @Schema(description = "仓位待出库库存", example = "")
+    @ExcelProperty("仓位可用库存")
     private Integer binOutboundPendingQty;
-    /**
-     * 上架单ID
-     */
-    @Schema(description = "待上单ID", example = "")
-    private String pickupId;
+
     /**
      * 上架数量
      */
-    @Schema(description = "上架数量", example = "")
+    @ExcelProperty("上架数量")
     private Integer pickupQty;
+
     /**
      * 上架单号
      */
-    @Schema(description = "上架单号", example = "")
+    @ExcelProperty("上架单号")
     private String pickupCode;
 
     /**
      * 入库单号
      */
-    @Schema(description = "入库单号", example = "")
+    @ExcelProperty("入库单号")
     private String inboundCode;
+
+
 
 
 }

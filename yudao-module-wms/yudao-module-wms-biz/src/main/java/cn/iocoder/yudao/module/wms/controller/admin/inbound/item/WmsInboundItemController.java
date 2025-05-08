@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemBinExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemExportVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemImportExcelVO;
@@ -23,6 +24,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemBin
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
+import cn.iocoder.yudao.module.wms.enums.stock.WmsStockType;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import cn.iocoder.yudao.module.wms.service.quantity.InboundExecutor;
@@ -184,6 +186,51 @@ public class WmsInboundItemController {
         // 返回
         return success(voPageResult);
     }
+
+
+    @PostMapping("/export-excel-bin")
+    @Operation(summary = "导出批次库存仓位详情 Excel")
+    @PreAuthorize("@ss.hasPermission('wms:inbound-item-bin:export')")
+    @ApiAccessLog(operateType = EXPORT)
+    public void exportInboundItemExcelBin(@Valid @RequestBody WmsInboundItemPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
+        List<WmsInboundItemBinRespVO> voList = this.getInboundItemBinPage(pageReqVO).getData().getList();
+        Integer lineNumber=0;
+        for (WmsInboundItemBinRespVO wmsInboundItemBinRespVO : voList) {
+            wmsInboundItemBinRespVO.setLineNumber(lineNumber++);
+        }
+        Map<Integer, WmsInboundItemBinRespVO> distinctMap = StreamX.from(voList).toMap(WmsInboundItemBinRespVO::getLineNumber);
+
+
+
+        List<WmsInboundItemBinExcelVO> inboundItemBinVOS = BeanUtils.toBean(voList, WmsInboundItemBinExcelVO.class);
+        for (WmsInboundItemBinExcelVO inboundItemBinVO : inboundItemBinVOS) {
+            WmsInboundItemBinRespVO itemRespVO = distinctMap.get(inboundItemBinVO.getLineNumber());
+            if (itemRespVO == null) {
+                continue;
+            }
+
+            inboundItemBinVO.setWarehouseName(itemRespVO.getWarehouse().getName());
+            inboundItemBinVO.setInboundCode(itemRespVO.getInbound().getCode());
+            inboundItemBinVO.setProductCode(itemRespVO.getProduct().getBarCode());
+
+            WmsStockType stockType = WmsStockType.parse(itemRespVO.getStockType());
+            inboundItemBinVO.setStockTypeLabel(stockType.getLabel());
+
+            if(itemRespVO.getInboundCompany()!=null) {
+                inboundItemBinVO.setCompanyName(itemRespVO.getInboundCompany().getName());
+            }
+
+            if(itemRespVO.getInboundDept()!=null) {
+                inboundItemBinVO.setDeptName(itemRespVO.getInboundDept().getName());
+            }
+
+        }
+
+        // 导出 Excel
+        ExcelUtils.write(response, "批次库存仓位详情.xls", "数据", WmsInboundItemBinExcelVO.class, inboundItemBinVOS);
+    }
+
 
     @GetMapping("/pickup-pending")
     @Operation(summary = "待上架的入库明细")
