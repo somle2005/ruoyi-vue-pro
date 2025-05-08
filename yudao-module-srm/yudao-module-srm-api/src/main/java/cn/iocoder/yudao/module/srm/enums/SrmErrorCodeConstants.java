@@ -25,7 +25,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_ORDER_PROCESS_FAIL = new ErrorCode(1_030_101_002, "反审核失败，只有已审核的采购订单才能反审核");
     ErrorCode PURCHASE_ORDER_APPROVE_FAIL = new ErrorCode(1_030_101_003, "审核失败，只有未审核的采购订单才能审核");
     ErrorCode PURCHASE_ORDER_NO_EXISTS = new ErrorCode(1_030_101_004, "生成采购单号失败，请重新提交");
-    ErrorCode PURCHASE_ORDER_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_101_005, "采购订单({})已审核，无法修改");
+    ErrorCode PURCHASE_ORDER_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_101_005, "采购订单({})未处于审核、审核不通过状态，无法修改");
     ErrorCode PURCHASE_ORDER_NOT_APPROVE = new ErrorCode(1_030_101_006, "采购订单({})未审核，无法操作");
     ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_PRODUCT_EXCEED = new ErrorCode(1_030_101_007, "采购订单项({})超过最大允许入库数量({})");
     ErrorCode PURCHASE_ORDER_PROCESS_FAIL_EXISTS_IN = new ErrorCode(1_030_101_008, "反审核失败，已存在对应的采购入库单");
@@ -34,7 +34,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_ORDER_NO_OUT_OF_BOUNDS = new ErrorCode(1_030_101_011, "采购订单号编码大于999999,生成失败");
     ErrorCode PURCHASE_ORDER_CODE_DUPLICATE = new ErrorCode(1_030_101_012, "采购订单编号({})已存在");
     ErrorCode PURCHASE_ORDER_CLOSE_FAIL = new ErrorCode(1_030_101_014, "未审核的采购订单({})不能进行关闭");
-    ErrorCode PURCHASE_ORDER_ITEM_PURCHASE_FAIL_EXCEED = new ErrorCode(1_030_101_015, "采购数量不能大于申请项({})的剩余订购数量({})");
+    ErrorCode PURCHASE_ORDER_ITEM_PURCHASE_FAIL_EXCEED = new ErrorCode(1_030_101_015, "采购数量不能大于申请项编号({})的剩余订购数量({})");
     ErrorCode PURCHASE_REQUEST_DELETE_FAIL = new ErrorCode(1_030_101_016, "存在关联的采购订单，不能删除采购申请单");
     ErrorCode PURCHASE_REQUEST_CLOSE_FAIL = new ErrorCode(1_030_101_014, "未审核的采购申请单不能进行({})");
     ErrorCode PURCHASE_ORDER_ITEM_NOT_EXISTS = new ErrorCode(1_030_101_017, "采购订单编号({})不存在");
@@ -46,10 +46,11 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_ORDER_GENERATE_CONTRACT_FAIL_PARSE = new ErrorCode(1_030_101_022, "编译模板({})失败,({})");
     ErrorCode PURCHASE_ORDER_GENERATE_CONTRACT_FAIL_ERROR = new ErrorCode(1_030_101_022, "生成合同发生错误，请联系管理员,({})");
     ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_EXISTS_IN = new ErrorCode(1_030_101_021, "采购订单项编号({})存在对应的入库项，无法反审核");
-    ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_EXISTS_DEL = new ErrorCode(1_030_101_021, "采购订单项({})存在对应的入库项，无法删除");
+    ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_EXISTS_DEL = new ErrorCode(1_030_101_021, "采购订单项({})存在对应的采购入库项，无法删除");
     ErrorCode PURCHASE_ORDER_NO_HAS_EXISTS = new ErrorCode(1_030_101_004, "采购订单NO:({})已经存在");
     ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_APPROVE = new ErrorCode(1_030_101_023, "采购订单项({})不处于已审核，无法修改验货+完工单");
     ErrorCode PURCHASE_ORDER_NOT_AUDIT = new ErrorCode(1_030_101_024, "订单处于已审核,才可以生成采购合同");
+    ErrorCode PURCHASE_ORDER_UPDATE_FAIL_OFF = new ErrorCode(1_030_101_025, "采购订单({})不是开启状态，无法修改");
 
     // ========== ERP 采购入库（1-030-102-000） ==========
     ErrorCode PURCHASE_IN_NOT_EXISTS = new ErrorCode(1_030_102_000, "采购入库单不存在");
@@ -112,7 +113,7 @@ public interface SrmErrorCodeConstants {
     // ========== ERP 采购申请单 1-030-603-000 ==========
     ErrorCode PURCHASE_REQUEST_NOT_EXISTS = new ErrorCode(1_030_603_100, "采购申请单不存在");
     ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS = new ErrorCode(1_030_603_101, "采购申请编号({})不存在");
-    ErrorCode PURCHASE_REQUEST_ITEM_NOT_FOUND = new ErrorCode(1_030_603_102, "未找到对应的采购申请项,订单项id={},申请项id={}");
+    ErrorCode PURCHASE_REQUEST_ITEM_NOT_FOUND = new ErrorCode(1_030_603_102, "未找到对应的采购申请项,订单项编号={},申请项编号={}");
     ErrorCode PURCHASE_REQUEST_OPENED = new ErrorCode(1_030_603_110, "采购申请单({})已开启");
     ErrorCode PURCHASE_REQUEST_CLOSED = new ErrorCode(1_030_603_111, "采购申请单({})已关闭");
     ErrorCode PURCHASE_REQUEST_MANUAL_CLOSED = new ErrorCode(1_030_603_112, "采购申请单({})已手动关闭");
@@ -135,14 +136,14 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_REQUEST_UPDATE_FAIL = new ErrorCode(1_030_603_140, "订单编号({})更新状态失败，请联系管理员");
     ErrorCode PURCHASE_REQUEST_ITEM_CLOSED = new ErrorCode(1_030_603_141, "订单项编号({})已关闭,采购项无法修改");
     ErrorCode PURCHASE_REQUEST_ITEM_MANUAL_CLOSED = new ErrorCode(1_030_603_142, "id({})已手动关闭,采购项无法修改");
-    ErrorCode PURCHASE_REQUEST_ITEM_ORDERED = new ErrorCode(1_030_603_143, "申请项({})存在对应的采购订单项，无法反审核");
+    ErrorCode PURCHASE_REQUEST_ITEM_ORDERED = new ErrorCode(1_030_603_143, "申请项编号({})存在对应的采购订单项，无法反审核");
     //采购子项不存在
     ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS_BY_ID = new ErrorCode(1_030_603_143, "采购请求ID=({})没有子项");
     //当前状态不能触发事件
     //状态机错误回调
     ErrorCode PURCHASE_REQUEST_NOT_EXISTS_BY_EVENT = new ErrorCode(1_030_603_144, "{}:无法在({})状态下触发({})事件");
     ErrorCode PURCHASE_REQUEST_MERGE_FAIL = new ErrorCode(1_030_603_145, "采购申请单({})未审核，无法合并");
-    ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS_BY_OPEN = new ErrorCode(1_030_603_146, "采购申请项({})不处于开启状态");
+    ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS_BY_OPEN = new ErrorCode(1_030_603_146, "采购申请项编号({})不处于开启状态");
     //存在对应订单，无法手动关闭
     ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS_BY_MANUAL_CLOSE = new ErrorCode(1_030_603_147, "申请单存在关联订单,无法手动关闭状态");
     ErrorCode PURCHASE_REQUEST_NO_EXISTS_BY_NO = new ErrorCode(1_030_603_148, "采购申请单号({})已存在");

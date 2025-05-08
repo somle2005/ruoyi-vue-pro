@@ -18,10 +18,6 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @ToString(callSuper = true)
 public class SrmPurchaseInPageReqVO extends PageParam {
 
-    public static final Integer PAYMENT_STATUS_NONE = 0;
-    public static final Integer PAYMENT_STATUS_PART = 1;
-    public static final Integer PAYMENT_STATUS_ALL = 2;
-
     @Schema(description = "采购单编号-单据编号")
     private String no;
 

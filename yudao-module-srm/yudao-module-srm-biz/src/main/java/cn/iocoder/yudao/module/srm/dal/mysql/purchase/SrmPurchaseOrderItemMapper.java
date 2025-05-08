@@ -27,6 +27,9 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
     }
 
     default MPJLambdaWrapper<SrmPurchaseOrderItemDO> getBOWrapper(SrmPurchaseOrderPageReqVO reqVO) {
+        if (reqVO == null) {
+            reqVO = new SrmPurchaseOrderPageReqVO();
+        }
         return wrapper(reqVO).leftJoin(SrmPurchaseOrderDO.class, SrmPurchaseOrderDO::getId, SrmPurchaseOrderItemDO::getOrderId)
             .selectAll(SrmPurchaseOrderDO.class).eqIfExists(SrmPurchaseOrderDO::getStatus, reqVO.getStatus())
             .eqIfExists(SrmPurchaseOrderDO::getSupplierId, reqVO.getSupplierId()).eqIfExists(SrmPurchaseOrderDO::getAccountId, reqVO.getAccountId())
@@ -49,7 +52,10 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .eqIfExists(SrmPurchaseOrderDO::getOffStatus, reqVO.getOffStatus()).eqIfExists(SrmPurchaseOrderDO::getExecuteStatus, reqVO.getExecuteStatus())
             .eqIfExists(SrmPurchaseOrderDO::getInStatus, reqVO.getInStatus()).eqIfExists(SrmPurchaseOrderDO::getPayStatus, reqVO.getPayStatus())
             .eqIfExists(SrmPurchaseOrderDO::getAuditStatus, reqVO.getAuditStatus()).likeIfExists(SrmPurchaseOrderDO::getAddress, reqVO.getAddress())
-            .likeIfExists(SrmPurchaseOrderDO::getPaymentTerms, reqVO.getPaymentTerms()).eqIfExists(SrmPurchaseOrderDO::getOrderStatus, reqVO.getOrderStatus());
+            .likeIfExists(SrmPurchaseOrderDO::getPaymentTerms, reqVO.getPaymentTerms()).eqIfExists(SrmPurchaseOrderDO::getOrderStatus, reqVO.getOrderStatus())
+            //创建时间排序
+            .orderByDesc(SrmPurchaseOrderDO::getCreateTime)
+            ;
     }
 
     //获得ErpPurchaseOrderItemBO分页查询

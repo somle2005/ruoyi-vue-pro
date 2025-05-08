@@ -47,17 +47,12 @@ public class SrmPurchaseInDO extends BaseDO {
     /**
      * 结算账户编号
      */
-    //     * 关联 {@link cn.iocoder.yudao.module.erp.dal.dataobject.finance.ErpAccountDO#getId()}
+//     * 关联 {@link cn.iocoder.yudao.module.erp.dal.dataobject.finance.ErpAccountDO#getId()}
     private Long accountId;
     /**
      * 单据日期
      */
     private LocalDateTime billTime;
-    //    /**
-    //     * 币别
-    //     */
-    //    private Long currencyId;
-
     /**
      * 审核人ID
      */
@@ -80,12 +75,6 @@ public class SrmPurchaseInDO extends BaseDO {
      * 收获地址
      */
     private String address;
-    //    /**
-    //     * 采购订单编号
-    //     * 关联 {@link SrmPurchaseOrderDO#getId()}
-    //     */
-    //    private Long orderId;
-
     /**
      * 合计数量
      */

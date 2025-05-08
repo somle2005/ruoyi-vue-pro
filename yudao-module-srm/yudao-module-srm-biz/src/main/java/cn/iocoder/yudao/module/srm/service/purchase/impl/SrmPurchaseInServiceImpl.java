@@ -28,6 +28,9 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
+import cn.iocoder.yudao.module.wms.enums.api.inbound.WmsInboundApi;
+import cn.iocoder.yudao.module.wms.enums.api.inbound.dto.WmsInboundSaveReqDTO;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -66,6 +69,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     private final SrmNoRedisDAO noRedisDAO;
     private final FmsAccountApi erpAccountApi;
     private final SrmPurchaseReturnItemMapper srmPurchaseReturnItemMapper;
+    private final WmsInboundApi wmsInboundApi;
     @Resource
     @Lazy // 延迟加载，避免循环依赖
     SrmPurchaseOrderService purchaseOrderService;
@@ -390,6 +394,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 //联动状态
                 auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
                 linkSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
+                generateInBoundData(inDO);
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", inDO.getId());
                 auditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
@@ -410,7 +415,23 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             rollbackSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
             log.debug("采购订单撤回审核，ID: {}", inDO.getId());
             auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
+            // 1.4 删除入库单
+            //如果未入库则 -> 作废，已入库->e
         }
+    }
+
+    //生成入库单
+    private void generateInBoundData(SrmPurchaseInDO inDO) {
+        wmsInboundApi.createInbound(
+            WmsInboundSaveReqDTO.builder()
+                .type(BillType.WMS_INBOUND.getValue())
+                .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
+                .upstreamBillId(inDO.getId())
+                .upstreamBillCode(inDO.getNo())
+                //归属部门
+                .traceNo(inDO.getNo())
+                .build()
+        );
     }
 
     @Override

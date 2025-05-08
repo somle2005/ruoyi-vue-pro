@@ -240,14 +240,28 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         purchaseOrderPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, orderDO);
     }
 
+    /**
+     * 判断当前状态是否可以更新
+     *
+     * @param purchaseOrder purchaseOrder
+     */
+    private static void updateStatusCheck(SrmPurchaseOrderDO purchaseOrder) {
+        //判断主单是 未通过、草稿
+        if (!SrmAuditStatus.DRAFT.getCode()
+            .equals(purchaseOrder.getAuditStatus()) || !SrmAuditStatus.REJECTED.getCode()
+            .equals(purchaseOrder.getAuditStatus())) {
+            throw exception(PURCHASE_ORDER_UPDATE_FAIL_APPROVE, purchaseOrder.getNo());
+        }
+        //主单是开启状态
+        ThrowUtil.ifThrow(!SrmOffStatus.OPEN.getCode().equals(purchaseOrder.getOffStatus()), PURCHASE_ORDER_UPDATE_FAIL_OFF, purchaseOrder.getNo());
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseOrder(SrmPurchaseOrderSaveReqVO vo) {
-        // 1.1 校验存在,校验不处于已审批
+        // 1.1 处于未审核、审核不通过才可以修改
         SrmPurchaseOrderDO purchaseOrder = validatePurchaseOrderExists(vo.getId());
-        if (SrmAuditStatus.APPROVED.getCode().equals(purchaseOrder.getAuditStatus())) {
-            throw exception(PURCHASE_ORDER_UPDATE_FAIL_APPROVE, purchaseOrder.getNo());
-        }
+        updateStatusCheck(purchaseOrder);
         // 1.2 校验供应商
         if (SrmOffStatus.OPEN.getCode().equals(purchaseOrder.getAuditStatus())) {
             supplierService.validateSupplier(vo.getSupplierId());
@@ -301,10 +315,6 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         }
     }
 
-    @Override
-    public void updatePurchaseOrderItemList(List<SrmPurchaseOrderItemDO> itemsDOList) {
-        ThrowUtil.ifThrow(purchaseOrderItemMapper.updateBatch(itemsDOList), DB_UPDATE_ERROR);
-    }
 
     //计算采购订单的总价、税费、折扣价格,|计算总数量|计算总商品价格|计算总税费|计算折扣价格
     private void calculateTotalPrice(SrmPurchaseOrderDO purchaseOrder, List<SrmPurchaseOrderItemDO> purchaseOrderItems) {
@@ -467,6 +477,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             return;
         }
         purchaseOrders.forEach(orderDO -> {
+            //已审核 -> e
             if (SrmAuditStatus.APPROVED.getCode().equals(orderDO.getAuditStatus())) {
                 throw exception(PURCHASE_ORDER_DELETE_FAIL_APPROVE, orderDO.getNo());
             }
@@ -503,9 +514,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             SrmPurchaseRequestItemsDO requestItemsDO = requestItemsMapper.selectById(id);
             SrmOrderCountDTO dto = SrmOrderCountDTO.builder().purchaseRequestItemId(item.getPurchaseApplyItemId()).quantity(item.getQty().negate().intValue())
                 .build();//减少申请个数的订购数量
-            //撤销自动关闭
+            //触发关闭撤销
             requestItemOffMachine.fireEvent(SrmOffStatus.fromCode(requestItemsDO.getOffStatus()), SrmEventEnum.CANCEL_DELETE, requestItemsDO);
-            //订购状态
+            //订购状态调整
             requestOrderItemMachine.fireEvent(SrmOrderStatus.fromCode(requestItemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
         });
     }

@@ -58,9 +58,13 @@ public class SrmPurchaseInItemDO extends BaseDO {
      */
     private BigDecimal payPrice;
     /**
-     * 数量
+     * 到货数量
      */
     private BigDecimal qty;
+    /**
+     * 实际入库数量
+     */
+    private BigDecimal actualQty;
     /**
      * 总价，单位：元 totalPrice = productPrice * qty
      */

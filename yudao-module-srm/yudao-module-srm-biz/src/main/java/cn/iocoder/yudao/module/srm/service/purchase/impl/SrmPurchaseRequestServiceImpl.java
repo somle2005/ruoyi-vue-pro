@@ -274,13 +274,6 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         if (!oldNo.equals(vo.getNo())) {
             voSetNo(vo);
         }
-        if (!oldNo.equals(vo.getNo())) {
-            //关联更新采购申请项冗余字段erpPurchaseRequestItemNo
-            List<SrmPurchaseOrderItemDO> srmPurchaseOrderItemDOList =
-                srmPurchaseOrderService.getPurchaseOrderItemListByApplyIds(requestItemsDOS.stream().map(SrmPurchaseRequestItemsDO::getId).distinct().toList());
-            srmPurchaseOrderItemDOList.forEach(item -> item.setErpPurchaseRequestItemNo(vo.getNo()));
-            srmPurchaseOrderService.updatePurchaseOrderItemList(srmPurchaseOrderItemDOList);
-        }
         // 2 更新
         // 2.2 更新主表
         SrmPurchaseRequestDO updateObj = BeanUtils.toBean(vo, SrmPurchaseRequestDO.class);

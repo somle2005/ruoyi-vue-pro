@@ -37,16 +37,9 @@ public interface SrmPurchaseOrderService {
     void updatePurchaseOrder(@Valid SrmPurchaseOrderSaveReqVO updateReqVO);
 
     /**
-     * 更新item订单项的json属性，完工单+验货单,在已审核时
+     * 更新item订单项的json属性，完工单+验货单,(审核后)
      */
     void updatePurchaseOrderJson(@Valid SrmPurchaseOrderSaveJsonReqVO reqVO);
-
-    /**
-     * 更新item订单子表
-     *
-     * @param itemsDOList 订单子表集合
-     */
-    void updatePurchaseOrderItemList(List<SrmPurchaseOrderItemDO> itemsDOList);
 
     /**
      * 更新采购订单的入库数量
@@ -67,7 +60,7 @@ public interface SrmPurchaseOrderService {
     /**
      * 删除采购订单
      *
-     * @param ids 编号数组
+     * @param ids 主表Ids
      */
     void deletePurchaseOrder(List<Long> ids);
 

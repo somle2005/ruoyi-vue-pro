@@ -1,15 +1,20 @@
 package cn.iocoder.yudao.module.wms.enums.api.inbound.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
+@SuppressWarnings("ALL")
+@Builder
 public class WmsInboundSaveReqDTO {
 
     /**
      * WMS入库单类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单
+     * <p>
+     * {@link  cn.iocoder.yudao.module.system.enums.somle.BillType}
      **/
     private Integer type;
 
