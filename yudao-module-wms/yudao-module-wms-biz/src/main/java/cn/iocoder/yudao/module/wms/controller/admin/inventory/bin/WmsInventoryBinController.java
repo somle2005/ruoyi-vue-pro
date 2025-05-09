@@ -17,6 +17,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventor
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryProductExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryProductParseVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.bin.WmsInventoryBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
@@ -24,6 +25,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinD
 import cn.iocoder.yudao.module.wms.enums.inventory.WmsInventoryAuditStatus;
 import cn.iocoder.yudao.module.wms.service.inventory.WmsInventoryService;
 import cn.iocoder.yudao.module.wms.service.inventory.bin.WmsInventoryBinService;
+import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
 import de.danielbechler.util.Collections;
@@ -42,6 +44,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -74,6 +77,9 @@ public class WmsInventoryBinController {
 
     @Resource
     private WmsWarehouseService warehouseService;
+
+    @Resource
+    private WmsStockBinService stockBinService;
 
     @Resource
     private ErpProductApi productApi;
@@ -258,6 +264,8 @@ public class WmsInventoryBinController {
             throw exception(INVENTORY_BIN_WAREHOUSE_BIN_NOT_MATCH);
         }
 
+        List<WmsWarehouseProductVO> wmsWarehouseProductVOList = new ArrayList<>();
+
         Map<String, WmsInventoryBinExcelVO> imMap=StreamX.from(impVOList).toMap(e->e.getBinId()+"-"+e.getProductId());
         // 转 DOList 去保存
         List<WmsInventoryBinDO> dosInDB = inventoryBinService.selectByInventoryId(inventory.getId());
@@ -266,6 +274,28 @@ public class WmsInventoryBinController {
             if(inventoryBinExcelVO!=null){
                 inventoryBinDO.setActualQty(inventoryBinExcelVO.getActualQty());
                 inventoryBinDO.setRemark(inventoryBinExcelVO.getRemark());
+            }
+            wmsWarehouseProductVOList.add(WmsWarehouseProductVO.builder().warehouseId(inventory.getWarehouseId()).productId(inventoryBinDO.getProductId()).build());
+        }
+
+        Map<String,WmsInventoryBinDO> map=StreamX.from(dosInDB).toMap(e->e.getBinId()+"-"+e.getProductId());
+        for (WmsInventoryBinExcelVO inventoryBinExcelVO : impVOList) {
+            WmsInventoryBinDO inventoryBinDO = map.get(inventoryBinExcelVO.getBinId()+"-"+inventoryBinExcelVO.getProductId());
+            if(inventoryBinDO==null) {
+                dosInDB.add(BeanUtils.toBean(inventoryBinExcelVO, WmsInventoryBinDO.class));
+                wmsWarehouseProductVOList.add(WmsWarehouseProductVO.builder().warehouseId(inventory.getWarehouseId()).productId(inventoryBinExcelVO.getProductId()).build());
+            }
+        }
+
+        List<WmsStockBinRespVO> stockBinList = stockBinService.selectStockBinList(wmsWarehouseProductVOList, false);
+        Map<String, WmsStockBinRespVO> stockBinMap = StreamX.from(stockBinList).toMap(e -> e.getBinId()+"-"+e.getProductId());
+
+        for (WmsInventoryBinDO inventoryBinDO : dosInDB) {
+            WmsStockBinRespVO stockBinDO = stockBinMap.get(inventoryBinDO.getBinId()+"-"+inventoryBinDO.getProductId());
+            if(stockBinDO==null) {
+                inventoryBinDO.setExpectedQty(0);
+            } else {
+                inventoryBinDO.setExpectedQty(stockBinDO.getAvailableQty());
             }
         }
 
