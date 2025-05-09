@@ -382,7 +382,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void review(SrmPurchaseInAuditReqVO req) {
-        //        purchaseInAuditStateMachine.fireEvent(SrmAuditStatus.fromCode(erpPurchaseInDO.getAuditorStatus()), SrmEventEnum.SUBMIT_FOR_REVIEW, req);//提交审核
         // 查询采购订单信息
         SrmPurchaseInDO inDO = validatePurchaseInExists(req.getInId());
         // 获取当前订单状态
@@ -394,6 +393,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 //联动状态
                 auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
                 linkSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
+                //生成订单
                 generateInBoundData(inDO);
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", inDO.getId());

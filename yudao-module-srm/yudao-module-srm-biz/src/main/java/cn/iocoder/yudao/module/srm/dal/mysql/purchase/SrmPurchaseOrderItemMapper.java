@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * ERP 采购订单明项目 Mapper
  *
- * @author 芋道源码
+ * @author wdy
  */
 @Mapper
 public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrderItemDO> {
@@ -73,14 +73,13 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .likeIfPresent(SrmPurchaseOrderDO::getAddress, reqVO.getAddress()) // 收货地址
             .likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, reqVO.getPaymentTerms()) // 付款条款
             .eqIfPresent(SrmPurchaseOrderDO::getOrderStatus, reqVO.getOrderStatus()) // 订单状态
-            .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按创建时间降序排序
+            .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
             ;
     }
 
     //获得ErpPurchaseOrderItemBO分页查询
     default PageResult<SrmPurchaseOrderItemBO> selectErpPurchaseOrderItemBOPage(SrmPurchaseOrderPageReqVO reqVO) {
-        MPJLambdaWrapper<SrmPurchaseOrderItemDO> wrapper =
-            buildBOWrapper(reqVO).selectAssociation(SrmPurchaseOrderDO.class, SrmPurchaseOrderItemBO::getSrmPurchaseOrderDO);//一对一关联
+        MPJLambdaWrapper<SrmPurchaseOrderItemDO> wrapper = buildBOWrapper(reqVO).selectAssociation(SrmPurchaseOrderDO.class, SrmPurchaseOrderItemBO::getSrmPurchaseOrderDO);//一对一关联
         return selectJoinPage(reqVO, SrmPurchaseOrderItemBO.class, wrapper);
     }
 

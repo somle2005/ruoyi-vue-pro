@@ -1,12 +1,12 @@
 package cn.iocoder.yudao.module.srm.convert.purchase;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.req.SrmPurchaseRequestBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.req.SrmPurchaseRequestItemsBO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
-import org.springframework.beans.BeanUtils;
 
 import java.util.Collections;
 import java.util.List;
@@ -21,54 +21,36 @@ public interface SrmPurchaseRequestItemsConvert {
     SrmPurchaseRequestItemsConvert INSTANCE = Mappers.getMapper(SrmPurchaseRequestItemsConvert.class);
 
     /**
-     * 将ItemsBO列表转换为PurchaseRequestBO列表
+     * 将采购申请项 BO 列表转换为采购申请 BO 列表（带子项）
      *
-     * @param itemsBOList 采购申请项BO列表
-     * @return 采购申请BO列表
+     * @param itemsBOList 采购申请项 BO 列表，每项中包含其所属的采购申请主表信息
+     * @return 采购申请 BO 列表，每个 BO 包含子项列表
      */
     default List<SrmPurchaseRequestBO> convertList(List<SrmPurchaseRequestItemsBO> itemsBOList) {
+        // 如果输入为空，返回空列表
         if (CollUtil.isEmpty(itemsBOList)) {
             return Collections.emptyList();
         }
-        // 按主表ID分组，收集子项
-        Map<Long, List<SrmPurchaseRequestItemsDO>> itemsMap = itemsBOList.stream()
-                .collect(Collectors.groupingBy(
-                        SrmPurchaseRequestItemsDO::getRequestId,
-                        Collectors.mapping(bo -> (SrmPurchaseRequestItemsDO) bo, Collectors.toList())
-                ));
 
-        // 转换为BO列表
-        return itemsBOList.stream()
-                .map(bo -> {
-                    SrmPurchaseRequestBO requestBO = new SrmPurchaseRequestBO();
-                    // 复制主表属性
-                    BeanUtils.copyProperties(bo.getPurchaseRequest(), requestBO);
-                    // 设置子项列表
-                    requestBO.setItems(itemsMap.get(bo.getRequestId()));
-                    return requestBO;
-                })
-                .collect(Collectors.toList());
+        // 按采购申请主表 ID 分组，聚合对应的子项列表
+        Map<Long, List<SrmPurchaseRequestItemsBO>> itemsMap = itemsBOList.stream().collect(Collectors.groupingBy(SrmPurchaseRequestItemsBO::getRequestId));
+
+        //构建主表 BO，并设置其子项列表
+        return itemsMap.values().stream().map(srmPurchaseRequestItemsBOS -> {
+            // 获取该组的第一项（代表当前主表的基本信息）
+            SrmPurchaseRequestItemsBO firstItem = srmPurchaseRequestItemsBOS.get(0);
+
+            // 将主表 DO 转为 BO
+            SrmPurchaseRequestBO requestBO =
+                BeanUtils.toBean(firstItem.getPurchaseRequest(), SrmPurchaseRequestBO.class);
+
+            // 将该主表对应的子项列表转为 DO，并设置到 BO 中
+            requestBO.setItems(BeanUtils.toBean(srmPurchaseRequestItemsBOS, SrmPurchaseRequestItemsDO.class));
+
+            return requestBO;
+        }).collect(Collectors.toList());
     }
 
-    /**
-     * 将单个ItemsBO转换为PurchaseRequestBO
-     *
-     * @param itemsBO 采购申请项BO
-     * @return 采购申请BO
-     */
-    default SrmPurchaseRequestBO convertBO(SrmPurchaseRequestItemsBO itemsBO) {
-        if (itemsBO == null || itemsBO.getPurchaseRequest() == null) {
-            return null;
-        }
-        // 1. 创建BO对象
-        SrmPurchaseRequestBO bo = new SrmPurchaseRequestBO();
 
-        // 2. 复制主表属性
-        BeanUtils.copyProperties(itemsBO.getPurchaseRequest(), bo);
 
-        // 3. 设置子表列表（当前子表）
-        bo.setItems(Collections.singletonList(itemsBO));
-
-        return bo;
-    }
 }

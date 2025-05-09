@@ -10,7 +10,7 @@ import org.apache.ibatis.annotations.Mapper;
 /**
  * ERP采购申请单 Mapper
  *
- * @author 索迈管理员
+ * @author wdy
  */
 @Mapper
 public interface SrmPurchaseRequestMapper extends BaseMapperX<SrmPurchaseRequestDO> {

@@ -260,8 +260,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseOrder(SrmPurchaseOrderSaveReqVO vo) {
-        // 1.1 处于未审核、审核不通过才可以修改
         SrmPurchaseOrderDO purchaseOrder = validatePurchaseOrderExists(vo.getId());
+        // 1.1 处于未审核、审核不通过才可以修改
         updateStatusCheck(purchaseOrder);
         // 1.2 校验供应商
         if (SrmOffStatus.OPEN.getCode().equals(purchaseOrder.getAuditStatus())) {

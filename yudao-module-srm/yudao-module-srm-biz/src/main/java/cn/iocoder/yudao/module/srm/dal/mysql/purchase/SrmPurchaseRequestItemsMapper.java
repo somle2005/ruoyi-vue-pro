@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.SrmPurchaseRequestPageReqVO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.req.SrmPurchaseRequestItemsBO;
@@ -19,7 +20,7 @@ import java.util.stream.Collectors;
 /**
  * ERP采购申请单子 Mapper
  *
- * @author 索迈管理员
+ * @author wdy
  */
 @Mapper
 public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRequestItemsDO> {
@@ -27,6 +28,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
     //buildWrapper
     default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> buildWrapper(SrmPurchaseRequestPageReqVO req) {
         return new MPJLambdaWrapperX<SrmPurchaseRequestItemsDO>()
+            .selectAll(SrmPurchaseRequestItemsDO.class)
             .eqIfPresent(SrmPurchaseRequestItemsDO::getProductId, req.getProductId())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getBarCode, req.getBarCode())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductName, req.getProductName())
@@ -37,6 +39,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
     default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> buildBOWrapper(SrmPurchaseRequestPageReqVO req) {
         return buildWrapper(req)
             .leftJoin(SrmPurchaseRequestDO.class, SrmPurchaseRequestDO::getId, SrmPurchaseRequestItemsDO::getRequestId)
+            .selectAll(SrmPurchaseRequestDO.class)
             .likeIfPresent(SrmPurchaseRequestDO::getNo, req.getNo())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicantId, req.getApplicantId())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicationDeptId, req.getApplicationDeptId())
@@ -52,6 +55,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
             .likeIfPresent(SrmPurchaseRequestDO::getDelivery, req.getDelivery())
             .likeIfPresent(SrmPurchaseRequestDO::getReviewComment, req.getReviewComment())
             .eqIfPresent(SrmPurchaseRequestDO::getInStatus, req.getInStatus())
+            .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
             ;
     }
 
@@ -60,7 +64,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
         return selectJoinPage(
             req,
             SrmPurchaseRequestItemsBO.class,
-            buildBOWrapper(req).selectAssociation(SrmPurchaseRequestItemsDO.class, SrmPurchaseRequestItemsBO::getPurchaseRequest)
+            buildBOWrapper(req).selectAssociation(SrmPurchaseRequestDO.class, SrmPurchaseRequestItemsBO::getPurchaseRequest)
         );
     }
 
