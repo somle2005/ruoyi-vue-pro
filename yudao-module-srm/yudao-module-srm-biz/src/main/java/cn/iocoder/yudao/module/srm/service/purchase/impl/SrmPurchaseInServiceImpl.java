@@ -90,20 +90,21 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseIn(SrmPurchaseInSaveReqVO vo) {
         // 1.2 校验入库项的有效性
-        List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItems(vo.getItems());
+        List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
         // 1.3 校验结算账户
         erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 生成入库单号，并校验唯一性
+        //TODO 校验code存在？ 是否是当日？ 没有手动输入就
         String no = noRedisDAO.generate(SrmNoRedisDAO.PURCHASE_IN_NO_PREFIX, PURCHASE_IN_NO_OUT_OF_BOUNDS);
         ThrowUtil.ifThrow(purchaseInMapper.selectByNo(no) != null, PURCHASE_IN_NO_EXISTS);
 
         // 2.1 插入入库
         SrmPurchaseInDO purchaseIn = BeanUtils.toBean(vo, SrmPurchaseInDO.class, in -> in.setCode(no));
+        //计算总量、总价、总产品价、总税价、优惠金额、其它金额、支付金额
         calculateTotalPrice(purchaseIn, purchaseInItems);
         ThrowUtil.ifSqlThrow(purchaseInMapper.insert(purchaseIn), GlobalErrorCodeConstants.DB_INSERT_ERROR);
         // 2.2 插入入库项
         purchaseInItems.forEach(o -> o.setInId(purchaseIn.getId()));
-        BeanUtils.copyProperties(vo.getItems(), purchaseInItems);
         ThrowUtil.ifThrow(!purchaseInItemMapper.insertBatch(purchaseInItems), GlobalErrorCodeConstants.DB_BATCH_INSERT_ERROR);
         //3.0 设置初始化状态
         initMasterStatus(purchaseIn);
@@ -157,7 +158,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 1.3 校验结算账户
         erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 校验订单项的有效性
-        List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItems(vo.getItems());
+        List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
         // 2.1 更新入库
         SrmPurchaseInDO updateObj = BeanUtils.toBean(vo, SrmPurchaseInDO.class);
         //            .setOrderNo(purchaseOrder.getCode())
@@ -207,15 +208,15 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     /**
-     * 校验入库项+汇总金额
+     * 校验入库项+汇总金额，如果存在关联则复制对应属性
      *
      * @param voItems 入库项
      * @return SrmPurchaseInItemDOs
      */
-    private List<SrmPurchaseInItemDO> validatePurchaseInItems(List<SrmPurchaseInSaveReqVO.Item> voItems) {
+    private List<SrmPurchaseInItemDO> validatePurchaseInItemsAndCopyProperty(List<SrmPurchaseInSaveReqVO.Item> voItems) {
         // 1.1 批量获取订单项,根据入库项的订单项id
         Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(convertSet(voItems, SrmPurchaseInSaveReqVO.Item::getOrderItemId)),
-                SrmPurchaseOrderItemDO::getId);
+            SrmPurchaseOrderItemDO::getId);
         //
         return convertList(voItems, voItem -> BeanUtils.toBean(voItem, SrmPurchaseInItemDO.class, inItemDO -> {
             // 金额计算
@@ -223,15 +224,41 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             if (inItemDO.getTaxPercent() != null && inItemDO.getTotalPrice() != null) {
                 inItemDO.setTaxPrice(MoneyUtils.priceMultiplyPercent(inItemDO.getTotalPrice(), inItemDO.getTaxPercent()));
             }
-//             填充订单项字段
-            Optional.ofNullable(inItemDO.getOrderItemId()).ifPresent(orderItemId -> {
-                SrmPurchaseOrderItemDO orderItemDO = orderItemMap.get(orderItemId);
-                if (orderItemDO != null) {
-                    //TODO 订单项复制给 入库项
-                    inItemDO.setOrderItemId(orderItemDO.getId());
-                }
-            });
+            // 存在关联 -> 填充订单项字段
+            Optional.ofNullable(inItemDO.getOrderItemId())
+                .flatMap(orderItemId -> Optional.ofNullable(orderItemMap.get(orderItemId))).ifPresent(orderItemDO -> copyOrderItemToInItem(orderItemDO, inItemDO));
         }));
+    }
+
+    /**
+     * 将订单项属性复制到入库项中
+     *
+     * @param orderItemDO 订单项
+     * @param inItemDO    入库项
+     */
+    private void copyOrderItemToInItem(SrmPurchaseOrderItemDO orderItemDO, SrmPurchaseInItemDO inItemDO) {
+        if (orderItemDO == null || inItemDO == null) {
+            return;
+        }
+        // 复制产品相关信息
+        inItemDO.setProductId(orderItemDO.getProductId());
+        inItemDO.setProductUnitId(orderItemDO.getProductUnitId());
+        inItemDO.setProductUnitName(orderItemDO.getProductUnitName());
+        inItemDO.setProductPrice(orderItemDO.getProductPrice());
+        inItemDO.setProductName(orderItemDO.getProductName());
+        inItemDO.setDeclaredType(orderItemDO.getDeclaredType());
+        inItemDO.setDeclaredTypeEn(orderItemDO.getDeclaredTypeEn());
+        inItemDO.setXcode(orderItemDO.getXcode());
+        inItemDO.setContainerRate(orderItemDO.getContainerRate());
+        inItemDO.setBarCode(orderItemDO.getBarCode());
+
+        //产品价格
+        inItemDO.setActTaxPrice(orderItemDO.getActTaxPrice());
+        // 复制税率相关
+        inItemDO.setTaxPercent(orderItemDO.getTaxPercent());
+
+        // 复制规格型号等信息
+        // 不需要复制ID和入库单ID等字段，这些应该是新生成的
     }
 
     private void updatePurchaseInItemList(Long id, List<SrmPurchaseInItemDO> newList) {
