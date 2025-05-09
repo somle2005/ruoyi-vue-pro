@@ -19,6 +19,7 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
+import cn.iocoder.yudao.module.srm.enums.SrmPurchaseOrderSourceEnum;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
@@ -73,7 +74,7 @@ public class SrmPurchaseInController {
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:create')")
     public CommonResult<Long> createPurchaseIn(@Valid @RequestBody SrmPurchaseInSaveReqVO createReqVO) {
         //给vo里面的项的source设置字符串a
-        createReqVO.getItems().forEach(item -> item.setSource("WEB录入"));
+        createReqVO.getItems().forEach(item -> item.setSource(SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc()));
         return success(purchaseInService.createPurchaseIn(createReqVO));
     }
 

@@ -31,6 +31,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestItemsMapper;
 import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
+import cn.iocoder.yudao.module.srm.enums.SrmPurchaseOrderSourceEnum;
 import cn.iocoder.yudao.module.srm.enums.status.*;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
@@ -95,7 +96,6 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     private final FmsCompanyApi erpCompanyApi;
     private final ResourcePatternResolver resourcePatternResolver;
     private final TemplateService templateService;
-    private final String SOURCE = "WEB录入";
 
     @Resource(name = PURCHASE_ORDER_OFF_STATE_MACHINE_NAME)
     StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> offMachine;
@@ -246,7 +246,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         ThrowUtil.ifSqlThrow(purchaseOrderMapper.insert(orderDO), DB_INSERT_ERROR);
         // 2.2 插入订单项
         orderItems.forEach(o -> {
-            o.setSource(o.getSource() == null ? SOURCE : o.getSource());
+            o.setSource(o.getSource() == null ? SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc() : o.getSource());
             o.setOrderId(orderDO.getId());
         });
         ThrowUtil.ifThrow(!purchaseOrderItemMapper.insertBatch(orderItems), DB_BATCH_INSERT_ERROR);
@@ -371,7 +371,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
 
         // 第二步，批量添加、修改、删除
         if (CollUtil.isNotEmpty(diffList.get(0))) {
-            diffList.get(0).forEach(o -> o.setOrderId(id).setSource(SOURCE));
+            diffList.get(0).forEach(o -> o.setOrderId(id).setSource(SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc()));
             purchaseOrderItemMapper.insertBatch(diffList.get(0));
             //行状态初始化
             initSlaveStatus(diffList.get(0));

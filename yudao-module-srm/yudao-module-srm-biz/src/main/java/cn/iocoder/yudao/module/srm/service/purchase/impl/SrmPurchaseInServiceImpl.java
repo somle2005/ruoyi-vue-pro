@@ -23,6 +23,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseReturnItemMapper;
 import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
+import cn.iocoder.yudao.module.srm.enums.SrmPurchaseOrderSourceEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
@@ -243,7 +244,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         if (CollUtil.isNotEmpty(diffList.get(0))) {
             diffList.get(0).forEach(o -> {
                 o.setInId(id);
-                o.setSource("WEB录入");
+                o.setSource(SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc());
             });
             purchaseInItemMapper.insertBatch(diffList.get(0));
         }
