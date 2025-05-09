@@ -168,7 +168,7 @@ public class WmsInboundItemController {
     @PreAuthorize("@ss.hasPermission('wms:inbound-item:query')")
     public CommonResult<PageResult<WmsInboundItemBinRespVO>> getInboundItemBinPage(@Valid @RequestBody WmsInboundItemPageReqVO pageReqVO) {
         // 查询数据
-        PageResult<WmsInboundItemBinQueryDO> doPageResult = inboundItemService.getInboundItemBinPage(pageReqVO);
+        PageResult<WmsInboundItemBinQueryDO> doPageResult = inboundItemService.getInboundItemBinPage(pageReqVO,false);
         // 转换
         PageResult<WmsInboundItemBinRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsInboundItemBinRespVO.class);
 

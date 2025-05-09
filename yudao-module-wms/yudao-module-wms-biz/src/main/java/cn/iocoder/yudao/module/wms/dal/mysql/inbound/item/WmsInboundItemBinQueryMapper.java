@@ -28,7 +28,10 @@ import static cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemQ
 public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItemBinQueryDO> {
 
 
-    default PageResult<WmsInboundItemBinQueryDO> selectPage(WmsInboundItemPageReqVO reqVO) {
+    /**
+     * @param withPickupDetail 展开或合并上架详情
+     **/
+    default PageResult<WmsInboundItemBinQueryDO> selectPage(WmsInboundItemPageReqVO reqVO,boolean withPickupDetail) {
 
         // 入库单明细
         MPJLambdaWrapperX<WmsInboundItemBinQueryDO> wrapper = new MPJLambdaWrapperX();
@@ -50,7 +53,14 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
         wrapper.innerJoin(WmsPickupDO.class,WmsPickupDO::getId,WmsPickupItemDO::getPickupId);
 
         // 连接仓位库存
-        wrapper.innerJoin(WmsStockBinDO.class, WmsStockBinDO::getBinId, WmsPickupItemDO::getBinId);
+//        wrapper.innerJoin(WmsStockBinDO.class, WmsStockBinDO::getBinId, WmsPickupItemDO::getBinId,WmsStockBinDO::getProductId,WmsPickupItemDO::getPickupId)
+//            .gt(WmsStockBinDO::getAvailableQty,0);
+
+        wrapper.innerJoin(WmsStockBinDO.class,on->{
+            return on.eq(WmsStockBinDO::getProductId,WmsPickupItemDO::getProductId)
+                .eq(WmsStockBinDO::getBinId,WmsPickupItemDO::getBinId)
+                .gt(WmsStockBinDO::getAvailableQty,0);
+        });
 
 
         // 连接产品视图
@@ -88,9 +98,11 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
         wrapper.selectAs(WmsStockBinDO::getOutboundPendingQty,WmsInboundItemBinQueryDO::getBinOutboundPendingQty);
         wrapper.selectAs(WmsStockBinDO::getSellableQty,WmsInboundItemBinQueryDO::getBinSellableQty);
         //
-        wrapper.selectAs(WmsPickupItemDO::getPickupId,WmsInboundItemBinQueryDO::getPickupId);
-        wrapper.selectAs(WmsPickupDO::getCode,WmsInboundItemBinQueryDO::getPickupCode);
-        wrapper.selectAs(WmsPickupItemDO::getQty,WmsInboundItemBinQueryDO::getPickupQty);
+        if(withPickupDetail) {
+            wrapper.selectAs(WmsPickupItemDO::getPickupId, WmsInboundItemBinQueryDO::getPickupId);
+            wrapper.selectAs(WmsPickupDO::getCode, WmsInboundItemBinQueryDO::getPickupCode);
+            wrapper.selectAs(WmsPickupItemDO::getQty, WmsInboundItemBinQueryDO::getPickupQty);
+        }
         wrapper.select(AGE_COL_EXPR);
 
         return selectPage(reqVO, wrapper);

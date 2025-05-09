@@ -16,6 +16,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventor
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventorySaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
@@ -286,7 +287,13 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
              wmsWarehouseProductVOS.add(WmsWarehouseProductVO.builder().productId(excelVO.getProductId()).warehouseId(wmsWarehouseDO.getId()).build());
         }
 
-        return stockBinService.selectStockBinList(wmsWarehouseProductVOS, true);
+        List<WmsStockBinRespVO> stockBinList = stockBinService.selectStockBinList(wmsWarehouseProductVOS, true);
+        StreamX.from(stockBinList).assemble(productMapByCode.values(),ErpProductDTO::getId,WmsStockBinRespVO::getProductId,(e,v)->{
+            if (v != null) {
+                e.setProduct(BeanUtils.toBean(v, WmsProductRespSimpleVO.class));
+            }
+        });
+        return stockBinList;
 
     }
 }

@@ -409,8 +409,8 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     }
 
     @Override
-    public PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(WmsInboundItemPageReqVO pageReqVO) {
-        return inboundItemBinQueryMapper.selectPage(pageReqVO);
+    public PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(WmsInboundItemPageReqVO pageReqVO,boolean withPickupDetail) {
+        return inboundItemBinQueryMapper.selectPage(pageReqVO,withPickupDetail);
     }
 
     @Override
@@ -461,5 +461,10 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
 
         Set<Integer> stockTypes = StreamX.from(zoneDOList).map(WmsWarehouseZoneDO::getStockType).toSet();
 
+    }
+
+    @Override
+    public WmsInboundItemDO getByInboundIdAndProductId(Long inboundId, Long productId) {
+        return inboundItemMapper.getByInboundIdAndProductId(inboundId, productId);
     }
 }

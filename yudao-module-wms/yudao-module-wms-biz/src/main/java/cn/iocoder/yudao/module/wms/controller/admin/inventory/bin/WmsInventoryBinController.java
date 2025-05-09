@@ -255,9 +255,19 @@ public class WmsInventoryBinController {
         if (!Objects.equals(warehouseId, inventory.getWarehouseId())) {
             throw exception(INVENTORY_BIN_WAREHOUSE_BIN_NOT_MATCH);
         }
+
+        Map<String, WmsInventoryBinExcelVO> imMap=StreamX.from(impVOList).toMap(e->e.getBinId()+"-"+e.getProductId());
         // 转 DOList 去保存
-        List<WmsInventoryBinDO> doList = BeanUtils.toBean(impVOList, WmsInventoryBinDO.class);
-        inventoryBinService.saveInventoryBinList(inventory, doList);
+        List<WmsInventoryBinDO> dosInDB = inventoryBinService.selectByInventoryId(inventory.getId());
+        for (WmsInventoryBinDO inventoryBinDO : dosInDB) {
+            WmsInventoryBinExcelVO inventoryBinExcelVO = imMap.get(inventoryBinDO.getBinId()+"-"+inventoryBinDO.getProductId());
+            if(inventoryBinExcelVO!=null){
+                inventoryBinDO.setActualQty(inventoryBinExcelVO.getActualQty());
+                inventoryBinDO.setRemark(inventoryBinExcelVO.getRemark());
+            }
+        }
+
+        inventoryBinService.saveInventoryBinList(inventory, dosInDB);
         return success(true);
     }
 }
