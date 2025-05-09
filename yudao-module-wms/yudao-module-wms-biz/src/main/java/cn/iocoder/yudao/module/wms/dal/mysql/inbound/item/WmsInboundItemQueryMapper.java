@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQue
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -77,7 +78,10 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         MPJLambdaWrapperX<WmsInboundItemQueryDO> query = new MPJLambdaWrapperX<>();
         query.selectAll(WmsInboundItemDO.class).select(WmsInboundDO::getWarehouseId);
         query.eqIfPresent(WmsInboundItemDO::getProductId, reqVO.getProductId());
-        query.gt(WmsInboundItemDO::getActualQty, WmsInboundItemDO::getShelvedQty).innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId).likeIfExists(WmsInboundDO::getCode, reqVO.getInboundCode())
+        // 已入库或部分入库
+        query.in(WmsInboundItemDO::getInboundStatus, WmsInboundStatus.ALL.getValue(), WmsInboundStatus.PART.getValue());
+        query.gt(WmsInboundItemDO::getActualQty, WmsInboundItemDO::getShelvedQty)
+            .innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId).likeIfExists(WmsInboundDO::getCode, reqVO.getInboundCode())
             .orderByDesc(WmsInboundItemDO::getId);
         // 按仓库ID查询
         if(reqVO.getWarehouseId()!=null) {
