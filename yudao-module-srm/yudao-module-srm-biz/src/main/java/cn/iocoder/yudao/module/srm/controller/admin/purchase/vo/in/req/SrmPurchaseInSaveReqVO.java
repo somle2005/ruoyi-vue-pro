@@ -40,19 +40,11 @@ public class SrmPurchaseInSaveReqVO {
     @Schema(description = "收货地址")
     private String address;
 
-    //    @Schema(description = "结算日期")
-    //    private LocalDateTime settlementDate;
-
     @Schema(description = "结算账户编号")
     private Long accountId;
 
     @Schema(description = "优惠率，百分比")
     private BigDecimal discountPercent;
-
-//    @Schema(description = "产品单价")
-//    @DecimalMin(value = "0.00", message = "产品单价不能小于0")
-//    @NotNull(message = "产品单价不能为空")
-//    private BigDecimal productPrice;
 
     @Schema(description = "其它金额，单位：元")
     private BigDecimal otherPrice;
@@ -100,26 +92,26 @@ public class SrmPurchaseInSaveReqVO {
         /**
          * 总价，单位：元 totalPrice = productPrice * qty
          */
-        @Schema(description = "总价，单位：元。totalPrice = productPrice * qty")
+        @Schema(description = "总价，单位：元。totalPrice = productPrice * qty", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "总价不能为空")
         private BigDecimal totalPrice;
 
-        @Schema(description = "税价合计，单位：元。 taxPrice = totalPrice * taxPercent")
+        @Schema(description = "税价合计，单位：元。 taxPrice = totalPrice * taxPercent", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "税价合计不能为空")
         private BigDecimal taxPrice;
         /**
          * 合计产品价格，单位：元
          */
-        @Schema(description = "合计产品价格，单位：元")
+        @Schema(description = "合计产品价格，单位：元", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "合计产品价格不能为空")
         private BigDecimal totalProductPrice;
 
-        @Schema(description = "合计税价，单位：元。 totalTaxPrice = totalPrice * taxPercent")
+        @Schema(description = "合计税价，单位：元。 totalTaxPrice = totalPrice * taxPercent", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "合计税价不能为空")
         private BigDecimal totalTaxPrice;
 
-        @Schema(description = "仓库id", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull(message = "仓库id不能为空")
+        @Schema(description = "仓库Id", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotNull(message = "仓库不能为空")
         private Long warehouseId;
 
         @Schema(description = "备注")

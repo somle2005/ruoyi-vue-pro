@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.srm.dal.dataobject.purchase;
 
-import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
@@ -23,7 +23,7 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuppressWarnings("all")
-public class SrmPurchaseInItemDO extends BaseDO {
+public class SrmPurchaseInItemDO extends TenantBaseDO {
 
     /**
      * 编号
@@ -89,20 +89,6 @@ public class SrmPurchaseInItemDO extends BaseDO {
      * 采购订单项编号 关联 {@link SrmPurchaseOrderItemDO#getId()} 目的：方便更新关联的采购订单项的入库数量
      */
     private Long orderItemId;
-    //    /**
-    //     * 采购订单编号-展示用(源单单号,采购单)
-    //     * 关联 {@link SrmPurchaseOrderDO#getNo()}
-    //     */
-    //    private String orderNo;
-
-    /**
-     * 币别id(财务管理-币别维护)
-     */
-    private Long currencyId;
-    /**
-     * 币别名称
-     */
-    private String currencyName;
     /**
      * 付款状态
      */
@@ -133,10 +119,6 @@ public class SrmPurchaseInItemDO extends BaseDO {
      * 部门id
      */
     private Long applicationDeptId;
-    /**
-     * 汇率
-     */
-    private BigDecimal exchangeRate;
     /**
      * 报关品名
      */

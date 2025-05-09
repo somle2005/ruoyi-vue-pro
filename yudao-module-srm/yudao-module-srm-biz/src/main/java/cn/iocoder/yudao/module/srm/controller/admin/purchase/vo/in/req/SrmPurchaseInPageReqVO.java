@@ -24,9 +24,6 @@ public class SrmPurchaseInPageReqVO extends PageParam {
     @Schema(description = "单据日期")
     private LocalDateTime[] billTime;
 
-    //    @Schema(description = "汇率,财务管理-币别维护",example = "5.8")
-    //    private BigDecimal exchangeRate;
-
     @Schema(description = "应付款余额")
     private BigDecimal payableBalance;
 
@@ -68,12 +65,11 @@ public class SrmPurchaseInPageReqVO extends PageParam {
     private Integer payStatus;
 
     @Schema(description = "是否可付款")
-    private Boolean paymentEnable; // 对应 paymentStatus = [0, 1]
+    private Boolean paymentEnable;
 
     @Schema(description = "采购单号")
     private String orderNo;
 
-    //reconciliationStatus
     @Schema(description = "是否对账")
     private Boolean reconciliationEnable;
 

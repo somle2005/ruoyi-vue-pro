@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.srm.dal.dataobject.purchase;
 
-import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
@@ -24,7 +24,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuppressWarnings("all")
-public class SrmPurchaseReturnDO extends BaseDO {
+public class SrmPurchaseReturnDO extends TenantBaseDO {
 
     /**
      * 编号

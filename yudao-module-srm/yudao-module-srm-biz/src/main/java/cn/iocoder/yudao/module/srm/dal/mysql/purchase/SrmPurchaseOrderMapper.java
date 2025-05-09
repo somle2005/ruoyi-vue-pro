@@ -19,28 +19,28 @@ import org.apache.ibatis.annotations.Mapper;
 @Mapper
 public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> {
 
-    default MPJLambdaWrapper<SrmPurchaseOrderDO> wrapper(SrmPurchaseOrderPageReqVO reqVO) {
-        return new MPJLambdaWrapperX<SrmPurchaseOrderDO>().selectAll(SrmPurchaseOrderDO.class).eqIfPresent(SrmPurchaseOrderDO::getStatus, reqVO.getStatus())
-            .eqIfPresent(SrmPurchaseOrderDO::getSupplierId, reqVO.getSupplierId()).eqIfPresent(SrmPurchaseOrderDO::getAccountId, reqVO.getAccountId())
-            .eqIfPresent(SrmPurchaseOrderDO::getTotalCount, reqVO.getTotalCount()).eqIfPresent(SrmPurchaseOrderDO::getTotalPrice, reqVO.getTotalPrice())
-            .eqIfPresent(SrmPurchaseOrderDO::getTotalProductPrice, reqVO.getTotalProductPrice())
-            .eqIfPresent(SrmPurchaseOrderDO::getTotalTaxPrice, reqVO.getTotalTaxPrice())
-            .eqIfPresent(SrmPurchaseOrderDO::getDiscountPercent, reqVO.getDiscountPercent())
-            .eqIfPresent(SrmPurchaseOrderDO::getDiscountPrice, reqVO.getDiscountPrice())
-            .eqIfPresent(SrmPurchaseOrderDO::getDepositPrice, reqVO.getDepositPrice()).eqIfPresent(SrmPurchaseOrderDO::getFileUrl, reqVO.getFileUrl())
-            .eqIfPresent(SrmPurchaseOrderDO::getRemark, reqVO.getRemark()).eqIfPresent(SrmPurchaseOrderDO::getTotalInCount, reqVO.getTotalInCount())
-            .eqIfPresent(SrmPurchaseOrderDO::getTotalReturnCount, reqVO.getTotalReturnCount())
-            .betweenIfPresent(SrmPurchaseOrderDO::getBillTime, reqVO.getBillTime()).betweenIfPresent(SrmPurchaseOrderDO::getCreateTime, reqVO.getCreateTime())
-            .betweenIfPresent(SrmPurchaseOrderDO::getSettlementDate, reqVO.getSettlementDate())
-            .eqIfPresent(SrmPurchaseOrderDO::getAuditorId, reqVO.getAuditorId()).betweenIfPresent(SrmPurchaseOrderDO::getAuditTime, reqVO.getAuditTime())
-            .eqIfPresent(SrmPurchaseOrderDO::getPurchaseCompanyId, reqVO.getPurchaseCompanyId())
-            //            .likeIfPresent(SrmPurchaseOrderDO::getXCode, reqVO.getXCode())
-            .likeIfPresent(SrmPurchaseOrderDO::getContainerRate, reqVO.getContainerRate())
-            .eqIfPresent(SrmPurchaseOrderDO::getWarehouseId, reqVO.getWarehouseId()).eqIfPresent(SrmPurchaseOrderDO::getOffStatus, reqVO.getOffStatus())
-            .eqIfPresent(SrmPurchaseOrderDO::getExecuteStatus, reqVO.getExecuteStatus()).eqIfPresent(SrmPurchaseOrderDO::getInStatus, reqVO.getInStatus())
-            .eqIfPresent(SrmPurchaseOrderDO::getPayStatus, reqVO.getPayStatus()).eqIfPresent(SrmPurchaseOrderDO::getAuditStatus, reqVO.getAuditStatus())
-            .likeIfPresent(SrmPurchaseOrderDO::getAddress, reqVO.getAddress()).likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, reqVO.getPaymentTerms())
-            .eqIfPresent(SrmPurchaseOrderDO::getOrderStatus, reqVO.getOrderStatus());
+    default MPJLambdaWrapper<SrmPurchaseOrderDO> wrapper(SrmPurchaseOrderPageReqVO vo) {
+        return new MPJLambdaWrapperX<SrmPurchaseOrderDO>().selectAll(SrmPurchaseOrderDO.class).eqIfPresent(SrmPurchaseOrderDO::getStatus, vo.getStatus())
+            .eqIfPresent(SrmPurchaseOrderDO::getSupplierId, vo.getSupplierId()).eqIfPresent(SrmPurchaseOrderDO::getAccountId, vo.getAccountId())
+            .eqIfPresent(SrmPurchaseOrderDO::getTotalCount, vo.getTotalCount()).eqIfPresent(SrmPurchaseOrderDO::getTotalPrice, vo.getTotalPrice())
+            .eqIfPresent(SrmPurchaseOrderDO::getTotalProductPrice, vo.getTotalProductPrice())
+            .eqIfPresent(SrmPurchaseOrderDO::getTotalTaxPrice, vo.getTotalTaxPrice())
+            .eqIfPresent(SrmPurchaseOrderDO::getDiscountPercent, vo.getDiscountPercent())
+            .eqIfPresent(SrmPurchaseOrderDO::getDiscountPrice, vo.getDiscountPrice())
+            .eqIfPresent(SrmPurchaseOrderDO::getDepositPrice, vo.getDepositPrice()).eqIfPresent(SrmPurchaseOrderDO::getFileUrl, vo.getFileUrl())
+            .eqIfPresent(SrmPurchaseOrderDO::getRemark, vo.getRemark()).eqIfPresent(SrmPurchaseOrderDO::getTotalInCount, vo.getTotalInCount())
+            .eqIfPresent(SrmPurchaseOrderDO::getTotalReturnCount, vo.getTotalReturnCount())
+            .betweenIfPresent(SrmPurchaseOrderDO::getBillTime, vo.getBillTime()).betweenIfPresent(SrmPurchaseOrderDO::getCreateTime, vo.getCreateTime())
+            .betweenIfPresent(SrmPurchaseOrderDO::getSettlementDate, vo.getSettlementDate())
+            .eqIfPresent(SrmPurchaseOrderDO::getAuditorId, vo.getAuditorId()).betweenIfPresent(SrmPurchaseOrderDO::getAuditTime, vo.getAuditTime())
+            .eqIfPresent(SrmPurchaseOrderDO::getPurchaseCompanyId, vo.getPurchaseCompanyId())
+//                        .likeIfPresent(SrmPurchaseOrderDO::getXCode, vo.getXCode())
+            .likeIfPresent(SrmPurchaseOrderDO::getContainerRate, vo.getContainerRate())
+            .eqIfPresent(SrmPurchaseOrderDO::getWarehouseId, vo.getWarehouseId()).eqIfPresent(SrmPurchaseOrderDO::getOffStatus, vo.getOffStatus())
+            .eqIfPresent(SrmPurchaseOrderDO::getExecuteStatus, vo.getExecuteStatus()).eqIfPresent(SrmPurchaseOrderDO::getInStatus, vo.getInStatus())
+            .eqIfPresent(SrmPurchaseOrderDO::getPayStatus, vo.getPayStatus()).eqIfPresent(SrmPurchaseOrderDO::getAuditStatus, vo.getAuditStatus())
+            .likeIfPresent(SrmPurchaseOrderDO::getAddress, vo.getAddress()).likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, vo.getPaymentTerms())
+            .eqIfPresent(SrmPurchaseOrderDO::getOrderStatus, vo.getOrderStatus());
     }
 
     //getBOWrapper
