@@ -237,12 +237,14 @@ public class WmsInventoryBinController {
         inventoryBinService.assembleBin(voList);
         inventoryBinService.assembleProduct(voList);
         // 检查仓位与产品的有效性
-        for (WmsInventoryBinRespVO inventoryBinRespVO : voList) {
+        for (int i = 0; i < voList.size(); i++) {
+            WmsInventoryBinRespVO inventoryBinRespVO = voList.get(i);
+            WmsInventoryBinExcelVO excelVO = impVOList.get(i);
             if (inventoryBinRespVO.getBin() == null) {
-                throw exception(INVENTORY_BIN_BIN_NOT_EXISTS);
+                throw exception(INVENTORY_BIN_BIN_NOT_EXISTS,excelVO.getBinCode());
             }
             if (inventoryBinRespVO.getProduct() == null) {
-                throw exception(INVENTORY_BIN_PRODUCT_NOT_EXISTS);
+                throw exception(INVENTORY_BIN_PRODUCT_NOT_EXISTS, excelVO.getProductCode());
             }
         }
         // 检查仓位数据的合规性

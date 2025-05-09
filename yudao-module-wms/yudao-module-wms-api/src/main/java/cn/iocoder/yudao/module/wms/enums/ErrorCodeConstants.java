@@ -254,8 +254,8 @@ public interface ErrorCodeConstants {
     ErrorCode INVENTORY_BIN_BE_REFERRED = new ErrorCode(2_001_022_004, "库位盘点被引用");
     ErrorCode INVENTORY_BIN_CAN_NOT_EDIT = new ErrorCode(2_001_022_005, "库位盘点不允许编辑");
     ErrorCode INVENTORY_BIN_QUANTITY_ERROR = new ErrorCode(2_001_022_006, "库位盘点数量错误");
-    ErrorCode INVENTORY_BIN_BIN_NOT_EXISTS = new ErrorCode(2_001_022_007, "盘点库位不存在");
-    ErrorCode INVENTORY_BIN_PRODUCT_NOT_EXISTS = new ErrorCode(2_001_022_008, "盘点产品不存在");
+    ErrorCode INVENTORY_BIN_BIN_NOT_EXISTS = new ErrorCode(2_001_022_007, "盘点库位{}不存在");
+    ErrorCode INVENTORY_BIN_PRODUCT_NOT_EXISTS = new ErrorCode(2_001_022_008, "盘点产品{}不存在");
     ErrorCode INVENTORY_BIN_WAREHOUSE_BIN_ERROR = new ErrorCode(2_001_022_009, "盘点库位错误");
     ErrorCode INVENTORY_BIN_WAREHOUSE_BIN_NOT_MATCH = new ErrorCode(2_001_022_010, "盘点库位与仓库不匹配");
     ErrorCode INVENTORY_BIN_CAN_NOT_DELETE = new ErrorCode(2_001_022_011, "库位盘点不允许删除");
@@ -290,4 +290,4 @@ public interface ErrorCodeConstants {
 
     // ========== WMS_PRODUCT 良次换货详情表 2_001_025_000 ==========
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(2_001_025_001, "{} 产品不存在");
-}
+}
