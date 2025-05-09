@@ -93,10 +93,6 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
      */
     private String remark;
     /**
-     * 箱率 关联 {@link SrmPurchaseOrderItemDO#getContainerRate()}
-     */
-    private String containerRate;//箱率
-    /**
      * 采购订单项编号 关联 {@link SrmPurchaseOrderItemDO#getId()}
      * <p>
      * 目的：方便更新关联的采购订单项的入库数量
@@ -135,15 +131,23 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
      */
     private String declaredType;
     /**
+     * 报关品名英文
+     */
+    private String declaredTypeEn;
+    /**
      * 产品名称
      */
     private String productName;
     /**
+     * x码
+     */
+    private String xcode;
+    /**
+     * 箱率 关联 {@link SrmPurchaseOrderItemDO#getContainerRate()}
+     */
+    private String containerRate;
+    /**
      * 产品sku
      */
     private String barCode;
-    /**
-     * 报关品名英文
-     */
-    private String declaredTypeEn;
 }

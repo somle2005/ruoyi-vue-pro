@@ -26,6 +26,7 @@ import java.time.LocalDateTime;
  */
 @Repository
 @Slf4j
+@SuppressWarnings("ALL")
 public class SrmNoRedisDAO {
 
     //    /**
@@ -71,7 +72,7 @@ public class SrmNoRedisDAO {
     /**
      * 采购入库 {@link SrmPurchaseInDO}
      */
-    public static final String PURCHASE_IN_NO_PREFIX = "CGRK";
+    public static final String PURCHASE_IN_NO_PREFIX = "CGDH";
     /**
      * 采购退货 {@link SrmPurchaseReturnDO}
      */

@@ -41,7 +41,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.math.RoundingMode;
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -75,7 +74,6 @@ public class SrmPurchaseInController {
     public CommonResult<Long> createPurchaseIn(@Valid @RequestBody SrmPurchaseInSaveReqVO createReqVO) {
         //给vo里面的项的source设置字符串a
         createReqVO.getItems().forEach(item -> item.setSource("WEB录入"));
-        createReqVO.setInTime(LocalDateTime.now());
         return success(purchaseInService.createPurchaseIn(createReqVO));
     }
 
@@ -184,10 +182,11 @@ public class SrmPurchaseInController {
         return BeanUtils.toBean(list, SrmPurchaseInBaseRespVO.class, purchaseIn -> {
             purchaseIn.setItems(BeanUtils.toBean(purchaseInItemMap.get(purchaseIn.getId()), SrmPurchaseInBaseRespVO.Item.class, item -> {
                 //设置产品信息-带出相关字段
-                MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProduct(product).setTotalVolume(
-                            product.getLength() * product.getHeight() * product.getWidth() * Double.parseDouble(String.valueOf(item.getQty())))//总体积=数量*产品体积
-                        .setTotalWeight(product.getWeight().setScale(2, RoundingMode.HALF_UP).longValue() * Double.parseDouble(String.valueOf(item.getQty())))
+                MapUtils.findAndThen(productMap, item.getProductId(), product -> purchaseIn
+                    //总体积=数量*产品体积
+                    .setTotalVolume(product.getLength() * product.getHeight() * product.getWidth() * Double.parseDouble(String.valueOf(item.getQty())))
                     //总重量=数量*产品重量
+                    .setTotalWeight(product.getWeight().setScale(4, RoundingMode.HALF_UP).longValue() * Double.parseDouble(String.valueOf(item.getQty())))
                 );
                 // 设置仓库信息
                 MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), erpWarehouseDO -> item.setWarehouseName(erpWarehouseDO.getName()));
@@ -196,7 +195,7 @@ public class SrmPurchaseInController {
                 //人员
                 MapUtils.findAndThen(userMap, item.getApplicantId(), user -> item.setApplicantName(user.getNickname()));
                 //订单的no
-                MapUtils.findAndThen(orderItemMap, item.getOrderItemId(), order -> item.setOrderNo(order.getCode()));
+                MapUtils.findAndThen(orderItemMap, item.getOrderItemId(), order -> item.setBarCode(order.getCode()));
             }));
             //            purchaseIn.setProductNames(CollUtil.join(purchaseIn.getItems(), "，", SrmPurchaseInBaseRespVO.Item::getProductName));
             //产品-带出相关字段

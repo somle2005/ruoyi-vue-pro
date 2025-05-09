@@ -55,7 +55,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
 /**
  * ERP 采购入库 Service 实现类
  *
- * @author 芋道源码
+ * @author wdy
  */
 @Service
 @Validated
@@ -87,34 +87,37 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createPurchaseIn(SrmPurchaseInSaveReqVO createReqVO) {
-        // 1.1 校验采购订单已审核
-        for (SrmPurchaseInSaveReqVO.Item item : createReqVO.getItems()) {
-            SrmPurchaseOrderItemDO aDo = purchaseOrderService.validatePurchaseOrderItemExists(item.getOrderItemId());
-            if (aDo != null) {
-                Optional.ofNullable(aDo.getOrderId()).ifPresent(orderId -> purchaseOrderService.validatePurchaseOrder(orderId));
-            }
-        }
+    public Long createPurchaseIn(SrmPurchaseInSaveReqVO vo) {
         // 1.2 校验入库项的有效性
-        List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItems(createReqVO.getItems());
+        List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItems(vo.getItems());
         // 1.3 校验结算账户
-        erpAccountApi.validateAccount(createReqVO.getAccountId());
+        erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 生成入库单号，并校验唯一性
         String no = noRedisDAO.generate(SrmNoRedisDAO.PURCHASE_IN_NO_PREFIX, PURCHASE_IN_NO_OUT_OF_BOUNDS);
         ThrowUtil.ifThrow(purchaseInMapper.selectByNo(no) != null, PURCHASE_IN_NO_EXISTS);
 
         // 2.1 插入入库
-        SrmPurchaseInDO purchaseIn = BeanUtils.toBean(createReqVO, SrmPurchaseInDO.class, in -> in.setCode(no));
+        SrmPurchaseInDO purchaseIn = BeanUtils.toBean(vo, SrmPurchaseInDO.class, in -> in.setCode(no));
         calculateTotalPrice(purchaseIn, purchaseInItems);
         ThrowUtil.ifSqlThrow(purchaseInMapper.insert(purchaseIn), GlobalErrorCodeConstants.DB_INSERT_ERROR);
         // 2.2 插入入库项
         purchaseInItems.forEach(o -> o.setInId(purchaseIn.getId()));
-        BeanUtils.copyProperties(createReqVO.getItems(), purchaseInItems);
+        BeanUtils.copyProperties(vo.getItems(), purchaseInItems);
         ThrowUtil.ifThrow(!purchaseInItemMapper.insertBatch(purchaseInItems), GlobalErrorCodeConstants.DB_BATCH_INSERT_ERROR);
         //3.0 设置初始化状态
         initMasterStatus(purchaseIn);
         initSlaveStatus(purchaseInItems);
         return purchaseIn.getId();
+    }
+
+    private void updateStatusCheck(SrmPurchaseInSaveReqVO vo) {
+        //1.1 不处于草稿、审核不通过、审核撤销 状态->e
+        for (SrmPurchaseInSaveReqVO.Item item : vo.getItems()) {
+            SrmPurchaseOrderItemDO aDo = purchaseOrderService.validatePurchaseOrderItemExists(item.getOrderItemId());
+            if (aDo != null) {
+                Optional.ofNullable(aDo.getOrderId()).ifPresent(orderId -> purchaseOrderService.validatePurchaseOrder(orderId));
+            }
+        }
     }
 
     private void initSlaveStatus(List<SrmPurchaseInItemDO> purchaseInItems) {
@@ -149,17 +152,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             throw exception(PURCHASE_IN_UPDATE_FAIL_APPROVE, purchaseIn.getCode());
         }
         // 1.2 校验采购订单已审核
-        for (SrmPurchaseInSaveReqVO.Item item : vo.getItems()) {
-            SrmPurchaseOrderItemDO aDo = purchaseOrderService.validatePurchaseOrderItemExists(item.getOrderItemId());
-            if (aDo != null) {
-                Optional.ofNullable(aDo.getOrderId()).ifPresent(orderId -> purchaseOrderService.validatePurchaseOrder(orderId));
-            }
-        }
+        updateStatusCheck(vo);
         // 1.3 校验结算账户
         erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 校验订单项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItems(vo.getItems());
-
         // 2.1 更新入库
         SrmPurchaseInDO updateObj = BeanUtils.toBean(vo, SrmPurchaseInDO.class);
         //            .setOrderNo(purchaseOrder.getCode())
@@ -208,10 +205,15 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         purchaseInItemMapper.updateById(new SrmPurchaseInItemDO().setId(id).setPayPrice(paymentPrice));
     }
 
+    /**
+     * 校验入库项+汇总金额
+     *
+     * @param voItems 入库项
+     * @return SrmPurchaseInItemDOs
+     */
     private List<SrmPurchaseInItemDO> validatePurchaseInItems(List<SrmPurchaseInSaveReqVO.Item> voItems) {
         // 1.1 批量获取订单项,根据入库项的订单项id
-        Map<Long, SrmPurchaseOrderItemDO> orderItemMap =
-            convertMap(purchaseOrderService.getPurchaseOrderItemList(convertSet(voItems, SrmPurchaseInSaveReqVO.Item::getOrderItemId)),
+        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(convertSet(voItems, SrmPurchaseInSaveReqVO.Item::getOrderItemId)),
                 SrmPurchaseOrderItemDO::getId);
         //
         return convertList(voItems, voItem -> BeanUtils.toBean(voItem, SrmPurchaseInItemDO.class, inItemDO -> {
@@ -220,14 +222,14 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             if (inItemDO.getTaxPercent() != null && inItemDO.getTotalPrice() != null) {
                 inItemDO.setTaxPrice(MoneyUtils.priceMultiplyPercent(inItemDO.getTotalPrice(), inItemDO.getTaxPercent()));
             }
-            // 填充订单项字段
-            //            Optional.ofNullable(inItemDO.getOrderItemId()).ifPresent(orderItemId -> {
-            //                SrmPurchaseOrderItemDO orderItemDO = orderItemMap.get(orderItemId);
-            //                if (orderItemDO != null) {
-            //                    BeanUtils.copyProperties(SrmOrderInConvert.INSTANCE.toPurchaseInItem(orderItemDO), inItemDO);
-            //                    inItemDO.setOrderItemId(orderItemDO.getId());
-            //                }
-            //            });
+//             填充订单项字段
+            Optional.ofNullable(inItemDO.getOrderItemId()).ifPresent(orderItemId -> {
+                SrmPurchaseOrderItemDO orderItemDO = orderItemMap.get(orderItemId);
+                if (orderItemDO != null) {
+                    //TODO 订单项复制给 入库项
+                    inItemDO.setOrderItemId(orderItemDO.getId());
+                }
+            });
         }));
     }
 
