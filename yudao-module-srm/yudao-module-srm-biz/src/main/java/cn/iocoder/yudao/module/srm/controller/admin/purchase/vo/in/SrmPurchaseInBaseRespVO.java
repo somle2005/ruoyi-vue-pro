@@ -21,7 +21,7 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
 
     @Schema(description = "入库单编号")
     @ExcelProperty("入库单编号")
-    private String no;
+    private String code;
 
     @Schema(description = "单据日期")
     private LocalDateTime billTime;
@@ -43,7 +43,7 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
     private String reviewComment;
 
     @Schema(description = "版本号")
-    private Long version;
+    private Integer version;
 
     @Schema(description = "入库项列表")
     private List<Item> items;
@@ -173,6 +173,6 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
         private String productUnitName;
 
         @Schema(description = "版本号")
-        private Long version;
+        private Integer version;
     }
 }

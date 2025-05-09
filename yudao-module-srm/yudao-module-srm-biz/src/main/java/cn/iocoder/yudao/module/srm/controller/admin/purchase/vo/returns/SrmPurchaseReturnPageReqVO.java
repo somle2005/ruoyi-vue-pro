@@ -22,7 +22,7 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
     public static final Integer REFUND_STATUS_ALL = 2;
 
     @Schema(description = "采购单编号", example = "XS001")
-    private String no;
+    private String code;
 
     @Schema(description = "供应商编号", example = "1724")
     private Long supplierId;

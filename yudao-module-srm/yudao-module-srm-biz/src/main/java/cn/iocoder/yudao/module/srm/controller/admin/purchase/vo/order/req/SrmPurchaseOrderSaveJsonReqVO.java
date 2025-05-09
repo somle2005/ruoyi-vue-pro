@@ -22,7 +22,7 @@ public class SrmPurchaseOrderSaveJsonReqVO {
     private List<@Valid Item> items;
 
     @Schema(description = "版本号")
-    private Long version;
+    private Integer version;
 
     @Data
     public static class Item {
@@ -44,7 +44,7 @@ public class SrmPurchaseOrderSaveJsonReqVO {
         private Integer totalCompletionPassCount;
 
         @Schema(description = "版本号")
-        private Long version;
+        private Integer version;
     }
 
 }

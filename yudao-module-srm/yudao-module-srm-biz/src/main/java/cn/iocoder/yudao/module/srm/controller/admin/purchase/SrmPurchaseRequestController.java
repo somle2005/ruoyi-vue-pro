@@ -208,7 +208,7 @@ public class SrmPurchaseRequestController {
             purchaseRequest.setItems(BeanUtils.toBean(purchaseRequestItemMap.get(purchaseRequest.getId()), SrmPurchaseRequestItemRespVO.class, item -> {
                 MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName()).setProductBarCode(product.getBarCode())
                     .setProductUnitName(unitMap.get(product.getUnitId()).getName()).setProductUnitId(unitMap.get(product.getUnitId()).getId())
-                    .setNo(product.getBarCode()));
+                    .setCode(product.getBarCode()));
                 //产品仓库填充
                 MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), erpWarehouseDO -> item.setWarehouseName(erpWarehouseDO.getName()));
                 //产品创建者、更新者填充

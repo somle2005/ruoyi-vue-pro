@@ -43,7 +43,7 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
         return buildWrapper(reqVO)
             .leftJoin(SrmPurchaseOrderDO.class, SrmPurchaseOrderDO::getId, SrmPurchaseOrderItemDO::getOrderId) // 采购订单ID关联
             .selectAll(SrmPurchaseOrderDO.class)
-            .likeIfPresent(SrmPurchaseOrderDO::getNo, reqVO.getNo()) // 采购单编号
+            .likeIfPresent(SrmPurchaseOrderDO::getCode, reqVO.getCode()) // 采购单编号
             .betweenIfPresent(SrmPurchaseOrderDO::getBillTime, reqVO.getBillTime()) // 单据日期
             .eqIfPresent(SrmPurchaseOrderDO::getStatus, reqVO.getStatus()) // 采购状态
             .eqIfPresent(SrmPurchaseOrderDO::getSupplierId, reqVO.getSupplierId()) // 供应商ID

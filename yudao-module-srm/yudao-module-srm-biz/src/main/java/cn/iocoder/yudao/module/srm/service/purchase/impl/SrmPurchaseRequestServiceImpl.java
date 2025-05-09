@@ -108,7 +108,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         adminUserApi.validateUser(vo.getApplicantId());
         //初始化
         SrmPurchaseRequestDO purchaseRequest = BeanUtils.toBean(vo, SrmPurchaseRequestDO.class);
-        purchaseRequest.setNo(vo.getNo());
+        purchaseRequest.setCode(vo.getCode());
         //2. 插入主表的申请单数据
         ThrowUtil.ifSqlThrow(srmPurchaseRequestMapper.insert(purchaseRequest), PURCHASE_REQUEST_ADD_FAIL_APPROVE);
         Long id = purchaseRequest.getId();
@@ -124,13 +124,13 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
 
     private void voSetNo(SrmPurchaseRequestSaveReqVO vo) {
         //生成单据编号
-        if (vo.getNo() != null) {
-            ThrowUtil.ifThrow(srmPurchaseRequestMapper.selectByNo(vo.getNo()) != null, PURCHASE_REQUEST_NO_EXISTS_BY_NO, vo.getNo());
-            noRedisDAO.setManualSerial(PURCHASE_REQUEST_NO_PREFIX, vo.getNo());
+        if (vo.getCode() != null) {
+            ThrowUtil.ifThrow(srmPurchaseRequestMapper.selectByNo(vo.getCode()) != null, PURCHASE_REQUEST_NO_EXISTS_BY_NO, vo.getCode());
+            noRedisDAO.setManualSerial(PURCHASE_REQUEST_NO_PREFIX, vo.getCode());
         } else {
-            vo.setNo(noRedisDAO.generate(PURCHASE_REQUEST_NO_PREFIX, PURCHASE_REQUEST_NO_OUT_OF_BOUNDS));
+            vo.setCode(noRedisDAO.generate(PURCHASE_REQUEST_NO_PREFIX, PURCHASE_REQUEST_NO_OUT_OF_BOUNDS));
             //1.1 校验编号no是否在数据库中重复
-            ThrowUtil.ifThrow(srmPurchaseRequestMapper.selectByNo(vo.getNo()) != null, PURCHASE_REQUEST_NO_EXISTS);
+            ThrowUtil.ifThrow(srmPurchaseRequestMapper.selectByNo(vo.getCode()) != null, PURCHASE_REQUEST_NO_EXISTS);
         }
     }
 
@@ -225,7 +225,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             item.setPurchaseApplyItemId(itemId);//采购申请项id
             //获得主表DO
             SrmPurchaseRequestDO aDo = rDOMap.get(requestItemDOMap.get(itemId).getRequestId());
-            item.setErpPurchaseRequestItemNo(aDo.getNo());
+            item.setErpPurchaseRequestItemNo(aDo.getCode());
             item.setApplicantId(aDo.getApplicantId());//申请人
             item.setApplicationDeptId(aDo.getApplicationDeptId());//申请部门
             //设置来源
@@ -248,7 +248,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         //1. 校验申请单需已审核
         List<SrmPurchaseRequestDO> requestDOS = srmPurchaseRequestMapper.selectByIds(convertList(itemsDOS, SrmPurchaseRequestItemsDO::getRequestId));
         for (SrmPurchaseRequestDO requestDO : requestDOS) {
-            ThrowUtil.ifThrow(!requestDO.getAuditStatus().equals(SrmAuditStatus.APPROVED.getCode()), PURCHASE_REQUEST_MERGE_FAIL, requestDO.getNo());
+            ThrowUtil.ifThrow(!requestDO.getAuditStatus().equals(SrmAuditStatus.APPROVED.getCode()), PURCHASE_REQUEST_MERGE_FAIL, requestDO.getCode());
         }
         //2. 校验申请项需处于开启状态
         for (SrmPurchaseRequestItemsDO itemsDO : itemsDOS) {
@@ -270,8 +270,8 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         List<Long> requestItemsIds = convertList(requestItemsDOS, SrmPurchaseRequestItemsDO::getId);
         validatePurchaseRequestItemsMasterId(vo.getId(), requestItemsIds);
         //1.5 设置no
-        String oldNo = srmPurchaseRequestDO.getNo();
-        if (!oldNo.equals(vo.getNo())) {
+        String oldNo = srmPurchaseRequestDO.getCode();
+        if (!oldNo.equals(vo.getCode())) {
             voSetNo(vo);
         }
         // 2 更新
@@ -289,11 +289,11 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             !requestDO.getAuditStatus().equals(SrmAuditStatus.DRAFT.getCode()) && !requestDO.getAuditStatus()
                 .equals(SrmAuditStatus.REJECTED.getCode()) && !requestDO.getAuditStatus()
                 .equals(SrmAuditStatus.REVOKED.getCode()), PURCHASE_REQUEST_UPDATE_FAIL_APPROVE,
-            SrmAuditStatus.fromCode(requestDO.getAuditStatus()).getDesc(), requestDO.getNo());
+            SrmAuditStatus.fromCode(requestDO.getAuditStatus()).getDesc(), requestDO.getCode());
         //1.2 判断已关闭
-        ThrowUtil.ifThrow(requestDO.getOffStatus().equals(SrmOffStatus.CLOSED.getCode()), PURCHASE_REQUEST_CLOSED, requestDO.getNo());
+        ThrowUtil.ifThrow(requestDO.getOffStatus().equals(SrmOffStatus.CLOSED.getCode()), PURCHASE_REQUEST_CLOSED, requestDO.getCode());
         //1.3 判断已手动关闭
-        ThrowUtil.ifThrow(requestDO.getOffStatus().equals(SrmOffStatus.MANUAL_CLOSED.getCode()), PURCHASE_REQUEST_MANUAL_CLOSED, requestDO.getNo());
+        ThrowUtil.ifThrow(requestDO.getOffStatus().equals(SrmOffStatus.MANUAL_CLOSED.getCode()), PURCHASE_REQUEST_MANUAL_CLOSED, requestDO.getCode());
         //2 判断子表已关闭？手动关闭？
         List<SrmPurchaseRequestItemsDO> itemsDOList = erpPurchaseRequestItemsMapper.selectListByIds(itemIds);
         for (SrmPurchaseRequestItemsDO itemsDO : itemsDOList) {
@@ -429,10 +429,10 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         // 1.1 已审核->异常
         purchaseRequestDOs.forEach(erpPurchaseRequestDO -> {
             ThrowUtil.ifThrow(erpPurchaseRequestDO.getAuditStatus().equals(SrmAuditStatus.APPROVED.getCode()), PURCHASE_REQUEST_DELETE_FAIL_APPROVE,
-                erpPurchaseRequestDO.getNo());
+                erpPurchaseRequestDO.getCode());
             //已关闭->异常
             ThrowUtil.ifThrow(erpPurchaseRequestDO.getOffStatus().equals(SrmOffStatus.CLOSED.getCode()), PURCHASE_REQUEST_DELETE_FAIL_CLOSE,
-                erpPurchaseRequestDO.getNo());
+                erpPurchaseRequestDO.getCode());
         });
         //1.2 校验存在关联的采购订单
         //收集ids
@@ -508,9 +508,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         //查子表
         List<SrmPurchaseRequestItemsDO> itemsDOS = erpPurchaseRequestItemsMapper.selectListByRequestId(id);
         //转换 SrmPurchaseRequestBO
-        return BeanUtils.toBean(srmPurchaseRequestDO, SrmPurchaseRequestBO.class, bo -> {
-            bo.setItems(itemsDOS);
-        });
+        return BeanUtils.toBean(srmPurchaseRequestDO, SrmPurchaseRequestBO.class, bo -> bo.setItems(itemsDOS));
     }
 
     @Override

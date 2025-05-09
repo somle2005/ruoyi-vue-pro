@@ -16,7 +16,7 @@ import java.util.List;
 public class SrmPurchaseRequestMergeReqVO {
 
     @Schema(description = "订单No")
-    private String no;
+    private String code;
 
     @Schema(description = "供应商编号", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "供应商编号不能为空")

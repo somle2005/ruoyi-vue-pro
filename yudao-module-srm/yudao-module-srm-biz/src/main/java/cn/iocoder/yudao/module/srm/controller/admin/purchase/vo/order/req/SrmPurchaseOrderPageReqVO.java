@@ -19,7 +19,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 public class SrmPurchaseOrderPageReqVO extends PageParam {
 
     @Schema(description = "采购单编号")
-    private String no;
+    private String code;
 
     @Schema(description = "采购状态")
     private Integer status;

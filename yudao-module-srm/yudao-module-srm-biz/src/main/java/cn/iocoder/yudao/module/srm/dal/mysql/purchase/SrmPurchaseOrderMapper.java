@@ -67,7 +67,7 @@ public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> 
     }
 
     default SrmPurchaseOrderDO selectByNo(String no) {
-        return selectOne(SrmPurchaseOrderDO::getNo, no);
+        return selectOne(SrmPurchaseOrderDO::getCode, no);
     }
 
     //查询BO，根据订单项的erpPurchaseRequestItemNo查出对应的BO

@@ -80,5 +80,5 @@ public class SrmPurchaseRequestItemsSaveReqVO {
     private LocalDateTime expectArrivalDate;
 
     @Schema(description = "版本号")
-    private Long version;
+    private Integer version;
 }

@@ -45,7 +45,7 @@ public class SrmPurchaseRequestSaveReqVO {
     @Pattern(regexp = "^" + PURCHASE_REQUEST_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$",
         message = "单据编号格式不正确，注意后6位序号中不能以9开头,正确格式:" + PURCHASE_REQUEST_NO_PREFIX + "-20250108-000001")
     @Schema(description = "单据编号", example = "CGDD-20250108-000027")
-    private String no;
+    private String code;
 
     @Schema(description = "单据标签")
     private String tag;
@@ -57,7 +57,7 @@ public class SrmPurchaseRequestSaveReqVO {
     private String delivery;
 
     @Schema(description = "版本号")
-    private Long version;
+    private Integer version;
 
     @Schema(description = "商品信息")
     @NotNull(message = "商品信息不能为空")

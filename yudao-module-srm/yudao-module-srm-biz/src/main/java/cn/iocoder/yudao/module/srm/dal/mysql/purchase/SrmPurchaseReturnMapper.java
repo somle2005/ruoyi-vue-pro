@@ -23,7 +23,7 @@ public interface SrmPurchaseReturnMapper extends BaseMapperX<SrmPurchaseReturnDO
 
     default PageResult<SrmPurchaseReturnDO> selectPage(SrmPurchaseReturnPageReqVO reqVO) {
         MPJLambdaWrapperX<SrmPurchaseReturnDO> query = new MPJLambdaWrapperX<SrmPurchaseReturnDO>()
-                .likeIfPresent(SrmPurchaseReturnDO::getNo, reqVO.getNo())
+            .likeIfPresent(SrmPurchaseReturnDO::getCode, reqVO.getCode())
                 .eqIfPresent(SrmPurchaseReturnDO::getSupplierId, reqVO.getSupplierId())
                 .betweenIfPresent(SrmPurchaseReturnDO::getReturnTime, reqVO.getReturnTime())
                 .eqIfPresent(SrmPurchaseReturnDO::getAuditStatus, reqVO.getStatus())
@@ -59,7 +59,7 @@ public interface SrmPurchaseReturnMapper extends BaseMapperX<SrmPurchaseReturnDO
     }
 
     default SrmPurchaseReturnDO selectByNo(String no) {
-        return selectOne(SrmPurchaseReturnDO::getNo, no);
+        return selectOne(SrmPurchaseReturnDO::getCode, no);
     }
 
 //    default List<SrmPurchaseReturnDO> selectListByOrderId(Long orderId) {

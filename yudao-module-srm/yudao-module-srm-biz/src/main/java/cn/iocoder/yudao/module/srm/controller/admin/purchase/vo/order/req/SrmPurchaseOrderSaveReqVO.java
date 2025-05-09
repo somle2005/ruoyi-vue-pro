@@ -27,7 +27,7 @@ public class SrmPurchaseOrderSaveReqVO {
     @Pattern(regexp = "^" + PURCHASE_ORDER_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$",
              message = "单据编号格式不正确，注意后6位序号中不能以9开头,正确格式:" + PURCHASE_ORDER_NO_PREFIX + "-20250108-000001")
     @Schema(description = "单据编号", example = "CGDD-20250108-000027")
-    private String no;
+    private String code;
 
     @Schema(description = "单据日期", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime billTime;
@@ -83,7 +83,7 @@ public class SrmPurchaseOrderSaveReqVO {
     private List<@Valid Item> items;
 
     @Schema(description = "版本号")
-    private Long version;
+    private Integer version;
 
     @Data
     public static class Item {
@@ -214,7 +214,7 @@ public class SrmPurchaseOrderSaveReqVO {
         private Integer totalCompletionPassCount;
 
         @Schema(description = "版本号")
-        private Long version;
+        private Integer version;
     }
 
 }

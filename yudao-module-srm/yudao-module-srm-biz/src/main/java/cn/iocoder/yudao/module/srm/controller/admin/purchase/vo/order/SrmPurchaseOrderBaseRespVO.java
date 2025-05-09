@@ -24,7 +24,7 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
     private Long id;
     @Schema(description = "采购单编号")
 
-    private String no;
+    private String code;
     @Schema(description = "单据日期")
     private LocalDateTime billTime;
     @Schema(description = "采购时间")
@@ -145,7 +145,7 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
     private String portOfDischarge;
 
     @Schema(description = "版本号")
-    private Long version;
+    private Integer version;
 
     @Data
     public static class Item extends BaseVO {
@@ -297,6 +297,6 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
         private Integer totalCompletionPassCount;
 
         @Schema(description = "版本号")
-        private Long version;
+        private Integer version;
     }
 }

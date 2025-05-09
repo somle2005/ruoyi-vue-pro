@@ -16,7 +16,7 @@ import org.apache.ibatis.annotations.Mapper;
 public interface SrmPurchaseRequestMapper extends BaseMapperX<SrmPurchaseRequestDO> {
 
     default MPJLambdaWrapperX<SrmPurchaseRequestDO> queryWrapper(SrmPurchaseRequestPageReqVO reqVO) {
-        return new MPJLambdaWrapperX<SrmPurchaseRequestDO>().selectAll(SrmPurchaseRequestDO.class).eqIfPresent(SrmPurchaseRequestDO::getNo, reqVO.getNo())
+        return new MPJLambdaWrapperX<SrmPurchaseRequestDO>().selectAll(SrmPurchaseRequestDO.class).eqIfPresent(SrmPurchaseRequestDO::getCode, reqVO.getCode())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicantId, reqVO.getApplicantId())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicationDeptId, reqVO.getApplicationDeptId())
             //supplierId 供应商编号
@@ -50,7 +50,7 @@ public interface SrmPurchaseRequestMapper extends BaseMapperX<SrmPurchaseRequest
     }
 
     default SrmPurchaseRequestDO selectByNo(String no) {
-        return selectOne(SrmPurchaseRequestDO::getNo, no);
+        return selectOne(SrmPurchaseRequestDO::getCode, no);
     }
 
 }

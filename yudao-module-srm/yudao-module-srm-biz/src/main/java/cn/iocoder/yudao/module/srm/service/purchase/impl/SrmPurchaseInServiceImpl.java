@@ -104,7 +104,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         ThrowUtil.ifThrow(purchaseInMapper.selectByNo(no) != null, PURCHASE_IN_NO_EXISTS);
 
         // 2.1 插入入库
-        SrmPurchaseInDO purchaseIn = BeanUtils.toBean(createReqVO, SrmPurchaseInDO.class, in -> in.setNo(no));
+        SrmPurchaseInDO purchaseIn = BeanUtils.toBean(createReqVO, SrmPurchaseInDO.class, in -> in.setCode(no));
         calculateTotalPrice(purchaseIn, purchaseInItems);
         ThrowUtil.ifSqlThrow(purchaseInMapper.insert(purchaseIn), GlobalErrorCodeConstants.DB_INSERT_ERROR);
         // 2.2 插入入库项
@@ -146,7 +146,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 1.1 校验存在
         SrmPurchaseInDO purchaseIn = validatePurchaseInExists(vo.getId());
         if (SrmAuditStatus.APPROVED.getCode().equals(purchaseIn.getAuditStatus())) {
-            throw exception(PURCHASE_IN_UPDATE_FAIL_APPROVE, purchaseIn.getNo());
+            throw exception(PURCHASE_IN_UPDATE_FAIL_APPROVE, purchaseIn.getCode());
         }
         // 1.2 校验采购订单已审核
         for (SrmPurchaseInSaveReqVO.Item item : vo.getItems()) {
@@ -162,7 +162,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
         // 2.1 更新入库
         SrmPurchaseInDO updateObj = BeanUtils.toBean(vo, SrmPurchaseInDO.class);
-        //            .setOrderNo(purchaseOrder.getNo())
+        //            .setOrderNo(purchaseOrder.getCode())
         //            .setSupplierId(purchaseOrder.getSupplierId());
         calculateTotalPrice(updateObj, purchaseInItems);//合计
         purchaseInMapper.updateById(updateObj);
@@ -291,7 +291,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         //2. 联动回滚状态数量
         purchaseIns.forEach(purchaseIn -> {
             if (SrmAuditStatus.APPROVED.getCode().equals(purchaseIn.getAuditStatus())) {
-                throw exception(PURCHASE_IN_DELETE_FAIL_APPROVE, purchaseIn.getNo());
+                throw exception(PURCHASE_IN_DELETE_FAIL_APPROVE, purchaseIn.getCode());
             }
             rollbackSlaveStatus(purchaseInItemMapper.selectListByInId(purchaseIn.getId()));
         });
@@ -331,7 +331,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     public SrmPurchaseInDO validatePurchaseIn(Long id) {
         SrmPurchaseInDO purchaseIn = validatePurchaseInExists(id);
         if (ObjectUtil.notEqual(purchaseIn.getAuditStatus(), SrmAuditStatus.APPROVED.getCode())) {
-            throw exception(PURCHASE_IN_NOT_APPROVE, purchaseIn.getNo());
+            throw exception(PURCHASE_IN_NOT_APPROVE, purchaseIn.getCode());
         }
         return purchaseIn;
     }
@@ -427,9 +427,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 .type(BillType.WMS_INBOUND.getValue())
                 .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
                 .upstreamBillId(inDO.getId())
-                .upstreamBillCode(inDO.getNo())
+                .upstreamBillCode(inDO.getCode())
                 //归属部门
-                .traceNo(inDO.getNo())
+                .traceNo(inDO.getCode())
                 .build()
         );
     }
@@ -444,7 +444,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         itemIds.stream().distinct().forEach(item -> {
             Long inId = purchaseInItemMapper.selectById(item).getInId();
             SrmPurchaseInDO purchaseInDO = purchaseInMapper.selectById(inId);
-            ThrowUtil.ifThrow(!purchaseInDO.getAuditStatus().equals(SrmAuditStatus.APPROVED.getCode()), PURCHASE_IN_NOT_APPROVE, purchaseInDO.getNo());
+            ThrowUtil.ifThrow(!purchaseInDO.getAuditStatus().equals(SrmAuditStatus.APPROVED.getCode()), PURCHASE_IN_NOT_APPROVE, purchaseInDO.getCode());
         });
 
         itemIds.stream().distinct().forEach(inItemId -> {

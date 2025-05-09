@@ -22,7 +22,7 @@ public class SrmPurchaseReturnBaseRespVO extends SrmPurchaseBaseRespVO {
 
     @Schema(description = "退货单编号")
     @ExcelProperty("退货单编号")
-    private String no;
+    private String code;
 
     @Schema(description = "退货状态")
     @ExcelProperty("退货状态")
@@ -122,7 +122,7 @@ public class SrmPurchaseReturnBaseRespVO extends SrmPurchaseBaseRespVO {
         /**
          * 采购订单号
          * <p>
-         * 冗余 {@link SrmPurchaseOrderDO#getNo()}
+         * 冗余 {@link SrmPurchaseOrderDO#getCode()}
          */
 //        private String orderNo;
 

@@ -19,7 +19,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 public class SrmPurchaseInPageReqVO extends PageParam {
 
     @Schema(description = "采购单编号-单据编号")
-    private String no;
+    private String code;
 
     @Schema(description = "单据日期")
     private LocalDateTime[] billTime;

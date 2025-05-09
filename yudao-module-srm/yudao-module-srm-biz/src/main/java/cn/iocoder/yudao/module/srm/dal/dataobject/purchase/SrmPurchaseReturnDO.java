@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -13,7 +14,7 @@ import java.time.LocalDateTime;
 /**
  * ERP 采购退货 DO
  *
- * @author 芋道源码
+ * @author wdy
  */
 @TableName(value = "srm_purchase_return")
 @KeySequence("srm_purchase_return_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
@@ -32,9 +33,14 @@ public class SrmPurchaseReturnDO extends TenantBaseDO {
     @TableId
     private Long id;
     /**
+     * 乐观锁
+     */
+    @Version
+    private Integer version;
+    /**
      * 采购退货单号
      */
-    private String no;
+    private String code;
     /**
      * 审批状态
      * <p>
@@ -70,18 +76,14 @@ public class SrmPurchaseReturnDO extends TenantBaseDO {
      */
     private LocalDateTime returnTime;
 
-//    /**
-//     * 采购订单编号
-//     *
-//     * 关联 {@link SrmPurchaseOrderDO#getId()}
-//     */
-//    private Long orderId;
-//    /**
-//     * 采购订单号
-//     *
-//     * 冗余 {@link SrmPurchaseOrderDO#getNo()}
-//     */
-//    private String orderNo;
+    /**
+     * 币种编号
+     */
+    private Long currencyId;
+    /**
+     * 价税合计
+     */
+    private BigDecimal allAmount;
 
     /**
      * 合计数量

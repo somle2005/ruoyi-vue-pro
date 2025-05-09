@@ -18,7 +18,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 public class SrmPurchaseRequestPageReqVO extends PageParam {
 
     @Schema(description = "单据编号")
-    private String no;
+    private String code;
 
     @Schema(description = "申请人id")
     private Long applicantId;

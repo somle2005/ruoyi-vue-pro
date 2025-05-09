@@ -31,7 +31,7 @@ public class SrmPurchaseRequestItemsDO extends TenantBaseDO {
     @TableId
     private Long id;
     @Version
-    private Long version;
+    private Integer version;
     /**
      * 商品id
      */

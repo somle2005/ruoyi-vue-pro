@@ -20,7 +20,7 @@ public class SrmPurchaseRequestItemRespVO extends BaseVO {
 
     @Schema(description = "产品编码", example = "FTC1607AWB")
     @ExcelProperty("产品编码")
-    private String no;
+    private String code;
 
     // ========== 产品信息 ==========
     //
@@ -130,5 +130,5 @@ public class SrmPurchaseRequestItemRespVO extends BaseVO {
     private LocalDateTime expectArrivalDate;
 
     @Schema(description = "版本号")
-    private Long version;
+    private Integer version;
 }

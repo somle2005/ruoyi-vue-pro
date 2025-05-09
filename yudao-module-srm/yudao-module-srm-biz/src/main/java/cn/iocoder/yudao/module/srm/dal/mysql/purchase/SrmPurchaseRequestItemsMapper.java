@@ -40,7 +40,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
         return buildWrapper(req)
             .leftJoin(SrmPurchaseRequestDO.class, SrmPurchaseRequestDO::getId, SrmPurchaseRequestItemsDO::getRequestId)
             .selectAll(SrmPurchaseRequestDO.class)
-            .likeIfPresent(SrmPurchaseRequestDO::getNo, req.getNo())
+            .likeIfPresent(SrmPurchaseRequestDO::getCode, req.getCode())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicantId, req.getApplicantId())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicationDeptId, req.getApplicationDeptId())
             .betweenIfPresent(SrmPurchaseRequestDO::getBillTime, req.getBillTime())

@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.tenant.core.db.TenantBaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -28,6 +29,11 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
      */
     @TableId
     private Long id;
+    /**
+     * 乐观锁
+     */
+    @Version
+    private Integer version;
     /**
      * 采购退货编号
      * <p>
@@ -55,19 +61,14 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
      * <p>
      */
     private Long productUnitId;
-
-    /**
-     * 币种编号
-     */
-//    private Long currencyId;
-    /**
-     * 币别名称
-     */
-    private String currencyName;
     /**
      * 产品单位单价，单位：元
      */
     private BigDecimal productPrice;
+    /**
+     * 产品单位名称
+     */
+    private String productUnitName;
     /**
      * 数量
      */

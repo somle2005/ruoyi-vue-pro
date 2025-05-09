@@ -85,8 +85,8 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         String no = noRedisDAO.generate(SrmNoRedisDAO.PURCHASE_RETURN_NO_PREFIX, PURCHASE_RETURN_NO_OUT_OF_BOUNDS);
         ThrowUtil.ifThrow(purchaseReturnMapper.selectByNo(no) != null, PURCHASE_RETURN_NO_EXISTS);
         // 2.1 插入退货
-        SrmPurchaseReturnDO purchaseReturn = BeanUtils.toBean(vo, SrmPurchaseReturnDO.class, in -> in.setNo(no).setAuditStatus(SrmAuditStatus.PENDING_REVIEW.getCode()));
-        //                .setOrderNo(purchaseOrder.getNo()).setSupplierId(purchaseOrder.getSupplierId());
+        SrmPurchaseReturnDO purchaseReturn = BeanUtils.toBean(vo, SrmPurchaseReturnDO.class, in -> in.setCode(no).setAuditStatus(SrmAuditStatus.PENDING_REVIEW.getCode()));
+        //                .setOrderNo(purchaseOrder.getCode()).setSupplierId(purchaseOrder.getSupplierId());
         calculateTotalPrice(purchaseReturn, item);
         purchaseReturnMapper.insert(purchaseReturn);
         // 2.2 插入退货项
@@ -238,7 +238,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
             purchaseReturnItemMapper.updateBatch(diffList.get(1));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {
-            purchaseReturnItemMapper.deleteBatchIds(convertList(diffList.get(2), SrmPurchaseReturnItemDO::getId));
+            purchaseReturnItemMapper.deleteByIds(convertList(diffList.get(2), SrmPurchaseReturnItemDO::getId));
         }
     }
 

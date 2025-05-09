@@ -33,12 +33,12 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
     private Long id;
 
     @Version
-    private Long version;
+    private Integer version;
 
     /**
      * 采购单编号
      */
-    private String no;
+    private String code;
     /**
      * 采购状态
      */

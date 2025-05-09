@@ -33,12 +33,12 @@ public class SrmPurchaseInDO extends TenantBaseDO {
      * 乐观锁
      */
     @Version
-    private Long version;
+    private Integer version;
 
     /**
      * 采购入库单据编号
      */
-    private String no;
+    private String code;
 
     // ========= 基础关联字段 =========
 

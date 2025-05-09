@@ -137,40 +137,21 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         }
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Long createPurchaseOrder(SrmPurchaseOrderSaveReqVO vo) {
-        // 1.1 校验订单项的有效性
-        List<SrmPurchaseOrderItemDO> orderItems = validatePurchaseOrderItems(vo.getItems());
-        // 1.2 校验供应商
-        supplierService.validateSupplier(vo.getSupplierId());
-        // 1.3 校验结算账户
-        if (vo.getAccountId() != null) {
-            erpAccountApi.validateAccount(vo.getAccountId());
-        }
-        // 1.3.1 校验订单项是否可以被创建
-        List<Long> purchaseApplyItemIds = orderItems.stream().map(SrmPurchaseOrderItemDO::getPurchaseApplyItemId).distinct().toList();
-        //构造purchaseApplyItemIds:count 的Map
-        validPurchaseApplyItemId(purchaseApplyItemIds, orderItems);
-        // 1.4 生成订单号，并校验唯一性
-        voSetNo(vo);
-        // 2.1 插入订单
-        SrmPurchaseOrderDO orderDO = BeanUtils.toBean(vo, SrmPurchaseOrderDO.class, in -> in.setNo(vo.getNo()));
-        calculateTotalPrice(orderDO, orderItems);
-        // 2.1.1 插入单据日期+结算日期
-        orderDO.setBillTime(vo.getBillTime() == null ? LocalDateTime.now() : vo.getBillTime());
-        ThrowUtil.ifSqlThrow(purchaseOrderMapper.insert(orderDO), DB_INSERT_ERROR);
-        // 2.2 插入订单项
-        orderItems.forEach(o -> {
-            o.setSource(o.getSource() == null ? SOURCE : o.getSource());
-            o.setOrderId(orderDO.getId());
-        });
-        ThrowUtil.ifThrow(!purchaseOrderItemMapper.insertBatch(orderItems), DB_BATCH_INSERT_ERROR);
-        orderItems = purchaseOrderItemMapper.selectListByOrderId(orderDO.getId());
-        //3.0 设置初始化状态
-        initMasterState(orderDO);
-        initSlaveStatus(orderItems);
-        return orderDO.getId();
+    /**
+     * 判断当前状态是否可以更新
+     *
+     * @param purchaseOrder purchaseOrder
+     */
+    private static void updateStatusCheck(SrmPurchaseOrderDO purchaseOrder) {
+        //1.1 不处于草稿、审核不通过、审核撤销 状态->e
+        ThrowUtil.ifThrow(
+            !SrmAuditStatus.DRAFT.getCode().equals(purchaseOrder.getAuditStatus()) && !SrmAuditStatus.REJECTED.getCode()
+                .equals(purchaseOrder.getAuditStatus()) && !SrmAuditStatus.REVOKED.getCode()
+                .equals(purchaseOrder.getAuditStatus()), PURCHASE_ORDER_UPDATE_FAIL_APPROVE, purchaseOrder.getCode(),
+            SrmAuditStatus.fromCode(purchaseOrder.getAuditStatus()).getDesc());
+
+        //2.0 非开启 -> e
+        ThrowUtil.ifThrow(!SrmOffStatus.OPEN.getCode().equals(purchaseOrder.getOffStatus()), PURCHASE_ORDER_UPDATE_FAIL_OFF, purchaseOrder.getCode());
     }
 
     /**
@@ -240,21 +221,40 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         purchaseOrderPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, orderDO);
     }
 
-    /**
-     * 判断当前状态是否可以更新
-     *
-     * @param purchaseOrder purchaseOrder
-     */
-    private static void updateStatusCheck(SrmPurchaseOrderDO purchaseOrder) {
-        //1.1 不处于草稿、审核不通过、审核撤销 状态->e
-        ThrowUtil.ifThrow(
-            !SrmAuditStatus.DRAFT.getCode().equals(purchaseOrder.getAuditStatus()) && !SrmAuditStatus.REJECTED.getCode()
-                .equals(purchaseOrder.getAuditStatus()) && !SrmAuditStatus.REVOKED.getCode()
-                .equals(purchaseOrder.getAuditStatus()), PURCHASE_ORDER_UPDATE_FAIL_APPROVE, purchaseOrder.getNo(),
-            SrmAuditStatus.fromCode(purchaseOrder.getAuditStatus()).getDesc());
-
-        //2.0 非开启 -> e
-        ThrowUtil.ifThrow(!SrmOffStatus.OPEN.getCode().equals(purchaseOrder.getOffStatus()), PURCHASE_ORDER_UPDATE_FAIL_OFF, purchaseOrder.getNo());
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createPurchaseOrder(SrmPurchaseOrderSaveReqVO vo) {
+        // 1.1 校验订单项的有效性
+        List<SrmPurchaseOrderItemDO> orderItems = validatePurchaseOrderItems(vo.getItems());
+        // 1.2 校验供应商
+        supplierService.validateSupplier(vo.getSupplierId());
+        // 1.3 校验结算账户
+        if (vo.getAccountId() != null) {
+            erpAccountApi.validateAccount(vo.getAccountId());
+        }
+        // 1.3.1 校验订单项是否可以被创建
+        List<Long> purchaseApplyItemIds = orderItems.stream().map(SrmPurchaseOrderItemDO::getPurchaseApplyItemId).distinct().toList();
+        //构造purchaseApplyItemIds:count 的Map
+        validPurchaseApplyItemId(purchaseApplyItemIds, orderItems);
+        // 1.4 生成订单号，并校验唯一性
+        voSetNo(vo);
+        // 2.1 插入订单
+        SrmPurchaseOrderDO orderDO = BeanUtils.toBean(vo, SrmPurchaseOrderDO.class, in -> in.setCode(vo.getCode()));
+        calculateTotalPrice(orderDO, orderItems);
+        // 2.1.1 插入单据日期+结算日期
+        orderDO.setBillTime(vo.getBillTime() == null ? LocalDateTime.now() : vo.getBillTime());
+        ThrowUtil.ifSqlThrow(purchaseOrderMapper.insert(orderDO), DB_INSERT_ERROR);
+        // 2.2 插入订单项
+        orderItems.forEach(o -> {
+            o.setSource(o.getSource() == null ? SOURCE : o.getSource());
+            o.setOrderId(orderDO.getId());
+        });
+        ThrowUtil.ifThrow(!purchaseOrderItemMapper.insertBatch(orderItems), DB_BATCH_INSERT_ERROR);
+        orderItems = purchaseOrderItemMapper.selectListByOrderId(orderDO.getId());
+        //3.0 设置初始化状态
+        initMasterState(orderDO);
+        initSlaveStatus(orderItems);
+        return orderDO.getId();
     }
 
     @Override
@@ -272,8 +272,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             erpAccountApi.validateAccount(vo.getAccountId());
         }
         // 1.3.1 设置no
-        String oldNo = purchaseOrder.getNo();
-        if (!oldNo.equals(vo.getNo())) {
+        String oldNo = purchaseOrder.getCode();
+        if (!oldNo.equals(vo.getCode())) {
             voSetNo(vo);
         }
         // 1.4 校验订单项的有效性
@@ -292,7 +292,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         SrmPurchaseOrderDO purchaseOrder = validatePurchaseOrderExists(reqVO.getId());
         //不处于已审核 -> e
         ThrowUtil.ifThrow(!SrmAuditStatus.APPROVED.getCode().equals(purchaseOrder.getAuditStatus()), PURCHASE_ORDER_ITEM_IN_FAIL_APPROVE,
-            purchaseOrder.getNo());
+            purchaseOrder.getCode());
         //验证子表id存在
         List<Long> itemIds = reqVO.getItems().stream().map(SrmPurchaseOrderSaveJsonReqVO.Item::getId).distinct().toList();
         //map
@@ -306,13 +306,13 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
 
     private void voSetNo(SrmPurchaseOrderSaveReqVO vo) {
         //生成单据编号
-        if (vo.getNo() != null) {
-            ThrowUtil.ifThrow(purchaseOrderMapper.selectByNo(vo.getNo()) != null, PURCHASE_ORDER_NO_HAS_EXISTS, vo.getNo());
-            noRedisDAO.setManualSerial(PURCHASE_ORDER_NO_PREFIX, vo.getNo());
+        if (vo.getCode() != null) {
+            ThrowUtil.ifThrow(purchaseOrderMapper.selectByNo(vo.getCode()) != null, PURCHASE_ORDER_NO_HAS_EXISTS, vo.getCode());
+            noRedisDAO.setManualSerial(PURCHASE_ORDER_NO_PREFIX, vo.getCode());
         } else {
-            vo.setNo(noRedisDAO.generate(PURCHASE_ORDER_NO_PREFIX, PURCHASE_ORDER_NO_OUT_OF_BOUNDS));
+            vo.setCode(noRedisDAO.generate(PURCHASE_ORDER_NO_PREFIX, PURCHASE_ORDER_NO_OUT_OF_BOUNDS));
             //1.1 校验编号no是否在数据库中重复
-            ThrowUtil.ifThrow(purchaseOrderMapper.selectByNo(vo.getNo()) != null, PURCHASE_ORDER_NO_EXISTS, vo.getNo());
+            ThrowUtil.ifThrow(purchaseOrderMapper.selectByNo(vo.getCode()) != null, PURCHASE_ORDER_NO_EXISTS, vo.getCode());
         }
     }
 
@@ -480,7 +480,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         purchaseOrders.forEach(orderDO -> {
             //已审核 -> e
             if (SrmAuditStatus.APPROVED.getCode().equals(orderDO.getAuditStatus())) {
-                throw exception(PURCHASE_ORDER_DELETE_FAIL_APPROVE, orderDO.getNo());
+                throw exception(PURCHASE_ORDER_DELETE_FAIL_APPROVE, orderDO.getCode());
             }
             //存在对应的采购入库项->异常
             purchaseOrderItemMapper.selectListByOrderId(orderDO.getId()).forEach(item -> {
@@ -565,7 +565,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         //只有已审核的才可以
         SrmPurchaseOrderDO purchaseOrder = validatePurchaseOrderExists(id);
         if (ObjectUtil.notEqual(purchaseOrder.getAuditStatus(), SrmAuditStatus.APPROVED.getCode())) {
-            throw exception(PURCHASE_ORDER_NOT_APPROVE, purchaseOrder.getNo());
+            throw exception(PURCHASE_ORDER_NOT_APPROVE, purchaseOrder.getCode());
         }
         return purchaseOrder;
     }
@@ -724,7 +724,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         List<SrmPurchaseOrderItemDO> orderItemDOS = purchaseOrderItemMapper.selectListByItemIds(itemIds);
         //转换
         SrmPurchaseInSaveReqVO vo = BeanUtils.toBean(reqVO, SrmPurchaseInSaveReqVO.class, saveReqVO ->
-                saveReqVO.setNo(null).setItems(SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS)).setId(null)
+            saveReqVO.setCode(null).setItems(SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS)).setId(null)
                         .setInTime(LocalDateTime.now()));
         //service持久化
         Long purchaseIn = purchaseInService.createPurchaseIn(vo);

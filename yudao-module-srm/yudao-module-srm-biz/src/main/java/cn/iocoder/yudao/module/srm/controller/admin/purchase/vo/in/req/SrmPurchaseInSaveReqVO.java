@@ -22,10 +22,10 @@ public class SrmPurchaseInSaveReqVO {
     private Long id;
 
     /**
-     * 采购订单号 冗余 {@link SrmPurchaseOrderDO#getNo()}
+     * 采购订单号 冗余 {@link SrmPurchaseOrderDO#getCode()}
      */
     @Schema(description = "入库单号")
-    private String no;
+    private String code;
 
     @Schema(description = "入库时间(不填默认当前时间)")
     private LocalDateTime inTime;
@@ -59,7 +59,7 @@ public class SrmPurchaseInSaveReqVO {
     private Boolean reconciliationStatus;
 
     @Schema(description = "版本号")
-    private Long version;
+    private Integer version;
 
     @Schema(description = "入库清单列表")
     @Size(min = 1, message = "入库项至少有一个")
@@ -127,6 +127,6 @@ public class SrmPurchaseInSaveReqVO {
         private Long applicationDeptId;
 
         @Schema(description = "版本号")
-        private Long version;
+        private Integer version;
     }
 }

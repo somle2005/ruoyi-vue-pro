@@ -20,7 +20,7 @@ public interface SrmPurchaseInMapper extends BaseMapperX<SrmPurchaseInDO> {
 
     //WrapperX 方法
     default MPJLambdaWrapper<SrmPurchaseInDO> bindQueryWrapper(SrmPurchaseInPageReqVO reqVO) {
-        return new MPJLambdaWrapperX<SrmPurchaseInDO>().selectAll(SrmPurchaseInDO.class).likeIfPresent(SrmPurchaseInDO::getNo, reqVO.getNo())
+        return new MPJLambdaWrapperX<SrmPurchaseInDO>().selectAll(SrmPurchaseInDO.class).likeIfPresent(SrmPurchaseInDO::getCode, reqVO.getCode())
             .eqIfPresent(SrmPurchaseInDO::getAuditStatus, reqVO.getAuditStatus()).eqIfPresent(SrmPurchaseInDO::getPayStatus, reqVO.getPayStatus())
             .eqIfPresent(SrmPurchaseInDO::getReconciliationStatus, reqVO.getReconciliationEnable())
             .eqIfPresent(SrmPurchaseInDO::getAuditorId, reqVO.getAuditorId())
@@ -46,7 +46,7 @@ public interface SrmPurchaseInMapper extends BaseMapperX<SrmPurchaseInDO> {
     }
 
     default SrmPurchaseInDO selectByNo(String no) {
-        return selectOne(SrmPurchaseInDO::getNo, no);
+        return selectOne(SrmPurchaseInDO::getCode, no);
     }
 
     //    default List<SrmPurchaseInDO> selectListByOrderId(Long orderId) {

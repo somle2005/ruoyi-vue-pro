@@ -29,11 +29,11 @@ public class SrmPurchaseRequestDO extends TenantBaseDO {
     @TableId
     private Long id;
     @Version
-    private Long version;
+    private Integer version;
     /**
      * 单据编号
      */
-    private String no;
+    private String code;
     /**
      * 申请人id
      */

@@ -31,12 +31,11 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
     @TableId
     private Long id;
     @Version
-    private Long version;
+    private Integer version;
     /**
      * 采购入库编号 关联 {@link SrmPurchaseInDO#getId()}
      */
     private Long inId;
-
     /**
      * 仓库编号 关联 {@link cn.iocoder.yudao.module.erp.dal.dataobject.stock.ErpWarehouseDO#getId()}
      */
@@ -49,6 +48,10 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
      * 产品单位 冗余 {@link cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO#getUnitId()}
      */
     private Long productUnitId;
+    /**
+     * 产品单位名称
+     */
+    private String productUnitName;
     /**
      * 产品单位单价，单位：元
      */
@@ -70,6 +73,14 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
      */
     private BigDecimal totalPrice;
     /**
+     * 合计产品价格，单位：元
+     */
+    private BigDecimal totalProductPrice;
+    /**
+     * 合计税额
+     */
+    private BigDecimal totalTaxPrice;
+    /**
      * 税率，百分比
      */
     private BigDecimal taxPercent;
@@ -86,7 +97,9 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
      */
     private String containerRate;//箱率
     /**
-     * 采购订单项编号 关联 {@link SrmPurchaseOrderItemDO#getId()} 目的：方便更新关联的采购订单项的入库数量
+     * 采购订单项编号 关联 {@link SrmPurchaseOrderItemDO#getId()}
+     * <p>
+     * 目的：方便更新关联的采购订单项的入库数量
      */
     private Long orderItemId;
     /**
@@ -114,9 +127,7 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
      */
     private Long applicantId;
     /**
-     * 申请部门id
-     * <p>
-     * 部门id
+     * 申请人部门id
      */
     private Long applicationDeptId;
     /**
@@ -127,10 +138,6 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
      * 产品名称
      */
     private String productName;
-    /**
-     * 产品单位名称
-     */
-    private String productUnitName;
     /**
      * 产品sku
      */

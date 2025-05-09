@@ -34,7 +34,7 @@ public class SrmPurchaseOrderItemDO extends TenantBaseDO {
     private Long id;
 
     @Version
-    private Long version;
+    private Integer version;
     /**
      * 仓库编号
      * <p>
@@ -99,7 +99,7 @@ public class SrmPurchaseOrderItemDO extends TenantBaseDO {
      */
     private BigDecimal totalProductPrice;
     /**
-     * 合计产品税价，单位：元
+     * 合计税额
      */
     private BigDecimal totalTaxPrice;
     /**
