@@ -214,7 +214,7 @@ public class WmsInventoryBinController {
     @PostMapping("/import-excel")
     @Operation(summary = "导入盘点结果")
     @PreAuthorize("@ss.hasPermission('wms:inbound-item:import')")
-    public CommonResult<Boolean> importExcel(@Valid WmsInventoryBinImportVO importReqVO) throws Exception {
+    public CommonResult<List<WmsInventoryBinRespVO>> importExcel(@Valid WmsInventoryBinImportVO importReqVO) throws Exception {
         WmsInventoryDO inventory = inventoryService.validateInventoryExists(importReqVO.getInventoryId());
         WmsInventoryAuditStatus inventoryAuditStatus = WmsInventoryAuditStatus.parse(inventory.getAuditStatus());
         // 不允许导入
@@ -299,7 +299,10 @@ public class WmsInventoryBinController {
             }
         }
 
-        inventoryBinService.saveInventoryBinList(inventory, dosInDB);
-        return success(true);
+        List<WmsInventoryBinRespVO> inventoryBinRespVOS = BeanUtils.toBean(dosInDB, WmsInventoryBinRespVO.class);
+        inventoryBinService.assembleProduct(inventoryBinRespVOS);
+        inventoryBinService.assembleBin(inventoryBinRespVOS);
+        // inventoryBinService.saveInventoryBinList(inventory, dosInDB);
+        return success(inventoryBinRespVOS);
     }
 }
