@@ -121,11 +121,9 @@ public class SrmPurchaseOrderSaveReqVO {
         @DecimalMin(value = "0.00", message = "产品单价不能小于0")
         @NotNull(message = "产品单价不能为空")
         private BigDecimal productPrice;
-        /**
-         * 产品单位
-         * <p>
-         * 冗余 {@link cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO#getUnitId()}
-         */
+
+        @Schema(description = "产品单位ID")
+        @NotNull(message = "产品单位ID不能为空")
         private Long productUnitId;
 
         @Schema(description = "增值税税率，百分比")

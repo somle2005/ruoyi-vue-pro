@@ -73,7 +73,6 @@ public class SrmPurchaseInController {
     @Idempotent
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:create')")
     public CommonResult<Long> createPurchaseIn(@Valid @RequestBody SrmPurchaseInSaveReqVO createReqVO) {
-        //给vo里面的项的source设置字符串a
         createReqVO.getItems().forEach(item -> item.setSource(SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc()));
         return success(purchaseInService.createPurchaseIn(createReqVO));
     }
@@ -149,7 +148,6 @@ public class SrmPurchaseInController {
     @Operation(summary = "切换付款状态")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:changePayStatus')")
     public CommonResult<Boolean> changePayStatus(@Valid @RequestBody SrmPurchaseInPayReqVO vo) {
-        //        purchaseInService.changePayStatus(reqVO.getInId(), reqVO.getPayStatus());
         purchaseInService.switchPayStatus(vo);
         return success(true);
     }

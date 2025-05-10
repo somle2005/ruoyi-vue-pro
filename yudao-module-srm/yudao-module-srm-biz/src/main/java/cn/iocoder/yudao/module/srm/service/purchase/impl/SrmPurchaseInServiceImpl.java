@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -89,6 +90,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseIn(SrmPurchaseInSaveReqVO vo) {
+        //默认入库时间
+        vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
         // 1.2 校验入库项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
         // 1.3 校验结算账户
@@ -148,6 +151,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseIn(SrmPurchaseInSaveReqVO vo) {
+        //默认入库时间
+        vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
         // 1.1 校验存在
         SrmPurchaseInDO purchaseIn = validatePurchaseInExists(vo.getId());
         if (SrmAuditStatus.APPROVED.getCode().equals(purchaseIn.getAuditStatus())) {
@@ -215,12 +220,12 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
      */
     private List<SrmPurchaseInItemDO> validatePurchaseInItemsAndCopyProperty(List<SrmPurchaseInSaveReqVO.Item> voItems) {
         // 1.1 批量获取订单项,根据入库项的订单项id
-        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(convertSet(voItems, SrmPurchaseInSaveReqVO.Item::getOrderItemId)),
-            SrmPurchaseOrderItemDO::getId);
+        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(convertSet(voItems, SrmPurchaseInSaveReqVO.Item::getOrderItemId)), SrmPurchaseOrderItemDO::getId);
         //
         return convertList(voItems, voItem -> BeanUtils.toBean(voItem, SrmPurchaseInItemDO.class, inItemDO -> {
-            // 金额计算
+            //总价
             inItemDO.setTotalPrice(MoneyUtils.priceMultiply(inItemDO.getProductPrice(), inItemDO.getQty()));
+            //税率
             if (inItemDO.getTaxPercent() != null && inItemDO.getTotalPrice() != null) {
                 inItemDO.setTaxPrice(MoneyUtils.priceMultiplyPercent(inItemDO.getTotalPrice(), inItemDO.getTaxPercent()));
             }
@@ -262,12 +267,12 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     private void updatePurchaseInItemList(Long id, List<SrmPurchaseInItemDO> newList) {
-        // 第一步，对比新老数据，获得添加、修改、删除的列表
+        //1 对比列表
         List<SrmPurchaseInItemDO> oldList = purchaseInItemMapper.selectListByInId(id);
         List<List<SrmPurchaseInItemDO>> diffList = diffList(oldList, newList, // id 不同，就认为是不同的记录
             (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
 
-        // 第二步，批量添加、修改、删除
+        //2 批量添加、修改、删除
         if (CollUtil.isNotEmpty(diffList.get(0))) {
             diffList.get(0).forEach(o -> {
                 o.setInId(id);

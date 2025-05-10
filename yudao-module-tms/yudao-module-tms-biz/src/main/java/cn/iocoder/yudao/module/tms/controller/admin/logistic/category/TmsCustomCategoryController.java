@@ -177,7 +177,7 @@ public class TmsCustomCategoryController {
             List<TmsCustomCategoryItemDO> items = itemMap.get(vo.getId());
             Optional.ofNullable(vo.getUpdater()).ifPresent(updater -> vo.setUpdater(userMap.get(Long.parseLong(updater)).getNickname()));//创建人
             Optional.ofNullable(vo.getCreator()).ifPresent(creator -> vo.setCreator(userMap.get(Long.parseLong(creator)).getNickname()));//更新人
-            Optional.of(vo.getCustomRuleCategoryItems()).ifPresent(itemRespVOS -> vo.setItemCount(itemRespVOS.size()));
+            Optional.ofNullable(vo.getCustomRuleCategoryItems()).ifPresent(itemRespVOS -> vo.setItemCount(itemRespVOS.size()));
 
             vo.setCustomRuleCategoryItems(BeanUtils.toBean(items, TmsCustomCategoryItemRespVO.class, item -> {
                 Optional.ofNullable(item.getUpdater()).ifPresent(updater -> item.setUpdater(userMap.get(Long.parseLong(updater)).getNickname()));//创建人

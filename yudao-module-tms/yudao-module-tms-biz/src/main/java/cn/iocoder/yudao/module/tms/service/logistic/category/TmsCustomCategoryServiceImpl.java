@@ -94,7 +94,7 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
         TmsCustomCategoryDO updateObj = BeanUtils.toBean(updateReqVO, TmsCustomCategoryDO.class);
         customRuleCategoryMapper.updateById(updateObj);
         // 更新子表
-        List<TmsCustomCategoryItemDO> itemDOS = TmsCustomCategoryItemConvert.INSTANCE.convert(updateReqVO.getCustomRuleCategoryItems());
+        List<TmsCustomCategoryItemDO> itemDOS = BeanUtils.toBean(updateReqVO.getCustomRuleCategoryItems(), TmsCustomCategoryItemDO.class);
         List<Long> itemIds = updateCustomRuleCategoryItemList(categoryId, itemDOS);
         //同步
 //        this.syncCustomRuleCategoryItem(itemIds);
@@ -133,7 +133,7 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
         if (CollUtil.isEmpty(ids)) {
             return;
         }
-        List<TmsCustomCategoryDO> list = customRuleCategoryMapper.selectBatchIds(ids);
+        List<TmsCustomCategoryDO> list = customRuleCategoryMapper.selectByIds(ids);
         Map<Long, TmsCustomCategoryDO> map = convertMap(list, TmsCustomCategoryDO::getId);
         for (Long id : ids) {
             TmsCustomCategoryDO aDo = map.get(id);
@@ -198,13 +198,18 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
      * @param itemsDOList 海关分类子表
      */
     private List<Long> updateCustomRuleCategoryItemList(Long categoryId, List<TmsCustomCategoryItemDO> itemsDOList) {
+        itemsDOList.forEach(o -> o.setCustomCategoryId(categoryId));
         List<TmsCustomCategoryItemDO> oldList = customRuleCategoryItemMapper.selectListByCategoryId(categoryId);
-        List<List<TmsCustomCategoryItemDO>> diffedList = diffList(oldList, itemsDOList,
-            (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
+        List<List<TmsCustomCategoryItemDO>> diffedList = diffList(
+            oldList,
+            itemsDOList,
+            (o1, o2) -> o1.getId().equals(o2.getId()),
+            (o1, o2) -> o1.businessHashCode() == o2.businessHashCode() || o1.businessEquals(o2)
+        );
+
         List<Long> itemIds = new ArrayList<>();
         //批量添加、修改、删除
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
-            diffedList.get(0).forEach(o -> o.setCustomCategoryId(categoryId));
             customRuleCategoryItemMapper.insertBatch(diffedList.get(0));
             itemIds.addAll(diffedList.get(0).stream().map(TmsCustomCategoryItemDO::getId).toList());
         }
