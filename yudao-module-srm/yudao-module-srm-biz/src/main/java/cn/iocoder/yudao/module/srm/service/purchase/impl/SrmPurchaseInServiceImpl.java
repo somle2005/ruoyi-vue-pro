@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.srm.service.purchase.impl;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
@@ -115,16 +114,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         return purchaseIn.getId();
     }
 
-    private void updateStatusCheck(SrmPurchaseInSaveReqVO vo) {
-        //1.1 不处于草稿、审核不通过、审核撤销 状态->e
-        for (SrmPurchaseInSaveReqVO.Item item : vo.getItems()) {
-            SrmPurchaseOrderItemDO aDo = purchaseOrderService.validatePurchaseOrderItemExists(item.getOrderItemId());
-            if (aDo != null) {
-                Optional.ofNullable(aDo.getOrderId()).ifPresent(orderId -> purchaseOrderService.validatePurchaseOrder(orderId));
-            }
-        }
-    }
-
     private void initSlaveStatus(List<SrmPurchaseInItemDO> purchaseInItems) {
         for (SrmPurchaseInItemDO purchaseInItem : purchaseInItems) {
             itemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, purchaseInItem);
@@ -148,6 +137,16 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         }
     }
 
+    //判断当前状态是否可以更新 方法
+    private static void updateStatusCheck(SrmPurchaseInDO srmPurchaseInDO) {
+        //1.1 不处于草稿、审核不通过、审核撤销 状态->e
+        ThrowUtil.ifThrow(
+            !SrmAuditStatus.DRAFT.getCode().equals(srmPurchaseInDO.getAuditStatus()) && !SrmAuditStatus.REJECTED.getCode()
+                .equals(srmPurchaseInDO.getAuditStatus()) && !SrmAuditStatus.REVOKED.getCode()
+                .equals(srmPurchaseInDO.getAuditStatus()), PURCHASE_IN_UPDATE_FAIL_APPROVE, srmPurchaseInDO.getCode(),
+            SrmAuditStatus.fromCode(srmPurchaseInDO.getAuditStatus()).getDesc());
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseIn(SrmPurchaseInSaveReqVO vo) {
@@ -155,24 +154,18 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
         // 1.1 校验存在
         SrmPurchaseInDO purchaseIn = validatePurchaseInExists(vo.getId());
-        if (SrmAuditStatus.APPROVED.getCode().equals(purchaseIn.getAuditStatus())) {
-            throw exception(PURCHASE_IN_UPDATE_FAIL_APPROVE, purchaseIn.getCode());
-        }
-        // 1.2 校验采购订单已审核
-        updateStatusCheck(vo);
+        // 1.2 校验采购入库审核状态可以修改
+        updateStatusCheck(purchaseIn);
         // 1.3 校验结算账户
         erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 校验订单项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
         // 2.1 更新入库
         SrmPurchaseInDO updateObj = BeanUtils.toBean(vo, SrmPurchaseInDO.class);
-        //            .setOrderNo(purchaseOrder.getCode())
-        //            .setSupplierId(purchaseOrder.getSupplierId());
         calculateTotalPrice(updateObj, purchaseInItems);//合计
         purchaseInMapper.updateById(updateObj);
         // 2.2 更新入库项
         updatePurchaseInItemList(vo.getId(), purchaseInItems);
-
     }
 
     private void calculateTotalPrice(SrmPurchaseInDO purchaseIn, List<SrmPurchaseInItemDO> purchaseInItems) {
@@ -281,7 +274,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             purchaseInItemMapper.insertBatch(diffList.get(0));
         }
         if (CollUtil.isNotEmpty(diffList.get(1))) {
-
             purchaseInItemMapper.updateBatch(diffList.get(1));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {
@@ -340,7 +332,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
     }
 
-    private SrmPurchaseInDO validatePurchaseInExists(Long id) {
+    public SrmPurchaseInDO validatePurchaseInExists(Long id) {
         SrmPurchaseInDO purchaseIn = purchaseInMapper.selectById(id);
         if (purchaseIn == null) {
             throw exception(PURCHASE_IN_NOT_EXISTS);
@@ -362,14 +354,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         return purchaseInMapper.selectById(id);
     }
 
-    @Override
-    public SrmPurchaseInDO validatePurchaseIn(Long id) {
-        SrmPurchaseInDO purchaseIn = validatePurchaseInExists(id);
-        if (ObjectUtil.notEqual(purchaseIn.getAuditStatus(), SrmAuditStatus.APPROVED.getCode())) {
-            throw exception(PURCHASE_IN_NOT_APPROVE, purchaseIn.getCode());
-        }
-        return purchaseIn;
-    }
 
     @Override
     public PageResult<SrmPurchaseInDO> getPurchaseInPage(SrmPurchaseInPageReqVO pageReqVO) {
