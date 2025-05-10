@@ -9,8 +9,10 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
 import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
+import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -44,5 +46,12 @@ public class SrmPurchaseInItemStatusMachine {
         builder.externalTransition().from(SrmPaymentStatus.ALL_PAYMENT).to(SrmPaymentStatus.NONE_PAYMENT).on(SrmEventEnum.CANCEL_PAYMENT).perform(inPayItemActionImpl);
         builder.setFailCallback(baseFailCallbackImpl);
         return builder.build(SrmStateMachines.PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE);
+    }
+
+    @Bean(SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
+    public StateMachine<SrmStorageStatus, SrmEventEnum, T> getPurchaseRequestStorageStateMachine() {
+
+        //TODO 待完善 wdy
+        return null;
     }
 }

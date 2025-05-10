@@ -1,6 +1,8 @@
 package cn.iocoder.yudao.module.srm.service.purchase.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
@@ -31,6 +33,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.enums.api.inbound.dto.WmsInboundSaveReqDTO;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -96,9 +99,18 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 1.3 校验结算账户
         erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 生成入库单号，并校验唯一性
-        //TODO 校验code存在？ 是否是当日？ 没有手动输入就
-        String no = noRedisDAO.generate(SrmNoRedisDAO.PURCHASE_IN_NO_PREFIX, PURCHASE_IN_NO_OUT_OF_BOUNDS);
-        ThrowUtil.ifThrow(purchaseInMapper.selectByNo(no) != null, PURCHASE_IN_NO_EXISTS);
+        String no;
+        if (vo.getCode() != null) {
+            // 1.4.1 手动输入编号
+            no = vo.getCode();
+            validateAndUpdateCode(no, null);
+        } else {
+            // 1.4.2 自动生成编号
+            no = noRedisDAO.generate(SrmNoRedisDAO.PURCHASE_IN_NO_PREFIX, PURCHASE_IN_NO_OUT_OF_BOUNDS);
+            // 校验编号是否已存在
+            ThrowUtil.ifThrow(purchaseInMapper.selectByNo(no) != null, PURCHASE_IN_NO_EXISTS);
+        }
+        vo.setCode(no);
 
         // 2.1 插入入库
         SrmPurchaseInDO purchaseIn = BeanUtils.toBean(vo, SrmPurchaseInDO.class, in -> in.setCode(no));
@@ -158,7 +170,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         updateStatusCheck(purchaseIn);
         // 1.3 校验结算账户
         erpAccountApi.validateAccount(vo.getAccountId());
-        // 1.4 校验订单项的有效性
+        // 1.4 校验编号
+        if (vo.getCode() != null && !vo.getCode().equals(purchaseIn.getCode())) {
+            validateAndUpdateCode(vo.getCode(), purchaseIn.getCode());
+        }
+        // 1.5 校验订单项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
         // 2.1 更新入库
         SrmPurchaseInDO updateObj = BeanUtils.toBean(vo, SrmPurchaseInDO.class);
@@ -412,7 +428,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 //联动状态
                 auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
                 linkSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
-                //生成订单
+                //生成入库单
                 generateInBoundData(inDO);
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", inDO.getId());
@@ -435,7 +451,18 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             log.debug("采购订单撤回审核，ID: {}", inDO.getId());
             auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
             // 1.4 删除入库单
-            //如果未入库则 -> 作废，已入库->e
+            //如果未入库(草稿)则 -> 作废删除，已入库->e
+            Optional.ofNullable(wmsInboundApi.getInboundList(BillType.WMS_INBOUND.getValue(), inDO.getId())).ifPresent(inbounds -> {
+                inbounds.forEach(inbound -> {
+                    if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())) {
+                        //TODO 未入库 -> 作废
+//                        wmsInboundApi.deleteInbound(inDO.getId());
+                    } else {
+                        //已入库 -> 拒绝
+                        throw exception(PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS);
+                    }
+                });
+            });
         }
     }
 
@@ -482,5 +509,25 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 itemPaymentMachine.fireEvent(SrmPaymentStatus.fromCode(inItemDO.getPayStatus()), PAYMENT_ADJUSTMENT, inItemDO);
             }
         });
+    }
+
+    /**
+     * 校验并更新编号
+     *
+     * @param newCode 新编号
+     * @param oldCode 旧编号
+     */
+    private void validateAndUpdateCode(String newCode, String oldCode) {
+        // 校验编号是否已存在
+        if (purchaseInMapper.selectByNo(newCode) != null) {
+            throw exception(PURCHASE_IN_NO_EXISTS);
+        }
+        // 校验是否是当日的编号
+        String today = DateUtil.format(LocalDateTime.now(), DatePattern.PURE_DATE_PATTERN);
+        if (!newCode.contains(today)) {
+            throw exception(PURCHASE_IN_CODE_NOT_TODAY);
+        }
+        // 更新 Redis 中的最大编号
+        noRedisDAO.setManualSerial(SrmNoRedisDAO.PURCHASE_IN_NO_PREFIX, newCode);
     }
 }

@@ -66,11 +66,12 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_IN_PROCESS_FAIL_PAYMENT_STATUS = new ErrorCode(1_030_102_010, "反审核失败，已付款入库单不能反审核");
     ErrorCode PURCHASE_IN_ITEM_NOT_EXISTS = new ErrorCode(1_030_102_011, "采购入库单项({})不存在");
     ErrorCode PURCHASE_IN_ITEM_NOT_AUDIT = new ErrorCode(1_030_102_012, "采购入库单项({})关联的入库单未审核，无法创建退货单");
-    //PURCHASE_IN_PROCESS_FAIL_RETURN_ITEM_EXISTS
     ErrorCode PURCHASE_IN_PROCESS_FAIL_RETURN_ITEM_EXISTS = new ErrorCode(1_030_102_013, "反审核失败，入库项{}已存在对应的退货单");
-    //存在退货单，不能删除
     ErrorCode PURCHASE_IN_DELETE_FAIL = new ErrorCode(1_030_102_014, "入库项{}存在关联退货项，无法删除");
     ErrorCode PURCHASE_IN_FAIL_PAYMENT_ITEM_PRICE_EXCEED = new ErrorCode(1_030_102_007, "付款金额({})超过采购入库项总金额({})");
+    ErrorCode PURCHASE_IN_CODE_FORMAT_ERROR = new ErrorCode(1_030_102_015, "采购入库单编号格式不正确");
+    ErrorCode PURCHASE_IN_CODE_NOT_TODAY = new ErrorCode(1_030_102_016, "采购入库单编号必须是当天的日期");
+    ErrorCode PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS = new ErrorCode(1_030_102_017, "反审核失败，到货项{}已存在对应的入库单");
 
     // ========== ERP 采购退货（1-030-103-000） ==========
     ErrorCode PURCHASE_RETURN_NOT_EXISTS = new ErrorCode(1_030_103_000, "采购退货单({})不存在");
