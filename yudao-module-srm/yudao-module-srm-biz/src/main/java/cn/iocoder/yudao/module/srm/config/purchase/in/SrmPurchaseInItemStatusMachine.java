@@ -58,7 +58,8 @@ public class SrmPurchaseInItemStatusMachine {
         //库存调整,不管终点，在 Action 里面调整终点
         builder.externalTransitions().fromAmong(SrmStorageStatus.NONE_IN_STORAGE, SrmStorageStatus.PARTIALLY_IN_STORAGE, SrmStorageStatus.ALL_IN_STORAGE).to(SrmStorageStatus.PARTIALLY_IN_STORAGE)
             .on(SrmEventEnum.STOCK_ADJUSTMENT).perform(itemStorageActionImpl);
-        //TODO 待完善 wdy
-        return null;
+        //
+        builder.setFailCallback(baseFailCallbackImpl);
+        return builder.build(SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE);
     }
 }

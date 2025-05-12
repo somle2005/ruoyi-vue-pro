@@ -51,6 +51,7 @@ public interface SrmStateMachines {
     String PURCHASE_IN_PAYMENT_STATE_MACHINE = "purchaseInPay";
     // ========== ERP 到货单明细 ==========
     String PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE = "purchaseInItemPay";
+    //到货单入库状态机
     String PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE = "purchaseInItemStorage";
     
     // ========== ERP 退货单 ==========

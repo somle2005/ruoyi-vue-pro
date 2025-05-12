@@ -87,10 +87,10 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         List<TmsFirstMileRequestItemDO> requestItemDOS = TmsFirstMileRequestConvert.convertItemList(vo.getItems());
         calculateTotalWeightAndVolume(firstMileRequest, requestItemDOS);
 
+        firstMileRequest.setCode(firstMileRequest.getCode() == null ? tmsNoRedisDAO.generate(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CREATE_FAIL)
+            : firstMileRequest.getCode());
         //校验code是否和数据库的重复
         validCodeDuplicate(firstMileRequest);
-        firstMileRequest.setCode(firstMileRequest.getCode() == null ? tmsNoRedisDAO.generate(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CREATE_FAIL)
-                                                                    : firstMileRequest.getCode());
         //校验产品是否存在
         erpProductApi.validProductList(requestItemDOS.stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList());
         // 校验人+部门+仓库是否合法
@@ -109,7 +109,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     }
 
     private void validCodeDuplicate(TmsFirstMileRequestDO firstMileRequest) {
-        ThrowUtil.ifThrow(firstMileRequestMapper.selectByNo(firstMileRequest.getCode()) != null, FIRST_MILE_REQUEST_CODE_DUPLICATE);
+        ThrowUtil.ifThrow(firstMileRequestMapper.selectByNo(firstMileRequest.getCode()) != null, FIRST_MILE_REQUEST_CODE_DUPLICATE, firstMileRequest.getCode());
     }
 
     private void initMasterStatus(TmsFirstMileRequestDO firstMileRequest) {
