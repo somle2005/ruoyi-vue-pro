@@ -175,6 +175,8 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setDirection(WmsStockFlowDirection.OUT.getValue());
                 flowDO.setOutboundAvailableDeltaQty(flowQty);
                 flowDO.setOutboundAvailableQty(itemDO.getOutboundAvailableQty());
+                flowDO.setActualQty(itemDO.getActualQty());
+                flowDO.setShelvedQty(itemDO.getShelvedQty());
 
                 inboundItemFlowList.add(flowDO);
 
@@ -198,6 +200,8 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setDirection(WmsStockFlowDirection.OUT.getValue());
                 flowDO.setOutboundAvailableDeltaQty(flowQty);
                 flowDO.setOutboundAvailableQty(itemDO.getOutboundAvailableQty());
+                flowDO.setActualQty(itemDO.getActualQty());
+                flowDO.setShelvedQty(itemDO.getShelvedQty());
 
                 inboundItemFlowList.add(flowDO);
 
@@ -222,6 +226,8 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setDirection(WmsStockFlowDirection.OUT.getValue());
                 flowDO.setOutboundAvailableDeltaQty(flowQty);
                 flowDO.setOutboundAvailableQty(itemDO.getOutboundAvailableQty());
+                flowDO.setActualQty(itemDO.getActualQty());
+                flowDO.setShelvedQty(itemDO.getShelvedQty());
 
                 inboundItemFlowList.add(flowDO);
 

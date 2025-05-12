@@ -111,6 +111,8 @@ public class OutboundFinishExecutor extends OutboundExecutor {
             newFlowDO.setDirection(WmsStockFlowDirection.parseByQty(quantity).getValue());
             newFlowDO.setOutboundAvailableDeltaQty(Math.abs(quantity));
             newFlowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty());
+            newFlowDO.setActualQty(inboundItemDO.getActualQty());
+            newFlowDO.setShelvedQty(inboundItemDO.getShelvedQty());
 
             inboundItemFlowList.add(newFlowDO);
 

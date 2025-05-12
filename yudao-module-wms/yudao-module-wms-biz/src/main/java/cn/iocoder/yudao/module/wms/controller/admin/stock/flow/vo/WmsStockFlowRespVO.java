@@ -1,11 +1,15 @@
 package cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo;
 
+import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMoveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
@@ -14,8 +18,10 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
@@ -141,6 +147,15 @@ public class WmsStockFlowRespVO {
     @Schema(description = "拣货单", example = "")
     private WmsPickupSimpleRespVO pickup;
 
+    @Schema(description = "盘点单", example = "")
+    private WmsInventoryRespVO inventory;
+
+    @Schema(description = "仓位库存移动单", example = "")
+    private WmsStockBinMoveRespVO stockBinMove;
+
+    @Schema(description = "仓位库存移动单", example = "")
+    private WmsStockOwnershipMoveRespVO stockOwnershipMove;
+
     @Schema(description = "部门", example = "")
     private DeptSimpleRespVO dept;
 
@@ -171,4 +186,12 @@ public class WmsStockFlowRespVO {
     @Schema(description = "在途量", example = "")
     @ExcelProperty("在途量")
     private Integer transitQty;
+
+    @Schema(description = "公司", example = "")
+    @ExcelProperty("公司")
+    private FmsCompanySimpleRespVO company;
+
+
+
+
 }

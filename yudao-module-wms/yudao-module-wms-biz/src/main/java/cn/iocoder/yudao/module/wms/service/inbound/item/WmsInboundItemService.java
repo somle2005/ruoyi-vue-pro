@@ -141,7 +141,11 @@ public interface WmsInboundItemService {
     /**
      * 批次库存关联仓位查询
      */
-    PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(@Valid WmsInboundItemPageReqVO pageReqVO);
+    PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(@Valid WmsInboundItemPageReqVO pageReqVO,boolean withPickupDetail);
 
     void assembleStockWarehouse(List<? extends WmsInboundItemRespVO> list);
+
+    void assembleStockType(List<WmsInboundItemRespVO> list);
+
+    WmsInboundItemDO getByInboundIdAndProductId(Long inboundId, Long productId);
 }

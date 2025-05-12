@@ -12,6 +12,8 @@ import lombok.Data;
 @ExcelIgnoreUnannotated
 public class WmsInboundItemBinRespVO extends WmsInboundItemRespVO {
 
+
+    private Integer lineNumber;
     /**
      * 仓位ID
      */
@@ -66,8 +68,6 @@ public class WmsInboundItemBinRespVO extends WmsInboundItemRespVO {
      */
     @Schema(description = "入库单号", example = "")
     private String inboundCode;
-
-
 
 
 }

@@ -102,4 +102,10 @@ public interface WmsStockFlowService {
     List<WmsStockFlowDO> selectByIds(List<Long> idList);
 
     void assembleInboundItemFlow(List<WmsStockFlowRespVO> list);
+
+    void assembleInventory(List<WmsStockFlowRespVO> list);
+
+    void assembleBinMove(List<WmsStockFlowRespVO> list);
+
+    void assembleOwnershipMove(List<WmsStockFlowRespVO> list);
 }

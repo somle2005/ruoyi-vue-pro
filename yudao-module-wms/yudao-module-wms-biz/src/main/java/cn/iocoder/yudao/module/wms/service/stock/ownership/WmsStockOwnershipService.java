@@ -6,7 +6,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockO
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockOwnershipSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
 import jakarta.validation.Valid;
-
 import java.util.List;
 
 /**
@@ -61,7 +60,7 @@ public interface WmsStockOwnershipService {
      * @param productId   产品id
      * @return 库存归属
      */
-    List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, Long productId,Long companyId,Long deptId);
+    List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, Long productId, Long companyId, Long deptId);
 
     List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, List<Long> productId);
 

@@ -5,7 +5,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInbo
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import jakarta.validation.Valid;
-
 import java.util.List;
 import java.util.Set;
 
@@ -67,4 +66,9 @@ public interface WmsInboundItemFlowService {
      * 按 ID 集合查询 WmsInboundItemFlowDO
      */
     List<WmsInboundItemFlowDO> selectByIds(Set<Long> idList);
+
+    /**
+     * 按 ID 集合查询 WmsInboundItemFlowDO
+     */
+    List<WmsInboundItemFlowDO> selectByIds(List<Long> idList);
 }

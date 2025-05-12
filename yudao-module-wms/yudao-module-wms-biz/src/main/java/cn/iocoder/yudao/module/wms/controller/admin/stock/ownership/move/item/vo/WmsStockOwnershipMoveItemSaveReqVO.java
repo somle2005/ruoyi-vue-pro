@@ -6,7 +6,7 @@ import java.util.*;
 import jakarta.validation.constraints.*;
 
 /**
- * @table-fields : ownership_move_id,from_dept_id,product_id,qty,from_company_id,id,to_company_id,to_dept_id
+ * @table-fields : ownership_move_id,from_dept_id,product_id,qty,from_company_id,remark,id,to_company_id,to_dept_id
  */
 @Schema(description = "管理后台 - 所有者库存移动详情新增/修改 Request VO")
 @Data
@@ -37,4 +37,7 @@ public class WmsStockOwnershipMoveItemSaveReqVO {
     @Schema(description = "移动数量", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "移动数量不能为空")
     private Integer qty;
+
+    @Schema(description = "备注", example = "")
+    private String remark;
 }

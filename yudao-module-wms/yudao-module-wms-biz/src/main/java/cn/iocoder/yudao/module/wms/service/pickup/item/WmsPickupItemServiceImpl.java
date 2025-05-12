@@ -14,6 +14,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.pickup.item.WmsPickupItemMapper;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
+import de.danielbechler.util.Collections;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.PICKUP_ITEM_NOT_EXISTS;
@@ -125,5 +127,13 @@ public class WmsPickupItemServiceImpl implements WmsPickupItemService {
         List<WmsInboundDO> inboundDOList = inboundService.selectByIds(StreamX.from(itemList).toList(WmsPickupItemRespVO::getInboundId));
         Map<Long, WmsInboundSimpleRespVO> inboundMap = StreamX.from(inboundDOList).toMap(WmsInboundDO::getId, inboundDO -> BeanUtils.toBean(inboundDO, WmsInboundSimpleRespVO.class));
         StreamX.from(itemList).assemble(inboundMap, WmsPickupItemRespVO::getInboundId, WmsPickupItemRespVO::setInbound);
+    }
+
+    @Override
+    public List<WmsPickupItemDO> getPickupItemListByInboundItemIds(Set<Long> inboundItemIds) {
+        if(Collections.isEmpty(inboundItemIds)) {
+            return List.of();
+        }
+        return pickupItemMapper.getPickupItemListByInboundItemIds(inboundItemIds);
     }
 }

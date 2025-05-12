@@ -1,10 +1,15 @@
 package cn.iocoder.yudao.module.wms.controller.admin.stock.ownership;
 
+import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
+import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockOwnershipExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockOwnershipPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockOwnershipRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
@@ -13,6 +18,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -22,9 +28,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
+import java.io.IOException;
 import java.util.List;
-
+import java.util.Map;
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "所有者库存")
@@ -73,13 +80,12 @@ public class WmsStockOwnershipController {
     @PreAuthorize("@ss.hasPermission('wms:stock-ownership:query')")
     public CommonResult<List<WmsStockOwnershipRespVO>> selectStockOwnershipList(@RequestParam("warehouseId") Long warehouseId, @RequestParam("productId") Long productId) {
         // 查询数据
-        List<WmsStockOwnershipDO> stockOwnershipList = stockOwnershipService.selectStockOwnership(warehouseId, productId,null,null);
+        List<WmsStockOwnershipDO> stockOwnershipList = stockOwnershipService.selectStockOwnership(warehouseId, productId, null, null);
         // 转换
         List<WmsStockOwnershipRespVO> stockOwnershipVOList = BeanUtils.toBean(stockOwnershipList, WmsStockOwnershipRespVO.class);
         // 返回
         return success(stockOwnershipVOList);
     }
-
 
     /**
      * @sign : 7CDB60ED7A6D3E5E
@@ -91,20 +97,18 @@ public class WmsStockOwnershipController {
     @Parameter(name = "companyId", description = "公司ID", required = true, example = "1024")
     @Parameter(name = "deptId", description = "部门ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('wms:stock-ownership:query')")
-    public CommonResult<WmsStockOwnershipRespVO> selectStockOwnership(@RequestParam("warehouseId") Long warehouseId, @RequestParam("productId") Long productId,@RequestParam("companyId") Long companyId,@RequestParam("deptId") Long deptId) {
+    public CommonResult<WmsStockOwnershipRespVO> selectStockOwnership(@RequestParam("warehouseId") Long warehouseId, @RequestParam("productId") Long productId, @RequestParam("companyId") Long companyId, @RequestParam("deptId") Long deptId) {
         // 查询数据
-        List<WmsStockOwnershipDO> stockOwnershipList = stockOwnershipService.selectStockOwnership(warehouseId, productId,companyId,deptId);
+        List<WmsStockOwnershipDO> stockOwnershipList = stockOwnershipService.selectStockOwnership(warehouseId, productId, companyId, deptId);
         // 转换
         List<WmsStockOwnershipRespVO> stockOwnershipVOList = BeanUtils.toBean(stockOwnershipList, WmsStockOwnershipRespVO.class);
-        if(CollectionUtils.isEmpty(stockOwnershipVOList)) {
+        if (CollectionUtils.isEmpty(stockOwnershipVOList)) {
             return success(null);
         } else {
             // 返回
             return success(stockOwnershipVOList.get(0));
         }
     }
-
-
 
     /**
      * @sign : EC951F0579860D97
@@ -122,24 +126,34 @@ public class WmsStockOwnershipController {
         stockOwnershipService.assembleWarehouse(voPageResult.getList());
         stockOwnershipService.assembleDept(voPageResult.getList());
         stockOwnershipService.assembleCompany(voPageResult.getList());
-
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
-            .mapping(WmsStockOwnershipRespVO::getCreator, WmsStockOwnershipRespVO::setCreatorName)
-            .mapping(WmsStockOwnershipRespVO::getUpdater, WmsStockOwnershipRespVO::setUpdaterName)
-            .fill();
-
+			.mapping(WmsStockOwnershipRespVO::getCreator, WmsStockOwnershipRespVO::setCreatorName)
+			.mapping(WmsStockOwnershipRespVO::getUpdater, WmsStockOwnershipRespVO::setUpdaterName)
+			.fill();
         // 返回
         return success(voPageResult);
     }
-    // @GetMapping("/export-excel")
-    // @Operation(summary = "导出所有者库存 Excel")
-    // @PreAuthorize("@ss.hasPermission('wms:stock-ownership:export')")
-    // @ApiAccessLog(operateType = EXPORT)
-    // public void exportStockOwnershipExcel(@Valid WmsStockOwnershipPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
-    // pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-    // List<WmsStockOwnershipDO> list = stockOwnershipService.getStockOwnershipPage(pageReqVO).getList();
-    // // 导出 Excel
-    // ExcelUtils.write(response, "所有者库存.xls", "数据", WmsStockOwnershipRespVO.class, BeanUtils.toBean(list, WmsStockOwnershipRespVO.class));
-    // }
-}
+
+    @PostMapping("/export-excel")
+    @Operation(summary = "导出所有者库存 Excel")
+    @PreAuthorize("@ss.hasPermission('wms:stock-ownership:export')")
+    @ApiAccessLog(operateType = EXPORT)
+    public void exportStockOwnershipExcel(@Valid @RequestBody WmsStockOwnershipPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
+        List<WmsStockOwnershipRespVO> voList = this.getStockOwnershipPage(pageReqVO).getData().getList();
+        List<WmsStockOwnershipExcelVO> xlsList = BeanUtils.toBean(voList, WmsStockOwnershipExcelVO.class);
+        Map<Long, WmsStockOwnershipRespVO> voMap = StreamX.from(voList).toMap(WmsStockOwnershipRespVO::getId);
+        for (WmsStockOwnershipExcelVO excelVO : xlsList) {
+            WmsStockOwnershipRespVO vo = voMap.get(excelVO.getId());
+            if (vo != null) {
+                excelVO.setWarehouseName(vo.getWarehouse().getName());
+                excelVO.setProductCode(vo.getProduct().getBarCode());
+                excelVO.setCompanyName(vo.getCompany().getName());
+                excelVO.setDeptName(vo.getDept().getName());
+            }
+        }
+        // 导出 Excel
+        ExcelUtils.write(response, "所有者库存.xls", "数据", WmsStockOwnershipExcelVO.class, xlsList);
+    }
+}

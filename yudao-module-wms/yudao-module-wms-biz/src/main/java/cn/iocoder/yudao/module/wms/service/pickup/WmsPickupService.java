@@ -58,4 +58,6 @@ public interface WmsPickupService {
     void assembleWarehouse(List<WmsPickupRespVO> list);
 
     void createForInventory(WmsPickupSaveReqVO pickupSaveReqVO);
+
+    void createForBinMove(WmsPickupSaveReqVO pickupSaveReqVO);
 }

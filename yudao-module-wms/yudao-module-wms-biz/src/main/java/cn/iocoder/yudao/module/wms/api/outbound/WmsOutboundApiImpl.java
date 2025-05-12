@@ -1,11 +1,13 @@
 package cn.iocoder.yudao.module.wms.api.outbound;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.enums.api.outbound.WmsOutboundApi;
 import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundDTO;
 import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundSaveReqDTO;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
@@ -41,6 +43,17 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     public List<WmsOutboundDTO> getOutboundList(Integer upstreamBillType, Long upstreamBillId) {
         List<WmsOutboundDO> outboundList = outboundService.getOutboundList(upstreamBillType, upstreamBillId);
         return BeanUtils.toBean(outboundList, WmsOutboundDTO.class);
+    }
+
+
+    /**
+     * 出库单作废
+     **/
+    public void abandonOutbound(Long id,String comment) {
+        WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
+        approvalReqVO.setBillId(id);
+        approvalReqVO.setComment(comment);
+        outboundService.approve(WmsOutboundAuditStatus.Event.ABANDON, approvalReqVO);
     }
 
 }

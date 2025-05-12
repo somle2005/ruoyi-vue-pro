@@ -1,11 +1,15 @@
 package cn.iocoder.yudao.module.wms.controller.admin.stock.bin;
 
+import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
+import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespBinVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockOwnershipPureRespVO;
@@ -17,6 +21,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
@@ -27,10 +32,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "仓位库存")
@@ -149,15 +156,27 @@ public class WmsStockBinController {
     }
 
 
-    // @GetMapping("/export-excel")
-    // @Operation(summary = "导出仓位库存 Excel")
-    // @PreAuthorize("@ss.hasPermission('wms:stock-bin:export')")
-    // @ApiAccessLog(operateType = EXPORT)
-    // public void exportStockBinExcel(@Valid WmsStockBinPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
-    // pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-    // List<WmsStockBinDO> list = stockBinService.getStockBinPage(pageReqVO).getList();
-    // // 导出 Excel
-    // ExcelUtils.write(response, "仓位库存.xls", "数据", WmsStockBinRespVO.class, BeanUtils.toBean(list, WmsStockBinRespVO.class));
-    // }
+    @PostMapping("/export-excel")
+    @Operation(summary = "导出仓位库存 Excel")
+    @PreAuthorize("@ss.hasPermission('wms:stock-bin:export')")
+    @ApiAccessLog(operateType = EXPORT)
+    public void exportStockBinExcel(@Valid @RequestBody WmsStockBinPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
+        List<WmsStockBinRespVO> list = this.getStockBinPage(pageReqVO).getData().getList();
+        List<WmsStockBinExcelVO> xlsList = BeanUtils.toBean(list, WmsStockBinExcelVO.class);
+        Map<Long, WmsStockBinRespVO> voMap= StreamX.from(list).toMap(WmsStockBinRespVO::getId);
+        for (WmsStockBinExcelVO xlsVO : xlsList) {
+            WmsStockBinRespVO vo=voMap.get(xlsVO.getId());
+            if(vo==null) {
+                continue;
+            }
+            xlsVO.setWarehouseName(vo.getWarehouse().getName());
+            xlsVO.setBinName(vo.getBin().getName());
+            xlsVO.setProductCode(vo.getProduct().getBarCode());
+        }
+
+        // 导出 Excel
+        ExcelUtils.write(response, "仓位库存.xls", "数据", WmsStockBinExcelVO.class,xlsList);
+    }
 }
 

@@ -27,14 +27,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_ITEM_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_MOVE_ITEM_NOT_EXISTS;
@@ -63,7 +61,6 @@ public class WmsStockOwnershipMoveItemServiceImpl implements WmsStockOwnershipMo
     @Autowired
     @Lazy
     private WmsWarehouseService warehouseService;
-
 
     /**
      * @sign : E8E4A45DABECEF25
@@ -153,7 +150,6 @@ public class WmsStockOwnershipMoveItemServiceImpl implements WmsStockOwnershipMo
         return stockOwnershipMoveItemMapper.selectByOwnershipMoveId(ownershipMoveId);
     }
 
-
     @Override
     public void assembleProduct(List<WmsStockOwnershipMoveItemRespVO> itemList) {
         Map<Long, ErpProductDTO> productDTOMap = productApi.getProductMap(StreamX.from(itemList).map(WmsStockOwnershipMoveItemRespVO::getProductId).toList());
@@ -167,12 +163,10 @@ public class WmsStockOwnershipMoveItemServiceImpl implements WmsStockOwnershipMo
 
     @Override
     public void assembleCompanyAndDept(List<WmsStockOwnershipMoveItemRespVO> itemList) {
-
         // 装配部门
-        Set<Long> deptIds=new HashSet<>();
+        Set<Long> deptIds = new HashSet<>();
         deptIds.addAll(StreamX.from(itemList).map(WmsStockOwnershipMoveItemRespVO::getFromDeptId).toList());
         deptIds.addAll(StreamX.from(itemList).map(WmsStockOwnershipMoveItemRespVO::getToDeptId).toList());
-
         Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(deptIds);
         Map<Long, DeptSimpleRespVO> deptVOMap = new HashMap<>();
         for (DeptRespDTO productDTO : deptDTOMap.values()) {
@@ -181,94 +175,72 @@ public class WmsStockOwnershipMoveItemServiceImpl implements WmsStockOwnershipMo
         }
         StreamX.from(itemList).assemble(deptVOMap, WmsStockOwnershipMoveItemRespVO::getFromDeptId, WmsStockOwnershipMoveItemRespVO::setFromDept);
         StreamX.from(itemList).assemble(deptVOMap, WmsStockOwnershipMoveItemRespVO::getToDeptId, WmsStockOwnershipMoveItemRespVO::setToDept);
-
-
         // 装配公司
-        Set<Long> companyIds=new HashSet<>();
+        Set<Long> companyIds = new HashSet<>();
         companyIds.addAll(StreamX.from(itemList).map(WmsStockOwnershipMoveItemRespVO::getFromCompanyId).toList());
         companyIds.addAll(StreamX.from(itemList).map(WmsStockOwnershipMoveItemRespVO::getToCompanyId).toList());
-
         Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(companyIds);
         Map<Long, FmsCompanySimpleRespVO> companyVOMap = StreamX.from(companyMap.values()).toMap(FmsCompanyDTO::getId, v -> BeanUtils.toBean(v, FmsCompanySimpleRespVO.class));
-
         StreamX.from(itemList).assemble(companyVOMap, WmsStockOwnershipMoveItemRespVO::getFromCompanyId, WmsStockOwnershipMoveItemRespVO::setFromCompany);
         StreamX.from(itemList).assemble(companyVOMap, WmsStockOwnershipMoveItemRespVO::getToCompanyId, WmsStockOwnershipMoveItemRespVO::setToCompany);
-
     }
 
     @Override
     public void assembleWarehouseForImp(List<WmsStockOwnershipMoveImportExcelVO> impVOList) {
-
         Map<String, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMapByCode(StreamX.from(impVOList).toSet(WmsStockOwnershipMoveImportExcelVO::getWarehouseCode));
-
-        StreamX.from(impVOList).assemble(warehouseDOMap, WmsStockOwnershipMoveImportExcelVO::getWarehouseCode, (e,p)->{
-            if(p!=null) {
+        StreamX.from(impVOList).assemble(warehouseDOMap, WmsStockOwnershipMoveImportExcelVO::getWarehouseCode, (e, p) -> {
+            if (p != null) {
                 e.setWarehouseId(p.getId());
             }
         });
-
     }
 
     @Override
     public void assembleCompanyAndDeptForImp(List<WmsStockOwnershipMoveImportExcelVO> impVOList) {
-
         // 装配部门
-        Set<String> deptNames=new HashSet<>();
+        Set<String> deptNames = new HashSet<>();
         deptNames.addAll(StreamX.from(impVOList).map(WmsStockOwnershipMoveImportExcelVO::getFromDeptName).toList());
         deptNames.addAll(StreamX.from(impVOList).map(WmsStockOwnershipMoveImportExcelVO::getToDeptName).toList());
-
         Map<String, DeptRespDTO> deptDTOMap = deptApi.getDeptMapByNames(deptNames);
-
-        StreamX.from(impVOList).assemble(deptDTOMap, WmsStockOwnershipMoveImportExcelVO::getFromDeptName, (itm,dept)->{
-            if(dept!=null) {
+        StreamX.from(impVOList).assemble(deptDTOMap, WmsStockOwnershipMoveImportExcelVO::getFromDeptName, (itm, dept) -> {
+            if (dept != null) {
                 itm.setFromDeptId(dept.getId());
             }
         });
-        StreamX.from(impVOList).assemble(deptDTOMap, WmsStockOwnershipMoveImportExcelVO::getToDeptName,(itm,dept)->{
-            if(dept!=null) {
+        StreamX.from(impVOList).assemble(deptDTOMap, WmsStockOwnershipMoveImportExcelVO::getToDeptName, (itm, dept) -> {
+            if (dept != null) {
                 itm.setToDeptId(dept.getId());
             }
         });
-
-
-
-
         // 装配公司
-        Set<String> companyNames=new HashSet<>();
+        Set<String> companyNames = new HashSet<>();
         companyNames.addAll(StreamX.from(impVOList).map(WmsStockOwnershipMoveImportExcelVO::getFromCompanyName).toSet());
         companyNames.addAll(StreamX.from(impVOList).map(WmsStockOwnershipMoveImportExcelVO::getToCompanyName).toSet());
-
         Map<String, FmsCompanyDTO> companyMap = companyApi.getCompanyMapByNames(companyNames);
-
-
-        StreamX.from(impVOList).assemble(companyMap, WmsStockOwnershipMoveImportExcelVO::getFromCompanyName, (itm,com)->{
-            if(com!=null) {
+        StreamX.from(impVOList).assemble(companyMap, WmsStockOwnershipMoveImportExcelVO::getFromCompanyName, (itm, com) -> {
+            if (com != null) {
                 itm.setFromCompanyId(com.getId());
             }
         });
-
-        StreamX.from(impVOList).assemble(companyMap, WmsStockOwnershipMoveImportExcelVO::getToCompanyName,  (itm,com)->{
-            if(com!=null) {
+        StreamX.from(impVOList).assemble(companyMap, WmsStockOwnershipMoveImportExcelVO::getToCompanyName, (itm, com) -> {
+            if (com != null) {
                 itm.setToCompanyId(com.getId());
             }
         });
-
     }
 
     @Override
     public void assembleProductForImp(List<WmsStockOwnershipMoveImportExcelVO> impVOList) {
-
         Map<String, ErpProductDTO> productDTOMap = productApi.getProductMapByCode(StreamX.from(impVOList).map(WmsStockOwnershipMoveImportExcelVO::getProductCode).toSet());
         Map<String, WmsProductRespSimpleVO> productVOMap = new HashMap<>();
         for (ErpProductDTO productDTO : productDTOMap.values()) {
             WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
             productVOMap.put(productDTO.getBarCode(), productVO);
         }
-        StreamX.from(impVOList).assemble(productVOMap, WmsStockOwnershipMoveImportExcelVO::getProductCode, (e,v)->{
-            if (v!=null){
+        StreamX.from(impVOList).assemble(productVOMap, WmsStockOwnershipMoveImportExcelVO::getProductCode, (e, v) -> {
+            if (v != null) {
                 e.setProductId(v.getId());
             }
         });
-
     }
-}
+}

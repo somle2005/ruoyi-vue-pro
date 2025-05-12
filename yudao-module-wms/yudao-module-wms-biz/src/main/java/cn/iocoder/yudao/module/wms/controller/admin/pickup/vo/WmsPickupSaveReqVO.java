@@ -1,11 +1,10 @@
 package cn.iocoder.yudao.module.wms.controller.admin.pickup.vo;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import java.util.*;
-import jakarta.validation.constraints.*;
-import java.util.List;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.item.vo.WmsPickupItemSaveReqVO;
+import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.Data;
+
+import java.util.List;
 
 /**
  * @table-fields : code,upstream_bill_id,id,upstream_bill_code,warehouse_id,upstream_bill_type
@@ -34,4 +33,8 @@ public class WmsPickupSaveReqVO {
 
     @Schema(description = "来源单据类型", example = "")
     private Integer upstreamBillType;
+
+    @Schema(description = "创建拣货单的原因,默认留空", example = "")
+    private Integer cause;
+
 }

@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
+import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -13,6 +14,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
@@ -154,5 +156,16 @@ public class WmsInboundItemRespVO {
     @ExcelProperty("当前仓库库存")
     private WmsStockWarehouseSimpleVO stockWarehouse;
 
+    @Schema(description = "上架的货位清单", example = "{}")
+    @ExcelProperty("上架的货位清单")
+    private List<WmsWarehouseBinSimpleRespVO> warehouseBinList;
+
+
+
+
+
+    @Schema(description = "上架的货位清单", example = "{}")
+    @ExcelProperty("上架的货位清单")
+    private Integer stockType;
 
 }

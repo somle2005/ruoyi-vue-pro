@@ -27,12 +27,10 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_NOT_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_WAREHOUSE_ID_COMPANY_ID_DEPT_ID_PRODUCT_ID_DUPLICATE;
@@ -138,13 +136,13 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
     }
 
     @Override
-    public List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, Long productId,Long companyId,Long deptId) {
-        return stockOwnershipMapper.selectStockOwnership(warehouseId, productId,companyId,deptId);
+    public List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, Long productId, Long companyId, Long deptId) {
+        return stockOwnershipMapper.selectStockOwnership(warehouseId, productId, companyId, deptId);
     }
 
     @Override
     public List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, List<Long> productIdList) {
-        if(CollectionUtils.isEmpty(productIdList)) {
+        if (CollectionUtils.isEmpty(productIdList)) {
             return List.of();
         }
         return stockOwnershipMapper.selectStockOwnership(warehouseId, productIdList);
@@ -153,7 +151,7 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
     @Override
     public WmsStockOwnershipDO getByUkProductOwner(Long warehouseId, Long companyId, Long deptId, Long productId, boolean createNew) {
         WmsStockOwnershipDO stockOwnershipDO = stockOwnershipMapper.getByUkProductOwner(warehouseId, companyId, deptId, productId);
-        if(stockOwnershipDO==null && createNew) {
+        if (stockOwnershipDO == null && createNew) {
             stockOwnershipDO = new WmsStockOwnershipDO();
             stockOwnershipDO.setWarehouseId(warehouseId);
             stockOwnershipDO.setCompanyId(companyId);
@@ -208,17 +206,13 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
 
     @Override
     public void assembleWarehouse(List<WmsStockOwnershipRespVO> list) {
-
         Map<Long, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsStockOwnershipRespVO::getWarehouseId));
-        Map<Long, WmsWarehouseSimpleRespVO> warehouseVOMap = StreamX.from(warehouseDOMap.values())
-            .toMap(WmsWarehouseDO::getId, v-> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
-
+        Map<Long, WmsWarehouseSimpleRespVO> warehouseVOMap = StreamX.from(warehouseDOMap.values()).toMap(WmsWarehouseDO::getId, v -> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
         StreamX.from(list).assemble(warehouseVOMap, WmsStockOwnershipRespVO::getWarehouseId, WmsStockOwnershipRespVO::setWarehouse);
     }
 
     @Override
     public void assembleDept(List<WmsStockOwnershipRespVO> list) {
-
         Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(StreamX.from(list).map(WmsStockOwnershipRespVO::getDeptId).toList());
         Map<Long, DeptSimpleRespVO> deptVOMap = new HashMap<>();
         for (DeptRespDTO productDTO : deptDTOMap.values()) {
@@ -226,7 +220,6 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
             deptVOMap.put(productDTO.getId(), deptVO);
         }
         StreamX.from(list).assemble(deptVOMap, WmsStockOwnershipRespVO::getDeptId, WmsStockOwnershipRespVO::setDept);
-
     }
 
     @Override
@@ -238,9 +231,9 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
 
     @Override
     public List<WmsStockOwnershipDO> selectByIds(List<Long> stockOwnershipIds) {
-        if(CollectionUtils.isEmpty(stockOwnershipIds)) {
+        if (CollectionUtils.isEmpty(stockOwnershipIds)) {
             return List.of();
         }
         return stockOwnershipMapper.selectByIds(stockOwnershipIds);
     }
-}
+}

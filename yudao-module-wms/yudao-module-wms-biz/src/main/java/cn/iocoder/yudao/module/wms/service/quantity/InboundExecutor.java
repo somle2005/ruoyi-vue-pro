@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.service.quantity;
 
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
@@ -13,6 +14,7 @@ import cn.iocoder.yudao.module.wms.service.quantity.context.InboundContext;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -150,6 +152,12 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
 
 
     public static void setShelveAvailableQty(List<? extends WmsInboundItemRespVO> items) {
+        items.forEach(item -> {
+            item.setShelveAvailableQty(item.getActualQty() - item.getShelvedQty());
+        });
+    }
+
+    public static void setShelveAvailableQty(Collection<? extends WmsInboundItemFlowSimpleVO> items) {
         items.forEach(item -> {
             item.setShelveAvailableQty(item.getActualQty() - item.getShelvedQty());
         });

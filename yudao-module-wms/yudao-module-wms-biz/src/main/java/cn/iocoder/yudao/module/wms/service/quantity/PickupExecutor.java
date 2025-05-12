@@ -168,6 +168,8 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         flowDO.setDirection(WmsStockFlowDirection.IN.getValue());
         flowDO.setOutboundAvailableDeltaQty(quantity);
         flowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty());
+        flowDO.setActualQty(inboundItemDO.getActualQty());
+        flowDO.setShelvedQty(inboundItemDO.getShelvedQty());
 
         inboundItemFlowService.insert(flowDO);
 

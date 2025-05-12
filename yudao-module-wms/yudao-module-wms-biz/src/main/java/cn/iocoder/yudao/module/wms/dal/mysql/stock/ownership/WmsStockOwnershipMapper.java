@@ -8,7 +8,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockO
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
 import org.apache.ibatis.annotations.Mapper;
-
 import java.util.List;
 
 /**
@@ -20,30 +19,20 @@ import java.util.List;
 public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO> {
 
     default PageResult<WmsStockOwnershipDO> selectPage(WmsStockOwnershipPageReqVO reqVO) {
-
         MPJLambdaWrapperX<WmsStockOwnershipDO> wrapper = new MPJLambdaWrapperX();
         // 连接产品视图
-        wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockOwnershipDO::getProductId)
-            .likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode())
-            // .eqIfExists(WmsProductDO::getDeptId, reqVO.getDeptId())
-        ;
+        wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockOwnershipDO::getProductId).likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode());
         // 按仓库
-        wrapper.eqIfPresent(WmsStockOwnershipDO::getWarehouseId, reqVO.getWarehouseId())
-            // 按产品ID
-            .eqIfPresent(WmsStockOwnershipDO::getProductId, reqVO.getProductId());
-
+        wrapper.eqIfPresent(WmsStockOwnershipDO::getWarehouseId, reqVO.getWarehouseId()).// 按产品ID
+        eqIfPresent(WmsStockOwnershipDO::getProductId, reqVO.getProductId());
         wrapper.eqIfPresent(WmsStockOwnershipDO::getCompanyId, reqVO.getCompanyId());
         wrapper.eqIfPresent(WmsStockOwnershipDO::getDeptId, reqVO.getDeptId());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getCreateTime, reqVO.getCreateTime());
-        wrapper.betweenIfPresent(WmsStockOwnershipDO::getAvailableQty,reqVO.getAvailableQty());
-        wrapper.betweenIfPresent(WmsStockOwnershipDO::getOutboundPendingQty,reqVO.getOutboundPendingQty());
-        wrapper.betweenIfPresent(WmsStockOwnershipDO::getShelvingPendingQty,reqVO.getShelvingPendingQty());
-
+        wrapper.betweenIfPresent(WmsStockOwnershipDO::getAvailableQty, reqVO.getAvailableQty());
+        wrapper.betweenIfPresent(WmsStockOwnershipDO::getOutboundPendingQty, reqVO.getOutboundPendingQty());
+        wrapper.betweenIfPresent(WmsStockOwnershipDO::getShelvingPendingQty, reqVO.getShelvingPendingQty());
         return selectPage(reqVO, wrapper);
-
-
     }
-
 
     /**
      * 按 warehouse_id,dept_id,product_id 查询唯一的 WmsStockOwnershipDO
@@ -57,7 +46,7 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         return selectOne(wrapper);
     }
 
-    default List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, Long productId,Long companyId,Long deptId) {
+    default List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, Long productId, Long companyId, Long deptId) {
         LambdaQueryWrapperX<WmsStockOwnershipDO> wrapper = new LambdaQueryWrapperX<>();
         wrapper.eq(WmsStockOwnershipDO::getWarehouseId, warehouseId);
         wrapper.eqIfPresent(WmsStockOwnershipDO::getProductId, productId);
@@ -72,4 +61,4 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         wrapper.in(WmsStockOwnershipDO::getProductId, productIdList);
         return selectList(wrapper);
     }
-}
+}
