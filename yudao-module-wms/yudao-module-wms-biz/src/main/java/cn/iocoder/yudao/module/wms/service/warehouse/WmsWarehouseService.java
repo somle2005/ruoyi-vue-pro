@@ -48,6 +48,13 @@ public interface WmsWarehouseService {
     WmsWarehouseDO getWarehouse(Long id);
 
     /**
+     * 验证仓库是否存在
+     *
+     * @param id 编号
+     * @return 仓库
+     */
+    WmsWarehouseDO validateWarehouseExists(Long id);
+    /**
      * 获得仓库分页
      *
      * @param pageReqVO 分页查询
