@@ -1,5 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.impl;
 
+import cn.hutool.core.date.DatePattern;
+import cn.hutool.core.date.DateUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.ErrorCode;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
@@ -37,6 +39,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -77,6 +80,19 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Autowired
     private TmsFirstMileService tmsFirstMileService;
 
+    //校验code中间日期是否是当天
+    private static void validCodeDateIsToday(String code) {
+        String[] parts = code.split("-");
+        if (parts.length != 3) {
+            throw exception(FIRST_MILE_REQUEST_CODE_FORMAT_ERROR, code);
+        }
+        String dateStr = parts[1];
+        String today = DateUtil.format(LocalDateTime.now(), DatePattern.PURE_DATE_PATTERN);
+        if (!dateStr.equals(today)) {
+            throw exception(FIRST_MILE_REQUEST_CODE_DATE_NOT_TODAY, dateStr);
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createFirstMileRequest(TmsFirstMileRequestSaveReqVO vo) {
@@ -87,10 +103,15 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         List<TmsFirstMileRequestItemDO> requestItemDOS = TmsFirstMileRequestConvert.convertItemList(vo.getItems());
         calculateTotalWeightAndVolume(firstMileRequest, requestItemDOS);
 
-        firstMileRequest.setCode(firstMileRequest.getCode() == null ? tmsNoRedisDAO.generate(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CREATE_FAIL)
-            : firstMileRequest.getCode());
-        //校验code是否和数据库的重复
-        validCodeDuplicate(firstMileRequest);
+        //code 校验
+        if (vo.getCode() != null) {
+            validCodeDateIsToday(vo.getCode());
+            if (validCodeDuplicate(vo.getCode())) {
+                throw exception(FIRST_MILE_REQUEST_CODE_DUPLICATE, vo.getCode());
+            }
+        } else {
+            vo.setCode(tmsNoRedisDAO.generate(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CREATE_FAIL));
+        }
         //校验产品是否存在
         erpProductApi.validProductList(requestItemDOS.stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList());
         // 校验人+部门+仓库是否合法
@@ -108,10 +129,6 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         return firstMileRequest.getId();
     }
 
-    private void validCodeDuplicate(TmsFirstMileRequestDO firstMileRequest) {
-        ThrowUtil.ifThrow(firstMileRequestMapper.selectByNo(firstMileRequest.getCode()) != null, FIRST_MILE_REQUEST_CODE_DUPLICATE, firstMileRequest.getCode());
-    }
-
     private void initMasterStatus(TmsFirstMileRequestDO firstMileRequest) {
         //审核
         tmsFirstMileRequestStatusMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT,
@@ -122,37 +139,14 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         orderStatusStatusMachine.fireEvent(TmsOrderStatus.OT_ORDERED, TmsEventEnum.ORDER_INIT, firstMileRequest);
     }
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public void updateFirstMileRequest(TmsFirstMileRequestSaveReqVO vo) {
-        // 校验存在
-        TmsFirstMileRequestDO oldDo = validateFirstMileRequestExists(vo.getId());
-        TmsFirstMileRequestDO updateObj = TmsFirstMileRequestConvert.convert(vo);
-        if (!Objects.equals(oldDo.getCode(), vo.getCode())) {
-            //校验code重复
-            validCodeDuplicate(updateObj);
-        }
-        if (!Objects.equals(vo.getRequesterId(), oldDo.getRequesterId())) {
-            adminUserApi.validateUser(vo.getRequesterId());
-        }
-        if (!Objects.equals(vo.getRequestDeptId(), oldDo.getRequestDeptId())) {
-            deptApi.validateDeptList(Collections.singleton(vo.getRequestDeptId()));
-        }
-        if (!Objects.equals(vo.getToWarehouseId(), oldDo.getToWarehouseId())) {
-            wmsWarehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
-        }
-        statusCheckForUpdate(oldDo, FIRST_MILE_REQUEST_UPDATE_FAIL_APPROVE);
-
-        // 计算主表的总重量和总体积
-        List<TmsFirstMileRequestItemDO> requestItemDOS = TmsFirstMileRequestConvert.convertItemList(vo.getItems());
-        //校验产品是否存在
-        erpProductApi.validProductList(requestItemDOS.stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList());
-        calculateTotalWeightAndVolume(updateObj, requestItemDOS);
-
-        firstMileRequestMapper.updateById(updateObj);
-
-        // 更新子表
-        firstMileRequestItemService.updateFirstMileRequestItemList(vo.getId(), requestItemDOS);
+    /**
+     * 数据库已存在code
+     *
+     * @param code code
+     * @return Boolean
+     */
+    private Boolean validCodeDuplicate(String code) {
+        return firstMileRequestMapper.selectByNo(code) != null;
     }
 
     //判断当前状态是否可以更新
@@ -421,6 +415,45 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Override
     public String getLatestCode() {
         return tmsNoRedisDAO.getMaxSerial(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CODE_GENERATE_FAIL);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateFirstMileRequest(TmsFirstMileRequestSaveReqVO vo) {
+        // 校验存在
+        TmsFirstMileRequestDO oldDo = validateFirstMileRequestExists(vo.getId());
+        TmsFirstMileRequestDO updateObj = TmsFirstMileRequestConvert.convert(vo);
+
+        if (!Objects.equals(oldDo.getCode(), vo.getCode())) {
+            validCodeDateIsToday(vo.getCode());
+            if (validCodeDuplicate(vo.getCode())) {
+                throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
+            }
+        } else {
+            vo.setCode(tmsNoRedisDAO.generate(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CREATE_FAIL));
+        }
+
+        if (!Objects.equals(vo.getRequesterId(), oldDo.getRequesterId())) {
+            adminUserApi.validateUser(vo.getRequesterId());
+        }
+        if (!Objects.equals(vo.getRequestDeptId(), oldDo.getRequestDeptId())) {
+            deptApi.validateDeptList(Collections.singleton(vo.getRequestDeptId()));
+        }
+        if (!Objects.equals(vo.getToWarehouseId(), oldDo.getToWarehouseId())) {
+            wmsWarehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
+        }
+        statusCheckForUpdate(oldDo, FIRST_MILE_REQUEST_UPDATE_FAIL_APPROVE);
+
+        // 计算主表的总重量和总体积
+        List<TmsFirstMileRequestItemDO> requestItemDOS = TmsFirstMileRequestConvert.convertItemList(vo.getItems());
+        //校验产品是否存在
+        erpProductApi.validProductList(requestItemDOS.stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList());
+        calculateTotalWeightAndVolume(updateObj, requestItemDOS);
+
+        firstMileRequestMapper.updateById(updateObj);
+
+        // 更新子表
+        firstMileRequestItemService.updateFirstMileRequestItemList(vo.getId(), requestItemDOS);
     }
 
     @Override
