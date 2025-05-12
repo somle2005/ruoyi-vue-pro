@@ -75,5 +75,4 @@ public interface WmsWarehouseService {
 
     Map<String, WmsWarehouseDO> getWarehouseMapByCode(Set<String> codes);
 
-    WmsWarehouseDO validateWarehouseExists(Long id);
 }
