@@ -2,15 +2,16 @@ package cn.iocoder.yudao.module.srm.config.purchase.order;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
-import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
+import cn.iocoder.yudao.module.srm.config.BaseFailCallbackImpl;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.SrmPurchaseOrderAuditReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.*;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -31,8 +32,8 @@ public class SrmPurchaseOrderStatusMachine {
     private Action<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderDO> orderExecuteActionImpl;
     @Resource
     private Action<SrmPaymentStatus, SrmEventEnum, SrmPurchaseOrderDO> orderPayActionImpl;
-    @Resource
-    private FailCallback baseFailCallbackImpl;
+    @Autowired
+    private BaseFailCallbackImpl baseFailCallbackImpl;
 
     //订单主项开关状态机
     @Bean(PURCHASE_ORDER_OFF_STATE_MACHINE_NAME)

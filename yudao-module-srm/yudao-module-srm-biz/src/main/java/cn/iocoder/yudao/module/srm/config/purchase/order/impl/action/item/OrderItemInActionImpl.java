@@ -142,6 +142,11 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
         SrmPurchaseOrderDO orderDO = mapper.selectById(oldData.getOrderId());
         if (orderDO == null) {
             log.error("未找到对应的采购订单,订单ID={}", oldData.getOrderId());
+            return;
+        }
+        if (orderDO.getInStatus() == null) {
+            log.warn("未找到对应的采购订单,订单ID={}", oldData.getOrderId());
+            return;
         }
         storageStateMachine.fireEvent(SrmStorageStatus.fromCode(orderDO.getInStatus()), event, orderDO);
     }
