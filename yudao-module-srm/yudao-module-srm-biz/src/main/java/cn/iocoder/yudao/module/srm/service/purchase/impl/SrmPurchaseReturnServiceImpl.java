@@ -10,7 +10,7 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
-import cn.iocoder.yudao.module.srm.api.purchase.SrmInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnSaveReqVO;
@@ -63,7 +63,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     private final FmsAccountApi erpAccountApi;
 
     @Resource(name = PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmInCountDTO> orderItemStorageMachine;
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemStorageMachine;
     @Resource(name = PURCHASE_RETURN_AUDIT_STATE_MACHINE_NAME)
     StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseReturnAuditReqVO> auditStatusMachine;
     @Resource(name = PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME)
@@ -252,7 +252,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         Long orderItemId = inItemDO.getOrderItemId();
         SrmPurchaseOrderItemDO orderItemDO = orderItemMapper.selectById(orderItemId);
 
-        orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT, SrmInCountDTO.builder().orderItemId(orderItemId).returnCount(number).build());
+        orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT, SrmOrderInCountDTO.builder().orderItemId(orderItemId).returnCount(number).build());
     }
 
     @Override

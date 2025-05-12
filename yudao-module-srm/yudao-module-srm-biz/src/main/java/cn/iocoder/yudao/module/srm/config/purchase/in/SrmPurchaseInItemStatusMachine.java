@@ -1,10 +1,11 @@
 package cn.iocoder.yudao.module.srm.config.purchase.in;
 
+import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.srm.config.purchase.in.impl.action.item.InPayItemActionImpl;
+import cn.iocoder.yudao.module.srm.api.purchase.in.SrmPuchaseInCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
@@ -12,7 +13,7 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -23,10 +24,10 @@ import org.springframework.context.annotation.Configuration;
 public class SrmPurchaseInItemStatusMachine {
 
     @Resource
-    InPayItemActionImpl inPayItemActionImpl;
-    @Resource
     private FailCallback baseFailCallbackImpl;
 
+    @Autowired
+    Action<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> inPayItemActionImpl;
     @Bean(SrmStateMachines.PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE)
     public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> getPurchaseRequestPaymentStateMachine() {
         StateMachineBuilder<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> builder = StateMachineBuilderFactory.create();
@@ -48,9 +49,16 @@ public class SrmPurchaseInItemStatusMachine {
         return builder.build(SrmStateMachines.PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE);
     }
 
+    @Autowired
+    Action<SrmStorageStatus, SrmEventEnum, SrmPuchaseInCountDTO> itemStorageActionImpl;
     @Bean(SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
-    public StateMachine<SrmStorageStatus, SrmEventEnum, T> getPurchaseRequestStorageStateMachine() {
-
+    public StateMachine<SrmStorageStatus, SrmEventEnum, SrmPuchaseInCountDTO> getPurchaseRequestStorageStateMachine() {
+        StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmPuchaseInCountDTO> builder = StateMachineBuilderFactory.create();
+        //初始化
+        builder.internalTransition().within(SrmStorageStatus.NONE_IN_STORAGE).on(SrmEventEnum.STORAGE_INIT).perform(itemStorageActionImpl);
+        //库存调整,不管终点，在 Action 里面调整终点
+        builder.externalTransitions().fromAmong(SrmStorageStatus.NONE_IN_STORAGE, SrmStorageStatus.PARTIALLY_IN_STORAGE, SrmStorageStatus.ALL_IN_STORAGE).to(SrmStorageStatus.PARTIALLY_IN_STORAGE)
+            .on(SrmEventEnum.STOCK_ADJUSTMENT).perform(itemStorageActionImpl);
         //TODO 待完善 wdy
         return null;
     }

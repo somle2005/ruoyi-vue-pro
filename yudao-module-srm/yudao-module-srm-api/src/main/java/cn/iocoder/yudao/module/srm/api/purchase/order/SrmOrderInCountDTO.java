@@ -1,13 +1,16 @@
-package cn.iocoder.yudao.module.srm.api.purchase;
+package cn.iocoder.yudao.module.srm.api.purchase.order;
 
 import lombok.Builder;
 import lombok.Data;
 
 import java.math.BigDecimal;
 
+/**
+ * 采购订单-入库数量变动DTO，inCount变动数量属性。
+ */
 @Data
 @Builder
-public class SrmInCountDTO {
+public class SrmOrderInCountDTO {
 
     //订单项
     private Long orderItemId;
