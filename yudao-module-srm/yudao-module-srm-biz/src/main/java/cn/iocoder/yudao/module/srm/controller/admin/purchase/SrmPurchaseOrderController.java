@@ -166,14 +166,14 @@ public class SrmPurchaseOrderController {
     }
 
     @PostMapping("/merge")
-    @Operation(summary = "合并入库")
+    @Operation(summary = "合并成采购到货单")
     @PreAuthorize("@ss.hasPermission('srm:purchase-order:merge')")
     public CommonResult<Boolean> mergePurchaseOrder(@Validated @RequestBody SrmPurchaseOrderMergeReqVO reqVO) {
         purchaseOrderService.merge(reqVO);
         return success(true);
     }
 
-    //查查询采购合同的模板List<String>
+    //查询采购合同的模板List<String>
     @GetMapping("/getTemplateList")
     @Operation(summary = "查询采购合同模板")
     @PreAuthorize("@ss.hasPermission('srm:purchase-order:generate-contract')")

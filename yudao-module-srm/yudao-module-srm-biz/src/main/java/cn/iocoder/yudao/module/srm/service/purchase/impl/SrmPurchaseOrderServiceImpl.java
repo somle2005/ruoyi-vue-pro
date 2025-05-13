@@ -21,7 +21,6 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurcha
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.*;
 import cn.iocoder.yudao.module.srm.convert.purchase.SrmOrderConvert;
 import cn.iocoder.yudao.module.srm.convert.purchase.SrmOrderInConvert;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
@@ -724,14 +723,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         List<SrmPurchaseOrderItemDO> orderItemDOS = purchaseOrderItemMapper.selectListByItemIds(itemIds);
         //转换
         SrmPurchaseInSaveReqVO vo = BeanUtils.toBean(reqVO, SrmPurchaseInSaveReqVO.class, saveReqVO ->
-            saveReqVO.setCode(null).setItems(SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS)).setId(null)
-                        .setInTime(LocalDateTime.now()));
+            saveReqVO.setCode(null).setItems(SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS)).setId(null).setInTime(LocalDateTime.now()));
         //service持久化
         Long purchaseIn = purchaseInService.createPurchaseIn(vo);
-        //修改采购单项的source = 合并入库
-        List<SrmPurchaseInItemDO> itemDOS = srmPurchaseInItemMapper.selectListByInId(purchaseIn);
-        itemDOS.forEach(itemDO -> itemDO.setSource("合并入库"));
-        srmPurchaseInItemMapper.updateBatch(itemDOS);
     }
 
     @Override

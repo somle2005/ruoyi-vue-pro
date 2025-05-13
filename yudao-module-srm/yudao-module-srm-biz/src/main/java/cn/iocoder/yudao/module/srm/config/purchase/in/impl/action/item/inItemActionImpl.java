@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
 
+/**
+ * 更改item实际入库数量+入库状态
+ */
 @Slf4j
 @Component
 public class inItemActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmPuchaseInCountDTO> {
@@ -49,6 +52,9 @@ public class inItemActionImpl implements Action<SrmStorageStatus, SrmEventEnum, 
         //
         srmPurchaseInItemMapper.updateById(srmPurchaseInItemDO.setInStatus(to.getCode()));
 
-        //传递事件给订单项
+        if (event != SrmEventEnum.ORDER_INIT) {
+            //TODO 传递事件给订单项
+
+        }
     }
 }
