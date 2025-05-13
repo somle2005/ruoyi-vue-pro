@@ -21,8 +21,8 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.PRODUCT_NOT_ENABLE;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.PRODUCT_NOT_EXISTS;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.PRODUCT_NOT_ENABLE;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.PRODUCT_NOT_EXISTS;
 
 @Service
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))

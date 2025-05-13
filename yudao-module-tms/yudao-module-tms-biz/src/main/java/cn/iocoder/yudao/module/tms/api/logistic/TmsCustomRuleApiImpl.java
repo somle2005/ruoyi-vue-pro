@@ -16,7 +16,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.CUSTOM_RULE_NOT_EXISTS;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.CUSTOM_RULE_NOT_EXISTS;
 
 @Service
 public class TmsCustomRuleApiImpl implements TmsCustomRuleApi {

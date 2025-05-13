@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.logistic.customrule;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
@@ -8,6 +9,7 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.enums.ErpDictTypeConstants;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
+import cn.iocoder.yudao.module.system.api.dict.dto.DictDataRespDTO;
 import cn.iocoder.yudao.module.tms.api.logistic.customrule.TmsCustomRuleApi;
 import cn.iocoder.yudao.module.tms.api.logistic.customrule.dto.TmsCustomRuleDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.customrule.vo.TmsCustomRulePageReqVO;
@@ -36,7 +38,7 @@ import java.util.stream.Collectors;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_BATCH_INSERT_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.*;
 
 /**
  * ERP 海关规则 Service 实现类
@@ -208,5 +210,24 @@ public class TmsCustomRuleServiceImpl implements TmsCustomRuleService {
         //手动映射
         source.setCountryCode(null);
         return BeanUtils.toBean(source, TmsCustomRuleDO.class).setCountryCode(countryCode);
+    }
+
+    /**
+     * 根据国别和产品ID集合获得海关规则列表
+     */
+    @Override
+    public List<TmsCustomRuleDO> getCustomRuleListByCountryAndProducts(String country, List<Long> productIds) {
+        if (CollUtil.isEmpty(productIds) || StrUtil.isBlank(country)) {
+            return Collections.emptyList();
+        }
+        DictDataRespDTO dictData = dictDataApi.parseDictData(DictTypeConstants.COUNTRY_CODE, country);
+        long countryCode;
+        try {
+            countryCode = Long.parseLong(dictData.getValue());
+        } catch (NumberFormatException e) {
+            log.warn("countryCode is not number , 转换失败");
+            return Collections.emptyList();
+        }
+        return customRuleMapper.selectListByCountryAndProductIds(countryCode, productIds);
     }
 }

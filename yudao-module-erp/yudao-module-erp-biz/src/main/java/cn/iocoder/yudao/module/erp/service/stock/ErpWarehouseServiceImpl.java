@@ -20,8 +20,8 @@ import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.WAREHOUSE_NOT_ENABLE;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.WAREHOUSE_NOT_EXISTS;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.WAREHOUSE_NOT_ENABLE;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.WAREHOUSE_NOT_EXISTS;
 
 /**
  * ERP 仓库 Service 实现类

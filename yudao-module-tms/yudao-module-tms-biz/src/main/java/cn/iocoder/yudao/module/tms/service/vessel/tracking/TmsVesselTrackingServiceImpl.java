@@ -15,8 +15,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.VESSEL_TRACKING_LOG_NOT_EXISTS;
-import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.VESSEL_TRACKING_NOT_EXISTS;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.VESSEL_TRACKING_LOG_NOT_EXISTS;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.VESSEL_TRACKING_NOT_EXISTS;
 
 /**
  * 出运跟踪信息表（由外部API更新，船） Service 实现类

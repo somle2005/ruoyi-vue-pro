@@ -4,7 +4,6 @@ import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.TmsCustomCategoryPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.TmsCustomCategorySaveReqVO;
@@ -15,6 +14,7 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.item.TmsCust
 import cn.iocoder.yudao.module.tms.dal.mysql.logistic.category.TmsCustomCategoryMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.logistic.category.item.TmsCustomCategoryItemMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.logistic.customrule.TmsCustomRuleMapper;
+import cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants;
 import cn.iocoder.yudao.module.tms.service.logistic.category.bo.TmsCustomCategoryBO;
 import cn.iocoder.yudao.module.tms.service.logistic.category.item.TmsCustomCategoryItemService;
 import jakarta.annotation.Resource;
@@ -77,7 +77,7 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
                 createReqVO.getMaterial(), createReqVO.getDeclaredType());
 
         if (CollectionUtils.isNotEmpty(categoryList)) {
-            throw exception(ErrorCodeConstants.CUSTOM_RULE_CATEGORY_EXISTS, createReqVO.getDeclaredType());
+            throw exception(TmsErrorCodeConstants.CUSTOM_RULE_CATEGORY_EXISTS, createReqVO.getDeclaredType());
         }
     }
 
@@ -114,7 +114,7 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
 
     private void validateCustomRuleCategoryExists(Long id) {
         if (customRuleCategoryMapper.selectById(id) == null) {
-            throw exception(ErrorCodeConstants.CUSTOM_RULE_CATEGORY_NOT_EXISTS);
+            throw exception(TmsErrorCodeConstants.CUSTOM_RULE_CATEGORY_NOT_EXISTS);
         }
     }
 
@@ -137,7 +137,7 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
         Map<Long, TmsCustomCategoryDO> map = convertMap(list, TmsCustomCategoryDO::getId);
         for (Long id : ids) {
             TmsCustomCategoryDO aDo = map.get(id);
-            ThrowUtil.ifEmptyThrow(aDo, ErrorCodeConstants.CUSTOM_RULE_CATEGORY_NOT_EXISTS);
+            ThrowUtil.ifEmptyThrow(aDo, TmsErrorCodeConstants.CUSTOM_RULE_CATEGORY_NOT_EXISTS);
         }
     }
 

@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.FINANCE_SUBJECT_NOT_EXISTS;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.FINANCE_SUBJECT_NOT_EXISTS;
 
 @Service
 public class FmsCompanyApiImpl implements FmsCompanyApi {
