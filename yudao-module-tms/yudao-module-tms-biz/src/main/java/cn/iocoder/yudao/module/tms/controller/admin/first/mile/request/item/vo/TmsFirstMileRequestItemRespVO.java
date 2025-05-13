@@ -76,6 +76,11 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
     @ExcelProperty("产品名称")
     private String productName;
 
+    //产品重量
+    @Schema(description = "产品基础重量（kg）")
+    @ExcelProperty("产品基础重量（kg）")
+    private BigDecimal productWeight;
+
     @Schema(description = "销售公司ID")
     private Long salesCompanyId;
 

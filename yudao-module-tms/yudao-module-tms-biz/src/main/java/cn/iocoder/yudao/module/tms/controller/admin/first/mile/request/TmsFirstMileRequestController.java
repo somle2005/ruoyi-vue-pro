@@ -213,6 +213,7 @@ public class TmsFirstMileRequestController {
                         MapUtils.findAndThen(productMap, item.getProductId(), product -> {
                             itemRespVO.setProductName(product.getBarCode());
                             itemRespVO.setBarCode(product.getBarCode());
+                            itemRespVO.setProductWeight(product.getWeight());
                         });
                             MapUtils.findAndThen(dtoMap, item.getSalesCompanyId(), company -> itemRespVO.setSalesCompanyName(company.getName()));
                         MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> itemRespVO.setCreator(user.getNickname()));
