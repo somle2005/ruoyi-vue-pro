@@ -103,6 +103,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             if (validCodeDuplicate(vo.getCode())) {
                 throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
             }
+            noRedisDAO.setManualSerial(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, vo.getCode());
         } else {
             vo.setCode(noRedisDAO.generate(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, FIRST_MILE_CODE_DUPLICATE));
         }
@@ -144,9 +145,9 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             if (validCodeDuplicate(vo.getCode(), vo.getId())) {
                 throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
             }
+            noRedisDAO.setManualSerial(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, vo.getCode());
         }
         //校验申请人
-
         statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_UPDATE_FAIL_APPROVE);
 
         TmsFirstMileDO updateObj = BeanUtils.toBean(vo, TmsFirstMileDO.class);

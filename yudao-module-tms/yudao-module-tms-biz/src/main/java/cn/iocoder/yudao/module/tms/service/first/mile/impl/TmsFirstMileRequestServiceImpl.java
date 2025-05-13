@@ -109,6 +109,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             if (validCodeDuplicate(vo.getCode())) {
                 throw exception(FIRST_MILE_REQUEST_CODE_DUPLICATE, vo.getCode());
             }
+            tmsNoRedisDAO.setManualSerial(FIRST_MILE_REQUEST_NO_PREFIX, vo.getCode());
         } else {
             vo.setCode(tmsNoRedisDAO.generate(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CREATE_FAIL));
         }
@@ -429,6 +430,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             if (validCodeDuplicate(vo.getCode())) {
                 throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
             }
+            tmsNoRedisDAO.setManualSerial(FIRST_MILE_REQUEST_NO_PREFIX, vo.getCode());
         } else {
             vo.setCode(tmsNoRedisDAO.generate(FIRST_MILE_REQUEST_NO_PREFIX, FIRST_MILE_REQUEST_CREATE_FAIL));
         }

@@ -51,4 +51,7 @@ public class ErpProductSimpleRespVO {
 
     @Schema(description = "包装重量（保留至小数点后两位，单位kg，必须为非负数）", example = "12.50")
     private BigDecimal packageWeight;
+
+    @Schema(description = "基础重量（kg）", requiredMode = Schema.RequiredMode.REQUIRED)
+    private BigDecimal weight;
 }

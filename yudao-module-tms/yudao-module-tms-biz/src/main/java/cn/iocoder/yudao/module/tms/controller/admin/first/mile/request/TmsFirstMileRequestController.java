@@ -210,15 +210,15 @@ public class TmsFirstMileRequestController {
             if (bo.getItems() != null) {
                 List<TmsFirstMileRequestItemRespVO> items = bo.getItems().stream().map(item ->
                     BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
-                            MapUtils.findAndThen(productMap, item.getProductId(), product -> {
-                                itemRespVO.setProductName(product.getBarCode());
-                                itemRespVO.setBarCode(product.getBarCode());
-                            });
+                        MapUtils.findAndThen(productMap, item.getProductId(), product -> {
+                            itemRespVO.setProductName(product.getBarCode());
+                            itemRespVO.setBarCode(product.getBarCode());
+                        });
                             MapUtils.findAndThen(dtoMap, item.getSalesCompanyId(), company -> itemRespVO.setSalesCompanyName(company.getName()));
+                        MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> itemRespVO.setCreator(user.getNickname()));
+                        MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> itemRespVO.setUpdater(user.getNickname()));
                         }
                     )).collect(Collectors.toList());
-                MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO.setCreator(user.getNickname()));
-                MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO.setUpdater(user.getNickname()));
 
                 respVO.setItems(items);
                 // 设置明细数量

@@ -242,13 +242,16 @@ public class TmsFirstMileController {
                 }).collect(Collectors.toList());
                 respVO.setFirstMileItemList(items);
             }
-            // 设置费用信息
+            // 设置费用信息 1:N
             if (CollUtil.isNotEmpty(bo.getFees())) {
-                respVO.setFees(TmsFirstMileConvert.convertFeeList(bo.getFees()));
-                MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO.setUpdater(user.getNickname()));
-                MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO.setCreator(user.getNickname()));
+                List<TmsFeeRespVO> tmsFeeRespVOS = TmsFirstMileConvert.convertFeeList(bo.getFees());
+                tmsFeeRespVOS.forEach(tmsFeeRespVO -> {
+                    MapUtils.findAndThen(userMap, safeParseLong(tmsFeeRespVO.getUpdater()), user -> tmsFeeRespVO.setUpdater(user.getNickname()));
+                    MapUtils.findAndThen(userMap, safeParseLong(tmsFeeRespVO.getCreator()), user -> tmsFeeRespVO.setCreator(user.getNickname()));
+                });
+                respVO.setFees(tmsFeeRespVOS);
             }
-            // 设置最新跟踪信息
+            // 设置最新跟踪信息 1:1
             if (bo.getTracking() != null) {
                 respVO.setTracking(BeanUtils.toBean(bo.getTracking(), TmsVesselTrackingRespVO.class));
             }
