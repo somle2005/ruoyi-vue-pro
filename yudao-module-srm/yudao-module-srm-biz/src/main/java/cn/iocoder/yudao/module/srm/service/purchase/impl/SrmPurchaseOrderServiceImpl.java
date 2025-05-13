@@ -714,10 +714,10 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             Long itemId = item.getItemId();
             SrmPurchaseOrderItemDO aDo = validatePurchaseOrderItemExists(itemId);
             SrmPurchaseOrderDO order = getPurchaseOrder(aDo.getOrderId());
-            //非已审核+非开启+非完全入库,异常
+            //非已审核+非开启+完全入库,异常
             ThrowUtil.ifThrow(!Objects.equals(order.getAuditStatus(), SrmAuditStatus.APPROVED.getCode()), PURCHASE_ORDER_ITEM_NOT_AUDIT, itemId);
             ThrowUtil.ifThrow(!Objects.equals(aDo.getOffStatus(), SrmOffStatus.OPEN.getCode()), PURCHASE_ORDER_ITEM_NOT_OPEN, itemId);
-            ThrowUtil.ifThrow(!Objects.equals(aDo.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()), PURCHASE_ORDER_IN_ITEM_NOT_OPEN, itemId);
+            ThrowUtil.ifThrow(Objects.equals(aDo.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()), PURCHASE_ORDER_IN_ITEM_NOT_OPEN, itemId);
         }
         List<Long> itemIds = reqVO.getItems().stream().map(SrmPurchaseOrderMergeReqVO.item::getItemId).collect(Collectors.toList());
         List<SrmPurchaseOrderItemDO> orderItemDOS = purchaseOrderItemMapper.selectListByItemIds(itemIds);
@@ -738,8 +738,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         try (XWPFTemplate xwpfTemplate = templateService.buildXWPDFTemplate(resource)) {
             //2 模板word渲染数据
             List<SrmPurchaseOrderItemDO> itemDOS = purchaseOrderItemMapper.selectListByOrderId(orderDO.getId());
-            Map<Long, FmsCompanyDTO> dtoMap =
-                convertMap(erpCompanyApi.validateCompany(Set.of(reqVO.getPartyAId(), reqVO.getPartyBId())), FmsCompanyDTO::getId);
+            Map<Long, FmsCompanyDTO> dtoMap = convertMap(erpCompanyApi.validateCompany(Set.of(reqVO.getPartyAId(), reqVO.getPartyBId())), FmsCompanyDTO::getId);
             SrmPurchaseOrderWordBO wordBO = SrmOrderConvert.INSTANCE.bindDataFormOrderItemDO(itemDOS, orderDO, reqVO, dtoMap);
             xwpfTemplate.render(wordBO);
             //3 转换pdf，返回响应
@@ -760,7 +759,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 out.flush();
             }
         } catch (Exception e) {
-            throw exception(PURCHASE_ORDER_GENERATE_CONTRACT_FAIL_ERROR, e.getMessage());
+            throw exception(PURCHASE_ORDER_GENERATE_CONTRACT_FAIL_ERROR, reqVO.getTemplateName(), e.getMessage());
         }
     }
 

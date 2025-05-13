@@ -94,6 +94,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     public Long createPurchaseIn(SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
         vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
+        // 1.2.1 校验到货项对应的采购项可入库数量是否充足。
+        validatePurchaseOrderItemQty(vo.getItems());
         // 1.2 校验入库项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
         // 1.3 校验结算账户
@@ -110,7 +112,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             // 校验编号是否已存在
             ThrowUtil.ifThrow(purchaseInMapper.selectByNo(no) != null, PURCHASE_IN_NO_EXISTS);
         }
-        vo.setCode(no);
 
         // 2.1 插入入库
         SrmPurchaseInDO purchaseIn = BeanUtils.toBean(vo, SrmPurchaseInDO.class, in -> in.setCode(no));
@@ -124,6 +125,74 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         initMasterStatus(purchaseIn);
         initSlaveStatus(purchaseInItems);
         return purchaseIn.getId();
+    }
+
+    /**
+     * 校验到货项对应的采购项可入库数量是否充足。
+     *
+     * @param voItems 采购入库项
+     */
+    private void validatePurchaseOrderItemQty(List<SrmPurchaseInSaveReqVO.Item> voItems) {
+        if (CollUtil.isEmpty(voItems)) {
+            return;
+        }
+
+        //1.0 订单项对应到货项未审核 -> e
+        List<Long> orderItemIds = voItems.stream()
+            .map(SrmPurchaseInSaveReqVO.Item::getOrderItemId)
+            .distinct()
+            .toList();
+
+        // 1.1 批量获取入库项和入库单信息,减少数据库查询
+        List<SrmPurchaseInItemDO> srmPurchaseInItemDOS = purchaseInItemMapper.selectListByOrderItemIds(orderItemIds);
+        if (CollUtil.isNotEmpty(srmPurchaseInItemDOS)) {
+            List<Long> inIds = srmPurchaseInItemDOS.stream().map(SrmPurchaseInItemDO::getInId).distinct().toList();
+            // 批量查询入库单状态
+            Map<Long, SrmPurchaseInDO> inMap = convertMap(purchaseInMapper.selectByIds(inIds), SrmPurchaseInDO::getId);
+
+            // 获取订单项信息,用于异常提示
+            Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(
+                purchaseOrderService.getPurchaseOrderItemList(orderItemIds),
+                SrmPurchaseOrderItemDO::getId
+            );
+
+            // 校验入库单状态,并关联订单项信息
+            srmPurchaseInItemDOS.stream()
+                .filter(item -> {
+                    SrmPurchaseInDO in = inMap.get(item.getInId());
+                    return in != null && !Objects.equals(in.getAuditStatus(), SrmAuditStatus.APPROVED.getCode());
+                })
+                .findFirst()
+                .ifPresent(item -> {
+                    SrmPurchaseOrderItemDO orderItem = orderItemMap.get(item.getOrderItemId());
+                    String orderItemInfo = orderItem != null ? String.format("订单项[%s-编号:%s]", orderItem.getProductName(), orderItem.getId()) : String.format("订单项ID[%s]", item.getOrderItemId());
+                    SrmPurchaseInDO in = inMap.get(item.getInId());
+                    throw exception(PURCHASE_IN_ITEM_ORDER_ITEM_NOT_AUDIT_PASS,
+                        orderItemInfo, // 订单项信息
+                        in.getCode()); // 到货单编号
+                });
+        }
+
+        // 2.0 校验vo创建数量是否超过了采购订单的采购项可到货数量 voItem.qty >  (SrmPurchaseOrderItemDO.qty - SrmPurchaseOrderItemDO.inboundClosedQty) -> e
+        // 2.1 批量获取采购订单项信息
+        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(orderItemIds), SrmPurchaseOrderItemDO::getId);
+
+        // 2.2 校验每个入库项的数量是否超过可入库数量
+        for (SrmPurchaseInSaveReqVO.Item voItem : voItems) {
+            // 2.2.1 校验采购订单项是否存在
+            SrmPurchaseOrderItemDO orderItem = orderItemMap.get(voItem.getOrderItemId());
+            if (orderItem == null) {
+                throw exception(PURCHASE_ORDER_ITEM_NOT_EXISTS, voItem.getOrderItemId());
+            }
+
+            // 2.2.2 计算可到货数量 = 采购数量 - 已完成入库数量
+            BigDecimal availableQty = orderItem.getQty().subtract(orderItem.getInboundClosedQty());
+
+            // 2.2.3 校验当前到货数量是否超过可入库数量
+            if (voItem.getQty().compareTo(availableQty) > 0) {
+                throw exception(PURCHASE_IN_ITEM_QTY_EXCEED, orderItem.getId(), orderItem.getProductName(), availableQty, voItem.getQty());
+            }
+        }
     }
 
     private void initSlaveStatus(List<SrmPurchaseInItemDO> purchaseInItems) {
@@ -166,7 +235,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
         // 1.1 校验存在
         SrmPurchaseInDO purchaseIn = validatePurchaseInExists(vo.getId());
-        // 1.2 校验采购入库审核状态可以修改
+        // 1.2 校验采购到货审核状态可以修改
         updateStatusCheck(purchaseIn);
         // 1.3 校验结算账户
         erpAccountApi.validateAccount(vo.getAccountId());
@@ -176,12 +245,50 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         }
         // 1.5 校验订单项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
+        // 1.6 如果vo和旧item不同,则校验订单项到货数量是否超过采购订单的采购项入库数量
+        validQtyWhenUpdate(vo);
+
         // 2.1 更新入库
         SrmPurchaseInDO updateObj = BeanUtils.toBean(vo, SrmPurchaseInDO.class);
         calculateTotalPrice(updateObj, purchaseInItems);//合计
         purchaseInMapper.updateById(updateObj);
         // 2.2 更新入库项
         updatePurchaseInItemList(vo.getId(), purchaseInItems);
+    }
+
+    /**
+     * 校验采购订单项的入库数量是否超过采购订单的采购项入库数量,在更新的时候
+     *
+     * @param vo SrmPurchaseInSaveReqVO
+     */
+    private void validQtyWhenUpdate(SrmPurchaseInSaveReqVO vo) {
+        List<SrmPurchaseInItemDO> oldItems = purchaseInItemMapper.selectListByInId(vo.getId());
+        if (CollUtil.isNotEmpty(oldItems)) {
+            // 1.6.1 找出数量变更的项
+            Map<Long, BigDecimal> oldItemMap = convertMap(oldItems, SrmPurchaseInItemDO::getOrderItemId, SrmPurchaseInItemDO::getQty);
+            Map<Long, String> oldItemNameMap = convertMap(oldItems, SrmPurchaseInItemDO::getOrderItemId, SrmPurchaseInItemDO::getProductName);
+
+            // 1.6.2 计算需要校验的增量项
+            List<SrmPurchaseInSaveReqVO.Item> diffItems = vo.getItems().stream()
+                .filter(voItem -> {
+                    BigDecimal oldQty = oldItemMap.getOrDefault(voItem.getOrderItemId(), BigDecimal.ZERO);
+                    return oldQty.compareTo(voItem.getQty()) < 0; // 只处理数量增加的项
+                })
+                .map(voItem -> {
+                    BigDecimal oldQty = oldItemMap.getOrDefault(voItem.getOrderItemId(), BigDecimal.ZERO);
+                    return new SrmPurchaseInSaveReqVO.Item()
+                        .setId(voItem.getId())
+                        .setOrderItemId(voItem.getOrderItemId())
+                        .setProductName(oldItemNameMap.getOrDefault(voItem.getOrderItemId(), voItem.getProductName()))
+                        .setQty(voItem.getQty().subtract(oldQty)); // 增量数量
+                })
+                .collect(Collectors.toList());
+
+            // 1.6.3 校验变更后的数量是否超过可到货数量
+            if (CollUtil.isNotEmpty(diffItems)) {
+                validatePurchaseOrderItemQty(diffItems);
+            }
+        }
     }
 
     private void calculateTotalPrice(SrmPurchaseInDO purchaseIn, List<SrmPurchaseInItemDO> purchaseInItems) {
@@ -451,7 +558,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             log.debug("采购订单撤回审核，ID: {}", inDO.getId());
             auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
             // 1.4 删除入库单
-            //如果未入库(草稿)则 -> 作废删除，已入库->e
+            //如果未入库(草稿)则 -> 作废删除，已入库-> e
             Optional.ofNullable(wmsInboundApi.getInboundList(BillType.WMS_INBOUND.getValue(), inDO.getId())).ifPresent(inbounds -> {
                 inbounds.forEach(inbound -> {
                     if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())) {
