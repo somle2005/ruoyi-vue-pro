@@ -157,10 +157,7 @@ public class SrmPurchaseOrderItemDO extends TenantBaseDO {
      * 采购申请项ID {@link SrmPurchaseRequestItemsDO#getId()}
      */
     private Long purchaseApplyItemId;
-    /**
-     * 采购申请单No
-     */
-    private String erpPurchaseRequestItemNo;
+
 
     private String xcode;//x码
     private String containerRate;//箱率

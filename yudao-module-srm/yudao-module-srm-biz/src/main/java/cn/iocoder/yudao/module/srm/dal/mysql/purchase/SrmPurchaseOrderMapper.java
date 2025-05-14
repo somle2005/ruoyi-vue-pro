@@ -5,8 +5,6 @@ import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.SrmPurchaseOrderPageReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
-import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
 import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -43,18 +41,6 @@ public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> 
             .eqIfPresent(SrmPurchaseOrderDO::getOrderStatus, vo.getOrderStatus());
     }
 
-    //getBOWrapper
-    default MPJLambdaWrapper<SrmPurchaseOrderDO> getBOWrapper(SrmPurchaseOrderPageReqVO vo) {
-        return wrapper(vo).innerJoin(SrmPurchaseOrderItemDO.class, SrmPurchaseOrderItemDO::getOrderId, SrmPurchaseOrderDO::getId,
-                on -> on.likeIfExists(SrmPurchaseOrderItemDO::getErpPurchaseRequestItemNo, vo.getErpPurchaseRequestItemNo())
-                    .eqIfExists(SrmPurchaseOrderItemDO::getProductId, vo.getProductId()).likeIfExists(SrmPurchaseOrderItemDO::getBarCode, vo.getBarCode())
-                    .likeIfExists(SrmPurchaseOrderItemDO::getProductUnitName, vo.getProductUnitName())
-                    .likeIfExists(SrmPurchaseOrderItemDO::getProductName, vo.getProductName())
-                    //applicantId
-                    .eqIfExists(SrmPurchaseOrderItemDO::getApplicantId, vo.getApplicantId())
-                    .eqIfExists(SrmPurchaseOrderItemDO::getApplicationDeptId, vo.getApplicationDeptId())).selectAll(SrmPurchaseOrderItemDO.class)
-            .selectAsClass(SrmPurchaseOrderItemDO.class, SrmPurchaseOrderItemBO.class);
-    }
 
     //需要分页主表	主表单独查 + 子表用 IN 批量查
     default PageResult<SrmPurchaseOrderDO> selectPage(SrmPurchaseOrderPageReqVO reqVO) {

@@ -152,7 +152,7 @@ public class TmsFirstMileController {
 
     @PutMapping("/audit-status")
     @Operation(summary = "审核/反审核")
-    @PreAuthorize("@ss.hasPermission('tms:first-mile:audit')")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile:review')")
     public CommonResult<Boolean> audit(@Validated @RequestBody TmsFirstMileAuditReqVO reqVO) {
         firstMileService.review(reqVO);
         return success(true);

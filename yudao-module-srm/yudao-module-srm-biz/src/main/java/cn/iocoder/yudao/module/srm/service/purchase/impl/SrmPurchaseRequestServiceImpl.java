@@ -225,7 +225,6 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             item.setPurchaseApplyItemId(itemId);//采购申请项id
             //获得主表DO
             SrmPurchaseRequestDO aDo = rDOMap.get(requestItemDOMap.get(itemId).getRequestId());
-            item.setErpPurchaseRequestItemNo(aDo.getCode());
             item.setApplicantId(aDo.getApplicantId());//申请人
             item.setApplicationDeptId(aDo.getApplicationDeptId());//申请部门
             //设置来源

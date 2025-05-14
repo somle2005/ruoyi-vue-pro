@@ -24,7 +24,6 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
     default MPJLambdaWrapperX<SrmPurchaseOrderItemDO> buildWrapper(SrmPurchaseOrderPageReqVO reqVO) {
         return new MPJLambdaWrapperX<SrmPurchaseOrderItemDO>()
             .selectAll(SrmPurchaseOrderItemDO.class)
-            .likeIfPresent(SrmPurchaseOrderItemDO::getErpPurchaseRequestItemNo, reqVO.getErpPurchaseRequestItemNo()) // 采购申请项编号
             .eqIfPresent(SrmPurchaseOrderItemDO::getProductId, reqVO.getProductId()) // 产品ID
             .likeIfPresent(SrmPurchaseOrderItemDO::getBarCode, reqVO.getBarCode()) // 产品SKU
             .likeIfPresent(SrmPurchaseOrderItemDO::getProductName, reqVO.getProductName()) // 产品名称
@@ -127,12 +126,6 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
 
     default MPJLambdaWrapper<SrmPurchaseOrderItemDO> getDOWrapper() {
         return new MPJLambdaWrapperX<SrmPurchaseOrderItemDO>().selectAll(SrmPurchaseOrderItemDO.class);
-    }
-
-    default Collection<SrmPurchaseOrderItemDO> selectIdsByErpPurchaseRequestItemNo(String erpPurchaseRequestItemNo) {
-        MPJLambdaWrapper<SrmPurchaseOrderItemDO> wrapper = new MPJLambdaWrapperX<SrmPurchaseOrderItemDO>().selectAll(SrmPurchaseOrderItemDO.class)
-            .like(SrmPurchaseOrderItemDO::getErpPurchaseRequestItemNo, erpPurchaseRequestItemNo);
-        return selectList(wrapper);
     }
 
     default List<SrmPurchaseOrderItemDO> selectListByApplyIds(Collection<Long> applyIds) {

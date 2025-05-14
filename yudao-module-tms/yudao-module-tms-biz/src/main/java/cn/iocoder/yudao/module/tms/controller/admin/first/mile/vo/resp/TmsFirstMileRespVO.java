@@ -20,6 +20,9 @@ import java.util.List;
 @Data
 @ExcelIgnoreUnannotated
 public class TmsFirstMileRespVO extends BaseVO {
+    @Schema(description = "主键ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("主键ID")
+    private Long id;
 
     @Schema(description = "创建时间")
     @ExcelProperty("创建时间")

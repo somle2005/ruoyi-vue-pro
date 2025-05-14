@@ -16,7 +16,6 @@ class SrmPurchaseOrderItemMapperTest extends BaseDbUnitTest {
     @Test
     void selectBOPage() {
         SrmPurchaseOrderPageReqVO vo = new SrmPurchaseOrderPageReqVO();
-        vo.setErpPurchaseRequestItemNo("1");
         PageResult<SrmPurchaseOrderItemBO> page = srmPurchaseOrderItemMapper.selectErpPurchaseOrderItemBOPage(vo);
         for (SrmPurchaseOrderItemBO itemBO : page.getList()) {
             //log

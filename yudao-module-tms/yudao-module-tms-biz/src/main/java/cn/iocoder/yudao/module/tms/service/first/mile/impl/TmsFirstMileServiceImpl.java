@@ -121,6 +121,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         // 保存费用项
         createFeeList(firstMileId, vo.getFees());
 
+        auditStateMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, TmsFirstMileAuditReqVO.builder().id(firstMileId).build());
         return firstMileId;
     }
 

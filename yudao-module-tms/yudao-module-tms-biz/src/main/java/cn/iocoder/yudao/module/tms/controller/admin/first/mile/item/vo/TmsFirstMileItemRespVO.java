@@ -13,6 +13,10 @@ import java.math.BigDecimal;
 @ExcelIgnoreUnannotated
 public class TmsFirstMileItemRespVO extends BaseVO {
 
+    @Schema(description = "主键ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("主键ID")
+    private Long id;
+
     @Schema(description = "申请项ID")
     @ExcelProperty("申请项ID")
     private Long requestItemId;

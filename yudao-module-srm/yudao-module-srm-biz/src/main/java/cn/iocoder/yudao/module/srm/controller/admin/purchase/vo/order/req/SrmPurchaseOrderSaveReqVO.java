@@ -185,9 +185,6 @@ public class SrmPurchaseOrderSaveReqVO {
         @Schema(description = "采购申请单的申请项id")
         private Long purchaseApplyItemId;
 
-        @Schema(description = "采购申请单No")
-        private String erpPurchaseRequestItemNo;
-
         @Schema(description = "部门id")
         private Long applicationDeptId;
 

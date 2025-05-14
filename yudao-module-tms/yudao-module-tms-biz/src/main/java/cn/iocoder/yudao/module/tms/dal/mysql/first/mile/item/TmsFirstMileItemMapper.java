@@ -7,7 +7,6 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstM
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.TmsVesselTrackingDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -133,7 +132,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         }
         return selectJoinPage(vo, TmsFirstMileItemBO.class, buildBOWrapper(vo)
             .selectAssociation(TmsFirstMileDO.class, TmsFirstMileItemBO::getTmsFirstMileDO)
-            .selectAssociation(TmsVesselTrackingDO.class, TmsFirstMileItemBO::getTmsVesselTrackingDO)
+//            .selectAssociation(TmsVesselTrackingDO.class, TmsFirstMileItemBO::getTmsVesselTrackingDO)
         );
     }
 

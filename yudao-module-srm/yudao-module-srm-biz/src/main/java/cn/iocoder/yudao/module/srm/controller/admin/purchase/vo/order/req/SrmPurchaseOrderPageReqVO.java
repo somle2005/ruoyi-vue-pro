@@ -118,17 +118,7 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     @Schema(description = "采购状态")
     private Integer orderStatus;
 
-    //    @Schema(description = "验货单json")
-    //    private String inspectionJson;
-    //
-    //    @Schema(description = "完工单json")
-    //    private String completionJson;
-    //    @Schema(description = "总验货通过数量")
-    //    private Integer totalInspectionPassCount;
-
     //子表分割线
-    @Schema(description = "采购申请单No")
-    private String erpPurchaseRequestItemNo;
 
     @Schema(description = "产品id")
     private Long productId;
