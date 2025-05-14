@@ -113,6 +113,10 @@ public class TmsFirstMileRespVO extends BaseVO {
     @ExcelProperty("货柜件数")
     private Integer totalQty;
 
+    @Schema(description = "总箱数")
+    @ExcelProperty("总箱数")
+    private Integer totalBoxQty;
+
     @Schema(description = "发货状态")
     @ExcelProperty("发货状态")
     private Integer outboundStatus;

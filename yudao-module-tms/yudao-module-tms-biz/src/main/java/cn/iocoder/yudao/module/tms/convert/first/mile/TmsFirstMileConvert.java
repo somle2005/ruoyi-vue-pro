@@ -15,6 +15,7 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundSaveReqDTO;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
 import java.util.Map;
@@ -24,10 +25,12 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.FIRST_MILE_ITEM_LIST_NOT_EMPTY;
 
 /**
+ *
  * 头程单 Convert
  *
  * @author wdy
  */
+@Slf4j
 public class TmsFirstMileConvert {
 
     /**
@@ -38,9 +41,8 @@ public class TmsFirstMileConvert {
      */
     public static List<TmsFirstMileBO> convertBOList(List<TmsFirstMileItemBO> itemBOList) {
         // 按主表ID分组
-        Map<Long, List<TmsFirstMileItemBO>> itemMap = itemBOList.stream()
-            .collect(Collectors.groupingBy(item -> item.getTmsFirstMileDO().getId()));
-
+        Map<Long, List<TmsFirstMileItemBO>> itemMap = itemBOList.stream().collect(Collectors.groupingBy(item -> item.getTmsFirstMileDO().getId()));
+        log.info("转换主表BO列表，itemMap: {}", itemMap);
         // 转换为主表BO列表
         return itemMap.values().stream()
             .map(tmsFirstMileItemBOS -> {

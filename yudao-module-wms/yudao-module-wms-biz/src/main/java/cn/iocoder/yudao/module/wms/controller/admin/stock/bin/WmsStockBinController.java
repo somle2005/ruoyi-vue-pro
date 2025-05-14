@@ -132,7 +132,8 @@ public class WmsStockBinController {
             .mapping(WmsStockBinRespVO::getCreator, WmsStockBinRespVO::setCreatorName)
             .mapping(WmsStockBinRespVO::getUpdater, WmsStockBinRespVO::setUpdaterName)
             .fill();
-        //过滤 3个都是0的,可用量,待出库量,可售量
+        //过滤 3个都是0的,可用量,待出库量,可售量，
+        // TODO待优化，mapper限定
         voPageResult.getList().removeIf(e -> Objects.equals(e.getAvailableQty(), 0) && Objects.equals(e.getOutboundPendingQty(), 0) && Objects.equals(e.getSellableQty(), 0));
         // 返回
         return success(voPageResult);

@@ -108,7 +108,7 @@ public class TmsFirstMileController {
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
     public CommonResult<PageResult<TmsFirstMileRespVO>> getFirstMilePage(@Valid @RequestBody TmsFirstMilePageReqVO pageReqVO) {
         PageResult<TmsFirstMileBO> pageResult = firstMileService.getFirstMileBOPage(pageReqVO);
-        return success(BeanUtils.toBean(pageResult, TmsFirstMileRespVO.class));
+        return success(new PageResult<>(bindResult(pageResult.getList()), pageResult.getTotal()));
     }
 
     @GetMapping("/export-excel")
@@ -173,7 +173,7 @@ public class TmsFirstMileController {
         // 收集所有创建人和更新人ID
         Set<Long> userIds = beans.stream()
             .flatMap(bo -> Stream.concat(
-                Stream.of(bo.getCreator(), bo.getUpdater(), bo.getAuditorId().toString()),
+                Stream.of(bo.getCreator(), bo.getUpdater(), bo.getAuditorId() == null ? null : bo.getAuditorId().toString()),
                 Stream.concat(
                     bo.getItems() == null ? Stream.empty() : bo.getItems().stream().flatMap(item -> Stream.of(item.getCreator(), item.getUpdater())),
                     bo.getFees() == null ? Stream.empty() : bo.getFees().stream().flatMap(fee -> Stream.of(fee.getCreator(), fee.getUpdater()))

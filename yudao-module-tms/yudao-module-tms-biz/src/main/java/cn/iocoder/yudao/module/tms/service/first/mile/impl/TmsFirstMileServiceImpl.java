@@ -34,6 +34,7 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
+import cn.iocoder.yudao.module.wms.enums.api.outbound.WmsOutboundApi;
 import cn.iocoder.yudao.module.wms.enums.api.warehouse.WmsWarehouseApi;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -69,6 +70,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final TmsFeeService feeService;
     private final TmsNoRedisDAO noRedisDAO;
     private final WmsWarehouseApi warehouseApi;
+    private final WmsOutboundApi wmsOutboundApi;
     @Autowired
     @Lazy
     TmsFirstMileRequestService tmsFirstMileRequestService;
@@ -242,8 +244,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
                 //1. 通过
                 auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.AGREE, req);
                 //2. 生成对应出库单
-//                TmsFirstMileBO tmsFirstMileBO = getFirstMileBO(req.getId());
-//                wmsOutboundApi.createOutbound(TmsFirstMileConvert.convertOutbound(tmsFirstMileBO));
+                TmsFirstMileBO tmsFirstMileBO = getFirstMileBO(req.getId());
+                wmsOutboundApi.createOutbound(TmsFirstMileConvert.convertOutbound(tmsFirstMileBO));
             } else {
                 //不通过
                 auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, req);

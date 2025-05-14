@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -13,7 +14,7 @@ public class TmsFirstMileItemSaveReqVO {
     //id
     @Schema(description = "id")
     @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时，头程单明细id不能为空")
-    @NotNull(groups = {Validation.OnCreate.class}, message = "创建时，头程单明细id需为空")
+    @Null(groups = {Validation.OnCreate.class}, message = "创建时，头程单明细id需为空")
     private Long id;
 
     @Schema(description = "申请项ID")
