@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Schema(description = "管理后台 - ERP 采购入库 Response VO")
+@Schema(description = "管理后台 - ERP 采购到货 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
@@ -20,8 +20,8 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
     @Schema(description = "编号")
     private Long id;
 
-    @Schema(description = "入库单编号")
-    @ExcelProperty("入库单编号")
+    @Schema(description = "到货单编号")
+    @ExcelProperty("到货单编号")
     private String code;
 
     @Schema(description = "单据日期")
@@ -39,8 +39,8 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
     @Schema(description = "对账状态(false:未对账 ，true:已对账)")
     private Boolean reconciliationStatus;
 
-    @Schema(description = "入库时间")
-    @ExcelProperty("入库时间")
+    @Schema(description = "到货时间")
+    @ExcelProperty("到货时间")
     private LocalDateTime inTime;
 
     @Schema(description = "审核意见")
@@ -55,7 +55,7 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
     @Schema(description = "版本号")
     private Integer version;
 
-    @Schema(description = "入库项列表")
+    @Schema(description = "到货项列表")
     private List<Item> items;
 
     // ========== 子项字段 ==========
@@ -65,10 +65,10 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
 
         // ========== 基本信息 ==========
 
-        @Schema(description = "入库项id")
+        @Schema(description = "到货项id")
         private Long id;
 
-        @Schema(description = "采购入库编号")
+        @Schema(description = "采购到货编号")
         private Long inId;
 
         @Schema(description = "仓库id")
@@ -120,7 +120,7 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
         @Schema(description = "到货数量")
         private BigDecimal qty;
 
-        @Schema(description = "实际入库数量")
+        @Schema(description = "实际到货数量")
         private BigDecimal actualQty;
 
         @Schema(description = "总价，单位：元")

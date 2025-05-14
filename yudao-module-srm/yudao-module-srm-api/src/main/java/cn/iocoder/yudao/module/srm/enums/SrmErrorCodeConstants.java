@@ -52,6 +52,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_ORDER_NOT_AUDIT = new ErrorCode(1_030_101_024, "订单处于已审核,才可以生成采购合同");
     ErrorCode PURCHASE_ORDER_UPDATE_FAIL_OFF = new ErrorCode(1_030_101_025, "采购订单({})非开启状态，无法修改");
     ErrorCode PURCHASE_IN_ITEM_QTY_EXCEED = new ErrorCode(1_030_102_001, "采购订单项({})的产品({})剩余可到货量({}) < 输入到货量({})");
+    ErrorCode PURCHASE_ORDER_MERGE_IN_FAIL = new ErrorCode(1_030_101_026, "({})合并失败,错误:{}");
 
     // ========== ERP 采购到货（1-030-102-000） ==========
     ErrorCode PURCHASE_IN_NOT_EXISTS = new ErrorCode(1_030_102_000, "采购到货单不存在");

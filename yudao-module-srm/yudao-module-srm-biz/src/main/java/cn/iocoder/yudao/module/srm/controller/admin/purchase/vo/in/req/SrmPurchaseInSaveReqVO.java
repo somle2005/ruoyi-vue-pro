@@ -9,7 +9,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Schema(description = "管理后台 - ERP 采购入库新增/修改 Request VO")
+@Schema(description = "管理后台 - ERP 采购到货新增/修改 Request VO")
 @Data
 public class SrmPurchaseInSaveReqVO {
 
@@ -20,10 +20,10 @@ public class SrmPurchaseInSaveReqVO {
     @NotNull(groups = Validation.OnUpdate.class, message = "更新时，订单id不能为空")
     private Long id;
 
-    @Schema(description = "入库单号")
+    @Schema(description = "到货单号")
     private String code;
 
-    @Schema(description = "入库时间(不填默认当前时间)")
+    @Schema(description = "到货时间(不填默认当前时间)")
     private LocalDateTime inTime;
 
     @Schema(description = "单据日期")
@@ -54,9 +54,9 @@ public class SrmPurchaseInSaveReqVO {
     @Schema(description = "版本号")
     private Integer version;
 
-    @Schema(description = "入库清单列表")
-    @Size(min = 1, message = "入库项至少有一个")
-    @NotNull(message = "入库项不能为空")
+    @Schema(description = "到货清单列表")
+    @Size(min = 1, message = "到货项至少有一个")
+    @NotNull(message = "到货项不能为空")
     private List<Item> items;
 
     // ========== 子表字段 ==========
@@ -66,13 +66,13 @@ public class SrmPurchaseInSaveReqVO {
 
         // ========== 基本信息 ==========
 
-        @Schema(description = "入库项编号")
-        @Null(groups = Validation.OnCreate.class, message = "入库id创建时要为null")
-        @NotNull(groups = Validation.OnUpdate.class, message = "更新时入库id不能为null")
-        @Size(min = 1, groups = Validation.OnUpdate.class, message = "更新时至少存在一项入库单")
+        @Schema(description = "到货项编号")
+        @Null(groups = Validation.OnCreate.class, message = "到货id创建时要为null")
+        @NotNull(groups = Validation.OnUpdate.class, message = "更新时到货id不能为null")
+        @Size(min = 1, groups = Validation.OnUpdate.class, message = "更新时至少存在一项到货单")
         private Long id;
 
-        @Schema(description = "采购入库编号")
+        @Schema(description = "采购到货编号")
         private Long inId;
 
         @Schema(description = "仓库Id", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -102,7 +102,7 @@ public class SrmPurchaseInSaveReqVO {
         @NotNull(message = "到货数量不能为空")
         private BigDecimal qty;
 
-//        @Schema(description = "实际入库数量(入库回填)")
+//        @Schema(description = "实际到货数量(到货回填)")
 //        private BigDecimal actualQty;
 
         @Schema(description = "总价，单位：元。totalPrice = productPrice * qty", requiredMode = Schema.RequiredMode.REQUIRED)

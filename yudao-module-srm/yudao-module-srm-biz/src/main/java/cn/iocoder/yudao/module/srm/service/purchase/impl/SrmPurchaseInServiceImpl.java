@@ -99,7 +99,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 1.2 校验入库项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
         // 1.3 校验结算账户
-        erpAccountApi.validateAccount(vo.getAccountId());
+//        erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 生成入库单号，并校验唯一性
         String no;
         if (vo.getCode() != null) {

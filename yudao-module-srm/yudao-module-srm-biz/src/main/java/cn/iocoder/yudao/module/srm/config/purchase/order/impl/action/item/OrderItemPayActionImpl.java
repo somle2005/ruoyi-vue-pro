@@ -50,16 +50,18 @@ public class OrderItemPayActionImpl implements Action<SrmPaymentStatus, SrmEvent
             if (context.getPayCountDiff() != null) {
                 BigDecimal oldMoney = orderItemDO.getPayPrice() == null ? BigDecimal.ZERO : orderItemDO.getPayPrice();
                 BigDecimal newMoney = context.getPayCountDiff();
+                BigDecimal finalMoney = oldMoney.add(newMoney);
                 //最终金额 = 原金额 + 调整金额
-                orderItemDO.setPayPrice(oldMoney.add(newMoney));
-            }
-            //根据支付金额 动态判断当前支付状态, 如果支付金额大于等于订单金额，则支付状态为已支付。如果支付金额为0，则支付状态为未支付。其余是部分支付。
-            if (orderItemDO.getPayPrice().compareTo(orderItemDO.getTotalPrice()) >= 0) {
-                t = SrmPaymentStatus.ALL_PAYMENT;
-            } else if (orderItemDO.getPayPrice().compareTo(BigDecimal.ZERO) == 0) {
-                t = SrmPaymentStatus.NONE_PAYMENT;
-            } else {
-                t = SrmPaymentStatus.PARTIALLY_PAYMENT;
+                orderItemDO.setPayPrice(finalMoney);
+
+                //根据支付金额 动态判断当前支付状态, 如果支付金额大于等于订单金额，则支付状态为已支付。如果支付金额为0，则支付状态为未支付。其余是部分支付。
+                if (finalMoney.compareTo(orderItemDO.getTotalPrice()) >= 0) {
+                    t = SrmPaymentStatus.ALL_PAYMENT;
+                } else if (finalMoney.compareTo(BigDecimal.ZERO) == 0) {
+                    t = SrmPaymentStatus.NONE_PAYMENT;
+                } else {
+                    t = SrmPaymentStatus.PARTIALLY_PAYMENT;
+                }
             }
         }
         orderItemDO.setPayStatus(t.getCode());

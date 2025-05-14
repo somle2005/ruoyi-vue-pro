@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
-@Schema(description = "管理后台 - ERP 采购入库分页 Request VO")
+@Schema(description = "管理后台 - ERP 采购到货分页 Request VO")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -33,17 +33,17 @@ public class SrmPurchaseInPageReqVO extends PageParam {
     @Schema(description = "审核时间")
     private LocalDateTime[] auditTime;
 
-    @Schema(description = "入库审核状态")
+    @Schema(description = "到货审核状态")
     private Integer auditStatus;
 
-    @Schema(description = "入库时间")
+    @Schema(description = "到货时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] inTime;
 
     @Schema(description = "备注")
     private String remark;
 
-    @Schema(description = "入库状态")
+    @Schema(description = "到货状态")
     private Integer status;
 
     @Schema(description = "创建者")

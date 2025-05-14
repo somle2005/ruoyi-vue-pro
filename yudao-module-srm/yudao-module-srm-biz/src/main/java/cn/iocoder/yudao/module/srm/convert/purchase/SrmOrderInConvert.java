@@ -35,6 +35,7 @@ public interface SrmOrderInConvert {
         inVOItem.setId(null); // 创建时 ID 需要为 null
         inVOItem.setVersion(null); // 版本号需要为 null
         inVOItem.setSource("采购项合并到货"); // 单据来源，默认写死
+        inVOItem.setOrderItemId(orderItemDO.getId()); // 订单项编号作为源单号
         //        inVOItem.setOrderId(orderItemDO.getOrderId()); // 订单编号转 int 作为源单号
         return inVOItem;
     }

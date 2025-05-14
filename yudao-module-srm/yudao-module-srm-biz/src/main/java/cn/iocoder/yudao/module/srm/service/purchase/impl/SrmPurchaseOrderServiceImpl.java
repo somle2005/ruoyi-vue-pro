@@ -708,25 +708,46 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void merge(SrmPurchaseOrderMergeReqVO reqVO) {
-        //校验
+        // 校验
         for (SrmPurchaseOrderMergeReqVO.item item : reqVO.getItems()) {
             Long itemId = item.getItemId();
             SrmPurchaseOrderItemDO aDo = validatePurchaseOrderItemExists(itemId);
             SrmPurchaseOrderDO order = getPurchaseOrder(aDo.getOrderId());
-            //非已审核+非开启+完全入库,异常
+            // 非已审核+非开启+完全入库,异常
             ThrowUtil.ifThrow(!Objects.equals(order.getAuditStatus(), SrmAuditStatus.APPROVED.getCode()), PURCHASE_ORDER_ITEM_NOT_AUDIT, itemId);
             ThrowUtil.ifThrow(!Objects.equals(aDo.getOffStatus(), SrmOffStatus.OPEN.getCode()), PURCHASE_ORDER_ITEM_NOT_OPEN, itemId);
             ThrowUtil.ifThrow(Objects.equals(aDo.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()), PURCHASE_ORDER_IN_ITEM_NOT_OPEN, itemId);
         }
         List<Long> itemIds = reqVO.getItems().stream().map(SrmPurchaseOrderMergeReqVO.item::getItemId).collect(Collectors.toList());
         List<SrmPurchaseOrderItemDO> orderItemDOS = purchaseOrderItemMapper.selectListByItemIds(itemIds);
-        //groupby itemID
-        Map<Long, List<SrmPurchaseOrderMergeReqVO.item>> itemIdMap = reqVO.getItems().stream().collect(Collectors.groupingBy(SrmPurchaseOrderMergeReqVO.item::getItemId));
-        //转换
+
+        // 1. 构建 itemId -> qty 的映射
+        Map<Long, BigDecimal> itemIdToQtyMap = reqVO.getItems().stream()
+            .collect(Collectors.toMap(SrmPurchaseOrderMergeReqVO.item::getItemId, SrmPurchaseOrderMergeReqVO.item::getQty));
+
+        // 2. 转换并赋值到货数量
+        List<SrmPurchaseInSaveReqVO.Item> inItems = SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS);
+        for (SrmPurchaseInSaveReqVO.Item inItem : inItems) {
+            BigDecimal qty = itemIdToQtyMap.get(inItem.getOrderItemId());
+            if (qty != null) {
+                inItem.setQty(qty);
+            }
+        }
+
+        // 3. 构建 saveVO
         SrmPurchaseInSaveReqVO vo = BeanUtils.toBean(reqVO, SrmPurchaseInSaveReqVO.class, saveReqVO ->
-            saveReqVO.setCode(null).setItems(SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS)).setId(null).setInTime(LocalDateTime.now()));
-        //service持久化
-        Long purchaseIn = purchaseInService.createPurchaseIn(vo);
+            saveReqVO.setCode(null)
+                .setItems(inItems)
+                .setId(null)
+                .setInTime(LocalDateTime.now())
+        );
+        // service持久化
+        try {
+            Long purchaseIn = purchaseInService.createPurchaseIn(vo);
+        } catch (Exception e) {
+            log.error("合并采购订单生成到货单失败，参数：{}，异常：{}", vo, e.getMessage(), e);
+            throw exception(PURCHASE_ORDER_MERGE_IN_FAIL, "合并到货单", e.getMessage());
+        }
     }
 
     @Override
