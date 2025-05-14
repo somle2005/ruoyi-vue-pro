@@ -69,6 +69,10 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
      */
     private BigDecimal actualQty;
     /**
+     * 实际入库状态
+     */
+    private Integer inStatus;
+    /**
      * 总价，单位：元 totalPrice = productPrice * qty
      */
     private BigDecimal totalPrice;

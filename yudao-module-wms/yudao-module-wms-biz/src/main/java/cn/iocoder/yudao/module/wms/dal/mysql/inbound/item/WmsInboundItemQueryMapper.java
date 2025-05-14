@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQue
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import org.apache.ibatis.annotations.Mapper;
 
 /**
@@ -22,7 +23,8 @@ import org.apache.ibatis.annotations.Mapper;
 public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQueryDO> {
 
     String AGE_EXPR = "(DATEDIFF(NOW(),t1.inbound_time)+IFNULL(t1.init_age,0))";
-    String AGE_COL_EXPR = AGE_EXPR+" as age";
+    String AGE_COL = "age";
+    String AGE_COL_EXPR = AGE_EXPR+" as "+AGE_COL;
 
     default PageResult<WmsInboundItemQueryDO> selectPage(WmsInboundItemPageReqVO reqVO) {
 
@@ -64,7 +66,7 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.betweenIfPresent(WmsInboundItemDO::getPlanQty,reqVO.getPlanQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getShelvedQty,reqVO.getShelvedQty());
 
-        wrapper.betweenIfPresent(AGE_EXPR, reqVO.getAge());
+        wrapper.betweenIfPresent(AGE_COL, reqVO.getAge());
 
         return selectPage(reqVO, wrapper);
 
@@ -76,7 +78,10 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         MPJLambdaWrapperX<WmsInboundItemQueryDO> query = new MPJLambdaWrapperX<>();
         query.selectAll(WmsInboundItemDO.class).select(WmsInboundDO::getWarehouseId);
         query.eqIfPresent(WmsInboundItemDO::getProductId, reqVO.getProductId());
-        query.gt(WmsInboundItemDO::getActualQty, WmsInboundItemDO::getShelvedQty).innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId).likeIfExists(WmsInboundDO::getCode, reqVO.getInboundCode())
+        // 已入库或部分入库
+        query.in(WmsInboundItemDO::getInboundStatus, WmsInboundStatus.ALL.getValue(), WmsInboundStatus.PART.getValue());
+        query.gt(WmsInboundItemDO::getActualQty, WmsInboundItemDO::getShelvedQty)
+            .innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId).likeIfExists(WmsInboundDO::getCode, reqVO.getInboundCode())
             .orderByDesc(WmsInboundItemDO::getId);
         // 按仓库ID查询
         if(reqVO.getWarehouseId()!=null) {

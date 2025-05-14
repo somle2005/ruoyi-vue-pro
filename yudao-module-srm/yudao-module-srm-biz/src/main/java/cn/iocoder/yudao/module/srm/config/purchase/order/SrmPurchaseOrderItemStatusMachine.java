@@ -2,19 +2,19 @@ package cn.iocoder.yudao.module.srm.config.purchase.order;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
-import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.srm.api.purchase.SrmInCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.SrmPayCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.order.SrmPayCountDTO;
+import cn.iocoder.yudao.module.srm.config.BaseFailCallbackImpl;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmExecutionStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmOffStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,12 +25,12 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
 public class SrmPurchaseOrderItemStatusMachine {
 
 
-    @Resource
-    private FailCallback baseFailCallbackImpl;
+    @Autowired
+    private BaseFailCallbackImpl baseFailCallbackImpl;
 
 
-    @Resource
-    private Action<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemOffActionImpl;
+    @Autowired
+    Action<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecuteActionImpl;
 
     //采购订单子项状态机
     @Bean(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
@@ -50,10 +50,8 @@ public class SrmPurchaseOrderItemStatusMachine {
         builder.setFailCallback(baseFailCallbackImpl);
         return builder.build(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME);
     }
-
-
-    @Resource
-    Action<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecuteActionImpl;
+    @Autowired
+    Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemInActionImpl;
 
     // 采购订单子项执行状态机
     @Bean(PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
@@ -86,13 +84,14 @@ public class SrmPurchaseOrderItemStatusMachine {
 
         return builder.build(PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME);
     }
-
-    @Resource
-    Action<SrmStorageStatus, SrmEventEnum, SrmInCountDTO> orderItemInActionImpl;
+    @Autowired
+    Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> orderItemPayActionImpl;
+    @Autowired
+    private Action<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemOffActionImpl;
 
     @Bean(PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
-    public StateMachine<SrmStorageStatus, SrmEventEnum, SrmInCountDTO> buildPurchaseOrderItemStorageStateMachine() {
-        StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmInCountDTO> builder = StateMachineBuilderFactory.create();
+    public StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> buildPurchaseOrderItemStorageStateMachine() {
+        StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> builder = StateMachineBuilderFactory.create();
 
         // 初始化入库
         builder.externalTransition().from(SrmStorageStatus.NONE_IN_STORAGE).to(SrmStorageStatus.NONE_IN_STORAGE).on(SrmEventEnum.STORAGE_INIT).perform(orderItemInActionImpl);
@@ -129,9 +128,6 @@ public class SrmPurchaseOrderItemStatusMachine {
 
         return builder.build(PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME);
     }
-
-    @Resource
-    Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> orderItemPayActionImpl;
 
     @Bean(PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME)
     public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> getPurchaseOrderItemPaymentStateMachine() {

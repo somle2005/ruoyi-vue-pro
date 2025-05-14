@@ -9,13 +9,11 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.time.LocalDateTime;
-
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,creator,company_id,create_time,outbound_pending_qty,available_qty,updater,update_time,product_id,shelving_pending_qty,id,dept_id,warehouse_id
+ * @table-fields : tenant_id,creator,company_id,outbound_pending_qty,create_time,available_qty,updater,update_time,product_id,shelving_pending_qty,id,dept_id,warehouse_id
  */
 @Schema(description = "管理后台 - 所有者库存 Response VO")
 @Data
@@ -60,7 +58,6 @@ public class WmsStockOwnershipRespVO {
     @ExcelProperty("部门")
     private DeptSimpleRespVO dept;
 
-
     @Schema(description = "创建者", example = "")
     @ExcelProperty("创建者")
     private String creator;
@@ -95,8 +92,6 @@ public class WmsStockOwnershipRespVO {
     private Integer outboundPendingQty;
 
     @Schema(description = "待上架数量，上架是指从拣货区上架到货架", example = "")
-    @ExcelProperty("待上架数量，上架是指从拣货区上架到货架")
+    @ExcelProperty("待上架数量")
     private Integer shelvingPendingQty;
-
-
 }

@@ -23,8 +23,10 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.bin.WmsInventoryBinDO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundType;
+import cn.iocoder.yudao.module.wms.enums.inventory.WmsInventoryStatus;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
+import cn.iocoder.yudao.module.wms.service.inventory.bin.WmsInventoryBinService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.outbound.item.WmsOutboundItemService;
 import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
@@ -79,6 +81,10 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
 
     @Resource
     @Lazy
+    private WmsInventoryBinService  inventoryBinService;
+
+    @Resource
+    @Lazy
     private WmsOutboundItemService outboundItemService;
 
     @Resource
@@ -111,9 +117,14 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
         for (WmsInventoryBinDO inventoryBinDO : wmsInventoryBinDOList) {
             int deltaQty = inventoryBinDO.getActualQty() - inventoryBinDO.getExpectedQty();
 
+            // 默认设置盘平
+            inventoryBinDO.setStatus(WmsInventoryStatus.BALANCED.getValue());
+
             // 如果盘赢，形成入库单+拣货单
             if (deltaQty > 0) {
 
+                // 设置为盘赢
+                inventoryBinDO.setStatus(WmsInventoryStatus.SURPLUS.getValue());
                 // 入库单明细
                 WmsInboundItemSaveReqVO inboundItemSaveReqVO = inboundItemSaveReqVOMap.computeIfAbsent(inventoryBinDO.getProductId(), productId -> {
                     WmsInboundItemSaveReqVO inboundItem = new WmsInboundItemSaveReqVO();
@@ -135,6 +146,10 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
 
             // 如果盘亏，形成出库单
             if (deltaQty < 0) {
+
+                // 设置为盘赢
+                inventoryBinDO.setStatus(WmsInventoryStatus.LOSS.getValue());
+
                 // 拣货单明细
                 WmsOutboundItemSaveReqVO outboundItemSaveReqVO = new WmsOutboundItemSaveReqVO();
                 outboundItemSaveReqVO.setProductId(inventoryBinDO.getProductId());
@@ -156,6 +171,8 @@ public class InventoryExecutor extends QuantityExecutor<InventoryContext> {
         if (!outboundItemSaveReqVOList.isEmpty()) {
             executeOutbound(inventoryDO,outboundItemSaveReqVOList);
         }
+
+        inventoryBinService.updateBatch(wmsInventoryBinDOList);
 
 
     }

@@ -27,8 +27,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_PRODUCT_EXISTS;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOM_PRODUCT_NOT_EXISTS;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.CUSTOM_PRODUCT_EXISTS;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.CUSTOM_PRODUCT_NOT_EXISTS;
 import static cn.iocoder.yudao.module.tms.dal.redis.TmsRedisKeyConstants.TMS_CUSTOM_PRODUCT;
 import static cn.iocoder.yudao.module.tms.dal.redis.TmsRedisKeyConstants.TMS_CUSTOM_PRODUCT_LIST;
 

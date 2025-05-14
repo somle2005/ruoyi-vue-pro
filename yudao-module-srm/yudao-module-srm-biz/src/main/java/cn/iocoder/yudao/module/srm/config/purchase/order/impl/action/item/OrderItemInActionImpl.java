@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.srm.config.purchase.order.impl.action.item;
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
-import cn.iocoder.yudao.module.srm.api.purchase.SrmInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
@@ -31,19 +31,19 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
 //订单项入库状态机
 @Component
 @Slf4j
-public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmInCountDTO> {
+public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> {
 
     @Autowired
-    SrmPurchaseRequestItemsMapper erpPurchaseRequestItemsMapper;
-    @Resource
+    private SrmPurchaseRequestItemsMapper erpPurchaseRequestItemsMapper;
+    @Autowired
     private SrmPurchaseOrderItemMapper itemMapper;
-    @Resource
+    @Autowired
     private SrmPurchaseOrderMapper mapper;
     @Resource(name = PURCHASE_ORDER_STORAGE_STATE_MACHINE_NAME)
-    private StateMachine storageStateMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> storageStateMachine;
 
     @Resource(name = PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME)
-    private StateMachine purchaseRequestItemStateMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> purchaseRequestItemStateMachine;
 
     @Resource(name = PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
     private StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> purchaseOrderItemExecutionStateMachine;
@@ -54,7 +54,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     //入库项(->入库主单)->订单项(->订单主单)->申请项(->订单主单)
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmInCountDTO dto) {
+    public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmOrderInCountDTO dto) {
         // 1. 先查询数据库中的采购项信息
         SrmPurchaseOrderItemDO oldData = itemMapper.selectById(dto.getOrderItemId());
         if (oldData == null) {
@@ -102,12 +102,12 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
         // 3. 记录日志
         log.debug("订单项入库状态机触发({})事件：订单项ID={}，状态 {} -> {}, 入库数量={}, 退货数量={}", event.getDesc(), oldData.getId(), from.getDesc(),
             to.getDesc(), dto.getInCount(), dto.getReturnCount());
-        //4.0
+        //4.0 传递事件给别的状态机
         toOrder(event, oldData);
         toRequestItem(oldData, dtoCount);
         // 当前订单项，完全入库 + 完全付款 -> 关闭订单项
         checkStatusAndClose(dto.getOrderItemId());
-        //
+        // 执行状态机
         toOrderExecute(dto.getOrderItemId());
     }
 
@@ -132,7 +132,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             BigDecimal result = oldCount == null ? BigDecimal.ZERO : oldCount;
             BigDecimal changeCount = result.subtract(dtoCount);
             purchaseRequestItemStateMachine.fireEvent(SrmStorageStatus.fromCode(applyItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT,
-                SrmInCountDTO.builder().applyItemId(applyItemId).inCount(changeCount).build());
+                SrmOrderInCountDTO.builder().applyItemId(applyItemId).inCount(changeCount).build());
         });
     }
 
@@ -142,6 +142,11 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
         SrmPurchaseOrderDO orderDO = mapper.selectById(oldData.getOrderId());
         if (orderDO == null) {
             log.error("未找到对应的采购订单,订单ID={}", oldData.getOrderId());
+            return;
+        }
+        if (orderDO.getInStatus() == null) {
+            log.warn("未找到对应的采购订单,订单ID={}", oldData.getOrderId());
+            return;
         }
         storageStateMachine.fireEvent(SrmStorageStatus.fromCode(orderDO.getInStatus()), event, orderDO);
     }

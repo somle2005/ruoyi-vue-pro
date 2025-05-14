@@ -58,6 +58,9 @@ public class WmsStockWarehouseSimpleVO {
     @ExcelProperty("待上架数量，上架是指从拣货区上架到货架")
     private Integer shelvingPendingQty;
 
+    @Schema(description = "库存总量，在库的库存总量", example = "")
+    @ExcelProperty("库存总量，在库的库存总量")
+    private Integer totalQty;
 
 
 }

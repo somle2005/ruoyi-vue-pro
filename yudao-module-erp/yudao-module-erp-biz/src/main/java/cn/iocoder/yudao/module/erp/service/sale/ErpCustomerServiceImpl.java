@@ -15,8 +15,8 @@ import java.util.Collection;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOMER_NOT_ENABLE;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.CUSTOMER_NOT_EXISTS;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.CUSTOMER_NOT_ENABLE;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.CUSTOMER_NOT_EXISTS;
 
 /**
  * ERP 客户 Service 实现类

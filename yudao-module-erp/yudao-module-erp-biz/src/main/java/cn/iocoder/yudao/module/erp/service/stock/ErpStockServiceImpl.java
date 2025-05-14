@@ -12,8 +12,8 @@ import org.springframework.validation.annotation.Validated;
 import java.math.BigDecimal;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.STOCK_COUNT_NEGATIVE;
-import static cn.iocoder.yudao.module.erp.enums.ErrorCodeConstants.STOCK_COUNT_NEGATIVE2;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.STOCK_COUNT_NEGATIVE;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.STOCK_COUNT_NEGATIVE2;
 
 /**
  * ERP 产品库存 Service 实现类

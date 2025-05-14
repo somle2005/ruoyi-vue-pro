@@ -51,9 +51,6 @@ public class SrmPurchaseInSaveReqVO {
     @Schema(description = "备注")
     private String remark;
 
-    @Schema(description = "对账状态(false:未对账 ，true:已对账)")
-    private Boolean reconciliationStatus;
-
     @Schema(description = "版本号")
     private Integer version;
 
@@ -87,6 +84,7 @@ public class SrmPurchaseInSaveReqVO {
         private Long productId;
 
         @Schema(description = "产品单位ID")
+        @NotNull(message = "产品单位ID不能为空")
         private Long productUnitId;
 
         @Schema(description = "产品单位名称", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -104,8 +102,8 @@ public class SrmPurchaseInSaveReqVO {
         @NotNull(message = "到货数量不能为空")
         private BigDecimal qty;
 
-        @Schema(description = "实际入库数量")
-        private BigDecimal actualQty;
+//        @Schema(description = "实际入库数量(入库回填)")
+//        private BigDecimal actualQty;
 
         @Schema(description = "总价，单位：元。totalPrice = productPrice * qty", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "总价不能为空")
@@ -147,7 +145,7 @@ public class SrmPurchaseInSaveReqVO {
         @Schema(description = "型号规格(产品带出)")
         private String model;
 
-        @Schema(description = "单据来源描述")
+        @Schema(description = "单据来源描述(前端不传)")
         private String source;
 
         // ========== 人员组织 ==========
@@ -160,16 +158,20 @@ public class SrmPurchaseInSaveReqVO {
 
         // ========== 产品相关 ==========
 
-        @Schema(description = "报关品名")
+        @Schema(description = "产品报关品名")
+        @NotBlank(message = "产品报关品名不能为空")
         private String declaredType;
 
-        @Schema(description = "报关品名英文")
+        @Schema(description = "产品报关品名英文")
+        @NotBlank(message = "产品报关品名英文不能为空")
         private String declaredTypeEn;
 
-        @Schema(description = "条码")
+        @Schema(description = "产品sku")
+        @NotBlank(message = "产品sku不能为空")
         private String barCode;
 
         @Schema(description = "产品名称")
+        @NotBlank(message = "产品名称不能为空")
         private String productName;
 
         // ========== 其他字段 ==========

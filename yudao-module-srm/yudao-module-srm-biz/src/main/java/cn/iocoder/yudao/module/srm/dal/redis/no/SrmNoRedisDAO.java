@@ -117,13 +117,13 @@ public class SrmNoRedisDAO {
     public void setManualSerial(String prefix, String fullSerialNo) {
         try {
             // 解析出日期和流水号数字部分
-            String[] parts = fullSerialNo.split("-");
+            String[] parts = fullSerialNo.split(StrPool.DASHED);
             String datePart = parts[1];           // 20250329
             String numberPart = parts[2];         // 000123
             long manualNo = Long.parseLong(numberPart);
 
             // 构造 Redis key
-            String keyPrefix = prefix + "-" + datePart;
+            String keyPrefix = prefix + StrPool.DASHED + datePart;
             String key = SrmRedisKeyConstants.NO + keyPrefix;
 
             // 获取 Redis 当前值

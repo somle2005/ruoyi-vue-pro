@@ -15,7 +15,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cn.iocoder.yudao.module.tms.enums.ErrorCodeConstants.FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR;
 
 /**
  * TMS 状态机统一失败回调实现类

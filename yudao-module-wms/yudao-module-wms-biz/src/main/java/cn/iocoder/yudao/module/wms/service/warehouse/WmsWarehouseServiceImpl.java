@@ -22,18 +22,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.EXTERNAL_STORAGE_NOT_EXISTS;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.WAREHOUSE_BE_REFERRED;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.WAREHOUSE_CODE_DUPLICATE;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.WAREHOUSE_NAME_DUPLICATE;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.WAREHOUSE_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.*;
 
 /**
  * 仓库 Service 实现类
@@ -149,7 +141,7 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
     /**
      * @sign : 8F00B204E9800998
      */
-    private WmsWarehouseDO validateWarehouseExists(Long id) {
+    public WmsWarehouseDO validateWarehouseExists(Long id) {
         WmsWarehouseDO warehouse = warehouseMapper.selectById(id);
         if (warehouse == null) {
             throw exception(WAREHOUSE_NOT_EXISTS);

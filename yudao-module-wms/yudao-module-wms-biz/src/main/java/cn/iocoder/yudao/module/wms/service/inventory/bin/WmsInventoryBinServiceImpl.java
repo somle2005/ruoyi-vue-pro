@@ -129,6 +129,11 @@ public class WmsInventoryBinServiceImpl implements WmsInventoryBinService {
         return true;
     }
 
+    @Override
+    public void updateBatch(List<WmsInventoryBinDO> wmsInventoryBinDOList) {
+        inventoryBinMapper.updateBatch(wmsInventoryBinDOList);
+    }
+
     /**
      * @sign : 62E245F5DCE7AB97
      */
@@ -283,4 +288,4 @@ public class WmsInventoryBinServiceImpl implements WmsInventoryBinService {
             inventoryBinMapper.updateBatch(updateList);
         }
     }
-}
+}

@@ -10,7 +10,7 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 /**
  * 库位盘点 DO
  * @author 李方捷
- * @table-fields : actual_qty,bin_id,expected_qty,inventory_id,product_id,remark,id
+ * @table-fields : actual_qty,bin_id,expected_qty,inventory_id,product_id,remark,id,status
  */
 @TableName("wms_inventory_bin")
 // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
@@ -58,4 +58,9 @@ public class WmsInventoryBinDO extends BaseDO {
      * 备注
      */
     private String remark;
+
+    /**
+     * 盘点状态
+     */
+    private Integer status;
 }

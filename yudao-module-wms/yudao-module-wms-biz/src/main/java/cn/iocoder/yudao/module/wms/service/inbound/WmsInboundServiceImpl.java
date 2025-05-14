@@ -539,4 +539,32 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     public List<WmsInboundDO> getInboundList(Integer upstreamBillType, Long upstreamBillId) {
         return inboundMapper.getInboundList(upstreamBillType,upstreamBillId);
     }
+
+    @Override
+    public WmsInboundDO createForTransfer(WmsInboundSaveReqVO inboundSaveReqVO) {
+
+        JdbcUtils.requireTransaction();
+        Map<Long, Integer> actualQtyMap = StreamX.from(inboundSaveReqVO.getItemList()).toMap(WmsInboundItemSaveReqVO::getProductId, WmsInboundItemSaveReqVO::getActualQty);
+        // 创建
+        WmsInboundDO inbound = this.createInbound(inboundSaveReqVO);
+        // 保存
+        inbound.setUpstreamBillType(BillType.TMS_TRANSFER.getValue());
+        inbound.setType(WmsInboundType.TRANSFER.getValue());
+        inboundMapper.updateById(inbound);
+        //
+        WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
+        approvalReqVO.setBillId(inbound.getId());
+        approvalReqVO.setComment("调拨入库");
+        this.approve(WmsInboundAuditStatus.Event.SUBMIT, approvalReqVO);
+        // 拉取明细
+        List<WmsInboundItemDO> inboundItemDOS = inboundItemService.selectByInboundId(inbound.getId());
+        // 设置实际入库量
+        StreamX.from(inboundItemDOS).assemble(actualQtyMap, WmsInboundItemDO::getProductId, (itemO, qty) -> {
+            itemO.setActualQty(qty);
+        });
+        // 保存实际入库量
+        inboundItemService.updateActualQuantity(BeanUtils.toBean(inboundItemDOS, WmsInboundItemSaveReqVO.class));
+        //
+        return this.getInbound(inbound.getId());
+    }
 }

@@ -143,7 +143,7 @@ public interface WmsInboundItemService {
     /**
      * 批次库存关联仓位查询
      */
-    PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(@Valid WmsInboundItemPageReqVO pageReqVO);
+    PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(@Valid WmsInboundItemPageReqVO pageReqVO,boolean withPickupDetail);
 
     /**
      * 仓库内产品的批次库存查询，先进先出排序
@@ -151,4 +151,8 @@ public interface WmsInboundItemService {
     Map<Long,List<WmsInboundItemBinQueryDO>> selectInboundItemBinMap(Long warehouseId, Set<Long> productIds, boolean olderFirst);
 
     void assembleStockWarehouse(List<? extends WmsInboundItemRespVO> list);
+
+    void assembleStockType(List<WmsInboundItemRespVO> list);
+
+    WmsInboundItemDO getByInboundIdAndProductId(Long inboundId, Long productId);
 }

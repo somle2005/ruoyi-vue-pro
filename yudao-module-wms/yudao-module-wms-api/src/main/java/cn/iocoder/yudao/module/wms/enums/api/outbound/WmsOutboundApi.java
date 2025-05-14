@@ -37,4 +37,11 @@ public interface WmsOutboundApi {
      */
     List<WmsOutboundDTO> getOutboundList(Integer upstreamBillType, Long upstreamBillId);
 
+    /**
+     * 出库单作废
+     * @param id 出库单ID
+     * @param comment 作废原因
+     **/
+    void abandonOutbound(Long id,String comment);
+
 }

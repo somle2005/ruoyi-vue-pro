@@ -165,5 +165,10 @@ public interface WmsInboundService {
      */
     void updateShelvingStatus(Set<Long> set);
 
+
     List<WmsInboundDO> getInboundList(Integer upstreamBillType, Long upstreamBillId);
+    /**
+     * 创建调拨入库单
+     */
+    WmsInboundDO createForTransfer(WmsInboundSaveReqVO inboundSaveReqVO);
 }

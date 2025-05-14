@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : inbound_id,bill_id,outbound_available_delta_qty,outbound_available_qty,outbound_action_id,bill_item_id,create_time,product_id,bill_type,inbound_item_id,direction
+ * @table-fields : bill_id,outbound_available_qty,create_time,shelved_qty,inbound_id,outbound_available_delta_qty,outbound_action_id,actual_qty,bill_item_id,product_id,bill_type,inbound_item_id,direction
  */
 @Schema(description = "管理后台 - 入库单库存详情扣减分页 Request VO")
 @Data
@@ -33,7 +33,7 @@ public class WmsInboundItemFlowPageReqVO extends PageParam {
     @Schema(description = "出库动作ID", example = "")
     private Long outboundActionId;
 
-    @Schema(description = "单据类型", example = "")
+    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
     private Integer billType;
 
     @Schema(description = "出库单ID", example = "")
@@ -42,7 +42,7 @@ public class WmsInboundItemFlowPageReqVO extends PageParam {
     @Schema(description = "出库单明细ID", example = "")
     private Long billItemId;
 
-    @Schema(description = "出入方向", example = "")
+    @Schema(description = "WMS库存流水方向 ; WmsStockFlowDirection : -1-流出 , 1-流入", example = "")
     private Integer direction;
 
     @Schema(description = "变化的数量，可出库量的变化量", example = "")
@@ -50,4 +50,10 @@ public class WmsInboundItemFlowPageReqVO extends PageParam {
 
     @Schema(description = "可出库量", example = "")
     private Integer outboundAvailableQty;
+
+    @Schema(description = "实际入库量", example = "")
+    private Integer actualQty;
+
+    @Schema(description = "已上架量，已经拣货到仓位的库存量", example = "")
+    private Integer shelvedQty;
 }

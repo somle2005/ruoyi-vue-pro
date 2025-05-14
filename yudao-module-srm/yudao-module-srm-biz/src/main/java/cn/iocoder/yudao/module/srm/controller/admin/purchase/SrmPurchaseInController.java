@@ -11,8 +11,6 @@ import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import cn.iocoder.yudao.module.erp.api.stock.WmsWarehouseApi;
-import cn.iocoder.yudao.module.erp.api.stock.dto.ErpWarehouseDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.SrmPurchaseInBaseRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.*;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
@@ -28,6 +26,8 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
+import cn.iocoder.yudao.module.wms.enums.api.warehouse.WmsWarehouseApi;
+import cn.iocoder.yudao.module.wms.enums.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -51,7 +51,7 @@ import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMultiMap;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 
-@Tag(name = "管理后台 - ERP 采购入库")
+@Tag(name = "管理后台 - ERP 采购到货")
 @RestController
 @RequestMapping("/srm/purchase-in")
 @Validated
@@ -69,17 +69,16 @@ public class SrmPurchaseInController {
     SrmPurchaseOrderService srmPurchaseOrderService;
 
     @PostMapping("/create")
-    @Operation(summary = "创建采购入库")
+    @Operation(summary = "创建采购到货")
     @Idempotent
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:create')")
     public CommonResult<Long> createPurchaseIn(@Valid @RequestBody SrmPurchaseInSaveReqVO createReqVO) {
-        //给vo里面的项的source设置字符串a
         createReqVO.getItems().forEach(item -> item.setSource(SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc()));
         return success(purchaseInService.createPurchaseIn(createReqVO));
     }
 
     @PutMapping("/update")
-    @Operation(summary = "更新采购入库")
+    @Operation(summary = "更新采购到货")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:update')")
     public CommonResult<Boolean> updatePurchaseIn(@Valid @RequestBody SrmPurchaseInSaveReqVO updateReqVO) {
         purchaseInService.updatePurchaseIn(updateReqVO);
@@ -87,7 +86,7 @@ public class SrmPurchaseInController {
     }
 
     @DeleteMapping("/delete")
-    @Operation(summary = "删除采购入库")
+    @Operation(summary = "删除采购到货")
     @Parameter(name = "ids", description = "编号数组", required = true)
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:delete')")
     public CommonResult<Boolean> deletePurchaseIn(@RequestParam("ids") List<Long> ids) {
@@ -96,7 +95,7 @@ public class SrmPurchaseInController {
     }
 
     @GetMapping("/get")
-    @Operation(summary = "获得采购入库")
+    @Operation(summary = "获得采购到货")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:query')")
     public CommonResult<SrmPurchaseInBaseRespVO> getPurchaseIn(@RequestParam("id") Long id) {
@@ -109,7 +108,7 @@ public class SrmPurchaseInController {
     }
 
     @GetMapping("/page")
-    @Operation(summary = "获得采购入库分页")
+    @Operation(summary = "获得采购到货分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:query')")
     public CommonResult<PageResult<SrmPurchaseInBaseRespVO>> getPurchaseInPage(@Valid SrmPurchaseInPageReqVO pageReqVO) {
         PageResult<SrmPurchaseInDO> pageResult = purchaseInService.getPurchaseInPage(pageReqVO);
@@ -118,14 +117,14 @@ public class SrmPurchaseInController {
     }
 
     @GetMapping("/export-excel")
-    @Operation(summary = "导出采购入库 Excel")
+    @Operation(summary = "导出采购到货 Excel")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:export')")
     @ApiAccessLog(operateType = EXPORT)
     public void exportPurchaseInExcel(@Valid SrmPurchaseInPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<SrmPurchaseInDO> page = purchaseInService.getPurchaseInPage(pageReqVO);
         // 导出 Excel
-        ExcelUtils.write(response, "采购入库.xls", "数据", SrmPurchaseInBaseRespVO.class, bindList(page.getList()));
+        ExcelUtils.write(response, "采购到货.xls", "数据", SrmPurchaseInBaseRespVO.class, bindList(page.getList()));
     }
 
     @PutMapping("/submitAudit")
@@ -149,7 +148,6 @@ public class SrmPurchaseInController {
     @Operation(summary = "切换付款状态")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:changePayStatus')")
     public CommonResult<Boolean> changePayStatus(@Valid @RequestBody SrmPurchaseInPayReqVO vo) {
-        //        purchaseInService.changePayStatus(reqVO.getInId(), reqVO.getPayStatus());
         purchaseInService.switchPayStatus(vo);
         return success(true);
     }
@@ -159,7 +157,7 @@ public class SrmPurchaseInController {
         if (CollUtil.isEmpty(list)) {
             return Collections.emptyList();
         }
-        // 1.1 入库项
+        // 1.1 到货项
         List<SrmPurchaseInItemDO> purchaseInItemList = purchaseInService.getPurchaseInItemListByInIds(convertSet(list, SrmPurchaseInDO::getId));
         Map<Long, List<SrmPurchaseInItemDO>> purchaseInItemMap = convertMultiMap(purchaseInItemList, SrmPurchaseInItemDO::getInId);
         // 1.2 产品信息
@@ -175,7 +173,7 @@ public class SrmPurchaseInController {
         // 1.5 部门
         Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(convertSet(purchaseInItemList, SrmPurchaseInItemDO::getApplicationDeptId));
         // 1.6 获取仓库信息
-        Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(convertSet(purchaseInItemList, SrmPurchaseInItemDO::getWarehouseId));
+        Map<Long, WmsWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(convertSet(purchaseInItemList, SrmPurchaseInItemDO::getWarehouseId));
         //1.7 订单项map orderItemId
         Map<Long, SrmPurchaseOrderDO> orderItemMap =
             srmPurchaseOrderService.getPurchaseOrderItemMap(purchaseInItemList.stream().map(SrmPurchaseInItemDO::getOrderItemId).collect(Collectors.toSet()));
@@ -190,7 +188,7 @@ public class SrmPurchaseInController {
                     .setTotalWeight(product.getWeight().setScale(4, RoundingMode.HALF_UP).longValue() * Double.parseDouble(String.valueOf(item.getQty())))
                 );
                 // 设置仓库信息
-                MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), erpWarehouseDO -> item.setWarehouseName(erpWarehouseDO.getName()));
+                MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), dto -> item.setWarehouseName(dto.getName()));
                 //部门
                 MapUtils.findAndThen(deptMap, item.getApplicationDeptId(), dept -> item.setApplicationDeptName(dept.getName()));
                 //人员

@@ -5,7 +5,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
-import cn.iocoder.yudao.module.srm.api.purchase.SrmInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestItemsMapper;
@@ -24,7 +24,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_REQUES
 
 @Slf4j
 @Component
-public class ItemStorageActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmInCountDTO> {
+public class ItemStorageActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> {
     @Autowired
     private SrmPurchaseRequestItemsMapper mapper;
     @Resource(name = PURCHASE_REQUEST_STORAGE_STATE_MACHINE_NAME)
@@ -34,7 +34,7 @@ public class ItemStorageActionImpl implements Action<SrmStorageStatus, SrmEventE
 
     @Override
     @Transactional
-    public void execute(SrmStorageStatus f, SrmStorageStatus t, SrmEventEnum event, SrmInCountDTO context) {
+    public void execute(SrmStorageStatus f, SrmStorageStatus t, SrmEventEnum event, SrmOrderInCountDTO context) {
         SrmPurchaseRequestItemsDO itemsDO = mapper.selectById(context.getApplyItemId());
         if (event == SrmEventEnum.STOCK_ADJUSTMENT) {
             BigDecimal oldCount = itemsDO.getInboundClosedQty() == null ? BigDecimal.ZERO : itemsDO.getInboundClosedQty();

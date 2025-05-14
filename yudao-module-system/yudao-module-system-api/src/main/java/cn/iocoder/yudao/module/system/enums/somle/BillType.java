@@ -20,6 +20,7 @@ public enum BillType implements ArrayValuable<Integer>, DictEnum {
     WMS_INVENTORY(2,"盘点单"),
     WMS_EXCHANGE(3,"换货单"),
     WMS_PICKUP(4,"上架单"),
+    WMS_BIN_MOVE(5,"库位移动单"),
 
     // ========== TMS  编码段 100~200 ==========
     TMS_FIRST_MILE(100, "头程单"),

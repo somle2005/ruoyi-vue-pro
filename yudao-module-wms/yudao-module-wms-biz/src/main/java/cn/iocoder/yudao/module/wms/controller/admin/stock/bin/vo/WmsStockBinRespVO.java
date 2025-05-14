@@ -91,5 +91,7 @@ public class WmsStockBinRespVO {
     @Schema(description = "更新人", example = "")
     private WmsStockOwnershipPureRespVO suggestedOwnership;
 
-
+    @Schema(description = "备注", example = "")
+    @ExcelProperty("备注")
+    private String remark;
 }

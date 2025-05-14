@@ -23,12 +23,15 @@ import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimple
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.warehouse.zone.vo.WmsWarehouseZoneSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemBinQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
@@ -40,6 +43,7 @@ import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsInboundItemFlo
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
+import cn.iocoder.yudao.module.wms.service.pickup.item.WmsPickupItemService;
 import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
@@ -107,6 +111,10 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     @Resource
     @Lazy
     private WmsStockWarehouseService stockWarehouseService;
+
+    @Resource
+    @Lazy
+    private WmsPickupItemService pickupItemService;
 
 
     @Resource
@@ -401,8 +409,8 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     }
 
     @Override
-    public PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(WmsInboundItemPageReqVO pageReqVO) {
-        return inboundItemBinQueryMapper.selectPage(pageReqVO);
+    public PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(WmsInboundItemPageReqVO pageReqVO,boolean withPickupDetail) {
+        return inboundItemBinQueryMapper.selectPage(pageReqVO,withPickupDetail);
     }
 
 
@@ -421,7 +429,49 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         }
         List<WmsStockWarehouseDO> stockWarehouseDOList = stockWarehouseService.selectStockWarehouse(wmsWarehouseProductVOList);
         Map<String, WmsStockWarehouseSimpleVO> stockWarehouseDOMap = StreamX.from(stockWarehouseDOList).toMap(e -> e.getProductId() + "-" + e.getWarehouseId(), e -> BeanUtils.toBean(e, WmsStockWarehouseSimpleVO.class));
+        for (WmsStockWarehouseSimpleVO simpleVO : stockWarehouseDOMap.values()) {
+            simpleVO.setTotalQty(simpleVO.getAvailableQty() + simpleVO.getShelvingPendingQty());
+        }
         StreamX.from(list).assemble(stockWarehouseDOMap, e -> e.getProductId() + "-" + e.getWarehouseId(), WmsInboundItemRespVO::setStockWarehouse);
 
+
+
+    }
+
+    @Override
+    public void assembleStockType(List<WmsInboundItemRespVO> list) {
+        List<WmsPickupItemDO> pickupItemDOList = pickupItemService.getPickupItemListByInboundItemIds(StreamX.from(list).toSet(WmsInboundItemRespVO::getId));
+        Map<Long,List<WmsPickupItemDO>> pickupItemMap = StreamX.from(pickupItemDOList).groupBy(WmsPickupItemDO::getInboundItemId);
+        List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(StreamX.from(pickupItemDOList).toSet(WmsPickupItemDO::getBinId));
+        List<WmsWarehouseBinSimpleRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinSimpleRespVO.class);
+
+        List<WmsWarehouseZoneDO> zoneDOList = warehouseZoneService.selectByIds(StreamX.from(binDOList).toSet(WmsWarehouseBinDO::getZoneId));
+
+
+        StreamX.from(binVOList).assemble(BeanUtils.toBean(zoneDOList, WmsWarehouseZoneSimpleRespVO.class),WmsWarehouseZoneSimpleRespVO::getId, WmsWarehouseBinSimpleRespVO::getZoneId, WmsWarehouseBinSimpleRespVO::setZone);
+
+        for (WmsInboundItemRespVO itemRespVO : list) {
+
+            List<WmsPickupItemDO> pickupItems = pickupItemMap.get(itemRespVO.getId());
+            if(pickupItems!=null) {
+                System.out.println();
+                Set<Long> binIds = StreamX.from(pickupItems).map(WmsPickupItemDO::getBinId).toSet();
+                List<WmsWarehouseBinSimpleRespVO> binVOS = StreamX.from(binVOList).filter(e -> binIds.contains(e.getId())).toList();
+                itemRespVO.setWarehouseBinList(binVOS);
+                if(itemRespVO.getStockType()==null) {
+                    itemRespVO.setStockType(binVOS.get(0).getZone().getStockType());
+                }
+            }
+        }
+
+
+
+        Set<Integer> stockTypes = StreamX.from(zoneDOList).map(WmsWarehouseZoneDO::getStockType).toSet();
+
+    }
+
+    @Override
+    public WmsInboundItemDO getByInboundIdAndProductId(Long inboundId, Long productId) {
+        return inboundItemMapper.getByInboundIdAndProductId(inboundId, productId);
     }
 }

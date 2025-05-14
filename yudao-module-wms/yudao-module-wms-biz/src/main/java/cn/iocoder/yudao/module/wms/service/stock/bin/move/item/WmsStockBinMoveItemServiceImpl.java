@@ -27,14 +27,12 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_ITEM_EXISTS;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_BIN_MOVE_ITEM_NOT_EXISTS;
@@ -154,14 +152,13 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
 
     @Override
     public void assembleBin(List<WmsStockBinMoveItemRespVO> stockBinMoveItemList) {
-        Set<Long> ids=new HashSet<>();
+        Set<Long> ids = new HashSet<>();
         ids.addAll(StreamX.from(stockBinMoveItemList).toSet(WmsStockBinMoveItemRespVO::getFromBinId));
         ids.addAll(StreamX.from(stockBinMoveItemList).toSet(WmsStockBinMoveItemRespVO::getToBinId));
         List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByIds(ids);
-
         List<WmsWarehouseBinRespVO> binVOList = BeanUtils.toBean(binDOList, WmsWarehouseBinRespVO.class);
-        StreamX.from(stockBinMoveItemList).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsStockBinMoveItemRespVO::getFromBinId,WmsStockBinMoveItemRespVO::setFromBin);
-        StreamX.from(stockBinMoveItemList).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsStockBinMoveItemRespVO::getToBinId,WmsStockBinMoveItemRespVO::setToBin);
+        StreamX.from(stockBinMoveItemList).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsStockBinMoveItemRespVO::getFromBinId, WmsStockBinMoveItemRespVO::setFromBin);
+        StreamX.from(stockBinMoveItemList).assemble(binVOList, WmsWarehouseBinRespVO::getId, WmsStockBinMoveItemRespVO::getToBinId, WmsStockBinMoveItemRespVO::setToBin);
     }
 
     @Override
@@ -177,19 +174,17 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
 
     @Override
     public void assembleBinMove(List<WmsStockBinMoveItemRespVO> list) {
-        Set<Long> ids=StreamX.from(list).toSet(WmsStockBinMoveItemRespVO::getBinMoveId);
+        Set<Long> ids = StreamX.from(list).toSet(WmsStockBinMoveItemRespVO::getBinMoveId);
         List<WmsStockBinMoveDO> stockBinMoveDOS = stockBinMoveService.selectByIds(ids);
-
         List<WmsStockBinMoveSimpleRespVO> binMoveVOList = BeanUtils.toBean(stockBinMoveDOS, WmsStockBinMoveSimpleRespVO.class);
-        StreamX.from(list).assemble(binMoveVOList, WmsStockBinMoveSimpleRespVO::getId, WmsStockBinMoveItemRespVO::getBinMoveId,WmsStockBinMoveItemRespVO::setBinMove);
+        StreamX.from(list).assemble(binMoveVOList, WmsStockBinMoveSimpleRespVO::getId, WmsStockBinMoveItemRespVO::getBinMoveId, WmsStockBinMoveItemRespVO::setBinMove);
     }
 
     @Override
     public void assembleWarehouseForImp(List<WmsStockBinMoveImportExcelVO> impVOList) {
         Map<String, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMapByCode(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getWarehouseCode));
-
-        StreamX.from(impVOList).assemble(warehouseDOMap, WmsStockBinMoveImportExcelVO::getWarehouseCode, (e, p)->{
-            if(p!=null) {
+        StreamX.from(impVOList).assemble(warehouseDOMap, WmsStockBinMoveImportExcelVO::getWarehouseCode, (e, p) -> {
+            if (p != null) {
                 e.setWarehouseId(p.getId());
             }
         });
@@ -197,25 +192,20 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
 
     @Override
     public void assembleBinForImp(List<WmsStockBinMoveImportExcelVO> impVOList) {
-
-        Set<String> binCodes=new HashSet<>();
-
+        Set<String> binCodes = new HashSet<>();
         binCodes.addAll(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getFromBinCode));
         binCodes.addAll(StreamX.from(impVOList).toSet(WmsStockBinMoveImportExcelVO::getToBinCode));
         List<WmsWarehouseBinDO> binDOList = warehouseBinService.selectByCodes(binCodes);
-
-        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getCode, WmsStockBinMoveImportExcelVO::getFromBinCode,(e,p)->{
-            if (p!=null){
+        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getCode, WmsStockBinMoveImportExcelVO::getFromBinCode, (e, p) -> {
+            if (p != null) {
                 e.setFromBinId(p.getId());
             }
         });
-
-        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getCode, WmsStockBinMoveImportExcelVO::getToBinCode,(e,p)->{
-            if (p!=null){
+        StreamX.from(impVOList).assemble(binDOList, WmsWarehouseBinDO::getCode, WmsStockBinMoveImportExcelVO::getToBinCode, (e, p) -> {
+            if (p != null) {
                 e.setToBinId(p.getId());
             }
         });
-
     }
 
     @Override
@@ -226,12 +216,10 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
             WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
             productVOMap.put(productDTO.getBarCode(), productVO);
         }
-        StreamX.from(impVOList).assemble(productVOMap, WmsStockBinMoveImportExcelVO::getProductCode,(e,p)->{
-            if (p!=null){
+        StreamX.from(impVOList).assemble(productVOMap, WmsStockBinMoveImportExcelVO::getProductCode, (e, p) -> {
+            if (p != null) {
                 e.setProductId(p.getId());
             }
         });
     }
-
-
-}
+}

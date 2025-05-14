@@ -2,12 +2,16 @@ package cn.iocoder.yudao.module.wms.service.inventory;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.bin.vo.WmsInventoryProductExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventorySaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.enums.inventory.WmsInventoryAuditStatus;
 import jakarta.validation.Valid;
+
 import java.util.List;
 
 /**
@@ -69,4 +73,6 @@ public interface WmsInventoryService {
     WmsInventoryDO validateInventoryExists(Long id);
 
     void assembleApprovalHistory(List<WmsInventoryRespVO> list);
+
+    List<WmsStockBinRespVO> parseProductExcel(WmsWarehouseDO wmsWarehouseDO, List<WmsInventoryProductExcelVO> impVOList);
 }

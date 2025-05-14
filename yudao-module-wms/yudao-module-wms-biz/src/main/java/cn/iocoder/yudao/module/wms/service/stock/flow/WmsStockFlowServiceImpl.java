@@ -7,26 +7,37 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
+import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
+import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMoveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.WmsPickupDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.move.WmsStockBinMoveDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.move.WmsStockOwnershipMoveDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
@@ -36,10 +47,14 @@ import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockType;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsInboundItemFlowService;
+import cn.iocoder.yudao.module.wms.service.inventory.WmsInventoryService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
+import cn.iocoder.yudao.module.wms.service.quantity.InboundExecutor;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
+import cn.iocoder.yudao.module.wms.service.stock.bin.move.WmsStockBinMoveService;
 import cn.iocoder.yudao.module.wms.service.stock.ownership.WmsStockOwnershipService;
+import cn.iocoder.yudao.module.wms.service.stock.ownership.move.WmsStockOwnershipMoveService;
 import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
@@ -47,6 +62,7 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,6 +71,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Consumer;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_FLOW_NOT_EXISTS;
 
@@ -98,6 +115,18 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Resource
     @Lazy
+    private WmsInventoryService inventoryService;
+
+    @Resource
+    @Lazy
+    private WmsStockBinMoveService stockBinMoveService;
+
+    @Resource
+    @Lazy
+    private WmsStockOwnershipMoveService stockOwnershipMoveService;
+
+    @Resource
+    @Lazy
     private WmsStockOwnershipService stockOwnershipService;
 
     @Resource
@@ -110,6 +139,9 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Resource
     private DeptApi deptApi;
+
+    @Resource
+    private FmsCompanyApi companyApi;
 
     /**
      * @sign : 5CDC0A12A8B023F4
@@ -344,16 +376,46 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     public void assembleOutbound(List<WmsStockFlowRespVO> list) {
         List<WmsStockFlowRespVO> outboundFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.OUTBOUND_AGREE.getValue(), v.getReason())).toList();
         List<WmsOutboundDO> outboundDOList = outboundService.selectByIds(StreamX.from(outboundFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
-        Map<Long, WmsInboundSimpleRespVO> outboundMap = StreamX.from(outboundDOList).toMap(WmsOutboundDO::getId, inboundDO -> BeanUtils.toBean(inboundDO, WmsInboundSimpleRespVO.class));
-        StreamX.from(outboundFlowList).assemble(outboundMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setInbound);
+        Map<Long, WmsOutboundSimpleRespVO> outboundMap = StreamX.from(outboundDOList).toMap(WmsOutboundDO::getId, outboundDO -> BeanUtils.toBean(outboundDO, WmsOutboundSimpleRespVO.class));
+        StreamX.from(outboundFlowList).assemble(outboundMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setOutbound);
     }
 
     @Override
     public void assemblePickup(List<WmsStockFlowRespVO> list) {
         List<WmsStockFlowRespVO> pickupFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.PICKUP.getValue(), v.getReason())).toList();
         List<WmsPickupDO> pickupDOList = pickupService.selectByIds(StreamX.from(pickupFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
-        Map<Long, WmsInboundSimpleRespVO> pickupMap = StreamX.from(pickupDOList).toMap(WmsPickupDO::getId, inboundDO -> BeanUtils.toBean(inboundDO, WmsInboundSimpleRespVO.class));
-        StreamX.from(pickupFlowList).assemble(pickupMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setInbound);
+        Map<Long, WmsPickupSimpleRespVO> pickupMap = StreamX.from(pickupDOList).toMap(WmsPickupDO::getId, inboundDO -> BeanUtils.toBean(inboundDO, WmsPickupSimpleRespVO.class));
+        StreamX.from(pickupFlowList).assemble(pickupMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setPickup);
+    }
+
+    @Override
+    public void assembleInventory(List<WmsStockFlowRespVO> list) {
+        List<WmsStockFlowRespVO> inventoryFlowList = StreamX.from(list).filter(
+            v -> Objects.equals(WmsStockReason.INVENTORY_NEGATIVE.getValue(), v.getReason()) || Objects.equals(WmsStockReason.INVENTORY_POSITIVE.getValue(), v.getReason())
+        ).toList();
+        List<WmsInventoryDO> inventoryDOList = inventoryService.selectByIds(StreamX.from(inventoryFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
+        Map<Long, WmsInventoryRespVO> inventoryMap = StreamX.from(inventoryDOList).toMap(WmsInventoryDO::getId, elem -> BeanUtils.toBean(elem, WmsInventoryRespVO.class));
+        StreamX.from(inventoryFlowList).assemble(inventoryMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setInventory);
+    }
+
+    @Override
+    public void assembleBinMove(List<WmsStockFlowRespVO> list) {
+        List<WmsStockFlowRespVO> flowList = StreamX.from(list).filter(
+            v -> Objects.equals(WmsStockReason.STOCK_BIN_MOVE.getValue(), v.getReason())
+        ).toList();
+        List<WmsStockBinMoveDO> doList = stockBinMoveService.selectByIds(StreamX.from(flowList).toSet(WmsStockFlowRespVO::getReasonBillId));
+        Map<Long, WmsStockBinMoveRespVO> voMap = StreamX.from(doList).toMap(WmsStockBinMoveDO::getId, elem -> BeanUtils.toBean(elem, WmsStockBinMoveRespVO.class));
+        StreamX.from(flowList).assemble(voMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setStockBinMove);
+    }
+
+    @Override
+    public void assembleOwnershipMove(List<WmsStockFlowRespVO> list) {
+        List<WmsStockFlowRespVO> flowList = StreamX.from(list).filter(
+            v -> Objects.equals(WmsStockReason.STOCK_OWNERSHIP_MOVE.getValue(), v.getReason())
+        ).toList();
+        List<WmsStockOwnershipMoveDO> doList = stockOwnershipMoveService.selectByIds(StreamX.from(flowList).toList(WmsStockFlowRespVO::getReasonBillId));
+        Map<Long, WmsStockOwnershipMoveRespVO> voMap = StreamX.from(doList).toMap(WmsStockOwnershipMoveDO::getId, elem -> BeanUtils.toBean(elem, WmsStockOwnershipMoveRespVO.class));
+        StreamX.from(flowList).assemble(voMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setStockOwnershipMove);
     }
 
     @Override
@@ -370,27 +432,32 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     @Override
     public void assembleCompanyAndDept(List<WmsStockFlowRespVO> list) {
         // 过滤所有者库存的动账流水
-        List<WmsStockFlowRespVO> ownershioFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockType.OWNERSHIP.getValue(), v.getStockType())).toList();
-        List<Long> stockOwnershipIds = StreamX.from(ownershioFlowList).toList(WmsStockFlowRespVO::getStockId).stream().distinct().toList();
+        List<WmsStockFlowRespVO> ownershipFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockType.OWNERSHIP.getValue(), v.getStockType())).toList();
+        List<Long> stockOwnershipIds = StreamX.from(ownershipFlowList).toList(WmsStockFlowRespVO::getStockId).stream().distinct().toList();
         // 查询到对应的所有者库存记录
         List<WmsStockOwnershipDO> stockOwnershipDOList = stockOwnershipService.selectByIds(stockOwnershipIds);
         Map<Long, WmsStockOwnershipDO> ownershipDOMap = StreamX.from(stockOwnershipDOList).toMap(WmsStockOwnershipDO::getId);
-        List<Long> companyIds = StreamX.from(stockOwnershipDOList).toList(WmsStockOwnershipDO::getCompanyId);
+        Set<Long> companyIds = StreamX.from(stockOwnershipDOList).toSet(WmsStockOwnershipDO::getCompanyId);
         List<Long> deptIds = StreamX.from(stockOwnershipDOList).toList(WmsStockOwnershipDO::getDeptId);
         // 查询到部门记录
         Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(deptIds);
+        Map<Long, FmsCompanyDTO> companyDTOMap = companyApi.getCompanyMap(companyIds);
         Map<Long, DeptSimpleRespVO> deptSimpleVOMap = BeanUtils.toBean(deptDTOMap, DeptSimpleRespVO.class);
         // 循环库位的动账流水
-        for (WmsStockFlowRespVO binRespVO : ownershioFlowList) {
+        for (WmsStockFlowRespVO ownershipRespVO : ownershipFlowList) {
             // 找到流水对应的所有者库存记录
-            WmsStockOwnershipDO stockOwnershipDO = ownershipDOMap.get(binRespVO.getStockId());
+            WmsStockOwnershipDO stockOwnershipDO = ownershipDOMap.get(ownershipRespVO.getStockId());
             // 通过所有者库存记录找到对应的部门
             DeptSimpleRespVO deptVO = deptSimpleVOMap.get(stockOwnershipDO.getDeptId());
-            // 设置仓位
-            binRespVO.setDept(deptVO);
+            // 设置部门
+            ownershipRespVO.setDept(deptVO);
             // 通过所有者库存记录找到对应的财务公司
-            // todo 待东宇财务公司就绪
+            FmsCompanyDTO companyDTO=companyDTOMap.get(stockOwnershipDO.getCompanyId());
+            // 设置公司
+            ownershipRespVO.setCompany(BeanUtils.toBean(companyDTO, FmsCompanySimpleRespVO.class));
         }
+
+
     }
 
     /**
@@ -408,5 +475,20 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         List<WmsInboundItemFlowDO> inboundItemFlowDOS = inboundItemFlowService.selectByIds(StreamX.from(list).toSet(WmsStockFlowRespVO::getInboundItemFlowId));
         Map<Long, WmsInboundItemFlowSimpleVO> inboundItemFlowDOMap = StreamX.from(inboundItemFlowDOS).toMap(WmsInboundItemFlowDO::getId, e -> BeanUtils.toBean(e, WmsInboundItemFlowSimpleVO.class));
         StreamX.from(list).assemble(inboundItemFlowDOMap, WmsStockFlowRespVO::getInboundItemFlowId, WmsStockFlowRespVO::setInboundItemFlow);
+        InboundExecutor.setShelveAvailableQty(inboundItemFlowDOMap.values());
+
+        List<Long> inboundIds=StreamX.from(inboundItemFlowDOMap.values()).toList(WmsInboundItemFlowSimpleVO::getInboundId);
+        List<WmsInboundDO> inboundDOList = inboundService.selectByIds(inboundIds);
+        Map<Long,WmsInboundDO> inboundDOMap=StreamX.from(inboundDOList).toMap(WmsInboundDO::getId);
+        for (WmsStockFlowRespVO flowRespVO : list) {
+            WmsInboundItemFlowSimpleVO inboundItemFlow = flowRespVO.getInboundItemFlow();
+            if(inboundItemFlow!=null) {
+                WmsInboundDO inboundDO = inboundDOMap.get(inboundItemFlow.getInboundId());
+                flowRespVO.setInbound(BeanUtils.toBean(inboundDO,WmsInboundSimpleRespVO.class));
+            }
+        }
+
     }
+
+
 }

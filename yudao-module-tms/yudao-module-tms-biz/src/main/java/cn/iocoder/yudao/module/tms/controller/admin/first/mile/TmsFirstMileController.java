@@ -10,8 +10,6 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import cn.iocoder.yudao.module.erp.api.stock.WmsWarehouseApi;
-import cn.iocoder.yudao.module.erp.api.stock.dto.ErpWarehouseDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
@@ -31,6 +29,8 @@ import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
+import cn.iocoder.yudao.module.wms.enums.api.warehouse.WmsWarehouseApi;
+import cn.iocoder.yudao.module.wms.enums.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -202,7 +202,7 @@ public class TmsFirstMileController {
         Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(beans.stream()
             .flatMap(bo -> bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getDeptId)).collect(Collectors.toSet()));
         //仓库
-        Map<Long, ErpWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(beans.stream()
+        Map<Long, WmsWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(beans.stream()
             .flatMap(bo -> Stream.concat(
                 bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getFromWarehouseId),
                 bo.getToWarehouseId() == null ? Stream.empty() : Stream.of(bo.getToWarehouseId())
@@ -242,13 +242,16 @@ public class TmsFirstMileController {
                 }).collect(Collectors.toList());
                 respVO.setFirstMileItemList(items);
             }
-            // 设置费用信息
+            // 设置费用信息 1:N
             if (CollUtil.isNotEmpty(bo.getFees())) {
-                respVO.setFees(TmsFirstMileConvert.convertFeeList(bo.getFees()));
-                MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO.setUpdater(user.getNickname()));
-                MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO.setCreator(user.getNickname()));
+                List<TmsFeeRespVO> tmsFeeRespVOS = TmsFirstMileConvert.convertFeeList(bo.getFees());
+                tmsFeeRespVOS.forEach(tmsFeeRespVO -> {
+                    MapUtils.findAndThen(userMap, safeParseLong(tmsFeeRespVO.getUpdater()), user -> tmsFeeRespVO.setUpdater(user.getNickname()));
+                    MapUtils.findAndThen(userMap, safeParseLong(tmsFeeRespVO.getCreator()), user -> tmsFeeRespVO.setCreator(user.getNickname()));
+                });
+                respVO.setFees(tmsFeeRespVOS);
             }
-            // 设置最新跟踪信息
+            // 设置最新跟踪信息 1:1
             if (bo.getTracking() != null) {
                 respVO.setTracking(BeanUtils.toBean(bo.getTracking(), TmsVesselTrackingRespVO.class));
             }
