@@ -405,6 +405,13 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         return inboundItemBinQueryMapper.selectPage(pageReqVO);
     }
 
+
+
+    @Override
+    public Map<Long,List<WmsInboundItemBinQueryDO>> selectInboundItemBinMap(Long warehouseId, Set<Long> productIds, boolean olderFirst) {
+        return inboundItemBinQueryMapper.selectInboundItemBinMap(warehouseId,productIds,olderFirst);
+    }
+
     @Override
     public void assembleStockWarehouse(List<? extends WmsInboundItemRespVO> list) {
 

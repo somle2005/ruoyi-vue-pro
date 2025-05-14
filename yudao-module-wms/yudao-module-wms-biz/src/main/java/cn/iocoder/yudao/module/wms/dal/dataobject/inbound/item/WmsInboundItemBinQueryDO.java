@@ -23,7 +23,7 @@ public class WmsInboundItemBinQueryDO extends WmsInboundItemDO  {
     /**
      * 仓位ID
      */
-    private String binId;
+    private Long binId;
 
     /**
      * 仓库ID

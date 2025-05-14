@@ -8,10 +8,6 @@ import java.util.List;
 @Data
 public class WmsOutboundSaveReqDTO {
 
-    /**
-     * 主键
-     **/
-    private Long id;
 
     /**
      * 仓库ID

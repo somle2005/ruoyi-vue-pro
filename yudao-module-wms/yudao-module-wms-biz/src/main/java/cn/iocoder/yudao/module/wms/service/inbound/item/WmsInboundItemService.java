@@ -13,6 +13,8 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQue
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import jakarta.validation.Valid;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 入库单详情 Service 接口
@@ -142,6 +144,11 @@ public interface WmsInboundItemService {
      * 批次库存关联仓位查询
      */
     PageResult<WmsInboundItemBinQueryDO> getInboundItemBinPage(@Valid WmsInboundItemPageReqVO pageReqVO);
+
+    /**
+     * 仓库内产品的批次库存查询，先进先出排序
+     */
+    Map<Long,List<WmsInboundItemBinQueryDO>> selectInboundItemBinMap(Long warehouseId, Set<Long> productIds, boolean olderFirst);
 
     void assembleStockWarehouse(List<? extends WmsInboundItemRespVO> list);
 }
