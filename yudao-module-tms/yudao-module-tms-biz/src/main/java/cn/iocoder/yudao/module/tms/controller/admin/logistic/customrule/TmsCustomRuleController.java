@@ -114,7 +114,7 @@ public class TmsCustomRuleController {
     @PostMapping("/list-by-country-product")
     @Operation(summary = "根据国别和产品ID集合获得海关规则")
     public CommonResult<List<TmsCustomRuleListRespVO>> getCustomRuleListByCountryAndProducts(@Valid @RequestBody TmsCustomRuleListReqVO reqVO) {
-        List<TmsCustomRuleDO> list = customRuleService.getCustomRuleListByCountryAndProducts(reqVO.getCountry(), reqVO.getProductIds());
+        List<TmsCustomRuleDO> list = customRuleService.getCustomRuleListByCountryAndProducts(reqVO.getCountryCode(), reqVO.getProductIds());
         return success(BeanUtils.toBean(list, TmsCustomRuleListRespVO.class));
     }
 

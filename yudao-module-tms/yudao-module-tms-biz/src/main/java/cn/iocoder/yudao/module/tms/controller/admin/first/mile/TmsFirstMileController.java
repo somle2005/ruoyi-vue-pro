@@ -232,7 +232,7 @@ public class TmsFirstMileController {
                     MapUtils.findAndThen(companyMap, item.getCompanyId(), company -> itemRespVO.setCompanyName(company.getAbbr()));
                     MapUtils.findAndThen(companyMap, item.getSalesCompanyId(), company -> itemRespVO.setSalesCompanyName(company.getAbbr()));
                     //产品
-                    MapUtils.findAndThen(productMap, item.getProductId(), product -> itemRespVO.setProductName(product.getBarCode()));
+                    MapUtils.findAndThen(productMap, item.getProductId(), product -> itemRespVO.setProductName(product.getBarCode()).setProductSku(product.getBarCode()));
                     //部门
                     MapUtils.findAndThen(deptMap, item.getDeptId(), dept -> itemRespVO.setDeptName(dept.getName()));
                     //仓库
@@ -240,7 +240,7 @@ public class TmsFirstMileController {
 
                     return itemRespVO;
                 }).collect(Collectors.toList());
-                respVO.setFirstMileItemList(items);
+                respVO.setFirstMileItems(items);
                 // 设置明细汇总box
                 respVO.setTotalBoxQty(items.stream().mapToInt(TmsFirstMileItemRespVO::getBoxQty).sum());
             }

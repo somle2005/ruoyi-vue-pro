@@ -154,7 +154,7 @@ public class TmsFirstMileRespVO extends BaseVO {
     private Integer revision;
 
     @Schema(description = "头程单明细")
-    private List<TmsFirstMileItemRespVO> firstMileItemList;
+    private List<TmsFirstMileItemRespVO> firstMileItems;
 
     @Schema(description = "费用明细")
     private List<TmsFeeRespVO> fees;

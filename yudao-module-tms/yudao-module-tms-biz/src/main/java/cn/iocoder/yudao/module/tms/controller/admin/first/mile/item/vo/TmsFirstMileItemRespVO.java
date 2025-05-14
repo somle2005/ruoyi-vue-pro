@@ -28,6 +28,10 @@ public class TmsFirstMileItemRespVO extends BaseVO {
     @Schema(description = "产品名称")
     @ExcelProperty("产品名称")
     private String productName;
+    //产品SKU
+    @Schema(description = "产品SKU")
+    @ExcelProperty("产品SKU")
+    private String productSku;
 
     @Schema(description = "件数")
     @ExcelProperty("件数")

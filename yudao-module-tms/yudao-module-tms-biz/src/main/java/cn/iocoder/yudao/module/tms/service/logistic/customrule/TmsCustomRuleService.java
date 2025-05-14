@@ -89,5 +89,5 @@ public interface TmsCustomRuleService {
      * @param productIds 产品ID集合
      * @return 海关规则列表
      */
-    List<TmsCustomRuleDO> getCustomRuleListByCountryAndProducts(String country, List<Long> productIds);
+    List<TmsCustomRuleDO> getCustomRuleListByCountryAndProducts(Long countryCode, List<Long> productIds);
 }
