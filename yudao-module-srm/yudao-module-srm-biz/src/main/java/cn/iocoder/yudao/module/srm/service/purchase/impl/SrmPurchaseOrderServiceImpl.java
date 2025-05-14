@@ -97,9 +97,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     private final TemplateService templateService;
 
     @Resource(name = PURCHASE_ORDER_OFF_STATE_MACHINE_NAME)
-    StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> offMachine;
+    StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> orderOffMachine;
     @Resource(name = PURCHASE_ORDER_AUDIT_STATE_MACHINE_NAME)
-    StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseOrderAuditReqVO> auditMachine;
+    StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseOrderAuditReqVO> orderAuditMachine;
     @Resource(name = PURCHASE_ORDER_STORAGE_STATE_MACHINE_NAME)
     StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> purchaseOrderStorageMachine;
     @Resource(name = PURCHASE_ORDER_PAYMENT_STATE_MACHINE_NAME)
@@ -208,9 +208,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     private void initMasterState(SrmPurchaseOrderDO orderDO) {
         //主表
         //开关
-        offMachine.fireEvent(SrmOffStatus.OPEN, SrmEventEnum.OFF_INIT, orderDO);
+        orderOffMachine.fireEvent(SrmOffStatus.OPEN, SrmEventEnum.OFF_INIT, orderDO);
         //审核
-        auditMachine.fireEvent(SrmAuditStatus.DRAFT, SrmEventEnum.AUDIT_INIT,
+        orderAuditMachine.fireEvent(SrmAuditStatus.DRAFT, SrmEventEnum.AUDIT_INIT,
             SrmPurchaseOrderAuditReqVO.builder().orderIds(Collections.singletonList(orderDO.getId())).build());
         //入库
         purchaseOrderStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, orderDO);
@@ -658,7 +658,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         }
         // 2. 触发事件
         orderDOS.forEach(orderDO ->
-                auditMachine.fireEvent(SrmAuditStatus.fromCode(orderDO.getAuditStatus()), SrmEventEnum.SUBMIT_FOR_REVIEW,
+            orderAuditMachine.fireEvent(SrmAuditStatus.fromCode(orderDO.getAuditStatus()), SrmEventEnum.SUBMIT_FOR_REVIEW,
                         SrmPurchaseOrderAuditReqVO.builder().orderIds(Collections.singletonList(orderDO.getId())).build()));
     }
 
@@ -676,10 +676,10 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             // 审核操作
             if (req.getPass()) {
                 log.debug("采购订单通过审核，ID: {}", orderDO.getId());
-                auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
+                orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", orderDO.getId());
-                auditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
+                orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
             }
         } else {
             //反审核
@@ -689,7 +689,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 ThrowUtil.ifThrow(b, PURCHASE_ORDER_ITEM_IN_FAIL_EXISTS_IN, item.getId());
             });
             log.debug("采购订单撤回审核，ID: {}", orderDO.getId());
-            auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
+            orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
         }
     }
 
@@ -708,7 +708,6 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void merge(SrmPurchaseOrderMergeReqVO reqVO) {
-
         //校验
         for (SrmPurchaseOrderMergeReqVO.item item : reqVO.getItems()) {
             Long itemId = item.getItemId();
@@ -721,6 +720,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         }
         List<Long> itemIds = reqVO.getItems().stream().map(SrmPurchaseOrderMergeReqVO.item::getItemId).collect(Collectors.toList());
         List<SrmPurchaseOrderItemDO> orderItemDOS = purchaseOrderItemMapper.selectListByItemIds(itemIds);
+        //groupby itemID
+        Map<Long, List<SrmPurchaseOrderMergeReqVO.item>> itemIdMap = reqVO.getItems().stream().collect(Collectors.groupingBy(SrmPurchaseOrderMergeReqVO.item::getItemId));
         //转换
         SrmPurchaseInSaveReqVO vo = BeanUtils.toBean(reqVO, SrmPurchaseInSaveReqVO.class, saveReqVO ->
             saveReqVO.setCode(null).setItems(SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS)).setId(null).setInTime(LocalDateTime.now()));

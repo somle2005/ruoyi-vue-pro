@@ -241,6 +241,8 @@ public class TmsFirstMileController {
                     return itemRespVO;
                 }).collect(Collectors.toList());
                 respVO.setFirstMileItemList(items);
+                // 设置明细汇总box
+                respVO.setTotalBoxQty(items.stream().mapToInt(TmsFirstMileItemRespVO::getBoxQty).sum());
             }
             // 设置费用信息 1:N
             if (CollUtil.isNotEmpty(bo.getFees())) {

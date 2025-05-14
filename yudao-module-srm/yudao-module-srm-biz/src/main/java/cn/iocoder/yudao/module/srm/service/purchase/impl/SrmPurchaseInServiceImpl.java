@@ -91,7 +91,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public Long createPurchaseIn(SrmPurchaseInSaveReqVO vo) {
+    public Long createPurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
         vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
         // 1.2.1 校验到货项对应的采购项可入库数量是否充足。
@@ -230,7 +230,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updatePurchaseIn(SrmPurchaseInSaveReqVO vo) {
+    public void updatePurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
         vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
         // 1.1 校验存在

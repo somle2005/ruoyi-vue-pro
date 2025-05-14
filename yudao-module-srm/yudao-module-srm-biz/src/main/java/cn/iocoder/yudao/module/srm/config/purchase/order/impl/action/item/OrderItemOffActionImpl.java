@@ -49,7 +49,7 @@ public class OrderItemOffActionImpl implements Action<SrmOffStatus, SrmEventEnum
         // 更新子项的状态
         itemDO.setOffStatus(to.getCode());
         itemMapper.updateById(itemDO);
-        log.info("子项开关状态机触发({})事件：对象ID={}，状态 {} -> {}", event.getDesc(), itemDO.getId(), from.getDesc(), to.getDesc());
+        log.debug("子项开关状态机触发({})事件：对象ID={}，状态 {} -> {}", event.getDesc(), itemDO.getId(), from.getDesc(), to.getDesc());
 
         SrmPurchaseOrderDO orderDO = orderMapper.selectById(context.getOrderId());
         if(orderDO == null) {
