@@ -34,6 +34,7 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
+import cn.iocoder.yudao.module.tms.service.vessel.tracking.TmsVesselTrackingService;
 import cn.iocoder.yudao.module.wms.enums.api.outbound.WmsOutboundApi;
 import cn.iocoder.yudao.module.wms.enums.api.warehouse.WmsWarehouseApi;
 import jakarta.annotation.Resource;
@@ -68,6 +69,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final TmsFirstMileMapper firstMileMapper;
     private final TmsFirstMileItemMapper firstMileItemMapper;
     private final TmsFeeService feeService;
+    private final TmsVesselTrackingService tmsVesselTrackingService;
     private final TmsNoRedisDAO noRedisDAO;
     private final WmsWarehouseApi warehouseApi;
     private final WmsOutboundApi wmsOutboundApi;
@@ -190,8 +192,12 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
      */
     @Override
     public TmsFirstMileBO getFirstMileBO(Long id) {
-        TmsFirstMileItemBO tmsFirstMileItemBO = firstMileItemMapper.selectBOById(id);
-        return TmsFirstMileConvert.convertBO(tmsFirstMileItemBO);
+        TmsFirstMileDO tmsFirstMileDO = firstMileMapper.selectById(id);
+        TmsFirstMileBO bo = BeanUtils.toBean(tmsFirstMileDO, TmsFirstMileBO.class);
+        bo.setItems(firstMileItemMapper.selectListByFirstMileId(id));
+        //跟踪信息
+        bo.setTracking(tmsVesselTrackingService.getVesselTrackingByUpstreamIdAndUpstreamType(id, BillType.TMS_FIRST_MILE.getValue()));
+        return bo;
     }
 
     @Override

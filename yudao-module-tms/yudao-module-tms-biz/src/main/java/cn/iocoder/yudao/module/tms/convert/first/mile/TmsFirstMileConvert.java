@@ -42,7 +42,7 @@ public class TmsFirstMileConvert {
     public static List<TmsFirstMileBO> convertBOList(List<TmsFirstMileItemBO> itemBOList) {
         // 按主表ID分组
         Map<Long, List<TmsFirstMileItemBO>> itemMap = itemBOList.stream().collect(Collectors.groupingBy(item -> item.getTmsFirstMileDO().getId()));
-        log.info("转换主表BO列表，itemMap: {}", itemMap);
+        log.debug("转换主表BO列表，itemMap: {}", itemMap);
         // 转换为主表BO列表
         return itemMap.values().stream()
             .map(tmsFirstMileItemBOS -> {

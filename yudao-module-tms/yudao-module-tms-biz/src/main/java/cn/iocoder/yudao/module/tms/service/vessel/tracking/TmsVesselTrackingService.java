@@ -46,6 +46,14 @@ public interface TmsVesselTrackingService {
     TmsVesselTrackingDO getVesselTracking(Long id);
 
     /**
+     * 根据上游ID+上游单据类型获得 出运跟踪信息
+     *
+     * @param upstreamId   上游ID
+     * @param upstreamType 上游单据类型
+     */
+    TmsVesselTrackingDO getVesselTrackingByUpstreamIdAndUpstreamType(Long upstreamId, Integer upstreamType);
+
+    /**
      * 获得出运跟踪信息表（由外部API更新）分页
      *
      * @param pageReqVO 分页查询

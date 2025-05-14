@@ -73,6 +73,18 @@ public class TmsVesselTrackingServiceImpl implements TmsVesselTrackingService {
         return vesselTrackingMapper.selectById(id);
     }
 
+    /**
+     * 根据上游ID+上游单据类型获得 出运跟踪信息
+     *
+     * @param upstreamId   上游ID
+     *                     upstreamType 上游单据类型
+     * @param upstreamType 上游单据类型
+     */
+    @Override
+    public TmsVesselTrackingDO getVesselTrackingByUpstreamIdAndUpstreamType(Long upstreamId, Integer upstreamType) {
+        return null;
+    }
+
     @Override
     public PageResult<TmsVesselTrackingDO> getVesselTrackingPage(TmsVesselTrackingPageReqVO pageReqVO) {
         return vesselTrackingMapper.selectPage(pageReqVO);

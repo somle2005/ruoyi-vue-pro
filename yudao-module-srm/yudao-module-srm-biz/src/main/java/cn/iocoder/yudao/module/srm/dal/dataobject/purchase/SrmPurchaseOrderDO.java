@@ -120,10 +120,6 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
      */
     private Long purchaseCompanyId;
     /**
-     * 箱率
-     */
-    private String containerRate;
-    /**
      * 仓库id
      */
     private Long warehouseId;

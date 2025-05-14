@@ -55,4 +55,11 @@ public interface TmsVesselTrackingMapper extends BaseMapperX<TmsVesselTrackingDO
         return selectPage(vo, buildWrapper(vo));
     }
 
+    // 根据上游ID+上游单据类型获得 出运跟踪信息
+    default TmsVesselTrackingDO getVesselTrackingByUpstreamIdAndUpstreamType(Long upstreamId, Integer upstreamType) {
+        return selectOne(new MPJLambdaWrapperX<TmsVesselTrackingDO>()
+            .eq(TmsVesselTrackingDO::getUpstreamId, upstreamId)
+            .eq(TmsVesselTrackingDO::getUpstreamType, upstreamType)
+        );
+    }
 }

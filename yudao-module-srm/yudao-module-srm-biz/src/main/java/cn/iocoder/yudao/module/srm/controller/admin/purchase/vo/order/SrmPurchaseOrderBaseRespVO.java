@@ -170,6 +170,9 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
 
         @Schema(description = "产品单位名称")
         private String productUnitName;
+
+        @Schema(description = "产品单位ID")
+        private Long productUnitId;
         //
         //        @Schema(description = "erp产品")
         //        private ErpProductDTO product;
@@ -228,8 +231,10 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
         //        private int srcNo;
         @Schema(description = "x码")
         private String xcode;
+
         @Schema(description = "箱率")
         private String containerRate;//箱率
+
         @Schema(description = "型号规格型号")
         private String model;
         // ========== 带出 ==========

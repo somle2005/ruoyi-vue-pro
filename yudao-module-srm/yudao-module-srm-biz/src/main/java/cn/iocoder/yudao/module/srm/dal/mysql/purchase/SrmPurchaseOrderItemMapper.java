@@ -62,7 +62,7 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .eqIfPresent(SrmPurchaseOrderDO::getAuditorId, reqVO.getAuditorId()) // 审核人ID
             .betweenIfPresent(SrmPurchaseOrderDO::getAuditTime, reqVO.getAuditTime()) // 审核时间
             .eqIfPresent(SrmPurchaseOrderDO::getPurchaseCompanyId, reqVO.getPurchaseCompanyId()) // 财务主体ID
-            .likeIfPresent(SrmPurchaseOrderDO::getContainerRate, reqVO.getContainerRate()) // 箱率
+//            .likeIfPresent(SrmPurchaseOrderDO::getContainerRate, reqVO.getContainerRate()) // 箱率
             .eqIfPresent(SrmPurchaseOrderDO::getWarehouseId, reqVO.getWarehouseId()) // 仓库ID
             .eqIfPresent(SrmPurchaseOrderDO::getOffStatus, reqVO.getOffStatus()) // 关闭状态
             .eqIfPresent(SrmPurchaseOrderDO::getExecuteStatus, reqVO.getExecuteStatus()) // 执行状态
