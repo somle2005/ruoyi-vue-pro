@@ -232,7 +232,7 @@ public class TmsFirstMileController {
                     MapUtils.findAndThen(companyMap, item.getCompanyId(), company -> itemRespVO.setCompanyName(company.getAbbr()));
                     MapUtils.findAndThen(companyMap, item.getSalesCompanyId(), company -> itemRespVO.setSalesCompanyName(company.getAbbr()));
                     //产品
-                    MapUtils.findAndThen(productMap, item.getProductId(), product -> itemRespVO.setProductName(product.getBarCode()).setProductSku(product.getBarCode()));
+                    MapUtils.findAndThen(productMap, item.getProductId(), product -> itemRespVO.setProductName(product.getName()).setProductSku(product.getBarCode()));
                     //部门
                     MapUtils.findAndThen(deptMap, item.getDeptId(), dept -> itemRespVO.setDeptName(dept.getName()));
                     //仓库
