@@ -180,6 +180,16 @@ public class TmsFirstMileRequestController {
         return success(firstMileRequestService.mergeFirstMileRequest(createReqVO));
     }
 
+    @PostMapping("/get-product-stock")
+    @Operation(summary = "获取产品可用库存")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile-request:query')")
+    public CommonResult<Map<Long, Integer>> getProductStock(@Valid @RequestBody TmsFirstMileRequestProductStockReqVO reqVO) {
+        Map<Long, WmsStockOwnershipDTO> stockMap = wmsStockOwnershipApi.selectByDeptIdAndProductIdAndCountryIdMap(reqVO.getDeptId(), reqVO.getProductIds(), reqVO.getCountry());
+        // 转换为产品ID -> 可用库存的Map
+        Map<Long, Integer> result = stockMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getAvailableQty()));
+        return success(result);
+    }
+
     private List<TmsFirstMileRequestRespVO> bindListResult(List<TmsFirstMileRequestBO> firstMileRequestBOList) {
         if (firstMileRequestBOList == null || firstMileRequestBOList.isEmpty()) {
             return Collections.emptyList();
@@ -232,6 +242,7 @@ public class TmsFirstMileRequestController {
                         //带出该申请部门的 该产品sku的 中国的 仓库库存汇总
                         MapUtils.findAndThen(wmsStockOwnershipDTOMap, item.getProductId(), wmsStockOwnershipDTO -> itemRespVO.setDomesticWarehouseStock(wmsStockOwnershipDTO.getAvailableQty()));
                         }
+                            //自动计算该sku的采购在途数量
                     )).collect(Collectors.toList());
 
                 respVO.setItems(items);
