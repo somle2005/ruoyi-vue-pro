@@ -9,7 +9,7 @@ import cn.iocoder.yudao.framework.common.exception.ErrorCode;
  *
  * @author Administrator
  */
-public interface ErrorCodeConstants {
+public interface WmsErrorCodeConstants {
 
     // ========== WMS_EXTERNAL_STORAGE 外部存储库 2_001_000_000 ==========
     ErrorCode EXTERNAL_STORAGE_NAME_DUPLICATE = new ErrorCode(2_001_000_000, "名称已存在");

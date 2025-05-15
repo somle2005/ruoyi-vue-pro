@@ -8,9 +8,7 @@ import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import org.springframework.stereotype.Component;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_AUDIT_ERROR;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_AUDIT_FAIL;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_STATUS_PARSE_ERROR;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 /**
  * @author: LeeFJ

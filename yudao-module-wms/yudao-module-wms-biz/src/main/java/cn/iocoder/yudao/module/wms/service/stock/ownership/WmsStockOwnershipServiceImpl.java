@@ -10,6 +10,8 @@ import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
+import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseListReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
@@ -23,18 +25,20 @@ import cn.iocoder.yudao.module.wms.dal.mysql.stock.ownership.WmsStockOwnershipMa
 import cn.iocoder.yudao.module.wms.service.stock.flow.WmsStockFlowService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import jakarta.annotation.Resource;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
+
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_NOT_EXISTS;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_WAREHOUSE_ID_COMPANY_ID_DEPT_ID_PRODUCT_ID_DUPLICATE;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.STOCK_OWNERSHIP_WAREHOUSE_ID_DEPT_ID_PRODUCT_ID_DUPLICATE;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 /**
  * 所有者库存 Service 实现类
@@ -63,6 +67,10 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
 
     @Resource
     private FmsCompanyApi companyApi;
+    @Autowired
+    DictDataApi dictDataApi;
+    @Autowired
+    private WmsWarehouseService wmsWarehouseService;
 
     /**
      * @sign : 4AF969274F47ADC0
@@ -136,12 +144,12 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
     }
 
     @Override
-    public List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, Long productId, Long companyId, Long deptId) {
+    public List<WmsStockOwnershipDO> selectStockOwnership(@NotNull Long warehouseId, Long productId, Long companyId, Long deptId) {
         return stockOwnershipMapper.selectStockOwnership(warehouseId, productId, companyId, deptId);
     }
 
     @Override
-    public List<WmsStockOwnershipDO> selectStockOwnership(Long warehouseId, List<Long> productIdList) {
+    public List<WmsStockOwnershipDO> selectStockOwnership(@NotNull Long warehouseId, List<Long> productIdList) {
         if (CollectionUtils.isEmpty(productIdList)) {
             return List.of();
         }
@@ -236,4 +244,13 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
         }
         return stockOwnershipMapper.selectByIds(stockOwnershipIds);
     }
-}
+
+    @Override
+    public List<WmsStockOwnershipDO> selectByDeptIdAndProductIdAndCountryId(@NotNull Long deptId, @NotNull Long productId, @NotNull String country) {
+        //仓库list
+        List<WmsWarehouseDO> warehouseDOList = wmsWarehouseService.selectList(WmsWarehouseListReqDTO.builder().country(country).build());
+        //2 根据仓库 查找对应 产品的库存
+        //TODO 待实现 根据仓库 查找对应 产品的库存
+        return null;
+    }
+}

@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockO
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
 import org.apache.ibatis.annotations.Mapper;
+
 import java.util.List;
 
 /**
@@ -61,4 +62,6 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         wrapper.in(WmsStockOwnershipDO::getProductId, productIdList);
         return selectList(wrapper);
     }
-}
+
+
+}

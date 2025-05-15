@@ -24,22 +24,11 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
+
+import java.util.*;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_CAN_NOT_APPEND;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_EXISTS;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_INVENTORY_ID_DUPLICATE;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_MUST_IN_SAME_INVENTORY;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_NOT_EXISTS;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_PRODUCT_NOT_ALLOWED;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_QUANTITY_ERROR;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_BIN_WAREHOUSE_BIN_ERROR;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INVENTORY_CAN_NOT_EDIT;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 /**
  * 库位盘点 Service 实现类

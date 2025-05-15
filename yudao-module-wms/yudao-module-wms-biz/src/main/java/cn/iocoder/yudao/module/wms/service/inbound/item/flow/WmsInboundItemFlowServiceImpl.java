@@ -13,11 +13,13 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
 import java.util.Set;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_ITEM_FLOW_NOT_EXISTS;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.INBOUND_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.INBOUND_ITEM_FLOW_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.INBOUND_NOT_EXISTS;
 
 /**
  * 入库单库存详情扣减 Service 实现类
@@ -143,4 +145,4 @@ public class WmsInboundItemFlowServiceImpl implements WmsInboundItemFlowService 
         }
         return inboundItemFlowMapper.selectByIds(idList);
     }
-}
+}

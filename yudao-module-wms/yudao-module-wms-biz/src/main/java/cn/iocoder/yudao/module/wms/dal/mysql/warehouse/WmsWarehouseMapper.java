@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.wms.dal.mysql.warehouse;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseListReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehousePageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import org.apache.ibatis.annotations.Mapper;
@@ -80,5 +81,44 @@ public interface WmsWarehouseMapper extends BaseMapperX<WmsWarehouseDO> {
         LambdaQueryWrapperX<WmsWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
         wrapper.in(WmsWarehouseDO::getCode, codes);
         return selectList(wrapper);
+    }
+
+    /**
+     * 根据仓库DO查询仓库列表
+     *
+     * @param warehouse 仓库查询条件
+     * @return 仓库列表
+     */
+    default List<WmsWarehouseDO> selectListByWarehouse(WmsWarehouseDO warehouse) {
+        LambdaQueryWrapperX<WmsWarehouseDO> queryWrapper = new LambdaQueryWrapperX<>();
+        if (warehouse != null) {
+            queryWrapper.eq(warehouse.getId() != null, WmsWarehouseDO::getId, warehouse.getId())
+                    .eq(warehouse.getCode() != null, WmsWarehouseDO::getCode, warehouse.getCode())
+                    .eq(warehouse.getName() != null, WmsWarehouseDO::getName, warehouse.getName())
+                    .eq(warehouse.getExternalStorageId() != null, WmsWarehouseDO::getExternalStorageId, warehouse.getExternalStorageId());
+        }
+        return selectList(queryWrapper);
+    }
+
+    /**
+     * 根据条件查询仓库列表
+     *
+     * @param reqDTO 查询条件
+     * @return 仓库列表
+     */
+    default List<WmsWarehouseDO> selectList(WmsWarehouseListReqDTO reqDTO) {
+        LambdaQueryWrapperX<WmsWarehouseDO> queryWrapper = new LambdaQueryWrapperX<>();
+        if (reqDTO != null) {
+            queryWrapper.eqIfPresent(WmsWarehouseDO::getId, reqDTO.getId())
+                    .eqIfPresent(WmsWarehouseDO::getCode, reqDTO.getCode())
+                    .eqIfPresent(WmsWarehouseDO::getName, reqDTO.getName())
+                    .eqIfPresent(WmsWarehouseDO::getExternalStorageId, reqDTO.getExternalStorageId())
+                    .eqIfPresent(WmsWarehouseDO::getCountry, reqDTO.getCountry())
+                    .eqIfPresent(WmsWarehouseDO::getProvince, reqDTO.getProvince())
+                    .eqIfPresent(WmsWarehouseDO::getCity, reqDTO.getCity())
+                    .eqIfPresent(WmsWarehouseDO::getPostcode, reqDTO.getPostcode())
+                    .eqIfPresent(WmsWarehouseDO::getCompanyName, reqDTO.getCompanyName());
+        }
+        return selectList(queryWrapper);
     }
 }

@@ -7,7 +7,7 @@ import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import org.springframework.stereotype.Component;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.OUTBOUND_ABANDON_NOT_ALLOWED;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.OUTBOUND_ABANDON_NOT_ALLOWED;
 
 /**
  * @author: LeeFJ

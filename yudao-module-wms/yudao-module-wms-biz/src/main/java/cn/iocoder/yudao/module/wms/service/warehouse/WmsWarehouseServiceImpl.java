@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseListReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehousePageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.external.storage.WmsExternalStorageDO;
@@ -25,7 +26,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 /**
  * 仓库 Service 实现类
@@ -195,5 +196,10 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
         }
         List<WmsWarehouseDO> wmsWarehouseDOList = warehouseMapper.selectByCodes(codes);
         return StreamX.from(wmsWarehouseDOList).toMap(WmsWarehouseDO::getCode);
+    }
+
+    @Override
+    public List<WmsWarehouseDO> selectList(WmsWarehouseListReqDTO reqDTO) {
+        return warehouseMapper.selectList(reqDTO);
     }
 }

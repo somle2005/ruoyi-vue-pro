@@ -20,17 +20,14 @@ import jakarta.validation.Valid;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.util.Arrays;
 import java.util.List;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-import static cn.iocoder.yudao.module.wms.enums.ErrorCodeConstants.PICKUP_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.PICKUP_NOT_EXISTS;
 
 @Tag(name = "拣货单")
 @RestController
@@ -97,7 +94,7 @@ public class WmsPickupController {
         List<WmsPickupItemDO> pickupItemList = pickupItemService.selectByPickupId(pickupVO.getId());
         pickupVO.setItemList(BeanUtils.toBean(pickupItemList, WmsPickupItemRespVO.class));
         // 
-        pickupService.assembleWarehouse(Arrays.asList(pickupVO));
+        pickupService.assembleWarehouse(List.of(pickupVO));
         pickupItemService.assembleProduct(pickupVO.getItemList());
         pickupItemService.assembleInbound(pickupVO.getItemList());
         // 返回
