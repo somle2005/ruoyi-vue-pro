@@ -2,9 +2,12 @@ package cn.iocoder.yudao.module.oms.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.collection.CollectionUtil;
+import cn.hutool.core.date.DateUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.oms.api.dto.OmsOrderItemSaveReqDTO;
 import cn.iocoder.yudao.module.oms.api.dto.OmsOrderSaveReqDTO;
@@ -14,8 +17,10 @@ import cn.iocoder.yudao.module.oms.convert.OmsOrderConvert;
 import cn.iocoder.yudao.module.oms.convert.OmsOrderItemConvert;
 import cn.iocoder.yudao.module.oms.dal.dataobject.OmsOrderDO;
 import cn.iocoder.yudao.module.oms.dal.dataobject.OmsOrderItemDO;
+import cn.iocoder.yudao.module.oms.dal.dataobject.OmsOrderRawDO;
 import cn.iocoder.yudao.module.oms.dal.mysql.OmsOrderItemMapper;
 import cn.iocoder.yudao.module.oms.dal.mysql.OmsOrderMapper;
+import cn.iocoder.yudao.module.oms.dal.mysql.OmsOrderRawMapper;
 import cn.iocoder.yudao.module.oms.service.OmsOrderItemService;
 import cn.iocoder.yudao.module.oms.service.OmsOrderService;
 import jakarta.annotation.Resource;
@@ -42,12 +47,16 @@ public class OmsOrderServiceImpl implements OmsOrderService {
 
     private final String CREATOR = "Admin";
 
+    private final String ORDER_CODE_PREFIX = "XSDD-";
+
     @Resource
     private OmsOrderMapper orderMapper;
     @Resource
     private OmsOrderItemMapper orderItemMapper;
     @Resource
     private OmsOrderItemService omsOrderItemService;
+    @Resource
+    private OmsOrderRawMapper orderRawMapper;
 
 
     @Override
@@ -143,6 +152,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
 
         List<OmsOrderDO> createOrders = new ArrayList<>();
         List<OmsOrderDO> updateOrders = new ArrayList<>();
+        List<OmsOrderRawDO> updateOrderRaws = new ArrayList<>();
 
         orders.forEach(order -> {
             //用创建者区分是否是同步过来的数据还是运营新增的数据
@@ -150,6 +160,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
             if (order.getId() != null) {
                 updateOrders.add(order);
             } else {
+                order.setCode(getOrderCode());
                 createOrders.add(order);
             }
         });
@@ -157,15 +168,50 @@ public class OmsOrderServiceImpl implements OmsOrderService {
         //新增订单时
         if (CollectionUtil.isNotEmpty(createOrders)) {
             orderMapper.insertBatch(createOrders);
+            //备份订单数据
+            List<OmsOrderRawDO> createOrderRaws = createOrders.stream().map(order -> {
+                return OmsOrderRawDO.builder().orderId(order.getId())
+                    .data(JsonUtilsX.toJsonString(order))
+                    .build();
+            }).collect(Collectors.toList());
+            orderRawMapper.insertBatch(createOrderRaws);
             createOrderItems(saveReqDTOs, createOrders);
         }
 
         if (CollectionUtil.isNotEmpty(updateOrders)) {
             orderMapper.updateById(updateOrders);
             updateOrderItems(saveReqDTOs);
+            //更新备份订单数据
+            updateOrderRaws(updateOrders);
         }
 
         log.info("sync order success,salesPlatformCode:{},orderCount:{}", saveReqDTOs.get(0).getPlatformCode(), saveReqDTOs.size());
+    }
+
+    /**
+     * 更新备份订单数据
+     */
+    public void updateOrderRaws(List<OmsOrderDO> updateOrders) {
+        List<Long> updateOrderIds = updateOrders.stream().map(order -> order.getId()).collect(Collectors.toList());
+        Map<Long, OmsOrderDO> updateOrderMap = updateOrders.stream().collect(Collectors.toMap(order -> order.getId(), order -> order));
+        List<OmsOrderRawDO> updateOrderRaws = orderRawMapper.selectList(OmsOrderRawDO::getOrderId, updateOrderIds);
+        updateOrderRaws.forEach(orderRaw -> {
+            MapUtils.findAndThen(updateOrderMap, orderRaw.getOrderId(), omsOrderDTO -> orderRaw.setData(JsonUtilsX.toJsonString(omsOrderDTO)));
+        });
+        orderRawMapper.updateById(updateOrderRaws);
+    }
+
+
+    /**
+     * @Description: 生成订单编码
+     */
+    public String getOrderCode() {
+        String orderCode = ORDER_CODE_PREFIX + DateUtil.format(new Date(), "yyyyMMdd") + "-";
+        UUID uuid = UUID.randomUUID();
+        long numericValue = uuid.getMostSignificantBits() & Long.MAX_VALUE; // 避免负数
+        int sixDigitNumber = (int) (numericValue % 1000000);
+        String formatted = String.format("%06d", sixDigitNumber); // 补零至6位
+        return orderCode + formatted;
     }
 
     private void validateOrderItemExists(Long id) {
@@ -210,6 +256,7 @@ public class OmsOrderServiceImpl implements OmsOrderService {
                 return saveReqDTO.getOmsOrderItemSaveReqDTOList().stream()
                     .map(itemReqDTO -> {
                         OmsOrderItemDO itemDO = OmsOrderItemConvert.INSTANCE.toOmsOrderItemDO(itemReqDTO);
+                        itemDO.setCreator(CREATOR);
                         itemDO.setOrderId(orderId);
                         return itemDO;
                     });
