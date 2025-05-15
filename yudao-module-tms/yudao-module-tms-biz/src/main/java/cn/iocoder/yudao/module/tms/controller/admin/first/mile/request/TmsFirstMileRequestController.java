@@ -185,7 +185,7 @@ public class TmsFirstMileRequestController {
         // 收集所有创建人和更新人ID
         Set<Long> userIds = firstMileRequestBOList.stream()
             .flatMap(bo -> Stream.concat(
-                Stream.of(bo.getCreator(), bo.getUpdater()),
+                Stream.of(bo.getCreator(), bo.getUpdater(), bo.getRequesterId() == null ? null : bo.getRequesterId().toString()),
                 bo.getItems() == null ? Stream.empty() :
                     bo.getItems().stream().flatMap(item -> Stream.of(item.getCreator(), item.getUpdater()))
             ))
@@ -206,16 +206,16 @@ public class TmsFirstMileRequestController {
                 MapUtils.findAndThen(deptMap, bo.getRequestDeptId(), dept -> respVO1.setRequestDeptName(dept.getName()));
                 MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO1.setCreator(user.getNickname()));
                 MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO1.setUpdater(user.getNickname()));
+                MapUtils.findAndThen(userMap, bo.getRequesterId(), user -> respVO1.setUpdater(user.getNickname()));
             });
             if (bo.getItems() != null) {
                 List<TmsFirstMileRequestItemRespVO> items = bo.getItems().stream().map(item ->
                     BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {
                         MapUtils.findAndThen(productMap, item.getProductId(), product -> {
-                            itemRespVO.setProductName(product.getBarCode());
-                            itemRespVO.setBarCode(product.getBarCode());
+                            itemRespVO.setProductName(product.getName());
                             itemRespVO.setProductWeight(product.getWeight());
                         });
-                            MapUtils.findAndThen(dtoMap, item.getSalesCompanyId(), company -> itemRespVO.setSalesCompanyName(company.getName()));
+                        MapUtils.findAndThen(dtoMap, item.getSalesCompanyId(), company -> itemRespVO.setSalesCompanyName(company.getName()));
                         MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> itemRespVO.setCreator(user.getNickname()));
                         MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> itemRespVO.setUpdater(user.getNickname()));
                         }

@@ -45,11 +45,8 @@ public class TmsFirstMileRequestSaveReqVO {
     @Schema(description = "审核状态")
     private Integer auditStatus;
 
-//    @Schema(description = "总重量（kg）")
-//    private BigDecimal totalWeight;
-//
-//    @Schema(description = "总体积（m³）")
-//    private BigDecimal totalVolume;
+    @Schema(description = "备注")
+    private String remark;
 
     @Schema(description = "版本号")
     @NotNull(groups = Validation.OnUpdate.class, message = "版本号更新时不能为空")

@@ -68,10 +68,6 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
     @ExcelProperty("已订购数")
     private Integer orderClosedQty;
 
-    @Schema(description = "产品SKU")
-    @ExcelProperty("产品SKU")
-    private String barCode;
-
     @Schema(description = "产品名称")
     @ExcelProperty("产品名称")
     private String productName;
@@ -91,7 +87,8 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
     @Schema(description = "版本号")
     private Integer revision;
 
-//    @Schema(description = "产品信息")
-//    @ExcelIgnore
-//    private ErpProductDTO product;
+
+    @Schema(description = "备注")
+    @ExcelProperty("备注")
+    private String remark;
 }

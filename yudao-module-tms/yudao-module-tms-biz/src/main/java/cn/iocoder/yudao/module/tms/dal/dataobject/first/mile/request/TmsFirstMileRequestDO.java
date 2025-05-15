@@ -74,5 +74,8 @@ public class TmsFirstMileRequestDO extends TenantBaseDO {
      * 总体积（m³）
      */
     private BigDecimal totalVolume;
-
+    /**
+     * 备注
+     */
+    private String remark;
 }

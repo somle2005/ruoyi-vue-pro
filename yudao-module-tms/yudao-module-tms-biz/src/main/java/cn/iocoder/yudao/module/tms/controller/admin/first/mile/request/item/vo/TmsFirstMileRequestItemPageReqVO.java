@@ -56,4 +56,9 @@ public class TmsFirstMileRequestItemPageReqVO {
 
     @Schema(description = "销售公司ID")
     private Long salesCompanyId;
+
+    /**
+     * 备注
+     */
+    private String remark;
 }

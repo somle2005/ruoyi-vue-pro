@@ -27,22 +27,28 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
         if (vo == null) {
             vo = new TmsFirstMileRequestItemPageReqVO();
         }
-        return new MPJLambdaWrapperX<TmsFirstMileRequestItemDO>().eqIfPresent(TmsFirstMileRequestItemDO::getId, vo.getId())
-            .betweenIfPresent(TmsFirstMileRequestItemDO::getCreateTime, vo.getCreateTime())
-            .eqIfPresent(TmsFirstMileRequestItemDO::getProductId, vo.getProductId()).likeIfPresent(TmsFirstMileRequestItemDO::getFbaBarCode, vo.getFbaBarCode())
-            .eqIfPresent(TmsFirstMileRequestItemDO::getQty, vo.getQty()).betweenIfPresent(TmsFirstMileRequestItemDO::getPackageLength, vo.getPackageLength())
+        return new MPJLambdaWrapperX<TmsFirstMileRequestItemDO>().eqIfPresent(TmsFirstMileRequestItemDO::getId,
+                vo.getId()).betweenIfPresent(TmsFirstMileRequestItemDO::getCreateTime, vo.getCreateTime())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getProductId, vo.getProductId())
+            .likeIfPresent(TmsFirstMileRequestItemDO::getFbaBarCode, vo.getFbaBarCode())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getQty, vo.getQty())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageLength, vo.getPackageLength())
             .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageWidth, vo.getPackageWidth())
             .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageHeight, vo.getPackageHeight())
             .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageWeight, vo.getPackageWeight())
-            .betweenIfPresent(TmsFirstMileRequestItemDO::getVolume, vo.getVolume()).eqIfPresent(TmsFirstMileRequestItemDO::getOrderStatus, vo.getOrderStatus())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getVolume, vo.getVolume())
+            .eqIfPresent(TmsFirstMileRequestItemDO::getOrderStatus, vo.getOrderStatus())
             .eqIfPresent(TmsFirstMileRequestItemDO::getOffStatus, vo.getOffStatus())
-            .eqIfPresent(TmsFirstMileRequestItemDO::getOrderClosedQty, vo.getOrderClosedQty()).orderByDesc(TmsFirstMileRequestItemDO::getId);
+            .eqIfPresent(TmsFirstMileRequestItemDO::getOrderClosedQty, vo.getOrderClosedQty())
+            //fba
+            .likeIfPresent(TmsFirstMileRequestItemDO::getFbaBarCode, vo.getFbaBarCode())
+            .orderByDesc(TmsFirstMileRequestItemDO::getId);
     }
 
     //buildBOWrapper(vo)
     default MPJLambdaWrapperX<TmsFirstMileRequestItemDO> buildBOWrapper(TmsFirstMileRequestPageReqVO vo) {
-        return buildWrapper(vo.getItem())
-            .leftJoin(TmsFirstMileRequestDO.class, TmsFirstMileRequestDO::getId, TmsFirstMileRequestItemDO::getRequestId)
+        return buildWrapper(vo.getItem()).leftJoin(TmsFirstMileRequestDO.class, TmsFirstMileRequestDO::getId,
+                TmsFirstMileRequestItemDO::getRequestId)
             .betweenIfPresent(TmsFirstMileRequestDO::getCreateTime, vo.getCreateTime())
             .betweenIfPresent(TmsFirstMileRequestDO::getTotalWeight, vo.getTotalWeight())
             .betweenIfPresent(TmsFirstMileRequestDO::getTotalVolume, vo.getTotalVolume())
@@ -70,7 +76,8 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
 
     default PageResult<TmsFirstMileRequestItemItemBO> selectPageBO(TmsFirstMileRequestPageReqVO pageReqVO) {
         return selectJoinPage(pageReqVO, TmsFirstMileRequestItemItemBO.class,
-            buildBOWrapper(pageReqVO).selectAssociation(TmsFirstMileRequestDO.class, TmsFirstMileRequestItemItemBO::getTmsFirstMileRequestDO));
+            buildBOWrapper(pageReqVO).selectAssociation(TmsFirstMileRequestDO.class,
+                TmsFirstMileRequestItemItemBO::getTmsFirstMileRequestDO));
     }
 
     /**
@@ -78,11 +85,13 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
      * @return 头程申请单明细
      */
     default TmsFirstMileRequestItemItemBO selectBOById(Long id) {
-        return selectJoinOne(TmsFirstMileRequestItemItemBO.class, buildBOWrapper(new TmsFirstMileRequestPageReqVO().setId(id)));
+        return selectJoinOne(TmsFirstMileRequestItemItemBO.class,
+            buildBOWrapper(new TmsFirstMileRequestPageReqVO().setId(id)));
     }
 
     default void deleteByRequestId(Long requestId) {
-        LambdaQueryWrapperX<TmsFirstMileRequestItemDO> wrapperX = new LambdaQueryWrapperX<TmsFirstMileRequestItemDO>().eq(TmsFirstMileRequestItemDO::getRequestId, requestId);
+        LambdaQueryWrapperX<TmsFirstMileRequestItemDO> wrapperX =
+            new LambdaQueryWrapperX<TmsFirstMileRequestItemDO>().eq(TmsFirstMileRequestItemDO::getRequestId, requestId);
         delete(wrapperX);
     }
 }

@@ -47,6 +47,10 @@ public class TmsFirstMileItemDO extends TenantBaseDO {
      */
     private Long productId;
     /**
+     * FBA条码
+     */
+    private String fbaBarCode;
+    /**
      * 件数
      */
     private Integer qty;

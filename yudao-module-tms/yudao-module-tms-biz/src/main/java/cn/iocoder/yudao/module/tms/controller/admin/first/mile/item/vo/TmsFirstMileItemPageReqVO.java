@@ -32,6 +32,12 @@ public class TmsFirstMileItemPageReqVO {
     @Schema(description = "产品ID")
     private Long productId;
 
+    /**
+     * FBA条码
+     */
+    @Schema(description = "FBA条码")
+    private String fbaBarCode;
+
     @Schema(description = "件数")
     private Integer qty;
 

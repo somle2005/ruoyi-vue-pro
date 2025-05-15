@@ -75,6 +75,10 @@ public class TmsFirstMileRequestRespVO extends BaseVO {
     @ExcelProperty("明细数量")
     private Integer itemCount;
 
+    @Schema(description = "备注")
+    @ExcelProperty("备注")
+    private String remark;
+
     @Schema(description = "版本号")
     private Integer revision;
 
