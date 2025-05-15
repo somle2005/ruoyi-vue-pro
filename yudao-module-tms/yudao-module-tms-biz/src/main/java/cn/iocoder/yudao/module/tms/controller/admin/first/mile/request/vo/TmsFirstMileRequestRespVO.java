@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -84,4 +85,7 @@ public class TmsFirstMileRequestRespVO extends BaseVO {
 
     @Schema(description = "头程申请表明细列表")
     private List<TmsFirstMileRequestItemRespVO> items;
+
+    @Schema(description = "船期信息")
+    private TmsVesselTrackingRespVO vesselTracking;
 }

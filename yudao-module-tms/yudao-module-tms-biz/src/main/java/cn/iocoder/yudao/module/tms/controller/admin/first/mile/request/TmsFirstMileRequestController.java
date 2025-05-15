@@ -64,6 +64,7 @@ public class TmsFirstMileRequestController {
     @Idempotent
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:create')")
     public CommonResult<Long> createFirstMileRequest(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileRequestSaveReqVO createReqVO) {
+        createReqVO.getVesselTracking().setUpstreamId(createReqVO.getId());//指定ID
         return success(firstMileRequestService.createFirstMileRequest(createReqVO));
     }
 
@@ -71,6 +72,7 @@ public class TmsFirstMileRequestController {
     @Operation(summary = "更新头程申请单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:update')")
     public CommonResult<Boolean> updateFirstMileRequest(@Validated(Validation.OnUpdate.class) @RequestBody TmsFirstMileRequestSaveReqVO updateReqVO) {
+        updateReqVO.getVesselTracking().setUpstreamId(updateReqVO.getId());//指定ID
         firstMileRequestService.updateFirstMileRequest(updateReqVO);
         return success(true);
     }
@@ -197,8 +199,9 @@ public class TmsFirstMileRequestController {
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         Map<Long, WmsWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(warehouseIds);
-        Map<Long, FmsCompanyDTO> dtoMap = fmsCompanyApi.getCompanyMap(firstMileRequestBOList.stream()
-            .flatMap(bo -> bo.getItems().stream().map(TmsFirstMileRequestItemDO::getSalesCompanyId)).collect(Collectors.toSet()));
+        Map<Long, FmsCompanyDTO> dtoMap = fmsCompanyApi.getCompanyMap(firstMileRequestBOList.stream().flatMap(bo -> bo.getItems().stream().map(TmsFirstMileRequestItemDO::getSalesCompanyId)).collect(Collectors.toSet()));
+
+        //公司MAP
 
         return firstMileRequestBOList.stream().map(bo -> {
             TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRequestRespVO.class, respVO1 -> {
@@ -206,8 +209,10 @@ public class TmsFirstMileRequestController {
                 MapUtils.findAndThen(deptMap, bo.getRequestDeptId(), dept -> respVO1.setRequestDeptName(dept.getName()));
                 MapUtils.findAndThen(userMap, safeParseLong(bo.getCreator()), user -> respVO1.setCreator(user.getNickname()));
                 MapUtils.findAndThen(userMap, safeParseLong(bo.getUpdater()), user -> respVO1.setUpdater(user.getNickname()));
-                MapUtils.findAndThen(userMap, bo.getRequesterId(), user -> respVO1.setUpdater(user.getNickname()));
+                MapUtils.findAndThen(userMap, bo.getRequesterId(), user -> respVO1.setRequestUserName(user.getNickname()));
             });
+            //设置出运跟踪信息
+
             if (bo.getItems() != null) {
                 List<TmsFirstMileRequestItemRespVO> items = bo.getItems().stream().map(item ->
                     BeanUtils.toBean(item, TmsFirstMileRequestItemRespVO.class, itemRespVO -> {

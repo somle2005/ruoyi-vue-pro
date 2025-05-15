@@ -186,9 +186,11 @@ public class TmsFirstMileController {
         //用户
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
         //公司
-        Set<Long> companyIds = beans.stream().flatMap(bo -> Stream.concat(Stream.of(bo.getExportCompanyId(), bo.getTransitCompanyId()), Stream.concat(
+        Set<Long> companyIds = beans.stream().flatMap(bo -> Stream.concat(
+                Stream.of(bo.getExportCompanyId(), bo.getTransitCompanyId(), bo.getTracking().getCarrierCompanyId(), bo.getTracking().getForwarderCompanyId()), Stream.concat(
                 bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getCompanyId),
-                bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getSalesCompanyId))))
+                    bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getSalesCompanyId)
+                )))
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
         Map<Long, FmsCompanyDTO> companyMap = fmsCompanyApi.getCompanyMap(companyIds);
@@ -255,7 +257,9 @@ public class TmsFirstMileController {
             }
             // 设置最新跟踪信息 1:1
             if (bo.getTracking() != null) {
-                respVO.setTracking(BeanUtils.toBean(bo.getTracking(), TmsVesselTrackingRespVO.class));
+                respVO.setTracking(BeanUtils.toBean(bo.getTracking(), TmsVesselTrackingRespVO.class, peek -> {
+
+                }));
             }
             return respVO;
         }).toList();

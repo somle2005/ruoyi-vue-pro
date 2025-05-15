@@ -101,7 +101,7 @@ public class TmsVesselTrackingDO extends TenantBaseDO {
     /**
      * 货代公司(供应商ID)
      */
-    private Integer forwarderCompanyId;
+    private Long forwarderCompanyId;
     /**
      * 箱号
      */

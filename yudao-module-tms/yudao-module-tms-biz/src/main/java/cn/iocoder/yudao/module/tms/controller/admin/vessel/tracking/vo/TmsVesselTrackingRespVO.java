@@ -82,6 +82,9 @@ public class TmsVesselTrackingRespVO {
     @ExcelProperty("船公司（供应商id）")
     private Long carrierCompanyId;
 
+    @Schema(description = "船公司名称")
+    private String carrierCompanyName;
+
     @Schema(description = "船名")
     @ExcelProperty("船名")
     private String vessel;
@@ -92,7 +95,10 @@ public class TmsVesselTrackingRespVO {
 
     @Schema(description = "货代公司(供应商ID)")
     @ExcelProperty("货代公司(供应商ID)")
-    private Integer forwarderCompanyId;
+    private Long forwarderCompanyId;
+
+    @Schema(description = "货代公司名称")
+    private String forwarderCompanyName;
 
     @Schema(description = "箱号")
     @ExcelProperty("箱号")

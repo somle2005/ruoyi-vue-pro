@@ -40,9 +40,6 @@ public class TmsVesselTrackingSaveReqVO {
     @Schema(description = "数据来源（API渠道标识）")
     private String apiSource;
 
-    @Schema(description = "乐观锁")
-    private Integer revision;
-
     @Schema(description = "中转港")
     private Long transitPort;
 
@@ -62,9 +59,12 @@ public class TmsVesselTrackingSaveReqVO {
     private String voyage;
 
     @Schema(description = "货代公司(供应商ID)")
-    private Integer forwarderCompanyId;
+    private Long forwarderCompanyId;
 
     @Schema(description = "箱号")
     private String containerNo;
+
+    @Schema(description = "乐观锁")
+    private Integer revision;
 
 }

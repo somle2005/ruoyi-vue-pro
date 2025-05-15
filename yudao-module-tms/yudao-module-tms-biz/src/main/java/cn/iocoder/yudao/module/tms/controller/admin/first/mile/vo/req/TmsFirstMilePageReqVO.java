@@ -162,7 +162,7 @@ public class TmsFirstMilePageReqVO extends PageParam {
         private String voyage;
 
         @Schema(description = "货代公司(供应商ID)")
-        private Integer forwarderCompanyId;
+        private Long forwarderCompanyId;
 
         @Schema(description = "箱号")
         private String containerNo;

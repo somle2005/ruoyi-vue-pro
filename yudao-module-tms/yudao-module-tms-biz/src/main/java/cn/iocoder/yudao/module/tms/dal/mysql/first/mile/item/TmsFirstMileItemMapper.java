@@ -3,10 +3,12 @@ package cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.TmsVesselTrackingDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
@@ -92,36 +94,36 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             .eqIfPresent(TmsFirstMileDO::getInboundStatus, vo.getInboundStatus()) // 入库状态
             .betweenIfPresent(TmsFirstMileDO::getInboundTime, vo.getInboundTime()) // 入库时间范围
             .orderByDesc(TmsFirstMileDO::getCreateTime)
-//            //TODO 关联船运
-//            .leftJoin(TmsVesselTrackingDO.class, on ->
-//                on.eq(TmsVesselTrackingDO::getUpstreamType, BillType.TMS_FIRST_MILE.getValue())
-//                    .eq(TmsVesselTrackingDO::getUpstreamId, TmsFirstMileDO::getId)
-//            )
-//            .selectAll(TmsVesselTrackingDO.class)
-//            // 时间
-//            .betweenIfPresent(TmsVesselTrackingDO::getArriveEstimateTime, vo.getTrackingQueryVO().getArriveEstimateTime()) // 预计到达时间
-//            .betweenIfPresent(TmsVesselTrackingDO::getDepartEstimateTime, vo.getTrackingQueryVO().getDepartEstimateTime()) // 预计离开时间
-//            .betweenIfPresent(TmsVesselTrackingDO::getArriveActualTime, vo.getTrackingQueryVO().getArriveActualTime()) // 实际到达时间
-//            .betweenIfPresent(TmsVesselTrackingDO::getDepartActualTime, vo.getTrackingQueryVO().getDepartActualTime()) // 实际离开时间
-//            .betweenIfPresent(TmsVesselTrackingDO::getPickupTime, vo.getTrackingQueryVO().getPickupTime()) // 提货时间
-//            .betweenIfPresent(TmsVesselTrackingDO::getReturnTime, vo.getTrackingQueryVO().getReturnTime()) // 还柜时间
-//            // 同步
-//            .eqIfPresent(TmsVesselTrackingDO::getApiSource, vo.getTrackingQueryVO().getApiSource()) // API来源
-//            .betweenIfPresent(TmsVesselTrackingDO::getLastSyncTime, vo.getTrackingQueryVO().getLastSyncTime()) // 最后同步时间
-//            .betweenIfPresent(TmsVesselTrackingDO::getCreateTime, vo.getCreateTime()) // 创建时间
-//            // 港口
-//            .eqIfPresent(TmsVesselTrackingDO::getTransitPort, vo.getTrackingQueryVO().getTransitPort()) // 中转港
-//            .eqIfPresent(TmsVesselTrackingDO::getToPort, vo.getTrackingQueryVO().getToPort()) // 目的港
-//            .eqIfPresent(TmsVesselTrackingDO::getFromPort, vo.getTrackingQueryVO().getFromPort()) // 起运港
-//            // 承运
-//            .eqIfPresent(TmsVesselTrackingDO::getCarrierCompanyId, vo.getTrackingQueryVO().getCarrierCompanyId()) // 承运公司ID
-//            .eqIfPresent(TmsVesselTrackingDO::getVessel, vo.getTrackingQueryVO().getVessel()) // 船名
-//            .eqIfPresent(TmsVesselTrackingDO::getVoyage, vo.getTrackingQueryVO().getVoyage()) // 航次
-//            // 货代
-//            .eqIfPresent(TmsVesselTrackingDO::getForwarderCompanyId, vo.getTrackingQueryVO().getForwarderCompanyId()) // 货代公司ID
-//            .eqIfPresent(TmsVesselTrackingDO::getContainerNo, vo.getTrackingQueryVO().getContainerNo()) // 集装箱号
-//            // 排序
-//            .orderByDesc(TmsVesselTrackingDO::getCreateTime)
+            //TODO 关联船运
+            .leftJoin(TmsVesselTrackingDO.class, on ->
+                on.eq(TmsVesselTrackingDO::getUpstreamType, BillType.TMS_FIRST_MILE.getValue())
+                    .eq(TmsVesselTrackingDO::getUpstreamId, TmsFirstMileDO::getId)
+            )
+            .selectAll(TmsVesselTrackingDO.class)
+            // 时间
+            .between(TmsVesselTrackingDO::getArriveEstimateTime, vo.getTrackingQueryVO().getArriveEstimateTime()[0], vo.getTrackingQueryVO().getArriveEstimateTime()[1]) // 预计到达时间
+            .between(TmsVesselTrackingDO::getDepartEstimateTime, vo.getTrackingQueryVO().getDepartEstimateTime()[0], vo.getTrackingQueryVO().getDepartEstimateTime()[1]) // 预计离开时间
+            .between(TmsVesselTrackingDO::getArriveActualTime, vo.getTrackingQueryVO().getArriveActualTime()[0], vo.getTrackingQueryVO().getArriveActualTime()[1]) // 实际到达时间
+            .between(TmsVesselTrackingDO::getDepartActualTime, vo.getTrackingQueryVO().getDepartActualTime()[0], vo.getTrackingQueryVO().getDepartActualTime()[1]) // 实际离开时间
+            .between(TmsVesselTrackingDO::getPickupTime, vo.getTrackingQueryVO().getPickupTime()[0], vo.getTrackingQueryVO().getPickupTime()[1]) // 提货时间
+            .between(TmsVesselTrackingDO::getReturnTime, vo.getTrackingQueryVO().getReturnTime()[0], vo.getTrackingQueryVO().getReturnTime()[1]) // 还柜时间
+            // 同步
+            .eqIfExists(TmsVesselTrackingDO::getApiSource, vo.getTrackingQueryVO().getApiSource()) // API来源
+            .between(TmsVesselTrackingDO::getLastSyncTime, vo.getTrackingQueryVO().getLastSyncTime()[0], vo.getTrackingQueryVO().getLastSyncTime()[1]) // 最后同步时间
+            .between(TmsVesselTrackingDO::getCreateTime, vo.getCreateTime()[0], vo.getCreateTime()[1]) // 创建时间
+            // 港口
+            .eqIfExists(TmsVesselTrackingDO::getTransitPort, vo.getTrackingQueryVO().getTransitPort()) // 中转港
+            .eqIfExists(TmsVesselTrackingDO::getToPort, vo.getTrackingQueryVO().getToPort()) // 目的港
+            .eqIfExists(TmsVesselTrackingDO::getFromPort, vo.getTrackingQueryVO().getFromPort()) // 起运港
+            // 承运
+            .eqIfExists(TmsVesselTrackingDO::getCarrierCompanyId, vo.getTrackingQueryVO().getCarrierCompanyId()) // 承运公司ID
+            .eqIfExists(TmsVesselTrackingDO::getVessel, vo.getTrackingQueryVO().getVessel()) // 船名
+            .eqIfExists(TmsVesselTrackingDO::getVoyage, vo.getTrackingQueryVO().getVoyage()) // 航次
+            // 货代
+            .eqIfExists(TmsVesselTrackingDO::getForwarderCompanyId, vo.getTrackingQueryVO().getForwarderCompanyId()) // 货代公司ID
+            .eqIfExists(TmsVesselTrackingDO::getContainerNo, vo.getTrackingQueryVO().getContainerNo()) // 集装箱号
+            // 排序
+            .orderByDesc(TmsVesselTrackingDO::getCreateTime)
 
             ;
     }
@@ -132,7 +134,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         }
         return selectJoinPage(vo, TmsFirstMileItemBO.class, buildBOWrapper(vo)
             .selectAssociation(TmsFirstMileDO.class, TmsFirstMileItemBO::getTmsFirstMileDO)
-//            .selectAssociation(TmsVesselTrackingDO.class, TmsFirstMileItemBO::getTmsVesselTrackingDO)
+            .selectAssociation(TmsVesselTrackingDO.class, TmsFirstMileItemBO::getTmsVesselTrackingDO)
         );
     }
 
