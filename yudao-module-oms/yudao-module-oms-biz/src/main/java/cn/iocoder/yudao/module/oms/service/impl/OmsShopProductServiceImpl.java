@@ -143,8 +143,8 @@ public class OmsShopProductServiceImpl extends ServiceImpl<OmsShopProductMapper,
             if (CollectionUtil.isEmpty(items)) {
                 return;
             }
-            String shopProductCodeAndQty = items.stream().map(item -> item.getProduct().getBarCode() + "*" + item.getQty()).collect(Collectors.joining(", "));
-            prod.setShopProductCodeAndQty(shopProductCodeAndQty);
+            String productCodeAndQty = items.stream().map(item -> item.getProduct().getBarCode() + "*" + item.getQty()).collect(Collectors.joining(", "));
+            prod.setProductCodeAndQty(productCodeAndQty);
         });
         return success(pageResultVO);
     }

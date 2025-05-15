@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.somle.wayfair.model.WayfairToken;
 import com.somle.wayfair.model.reps.WayfairOrderRepsVO;
+import lombok.Getter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -15,9 +16,10 @@ import org.mountcloud.graphql.request.result.ResultAttributtes;
 import java.time.LocalDateTime;
 
 @Slf4j
+@Getter
 public class WayfairClient {
 
-    public final WayfairToken token;
+    private final WayfairToken token;
 
     private String accessToken;
 

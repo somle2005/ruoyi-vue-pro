@@ -39,14 +39,14 @@ public class WayfairToOmsConverter {
         Map<String, OmsShopDTO> existShopMap = Optional.ofNullable(existShops)
             .orElse(Collections.emptyList())
             .stream()
-            .collect(Collectors.toMap(omsShopDO -> omsShopDO.getPlatformShopCode(), omsShopDO -> omsShopDO));
+            .collect(Collectors.toMap(omsShopDO -> omsShopDO.getExternalId(), omsShopDO -> omsShopDO));
 
         OmsShopSaveReqDTO shopDTO = new OmsShopSaveReqDTO();
         MapUtils.findAndThen(existShopMap, wayfairToken.getClientId(), omsShopDTO -> shopDTO.setId(omsShopDTO.getId()));
         shopDTO.setName(null);
         shopDTO.setExternalName(wayfairToken.getClientId());
         shopDTO.setCode(null);
-        shopDTO.setPlatformShopCode(wayfairToken.getClientId());
+        shopDTO.setExternalId(wayfairToken.getClientId());
         shopDTO.setPlatformCode(this.platform.toString());
         shopDTO.setType(ShopTypeEnum.ONLINE.getType());
         return shopDTO;
@@ -72,7 +72,7 @@ public class WayfairToOmsConverter {
         Map<String, OmsShopDTO> existShopMap = Optional.ofNullable(existShops)
             .orElse(Collections.emptyList())
             .stream()
-            .collect(Collectors.toMap(omsShopDO -> omsShopDO.getPlatformShopCode(), omsShopDO -> omsShopDO));
+            .collect(Collectors.toMap(omsShopDO -> omsShopDO.getExternalId(), omsShopDO -> omsShopDO));
 
 
         List<OmsOrderSaveReqDTO> omsOrderSaveReqDTOs = new ArrayList<>();

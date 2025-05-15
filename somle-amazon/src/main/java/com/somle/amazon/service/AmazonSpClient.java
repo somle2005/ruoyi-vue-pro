@@ -36,7 +36,7 @@ import java.util.stream.Stream;
 public class AmazonSpClient {
 
 
-    public AmazonSpAuthDO auth;
+    private AmazonSpAuthDO auth;
 
     private String getEndPoint() {
         return AmazonRegion.findByCode(auth.getRegionCode()).getSpUrl();

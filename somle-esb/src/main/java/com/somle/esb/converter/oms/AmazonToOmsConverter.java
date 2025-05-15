@@ -52,16 +52,16 @@ public class AmazonToOmsConverter {
         Map<String, OmsShopDTO> existShopMap = Optional.ofNullable(existShops)
             .orElse(Collections.emptyList())
             .stream()
-            .collect(Collectors.toMap(omsShopDO -> omsShopDO.getPlatformShopCode(), omsShopDO -> omsShopDO));
+            .collect(Collectors.toMap(omsShopDO -> omsShopDO.getExternalId(), omsShopDO -> omsShopDO));
 
         List<OmsShopSaveReqDTO> omsShopSaveReqDTOs = shopInfoDTOs.stream().map(shopInfoDTO -> {
-            AmazonSpMarketplaceVO marketplace = shopInfoDTO.getMarketplace();
             OmsShopSaveReqDTO shopDTO = new OmsShopSaveReqDTO();
-            MapUtils.findAndThen(existShopMap, marketplace.getId() + '#' + auth.getSellerId(), omsShopDTO -> shopDTO.setId(omsShopDTO.getId()));
+            AmazonSpMarketplaceVO marketplace = shopInfoDTO.getMarketplace();
+            MapUtils.findAndThen(existShopMap, auth.getSellerId() + '#' + marketplace.getId(), omsShopDTO -> shopDTO.setId(omsShopDTO.getId()));
             shopDTO.setName(null);
             shopDTO.setExternalName(shopInfoDTO.getStoreName());
             shopDTO.setCode(null);
-            shopDTO.setPlatformShopCode(marketplace.getId() + '#' + auth.getSellerId());
+            shopDTO.setExternalId(auth.getSellerId() + '#' + marketplace.getId());
             shopDTO.setPlatformCode(this.platform.toString());
             shopDTO.setType(ShopTypeEnum.ONLINE.getType());
             return shopDTO;
@@ -74,7 +74,7 @@ public class AmazonToOmsConverter {
 
 
         Map<String, OmsShopDTO> omsShopDTOMap = omsShopApi.getByPlatformCode(this.platform.toString()).stream()
-            .collect(Collectors.toMap(OmsShopDTO::getPlatformShopCode, Function.identity()));
+            .collect(Collectors.toMap(OmsShopDTO::getExternalId, Function.identity()));
 
         if (MapUtil.isEmpty(omsShopDTOMap)) {
             throw exception(OMS_SYNC_SHOP_INFO_FIRST, this.platform.toString());
@@ -135,7 +135,7 @@ public class AmazonToOmsConverter {
 
         // key是platformShopCode
         Map<String, OmsShopDTO> omsShopMap = omsShopApi.getByPlatformCode(this.platform.toString())
-            .stream().collect(Collectors.toMap(OmsShopDTO::getPlatformShopCode, Function.identity()));
+            .stream().collect(Collectors.toMap(OmsShopDTO::getExternalId, Function.identity()));
 
         List<OmsOrderDTO> existOrders = omsOrderApi.getByPlatformCode(this.platform.toString());
 

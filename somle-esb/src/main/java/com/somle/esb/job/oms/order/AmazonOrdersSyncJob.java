@@ -60,7 +60,7 @@ public class AmazonOrdersSyncJob extends BaseOrdersSyncJob {
 
                 // 3. 获取订单并转换（添加异常处理）
                 try {
-                    return amazonToOmsConverter.toOrders(client.getAllOrders(vo), client.auth).stream();
+                    return amazonToOmsConverter.toOrders(client.getAllOrders(vo), client.getAuth()).stream();
                 } catch (Exception e) {
                     log.error("Failed to process orders for client: {}", client, e);
                     return Stream.empty();

@@ -29,12 +29,12 @@ public class WayfairOrdersSyncJob extends BaseOrdersSyncJob {
         LocalDate targetDate = baseDate.minusDays(2);
         // 3. 生成起始时间（00:00:00）
         LocalDateTime startTime = targetDate.atStartOfDay();
-        
+
         return wayfairService.clients.stream()
             .flatMap(client -> {
                 try {
                     // 假设 getOrders() 返回 List<Order>，toOrders() 转换为 List<OmsOrderSaveReqDTO>
-                    return wayfairToOmsConverter.toOrders(client.getOrders(startTime), client.token).stream();
+                    return wayfairToOmsConverter.toOrders(client.getOrders(startTime), client.getToken()).stream();
                 } catch (Exception e) {
                     log.error("Failed to fetch orders for client", e);
                     return Stream.empty(); // 发生异常时返回空流

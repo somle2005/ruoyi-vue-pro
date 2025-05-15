@@ -24,7 +24,7 @@ public class AmazonShopsSyncJob extends BaseShopsSyncJob {
     public List<OmsShopSaveReqDTO> listShops() {
         List<OmsShopSaveReqDTO> shops = new ArrayList<>();
         for (AmazonSpClient client : amazonSpService.clients) {
-            shops.addAll(amazonToOmsConverter.toShops(client.getMarketplaceParticipations(), client.auth));
+            shops.addAll(amazonToOmsConverter.toShops(client.getMarketplaceParticipations(), client.getAuth()));
         }
         return shops;
     }

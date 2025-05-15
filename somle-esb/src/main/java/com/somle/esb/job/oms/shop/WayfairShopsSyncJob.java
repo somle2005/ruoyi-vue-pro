@@ -20,7 +20,7 @@ public class WayfairShopsSyncJob extends BaseShopsSyncJob {
     @Override
     public List<OmsShopSaveReqDTO> listShops() {
         return wayfairService.clients.stream()
-            .map(client -> wayfairToOmsConverter.toShops(client.token))
+            .map(client -> wayfairToOmsConverter.toShops(client.getToken()))
             .toList();
     }
 }
