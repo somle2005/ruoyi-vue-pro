@@ -12,6 +12,7 @@ import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.TmsPortInfoPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.TmsPortInfoRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.TmsPortInfoSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.TmsPortInfoSimpleRespVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.port.info.TmsPortInfoDO;
 import cn.iocoder.yudao.module.tms.service.port.info.TmsPortInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -106,6 +107,13 @@ public class TmsPortInfoController {
         // 导出 Excel
         ExcelUtils.write(response, "TMS港口信息.xls", "数据", TmsPortInfoRespVO.class,
             BeanUtils.toBean(list, TmsPortInfoRespVO.class));
+    }
+
+    @GetMapping("/list-simple")
+    @Operation(summary = "获得TMS港口信息精简列表")
+    public CommonResult<List<TmsPortInfoSimpleRespVO>> getPortInfoSimpleList() {
+        List<TmsPortInfoDO> list = portInfoService.getPortInfoList();
+        return success(BeanUtils.toBean(list, TmsPortInfoSimpleRespVO.class));
     }
 
     @PostMapping("/import-excel")

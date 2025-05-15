@@ -6,6 +6,8 @@ import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.TmsPortInfoSave
 import cn.iocoder.yudao.module.tms.dal.dataobject.port.info.TmsPortInfoDO;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 /**
  * TMS港口信息 Service 接口
  *
@@ -50,5 +52,12 @@ public interface TmsPortInfoService {
      * @return TMS港口信息分页
      */
     PageResult<TmsPortInfoDO> getPortInfoPage(TmsPortInfoPageReqVO pageReqVO);
+
+    /**
+     * 获得TMS港口信息列表
+     *
+     * @return TMS港口信息列表
+     */
+    List<TmsPortInfoDO> getPortInfoList();
 
 }
