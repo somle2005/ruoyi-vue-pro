@@ -13,8 +13,8 @@ import java.math.BigDecimal;
 public class TmsFeeSaveReqVO {
 
     @Schema(description = "主键ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时，出运订单id不能为空")
-    @Null(groups = {Validation.OnCreate.class}, message = "创建时，出运订单id需为空")
+    @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时，出运订单费用id不能为空")
+    @Null(groups = {Validation.OnCreate.class}, message = "创建时，出运订单费用id需为空")
     private Long id;
 
     @Schema(description = "原单类型;出运订单、调拨单")

@@ -63,17 +63,17 @@ public class TmsFirstMileRequestController {
     @Operation(summary = "创建头程申请单")
     @Idempotent
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:create')")
-    public CommonResult<Long> createFirstMileRequest(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileRequestSaveReqVO createReqVO) {
-        createReqVO.getVesselTracking().setUpstreamId(createReqVO.getId());//指定ID
-        return success(firstMileRequestService.createFirstMileRequest(createReqVO));
+    public CommonResult<Long> createFirstMileRequest(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileRequestSaveReqVO vo) {
+
+        return success(firstMileRequestService.createFirstMileRequest(vo));
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新头程申请单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:update')")
-    public CommonResult<Boolean> updateFirstMileRequest(@Validated(Validation.OnUpdate.class) @RequestBody TmsFirstMileRequestSaveReqVO updateReqVO) {
-        updateReqVO.getVesselTracking().setUpstreamId(updateReqVO.getId());//指定ID
-        firstMileRequestService.updateFirstMileRequest(updateReqVO);
+    public CommonResult<Boolean> updateFirstMileRequest(@Validated(Validation.OnUpdate.class) @RequestBody TmsFirstMileRequestSaveReqVO vo) {
+
+        firstMileRequestService.updateFirstMileRequest(vo);
         return success(true);
     }
 

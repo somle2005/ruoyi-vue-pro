@@ -98,7 +98,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Override
     @Idempotent
     @Transactional(rollbackFor = Exception.class)
-    public Long createFirstMile(TmsFirstMileSaveReqVO vo) {
+    public Long createFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
+        vo.initId(); //初始化上游ID
         //1.0 校验
         warehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
 
@@ -121,7 +122,9 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         createFirstMileItemList(firstMileId, vo.getFirstMileItems());
 
         // 保存费用项
-        createFeeList(firstMileId, vo.getFees());
+        createFeeList(firstMileId, BeanUtils.toBean(vo.getFees(), TmsFeeSaveReqVO.class));
+        // 保存船期信息
+        tmsVesselTrackingService.createVesselTracking(vo.getVesselTracking());
 
         auditStateMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, TmsFirstMileAuditReqVO.builder().id(firstMileId).build());
         return firstMileId;
@@ -141,7 +144,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void updateFirstMile(TmsFirstMileSaveReqVO vo) {
+    public void updateFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
+        vo.initId(); //初始化上游ID
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(vo.getId());
 
         //校验code
@@ -159,7 +163,9 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         firstMileMapper.updateById(updateObj);
 
         updateFirstMileItemList(vo.getId(), vo.getFirstMileItems());
-        updateFeeList(vo.getId(), vo.getFees());
+        updateFeeList(vo.getId(), BeanUtils.toBean(vo.getFees(), TmsFeeSaveReqVO.class));
+        //更新船运信息
+        tmsVesselTrackingService.updateVesselTracking(vo.getVesselTracking());
     }
     @Override
     @Transactional(rollbackFor = Exception.class)

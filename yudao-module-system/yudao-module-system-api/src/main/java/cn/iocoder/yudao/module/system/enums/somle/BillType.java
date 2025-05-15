@@ -26,7 +26,7 @@ public enum BillType implements ArrayValuable<Integer>, DictEnum {
     TMS_FIRST_MILE(100, "头程单"),
     TMS_TRANSFER(101, "调拨单"),
     TMS_LAST_MILE(102, "尾程单"),
-
+    TMS_FIRST_MILE_REQUEST(103, "头程单申请"),
     // ========== SRM  编码段 201~300 ==========
     SRM_PURCHASE_IN(201, "到货单"),
     ;

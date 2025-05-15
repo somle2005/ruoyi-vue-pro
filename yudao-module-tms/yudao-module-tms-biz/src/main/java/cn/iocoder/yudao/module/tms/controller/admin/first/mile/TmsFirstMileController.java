@@ -69,15 +69,17 @@ public class TmsFirstMileController {
     @PostMapping("/create")
     @Operation(summary = "创建头程单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:create')")
-    public CommonResult<Long> createFirstMile(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileSaveReqVO createReqVO) {
-        return success(firstMileService.createFirstMile(createReqVO));
+    public CommonResult<Long> createFirstMile(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileSaveReqVO vo) {
+        vo.initId(); //初始化上游ID
+        return success(firstMileService.createFirstMile(vo));
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新头程单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:update')")
-    public CommonResult<Boolean> updateFirstMile(@Validated(Validation.OnUpdate.class) @RequestBody TmsFirstMileSaveReqVO updateReqVO) {
-        firstMileService.updateFirstMile(updateReqVO);
+    public CommonResult<Boolean> updateFirstMile(@Validated(Validation.OnUpdate.class) @RequestBody TmsFirstMileSaveReqVO vo) {
+        vo.initId(); //初始化上游ID
+        firstMileService.updateFirstMile(vo);
         return success(true);
     }
 

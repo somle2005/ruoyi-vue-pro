@@ -1,8 +1,10 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req;
 
 import cn.iocoder.yudao.module.system.api.utils.Validation;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingSaveReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
@@ -92,6 +94,41 @@ public class TmsFirstMileSaveReqVO {
     private List<TmsFirstMileItemSaveReqVO> firstMileItems;
 
     @Schema(description = "出运订单费用明细列表")
-    private List<TmsFeeSaveReqVO> fees;
+    private List<TmsFeeSaveReqVO2> fees;
 
+    @Schema(description = "船期信息")
+    private TmsVesselTrackingSaveReqVO2 vesselTracking;
+
+
+    public void initId() {
+        // 在 id 被赋值后设置 upstreamId
+        if (id != null) {
+            // 设置 vesselTracking 和 fees 的 upstreamId
+            if (vesselTracking != null) {
+                vesselTracking.setUpstreamId(id);
+            }
+            if (fees != null) {
+                fees.forEach(fee -> fee.setSourceId(id));
+            }
+        }
+    }
+
+
+    @Data
+    public static class TmsVesselTrackingSaveReqVO2 extends TmsVesselTrackingSaveReqVO {
+        @Schema(description = "上游单据类型; 前端不填入，后端写死的")
+        private final Integer upstreamType = BillType.TMS_FIRST_MILE.getValue();
+
+        @Schema(description = "上游业务单ID，如调拨单ID(前端不填入)")
+        private Long upstreamId;
+    }
+
+    @Data
+    public static class TmsFeeSaveReqVO2 extends TmsFeeSaveReqVO {
+        @Schema(description = "上游单据类型; 前端不填入，后端写死的")
+        private final Integer sourceType = BillType.TMS_FIRST_MILE.getValue();
+
+        @Schema(description = "上游业务单ID，如调拨单ID(前端不填入)")
+        private Long sourceId;
+    }
 }

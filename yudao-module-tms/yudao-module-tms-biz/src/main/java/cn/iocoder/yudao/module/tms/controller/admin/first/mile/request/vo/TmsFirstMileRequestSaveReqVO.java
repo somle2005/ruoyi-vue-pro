@@ -1,9 +1,7 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo;
 
 import cn.iocoder.yudao.module.system.api.utils.Validation;
-import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSaveReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingSaveReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -59,15 +57,4 @@ public class TmsFirstMileRequestSaveReqVO {
     @Size(min = 1, message = "头程申请表明细列表至少有一个")
     private List<@Valid TmsFirstMileRequestItemSaveReqVO> items;
 
-    @Schema(description = "船期信息")
-    private TmsVesselTrackingSaveReqVO2 vesselTracking;
-
-    @Data
-    public static class TmsVesselTrackingSaveReqVO2 extends TmsVesselTrackingSaveReqVO {
-        @Schema(description = "上游单据类型; 前端不填入，后端写死的")
-        private final Integer upstreamType = BillType.TMS_FIRST_MILE.getValue();
-
-        @Schema(description = "上游业务单ID，如调拨单ID(前端不填入)")
-        private Long upstreamId;
-    }
 }

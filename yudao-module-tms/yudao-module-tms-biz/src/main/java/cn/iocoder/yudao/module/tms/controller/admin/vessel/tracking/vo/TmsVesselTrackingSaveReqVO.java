@@ -1,7 +1,9 @@
 package cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo;
 
+import cn.iocoder.yudao.module.system.api.utils.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 
 import java.time.LocalDateTime;
@@ -10,6 +12,8 @@ import java.time.LocalDateTime;
 @Data
 public class TmsVesselTrackingSaveReqVO {
     @Schema(description = "id")
+    @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时，出运跟踪信息id不能为空")
+    @Null(groups = {Validation.OnCreate.class}, message = "创建时，出运跟踪信息id需为空")
     private Long id;
 
     @Schema(description = "上游单据类型;调拨单、头程单、退货单")
