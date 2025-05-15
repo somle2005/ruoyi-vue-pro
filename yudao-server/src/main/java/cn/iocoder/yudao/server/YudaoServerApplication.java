@@ -1,6 +1,5 @@
 package cn.iocoder.yudao.server;
 
-import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -29,9 +28,6 @@ public class YudaoServerApplication {
         // 如果你碰到启动的问题，请认真阅读 https://doc.iocoder.cn/quick-start/ 文章
 
         SpringApplication.run(YudaoServerApplication.class, args);
-        //输出所有组件名称，使用log
-        SpringUtils.getBeans(Object.class) // 输出所有组件名称，使用log
-            .forEach(bean -> log.info("加载组件：{}", bean));
 //        new SpringApplicationBuilder(YudaoServerApplication.class)
 //                .applicationStartup(new BufferingApplicationStartup(20480))
 //                .run(args);
