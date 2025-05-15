@@ -101,16 +101,16 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             )
             .selectAll(TmsVesselTrackingDO.class)
             // 时间
-            .between(TmsVesselTrackingDO::getArriveEstimateTime, vo.getTrackingQueryVO().getArriveEstimateTime()[0], vo.getTrackingQueryVO().getArriveEstimateTime()[1]) // 预计到达时间
-            .between(TmsVesselTrackingDO::getDepartEstimateTime, vo.getTrackingQueryVO().getDepartEstimateTime()[0], vo.getTrackingQueryVO().getDepartEstimateTime()[1]) // 预计离开时间
-            .between(TmsVesselTrackingDO::getArriveActualTime, vo.getTrackingQueryVO().getArriveActualTime()[0], vo.getTrackingQueryVO().getArriveActualTime()[1]) // 实际到达时间
-            .between(TmsVesselTrackingDO::getDepartActualTime, vo.getTrackingQueryVO().getDepartActualTime()[0], vo.getTrackingQueryVO().getDepartActualTime()[1]) // 实际离开时间
-            .between(TmsVesselTrackingDO::getPickupTime, vo.getTrackingQueryVO().getPickupTime()[0], vo.getTrackingQueryVO().getPickupTime()[1]) // 提货时间
-            .between(TmsVesselTrackingDO::getReturnTime, vo.getTrackingQueryVO().getReturnTime()[0], vo.getTrackingQueryVO().getReturnTime()[1]) // 还柜时间
+//            .between(TmsVesselTrackingDO::getArriveEstimateTime, vo.getTrackingQueryVO().getArriveEstimateTime()[0], vo.getTrackingQueryVO().getArriveEstimateTime()[1]) // 预计到达时间
+//            .between(TmsVesselTrackingDO::getDepartEstimateTime, vo.getTrackingQueryVO().getDepartEstimateTime()[0], vo.getTrackingQueryVO().getDepartEstimateTime()[1]) // 预计离开时间
+//            .between(TmsVesselTrackingDO::getArriveActualTime, vo.getTrackingQueryVO().getArriveActualTime()[0], vo.getTrackingQueryVO().getArriveActualTime()[1]) // 实际到达时间
+//            .between(TmsVesselTrackingDO::getDepartActualTime, vo.getTrackingQueryVO().getDepartActualTime()[0], vo.getTrackingQueryVO().getDepartActualTime()[1]) // 实际离开时间
+//            .between(TmsVesselTrackingDO::getPickupTime, vo.getTrackingQueryVO().getPickupTime()[0], vo.getTrackingQueryVO().getPickupTime()[1]) // 提货时间
+//            .between(TmsVesselTrackingDO::getReturnTime, vo.getTrackingQueryVO().getReturnTime()[0], vo.getTrackingQueryVO().getReturnTime()[1]) // 还柜时间
             // 同步
             .eqIfExists(TmsVesselTrackingDO::getApiSource, vo.getTrackingQueryVO().getApiSource()) // API来源
-            .between(TmsVesselTrackingDO::getLastSyncTime, vo.getTrackingQueryVO().getLastSyncTime()[0], vo.getTrackingQueryVO().getLastSyncTime()[1]) // 最后同步时间
-            .between(TmsVesselTrackingDO::getCreateTime, vo.getCreateTime()[0], vo.getCreateTime()[1]) // 创建时间
+//            .between(TmsVesselTrackingDO::getLastSyncTime, vo.getTrackingQueryVO().getLastSyncTime()[0], vo.getTrackingQueryVO().getLastSyncTime()[1]) // 最后同步时间
+//            .between(TmsVesselTrackingDO::getCreateTime, vo.getCreateTime()[0], vo.getCreateTime()[1]) // 创建时间
             // 港口
             .eqIfExists(TmsVesselTrackingDO::getTransitPort, vo.getTrackingQueryVO().getTransitPort()) // 中转港
             .eqIfExists(TmsVesselTrackingDO::getToPort, vo.getTrackingQueryVO().getToPort()) // 目的港

@@ -6,8 +6,8 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Primary;
 import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.integration.dsl.IntegrationFlow;
 import org.springframework.messaging.Message;
@@ -15,6 +15,7 @@ import org.springframework.messaging.MessageChannel;
 
 @Slf4j
 @Configuration
+@EnableJpaRepositories(basePackages = "com.somle")  //esb模块才加载com.somle
 public class IntegrationConfig {
     @Resource
     DingTalkService dingTalkService;

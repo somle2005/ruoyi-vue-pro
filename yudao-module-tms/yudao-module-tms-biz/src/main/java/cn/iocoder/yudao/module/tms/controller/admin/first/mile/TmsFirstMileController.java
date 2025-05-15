@@ -189,10 +189,17 @@ public class TmsFirstMileController {
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
         //公司
         Set<Long> companyIds = beans.stream().flatMap(bo -> Stream.concat(
-                Stream.of(bo.getExportCompanyId(), bo.getTransitCompanyId(), bo.getTracking().getCarrierCompanyId(), bo.getTracking().getForwarderCompanyId()), Stream.concat(
+                Stream.of(
+                    bo.getExportCompanyId(),
+                    bo.getTransitCompanyId(),
+                    bo.getTracking() != null ? bo.getTracking().getCarrierCompanyId() : null,
+                    bo.getTracking() != null ? bo.getTracking().getForwarderCompanyId() : null
+                ),
+                Stream.concat(
                 bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getCompanyId),
                     bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getSalesCompanyId)
-                )))
+                )
+            ))
             .filter(Objects::nonNull)
             .collect(Collectors.toSet());
         Map<Long, FmsCompanyDTO> companyMap = fmsCompanyApi.getCompanyMap(companyIds);
