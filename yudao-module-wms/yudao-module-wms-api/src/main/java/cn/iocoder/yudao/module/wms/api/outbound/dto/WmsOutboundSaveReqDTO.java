@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.wms.enums.api.outbound.dto;
+package cn.iocoder.yudao.module.wms.api.outbound.dto;
 
 import lombok.Data;
 

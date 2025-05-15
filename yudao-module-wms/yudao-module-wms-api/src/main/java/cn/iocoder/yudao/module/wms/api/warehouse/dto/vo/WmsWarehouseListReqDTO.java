@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.wms.api.warehouse.dto;
+package cn.iocoder.yudao.module.wms.api.warehouse.dto.vo;
 
 import lombok.Builder;
 import lombok.Data;

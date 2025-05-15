@@ -11,7 +11,6 @@ import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
-import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseListReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
@@ -246,11 +245,8 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
     }
 
     @Override
-    public List<WmsStockOwnershipDO> selectByDeptIdAndProductIdAndCountryId(@NotNull Long deptId, @NotNull Long productId, @NotNull String country) {
-        //仓库list
-        List<WmsWarehouseDO> warehouseDOList = wmsWarehouseService.selectList(WmsWarehouseListReqDTO.builder().country(country).build());
-        //2 根据仓库 查找对应 产品的库存
-        //TODO 待实现 根据仓库 查找对应 产品的库存
-        return null;
+    public List<WmsStockOwnershipDO> selectByDeptIdAndProductIdAndCountryId(Long deptId, @NotNull List<Long> productIds, @NotNull String country) {
+
+        return stockOwnershipMapper.selectByDeptIdAndProductIdAndCountryId(deptId, productIds, country);
     }
 }

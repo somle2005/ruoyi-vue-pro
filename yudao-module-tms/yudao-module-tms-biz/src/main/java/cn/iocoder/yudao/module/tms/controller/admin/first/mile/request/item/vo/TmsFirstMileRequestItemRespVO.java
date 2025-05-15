@@ -26,6 +26,15 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
     @Schema(description = "产品id")
     private Long productId;
 
+    @Schema(description = "产品名称")
+    @ExcelProperty("产品名称")
+    private String productName;
+
+    //带出该申请部门的 该产品sku的 中国的 仓库库存汇总
+    @Schema(description = "国内仓库库存")
+    @ExcelProperty("国内仓库库存")
+    private BigDecimal domesticWarehouseStock;
+
     @Schema(description = "FBA条码")
     @ExcelProperty("FBA条码")
     private String fbaBarCode;
@@ -67,10 +76,6 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
     @Schema(description = "已订购数")
     @ExcelProperty("已订购数")
     private Integer orderClosedQty;
-
-    @Schema(description = "产品名称")
-    @ExcelProperty("产品名称")
-    private String productName;
 
     //产品重量
     @Schema(description = "产品基础重量（kg）")

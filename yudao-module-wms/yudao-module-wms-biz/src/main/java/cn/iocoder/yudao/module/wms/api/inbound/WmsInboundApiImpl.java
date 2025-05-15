@@ -1,12 +1,11 @@
 package cn.iocoder.yudao.module.wms.api.inbound;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
-import cn.iocoder.yudao.module.wms.enums.api.inbound.WmsInboundApi;
-import cn.iocoder.yudao.module.wms.enums.api.inbound.dto.WmsInboundDTO;
-import cn.iocoder.yudao.module.wms.enums.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import jakarta.annotation.Resource;

@@ -23,8 +23,8 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMi
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
-import cn.iocoder.yudao.module.wms.enums.api.warehouse.WmsWarehouseApi;
-import cn.iocoder.yudao.module.wms.enums.api.warehouse.dto.WmsWarehouseDTO;
+import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -199,8 +199,9 @@ public class TmsFirstMileRequestController {
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         Map<Long, WmsWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(warehouseIds);
-        Map<Long, FmsCompanyDTO> dtoMap = fmsCompanyApi.getCompanyMap(firstMileRequestBOList.stream().flatMap(bo -> bo.getItems().stream().map(TmsFirstMileRequestItemDO::getSalesCompanyId)).collect(Collectors.toSet()));
-
+        Map<Long, FmsCompanyDTO> dtoMap = fmsCompanyApi.getCompanyMap(firstMileRequestBOList.stream()
+                .flatMap(bo -> bo.getItems().stream().map(TmsFirstMileRequestItemDO::getSalesCompanyId)).collect(Collectors.toSet()));
+        //获取产品库存 wmsWarehouseApi
         //公司MAP
 
         return firstMileRequestBOList.stream().map(bo -> {

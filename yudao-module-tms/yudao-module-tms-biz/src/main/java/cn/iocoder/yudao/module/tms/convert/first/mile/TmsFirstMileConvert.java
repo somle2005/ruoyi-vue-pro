@@ -13,8 +13,8 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
-import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundItemSaveReqDTO;
-import cn.iocoder.yudao.module.wms.enums.api.outbound.dto.WmsOutboundSaveReqDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundItemSaveReqDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundSaveReqDTO;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;

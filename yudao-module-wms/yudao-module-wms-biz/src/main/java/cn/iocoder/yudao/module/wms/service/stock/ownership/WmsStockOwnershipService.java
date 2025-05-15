@@ -9,6 +9,9 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * 所有者库存 Service 接口
@@ -131,12 +134,25 @@ public interface WmsStockOwnershipService {
     List<WmsStockOwnershipDO> selectByIds(List<Long> stockOwnershipIds);
 
     /**
-     * 根据部门ID+产品ID+国别ID查询库存归属
-     *
+     * 获取某一部门在指定国别下的产品集合的库存归属
      * @param deptId    部门ID
-     * @param productId 产品ID
-     * @param country   国家字典值
+     * @param productIds 产品IDs
+     * @param country 国家字典值
      * @return 库存归属
      */
-    List<WmsStockOwnershipDO> selectByDeptIdAndProductIdAndCountryId(Long deptId, Long productId, String country);
+    List<WmsStockOwnershipDO> selectByDeptIdAndProductIdAndCountryId(Long deptId, @NotNull List<Long> productIds, @NotNull String country);
+
+
+    /**
+     * 获取某一部门在指定国别下的产品集合的库存归属
+     *
+     * @param deptId     部门ID
+     * @param productIds 产品IDs
+     * @param country    国家字典值
+     * @return 库存归属
+     */
+    default Map<Long, WmsStockOwnershipDO> selectByDeptIdAndProductIdAndCountryIdMap(Long deptId, @NotNull List<Long> productIds, @NotNull String country) {
+        List<WmsStockOwnershipDO> list = selectByDeptIdAndProductIdAndCountryId(deptId, productIds, country);
+        return list.stream().collect(Collectors.toMap(WmsStockOwnershipDO::getProductId, Function.identity()));
+    }
 }

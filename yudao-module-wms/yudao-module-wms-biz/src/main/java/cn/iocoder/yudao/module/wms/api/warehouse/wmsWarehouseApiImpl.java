@@ -2,9 +2,8 @@ package cn.iocoder.yudao.module.wms.api.warehouse;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
-import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseListReqDTO;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.vo.WmsWarehouseListReqDTO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
-import cn.iocoder.yudao.module.wms.enums.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -30,9 +29,9 @@ public class wmsWarehouseApiImpl implements WmsWarehouseApi {
     private WmsWarehouseService warehouseService;
 
     @Override
-    public Map<Long, cn.iocoder.yudao.module.wms.enums.api.warehouse.dto.WmsWarehouseDTO> getWarehouseMap(Collection<Long> ids) {
+    public Map<Long, WmsWarehouseDTO> getWarehouseMap(Collection<Long> ids) {
         Map<Long, WmsWarehouseDO> warehouseMap = warehouseService.getWarehouseMap(new HashSet<>(ids));
-        return warehouseMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> BeanUtils.toBean(entry.getValue(), cn.iocoder.yudao.module.wms.enums.api.warehouse.dto.WmsWarehouseDTO.class)));
+        return warehouseMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> BeanUtils.toBean(entry.getValue(), WmsWarehouseDTO.class)));
     }
 
     @Override

@@ -1,10 +1,6 @@
-package cn.iocoder.yudao.module.wms.enums.api.outbound.dto;
+package cn.iocoder.yudao.module.wms.api.outbound.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 

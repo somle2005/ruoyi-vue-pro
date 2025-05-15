@@ -33,7 +33,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseReques
 import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestItemsBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
-import cn.iocoder.yudao.module.wms.enums.api.warehouse.WmsWarehouseApi;
+import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

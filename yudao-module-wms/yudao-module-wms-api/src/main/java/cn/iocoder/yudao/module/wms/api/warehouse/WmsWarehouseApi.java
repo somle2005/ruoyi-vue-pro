@@ -1,7 +1,7 @@
-package cn.iocoder.yudao.module.wms.enums.api.warehouse;
+package cn.iocoder.yudao.module.wms.api.warehouse;
 
-import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseListReqDTO;
-import cn.iocoder.yudao.module.wms.enums.api.warehouse.dto.WmsWarehouseDTO;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.vo.WmsWarehouseListReqDTO;
 
 import java.util.Collection;
 import java.util.List;
@@ -24,5 +24,5 @@ public interface WmsWarehouseApi {
      * @param reqDTO 查询条件
      * @return 仓库列表
      */
-    List<cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO> selectList(WmsWarehouseListReqDTO reqDTO);
+    List<WmsWarehouseDTO> selectList(WmsWarehouseListReqDTO reqDTO);
 }

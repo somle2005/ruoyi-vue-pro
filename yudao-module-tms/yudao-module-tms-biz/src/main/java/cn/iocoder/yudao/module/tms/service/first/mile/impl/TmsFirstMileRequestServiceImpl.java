@@ -30,7 +30,7 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
-import cn.iocoder.yudao.module.wms.enums.api.warehouse.WmsWarehouseApi;
+import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;

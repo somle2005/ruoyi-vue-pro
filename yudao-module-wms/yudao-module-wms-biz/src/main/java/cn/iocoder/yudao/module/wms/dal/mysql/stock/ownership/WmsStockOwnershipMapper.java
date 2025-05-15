@@ -7,6 +7,8 @@ import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockOwnershipPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
+import jakarta.validation.constraints.NotNull;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -63,5 +65,15 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         return selectList(wrapper);
     }
 
+    default List<WmsStockOwnershipDO> selectByDeptIdAndProductIdAndCountryId(Long deptId, @NotNull List<Long> productIds, @NotNull String country) {
+        MPJLambdaWrapperX<WmsStockOwnershipDO> wrapper = new MPJLambdaWrapperX<>();
+        // 连接仓库表
+        wrapper.innerJoin(WmsWarehouseDO.class, WmsWarehouseDO::getId, WmsStockOwnershipDO::getWarehouseId)
+                .eq(WmsWarehouseDO::getCountry, country) //限定国家
+                // 按部门ID和产品ID查询
+                .eqIfPresent(WmsStockOwnershipDO::getDeptId, deptId) //指定部门
+                .in(WmsStockOwnershipDO::getProductId, productIds); //指定产品集合
+        return selectList(wrapper);
+    }
 
 }

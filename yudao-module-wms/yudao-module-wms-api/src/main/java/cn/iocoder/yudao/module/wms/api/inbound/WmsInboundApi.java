@@ -1,7 +1,7 @@
-package cn.iocoder.yudao.module.wms.enums.api.inbound;
+package cn.iocoder.yudao.module.wms.api.inbound;
 
-import cn.iocoder.yudao.module.wms.enums.api.inbound.dto.WmsInboundDTO;
-import cn.iocoder.yudao.module.wms.enums.api.inbound.dto.WmsInboundSaveReqDTO;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 
 import java.util.List;
 

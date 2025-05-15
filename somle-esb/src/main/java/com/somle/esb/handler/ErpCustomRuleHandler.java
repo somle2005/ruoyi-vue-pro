@@ -3,6 +3,7 @@ package com.somle.esb.handler;
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
+import cn.iocoder.yudao.module.system.enums.common.CountryEnum;
 import cn.iocoder.yudao.module.tms.api.logistic.customrule.dto.TmsCustomRuleDTO;
 import com.somle.eccang.model.EccangProduct;
 import com.somle.eccang.service.EccangService;
@@ -78,7 +79,7 @@ public class ErpCustomRuleHandler {
         CopyOnWriteArrayList<TmsCustomRuleDTO> processedRules = new CopyOnWriteArrayList<>(customRules);
         customRules.stream()
             .filter(customRule -> customRule.getCountryCode() != null)
-            .forEach(customRule -> Optional.ofNullable(dictDataApi.parseDictData(DictTypeConstants.COUNTRY_CODE, "CN"))
+                .forEach(customRule -> Optional.ofNullable(dictDataApi.parseDictData(DictTypeConstants.COUNTRY_CODE, CountryEnum.CHINA.getCountryCode()))
                 .flatMap(dictDataRespDTO -> Optional.ofNullable(dictDataRespDTO.getValue()))
                 .ifPresent(value -> {
                     Integer countryCode = Integer.valueOf(value);
