@@ -33,7 +33,12 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
     //带出该申请部门的 该产品sku的 中国的 仓库库存汇总
     @Schema(description = "国内仓库库存")
     @ExcelProperty("国内仓库库存")
-    private BigDecimal domesticWarehouseStock;
+    private Integer domesticWarehouseStock;
+
+    //purchase_transit_qty 自动计算该sku的采购在途数量
+    @Schema(description = "采购在途数量")
+    @ExcelProperty("采购在途数量")
+    private Integer purchaseTransitQty;
 
     @Schema(description = "FBA条码")
     @ExcelProperty("FBA条码")

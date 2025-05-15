@@ -17,12 +17,15 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
+import cn.iocoder.yudao.module.system.enums.common.CountryEnum;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
+import cn.iocoder.yudao.module.wms.api.stock.ownership.WmsStockOwnershipApi;
+import cn.iocoder.yudao.module.wms.api.stock.ownership.dto.WmsStockOwnershipDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -58,6 +61,7 @@ public class TmsFirstMileRequestController {
     private final DeptApi deptApi;
     private final AdminUserApi adminUserApi;
     private final FmsCompanyApi fmsCompanyApi;
+    private final WmsStockOwnershipApi wmsStockOwnershipApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程申请单")
@@ -203,6 +207,7 @@ public class TmsFirstMileRequestController {
                 .flatMap(bo -> bo.getItems().stream().map(TmsFirstMileRequestItemDO::getSalesCompanyId)).collect(Collectors.toSet()));
         //获取产品库存 wmsWarehouseApi
         //公司MAP
+        Map<Long, WmsStockOwnershipDTO> wmsStockOwnershipDTOMap = wmsStockOwnershipApi.selectByDeptIdAndProductIdAndCountryIdMap(firstMileRequestBOList.get(0).getRequestDeptId(), productIds, CountryEnum.CHINA.getCountryCode());
 
         return firstMileRequestBOList.stream().map(bo -> {
             TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRequestRespVO.class, respVO1 -> {
@@ -224,6 +229,8 @@ public class TmsFirstMileRequestController {
                         MapUtils.findAndThen(dtoMap, item.getSalesCompanyId(), company -> itemRespVO.setSalesCompanyName(company.getName()));
                         MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> itemRespVO.setCreator(user.getNickname()));
                         MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> itemRespVO.setUpdater(user.getNickname()));
+                        //带出该申请部门的 该产品sku的 中国的 仓库库存汇总
+                        MapUtils.findAndThen(wmsStockOwnershipDTOMap, item.getProductId(), wmsStockOwnershipDTO -> itemRespVO.setDomesticWarehouseStock(wmsStockOwnershipDTO.getAvailableQty()));
                         }
                     )).collect(Collectors.toList());
 

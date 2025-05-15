@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockO
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockOwnershipRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockOwnershipSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
+import com.google.common.collect.Maps;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -153,6 +154,9 @@ public interface WmsStockOwnershipService {
      */
     default Map<Long, WmsStockOwnershipDO> selectByDeptIdAndProductIdAndCountryIdMap(Long deptId, @NotNull List<Long> productIds, @NotNull String country) {
         List<WmsStockOwnershipDO> list = selectByDeptIdAndProductIdAndCountryId(deptId, productIds, country);
+        if (list == null) {
+            return Maps.newHashMap();
+        }
         return list.stream().collect(Collectors.toMap(WmsStockOwnershipDO::getProductId, Function.identity()));
     }
 }
