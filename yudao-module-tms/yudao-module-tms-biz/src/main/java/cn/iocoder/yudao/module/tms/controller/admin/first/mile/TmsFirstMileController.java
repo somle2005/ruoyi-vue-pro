@@ -266,7 +266,7 @@ public class TmsFirstMileController {
             }
             // 设置最新跟踪信息 1:1
             if (bo.getTracking() != null) {
-                respVO.setTracking(BeanUtils.toBean(bo.getTracking(), TmsVesselTrackingRespVO.class, peek -> {
+                respVO.setVesselTracking(BeanUtils.toBean(bo.getTracking(), TmsVesselTrackingRespVO.class, peek -> {
 
                 }));
             }

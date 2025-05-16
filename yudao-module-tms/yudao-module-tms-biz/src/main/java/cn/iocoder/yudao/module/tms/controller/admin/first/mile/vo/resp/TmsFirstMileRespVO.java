@@ -160,5 +160,5 @@ public class TmsFirstMileRespVO extends BaseVO {
     private List<TmsFeeRespVO> fees;
 
     @Schema(description = "最新跟踪信息")
-    private TmsVesselTrackingRespVO tracking;
+    private TmsVesselTrackingRespVO vesselTracking;
 }
