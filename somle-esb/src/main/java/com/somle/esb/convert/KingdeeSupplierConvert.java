@@ -105,7 +105,7 @@ public interface KingdeeSupplierConvert {
     }
 
     /**
-     * 转换为联系人信息
+     * 转换为联系人信息(金蝶可以是复数联系人)
      */
     default List<SupplierBomentity> convertToBomEntity(SrmSupplierDTO supplier) {
         if (supplier == null) {

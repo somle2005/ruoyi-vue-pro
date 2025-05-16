@@ -15,7 +15,6 @@ import org.springframework.beans.BeanUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -326,12 +325,12 @@ public class KingdeeClient {
             .findFirst().get();
     }
 
-    public Stream<KingdeePage> streamPurRequest(KingdeePurRequestReqVO vo) {
+    public Stream<KingdeePage> getAllPurRequest(KingdeePurRequestReqVO vo) {
         log.debug("fetching purchase request");
         String endUrl = "/jdy/v2/scm/pur_request";
         return StreamX.iterate(
             getPage(JsonUtilsX.toJSONObject(vo), endUrl),
-            page -> page.hasNext(),
+                KingdeePage::hasNext,
             page -> {
                 vo.setPage(String.valueOf(page.getPage() + 1));
                 return getPage(JsonUtilsX.toJSONObject(vo), endUrl);
@@ -339,12 +338,12 @@ public class KingdeeClient {
         );
     }
 
-    public Stream<KingdeePage> streamPurOrder(KingdeePurOrderReqVO vo) {
+    public Stream<KingdeePage> getAllPurOrder(KingdeePurOrderReqVO vo) {
         log.debug("fetching purchase order");
         String endUrl = "/jdy/v2/scm/pur_order";
         return StreamX.iterate(
             getPage(JsonUtilsX.toJSONObject(vo), endUrl),
-            page -> page.hasNext(),
+                KingdeePage::hasNext,
             page -> {
                 vo.setPage(String.valueOf(page.getPage() + 1));
                 return getPage(JsonUtilsX.toJSONObject(vo), endUrl);
@@ -358,12 +357,12 @@ public class KingdeeClient {
      * @param vo 请求参数
      *           2025.03.07 gumaomao
      */
-    public Stream<KingdeePage> streamPurInbound(KingdeePurInboundReqVO vo) {
+    public Stream<KingdeePage> getAllPurInbound(KingdeePurInboundReqVO vo) {
         log.debug("fetching purchase inbound");
         String endpoint = "/jdy/v2/scm/pur_inbound";
         return StreamX.iterate(
             getPage(JsonUtilsX.toJSONObject(vo), endpoint),
-            page -> page.hasNext(),
+                KingdeePage::hasNext,
             page -> {
                 vo.setPage(String.valueOf(page.getPage() + 1));
                 return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
