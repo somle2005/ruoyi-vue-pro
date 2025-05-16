@@ -1,4 +1,4 @@
-package com.somle.esb.handler;
+package com.somle.esb.handler.erp;
 
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.tms.api.logistic.customrule.TmsCustomRuleApi;

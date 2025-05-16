@@ -1,4 +1,4 @@
-package com.somle.esb.handler;
+package com.somle.esb.handler.system;
 
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import com.somle.eccang.model.EccangCategory;

@@ -2,6 +2,7 @@ package cn.iocoder.yudao.framework.common.util.concurrent;
 
 
 import cn.iocoder.yudao.framework.common.util.date.DateFormatConstants;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.task.TaskDecorator;
 import org.springframework.retry.RetryCallback;
@@ -31,7 +32,7 @@ public class AsyncTask {
 
     final static List<DecoratorItem<?>>  DECORATORS=new ArrayList<>();
 
-    public static interface DecoratorClear {
+    public interface DecoratorClear {
         void clear();
     }
 
@@ -96,8 +97,9 @@ public class AsyncTask {
 
     public static class AsyncTaskExecutor {
 
-        public static final String THREAD_NAME_PREFIX = "task-";
+        public static final String THREAD_NAME_PREFIX = "somle-task-";
         private ThreadPoolTaskScheduler scheduler = null;
+        @Getter
         private ThreadPoolTaskExecutor executor = null;
 
         private int parallelism = -1 ;
@@ -259,9 +261,9 @@ public class AsyncTask {
 class DecoratorItem<T> {
 
 
-    private Consumer<T> setter;
-    private Supplier<T> getter;
-    private AsyncTask.DecoratorClear clear;
+    private final Consumer<T> setter;
+    private final Supplier<T> getter;
+    private final AsyncTask.DecoratorClear clear;
     public DecoratorItem(Supplier<T> getter, Consumer<T> setter, AsyncTask.DecoratorClear clear) {
         this.getter=getter;
         this.setter=setter;

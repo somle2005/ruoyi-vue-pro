@@ -28,6 +28,16 @@
 
             </dependencies>
         </profile>
+        <profile>
+            <id>local-esb</id>
+            <dependencies>
+                <dependency>
+                    <groupId>com.somle</groupId>
+                    <artifactId>somle-esb</artifactId>
+                    <version>${revision}</version>
+                </dependency>
+            </dependencies>
+        </profile>
 
         <!-- 正式环境(全部加载)-默认 -->
         <profile>
