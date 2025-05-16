@@ -36,7 +36,11 @@
             <artifactId>spring-boot-starter-integration</artifactId>
         </dependency>
 
-
+        <!--给vo添加校验注解-->
+        <dependency>
+            <groupId>cn.iocoder.boot</groupId>
+            <artifactId>yudao-spring-boot-starter-security</artifactId>
+        </dependency>
 
 
         <dependency>

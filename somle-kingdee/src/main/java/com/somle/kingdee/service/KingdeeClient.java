@@ -386,6 +386,18 @@ public class KingdeeClient {
         return response.getData(KingdeePurRequestDetail.class);
     }
 
+    /**
+     * 保存采购订单
+     *
+     * @param order 采购订单数据_入参
+     * @return KingdeeResponse
+     */
+    public KingdeeResponse savePurOrder(KingdeePurOrderSaveReqVO order) {
+        log.debug("保存采购订单");
+        String endUrl = "/jdy/v2/scm/pur_order";
+        TreeMap<String, String> params = new TreeMap<>();
+        return postResponse(endUrl, params, order);
+    }
 
     private KingdeeResponse fetchResponse(String requestMethod, String endUrl, TreeMap<String, String> params, Object body) {
         String cts = String.valueOf(System.currentTimeMillis());
