@@ -28,6 +28,7 @@ import java.io.IOException;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.IMPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - 出运跟踪信息表（由外部API更新）")
@@ -95,6 +96,7 @@ public class TmsVesselTrackingController {
 
     @PostMapping("/import-excel")
     @Operation(summary = "导入出运跟踪信息表（由外部API更新） Excel")
+    @ApiAccessLog(operateType = IMPORT)
     @PreAuthorize("@ss.hasPermission('tms:vessel-tracking:import')")
     public CommonResult<Boolean> importVesselTrackingExcel(@RequestParam("file") MultipartFile file) throws Exception {
         List<TmsVesselTrackingSaveReqVO> list = ExcelUtils.read(file, TmsVesselTrackingSaveReqVO.class);

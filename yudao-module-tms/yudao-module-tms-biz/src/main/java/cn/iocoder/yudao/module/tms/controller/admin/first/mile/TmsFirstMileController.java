@@ -54,6 +54,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.IMPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - TMS头程单")
@@ -132,6 +133,7 @@ public class TmsFirstMileController {
 
     @PostMapping("/import-excel")
     @Operation(summary = "导入头程单 Excel")
+    @ApiAccessLog(operateType = IMPORT)
     @PreAuthorize("@ss.hasPermission('tms:first-mile:import')")
     public CommonResult<Boolean> importFirstMileExcel(@RequestParam("file") MultipartFile file) throws Exception {
         List<TmsFirstMileSaveReqVO> list = ExcelUtils.read(file, TmsFirstMileSaveReqVO.class);
