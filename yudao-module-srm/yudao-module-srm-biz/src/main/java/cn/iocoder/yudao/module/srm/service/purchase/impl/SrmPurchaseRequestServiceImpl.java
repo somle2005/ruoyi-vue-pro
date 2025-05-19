@@ -9,7 +9,6 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductUnitApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import cn.iocoder.yudao.module.srm.api.log.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmQuantityOrderedCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.SrmPurchaseOrderSaveReqVO;
@@ -23,6 +22,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderItemMapper
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestItemsMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestMapper;
 import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
+import cn.iocoder.yudao.module.srm.enums.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmOffStatus;
@@ -397,7 +397,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             success = LogRecordConstants.SRM_PURCHASE_REQUEST_SUBMIT_AUDIT_SUCCESS)
     public void submitAudit(Collection<Long> ids) {
         // 获取单据编号用于日志记录
-        List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectBatchIds(ids);
+        List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectByIds(ids);
         String codes = CollUtil.join(requests.stream().map(SrmPurchaseRequestDO::getCode).collect(Collectors.toList()), ",");
         LogRecordContext.putVariable("codes", codes);
         
@@ -418,25 +418,48 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
      * @param enable    是否开启（true 表示开启，false 表示关闭）
      */
     @Override
+    @LogRecord(type = LogRecordConstants.SRM_PURCHASE_REQUEST_TYPE,
+            subType = LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUB_TYPE,
+            bizNo = "{{#codes}}",
+            success = LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void switchPurchaseOrderStatus(Long requestId, List<Long> itemIds, Boolean enable) {
         SrmEventEnum event = Boolean.TRUE.equals(enable) ? SrmEventEnum.ACTIVATE : SrmEventEnum.MANUAL_CLOSE;
         if (requestId != null) {
-            // 处理采购订单状态
-            SrmPurchaseRequestDO aDo = validateIdExists(requestId);
-            if (aDo != null) {
-                offMachine.fireEvent(SrmOffStatus.fromCode(aDo.getOffStatus()), event, aDo);
+            // 处理采购申请主表状态
+            SrmPurchaseRequestDO requestDO = validateIdExists(requestId);
+            if (requestDO != null) {
+                // 获取申请单编号用于日志记录
+                LogRecordContext.putVariable("codes", requestDO.getCode());
+                // 根据操作类型设置日志模板
+                if (Boolean.TRUE.equals(enable)) {
+                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUB_TYPE);
+                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUCCESS);
+                } else {
+                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_REQUEST_CLOSE_SUB_TYPE);
+                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_REQUEST_CLOSE_SUCCESS);
+                }
+                offMachine.fireEvent(SrmOffStatus.fromCode(requestDO.getOffStatus()), event, requestDO);
             }
         } else {
             if (itemIds != null && !itemIds.isEmpty()) {
-                // 批量处理采购订单子项状态
+                // 批量处理采购申请子项状态
                 List<SrmPurchaseRequestItemsDO> itemsDOList = validItemIdsExist(itemIds);
-                //            if(!enable) {
-                //                //验证不存在订单。则可以关闭
-                //                Set<Long> requestDoIds = itemsDOList.stream().map(SrmPurchaseRequestItemsDO::getRequestId).collect(Collectors.toSet());
-                //                ThrowUtil.ifThrow(!validHasApplyItemId(requestDoIds), PURCHASE_REQUEST_ITEM_NOT_EXISTS_BY_MANUAL_CLOSE);
-                //            }
                 if (!itemsDOList.isEmpty()) {
+                    // 获取申请单编号用于日志记录
+                    List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectByIds(
+                            itemsDOList.stream().map(SrmPurchaseRequestItemsDO::getRequestId).collect(Collectors.toSet()));
+                    String codes = CollUtil.join(requests.stream().map(SrmPurchaseRequestDO::getCode).collect(Collectors.toList()), ",");
+                    LogRecordContext.putVariable("codes", codes);
+                    // 根据操作类型设置日志模板
+                    if (Boolean.TRUE.equals(enable)) {
+                        LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUB_TYPE);
+                        LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUCCESS);
+                    } else {
+                        LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_REQUEST_CLOSE_SUB_TYPE);
+                        LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_REQUEST_CLOSE_SUCCESS);
+                    }
+                    
                     itemsDOList.forEach(itemsDO -> requestItemsDOStateMachine.fireEvent(SrmOffStatus.fromCode(itemsDO.getOffStatus()), event, itemsDO));
                 }
             }
@@ -451,7 +474,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseRequest(List<Long> ids) {
         // 获取业务名称用于日志记录
-        List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectBatchIds(ids);
+        List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectByIds(ids);
         String businessName = CollUtil.join(requests.stream().map(SrmPurchaseRequestDO::getCode).collect(Collectors.toList()), ",");
         LogRecordContext.putVariable("businessName", businessName);
         

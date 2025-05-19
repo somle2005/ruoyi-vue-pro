@@ -14,7 +14,6 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
-import cn.iocoder.yudao.module.srm.api.log.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmPayCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmQuantityOrderedCountDTO;
@@ -30,6 +29,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderItemMapper
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestItemsMapper;
 import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
+import cn.iocoder.yudao.module.srm.enums.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmPurchaseOrderSourceEnum;
 import cn.iocoder.yudao.module.srm.enums.status.*;
@@ -246,6 +246,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         voSetNo(vo);
         // 2.1 插入订单
         SrmPurchaseOrderDO orderDO = BeanUtils.toBean(vo, SrmPurchaseOrderDO.class, in -> in.setCode(vo.getCode()));
+        //合计total
         calculateTotalPrice(orderDO, orderItems);
         // 2.1.1 插入单据日期+结算日期
         orderDO.setBillTime(vo.getBillTime() == null ? LocalDateTime.now() : vo.getBillTime());
@@ -701,12 +702,30 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     }
 
     @Override
+    @LogRecord(type = LogRecordConstants.SRM_PURCHASE_ORDER_TYPE,
+            subType = LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUB_TYPE,
+            bizNo = "{{#codes}}",
+            success = LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUCCESS)
     public void switchPurchaseOrderStatus(Collection<Long> itemIds, Boolean open) {
         SrmEventEnum event = Boolean.TRUE.equals(open) ? SrmEventEnum.ACTIVATE : SrmEventEnum.MANUAL_CLOSE;
         if (itemIds != null && !itemIds.isEmpty()) {
             // 批量处理采购订单子项状态
             List<SrmPurchaseOrderItemDO> orderItemDOS = validatePurchaseOrderItemExists(itemIds);
             if (!orderItemDOS.isEmpty()) {
+                // 获取订单编号用于日志记录
+                List<SrmPurchaseOrderDO> orders = purchaseOrderMapper.selectByIds(
+                        orderItemDOS.stream().map(SrmPurchaseOrderItemDO::getOrderId).collect(Collectors.toSet()));
+                String codes = CollUtil.join(orders.stream().map(SrmPurchaseOrderDO::getCode).collect(Collectors.toList()), ",");
+                LogRecordContext.putVariable("codes", codes);
+                // 根据操作类型设置日志模板
+                if (Boolean.TRUE.equals(open)) {
+                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUB_TYPE);
+                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUCCESS);
+                } else {
+                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUB_TYPE);
+                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUCCESS);
+                }
+                
                 orderItemDOS.forEach(orderItemDO -> orderItemOffMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), event, orderItemDO));
             }
         }
