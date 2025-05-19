@@ -24,11 +24,14 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMi
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileExcelVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
+import cn.iocoder.yudao.module.wms.api.inbound.item.WmsInboundItemApi;
+import cn.iocoder.yudao.module.wms.api.inbound.item.dto.WmsInboundItemBinDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -64,7 +67,7 @@ public class TmsFirstMileController {
     private final ErpProductApi erpProductApi;
     private final WmsWarehouseApi wmsWarehouseApi;
     private final DeptApi deptApi;
-
+    private final WmsInboundItemApi wmsInboundItemApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程单")
@@ -167,6 +170,28 @@ public class TmsFirstMileController {
         return success(firstMileService.getLatestCode());
     }
 
+    @GetMapping("/stock/list")
+    @Operation(summary = "批量查询产品库存信息")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
+    public CommonResult<Map<Long, List<TmsFirstMileStockRespVO>>> getStockList(
+            @RequestParam("warehouseId") Long warehouseId,
+            @RequestParam("deptId") Long deptId,
+            @RequestParam("productIds") Set<Long> productIds) {
+        // 1. 调用WMS API获取库存信息
+        Map<Long, List<WmsInboundItemBinDTO>> stockMap = wmsInboundItemApi.getInboundItemBinMap(warehouseId, productIds, true);
+
+        // 2. 转换为前端VO
+        Map<Long, List<TmsFirstMileStockRespVO>> result = new HashMap<>();
+        stockMap.forEach((productId, stockList) -> {
+            List<TmsFirstMileStockRespVO> voList = stockList.stream()
+                    .filter(stock -> deptId.equals(stock.getInboundDeptId())) // 过滤部门
+                    .map(stock -> BeanUtils.toBean(stock, TmsFirstMileStockRespVO.class))
+                    .collect(Collectors.toList());
+            result.put(productId, voList);
+        });
+
+        return success(result);
+    }
 
     private List<TmsFirstMileRespVO> bindResult(List<TmsFirstMileBO> beans) {
         if (CollUtil.isEmpty(beans)) {
