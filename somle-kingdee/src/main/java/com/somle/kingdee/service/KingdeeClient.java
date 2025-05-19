@@ -8,6 +8,7 @@ import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
+import com.somle.kingdee.util.CustomFieldCache;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -191,7 +192,7 @@ public class KingdeeClient {
 
 
     /**
-     * 根绝字段名称获取id，如果有该字段、则设置value，没有就日志记录
+     * 根据字段名称获取id，如果有该字段、则设置value，没有就日志记录
      *
      * @param reqVO       对象
      * @param displayName 属性名称
@@ -199,13 +200,21 @@ public class KingdeeClient {
      */
     private void setCustomFieldSafely(KingdeeProductSaveReqVO reqVO, String displayName, String fieldValue) {
         try {
-            KingdeeCustomField customField = getCustomFieldByDisplayName("bd_material", displayName);
+            KingdeeCustomField customField = CustomFieldCache.getCustomField("bd_material", displayName,
+                    () -> getCustomFieldByDisplayName("bd_material", displayName));
             if (customField != null) {
                 reqVO.setCustomField(customField, fieldValue);
             }
         } catch (Exception e) {
             log.debug("custom field " + displayName + " skipped for " + token.getAccountName(), e);
         }
+    }
+
+    /**
+     * 清除自定义字段缓存
+     */
+    public void clearCustomFieldCache() {
+        CustomFieldCache.invalidateByEntity("bd_material");
     }
 
     public KingdeeResponse addSupplier(KingdeeSupplier kingdeeSupplier) {
