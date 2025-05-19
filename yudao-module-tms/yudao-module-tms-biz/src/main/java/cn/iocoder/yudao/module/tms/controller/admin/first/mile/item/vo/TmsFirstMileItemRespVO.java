@@ -17,6 +17,10 @@ public class TmsFirstMileItemRespVO extends BaseVO {
     @ExcelProperty("主键ID")
     private Long id;
 
+    @Schema(description = "申请单编号")
+    @ExcelProperty("申请单编号")
+    private String requestCode;
+
     @Schema(description = "申请项ID")
     @ExcelProperty("申请项ID")
     private Long requestItemId;

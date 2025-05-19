@@ -539,12 +539,12 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     /**
      * 获取头程申请表明细列表MAP
      *
-     * @param list ids
+     * @param requestIds ids
      * @return map
      */
     @Override
-    public Map<Long, TmsFirstMileRequestItemDO> getFirstMileRequestItemListMap(List<Long> list) {
-        List<TmsFirstMileRequestItemDO> requestItemDOList = firstMileRequestItemMapper.selectListByRequestIds(list);
+    public Map<Long, TmsFirstMileRequestItemDO> getFirstMileRequestItemListMap(List<Long> requestIds) {
+        List<TmsFirstMileRequestItemDO> requestItemDOList = firstMileRequestItemMapper.selectListByRequestIds(requestIds);
         return requestItemDOList.stream().collect(Collectors.toMap(TmsFirstMileRequestItemDO::getId, Function.identity()));
     }
 }

@@ -23,9 +23,12 @@ import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.TmsFirstMileMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item.TmsFirstMileItemMapper;
+import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.TmsFirstMileRequestMapper;
+import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
 import cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
@@ -49,10 +52,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -70,6 +70,8 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQU
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
+    private final TmsFirstMileRequestMapper firstMileRequestMapper;
+    private final TmsFirstMileRequestItemMapper firstMileRequestItemMapper;
     private final TmsFirstMileMapper firstMileMapper;
     private final TmsFirstMileItemMapper firstMileItemMapper;
     private final TmsFeeService feeService;
@@ -457,5 +459,47 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         validateFirstMileExists(fistMileDTO.getId());
         TmsFirstMileDO firstMileDO = TmsFirstMileConvert.convertDO(fistMileDTO);
         firstMileMapper.updateById(firstMileDO);
+    }
+
+    /**
+     * 批量查询申请单MAP
+     *
+     * @param requestItemIds 申请项IDS
+     * @return 申请单MAP
+     */
+    @Override
+    public Map<Long, TmsFirstMileRequestDO> getRequestMap(Set<Long> requestItemIds) {
+        if (CollectionUtils.isEmpty(requestItemIds)) {
+            return Collections.emptyMap();
+        }
+
+        // 1. 查询子项信息，获取主单ID列表
+        List<TmsFirstMileRequestItemDO> items = firstMileRequestItemMapper.selectByIds(requestItemIds);
+        if (CollectionUtils.isEmpty(items)) {
+            return Collections.emptyMap();
+        }
+
+        // 2. 获取主单ID列表
+        Set<Long> requestIds = items.stream()
+                .map(TmsFirstMileRequestItemDO::getRequestId)
+                .collect(Collectors.toSet());
+
+
+        // 3. 查询主单信息
+        List<TmsFirstMileRequestDO> requests = firstMileRequestMapper.selectByIds(requestIds);
+        if (CollectionUtils.isEmpty(requests)) {
+            return Collections.emptyMap();
+        }
+
+        // 4. 构建主单Map
+        Map<Long, TmsFirstMileRequestDO> requestMap = requests.stream()
+                .collect(Collectors.toMap(TmsFirstMileRequestDO::getId, request -> request));
+
+        // 5. 构建子项ID到主单的映射
+        return items.stream()
+                .collect(Collectors.toMap(
+                        TmsFirstMileRequestItemDO::getId,
+                        item -> requestMap.get(item.getRequestId())
+                ));
     }
 }

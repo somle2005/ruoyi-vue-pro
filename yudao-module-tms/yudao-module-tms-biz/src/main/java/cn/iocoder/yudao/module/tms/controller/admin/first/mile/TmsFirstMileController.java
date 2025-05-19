@@ -30,6 +30,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstM
 import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.wms.api.inbound.item.WmsInboundItemApi;
@@ -72,6 +73,7 @@ public class TmsFirstMileController {
     private final WmsWarehouseApi wmsWarehouseApi;
     private final DeptApi deptApi;
     private final WmsInboundItemApi wmsInboundItemApi;
+    private final TmsFirstMileService tmsFirstMileService;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程单")
@@ -266,6 +268,10 @@ public class TmsFirstMileController {
                 bo.getToWarehouseId() == null ? Stream.empty() : Stream.of(bo.getToWarehouseId())
             ))
             .collect(Collectors.toSet()));
+        //申请单MAP，根据requestItemId
+        Map<Long, TmsFirstMileRequestDO> requestMap = tmsFirstMileService.getRequestMap(beans.stream()
+                .flatMap(bo -> bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getRequestItemId))
+                .collect(Collectors.toSet()));
 
         return beans.stream().map(bo -> {
             TmsFirstMileRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRespVO.class);
@@ -295,6 +301,8 @@ public class TmsFirstMileController {
                     MapUtils.findAndThen(deptMap, item.getDeptId(), dept -> itemRespVO.setDeptName(dept.getName()));
                     //仓库
                     MapUtils.findAndThen(warehouseMap, item.getFromWarehouseId(), warehouse -> itemRespVO.setFromWarehouseName(warehouse.getName()));
+                    //上游单据CODE
+                    MapUtils.findAndThen(requestMap, item.getRequestItemId(), request -> itemRespVO.setRequestCode(request.getCode()));
 
                     return itemRespVO;
                 }).collect(Collectors.toList());

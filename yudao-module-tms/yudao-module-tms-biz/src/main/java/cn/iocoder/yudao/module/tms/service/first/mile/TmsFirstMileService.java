@@ -8,10 +8,13 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMi
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 头程单 Service 接口
@@ -113,4 +116,12 @@ public interface TmsFirstMileService {
      * @param fistMileDTO dto
      */
     void updateFirstMileStatus(FistMileDTO fistMileDTO);
+
+    /**
+     * 批量查询申请单MAP
+     *
+     * @param requestItemIds 申请项IDS
+     * @return 申请单(主表)的MAP
+     */
+    Map<Long, TmsFirstMileRequestDO> getRequestMap(Set<Long> requestItemIds);
 }

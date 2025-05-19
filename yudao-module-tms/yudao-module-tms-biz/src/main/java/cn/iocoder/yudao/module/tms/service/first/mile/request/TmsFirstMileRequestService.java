@@ -134,8 +134,8 @@ public interface TmsFirstMileRequestService {
     /**
      * 获取头程申请表明细列表MAP
      *
-     * @param list ids
+     * @param requestIds 头程申请项IDs
      * @return map
      */
-    Map<Long, TmsFirstMileRequestItemDO> getFirstMileRequestItemListMap(List<Long> list);
+    Map<Long, TmsFirstMileRequestItemDO> getFirstMileRequestItemListMap(List<Long> requestIds);
 }
