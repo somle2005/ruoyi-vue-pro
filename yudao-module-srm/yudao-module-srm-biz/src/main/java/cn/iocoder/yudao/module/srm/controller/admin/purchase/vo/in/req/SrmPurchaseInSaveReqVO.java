@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req;
 
 import cn.iocoder.yudao.module.system.api.utils.Validation;
+import com.mzt.logapi.starter.annotation.DiffLogField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.*;
 import lombok.Data;
@@ -18,37 +19,48 @@ public class SrmPurchaseInSaveReqVO {
     @Schema(description = "id", requiredMode = Schema.RequiredMode.REQUIRED)
     @Null(groups = Validation.OnCreate.class, message = "创建时，id必须为空")
     @NotNull(groups = Validation.OnUpdate.class, message = "更新时，订单id不能为空")
+    @DiffLogField(name = "到货单编号")
     private Long id;
 
     @Schema(description = "到货单号")
+    @DiffLogField(name = "到货单号")
     private String code;
 
     @Schema(description = "到货时间(不填默认当前时间)")
+    @DiffLogField(name = "到货时间")
     private LocalDateTime inTime;
 
     @Schema(description = "单据日期")
+    @DiffLogField(name = "单据日期")
     private LocalDateTime billTime;
 
     @Schema(description = "供应商编号", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "供应商编号不能为空")
+    @DiffLogField(name = "供应商编号")
     private Long supplierId;
 
     @Schema(description = "收货地址")
+    @DiffLogField(name = "收货地址")
     private String address;
 
     @Schema(description = "结算账户编号")
+    @DiffLogField(name = "结算账户编号")
     private Long accountId;
 
     @Schema(description = "优惠率，百分比")
+    @DiffLogField(name = "优惠率")
     private BigDecimal discountPercent;
 
     @Schema(description = "其它金额，单位：元")
+    @DiffLogField(name = "其它金额")
     private BigDecimal otherPrice;
 
     @Schema(description = "附件地址")
+    @DiffLogField(name = "附件地址")
     private String fileUrl;
 
     @Schema(description = "备注")
+    @DiffLogField(name = "备注")
     private String remark;
 
     @Schema(description = "版本号")
@@ -57,6 +69,7 @@ public class SrmPurchaseInSaveReqVO {
     @Schema(description = "到货清单列表")
     @Size(min = 1, message = "到货项至少有一个")
     @NotNull(message = "到货项不能为空")
+    @DiffLogField(name = "到货清单列表")
     private List<Item> items;
 
     // ========== 子表字段 ==========
@@ -67,6 +80,7 @@ public class SrmPurchaseInSaveReqVO {
         // ========== 基本信息 ==========
 
         @Schema(description = "到货项编号")
+        @DiffLogField(name = "到货项编号")
         @Null(groups = Validation.OnCreate.class, message = "到货id创建时要为null")
         @NotNull(groups = Validation.OnUpdate.class, message = "更新时到货id不能为null")
         @Size(min = 1, groups = Validation.OnUpdate.class, message = "更新时至少存在一项到货单")
@@ -94,12 +108,14 @@ public class SrmPurchaseInSaveReqVO {
         // ========== 金额数量 ==========
 
         @Schema(description = "产品单价", requiredMode = Schema.RequiredMode.REQUIRED)
-        @DecimalMin(value = "0.00", message = "产品单价不能小于0")
         @NotNull(message = "产品单价不能为空")
+        @DiffLogField(name = "产品单价")
+        @DecimalMin(value = "0.00", message = "产品单价不能小于0")
         private BigDecimal productPrice;
 
         @Schema(description = "到货数量", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "到货数量不能为空")
+        @DiffLogField(name = "到货数量")
         private BigDecimal qty;
 
 //        @Schema(description = "实际到货数量(到货回填)")
@@ -107,50 +123,63 @@ public class SrmPurchaseInSaveReqVO {
 
         @Schema(description = "总价，单位：元。totalPrice = productPrice * qty", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "总价不能为空")
+        @DiffLogField(name = "总价")
         private BigDecimal totalPrice;
 
         @Schema(description = "税率，百分比")
+        @DiffLogField(name = "税率")
         private BigDecimal taxPercent;
 
         @Schema(description = "税价合计，单位：元。 taxPrice = totalPrice * taxPercent", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "税价合计不能为空")
+        @DiffLogField(name = "税价合计")
         private BigDecimal taxPrice;
 
         @Schema(description = "含税单价")
+        @DiffLogField(name = "含税单价")
         private BigDecimal actTaxPrice;
 
         @Schema(description = "价税合计")
+        @DiffLogField(name = "价税合计")
         private BigDecimal allAmount;
 
         @Schema(description = "合计产品价格，单位：元", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "合计产品价格不能为空")
+        @DiffLogField(name = "合计产品价格")
         private BigDecimal totalProductPrice;
 
         @Schema(description = "合计税价，单位：元。 totalTaxPrice = totalPrice * taxPercent", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "合计税价不能为空")
+        @DiffLogField(name = "合计税价")
         private BigDecimal totalTaxPrice;
 
         @Schema(description = "已付款金额")
+        @DiffLogField(name = "已付款金额")
         private BigDecimal payPrice;
 
         @Schema(description = "付款状态")
+        @DiffLogField(name = "付款状态")
         private Integer payStatus;
 
         // ========== 来源关联 ==========
 
         @Schema(description = "采购订单项ID", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "采购订单项ID不能为空")
+        @DiffLogField(name = "采购订单项编号")
         private Long orderItemId;
 
         @Schema(description = "型号规格(产品带出)")
+        @DiffLogField(name = "型号规格")
         private String model;
 
         @Schema(description = "单据来源描述(前端不传)")
+        @DiffLogField(name = "单据来源")
         private String source;
 
         // ========== 人员组织 ==========
 
         @Schema(description = "申请人id")
+        @DiffLogField(name = "申请人编号")
         private Long applicantId;
 
         @Schema(description = "申请人部门id")

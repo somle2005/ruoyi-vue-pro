@@ -21,6 +21,7 @@ import cn.iocoder.yudao.module.system.enums.common.CountryEnum;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.request.TmsFirstMileRequestProductStockRespVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
@@ -185,11 +186,23 @@ public class TmsFirstMileRequestController {
     @PostMapping("/get-product-stock")
     @Operation(summary = "获取产品可用库存")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:query')")
-    public CommonResult<Map<Long, Integer>> getProductStock(@Valid @RequestBody TmsFirstMileRequestProductStockReqVO reqVO) {
+    public CommonResult<TmsFirstMileRequestProductStockRespVO> getProductStock(@Valid @RequestBody TmsFirstMileRequestProductStockReqVO reqVO) {
         Map<Long, WmsStockOwnershipDTO> stockMap = wmsStockOwnershipApi.selectByDeptIdAndProductIdAndCountryIdMap(reqVO.getDeptId(), reqVO.getProductIds(), reqVO.getCountry());
-        // 转换为产品ID -> 可用库存的Map
-        Map<Long, Integer> result = stockMap.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, entry -> entry.getValue().getAvailableQty()));
-        return success(result);
+        
+        // 转换为 ProductStock 列表
+        List<TmsFirstMileRequestProductStockRespVO.ProductStock> productStocks = stockMap.entrySet().stream()
+                .map(entry -> {
+                    TmsFirstMileRequestProductStockRespVO.ProductStock stock = new TmsFirstMileRequestProductStockRespVO.ProductStock();
+                    stock.setProductId(entry.getKey());
+                    stock.setAvailableQty(entry.getValue().getAvailableQty());
+                    return stock;
+                })
+                .collect(Collectors.toList());
+
+        // 构建返回对象
+        TmsFirstMileRequestProductStockRespVO respVO = new TmsFirstMileRequestProductStockRespVO();
+        respVO.setProductStocks(productStocks);
+        return success(respVO);
     }
 
     private List<TmsFirstMileRequestRespVO> bindListResult(List<TmsFirstMileRequestBO> firstMileRequestBOList) {

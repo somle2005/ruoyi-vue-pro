@@ -44,6 +44,7 @@ import com.aspose.words.Document;
 import com.aspose.words.SaveFormat;
 import com.deepoove.poi.XWPFTemplate;
 import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.service.impl.DiffParseFunction;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
@@ -226,7 +227,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_ORDER_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_ORDER_CREATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
+            bizNo = "{{#id}}",
+            extra = "{{#vo.code}}",
             success = LogRecordConstants.SRM_PURCHASE_ORDER_CREATE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseOrder(SrmPurchaseOrderSaveReqVO vo) {
@@ -261,13 +263,16 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         //3.0 设置初始化状态
         initMasterState(orderDO);
         initSlaveStatus(orderItems);
+        //回填log记录
+        LogRecordContext.putVariable("id", orderDO.getId());
         return orderDO.getId();
     }
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_ORDER_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_ORDER_UPDATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
+            bizNo = "{{#vo.id}}",
+            extra = "{{#vo.code}}",
             success = LogRecordConstants.SRM_PURCHASE_ORDER_UPDATE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseOrder(SrmPurchaseOrderSaveReqVO vo) {
@@ -290,12 +295,19 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 1.4 校验订单项的有效性
         List<SrmPurchaseOrderItemDO> purchaseOrderItems = validatePurchaseOrderItems(vo.getItems());
 
+        // 1.5 设置旧值
+        // 3. 设置日志上下文
+        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(purchaseOrder, SrmPurchaseOrderSaveReqVO.class, spk -> {
+            spk.setItems(BeanUtils.toBean(purchaseOrderItems, SrmPurchaseOrderSaveReqVO.Item.class));
+        }));
+
         // 2.1 更新订单
         SrmPurchaseOrderDO updateObj = BeanUtils.toBean(vo, SrmPurchaseOrderDO.class);
         calculateTotalPrice(updateObj, purchaseOrderItems);//计算item合计。
         purchaseOrderMapper.updateById(updateObj);
         // 2.2 更新订单项
         updatePurchaseOrderItemList(vo.getId(), purchaseOrderItems);
+        vo.getItems().sort(Comparator.comparing(SrmPurchaseOrderSaveReqVO.Item::getId, Comparator.nullsFirst(Long::compareTo)));
     }
 
     @Override
@@ -483,7 +495,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_ORDER_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_ORDER_DELETE_SUB_TYPE,
-            bizNo = "{{#businessName}}",
+            bizNo = "{{#ids[0]}}",
+            extra = "{{#businessName}}",
             success = LogRecordConstants.SRM_PURCHASE_ORDER_DELETE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseOrder(List<Long> ids) {
@@ -665,29 +678,30 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         }
         return purchaseOrderItemMapper.selectListByOrderIds(orderIds);
     }
-
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_ORDER_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_ORDER_AUDIT_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
-            success = LogRecordConstants.SRM_PURCHASE_ORDER_AUDIT_SUCCESS)
-    public void reviewPurchaseOrder(SrmPurchaseOrderAuditReqVO req) {
+            bizNo = "{{#vo.orderIds[0]}}",
+            extra = "{{#code}}",
+            success = "{{#vo.reviewed ? (#vo.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购订单【{{#code}}】")
+    public void reviewPurchaseOrder(SrmPurchaseOrderAuditReqVO vo) {
         // 查询采购订单信息
-        SrmPurchaseOrderDO orderDO = purchaseOrderMapper.selectById(req.getOrderIds().get(0));
-
+        SrmPurchaseOrderDO orderDO = purchaseOrderMapper.selectById(vo.getOrderIds().get(0));
         if (orderDO == null) {
             throw exception(PURCHASE_ORDER_NOT_EXISTS);
         }
+        //日志上下文
+        LogRecordContext.putVariable("code", orderDO.getCode());
         // 获取当前订单状态
         SrmAuditStatus currentStatus = SrmAuditStatus.fromCode(orderDO.getAuditStatus());
-        if (Boolean.TRUE.equals(req.getReviewed())) {
+        if (Boolean.TRUE.equals(vo.getReviewed())) {
             // 审核操作
-            if (req.getPass()) {
+            if (vo.getPass()) {
                 log.debug("采购订单通过审核，ID: {}", orderDO.getId());
-                orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
+                orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, vo);
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", orderDO.getId());
-                orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
+                orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, vo);
             }
         } else {
             //反审核
@@ -697,15 +711,17 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 ThrowUtil.ifThrow(b, PURCHASE_ORDER_ITEM_IN_FAIL_EXISTS_IN, item.getId());
             });
             log.debug("采购订单撤回审核，ID: {}", orderDO.getId());
-            orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
+            orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, vo);
         }
     }
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_ORDER_TYPE,
-            subType = LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUB_TYPE,
-            bizNo = "{{#codes}}",
-            success = LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUCCESS)
+            subType = LogRecordConstants.ORDER_SUB_TYPE_SWITCH_EXPRESSION,
+            bizNo = "#itemIds[0]",
+            extra = "{{#codes}}",
+            success = LogRecordConstants.ORDER_SUCCESS_SWITCH_EXPRESSION)
+    @Transactional(rollbackFor = Exception.class)
     public void switchPurchaseOrderStatus(Collection<Long> itemIds, Boolean open) {
         SrmEventEnum event = Boolean.TRUE.equals(open) ? SrmEventEnum.ACTIVATE : SrmEventEnum.MANUAL_CLOSE;
         if (itemIds != null && !itemIds.isEmpty()) {
@@ -725,7 +741,6 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                     LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUB_TYPE);
                     LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUCCESS);
                 }
-                
                 orderItemDOS.forEach(orderItemDO -> orderItemOffMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), event, orderItemDO));
             }
         }
@@ -847,8 +862,10 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_ORDER_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_ORDER_SUBMIT_AUDIT_SUB_TYPE,
-            bizNo = "{{#codes}}",
+            bizNo = "{{#orderIds[0]}}",
+            extra = "{{#codes}}",
             success = LogRecordConstants.SRM_PURCHASE_ORDER_SUBMIT_AUDIT_SUCCESS)
+    @Transactional(rollbackFor = Exception.class)
     public void submitAudit(Collection<Long> orderIds) {
         // 提前校验传入的订单ID是否存在
         if (CollUtil.isEmpty(orderIds)) {

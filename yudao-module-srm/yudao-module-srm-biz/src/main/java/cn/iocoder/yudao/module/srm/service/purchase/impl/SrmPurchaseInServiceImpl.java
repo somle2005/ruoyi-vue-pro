@@ -95,7 +95,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_IN_CREATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
+            bizNo = "{{#id}}",
+            extra = "{{#vo.code}}",
             success = LogRecordConstants.SRM_PURCHASE_IN_CREATE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
@@ -238,7 +239,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_IN_UPDATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
+            bizNo = "{{#vo.id}}",
+            extra = "{{#vo.code}}",
             success = LogRecordConstants.SRM_PURCHASE_IN_UPDATE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
@@ -436,7 +438,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_IN_DELETE_SUB_TYPE,
-            bizNo = "{{#businessName}}",
+            bizNo = "{{#ids[0]}}",
+            extra = "{{#businessName}}",
             success = LogRecordConstants.SRM_PURCHASE_IN_DELETE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseIn(List<Long> ids) {
@@ -533,7 +536,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_IN_AUDIT_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
+            bizNo = "{{#inIds[0]}}",
+            extra = "{{#codes}}",
             success = LogRecordConstants.SRM_PURCHASE_IN_AUDIT_SUCCESS)
     public void submitAudit(Collection<Long> inIds) {
         // 获取单据编号用于日志记录
@@ -551,7 +555,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_IN_SUBMIT_AUDIT_SUB_TYPE,
-            bizNo = "{{#codes}}",
+            bizNo = "{{#req.inId}}",
+            extra = "{{#codes}}",
             success = LogRecordConstants.SRM_PURCHASE_IN_SUBMIT_AUDIT_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void review(SrmPurchaseInAuditReqVO req) {

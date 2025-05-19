@@ -99,14 +99,15 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_REQUEST_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_REQUEST_CREATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
+            bizNo = "{{#id}}",
+            extra = "{{#vo.code}}",
             success = LogRecordConstants.SRM_PURCHASE_REQUEST_CREATE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseRequest(SrmPurchaseRequestSaveReqVO vo) {
         //获取单据日期，不为空就拿，为空就当前时间
         vo.setBillTime(vo.getBillTime() == null ? LocalDateTime.now() : vo.getBillTime());
         //1.校验
-        voSetNo(vo);
+        voSetCode(vo);
         //1.2 校验子表合法
         List<SrmPurchaseRequestItemsDO> itemsDOList = validatePurchaseRequestItems(vo.getItems());
         //1.3 校验部门合法
@@ -126,10 +127,11 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         initMasterStatus(purchaseRequest);
         List<SrmPurchaseRequestItemsDO> itemsDOS = erpPurchaseRequestItemsMapper.selectListByRequestId(purchaseRequest.getId());
         initSlaveStatus(itemsDOS);
+        //
         return id;
     }
 
-    private void voSetNo(SrmPurchaseRequestSaveReqVO vo) {
+    private void voSetCode(SrmPurchaseRequestSaveReqVO vo) {
         //生成单据编号
         if (vo.getCode() != null) {
             ThrowUtil.ifThrow(srmPurchaseRequestMapper.selectByNo(vo.getCode()) != null, PURCHASE_REQUEST_NO_EXISTS_BY_NO, vo.getCode());
@@ -265,7 +267,8 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_REQUEST_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_REQUEST_UPDATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
+            bizNo = "{{#vo.id}}",
+            extra = "{{#vo.code}}",
             success = LogRecordConstants.SRM_PURCHASE_REQUEST_UPDATE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseRequest(SrmPurchaseRequestSaveReqVO vo) {
@@ -282,7 +285,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         //1.5 设置no
         String oldNo = srmPurchaseRequestDO.getCode();
         if (!oldNo.equals(vo.getCode())) {
-            voSetNo(vo);
+            voSetCode(vo);
         }
         // 2 更新
         // 2.2 更新主表
@@ -354,46 +357,50 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_REQUEST_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_REQUEST_AUDIT_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
-            success = LogRecordConstants.SRM_PURCHASE_REQUEST_AUDIT_SUCCESS)
-    public void reviewPurchaseOrder(SrmPurchaseRequestAuditReqVO req) {
+            bizNo = "{{#vo.requestId}}",
+            extra = "{{#code}}",
+            success = "{{#vo.reviewed ? (#vo.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购申请单【{{#code}}】")
+    public void reviewPurchaseOrder(SrmPurchaseRequestAuditReqVO vo) {
         // 查询采购申请单信息用于日志记录
-        SrmPurchaseRequestDO requestDO = srmPurchaseRequestMapper.selectById(req.getRequestId());
+        SrmPurchaseRequestDO requestDO = srmPurchaseRequestMapper.selectById(vo.getRequestId());
         LogRecordContext.putVariable("vo", requestDO);
-        LogRecordContext.putVariable("reqVO", req);
+        LogRecordContext.putVariable("reqVO", vo);
 
         if (requestDO == null) {
-            log.error("采购申请单不存在，ID: {}", req.getRequestId());
-            throw ServiceExceptionUtil.exception(PURCHASE_REQUEST_NOT_EXISTS, req.getRequestId());
+            log.error("采购申请单不存在，ID: {}", vo.getRequestId());
+            throw ServiceExceptionUtil.exception(PURCHASE_REQUEST_NOT_EXISTS, vo.getRequestId());
         }
+        //log
+        LogRecordContext.putVariable("code", requestDO.getCode());
         // 获取当前申请单状态
         SrmAuditStatus currentStatus = SrmAuditStatus.fromCode(requestDO.getAuditStatus());
-        if (Boolean.TRUE.equals(req.getReviewed())) {
+        if (Boolean.TRUE.equals(vo.getReviewed())) {
             // 审核操作
-            if (req.getPass()) {
-                log.debug("采购申请单通过审核，ID: {}", req.getRequestId());
-                auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
+            if (vo.getPass()) {
+                log.debug("采购申请单通过审核，ID: {}", vo.getRequestId());
+                auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, vo);
             } else {
-                log.debug("采购申请单拒绝审核，ID: {}", req.getRequestId());
-                auditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
+                log.debug("采购申请单拒绝审核，ID: {}", vo.getRequestId());
+                auditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, vo);
             }
         } else {
             //反审核
             //存在对应的采购订单项->异常
-            List<SrmPurchaseRequestItemsDO> itemsDOS = erpPurchaseRequestItemsMapper.selectListByRequestId(req.getRequestId());
+            List<SrmPurchaseRequestItemsDO> itemsDOS = erpPurchaseRequestItemsMapper.selectListByRequestId(vo.getRequestId());
             for (SrmPurchaseRequestItemsDO itemsDO : itemsDOS) {
                 ThrowUtil.ifThrow(srmPurchaseOrderItemMapper.selectCountByPurchaseApplyItemId(itemsDO.getId()) > 0, PURCHASE_REQUEST_ITEM_ORDERED,
                     itemsDO.getId());
             }
-            log.debug("采购申请单撤回审核，ID: {}", req.getRequestId());
-            auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
+            log.debug("采购申请单撤回审核，ID: {}", vo.getRequestId());
+            auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, vo);
         }
     }
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_REQUEST_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_REQUEST_SUBMIT_AUDIT_SUB_TYPE,
-            bizNo = "{{#codes}}",
+            bizNo = "{{#ids[0]}}",
+            extra = "{{#codes}}",
             success = LogRecordConstants.SRM_PURCHASE_REQUEST_SUBMIT_AUDIT_SUCCESS)
     public void submitAudit(Collection<Long> ids) {
         // 获取单据编号用于日志记录
@@ -419,9 +426,10 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
      */
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_REQUEST_TYPE,
-            subType = LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUB_TYPE,
-            bizNo = "{{#codes}}",
-            success = LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUCCESS)
+            subType = LogRecordConstants.SUB_TYPE_SWITCH_EXPRESSION,
+            bizNo = LogRecordConstants.BIZ_NO_SWITCH_EXPRESSION,
+            extra = "{{#codes}}",
+            success = LogRecordConstants.SUCCESS_SWITCH_EXPRESSION)
     @Transactional(rollbackFor = Exception.class)
     public void switchPurchaseOrderStatus(Long requestId, List<Long> itemIds, Boolean enable) {
         SrmEventEnum event = Boolean.TRUE.equals(enable) ? SrmEventEnum.ACTIVATE : SrmEventEnum.MANUAL_CLOSE;
@@ -469,7 +477,8 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_REQUEST_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_REQUEST_DELETE_SUB_TYPE,
-            bizNo = "{{#businessName}}",
+            bizNo = "{{#ids[0]}}",
+            extra = "{{#businessName}}",
             success = LogRecordConstants.SRM_PURCHASE_REQUEST_DELETE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseRequest(List<Long> ids) {
