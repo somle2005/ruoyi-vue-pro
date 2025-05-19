@@ -41,6 +41,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -154,7 +155,7 @@ public class TmsFirstMileController {
     @PutMapping("/submit-audit")
     @Operation(summary = "提交头程单审核")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:audit')")
-    public CommonResult<Boolean> submitAudit(@RequestBody List<Long> ids) {
+    public CommonResult<Boolean> submitAudit(@RequestBody @Size(min = 1, message = "提交审核的单据数量不小于1") List<Long> ids) {
         firstMileService.submitAudit(ids);
         return success(true);
     }
