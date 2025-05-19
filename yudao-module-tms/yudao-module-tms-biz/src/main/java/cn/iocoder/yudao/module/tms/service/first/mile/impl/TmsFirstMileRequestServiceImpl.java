@@ -100,7 +100,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_CREATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
+            bizNo = "{{#id}}",
+            extra = "{{#vo.code}}",
             success = LogRecordConstants.TMS_FIRST_MILE_REQUEST_CREATE_SUCCESS)
     public Long createFirstMileRequest(@Validated TmsFirstMileRequestSaveReqVO vo) {
         // 插入
@@ -133,6 +134,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         //初始化主子表状态
         initMasterStatus(firstMileRequest);
 
+        LogRecordContext.putVariable("id", firstMileRequest.getId());
         // 返回
         return firstMileRequest.getId();
     }
@@ -230,8 +232,9 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_UPDATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_REQUEST_UPDATE_SUCCESS)
+            bizNo = "{{#id}}",
+            extra = "{{#code}}",
+            success = "更新了头程申请单【{{#code}}】: {_DIFF{#requestDO}}")
     public TmsFirstMileRequestDO updateFirstMileRequestStatus(Long id, Integer offStatus, Integer orderStatus, Integer auditStatus, String auditMsg) {
         // 获取头程申请单
         TmsFirstMileRequestDO requestDO = validateFirstMileRequestExists(id);
@@ -248,6 +251,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         }
         // 执行更新
         firstMileRequestMapper.updateById(requestDO);
+        //
+        LogRecordContext.putVariable("code", requestDO.getCode());
         return requestDO;
     }
 
@@ -348,7 +353,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_AUDIT_SUB_TYPE,
             bizNo = "{{#reqVO.id}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_REQUEST_AUDIT_SUCCESS)
+            success = "{{#reqVO.reviewed ? (#reqVO.pass ? '审核通过' : '审核不通过') : '反审核'}}了头程申请单【{{#vo.code}}】")
     public void review(TmsFirstMileRequestAuditReqVO reqVO) {
         // 获取头程申请单信息，用于记录日志
         TmsFirstMileRequestDO request = validateFirstMileRequestExists(reqVO.getRequestId());
@@ -459,8 +464,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_UPDATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_REQUEST_UPDATE_SUCCESS)
+            bizNo = "{{#vo.id}}",
+            success = "更新了头程申请单【{{#vo.code}}】: {_DIFF{#vo}}")
     public void updateFirstMileRequest(@Validated TmsFirstMileRequestSaveReqVO vo) {
         // 校验存在
         TmsFirstMileRequestDO oldDo = validateFirstMileRequestExists(vo.getId());

@@ -106,7 +106,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_CREATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
+            bizNo = "{{#id}}",
             success = LogRecordConstants.TMS_FIRST_MILE_CREATE_SUCCESS)
     public Long createFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
         vo.initId(); //初始化上游ID
@@ -137,6 +137,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         tmsVesselTrackingService.createVesselTracking(vo.getVesselTracking());
 
         auditStateMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, TmsFirstMileAuditReqVO.builder().id(firstMileId).build());
+        //
+        LogRecordContext.putVariable("id", firstMileId);
         return firstMileId;
     }
 
@@ -156,8 +158,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_UPDATE_SUB_TYPE,
-            bizNo = "{{#vo.code}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_UPDATE_SUCCESS)
+            bizNo = "{{#vo.id}}",
+            success = "更新了头程单【{{#vo.code}}】: {_DIFF{#vo}}")
     public void updateFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
         vo.initId(); //初始化上游ID
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(vo.getId());
@@ -186,14 +188,17 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_DELETE_SUB_TYPE,
             bizNo = "{{#id}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_DELETE_SUCCESS)
+            success = "删除了头程单【{{#code}}】")
     public void deleteFirstMile(Long id) {
-        statusCheckForEdit(validateFirstMileExists(id), FIRST_MILE_DELETE_FAIL_APPROVE);
+        TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(id);
+        statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_DELETE_FAIL_APPROVE);
         firstMileMapper.deleteById(id);
         //删明细
         deleteFirstMileItemByFirstMileId(id);
         //删费用
         deleteFeeBySourceId(id);
+        //log
+        LogRecordContext.putVariable("code", tmsFirstMileDO.getCode());
     }
 
     private TmsFirstMileDO validateFirstMileExists(Long id) {
@@ -286,7 +291,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_AUDIT_SUB_TYPE,
             bizNo = "{{#reqVO.id}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_AUDIT_SUCCESS)
+            success = "{{#reqVO.reviewed ? (#reqVO.pass ? '审核通过' : '审核不通过') : '反审核'}}了头程单【{{#code}}】")
     public void review(TmsFirstMileAuditReqVO reqVO) {
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(reqVO.getId());
         if (Boolean.TRUE.equals(reqVO.getReviewed())) {
@@ -305,6 +310,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             //反审核
             auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.WITHDRAW_REVIEW, reqVO);
         }
+        //
+        LogRecordContext.putVariable("code", tmsFirstMileDO.getCode());
     }
     // ==================== 子表（头程单明细） ====================
     @Override

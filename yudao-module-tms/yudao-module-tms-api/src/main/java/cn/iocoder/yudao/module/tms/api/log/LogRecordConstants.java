@@ -20,7 +20,7 @@ public interface LogRecordConstants {
     /**
      * 头程单业务类型
      */
-    String TMS_FIRST_MILE_TYPE = "头程单";
+    String TMS_FIRST_MILE_TYPE = "TMS头程单";
 
     // ========== 操作类型 ==========
     /**
@@ -56,7 +56,7 @@ public interface LogRecordConstants {
     /**
      * 删除头程单日志模板
      */
-    String TMS_FIRST_MILE_DELETE_SUCCESS = "删除了头程单【{{#businessName}}】";
+    String TMS_FIRST_MILE_DELETE_SUCCESS = "删除了头程单【{{#code}}】";
     /**
      * 审核头程单日志模板
      */
@@ -70,7 +70,7 @@ public interface LogRecordConstants {
     /**
      * 头程申请单业务类型
      */
-    String TMS_FIRST_MILE_REQUEST_TYPE = "头程申请单";
+    String TMS_FIRST_MILE_REQUEST_TYPE = "TMS头程申请单";
     /**
      * 创建头程申请单
      */
@@ -86,7 +86,7 @@ public interface LogRecordConstants {
     /**
      * 更新头程申请单日志模板
      */
-    String TMS_FIRST_MILE_REQUEST_UPDATE_SUCCESS = "更新了头程申请单【{{#vo.code}}】: {_DIFF{#vo}}";
+    String TMS_FIRST_MILE_REQUEST_UPDATE_SUCCESS = "更新了头程申请单【{{#code}}】: {_DIFF{#vo}}";
     /**
      * 删除头程申请单
      */
