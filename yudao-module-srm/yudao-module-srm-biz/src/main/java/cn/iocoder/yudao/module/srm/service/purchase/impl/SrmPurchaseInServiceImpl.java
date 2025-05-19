@@ -11,7 +11,6 @@ import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
-import cn.iocoder.yudao.module.srm.api.log.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPageReqVO;
@@ -24,6 +23,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInItemMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseReturnItemMapper;
 import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
+import cn.iocoder.yudao.module.srm.enums.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmPurchaseOrderSourceEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
@@ -441,7 +441,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseIn(List<Long> ids) {
         // 获取业务名称用于日志记录
-        List<SrmPurchaseInDO> ins = purchaseInMapper.selectBatchIds(ids);
+        List<SrmPurchaseInDO> ins = purchaseInMapper.selectByIds(ids);
         String businessName = CollUtil.join(ins.stream().map(SrmPurchaseInDO::getCode).collect(Collectors.toList()), ",");
         LogRecordContext.putVariable("businessName", businessName);
         

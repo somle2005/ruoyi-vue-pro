@@ -14,7 +14,6 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
-import cn.iocoder.yudao.module.srm.api.log.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmPayCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmQuantityOrderedCountDTO;
@@ -30,6 +29,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderItemMapper
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestItemsMapper;
 import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
+import cn.iocoder.yudao.module.srm.enums.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmPurchaseOrderSourceEnum;
 import cn.iocoder.yudao.module.srm.enums.status.*;
@@ -246,6 +246,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         voSetNo(vo);
         // 2.1 插入订单
         SrmPurchaseOrderDO orderDO = BeanUtils.toBean(vo, SrmPurchaseOrderDO.class, in -> in.setCode(vo.getCode()));
+        //合计total
         calculateTotalPrice(orderDO, orderItems);
         // 2.1.1 插入单据日期+结算日期
         orderDO.setBillTime(vo.getBillTime() == null ? LocalDateTime.now() : vo.getBillTime());

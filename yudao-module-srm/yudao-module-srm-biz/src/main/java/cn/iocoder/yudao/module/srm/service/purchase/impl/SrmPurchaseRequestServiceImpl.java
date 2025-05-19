@@ -9,7 +9,6 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductUnitApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import cn.iocoder.yudao.module.srm.api.log.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmQuantityOrderedCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.SrmPurchaseOrderSaveReqVO;
@@ -23,6 +22,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderItemMapper
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestItemsMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestMapper;
 import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
+import cn.iocoder.yudao.module.srm.enums.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmOffStatus;
@@ -397,7 +397,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             success = LogRecordConstants.SRM_PURCHASE_REQUEST_SUBMIT_AUDIT_SUCCESS)
     public void submitAudit(Collection<Long> ids) {
         // 获取单据编号用于日志记录
-        List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectBatchIds(ids);
+        List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectByIds(ids);
         String codes = CollUtil.join(requests.stream().map(SrmPurchaseRequestDO::getCode).collect(Collectors.toList()), ",");
         LogRecordContext.putVariable("codes", codes);
         
@@ -451,7 +451,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseRequest(List<Long> ids) {
         // 获取业务名称用于日志记录
-        List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectBatchIds(ids);
+        List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectByIds(ids);
         String businessName = CollUtil.join(requests.stream().map(SrmPurchaseRequestDO::getCode).collect(Collectors.toList()), ",");
         LogRecordContext.putVariable("businessName", businessName);
         

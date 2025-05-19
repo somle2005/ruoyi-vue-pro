@@ -314,7 +314,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         LogRecordContext.putVariable("codes", codes);
 
         // 检查参数是否为空
-        if (ids == null || ids.isEmpty()) {
+        if (ids.isEmpty()) {
             throw exception(FIRST_MILE_REQUEST_NOT_EXISTS, ids);
         }
 
