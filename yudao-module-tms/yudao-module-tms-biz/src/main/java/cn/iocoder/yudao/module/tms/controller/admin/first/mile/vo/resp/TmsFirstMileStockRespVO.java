@@ -19,38 +19,35 @@ public class TmsFirstMileStockRespVO {
     @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long productId;
 
-    @Schema(description = "产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "测试产品")
-    private String productName;
-
-    @Schema(description = "产品SKU", requiredMode = Schema.RequiredMode.REQUIRED, example = "SKU001")
-    private String productSku;
-
     // ========== 仓库信息 ==========
 
     @Schema(description = "仓库编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long warehouseId;
-
-    @Schema(description = "仓库名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "测试仓库")
-    private String warehouseName;
 
     // ========== 公司信息 ==========
 
     @Schema(description = "公司编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long companyId;
 
-    @Schema(description = "公司名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "测试公司")
-    private String companyName;
-
-    @Schema(description = "公司简称", requiredMode = Schema.RequiredMode.REQUIRED, example = "测试")
-    private String companyAbbr;
-
     // ========== 入库信息 ==========
 
     @Schema(description = "入库部门编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long inboundDeptId;
 
-    @Schema(description = "可用数量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
-    private Integer availableQuantity;
+    @Schema(description = "入库公司编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
+    private Long inboundCompanyId;
+
+    @Schema(description = "入库状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
+    private Integer inboundStatus;
+
+    @Schema(description = "实际入库量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
+    private Integer actualQty;
+
+    @Schema(description = "计划入库量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
+    private Integer planQty;
+
+    @Schema(description = "已上架量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
+    private Integer shelvedQty;
 
     @Schema(description = "批次号", requiredMode = Schema.RequiredMode.REQUIRED, example = "BATCH001")
     private String batchNo;
@@ -58,13 +55,16 @@ public class TmsFirstMileStockRespVO {
     @Schema(description = "入库时间", requiredMode = Schema.RequiredMode.REQUIRED)
     private LocalDateTime inboundTime;
 
+    @Schema(description = "入库单号", requiredMode = Schema.RequiredMode.REQUIRED, example = "IN001")
+    private String inboundCode;
+
     // ========== 库位信息 ==========
 
     @Schema(description = "库位编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long binId;
 
-    @Schema(description = "库位编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "BIN001")
-    private String binCode;
+//    @Schema(description = "库位编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "BIN001")
+//    private String binCode;
 
     @Schema(description = "仓位可用库存", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
     private Integer binAvailableQty;
@@ -86,9 +86,11 @@ public class TmsFirstMileStockRespVO {
     @Schema(description = "上架单号", example = "PICK001")
     private String pickupCode;
 
-    @Schema(description = "入库单号", example = "IN001")
-    private String inboundCode;
+    // ========== 其他信息 ==========
 
     @Schema(description = "库龄", example = "30")
     private Integer age;
+
+    @Schema(description = "备注", example = "测试备注")
+    private String remark;
 } 

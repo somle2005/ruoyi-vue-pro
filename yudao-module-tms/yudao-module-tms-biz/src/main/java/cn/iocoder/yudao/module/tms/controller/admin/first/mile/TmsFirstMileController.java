@@ -22,6 +22,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstM
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileStockQueryReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileExcelVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockRespVO;
@@ -170,22 +171,40 @@ public class TmsFirstMileController {
         return success(firstMileService.getLatestCode());
     }
 
-    @GetMapping("/stock/list")
+    @PostMapping("/stock/list")
     @Operation(summary = "批量查询产品库存信息")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
-    public CommonResult<Map<Long, List<TmsFirstMileStockRespVO>>> getStockList(
-            @RequestParam("warehouseId") Long warehouseId,
-            @RequestParam("deptId") Long deptId,
-            @RequestParam("productIds") Set<Long> productIds) {
-        // 1. 调用WMS API获取库存信息
-        Map<Long, List<WmsInboundItemBinDTO>> stockMap = wmsInboundItemApi.getInboundItemBinMap(warehouseId, productIds, true);
+    public CommonResult<Map<Long, List<TmsFirstMileStockRespVO>>> getStockList(@Validated @RequestBody TmsFirstMileStockQueryReqVO reqVO) {
+        // 1. 获取所有产品ID
+        Set<Long> productIds = reqVO.getRelations().stream()
+                .map(TmsFirstMileStockQueryReqVO.ProductDeptRelation::getProductId)
+                .collect(Collectors.toSet());
 
-        // 2. 转换为前端VO
+        // 2. 调用WMS API获取库存信息
+        Map<Long, List<WmsInboundItemBinDTO>> stockMap = wmsInboundItemApi.getInboundItemBinMap(
+                reqVO.getWarehouseId(), productIds, true);
+
+        // 3. 转换为前端VO
         Map<Long, List<TmsFirstMileStockRespVO>> result = new HashMap<>();
         stockMap.forEach((productId, stockList) -> {
+            // 获取该产品对应的部门ID
+            Set<Long> deptIds = reqVO.getRelations().stream()
+                    .filter(relation -> relation.getProductId().equals(productId))
+                    .map(TmsFirstMileStockQueryReqVO.ProductDeptRelation::getDeptId)
+                    .collect(Collectors.toSet());
+
             List<TmsFirstMileStockRespVO> voList = stockList.stream()
-                    .filter(stock -> deptId.equals(stock.getInboundDeptId())) // 过滤部门
-                    .map(stock -> BeanUtils.toBean(stock, TmsFirstMileStockRespVO.class))
+                    .filter(stock -> deptIds.contains(stock.getInboundDeptId())) // 过滤部门
+                    .map(stock -> {
+                        // 设置额外的关联查询字段
+//                        vo.setProductName(stock.getProductName());
+//                        vo.setProductSku(stock.getProductSku());
+//                        vo.setWarehouseName(stock.getWarehouseName());
+//                        vo.setCompanyName(stock.getCompanyName());
+//                        vo.setCompanyAbbr(stock.getCompanyAbbr());
+//                        vo.setBinCode(stock.getBinCode());
+                        return BeanUtils.toBean(stock, TmsFirstMileStockRespVO.class);
+                    })
                     .collect(Collectors.toList());
             result.put(productId, voList);
         });
