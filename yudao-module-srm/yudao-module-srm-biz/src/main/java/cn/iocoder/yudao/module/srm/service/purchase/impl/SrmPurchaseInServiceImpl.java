@@ -11,6 +11,7 @@ import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
+import cn.iocoder.yudao.module.srm.api.log.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPageReqVO;
@@ -34,6 +35,8 @@ import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -90,6 +93,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     private StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseInAuditReqVO> purchaseInAuditStateMachine;
 
     @Override
+    @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
+            subType = LogRecordConstants.SRM_PURCHASE_IN_CREATE_SUB_TYPE,
+            bizNo = "{{#vo.code}}",
+            success = LogRecordConstants.SRM_PURCHASE_IN_CREATE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
@@ -229,6 +236,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     @Override
+    @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
+            subType = LogRecordConstants.SRM_PURCHASE_IN_UPDATE_SUB_TYPE,
+            bizNo = "{{#vo.code}}",
+            success = LogRecordConstants.SRM_PURCHASE_IN_UPDATE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
@@ -423,14 +434,22 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     @Override
+    @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
+            subType = LogRecordConstants.SRM_PURCHASE_IN_DELETE_SUB_TYPE,
+            bizNo = "{{#businessName}}",
+            success = LogRecordConstants.SRM_PURCHASE_IN_DELETE_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseIn(List<Long> ids) {
+        // 获取业务名称用于日志记录
+        List<SrmPurchaseInDO> ins = purchaseInMapper.selectBatchIds(ids);
+        String businessName = CollUtil.join(ins.stream().map(SrmPurchaseInDO::getCode).collect(Collectors.toList()), ",");
+        LogRecordContext.putVariable("businessName", businessName);
+        
         // 1. 已审批->无法删除
-        List<SrmPurchaseInDO> purchaseIns = purchaseInMapper.selectByIds(ids);
-        if (CollUtil.isEmpty(purchaseIns)) {
+        if (CollUtil.isEmpty(ins)) {
             return;
         }
-        for (SrmPurchaseInDO inDO : purchaseIns) {
+        for (SrmPurchaseInDO inDO : ins) {
             //校验,入库项存在对应的退货项 -> 异常
             purchaseInItemMapper.selectListByInId(inDO.getId()).forEach(purchaseInItem -> {
                 boolean b = srmPurchaseReturnItemMapper.existsByInItemId(purchaseInItem.getId());
@@ -439,20 +458,19 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         }
 
         //2. 联动回滚状态数量
-        purchaseIns.forEach(purchaseIn -> {
+        ins.forEach(purchaseIn -> {
             if (SrmAuditStatus.APPROVED.getCode().equals(purchaseIn.getAuditStatus())) {
                 throw exception(PURCHASE_IN_DELETE_FAIL_APPROVE, purchaseIn.getCode());
             }
             rollbackSlaveStatus(purchaseInItemMapper.selectListByInId(purchaseIn.getId()));
         });
         // 2. 遍历删除，并记录操作日志
-        purchaseIns.forEach(purchaseIn -> {
+        ins.forEach(purchaseIn -> {
             // 2.1 删除订单
             purchaseInMapper.deleteById(purchaseIn.getId());
             // 2.2 删除订单项
             purchaseInItemMapper.deleteByInId(purchaseIn.getId());
         });
-
     }
 
     public SrmPurchaseInDO validatePurchaseInExists(Long id) {
@@ -513,7 +531,16 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     @Override
+    @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
+            subType = LogRecordConstants.SRM_PURCHASE_IN_AUDIT_SUB_TYPE,
+            bizNo = "{{#vo.code}}",
+            success = LogRecordConstants.SRM_PURCHASE_IN_AUDIT_SUCCESS)
     public void submitAudit(Collection<Long> inIds) {
+        // 获取单据编号用于日志记录
+        List<SrmPurchaseInDO> ins = purchaseInMapper.selectByIds(inIds);
+        String codes = CollUtil.join(ins.stream().map(SrmPurchaseInDO::getCode).collect(Collectors.toList()), ",");
+        LogRecordContext.putVariable("codes", codes);
+        
         for (Long inId : inIds) {
             SrmPurchaseInDO srmPurchaseInDO = validatePurchaseInExists(inId);
             purchaseInAuditStateMachine.fireEvent(SrmAuditStatus.fromCode(srmPurchaseInDO.getAuditStatus()), SrmEventEnum.SUBMIT_FOR_REVIEW,
@@ -522,6 +549,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     @Override
+    @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
+            subType = LogRecordConstants.SRM_PURCHASE_IN_SUBMIT_AUDIT_SUB_TYPE,
+            bizNo = "{{#codes}}",
+            success = LogRecordConstants.SRM_PURCHASE_IN_SUBMIT_AUDIT_SUCCESS)
     @Transactional(rollbackFor = Exception.class)
     public void review(SrmPurchaseInAuditReqVO req) {
         // 查询采购订单信息
