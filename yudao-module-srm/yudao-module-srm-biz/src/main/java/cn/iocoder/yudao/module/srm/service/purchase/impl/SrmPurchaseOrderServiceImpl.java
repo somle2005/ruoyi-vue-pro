@@ -229,7 +229,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             subType = LogRecordConstants.SRM_PURCHASE_ORDER_CREATE_SUB_TYPE,
             bizNo = "{{#id}}",
             extra = "{{#vo.code}}",
-            success = LogRecordConstants.SRM_PURCHASE_ORDER_CREATE_SUCCESS)
+            success = "创建了采购订单【{{#vo.code}}】")
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseOrder(SrmPurchaseOrderSaveReqVO vo) {
         // 1.1 校验订单项的有效性
@@ -273,7 +273,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             subType = LogRecordConstants.SRM_PURCHASE_ORDER_UPDATE_SUB_TYPE,
             bizNo = "{{#vo.id}}",
             extra = "{{#vo.code}}",
-            success = LogRecordConstants.SRM_PURCHASE_ORDER_UPDATE_SUCCESS)
+            success = "更新了采购订单【{{#vo.code}}】: {_DIFF{#vo}}")
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseOrder(SrmPurchaseOrderSaveReqVO vo) {
         SrmPurchaseOrderDO purchaseOrder = validatePurchaseOrderExists(vo.getId());
@@ -497,7 +497,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             subType = LogRecordConstants.SRM_PURCHASE_ORDER_DELETE_SUB_TYPE,
             bizNo = "{{#ids[0]}}",
             extra = "{{#businessName}}",
-            success = LogRecordConstants.SRM_PURCHASE_ORDER_DELETE_SUCCESS)
+            success = "删除了采购订单【{{#businessName}}】")
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseOrder(List<Long> ids) {
         // 获取业务名称用于日志记录
@@ -720,7 +720,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             subType = "{{#open ? '开启采购订单' : '关闭采购订单'}}",
             bizNo = "{{#itemIds[0]}}",
             extra = "{{#codes}}",
-            success = "{{#open ? '开启' : '关闭'}}了采购订单【{{#codes}}】")
+            success = "{{#open ? '开启了采购订单【' + #codes + '】' : '关闭了采购订单【' + #codes + '】'}}")
     @Transactional(rollbackFor = Exception.class)
     public void switchPurchaseOrderStatus(List<Long> itemIds, Boolean open) {
         SrmEventEnum event = Boolean.TRUE.equals(open) ? SrmEventEnum.ACTIVATE : SrmEventEnum.MANUAL_CLOSE;
@@ -729,18 +729,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             List<SrmPurchaseOrderItemDO> orderItemDOS = validatePurchaseOrderItemExists(itemIds);
             if (!orderItemDOS.isEmpty()) {
                 // 获取订单编号用于日志记录
-                List<SrmPurchaseOrderDO> orders = purchaseOrderMapper.selectByIds(
-                        orderItemDOS.stream().map(SrmPurchaseOrderItemDO::getOrderId).collect(Collectors.toSet()));
+                List<SrmPurchaseOrderDO> orders = purchaseOrderMapper.selectByIds(orderItemDOS.stream().map(SrmPurchaseOrderItemDO::getOrderId).collect(Collectors.toSet()));
                 String codes = CollUtil.join(orders.stream().map(SrmPurchaseOrderDO::getCode).collect(Collectors.toList()), ",");
                 LogRecordContext.putVariable("codes", codes);
-//                // 根据操作类型设置日志模板
-//                if (Boolean.TRUE.equals(open)) {
-//                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUB_TYPE);
-//                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUCCESS);
-//                } else {
-//                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUB_TYPE);
-//                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUCCESS);
-//                }
                 orderItemDOS.forEach(orderItemDO -> orderItemOffMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), event, orderItemDO));
             }
         }
@@ -864,7 +855,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             subType = LogRecordConstants.SRM_PURCHASE_ORDER_SUBMIT_AUDIT_SUB_TYPE,
             bizNo = "{{#orderIds[0]}}",
             extra = "{{#codes}}",
-            success = LogRecordConstants.SRM_PURCHASE_ORDER_SUBMIT_AUDIT_SUCCESS)
+            success = "提交了采购订单【{{#codes}}】审核")
     @Transactional(rollbackFor = Exception.class)
     public void submitAudit(Collection<Long> orderIds) {
         // 提前校验传入的订单ID是否存在

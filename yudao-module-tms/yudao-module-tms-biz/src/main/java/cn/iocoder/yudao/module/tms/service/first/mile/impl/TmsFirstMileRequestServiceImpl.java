@@ -102,7 +102,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_CREATE_SUB_TYPE,
             bizNo = "{{#id}}",
             extra = "{{#vo.code}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_REQUEST_CREATE_SUCCESS)
+            success = "创建了头程申请单【{{#vo.code}}】")
     public Long createFirstMileRequest(@Validated TmsFirstMileRequestSaveReqVO vo) {
         // 插入
         TmsFirstMileRequestDO firstMileRequest = TmsFirstMileRequestConvert.convert(vo);
@@ -174,7 +174,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_DELETE_SUB_TYPE,
             bizNo = "{{#id}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_REQUEST_DELETE_SUCCESS)
+            success = "删除了头程申请单【{{#businessName}}】")
     public void deleteFirstMileRequest(Long id) {
         // 获取头程申请单信息，用于记录日志
         TmsFirstMileRequestDO request = validateFirstMileRequestExists(id);
@@ -306,7 +306,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_SUBMIT_AUDIT_SUB_TYPE,
             bizNo = "{{#ids[0]}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_REQUEST_SUBMIT_AUDIT_SUCCESS)
+            success = "提交了头程申请单【{{#codes}}】审核")
     public void submitAudit(List<Long> ids) {
         // 获取头程申请单信息，用于记录日志
         List<TmsFirstMileRequestDO> requests = ids.stream()

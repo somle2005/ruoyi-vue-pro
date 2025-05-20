@@ -97,7 +97,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             subType = LogRecordConstants.SRM_PURCHASE_IN_CREATE_SUB_TYPE,
             bizNo = "{{#id}}",
             extra = "{{#vo.code}}",
-            success = LogRecordConstants.SRM_PURCHASE_IN_CREATE_SUCCESS)
+            success = "创建了采购入库单【{{#vo.code}}】")
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
@@ -241,7 +241,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             subType = LogRecordConstants.SRM_PURCHASE_IN_UPDATE_SUB_TYPE,
             bizNo = "{{#vo.id}}",
             extra = "{{#vo.code}}",
-            success = LogRecordConstants.SRM_PURCHASE_IN_UPDATE_SUCCESS)
+            success = "更新了采购入库单【{{#vo.code}}】: {_DIFF{#vo}}")
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
@@ -440,7 +440,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             subType = LogRecordConstants.SRM_PURCHASE_IN_DELETE_SUB_TYPE,
             bizNo = "{{#ids[0]}}",
             extra = "{{#businessName}}",
-            success = LogRecordConstants.SRM_PURCHASE_IN_DELETE_SUCCESS)
+            success = "删除了采购入库单【{{#businessName}}】")
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseIn(List<Long> ids) {
         // 获取业务名称用于日志记录
@@ -538,7 +538,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             subType = LogRecordConstants.SRM_PURCHASE_IN_AUDIT_SUB_TYPE,
             bizNo = "{{#inIds[0]}}",
             extra = "{{#codes}}",
-            success = LogRecordConstants.SRM_PURCHASE_IN_AUDIT_SUCCESS)
+            success = "提交了采购入库单【{{#codes}}】审核")
     public void submitAudit(Collection<Long> inIds) {
         // 获取单据编号用于日志记录
         List<SrmPurchaseInDO> ins = purchaseInMapper.selectByIds(inIds);
@@ -557,7 +557,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             subType = LogRecordConstants.SRM_PURCHASE_IN_SUBMIT_AUDIT_SUB_TYPE,
             bizNo = "{{#req.inId}}",
             extra = "{{#codes}}",
-            success = LogRecordConstants.SRM_PURCHASE_IN_SUBMIT_AUDIT_SUCCESS)
+            success = "{{#req.reviewed ? (#req.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购入库单【{{#codes}}】")
     @Transactional(rollbackFor = Exception.class)
     public void review(SrmPurchaseInAuditReqVO req) {
         // 查询采购订单信息

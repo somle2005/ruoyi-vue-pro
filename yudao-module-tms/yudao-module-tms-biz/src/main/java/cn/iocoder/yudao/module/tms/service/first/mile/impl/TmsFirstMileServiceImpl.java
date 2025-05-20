@@ -107,7 +107,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_CREATE_SUB_TYPE,
             bizNo = "{{#id}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_CREATE_SUCCESS)
+            success = "创建了头程单【{{#vo.code}}】")
     public Long createFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
         vo.initId(); //初始化上游ID
         //1.0 校验
@@ -250,7 +250,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
             subType = LogRecordConstants.TMS_FIRST_MILE_SUBMIT_AUDIT_SUB_TYPE,
             bizNo = "{{#ids[0]}}",
-            success = LogRecordConstants.TMS_FIRST_MILE_SUBMIT_AUDIT_SUCCESS)
+            success = "提交了头程单【{{#codes}}】审核")
     public void submitAudit(List<Long> ids) {
         // 1. 获取头程单信息，用于记录日志
         List<TmsFirstMileDO> firstMiles = ids.stream()

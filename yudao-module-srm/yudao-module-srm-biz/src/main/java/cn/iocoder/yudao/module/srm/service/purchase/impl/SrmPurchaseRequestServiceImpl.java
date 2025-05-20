@@ -101,7 +101,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             subType = LogRecordConstants.SRM_PURCHASE_REQUEST_CREATE_SUB_TYPE,
             bizNo = "{{#id}}",
             extra = "{{#vo.code}}",
-            success = LogRecordConstants.SRM_PURCHASE_REQUEST_CREATE_SUCCESS)
+            success = "创建了采购申请单【{{#vo.code}}】")
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseRequest(SrmPurchaseRequestSaveReqVO vo) {
         //获取单据日期，不为空就拿，为空就当前时间
@@ -269,7 +269,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             subType = LogRecordConstants.SRM_PURCHASE_REQUEST_UPDATE_SUB_TYPE,
             bizNo = "{{#vo.id}}",
             extra = "{{#vo.code}}",
-            success = LogRecordConstants.SRM_PURCHASE_REQUEST_UPDATE_SUCCESS)
+            success = "更新了采购申请单【{{#vo.code}}】: {_DIFF{#vo}}")
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseRequest(SrmPurchaseRequestSaveReqVO vo) {
         //1 校验
@@ -401,7 +401,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             subType = LogRecordConstants.SRM_PURCHASE_REQUEST_SUBMIT_AUDIT_SUB_TYPE,
             bizNo = "{{#ids[0]}}",
             extra = "{{#codes}}",
-            success = LogRecordConstants.SRM_PURCHASE_REQUEST_SUBMIT_AUDIT_SUCCESS)
+            success = "提交了采购申请单【{{#codes}}】审核")
     public void submitAudit(Collection<Long> ids) {
         // 获取单据编号用于日志记录
         List<SrmPurchaseRequestDO> requests = srmPurchaseRequestMapper.selectByIds(ids);
@@ -429,7 +429,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             subType = LogRecordConstants.SUB_TYPE_SWITCH_EXPRESSION,
             bizNo = LogRecordConstants.BIZ_NO_SWITCH_EXPRESSION,
             extra = "{{#codes}}",
-            success = LogRecordConstants.SUCCESS_SWITCH_EXPRESSION)
+            success = "{{#enable ? '开启了采购申请单【' + #codes + '】' : '关闭了采购申请单【' + #codes + '】'}}")
     @Transactional(rollbackFor = Exception.class)
     public void switchPurchaseOrderStatus(Long requestId, List<Long> itemIds, Boolean enable) {
         SrmEventEnum event = Boolean.TRUE.equals(enable) ? SrmEventEnum.ACTIVATE : SrmEventEnum.MANUAL_CLOSE;
@@ -439,14 +439,6 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             if (requestDO != null) {
                 // 获取申请单编号用于日志记录
                 LogRecordContext.putVariable("codes", requestDO.getCode());
-                // 根据操作类型设置日志模板
-                if (Boolean.TRUE.equals(enable)) {
-                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUB_TYPE);
-                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUCCESS);
-                } else {
-                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_REQUEST_CLOSE_SUB_TYPE);
-                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_REQUEST_CLOSE_SUCCESS);
-                }
                 offMachine.fireEvent(SrmOffStatus.fromCode(requestDO.getOffStatus()), event, requestDO);
             }
         } else {
@@ -459,15 +451,6 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
                             itemsDOList.stream().map(SrmPurchaseRequestItemsDO::getRequestId).collect(Collectors.toSet()));
                     String codes = CollUtil.join(requests.stream().map(SrmPurchaseRequestDO::getCode).collect(Collectors.toList()), ",");
                     LogRecordContext.putVariable("codes", codes);
-                    // 根据操作类型设置日志模板
-                    if (Boolean.TRUE.equals(enable)) {
-                        LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUB_TYPE);
-                        LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_REQUEST_OPEN_SUCCESS);
-                    } else {
-                        LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_REQUEST_CLOSE_SUB_TYPE);
-                        LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_REQUEST_CLOSE_SUCCESS);
-                    }
-                    
                     itemsDOList.forEach(itemsDO -> requestItemsDOStateMachine.fireEvent(SrmOffStatus.fromCode(itemsDO.getOffStatus()), event, itemsDO));
                 }
             }
@@ -479,7 +462,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             subType = LogRecordConstants.SRM_PURCHASE_REQUEST_DELETE_SUB_TYPE,
             bizNo = "{{#ids[0]}}",
             extra = "{{#businessName}}",
-            success = LogRecordConstants.SRM_PURCHASE_REQUEST_DELETE_SUCCESS)
+            success = "删除了采购申请单【{{#businessName}}】")
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseRequest(List<Long> ids) {
         // 获取业务名称用于日志记录

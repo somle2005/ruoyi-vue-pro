@@ -30,30 +30,12 @@ public class SrmPurchaseOrderItemStatusMachine {
     private BaseFailCallbackImpl baseFailCallbackImpl;
 
 
-
     @Autowired
     Action<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecuteActionImpl;
-    //采购订单子项状态机
-    @Bean(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
-    public StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> getPurchaseOrderItemStateMachine() {
-        StateMachineBuilder<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> builder = StateMachineBuilderFactory.create();
-        // 初始化状态
-        builder.internalTransition().within(SrmOffStatus.OPEN).on(SrmEventEnum.OFF_INIT).perform(orderItemOffActionImpl);
-        // 开启
-        builder.externalTransitions().fromAmong(SrmOffStatus.MANUAL_CLOSED).to(SrmOffStatus.OPEN).on(SrmEventEnum.ACTIVATE).perform(orderItemOffActionImpl);
-        // 手动关闭
-        builder.externalTransition().from(SrmOffStatus.OPEN).to(SrmOffStatus.MANUAL_CLOSED).on(SrmEventEnum.MANUAL_CLOSE).perform(orderItemOffActionImpl);
-        //自动关闭
-        builder.externalTransition().from(SrmOffStatus.OPEN).to(SrmOffStatus.CLOSED).on(SrmEventEnum.AUTO_CLOSE).perform(orderItemOffActionImpl);
-        //关闭撤销
-        builder.externalTransitions().fromAmong(SrmOffStatus.MANUAL_CLOSED, SrmOffStatus.CLOSED, SrmOffStatus.OPEN).to(SrmOffStatus.OPEN).on(SrmEventEnum.CANCEL_DELETE).perform(orderItemOffActionImpl);
-        //错误回调函数
-        builder.setFailCallback(baseFailCallbackImpl);
-        return builder.build(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME);
-    }
     @Autowired
     Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemInActionImpl;
-    // 采购订单子项执行状态机
+    @Autowired
+    Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> orderItemPayActionImpl;
     @Bean(PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
     public StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> getPurchaseOrderItemExecutionStateMachine() {
         StateMachineBuilder<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> builder = StateMachineBuilderFactory.create();
@@ -85,7 +67,7 @@ public class SrmPurchaseOrderItemStatusMachine {
         return builder.build(PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME);
     }
     @Autowired
-    Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> orderItemPayActionImpl;
+    private Action<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> itemOffActionImpl;
     @Bean(PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
     public StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> buildPurchaseOrderItemStorageStateMachine() {
         StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> builder = StateMachineBuilderFactory.create();
@@ -125,8 +107,25 @@ public class SrmPurchaseOrderItemStatusMachine {
 
         return builder.build(PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME);
     }
-    @Autowired
-    private Action<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemOffActionImpl;
+
+    //采购订单子项状态机
+    @Bean(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
+    public StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> getPurchaseOrderItemStateMachine() {
+        StateMachineBuilder<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> builder = StateMachineBuilderFactory.create();
+        // 初始化状态
+        builder.internalTransition().within(SrmOffStatus.OPEN).on(SrmEventEnum.OFF_INIT).perform(itemOffActionImpl);
+        // 开启
+        builder.externalTransition().from(SrmOffStatus.MANUAL_CLOSED).to(SrmOffStatus.OPEN).on(SrmEventEnum.ACTIVATE).perform(itemOffActionImpl);
+        // 手动关闭
+        builder.externalTransition().from(SrmOffStatus.OPEN).to(SrmOffStatus.MANUAL_CLOSED).on(SrmEventEnum.MANUAL_CLOSE).perform(itemOffActionImpl);
+        //自动关闭
+        builder.externalTransition().from(SrmOffStatus.OPEN).to(SrmOffStatus.CLOSED).on(SrmEventEnum.AUTO_CLOSE).perform(itemOffActionImpl);
+        //关闭撤销
+        builder.externalTransitions().fromAmong(SrmOffStatus.MANUAL_CLOSED, SrmOffStatus.CLOSED, SrmOffStatus.OPEN).to(SrmOffStatus.OPEN).on(SrmEventEnum.CANCEL_DELETE).perform(itemOffActionImpl);
+        //错误回调函数
+        builder.setFailCallback(baseFailCallbackImpl);
+        return builder.build(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME);
+    }
     @Bean(PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME)
     public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> getPurchaseOrderItemPaymentStateMachine() {
         StateMachineBuilder<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> builder = StateMachineBuilderFactory.create();
