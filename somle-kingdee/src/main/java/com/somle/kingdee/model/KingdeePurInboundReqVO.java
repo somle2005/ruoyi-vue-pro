@@ -3,6 +3,7 @@ package com.somle.kingdee.model;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.Builder;
 import lombok.Data;
 
 import java.sql.Timestamp;
@@ -12,6 +13,7 @@ import java.util.List;
 /**
  * 采购入库单列表查询请求对象
  */
+@Builder
 @Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class KingdeePurInboundReqVO {

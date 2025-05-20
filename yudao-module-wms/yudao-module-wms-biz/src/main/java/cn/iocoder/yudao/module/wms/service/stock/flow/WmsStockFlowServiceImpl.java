@@ -205,6 +205,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     /**
      * 创建仓库库存变化流水
      */
+    @Override
     public void createForStockWarehouse(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockWarehouseDO stockWarehouseDO, Integer quantity, Long reasonId, Long reasonItemId) {
         createFor(reason, WmsStockType.WAREHOUSE, direction, stockWarehouseDO.getId(), stockWarehouseDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
             // 在制量
@@ -229,6 +230,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     /**
      * 创建所有者库存变化流水
      */
+    @Override
     public void createForStockOwnership(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockOwnershipDO stockOwnershipDO, Integer quantity, Long reasonId, Long reasonItemId) {
         createFor(reason, WmsStockType.OWNERSHIP, direction, stockOwnershipDO.getId(), stockOwnershipDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
             // 采购计划量
@@ -253,6 +255,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     /**
      * 创建仓位库存变化流水
      */
+    @Override
     public void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId, Long inboundItemFlowId) {
         createFor(reason, WmsStockType.BIN, direction, stockBinDO.getId(), stockBinDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
             // 采购计划量
@@ -414,6 +417,15 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     }
 
     @Override
+    public void assembleBatchAvailableQty(List<WmsStockFlowRespVO> list) {
+        for (WmsStockFlowRespVO respVO : list) {
+            WmsInboundItemFlowSimpleVO inboundItemFlowSimpleVO = respVO.getInboundItemFlow();
+            Integer getOutboundAvailableQty = Objects.isNull(inboundItemFlowSimpleVO)? 0 : inboundItemFlowSimpleVO.getOutboundAvailableQty();
+            respVO.setAvailableQty(getOutboundAvailableQty - respVO.getDeltaQty());
+        }
+    }
+
+    @Override
     public void assembleStockWarehouse(List<WmsStockFlowRespVO> list) {
         List<WmsWarehouseProductVO> wmsWarehouseProductVOList = new ArrayList<>();
         for (WmsStockFlowRespVO flowRespVO : list) {
@@ -458,6 +470,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     /**
      * 按 ID 集合查询 WmsStockFlowDO
      */
+    @Override
     public List<WmsStockFlowDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();
