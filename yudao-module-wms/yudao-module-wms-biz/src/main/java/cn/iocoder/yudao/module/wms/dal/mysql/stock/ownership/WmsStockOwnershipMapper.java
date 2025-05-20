@@ -26,7 +26,8 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         // 连接产品视图
         wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockOwnershipDO::getProductId).likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode());
         // 按仓库
-        wrapper.eqIfPresent(WmsStockOwnershipDO::getWarehouseId, reqVO.getWarehouseId()).// 按产品ID
+        // 按产品ID
+        wrapper.eqIfPresent(WmsStockOwnershipDO::getWarehouseId, reqVO.getWarehouseId()).
         eqIfPresent(WmsStockOwnershipDO::getProductId, reqVO.getProductId());
         wrapper.eqIfPresent(WmsStockOwnershipDO::getCompanyId, reqVO.getCompanyId());
         wrapper.eqIfPresent(WmsStockOwnershipDO::getDeptId, reqVO.getDeptId());
@@ -34,6 +35,7 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getAvailableQty, reqVO.getAvailableQty());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getOutboundPendingQty, reqVO.getOutboundPendingQty());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getShelvingPendingQty, reqVO.getShelvingPendingQty());
+        wrapper.ne(WmsStockOwnershipDO::getAvailableQty, 0);
         return selectPage(reqVO, wrapper);
     }
 
@@ -69,10 +71,13 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         MPJLambdaWrapperX<WmsStockOwnershipDO> wrapper = new MPJLambdaWrapperX<>();
         // 连接仓库表
         wrapper.innerJoin(WmsWarehouseDO.class, WmsWarehouseDO::getId, WmsStockOwnershipDO::getWarehouseId)
-                .eq(WmsWarehouseDO::getCountry, country) //限定国家
+                //限定国家
+                .eq(WmsWarehouseDO::getCountry, country)
                 // 按部门ID和产品ID查询
-                .eqIfPresent(WmsStockOwnershipDO::getDeptId, deptId) //指定部门
-                .in(WmsStockOwnershipDO::getProductId, productIds); //指定产品集合
+                //指定部门
+                .eqIfPresent(WmsStockOwnershipDO::getDeptId, deptId)
+                //指定产品集合
+                .in(WmsStockOwnershipDO::getProductId, productIds);
         return selectList(wrapper);
     }
 

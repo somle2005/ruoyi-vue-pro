@@ -18,10 +18,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -153,5 +159,26 @@ public class WmsStockBinMoveController {
         saveReqVO.setItemList(BeanUtils.toBean(impVOList, WmsStockBinMoveItemSaveReqVO.class));
         stockBinMoveService.createStockBinMove(saveReqVO);
         return success(true);
+    }
+
+    @GetMapping("/download-template")
+    @Operation(summary = "下载模板 批量库位")
+    @PreAuthorize("@ss.hasPermission('wms:stock-bin-move:download-template')")
+    public ResponseEntity<byte[]> downloadExcelTemplate() throws IOException {
+        ClassPathResource resource = new ClassPathResource("templates/inventory-bin-import.xlsx");
+        byte[] fileContent;
+        try (InputStream inputStream = resource.getInputStream()) {
+            fileContent = inputStream.readAllBytes();
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        // 设置文件名
+        String fileName = "批量库位模板.xlsx";
+        headers.set(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + fileName + "\"");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(fileContent);
     }
 }

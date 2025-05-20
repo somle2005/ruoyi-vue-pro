@@ -108,4 +108,6 @@ public interface WmsStockFlowService {
     void assembleBinMove(List<WmsStockFlowRespVO> list);
 
     void assembleOwnershipMove(List<WmsStockFlowRespVO> list);
+
+    void assembleBatchAvailableQty(List<WmsStockFlowRespVO> list);
 }
