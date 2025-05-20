@@ -18,11 +18,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -170,6 +175,27 @@ public class WmsStockOwnershipMoveController {
         stockOwnershipMoveService.createStockOwnershipMove(saveReqVO);
 
         return success(true);
+    }
+
+    @GetMapping("/download-template")
+    @Operation(summary = "下载模板 库存归属")
+    @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move:download-template')")
+    public ResponseEntity<byte[]> downloadExcelTemplate() throws IOException {
+        ClassPathResource resource = new ClassPathResource("templates/ownership-move-import.xlsx");
+        byte[] fileContent;
+        try (InputStream inputStream = resource.getInputStream()) {
+            fileContent = inputStream.readAllBytes();
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        // 设置文件名
+        String fileName = "库存归属模板.xlsx";
+        headers.set(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + fileName + "\"");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(fileContent);
     }
 
 }

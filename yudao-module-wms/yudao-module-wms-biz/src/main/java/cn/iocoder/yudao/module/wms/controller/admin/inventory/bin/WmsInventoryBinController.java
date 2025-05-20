@@ -28,11 +28,16 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
@@ -191,6 +196,28 @@ public class WmsInventoryBinController {
         return success(inventoryBinRespVOList);
     }
 
+    @GetMapping("/download-product-template")
+    @Operation(summary = "下载模板 盘点导入产品转换")
+    @PreAuthorize("@ss.hasPermission('wms:inbound-item:download-product-template')")
+    public ResponseEntity<byte[]> downloadProductExcelTemplate() throws IOException {
+            ClassPathResource resource = new ClassPathResource("templates/inventory-product-import.xlsx");
+            byte[] fileContent;
+            try (InputStream inputStream = resource.getInputStream()) {
+                fileContent = inputStream.readAllBytes();
+            }
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+            // 设置文件名
+            String fileName = "盘点导入产品转换.xlsx";
+            headers.set(HttpHeaders.CONTENT_DISPOSITION,
+                    "attachment; filename=\"" + fileName + "\"");
+
+            return ResponseEntity.ok()
+                        .headers(headers)
+                        .body(fileContent);
+    }
+
+
     @PostMapping("/import-excel")
     @Operation(summary = "导入盘点结果")
     @PreAuthorize("@ss.hasPermission('wms:inbound-item:import')")
@@ -284,5 +311,26 @@ public class WmsInventoryBinController {
         inventoryBinService.assembleBin(inventoryBinRespVOS);
         // inventoryBinService.saveInventoryBinList(inventory, dosInDB);
         return success(inventoryBinRespVOS);
+    }
+
+    @GetMapping("/download-template")
+    @Operation(summary = "下载模板 盘点结果")
+    @PreAuthorize("@ss.hasPermission('wms:inbound-item:download-template')")
+    public ResponseEntity<byte[]> downloadExcelTemplate() throws IOException {
+        ClassPathResource resource = new ClassPathResource("templates/import-item-result.xlsx");
+        byte[] fileContent;
+        try (InputStream inputStream = resource.getInputStream()) {
+            fileContent = inputStream.readAllBytes();
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        // 设置文件名
+        String fileName = "盘点结果模板.xlsx";
+        headers.set(HttpHeaders.CONTENT_DISPOSITION,
+                "attachment; filename=\"" + fileName + "\"");
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .body(fileContent);
     }
 }

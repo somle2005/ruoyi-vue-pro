@@ -34,6 +34,7 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getAvailableQty, reqVO.getAvailableQty());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getOutboundPendingQty, reqVO.getOutboundPendingQty());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getShelvingPendingQty, reqVO.getShelvingPendingQty());
+        wrapper.ne(WmsStockOwnershipDO::getAvailableQty, 0);
         return selectPage(reqVO, wrapper);
     }
 
