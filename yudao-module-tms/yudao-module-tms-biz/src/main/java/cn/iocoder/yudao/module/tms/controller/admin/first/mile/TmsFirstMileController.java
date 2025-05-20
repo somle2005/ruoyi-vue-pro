@@ -22,13 +22,19 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstM
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileStockQueryReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileExcelVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockListRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
+import cn.iocoder.yudao.module.wms.api.inbound.item.WmsInboundItemApi;
+import cn.iocoder.yudao.module.wms.api.inbound.item.dto.WmsInboundItemBinDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -36,6 +42,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -49,6 +56,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.IMPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - TMS头程单")
@@ -64,7 +72,8 @@ public class TmsFirstMileController {
     private final ErpProductApi erpProductApi;
     private final WmsWarehouseApi wmsWarehouseApi;
     private final DeptApi deptApi;
-
+    private final WmsInboundItemApi wmsInboundItemApi;
+    private final TmsFirstMileService tmsFirstMileService;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程单")
@@ -127,6 +136,7 @@ public class TmsFirstMileController {
 
     @PostMapping("/import-excel")
     @Operation(summary = "导入头程单 Excel")
+    @ApiAccessLog(operateType = IMPORT)
     @PreAuthorize("@ss.hasPermission('tms:first-mile:import')")
     public CommonResult<Boolean> importFirstMileExcel(@RequestParam("file") MultipartFile file) throws Exception {
         List<TmsFirstMileSaveReqVO> list = ExcelUtils.read(file, TmsFirstMileSaveReqVO.class);
@@ -147,7 +157,7 @@ public class TmsFirstMileController {
     @PutMapping("/submit-audit")
     @Operation(summary = "提交头程单审核")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:audit')")
-    public CommonResult<Boolean> submitAudit(@RequestBody List<Long> ids) {
+    public CommonResult<Boolean> submitAudit(@RequestBody @Size(min = 1, message = "提交审核的单据数量不小于1") List<Long> ids) {
         firstMileService.submitAudit(ids);
         return success(true);
     }
@@ -167,6 +177,45 @@ public class TmsFirstMileController {
         return success(firstMileService.getLatestCode());
     }
 
+    @PostMapping("/stock/list")
+    @Operation(summary = "批量查询产品库存信息")
+    @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
+    public CommonResult<TmsFirstMileStockListRespVO> getStockList(@Validated @RequestBody TmsFirstMileStockQueryReqVO reqVO) {
+        // 1. 获取所有产品ID
+        Set<Long> productIds = reqVO.getRelations().stream()
+                .map(TmsFirstMileStockQueryReqVO.ProductDeptRelation::getProductId)
+                .collect(Collectors.toSet());
+
+        // 2. 调用WMS API获取库存信息
+        Map<Long, List<WmsInboundItemBinDTO>> stockMap = wmsInboundItemApi.getInboundItemBinMap(
+                reqVO.getWarehouseId(), productIds, true);
+
+        // 3. 转换为前端VO
+        List<TmsFirstMileStockListRespVO.ProductStockVO> productStocks = new ArrayList<>();
+        stockMap.forEach((productId, stockList) -> {
+            // 获取该产品对应的部门ID
+            Set<Long> deptIds = reqVO.getRelations().stream()
+                    .filter(relation -> relation.getProductId().equals(productId))
+                    .map(TmsFirstMileStockQueryReqVO.ProductDeptRelation::getDeptId)
+                    .collect(Collectors.toSet());
+
+            List<TmsFirstMileStockRespVO> voList = stockList.stream()
+                    .filter(stock -> deptIds.contains(stock.getInboundDeptId())) // 过滤部门
+                    .map(stock -> BeanUtils.toBean(stock, TmsFirstMileStockRespVO.class))
+                    .collect(Collectors.toList());
+
+            // 创建产品库存VO
+            TmsFirstMileStockListRespVO.ProductStockVO productStockVO = new TmsFirstMileStockListRespVO.ProductStockVO();
+            productStockVO.setProductId(productId);
+            productStockVO.setStocks(voList);
+            productStocks.add(productStockVO);
+        });
+
+        // 4. 封装返回结果
+        TmsFirstMileStockListRespVO respVO = new TmsFirstMileStockListRespVO();
+        respVO.setProductStocks(productStocks);
+        return success(respVO);
+    }
 
     private List<TmsFirstMileRespVO> bindResult(List<TmsFirstMileBO> beans) {
         if (CollUtil.isEmpty(beans)) {
@@ -219,6 +268,10 @@ public class TmsFirstMileController {
                 bo.getToWarehouseId() == null ? Stream.empty() : Stream.of(bo.getToWarehouseId())
             ))
             .collect(Collectors.toSet()));
+        //申请单MAP，根据requestItemId
+        Map<Long, TmsFirstMileRequestDO> requestMap = tmsFirstMileService.getRequestMap(beans.stream()
+                .flatMap(bo -> bo.getItems() == null ? Stream.empty() : bo.getItems().stream().map(TmsFirstMileItemDO::getRequestItemId))
+                .collect(Collectors.toSet()));
 
         return beans.stream().map(bo -> {
             TmsFirstMileRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRespVO.class);
@@ -248,6 +301,8 @@ public class TmsFirstMileController {
                     MapUtils.findAndThen(deptMap, item.getDeptId(), dept -> itemRespVO.setDeptName(dept.getName()));
                     //仓库
                     MapUtils.findAndThen(warehouseMap, item.getFromWarehouseId(), warehouse -> itemRespVO.setFromWarehouseName(warehouse.getName()));
+                    //上游单据CODE
+                    MapUtils.findAndThen(requestMap, item.getRequestItemId(), request -> itemRespVO.setRequestCode(request.getCode()));
 
                     return itemRespVO;
                 }).collect(Collectors.toList());
@@ -266,7 +321,7 @@ public class TmsFirstMileController {
             }
             // 设置最新跟踪信息 1:1
             if (bo.getTracking() != null) {
-                respVO.setTracking(BeanUtils.toBean(bo.getTracking(), TmsVesselTrackingRespVO.class, peek -> {
+                respVO.setVesselTracking(BeanUtils.toBean(bo.getTracking(), TmsVesselTrackingRespVO.class, peek -> {
 
                 }));
             }

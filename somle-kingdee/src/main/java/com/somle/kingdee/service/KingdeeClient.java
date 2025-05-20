@@ -8,6 +8,7 @@ import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
+import com.somle.kingdee.util.CustomFieldCache;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -15,7 +16,6 @@ import org.springframework.beans.BeanUtils;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeMap;
@@ -192,7 +192,7 @@ public class KingdeeClient {
 
 
     /**
-     * 根绝字段名称获取id，如果有该字段、则设置value，没有就日志记录
+     * 根据字段名称获取id，如果有该字段、则设置value，没有就日志记录
      *
      * @param reqVO       对象
      * @param displayName 属性名称
@@ -200,13 +200,21 @@ public class KingdeeClient {
      */
     private void setCustomFieldSafely(KingdeeProductSaveReqVO reqVO, String displayName, String fieldValue) {
         try {
-            KingdeeCustomField customField = getCustomFieldByDisplayName("bd_material", displayName);
+            KingdeeCustomField customField = CustomFieldCache.getCustomField("bd_material", displayName,
+                    () -> getCustomFieldByDisplayName("bd_material", displayName));
             if (customField != null) {
                 reqVO.setCustomField(customField, fieldValue);
             }
         } catch (Exception e) {
             log.debug("custom field " + displayName + " skipped for " + token.getAccountName(), e);
         }
+    }
+
+    /**
+     * 清除自定义字段缓存
+     */
+    public void clearCustomFieldCache() {
+        CustomFieldCache.invalidateByEntity("bd_material");
     }
 
     public KingdeeResponse addSupplier(KingdeeSupplier kingdeeSupplier) {
@@ -326,12 +334,12 @@ public class KingdeeClient {
             .findFirst().get();
     }
 
-    public Stream<KingdeePage> streamPurRequest(KingdeePurRequestReqVO vo) {
+    public Stream<KingdeePage> getAllPurRequest(KingdeePurRequestReqVO vo) {
         log.debug("fetching purchase request");
         String endUrl = "/jdy/v2/scm/pur_request";
         return StreamX.iterate(
             getPage(JsonUtilsX.toJSONObject(vo), endUrl),
-            page -> page.hasNext(),
+                KingdeePage::hasNext,
             page -> {
                 vo.setPage(String.valueOf(page.getPage() + 1));
                 return getPage(JsonUtilsX.toJSONObject(vo), endUrl);
@@ -339,12 +347,12 @@ public class KingdeeClient {
         );
     }
 
-    public Stream<KingdeePage> streamPurOrder(KingdeePurOrderReqVO vo) {
+    public Stream<KingdeePage> getAllPurOrder(KingdeePurOrderReqVO vo) {
         log.debug("fetching purchase order");
         String endUrl = "/jdy/v2/scm/pur_order";
         return StreamX.iterate(
             getPage(JsonUtilsX.toJSONObject(vo), endUrl),
-            page -> page.hasNext(),
+                KingdeePage::hasNext,
             page -> {
                 vo.setPage(String.valueOf(page.getPage() + 1));
                 return getPage(JsonUtilsX.toJSONObject(vo), endUrl);
@@ -353,22 +361,34 @@ public class KingdeeClient {
     }
 
     /**
-     * 获取采购单入库列表
+     * 获取采购入库单列表
      *
-     * @param vo 请求参数
-     *           2025.03.07 gumaomao
+     * @param vo 查询参数
+     * @return 分页数据流
      */
-    public Stream<KingdeePage> streamPurInbound(KingdeePurInboundReqVO vo) {
-        log.debug("fetching purchase inbound");
+    public Stream<KingdeePage> getAllPurInbound(KingdeePurInboundReqVO vo) {
+        log.debug("获取采购入库单列表");
         String endpoint = "/jdy/v2/scm/pur_inbound";
         return StreamX.iterate(
             getPage(JsonUtilsX.toJSONObject(vo), endpoint),
-            page -> page.hasNext(),
+                KingdeePage::hasNext,
             page -> {
                 vo.setPage(String.valueOf(page.getPage() + 1));
                 return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
             }
         );
+    }
+
+    /**
+     * 获取单页采购入库单列表
+     *
+     * @param vo 查询参数
+     * @return 单页数据
+     */
+    public KingdeePage getPurInboundPage(KingdeePurInboundReqVO vo) {
+        log.debug("获取单页采购入库单列表");
+        String endpoint = "/jdy/v2/scm/pur_inbound";
+        return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
     }
 
     public KingdeePurOrderDetail getPurOrderDetail(String purOrderNumber) {
@@ -387,6 +407,75 @@ public class KingdeeClient {
         return response.getData(KingdeePurRequestDetail.class);
     }
 
+    /**
+     * 保存采购订单
+     *
+     * @param order 采购订单数据_入参
+     * @return KingdeeResponse
+     */
+    public KingdeeResponse savePurOrder(KingdeePurOrderSaveReqVO order) {
+        log.debug("保存采购订单");
+        String endUrl = "/jdy/v2/scm/pur_order";
+        TreeMap<String, String> params = new TreeMap<>();
+        return postResponse(endUrl, params, order);
+    }
+
+    /**
+     * 保存采购入库单
+     *
+     * @param inbound 采购入库单数据
+     * @return KingdeeResponse
+     */
+    public KingdeeResponse savePurInbound(KingdeePurInboundSaveReqVO inbound) {
+        log.debug("保存采购入库单");
+        String endUrl = "/jdy/v2/scm/pur_inbound";
+        TreeMap<String, String> params = new TreeMap<>();
+        return postResponse(endUrl, params, inbound);
+    }
+
+    /**
+     * 保存采购退货单
+     *
+     * @param returnOrder 采购退货单数据
+     * @return KingdeeResponse
+     */
+    public KingdeeResponse savePurReturn(KingdeePurReturnSaveReqVO returnOrder) {
+        log.debug("保存采购退货单");
+        String endUrl = "/jdy/v2/scm/pur_ret";
+        TreeMap<String, String> params = new TreeMap<>();
+        return postResponse(endUrl, params, returnOrder);
+    }
+
+    /**
+     * 获取采购退货单列表
+     *
+     * @param vo 查询参数
+     * @return 分页数据流
+     */
+    public Stream<KingdeePage> getAllPurReturn(KingdeePurReturnReqVO vo) {
+        log.debug("获取采购退货单列表");
+        String endpoint = "/jdy/v2/scm/pur_ret";
+        return StreamX.iterate(
+                getPage(JsonUtilsX.toJSONObject(vo), endpoint),
+                KingdeePage::hasNext,
+                page -> {
+                    vo.setPage(String.valueOf(page.getPage() + 1));
+                    return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
+                }
+        );
+    }
+
+    /**
+     * 获取单页采购退货单列表
+     *
+     * @param vo 查询参数
+     * @return 单页数据
+     */
+    public KingdeePage getPurReturnPage(KingdeePurReturnReqVO vo) {
+        log.debug("获取单页采购退货单列表");
+        String endpoint = "/jdy/v2/scm/pur_ret";
+        return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
+    }
 
     private KingdeeResponse fetchResponse(String requestMethod, String endUrl, TreeMap<String, String> params, Object body) {
         String cts = String.valueOf(System.currentTimeMillis());

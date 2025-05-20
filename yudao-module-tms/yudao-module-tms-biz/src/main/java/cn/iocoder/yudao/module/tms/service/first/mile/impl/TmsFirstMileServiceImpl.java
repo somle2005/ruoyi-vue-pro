@@ -12,6 +12,7 @@ import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.api.first.mile.request.FistMileRequestItemDTO;
+import cn.iocoder.yudao.module.tms.api.log.LogRecordConstants;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
@@ -22,9 +23,12 @@ import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.TmsFirstMileMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item.TmsFirstMileItemMapper;
+import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.TmsFirstMileRequestMapper;
+import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
 import cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
@@ -37,6 +41,8 @@ import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileReques
 import cn.iocoder.yudao.module.tms.service.vessel.tracking.TmsVesselTrackingService;
 import cn.iocoder.yudao.module.wms.api.outbound.WmsOutboundApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -46,10 +52,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.time.LocalDateTime;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.*;
@@ -66,6 +70,8 @@ import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQU
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
+    private final TmsFirstMileRequestMapper firstMileRequestMapper;
+    private final TmsFirstMileRequestItemMapper firstMileRequestItemMapper;
     private final TmsFirstMileMapper firstMileMapper;
     private final TmsFirstMileItemMapper firstMileItemMapper;
     private final TmsFeeService feeService;
@@ -98,6 +104,10 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Override
     @Idempotent
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
+            subType = LogRecordConstants.TMS_FIRST_MILE_CREATE_SUB_TYPE,
+            bizNo = "{{#id}}",
+            success = LogRecordConstants.TMS_FIRST_MILE_CREATE_SUCCESS)
     public Long createFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
         vo.initId(); //初始化上游ID
         //1.0 校验
@@ -127,6 +137,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         tmsVesselTrackingService.createVesselTracking(vo.getVesselTracking());
 
         auditStateMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, TmsFirstMileAuditReqVO.builder().id(firstMileId).build());
+        //
+        LogRecordContext.putVariable("id", firstMileId);
         return firstMileId;
     }
 
@@ -144,6 +156,10 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
+            subType = LogRecordConstants.TMS_FIRST_MILE_UPDATE_SUB_TYPE,
+            bizNo = "{{#vo.id}}",
+            success = "更新了头程单【{{#vo.code}}】: {_DIFF{#vo}}")
     public void updateFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
         vo.initId(); //初始化上游ID
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(vo.getId());
@@ -169,13 +185,20 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
+            subType = LogRecordConstants.TMS_FIRST_MILE_DELETE_SUB_TYPE,
+            bizNo = "{{#id}}",
+            success = "删除了头程单【{{#code}}】")
     public void deleteFirstMile(Long id) {
-        statusCheckForEdit(validateFirstMileExists(id), FIRST_MILE_DELETE_FAIL_APPROVE);
+        TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(id);
+        statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_DELETE_FAIL_APPROVE);
         firstMileMapper.deleteById(id);
         //删明细
         deleteFirstMileItemByFirstMileId(id);
         //删费用
         deleteFeeBySourceId(id);
+        //log
+        LogRecordContext.putVariable("code", tmsFirstMileDO.getCode());
     }
 
     private TmsFirstMileDO validateFirstMileExists(Long id) {
@@ -224,9 +247,24 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
+            subType = LogRecordConstants.TMS_FIRST_MILE_SUBMIT_AUDIT_SUB_TYPE,
+            bizNo = "{{#ids[0]}}",
+            success = LogRecordConstants.TMS_FIRST_MILE_SUBMIT_AUDIT_SUCCESS)
     public void submitAudit(List<Long> ids) {
+        // 1. 获取头程单信息，用于记录日志
+        List<TmsFirstMileDO> firstMiles = ids.stream()
+                .map(this::validateFirstMileExists)
+                .toList();
+        // 记录操作日志上下文
+        String codes = firstMiles.stream()
+                .map(TmsFirstMileDO::getCode)
+                .collect(Collectors.joining("、"));
+        LogRecordContext.putVariable("codes", codes);
+
+        // 2. 更新状态
         // 检查参数是否为空
-        if (ids == null || ids.isEmpty()) {
+        if (ids.isEmpty()) {
             throw exception(FIRST_MILE_ID_NOT_EXISTS, ids);
         }
 
@@ -250,24 +288,30 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void review(TmsFirstMileAuditReqVO req) {
-        TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(req.getId());
-        if (Boolean.TRUE.equals(req.getReviewed())) {
-            if (req.getPass()) {
+    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
+            subType = LogRecordConstants.TMS_FIRST_MILE_AUDIT_SUB_TYPE,
+            bizNo = "{{#reqVO.id}}",
+            success = "{{#reqVO.reviewed ? (#reqVO.pass ? '审核通过' : '审核不通过') : '反审核'}}了头程单【{{#code}}】")
+    public void review(TmsFirstMileAuditReqVO reqVO) {
+        TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(reqVO.getId());
+        if (Boolean.TRUE.equals(reqVO.getReviewed())) {
+            if (reqVO.getPass()) {
                 //1. 通过
-                auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.AGREE, req);
+                auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.AGREE, reqVO);
                 //2. 生成对应出库单
-                TmsFirstMileBO tmsFirstMileBO = getFirstMileBO(req.getId());
+                TmsFirstMileBO tmsFirstMileBO = getFirstMileBO(reqVO.getId());
                 wmsOutboundApi.createOutbound(TmsFirstMileConvert.convertOutbound(tmsFirstMileBO));
             } else {
                 //不通过
-                auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, req);
+                auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, reqVO);
             }
         } else {
             //TODO api 校验是否存在出库单，出库单是否删除了？报废了？
             //反审核
-            auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.WITHDRAW_REVIEW, req);
+            auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.WITHDRAW_REVIEW, reqVO);
         }
+        //
+        LogRecordContext.putVariable("code", tmsFirstMileDO.getCode());
     }
     // ==================== 子表（头程单明细） ====================
     @Override
@@ -422,5 +466,47 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         validateFirstMileExists(fistMileDTO.getId());
         TmsFirstMileDO firstMileDO = TmsFirstMileConvert.convertDO(fistMileDTO);
         firstMileMapper.updateById(firstMileDO);
+    }
+
+    /**
+     * 批量查询申请单MAP
+     *
+     * @param requestItemIds 申请项IDS
+     * @return 申请单MAP
+     */
+    @Override
+    public Map<Long, TmsFirstMileRequestDO> getRequestMap(Set<Long> requestItemIds) {
+        if (CollectionUtils.isEmpty(requestItemIds)) {
+            return Collections.emptyMap();
+        }
+
+        // 1. 查询子项信息，获取主单ID列表
+        List<TmsFirstMileRequestItemDO> items = firstMileRequestItemMapper.selectByIds(requestItemIds);
+        if (CollectionUtils.isEmpty(items)) {
+            return Collections.emptyMap();
+        }
+
+        // 2. 获取主单ID列表
+        Set<Long> requestIds = items.stream()
+                .map(TmsFirstMileRequestItemDO::getRequestId)
+                .collect(Collectors.toSet());
+
+
+        // 3. 查询主单信息
+        List<TmsFirstMileRequestDO> requests = firstMileRequestMapper.selectByIds(requestIds);
+        if (CollectionUtils.isEmpty(requests)) {
+            return Collections.emptyMap();
+        }
+
+        // 4. 构建主单Map
+        Map<Long, TmsFirstMileRequestDO> requestMap = requests.stream()
+                .collect(Collectors.toMap(TmsFirstMileRequestDO::getId, request -> request));
+
+        // 5. 构建子项ID到主单的映射
+        return items.stream()
+                .collect(Collectors.toMap(
+                        TmsFirstMileRequestItemDO::getId,
+                        item -> requestMap.get(item.getRequestId())
+                ));
     }
 }

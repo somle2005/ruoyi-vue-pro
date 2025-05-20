@@ -166,10 +166,17 @@ logging:
   file:
     name: log/${spring.application.name}.log # 日志文件名，全路径
   level:
+    com.mzt.logapi.service.impl: debug
+    org:
+      springframework:
+        beans:
+          factory: debug
     cn:
       iocoder:
         yudao:
           module:
+            system:
+              logger: debug #异步操作日志记录
             srm: debug
             oms: debug
           framework:

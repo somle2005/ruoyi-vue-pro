@@ -1,4 +1,4 @@
-package com.somle.esb.handler;
+package com.somle.esb.handler.erp;
 
 import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;

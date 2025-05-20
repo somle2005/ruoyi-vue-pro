@@ -1,10 +1,6 @@
 package cn.iocoder.yudao.module.srm.service.purchase.impl;
 
-import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_NOT_ENABLE;
-import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_NOT_EXISTS;
-import static java.util.Collections.emptyList;
-
+import cn.iocoder.yudao.framework.common.enums.ChannelEnum;
 import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
@@ -14,16 +10,25 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmSupplierMapper;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import jakarta.annotation.Resource;
-import java.util.Collection;
-import java.util.List;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_NOT_ENABLE;
+import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_NOT_EXISTS;
+import static java.util.Collections.emptyList;
+
 /**
  * ERP 供应商 Service 实现类
  *
- * @author 芋道源码
+ * @author wdy
  */
 @Service
 @Validated
@@ -32,10 +37,15 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     @Resource
     private SrmSupplierMapper supplierMapper;
 
+    @Resource(name = ChannelEnum.SUPPLIER)
+    private MessageChannel supplierChannel;
+
     @Override
     public Long createSupplier(SrmSupplierSaveReqVO createReqVO) {
         SrmSupplierDO supplier = BeanUtils.toBean(createReqVO, SrmSupplierDO.class);
         supplierMapper.insert(supplier);
+        // 发送消息到通道
+        supplierChannel.send(MessageBuilder.withPayload(Collections.singletonList(supplier.getId())).build());
         return supplier.getId();
     }
 
@@ -46,6 +56,8 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
         // 更新
         SrmSupplierDO updateObj = BeanUtils.toBean(updateReqVO, SrmSupplierDO.class);
         supplierMapper.updateById(updateObj);
+        // 发送消息到通道
+        supplierChannel.send(MessageBuilder.withPayload(Collections.singletonList(updateObj.getId())).build());
     }
 
     @Override
@@ -97,5 +109,4 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     public List<SrmSupplierDO> getSupplierListByStatus(Integer status) {
         return supplierMapper.selectListByStatus(status);
     }
-
 }

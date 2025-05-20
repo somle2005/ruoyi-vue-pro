@@ -4,6 +4,7 @@ import cn.iocoder.yudao.module.system.api.utils.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.Data;
 
 @Schema(description = "管理后台 - TMS港口信息新增/修改 Request VO")
@@ -11,7 +12,7 @@ import lombok.Data;
 public class TmsPortInfoSaveReqVO {
     @Schema(description = "编号")
     @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时，港口信息id不能为空")
-    @NotNull(groups = {Validation.OnCreate.class}, message = "创建时，港口信息id需为空")
+    @Null(groups = {Validation.OnCreate.class}, message = "创建时，港口信息id需为空")
     private Integer id;
 
     @Schema(description = "港口编码")

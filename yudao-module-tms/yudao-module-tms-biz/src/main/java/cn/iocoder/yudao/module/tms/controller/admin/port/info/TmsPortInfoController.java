@@ -31,6 +31,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.IMPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - TMS港口信息")
@@ -118,6 +119,7 @@ public class TmsPortInfoController {
 
     @PostMapping("/import-excel")
     @Operation(summary = "导入TMS港口信息 Excel")
+    @ApiAccessLog(operateType = IMPORT)
     @PreAuthorize("@ss.hasPermission('tms:port-info:import')")
     public CommonResult<Boolean> importPortInfoExcel(@RequestParam("file") MultipartFile file) throws Exception {
         List<TmsPortInfoSaveReqVO> list = ExcelUtils.read(file, TmsPortInfoSaveReqVO.class);

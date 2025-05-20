@@ -75,4 +75,18 @@ public class SrmSupplierDTO {
      * 开户地址
      */
     private String bankAddress;
+    /**
+     * 付款条款
+     */
+    private String paymentTerms;
+
+    /**
+     * 送达地址
+     */
+    private String deliveryAddress;
+
+    /**
+     * 公司地址
+     */
+    private String companyAddress;
 }
