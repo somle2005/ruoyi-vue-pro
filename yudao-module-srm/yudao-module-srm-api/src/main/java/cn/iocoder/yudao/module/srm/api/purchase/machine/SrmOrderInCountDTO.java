@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.api.purchase.order;
+package cn.iocoder.yudao.module.srm.api.purchase.machine;
 
 import lombok.Builder;
 import lombok.Data;

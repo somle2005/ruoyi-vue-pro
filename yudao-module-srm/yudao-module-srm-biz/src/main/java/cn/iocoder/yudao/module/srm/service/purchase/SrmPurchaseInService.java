@@ -59,6 +59,14 @@ public interface SrmPurchaseInService {
     SrmPurchaseInDO getPurchaseIn(Long id);
 
     /**
+     * 获取采购入库列表
+     *
+     * @param ids 入库单ids
+     * @return 采购入库列表
+     */
+    List<SrmPurchaseInDO> getPurchaseInList(List<Long> ids);
+
+    /**
      * 校验入库订单
      * @param id 入库单id
      * @return SrmPurchaseInDO
@@ -117,4 +125,6 @@ public interface SrmPurchaseInService {
      * @param vo 入库项ids
      */
     void switchPayStatus(SrmPurchaseInPayReqVO vo);
+
+
 }

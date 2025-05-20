@@ -10,7 +10,7 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
-import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnSaveReqVO;
@@ -291,6 +291,14 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     @Override
     public SrmPurchaseReturnDO getPurchaseReturn(Long id) {
         return purchaseReturnMapper.selectById(id);
+    }
+
+    @Override
+    public List<SrmPurchaseReturnDO> getPurchaseReturnList(List<Long> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return new ArrayList<>();
+        }
+        return purchaseReturnMapper.selectListByIds(ids);
     }
 
     @Override

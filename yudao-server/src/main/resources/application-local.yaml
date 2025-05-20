@@ -170,7 +170,7 @@ logging:
     org:
       springframework:
         beans:
-          factory: debug
+          factory: info
     cn:
       iocoder:
         yudao:

@@ -11,7 +11,7 @@ import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
-import cn.iocoder.yudao.module.srm.api.purchase.order.SrmOrderInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPayReqVO;
@@ -498,6 +498,14 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         return purchaseInMapper.selectById(id);
     }
 
+
+    @Override
+    public List<SrmPurchaseInDO> getPurchaseInList(List<Long> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        return purchaseInMapper.selectByIds(ids);
+    }
 
     @Override
     public PageResult<SrmPurchaseInDO> getPurchaseInPage(SrmPurchaseInPageReqVO pageReqVO) {

@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.srm.config.purchase.request.impl.action.item;
 import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
-import cn.iocoder.yudao.module.srm.api.purchase.order.SrmQuantityOrderedCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmQuantityOrderedCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestItemsMapper;

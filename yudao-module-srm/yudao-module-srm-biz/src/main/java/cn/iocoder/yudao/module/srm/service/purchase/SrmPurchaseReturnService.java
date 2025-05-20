@@ -60,6 +60,13 @@ public interface SrmPurchaseReturnService {
     SrmPurchaseReturnDO getPurchaseReturn(Long id);
 
     /**
+     * 获取采购退货列表
+     *
+     * @param ids 采购退货id数组
+     * @return 采购退货列表
+     */
+    List<SrmPurchaseReturnDO> getPurchaseReturnList(List<Long> ids);
+    /**
      * 校验采购退货，已经审核通过
      *
      * @param id 编号
@@ -111,4 +118,6 @@ public interface SrmPurchaseReturnService {
      * 切换退款状态
      */
     void refund(SrmPurchaseReturnAuditReqVO vo);
+
+
 }

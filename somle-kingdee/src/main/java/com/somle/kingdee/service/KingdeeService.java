@@ -84,7 +84,7 @@ public class KingdeeService {
      *
      * @param purchaseOrder 采购订单
      */
-    public void addPurchaseOrder(@Validated KingdeePurOrderSaveReqVO purchaseOrder) {
+    public void savePurchaseOrder(@Validated KingdeePurOrderSaveReqVO purchaseOrder) {
         clients.parallelStream().forEach(n -> n.savePurOrder(purchaseOrder));
     }
 
@@ -93,7 +93,7 @@ public class KingdeeService {
      *
      * @param purInbound 采购入库单
      */
-    public void addPurInbound(@Validated KingdeePurInboundSaveReqVO purInbound) {
+    public void savePurInbound(@Validated KingdeePurInboundSaveReqVO purInbound) {
         clients.parallelStream().forEach(n -> n.savePurInbound(purInbound));
     }
 
@@ -102,7 +102,7 @@ public class KingdeeService {
      *
      * @param purOutbound 采购出库单
      */
-    public void addPurOutbound(@Validated KingdeePurReturnSaveReqVO purOutbound) {
+    public void savePurOutbound(@Validated KingdeePurReturnSaveReqVO purOutbound) {
         clients.parallelStream().forEach(n -> n.savePurReturn(purOutbound));
     }
 
