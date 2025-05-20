@@ -1,13 +1,12 @@
 package com.somle.kingdee.model;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Data;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
@@ -102,7 +101,7 @@ public class KingdeeProductSaveReqVO {
 
     private String high;
     private String length;
-    private String grossWeight;
+    private String grossWeight;// 毛重
     private String wide;
 
     // private Float high;
@@ -111,7 +110,7 @@ public class KingdeeProductSaveReqVO {
     // private Float wide;
 
     // custom
-    private Long saleDepartmentId;
+    private Long saleDepartmentId; //销售部门 ID
     private String declaredTypeZh;
     private String declaredTypeEn;//报关品名英文
 }

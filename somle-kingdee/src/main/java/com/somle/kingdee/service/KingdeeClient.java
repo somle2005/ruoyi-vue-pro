@@ -8,7 +8,6 @@ import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
-import com.somle.kingdee.util.CustomFieldCache;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
@@ -200,24 +199,24 @@ public class KingdeeClient {
      */
     private void setCustomFieldSafely(KingdeeProductSaveReqVO reqVO, String displayName, String fieldValue) {
         try {
-            KingdeeCustomField customField = CustomFieldCache.getCustomField("bd_material", displayName,
-                    () -> getCustomFieldByDisplayName("bd_material", displayName));
+            KingdeeCustomField customField = getCustomFieldByDisplayName("bd_material", displayName);
             if (customField != null) {
                 reqVO.setCustomField(customField, fieldValue);
             }
         } catch (Exception e) {
-            log.debug("custom field " + displayName + " skipped for " + token.getAccountName(), e);
+            log.debug("custom field {} skipped for {}", displayName, token.getAccountName(), e);
         }
     }
 
-    /**
-     * 清除自定义字段缓存
-     */
-    public void clearCustomFieldCache() {
-        CustomFieldCache.invalidateByEntity("bd_material");
-    }
 
+    /**
+     * 添加供应商
+     *
+     * @param kingdeeSupplier 供应商
+     * @return 供应商
+     */
     public KingdeeResponse addSupplier(KingdeeSupplier kingdeeSupplier) {
+        String endUrl = "/jdy/v2/bd/supplier";
         KingdeeSupplier supplierCopy = new KingdeeSupplier();
         BeanUtils.copyProperties(kingdeeSupplier, supplierCopy);
         try {
@@ -226,18 +225,15 @@ public class KingdeeClient {
         } catch (Exception e) {
             log.debug("id not found for " + supplierCopy.getNumber() + "adding new");
         }
-        String endUrl = "/jdy/v2/bd/supplier";
         TreeMap<String, String> params = new TreeMap<>();
-        KingdeeResponse response = postResponse(endUrl, params, supplierCopy);
-        return response;
+        return postResponse(endUrl, params, supplierCopy);
     }
 
     public KingdeeResponse getSupplier(String number) {
         String endUrl = "/jdy/v2/bd/supplier";
         TreeMap<String, String> params = new TreeMap<>();
         params.put("number", number);
-        KingdeeResponse response = getResponse(endUrl, params);
-        return response;
+        return getResponse(endUrl, params);
     }
 
     public void addDepartment(KingdeeAuxInfoDetail department) {

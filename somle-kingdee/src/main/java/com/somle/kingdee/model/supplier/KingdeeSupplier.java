@@ -2,18 +2,13 @@ package com.somle.kingdee.model.supplier;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.util.List;
 import java.util.Map;
 
-/**
- * @className: KingdeeSupplier
- * @author: Wqh
- * @date: 2024/11/6 9:20
- * @Version: 1.0
- * @description:
- */
+
 @Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class KingdeeSupplier {
@@ -44,10 +39,12 @@ public class KingdeeSupplier {
     // 开票名称
     private String invoiceName;
 
-    // 名称
+    // 名称 必填
+    @NotNull(message = "供应商名称不能为空")
     private String name;
 
-    // 编码
+    // 编码 必填
+    @NotNull(message = "供应商编码不能为空")
     private String number;
 
     // 税率
