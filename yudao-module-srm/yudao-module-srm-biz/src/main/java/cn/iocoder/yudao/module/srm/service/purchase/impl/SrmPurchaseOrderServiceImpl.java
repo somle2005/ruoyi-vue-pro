@@ -717,12 +717,12 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_ORDER_TYPE,
-            subType = LogRecordConstants.ORDER_SUB_TYPE_SWITCH_EXPRESSION,
-            bizNo = "#itemIds[0]",
+            subType = "{{#open ? '开启采购订单' : '关闭采购订单'}}",
+            bizNo = "{{#itemIds[0]}}",
             extra = "{{#codes}}",
-            success = LogRecordConstants.ORDER_SUCCESS_SWITCH_EXPRESSION)
+            success = "{{#open ? '开启' : '关闭'}}了采购订单【{{#codes}}】")
     @Transactional(rollbackFor = Exception.class)
-    public void switchPurchaseOrderStatus(Collection<Long> itemIds, Boolean open) {
+    public void switchPurchaseOrderStatus(List<Long> itemIds, Boolean open) {
         SrmEventEnum event = Boolean.TRUE.equals(open) ? SrmEventEnum.ACTIVATE : SrmEventEnum.MANUAL_CLOSE;
         if (itemIds != null && !itemIds.isEmpty()) {
             // 批量处理采购订单子项状态
@@ -733,14 +733,14 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                         orderItemDOS.stream().map(SrmPurchaseOrderItemDO::getOrderId).collect(Collectors.toSet()));
                 String codes = CollUtil.join(orders.stream().map(SrmPurchaseOrderDO::getCode).collect(Collectors.toList()), ",");
                 LogRecordContext.putVariable("codes", codes);
-                // 根据操作类型设置日志模板
-                if (Boolean.TRUE.equals(open)) {
-                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUB_TYPE);
-                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUCCESS);
-                } else {
-                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUB_TYPE);
-                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUCCESS);
-                }
+//                // 根据操作类型设置日志模板
+//                if (Boolean.TRUE.equals(open)) {
+//                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUB_TYPE);
+//                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_ORDER_OPEN_SUCCESS);
+//                } else {
+//                    LogRecordContext.putVariable("subType", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUB_TYPE);
+//                    LogRecordContext.putVariable("success", LogRecordConstants.SRM_PURCHASE_ORDER_CLOSE_SUCCESS);
+//                }
                 orderItemDOS.forEach(orderItemDO -> orderItemOffMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), event, orderItemDO));
             }
         }

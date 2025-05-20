@@ -22,6 +22,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
 
 @Slf4j
 @Configuration
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SrmPurchaseOrderItemStatusMachine {
 
 
@@ -29,9 +30,9 @@ public class SrmPurchaseOrderItemStatusMachine {
     private BaseFailCallbackImpl baseFailCallbackImpl;
 
 
+
     @Autowired
     Action<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecuteActionImpl;
-
     //采购订单子项状态机
     @Bean(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
     public StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> getPurchaseOrderItemStateMachine() {
@@ -52,7 +53,6 @@ public class SrmPurchaseOrderItemStatusMachine {
     }
     @Autowired
     Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemInActionImpl;
-
     // 采购订单子项执行状态机
     @Bean(PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
     public StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> getPurchaseOrderItemExecutionStateMachine() {
@@ -86,9 +86,6 @@ public class SrmPurchaseOrderItemStatusMachine {
     }
     @Autowired
     Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> orderItemPayActionImpl;
-    @Autowired
-    private Action<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemOffActionImpl;
-
     @Bean(PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
     public StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> buildPurchaseOrderItemStorageStateMachine() {
         StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> builder = StateMachineBuilderFactory.create();
@@ -128,7 +125,8 @@ public class SrmPurchaseOrderItemStatusMachine {
 
         return builder.build(PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME);
     }
-
+    @Autowired
+    private Action<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemOffActionImpl;
     @Bean(PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME)
     public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> getPurchaseOrderItemPaymentStateMachine() {
         StateMachineBuilder<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> builder = StateMachineBuilderFactory.create();

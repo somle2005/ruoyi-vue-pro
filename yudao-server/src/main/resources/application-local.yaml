@@ -179,6 +179,7 @@ logging:
               logger: debug #异步操作日志记录
             srm: debug
             oms: debug
+            tms: debug
           framework:
             template: debug
     root: info

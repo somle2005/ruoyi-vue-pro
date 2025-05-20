@@ -191,7 +191,7 @@ public interface SrmPurchaseOrderService {
      * @param itemIds 采购订单项编号数组
      * @param open    是否开启/关闭
      */
-    void switchPurchaseOrderStatus(Collection<Long> itemIds, Boolean open);
+    void switchPurchaseOrderStatus(List<Long> itemIds, Boolean open);
 
     /**
      * 合并入库
