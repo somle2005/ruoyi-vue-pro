@@ -4,22 +4,29 @@ import cn.hutool.core.util.ObjUtil;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.somle.kingdee.constant.ErpRedisKeyConstants;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
+import com.somle.kingdee.model.vo.KingdeeSupplierQueryReqVO;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
-import java.util.Map;
-import java.util.Optional;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.somle.kingdee.util.SignatureUtils.*;
@@ -32,10 +39,11 @@ import static com.somle.kingdee.util.SignatureUtils.*;
 public class KingdeeClient {
 
     private KingdeeToken token;
+    private final StringRedisTemplate redisTemplate;
 
-
-    public KingdeeClient(KingdeeToken token) {
+    public KingdeeClient(KingdeeToken token, StringRedisTemplate redisTemplate) {
         this.token = token;
+        this.redisTemplate = redisTemplate;
     }
 
     /**
@@ -70,11 +78,11 @@ public class KingdeeClient {
         params.put("app_signature", appSignature);
         String apiSignature = getApiSignature(reqMtd, endUrl, params, ctime);
         var request = RequestX.builder()
-            .requestMethod(RequestX.Method.GET)
-            .url(fullUrl)
-            .queryParams(params)
-            .headers(getAuthHeaders(ctime, apiSignature))
-            .build();
+                .requestMethod(RequestX.Method.GET)
+                .url(fullUrl)
+                .queryParams(params)
+                .headers(getAuthHeaders(ctime, apiSignature))
+                .build();
         KingdeeResponse response = WebUtils.sendRequest(request, KingdeeResponse.class);
         return response.getData(JSONObject.class).getString("app-token");
     }
@@ -88,11 +96,11 @@ public class KingdeeClient {
         params.put("outerInstanceId", outerInstanceId);
         String apiSignature = getApiSignature(reqMtd, endUrl, params, ctime);
         var request = RequestX.builder()
-            .requestMethod(RequestX.Method.POST)
-            .url(fullUrl)
-            .queryParams(params)
-            .headers(getAuthHeaders(ctime, apiSignature))
-            .build();
+                .requestMethod(RequestX.Method.POST)
+                .url(fullUrl)
+                .queryParams(params)
+                .headers(getAuthHeaders(ctime, apiSignature))
+                .build();
         KingdeeResponse response = WebUtils.sendRequest(request, KingdeeResponse.class);
         return response.getDataList(KingdeeToken.class).get(0);
 
@@ -127,6 +135,7 @@ public class KingdeeClient {
 
     /**
      * 安全设置单位id，如果它存在。
+     *
      * @param unitName 单位名称
      * @param setter   回调函数
      */
@@ -151,19 +160,26 @@ public class KingdeeClient {
         }
     }
 
+    /**
+     * 获取产品详情
+     *
+     * @param number 产品编号
+     * @return 产品详情
+     */
+//    @Cacheable(value = ErpRedisKeyConstants.KINGDEE_MATERIAL, key = "#number", unless = "#result.errcode != '0'")
     public KingdeeResponse getMaterial(String number) {
         String endUrl = "/jdy/v2/bd/material_detail";
         TreeMap<String, String> params = new TreeMap<>();
         params.put("number", number);
-        KingdeeResponse response = getResponse(endUrl, params);
-        return response;
+        return getResponse(endUrl, params);
     }
 
     public KingdeeResponse addProduct(KingdeeProductSaveReqVO product) {
         KingdeeProductSaveReqVO reqVO = new KingdeeProductSaveReqVO();
         BeanUtils.copyProperties(product, reqVO);
         try {
-            String id = getMaterial(reqVO.getNumber()).getData(JSONObject.class).getString("id");
+            //根据产品编码查找是否存在
+            String id = this.getMaterial(reqVO.getNumber()).getData(JSONObject.class).getString("id");
             reqVO.setId(id);
         } catch (Exception e) {
             log.debug("id not found for ({}) adding new", reqVO.getNumber());
@@ -173,9 +189,9 @@ public class KingdeeClient {
         setUnitId("套", kingdeeUnit -> reqVO.setBaseUnitId(kingdeeUnit.getId()));
         try {
             Optional.ofNullable(getAuxInfoByNumber(reqVO.getSaleDepartmentId().toString()))
-                .ifPresent(kingdeeUnit ->
-                    setCustomFieldSafely(reqVO, "部门", kingdeeUnit.getId())
-                );
+                    .ifPresent(kingdeeUnit ->
+                            setCustomFieldSafely(reqVO, "部门", kingdeeUnit.getId())
+                    );
         } catch (Exception e) {
             log.debug("getAuxInfoByNumber error for sale department ID: {}", reqVO.getSaleDepartmentId(), e);
         }
@@ -223,8 +239,10 @@ public class KingdeeClient {
             String id = getSupplier(supplierCopy.getNumber()).getData(JSONObject.class).getString("id");
             supplierCopy.setId(id);
         } catch (Exception e) {
-            log.debug("id not found for " + supplierCopy.getNumber() + "adding new");
+            log.debug("id not found for {}adding new", supplierCopy.getNumber());
         }
+        //
+        supplierCopy.setIgnoreWarn(true);//忽略告警信息(如：单价为0)保存
         TreeMap<String, String> params = new TreeMap<>();
         return postResponse(endUrl, params, supplierCopy);
     }
@@ -261,14 +279,14 @@ public class KingdeeClient {
     public Stream<KingdeeResponse> list(String endpoint) {
         log.debug("kingdee listing");
         return Stream.iterate(1, n -> n + 1)
-            .map(n -> {
-                String endUrl = endpoint;
-                TreeMap<String, String> params = new TreeMap<>();
-                params.put("page_size", "100"); //max 100
-                params.put("page", String.valueOf(n));
-                return getResponse(endUrl, params);
-            })
-            .takeWhile(n -> n.getData(KingdeePage.class).getPage() <= n.getData(KingdeePage.class).getTotalPage());
+                .map(n -> {
+                    String endUrl = endpoint;
+                    TreeMap<String, String> params = new TreeMap<>();
+                    params.put("page_size", "100"); //max 100
+                    params.put("page", String.valueOf(n));
+                    return getResponse(endUrl, params);
+                })
+                .takeWhile(n -> n.getData(KingdeePage.class).getPage() <= n.getData(KingdeePage.class).getTotalPage());
     }
 
     public KingdeeResponse post(String endpoint, JSONObject payload) {
@@ -286,8 +304,8 @@ public class KingdeeClient {
         params.put("number", number);
         KingdeeResponse response = getResponse(endUrl, params);
         Optional<KingdeeAuxInfo> first = response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfo.class).stream()
-            .filter(n -> n.getNumber().equals(number))
-            .findFirst();
+                .filter(n -> n.getNumber().equals(number))
+                .findFirst();
         return first.orElse(null);
     }
 
@@ -298,8 +316,8 @@ public class KingdeeClient {
         params.put("name", name);
         KingdeeResponse response = getResponse(endUrl, params);
         Optional<KingdeeAuxInfo> first = response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfo.class).stream()
-            .filter(n -> n.getName().equals(name))
-            .findFirst();
+                .filter(n -> n.getName().equals(name))
+                .findFirst();
         return first.orElse(null);
     }
 
@@ -310,8 +328,8 @@ public class KingdeeClient {
         params.put("number", number);
         KingdeeResponse response = getResponse(endUrl, params);
         return response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfoType.class).stream()
-            .filter(n -> n.getNumber().equals(number))
-            .findFirst().get();
+                .filter(n -> n.getNumber().equals(number))
+                .findFirst().get();
     }
 
     public Stream<KingdeeCustomField> getCustomField(String entity_number) {
@@ -326,34 +344,76 @@ public class KingdeeClient {
 
     public KingdeeCustomField getCustomFieldByDisplayName(String entity_number, String displayName) {
         return getCustomField(entity_number)
-            .filter(n -> n.getDisplayName().equals(displayName))
-            .findFirst().get();
+                .filter(n -> n.getDisplayName().equals(displayName))
+                .findFirst().get();
     }
 
     public Stream<KingdeePage> getAllPurRequest(KingdeePurRequestReqVO vo) {
         log.debug("fetching purchase request");
         String endUrl = "/jdy/v2/scm/pur_request";
         return StreamX.iterate(
-            getPage(JsonUtilsX.toJSONObject(vo), endUrl),
+                getPage(JsonUtilsX.toJSONObject(vo), endUrl),
                 KingdeePage::hasNext,
-            page -> {
-                vo.setPage(String.valueOf(page.getPage() + 1));
-                return getPage(JsonUtilsX.toJSONObject(vo), endUrl);
-            }
+                page -> {
+                    vo.setPage(String.valueOf(page.getPage() + 1));
+                    return getPage(JsonUtilsX.toJSONObject(vo), endUrl);
+                }
         );
     }
 
+    /**
+     * 获取所有采购订单（不分页），使用多线程并行获取
+     *
+     * @param vo 查询参数
+     * @return 采购订单数据流
+     */
     public Stream<KingdeePage> getAllPurOrder(KingdeePurOrderReqVO vo) {
-        log.debug("fetching purchase order");
+        log.debug("开始多线程获取采购订单数据");
         String endUrl = "/jdy/v2/scm/pur_order";
-        return StreamX.iterate(
-            getPage(JsonUtilsX.toJSONObject(vo), endUrl),
-                KingdeePage::hasNext,
-            page -> {
-                vo.setPage(String.valueOf(page.getPage() + 1));
-                return getPage(JsonUtilsX.toJSONObject(vo), endUrl);
+
+        // 1. 获取第一页数据，同时获取总页数
+        KingdeePage firstPage = getPage(JsonUtilsX.toJSONObject(vo), endUrl);
+        int totalPages = firstPage.getTotalPage();
+        log.debug("采购订单总页数：{}", totalPages);
+
+        // 2. 从Spring容器获取通用线程池
+        ThreadPoolExecutor executorService = SpringUtils.getBean(ThreadPoolExecutor.class);
+        log.debug("使用通用线程池，核心线程数：{}，最大线程数：{}",
+                executorService.getCorePoolSize(), executorService.getMaximumPoolSize());
+
+        try {
+            // 3. 创建所有页的异步任务
+            List<CompletableFuture<KingdeePage>> futures = new ArrayList<>();
+            // 添加第一页的结果
+            futures.add(CompletableFuture.completedFuture(firstPage));
+
+            // 创建剩余页的异步任务
+            for (int page = 2; page <= totalPages; page++) {
+                final int currentPage = page;
+                CompletableFuture<KingdeePage> future = CompletableFuture.supplyAsync(() -> {
+                    KingdeePurOrderReqVO pageVO = new KingdeePurOrderReqVO();
+                    BeanUtils.copyProperties(vo, pageVO);
+                    pageVO.setPage(String.valueOf(currentPage));
+                    log.info("线程[{}]开始获取第{}页数据", Thread.currentThread().getName(), currentPage);
+                    return getPage(JsonUtilsX.toJSONObject(pageVO), endUrl);
+                }, executorService);
+                futures.add(future);
             }
-        );
+
+            // 4. 等待所有任务完成并收集结果
+            CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
+
+            // 5. 获取所有结果并转换为Stream
+            return allFutures.thenApply(v ->
+                    futures.stream()
+                            .map(CompletableFuture::join)
+                            .collect(Collectors.toList())
+            ).join().stream();
+
+        } catch (Exception e) {
+            log.error("获取采购订单数据异常", e);
+            throw new RuntimeException("获取采购订单数据失败", e);
+        }
     }
 
     /**
@@ -366,12 +426,12 @@ public class KingdeeClient {
         log.debug("获取采购入库单列表");
         String endpoint = "/jdy/v2/scm/pur_inbound";
         return StreamX.iterate(
-            getPage(JsonUtilsX.toJSONObject(vo), endpoint),
+                getPage(JsonUtilsX.toJSONObject(vo), endpoint),
                 KingdeePage::hasNext,
-            page -> {
-                vo.setPage(String.valueOf(page.getPage() + 1));
-                return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
-            }
+                page -> {
+                    vo.setPage(String.valueOf(page.getPage() + 1));
+                    return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
+                }
         );
     }
 
@@ -413,6 +473,7 @@ public class KingdeeClient {
         log.debug("保存采购订单");
         String endUrl = "/jdy/v2/scm/pur_order";
         TreeMap<String, String> params = new TreeMap<>();
+        order.setIgnoreWarn(false);//忽略告警信息(如：名称已存在)保存客户
         return postResponse(endUrl, params, order);
     }
 
@@ -480,20 +541,20 @@ public class KingdeeClient {
         KingdeeResponse response;
         if ("POST".equals(requestMethod)) {
             var request = RequestX.builder()
-                .requestMethod(RequestX.Method.POST)
-                .url(BASE_HOST + endUrl)
-                .queryParams(params)
-                .headers(headers)
-                .payload(body)
-                .build();
+                    .requestMethod(RequestX.Method.POST)
+                    .url(BASE_HOST + endUrl)
+                    .queryParams(params)
+                    .headers(headers)
+                    .payload(body)
+                    .build();
             response = WebUtils.sendRequest(request, KingdeeResponse.class);
         } else {
             var request = RequestX.builder()
-                .requestMethod(RequestX.Method.GET)
-                .url(BASE_HOST + endUrl)
-                .queryParams(params)
-                .headers(headers)
-                .build();
+                    .requestMethod(RequestX.Method.GET)
+                    .url(BASE_HOST + endUrl)
+                    .queryParams(params)
+                    .headers(headers)
+                    .build();
             response = WebUtils.sendRequest(request, KingdeeResponse.class);
         }
 
@@ -528,5 +589,64 @@ public class KingdeeClient {
     private KingdeePage getPage(JSONObject payload, String endpoint) {
         KingdeeResponse response = getResponse(endpoint, payload);
         return response.getData(KingdeePage.class);
+    }
+
+    /**
+     * 获取供应商列表
+     *
+     * @param queryReqVO 查询参数
+     * @return 供应商列表分页数据
+     */
+    public KingdeePage getSupplierList(KingdeeSupplierQueryReqVO queryReqVO) {
+        log.debug("获取供应商列表，查询参数：{}", queryReqVO);
+        String endUrl = "/jdy/v2/bd/supplier";
+        KingdeeResponse response = getResponse(endUrl, JsonUtilsX.toJSONObject(queryReqVO));
+        return response.getData(KingdeePage.class);
+    }
+
+    /**
+     * 获取所有供应商列表（不分页），以供应商名称为key的Map形式返回
+     * 结果会被缓存10分钟
+     *
+     * @param queryReqVO 查询参数
+     * @return Map<String, KingdeeSupplier> key为供应商名称，value为供应商信息
+     */
+    public Map<String, KingdeeSupplier> getAllSupplierList(KingdeeSupplierQueryReqVO queryReqVO) {
+        // 生成缓存key，使用查询参数的hash值作为key的一部分
+        String cacheKey = ErpRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + Objects.hash(JsonUtilsX.toJsonString(queryReqVO));
+
+        // 尝试从缓存获取
+        String cachedData = redisTemplate.opsForValue().get(cacheKey);
+        if (cachedData != null) {
+            log.debug("从缓存获取供应商列表数据");
+            return JsonUtilsX.parseObject(cachedData, new TypeReference<>() {
+            });
+        }
+
+        // 缓存未命中，从API获取数据
+        log.debug("从金蝶API获取供应商列表数据");
+        String endpoint = "/jdy/v2/bd/supplier";
+        Map<String, KingdeeSupplier> result = StreamX.iterate(
+                        getPage(JsonUtilsX.toJSONObject(queryReqVO), endpoint),
+                        KingdeePage::hasNext,
+                        page -> {
+                            queryReqVO.setPage(page.getPage() + 1);
+                            return getPage(JsonUtilsX.toJSONObject(queryReqVO), endpoint);
+                        }
+                )
+                .flatMap(page -> page.getRowsList(KingdeeSupplier.class).stream())
+                .collect(Collectors.toMap(
+                        KingdeeSupplier::getName, supplier -> supplier, (existing, replacement) -> {
+                            log.warn("发现重复的供应商名称：{}，将使用最新的数据", existing.getName());
+                            return replacement;
+                        }
+                ));
+
+        // 将结果存入缓存
+        if (!result.isEmpty()) {
+            redisTemplate.opsForValue().set(cacheKey, JsonUtilsX.toJsonString(result), 10, TimeUnit.MINUTES);
+            log.debug("供应商列表数据已缓存，过期时间10分钟");
+        }
+        return result;
     }
 }

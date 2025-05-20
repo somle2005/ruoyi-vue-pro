@@ -65,6 +65,7 @@ public interface KingdeeSupplierConvert {
      */
     default void convertBasicInfo(KingdeeSupplier target, SrmSupplierDTO source) {
         if (source.getId() != null) {
+            //把供应商ID作为金蝶的供应商编码
             target.setNumber(String.valueOf(source.getId()));
         }
         target.setName(StrUtil.trimToNull(source.getName()));

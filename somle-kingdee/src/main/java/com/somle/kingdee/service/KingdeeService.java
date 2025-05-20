@@ -1,9 +1,7 @@
 package com.somle.kingdee.service;
 
 
-import com.somle.kingdee.model.KingdeeAuxInfoDetail;
-import com.somle.kingdee.model.KingdeeProductSaveReqVO;
-import com.somle.kingdee.model.KingdeeToken;
+import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
 import com.somle.kingdee.repository.KingdeeTokenRepository;
 import jakarta.annotation.PostConstruct;
@@ -12,8 +10,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -24,23 +24,24 @@ import java.util.List;
 @ConfigurationProperties(prefix = "kingdee")
 public class KingdeeService {
 
-    private List<String> outerInstanceIds;
-
+    @Autowired
+    StringRedisTemplate stringRedisTemplate;
     @Autowired
     private KingdeeTokenRepository tokenRepository;
 
+    private List<String> outerInstanceIds;
     private List<KingdeeClient> clients;
 
     @PostConstruct
     public void init() {
         // clientList = tokenRepository.findAll().stream().map(n->new KingdeeClient(n)).toList();
         clients = outerInstanceIds.stream()
-            .map(n -> new KingdeeClient(tokenRepository.findByOuterInstanceId(n)))
+                .map(n -> new KingdeeClient(tokenRepository.findByOuterInstanceId(n), stringRedisTemplate))
             .toList();
     }
 
     public KingdeeClient getClientByName(String name) {
-        return new KingdeeClient(tokenRepository.findByAccountName(name));
+        return new KingdeeClient(tokenRepository.findByAccountName(name), stringRedisTemplate);
     }
 
 
@@ -75,6 +76,34 @@ public class KingdeeService {
 
     public void addSupplier(KingdeeSupplier kingdeeSupplier) {
         clients.parallelStream().forEach(n-> n.addSupplier(kingdeeSupplier));
+    }
+
+
+    /**
+     * 保存采购订单
+     *
+     * @param purchaseOrder 采购订单
+     */
+    public void addPurchaseOrder(@Validated KingdeePurOrderSaveReqVO purchaseOrder) {
+        clients.parallelStream().forEach(n -> n.savePurOrder(purchaseOrder));
+    }
+
+    /**
+     * 保存采购入库单
+     *
+     * @param purInbound 采购入库单
+     */
+    public void addPurInbound(@Validated KingdeePurInboundSaveReqVO purInbound) {
+        clients.parallelStream().forEach(n -> n.savePurInbound(purInbound));
+    }
+
+    /**
+     * 保存采购出库单
+     *
+     * @param purOutbound 采购出库单
+     */
+    public void addPurOutbound(@Validated KingdeePurReturnSaveReqVO purOutbound) {
+        clients.parallelStream().forEach(n -> n.savePurReturn(purOutbound));
     }
 
     /**

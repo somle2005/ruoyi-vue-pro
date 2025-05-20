@@ -54,4 +54,12 @@ public class SrmHandler {
             throw e;
         }
     }
+
+    //消费采购订单
+
+
+    //消费采购入库(到货)单
+
+
+    //消费采购退货单
 }

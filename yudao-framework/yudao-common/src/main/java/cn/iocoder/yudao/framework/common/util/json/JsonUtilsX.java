@@ -2,12 +2,14 @@ package cn.iocoder.yudao.framework.common.util.json;
 
 import cn.hutool.core.util.StrUtil;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.JsonNodeFactory;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.JsonNodeFactory;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import lombok.SneakyThrows;
@@ -16,7 +18,6 @@ import org.apache.commons.collections4.MultiValuedMap;
 import org.apache.commons.collections4.multimap.ArrayListValuedHashMap;
 
 import java.util.*;
-import java.util.stream.StreamSupport;
 
 /**
  * 索迈自定义的Json工具类
@@ -157,6 +158,36 @@ public class JsonUtilsX {
             return new ArrayList<>();
         }
         return objectMapper.readValue(text, objectMapper.getTypeFactory().constructCollectionType(List.class, clazz));
+    }
+
+    /**
+     * 将JSON字符串转换为指定类型的对象
+     *
+     * @param json          JSON字符串
+     * @param typeReference 类型引用
+     * @return 转换后的对象
+     */
+    public static <T> T parseObject(String json, TypeReference<T> typeReference) {
+        try {
+            return objectMapper.readValue(json, typeReference);
+        } catch (JsonProcessingException e) {
+            throw new RuntimeException("JSON解析异常", e);
+        }
+    }
+
+    /**
+     * 将JsonNode转换为指定类型的对象
+     *
+     * @param node          JsonNode对象
+     * @param typeReference 类型引用
+     * @return 转换后的对象
+     */
+    public static <T> T parseObject(JsonNode node, TypeReference<T> typeReference) {
+        try {
+            return objectMapper.convertValue(node, typeReference);
+        } catch (IllegalArgumentException e) {
+            throw new RuntimeException("JSON转换异常", e);
+        }
     }
 
 //    /**
