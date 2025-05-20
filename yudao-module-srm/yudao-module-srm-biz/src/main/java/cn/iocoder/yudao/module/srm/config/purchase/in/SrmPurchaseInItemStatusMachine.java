@@ -4,7 +4,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.srm.api.purchase.in.SrmPuchaseInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPuchaseInCountDTO;
 import cn.iocoder.yudao.module.srm.config.BaseFailCallbackImpl;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;

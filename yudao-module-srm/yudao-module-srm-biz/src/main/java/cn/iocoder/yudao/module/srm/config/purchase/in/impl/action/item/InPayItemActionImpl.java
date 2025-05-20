@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.srm.config.purchase.in.impl.action.item;
 import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
-import cn.iocoder.yudao.module.srm.api.purchase.order.SrmPayCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmPayCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;

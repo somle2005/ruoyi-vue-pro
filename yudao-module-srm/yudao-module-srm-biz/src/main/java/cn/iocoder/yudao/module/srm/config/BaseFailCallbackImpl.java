@@ -85,12 +85,10 @@ public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
     }
 
     public void onFail(S sourceState, S targetState, E event, C context) {
-        String stateMachineDesc = getStateMachineDescription(sourceState,targetState,event,context);
+        String stateMachineDesc = getStateMachineDescription(sourceState, targetState, event, context);
         String statusDesc = convertEventToDescription(sourceState);
 
         log.warn("{}无法在({})状态下触发({})事件，上下文：{}", stateMachineDesc, statusDesc, SrmEventEnum.valueOf(event.toString()).getDesc(), context.getClass().getName());
-        //        throw new IllegalArgumentException(msg);
-        //        throw new ServiceException(msg);
         throw exception(PURCHASE_REQUEST_NOT_EXISTS_BY_EVENT, stateMachineDesc, statusDesc, SrmEventEnum.valueOf(event.toString()).getDesc());
     }
 
