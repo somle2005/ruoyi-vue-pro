@@ -89,4 +89,7 @@ public class WmsStockFlowPageReqVO extends PageParam {
 
     @Schema(description = "在途量", example = "")
     private Integer[] transitQty;
+
+    @Schema(description = "公司ID", example = "")
+    private Long companyId;
 }

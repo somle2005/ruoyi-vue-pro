@@ -233,6 +233,7 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
         StreamX.from(list).assemble(warehouseVOMap, WmsStockWarehouseRespVO::getWarehouseId, WmsStockWarehouseRespVO::setWarehouse);
     }
 
+    @Override
     public String getWarehouseProductKey(Long warehouseId, Long productId) {
         return warehouseId + "_" + productId;
     }
@@ -294,6 +295,7 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
     /**
      * 按 ID 集合查询 WmsStockWarehouseDO
      */
+    @Override
     public List<WmsStockWarehouseDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();
