@@ -42,6 +42,7 @@ import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundType;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
@@ -678,7 +679,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
 
             // 处理关联的入库单
-            List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.WMS_INBOUND.getValue(), inDO.getId());
+            List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.SRM_PURCHASE_IN.getValue(), inDO.getId());
             if (CollUtil.isNotEmpty(inbounds)) {
                 for (WmsInboundDTO inbound : inbounds) {
                     if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue()) && Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue())) {
@@ -748,7 +749,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             // 5.2 创建入库单
             wmsInboundApi.createInbound(
                     WmsInboundSaveReqDTO.builder()
-                            .type(BillType.WMS_INBOUND.getValue())
+                            .type(WmsInboundType.PURCHASE.getValue())
                             .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
                             .upstreamBillId(inDO.getId())
                             .upstreamBillCode(inDO.getCode())
