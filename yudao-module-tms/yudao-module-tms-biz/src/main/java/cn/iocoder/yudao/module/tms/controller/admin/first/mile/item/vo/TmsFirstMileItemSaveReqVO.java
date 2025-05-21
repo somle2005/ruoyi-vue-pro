@@ -64,6 +64,7 @@ public class TmsFirstMileItemSaveReqVO {
     private BigDecimal volume;
 
     @Schema(description = "销售公司ID")
+    @NotNull(message = "销售公司不能为空")
     private Long salesCompanyId;
 
     @Schema(description = "版本号")
