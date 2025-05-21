@@ -3,12 +3,14 @@ package cn.iocoder.yudao.module.srm.service.purchase.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
@@ -98,15 +100,18 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             bizNo = "{{#id}}",
             extra = "{{#vo.code}}",
             success = "创建了采购入库单【{{#vo.code}}】")
+    @Idempotent
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
         vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
-        // 1.2.1 校验到货项对应的采购项可入库数量是否充足。
+        // 1.1 校验到货项对应的采购项可入库数量是否充足。
         validatePurchaseOrderItemQty(vo.getItems());
         // 1.2 校验入库项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
-        // 1.3 校验结算账户
+        // 1.3 校验币种一致性
+        validateOrderItemsCurrency(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
+        // 1.4 校验结算账户
 //        erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 生成入库单号，并校验唯一性
         String no;
@@ -250,8 +255,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         SrmPurchaseInDO purchaseIn = validatePurchaseInExists(vo.getId());
         // 1.2 校验采购到货审核状态可以修改
         updateStatusCheck(purchaseIn);
-        // 1.3 校验结算账户
-        erpAccountApi.validateAccount(vo.getAccountId());
+        // 1.3 校验币种一致性
+        validateOrderItemsCurrency(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
+        // 1.4 校验结算账户
+//        erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 校验编号
         if (vo.getCode() != null && !vo.getCode().equals(purchaseIn.getCode())) {
             validateAndUpdateCode(vo.getCode(), purchaseIn.getCode());
@@ -680,5 +687,44 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         }
         // 更新 Redis 中的最大编号
         noRedisDAO.setManualSerial(SrmNoRedisDAO.PURCHASE_IN_NO_PREFIX, newCode);
+    }
+
+    /**
+     * 校验入库单下所有关联的采购订单项的币种是否一致
+     *
+     * @param orderItemIds 采购订单项ID列表
+     */
+    private void validateOrderItemsCurrency(List<Long> orderItemIds) {
+        if (CollUtil.isEmpty(orderItemIds)) {
+            return;
+        }
+
+        // 获取所有关联的采购订单项
+        List<SrmPurchaseOrderItemDO> orderItems = purchaseOrderService.getPurchaseOrderItemList(orderItemIds);
+        if (CollUtil.isEmpty(orderItems)) {
+            return;
+        }
+
+        // 获取第一个非空币种的订单项作为基准
+        SrmPurchaseOrderItemDO baseItem = orderItems.stream()
+                .filter(item -> StrUtil.isNotBlank(item.getCurrencyName()))
+                .findFirst()
+                .orElse(null);
+
+        if (baseItem == null) {
+            return; // 如果没有找到任何有币种的订单项，则不校验
+        }
+
+        // 校验其他订单项的币种是否与基准币种一致
+        orderItems.stream()
+                .filter(item -> StrUtil.isNotBlank(item.getCurrencyName()) && !item.getId().equals(baseItem.getId()))
+                .forEach(item -> {
+                    if (!StrUtil.equals(item.getCurrencyName(), baseItem.getCurrencyName())) {
+                        throw exception(PURCHASE_IN_ITEM_CURRENCY_NOT_MATCH,
+                                item.getId(),
+                                item.getCurrencyName(),
+                                baseItem.getCurrencyName());
+                    }
+                });
     }
 }

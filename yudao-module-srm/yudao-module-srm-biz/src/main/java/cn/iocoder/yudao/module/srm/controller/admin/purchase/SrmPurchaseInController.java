@@ -8,7 +8,6 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
-import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.SrmPurchaseInBaseRespVO;
@@ -70,7 +69,6 @@ public class SrmPurchaseInController {
 
     @PostMapping("/create")
     @Operation(summary = "创建采购到货")
-    @Idempotent
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:create')")
     public CommonResult<Long> createPurchaseIn(@Valid @RequestBody SrmPurchaseInSaveReqVO createReqVO) {
         createReqVO.getItems().forEach(item -> item.setSource(SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc()));
@@ -129,7 +127,7 @@ public class SrmPurchaseInController {
 
     @PutMapping("/submitAudit")
     @Operation(summary = "提交审核")
-    @PreAuthorize("@ss.hasPermission('srm:purchase-in:submitAudit')")
+    @PreAuthorize("@ss.hasPermission('srm:purchase-in:submit-audit')")
     public CommonResult<Boolean> submitAudit(@Valid @RequestBody SrmPurchaseInSubmitReqVO vo) {
         purchaseInService.submitAudit(vo.getInIds().stream().distinct().toList());
         return success(true);
@@ -146,7 +144,7 @@ public class SrmPurchaseInController {
     //切换付款状态方法(暂时)
     @PostMapping("/changePayStatus")
     @Operation(summary = "切换付款状态")
-    @PreAuthorize("@ss.hasPermission('srm:purchase-in:changePayStatus')")
+    @PreAuthorize("@ss.hasPermission('srm:purchase-in:change-pay-status')")
     public CommonResult<Boolean> changePayStatus(@Valid @RequestBody SrmPurchaseInPayReqVO vo) {
         purchaseInService.switchPayStatus(vo);
         return success(true);
