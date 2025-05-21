@@ -40,10 +40,10 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     @Autowired
     private SrmPurchaseOrderMapper mapper;
     @Resource(name = PURCHASE_ORDER_STORAGE_STATE_MACHINE_NAME)
-    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> storageStateMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> purchaseOrderStorageStateMachine;
 
     @Resource(name = PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME)
-    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> purchaseRequestItemStateMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> purchaseRequestItemInStateMachine;
 
     @Resource(name = PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
     private StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> purchaseOrderItemExecutionStateMachine;
@@ -128,7 +128,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             SrmPurchaseRequestItemsDO applyItemDO = erpPurchaseRequestItemsMapper.selectById(applyItemId);
             ThrowUtil.ifThrow(applyItemDO == null, PURCHASE_REQUEST_ITEM_NOT_FOUND, oldData.getId(), applyItemId);
             //
-            purchaseRequestItemStateMachine.fireEvent(SrmStorageStatus.fromCode(applyItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT,
+            purchaseRequestItemInStateMachine.fireEvent(SrmStorageStatus.fromCode(applyItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT,
                     SrmOrderInCountDTO.builder().applyItemId(applyItemId).inCount(dtoCount).build());
         });
     }
@@ -145,7 +145,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             log.warn("未找到对应的采购订单,订单ID={}", oldData.getOrderId());
             return;
         }
-        storageStateMachine.fireEvent(SrmStorageStatus.fromCode(orderDO.getInStatus()), event, orderDO);
+        purchaseOrderStorageStateMachine.fireEvent(SrmStorageStatus.fromCode(orderDO.getInStatus()), event, orderDO);
     }
 
     private void checkStatusAndClose(Long orderItemId) {

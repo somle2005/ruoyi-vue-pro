@@ -39,7 +39,7 @@ public class OrderItemExecuteActionImpl implements Action<SrmExecutionStatus, Sr
         aDo.setExecuteStatus(to.getCode());
         mapper.updateById(aDo);
         //log
-        log.debug("执行状态机触发({})事件：将对象{},由状态 {}->{}", event.getDesc(), JSONUtil.toJsonStr(context), from.getDesc(), to.getDesc());
+        log.debug("订单项执行状态机触发({})事件：将对象{},由状态 {}->{}", event.getDesc(), JSONUtil.toJsonStr(context), from.getDesc(), to.getDesc());
 
         //
         Optional.ofNullable(aDo.getOrderId()).ifPresent(orderId -> {

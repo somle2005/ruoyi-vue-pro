@@ -12,6 +12,7 @@ import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInAuditReqVO;
@@ -320,16 +321,57 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     private void calculateTotalPrice(SrmPurchaseInDO purchaseIn, List<SrmPurchaseInItemDO> purchaseInItems) {
+        // 1. 计算总数量、总价等
         purchaseIn.setTotalCount(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getQty, BigDecimal::add));
         purchaseIn.setTotalProductPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
         purchaseIn.setTotalTaxPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTaxPrice, BigDecimal::add, BigDecimal.ZERO));
         purchaseIn.setTotalPrice(purchaseIn.getTotalProductPrice().add(purchaseIn.getTotalTaxPrice()));
-        // 计算优惠价格
+
+        // 2. 计算优惠价格
         if (purchaseIn.getDiscountPercent() == null) {
             purchaseIn.setDiscountPercent(BigDecimal.ZERO);
         }
         purchaseIn.setDiscountPrice(MoneyUtils.priceMultiplyPercent(purchaseIn.getTotalPrice(), purchaseIn.getDiscountPercent()));
         purchaseIn.setTotalPrice(safe(purchaseIn.getTotalPrice()).subtract(safe(purchaseIn.getDiscountPrice())).add(safe(purchaseIn.getOtherPrice())));
+
+        // 3. 计算总重量和总体积
+        // 3.1 获取所有产品ID
+        List<Long> productIds = convertList(purchaseInItems, SrmPurchaseInItemDO::getProductId);
+        if (CollUtil.isEmpty(productIds)) {
+            return;
+        }
+
+        // 3.2 批量获取产品信息
+        Map<Long, ErpProductDTO> productMap = convertMap(erpProductApi.listProductDTOs(productIds), ErpProductDTO::getId);
+
+        // 3.3 计算总重量和总体积
+        BigDecimal totalWeight = BigDecimal.ZERO;
+        BigDecimal totalVolume = BigDecimal.ZERO;
+
+        for (SrmPurchaseInItemDO item : purchaseInItems) {
+            ErpProductDTO product = productMap.get(item.getProductId());
+            if (product != null) {
+                // 计算单个产品的总重量 = 产品重量 * 数量
+                if (product.getWeight() != null) {
+                    totalWeight = totalWeight.add(
+                            MoneyUtils.priceMultiply(product.getWeight(), item.getQty())
+                    );
+                }
+                // 计算单个产品的总体积 = (长 * 宽 * 高) * 数量（单位：立方毫米）
+                if (product.getLength() != null && product.getWidth() != null && product.getHeight() != null) {
+                    BigDecimal itemVolume = new BigDecimal(product.getLength())
+                            .multiply(new BigDecimal(product.getWidth()))
+                            .multiply(new BigDecimal(product.getHeight()));
+                    totalVolume = totalVolume.add(
+                            MoneyUtils.priceMultiply(itemVolume, item.getQty())
+                    );
+                }
+            }
+        }
+
+        // 3.4 设置总重量和总体积
+        purchaseIn.setTotalWeight(totalWeight);
+        purchaseIn.setTotalVolume(totalVolume);
     }
     @Override
     public void updatePurchaseInPaymentPrice(Long id, BigDecimal paymentPrice) {
@@ -460,10 +502,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 //校验订单项是否存在
                 SrmPurchaseOrderItemDO orderItemDO = purchaseOrderService.validatePurchaseOrderItemExists(orderItemId);
                 //更新订单项入库数量+状态 入库状态机,创建入库单->增加入库数量
-                orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT,
-                    SrmOrderInCountDTO.builder().orderItemId(orderItemId)
-                        //正数
-                        .inCount(purchaseInItem.getQty()).build());
+                orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInStatus())
+                        , SrmEventEnum.STOCK_ADJUSTMENT
+                        , SrmOrderInCountDTO.builder().orderItemId(orderItemId).inCount(purchaseInItem.getQty()).build()); //正数
             });
         }
     }
@@ -609,8 +650,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             // 审核操作
             if (req.getPass()) {
                 log.debug("采购订单通过审核，ID: {}", inDO.getId());
-                //联动状态
+                // 主单审核 联动状态
                 auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
+                // 子项状态机->数量
                 linkSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
                 //按仓库分组生成入库单
                 generateInBoundDataByWarehouse(inDO);

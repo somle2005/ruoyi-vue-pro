@@ -44,10 +44,10 @@ public class SrmPurchaseOrderItemStatusMachine {
         builder.internalTransition().within(SrmExecutionStatus.PENDING).on(SrmEventEnum.EXECUTION_INIT).perform(orderItemExecuteActionImpl);
 
         // 开始执行
-        builder.externalTransition().from(SrmExecutionStatus.PENDING).to(SrmExecutionStatus.IN_PROGRESS).on(SrmEventEnum.START_EXECUTION).perform(orderItemExecuteActionImpl);
+        builder.externalTransitions().fromAmong(SrmExecutionStatus.PENDING, SrmExecutionStatus.IN_PROGRESS).to(SrmExecutionStatus.IN_PROGRESS).on(SrmEventEnum.START_EXECUTION).perform(orderItemExecuteActionImpl);
 
         // 执行完成
-        builder.externalTransition().from(SrmExecutionStatus.IN_PROGRESS).to(SrmExecutionStatus.COMPLETED).on(SrmEventEnum.COMPLETE_EXECUTION).perform(orderItemExecuteActionImpl);
+        builder.externalTransitions().fromAmong(SrmExecutionStatus.IN_PROGRESS, SrmExecutionStatus.COMPLETED).to(SrmExecutionStatus.COMPLETED).on(SrmEventEnum.COMPLETE_EXECUTION).perform(orderItemExecuteActionImpl);
 
         // 暂停执行
         builder.externalTransition().from(SrmExecutionStatus.IN_PROGRESS).to(SrmExecutionStatus.PAUSED).on(SrmEventEnum.PAUSE_EXECUTION).perform(orderItemExecuteActionImpl);
