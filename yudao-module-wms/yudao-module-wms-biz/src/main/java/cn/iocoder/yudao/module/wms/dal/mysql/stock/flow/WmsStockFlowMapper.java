@@ -74,6 +74,13 @@ public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
     }
 
     /**
+     * 按 reason_item_id 和 reason_bill_id 查询 WmsStockFlowDO 清单
+     */
+    default List<WmsStockFlowDO> selectByReasonItemIdAndReasonBillId(Long reasonItemId, Long reasonBillId) {
+        return selectList(new LambdaQueryWrapperX<WmsStockFlowDO>().eq(WmsStockFlowDO::getReasonItemId, reasonItemId).eq(WmsStockFlowDO::getReasonBillId, reasonBillId));
+    }
+
+    /**
      * 按 warehouse_id,stock_type,stock_id 查询 WmsStockFlowDO 清单
      */
     default List<WmsStockFlowDO> selectByIdxStock(Long warehouseId, Integer stockType, Long stockId) {

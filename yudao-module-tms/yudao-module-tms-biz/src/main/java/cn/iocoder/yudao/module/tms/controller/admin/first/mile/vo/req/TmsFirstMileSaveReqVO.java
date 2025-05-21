@@ -66,7 +66,6 @@ public class TmsFirstMileSaveReqVO {
     private LocalDateTime packTime;
 
     @Schema(description = "销售公司ID")
-    @NotNull(message = "销售公司不能为空")
     @DiffLogField(name = "销售公司ID")
     private Long salesCompanyId;
 
