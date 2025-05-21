@@ -315,6 +315,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         }
     }
 
+    public static BigDecimal safe(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
+    }
+
     private void calculateTotalPrice(SrmPurchaseInDO purchaseIn, List<SrmPurchaseInItemDO> purchaseInItems) {
         purchaseIn.setTotalCount(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getQty, BigDecimal::add));
         purchaseIn.setTotalProductPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
@@ -325,9 +329,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             purchaseIn.setDiscountPercent(BigDecimal.ZERO);
         }
         purchaseIn.setDiscountPrice(MoneyUtils.priceMultiplyPercent(purchaseIn.getTotalPrice(), purchaseIn.getDiscountPercent()));
-        purchaseIn.setTotalPrice(purchaseIn.getTotalPrice().subtract(purchaseIn.getDiscountPrice()).add(purchaseIn.getOtherPrice()));
+        purchaseIn.setTotalPrice(safe(purchaseIn.getTotalPrice()).subtract(safe(purchaseIn.getDiscountPrice())).add(safe(purchaseIn.getOtherPrice())));
     }
-
     @Override
     public void updatePurchaseInPaymentPrice(Long id, BigDecimal paymentPrice) {
         SrmPurchaseInDO purchaseIn = purchaseInMapper.selectById(id);

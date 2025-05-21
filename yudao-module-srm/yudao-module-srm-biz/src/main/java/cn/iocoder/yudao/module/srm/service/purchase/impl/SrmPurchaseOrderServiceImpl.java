@@ -780,7 +780,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             SrmPurchaseOrderDO order = getPurchaseOrder(aDo.getOrderId());
             // 非已审核+非开启+完全入库,异常
             ThrowUtil.ifThrow(!Objects.equals(order.getAuditStatus(), SrmAuditStatus.APPROVED.getCode()), PURCHASE_ORDER_ITEM_NOT_AUDIT, itemId);
-            ThrowUtil.ifThrow(!Objects.equals(aDo.getOffStatus(), SrmOffStatus.OPEN.getCode()), PURCHASE_ORDER_ITEM_NOT_OPEN, itemId);
+//            ThrowUtil.ifThrow(!Objects.equals(aDo.getOffStatus(), SrmOffStatus.OPEN.getCode()), PURCHASE_ORDER_ITEM_NOT_OPEN, itemId);
             ThrowUtil.ifThrow(Objects.equals(aDo.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()), PURCHASE_ORDER_IN_ITEM_NOT_OPEN, itemId);
         }
         List<Long> itemIds = reqVO.getItems().stream().map(SrmPurchaseOrderMergeReqVO.item::getItemId).collect(Collectors.toList());
