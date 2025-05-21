@@ -12,8 +12,10 @@ import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
+import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,9 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     private WmsInboundService inboundService;
     @Resource(name = SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
     StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> purchaseInCountDTOStateMachine;
+    @Resource
+    @Lazy
+    WmsInboundItemService wmsInboundItemService;
 
     public Long createInbound(WmsInboundSaveReqDTO createReqDTO) {
         WmsInboundSaveReqVO createReqVO = BeanUtils.toBean(createReqDTO, WmsInboundSaveReqVO.class);
@@ -64,7 +69,10 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     }
 
     /**
-     * 入库单作废
+     * 作废入库单
+     * @param id 入库单ID
+     * @param comment 作废原因
+     * @param billType 单据类型
      **/
     public void abandonInbound(Long id, String comment, Integer billType) {
         WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
@@ -74,11 +82,14 @@ public class WmsInboundApiImpl implements WmsInboundApi {
         //处理到货单逻辑
         if (billType != null && billType.equals(BillType.SRM_PURCHASE_IN.getValue())) {
             //触发到货单明细行-入库-状态机
-            this.getInboundList(billType, id).forEach(inbound -> purchaseInCountDTOStateMachine.fireEvent(
-                    SrmStorageStatus.PARTIALLY_IN_STORAGE,
-                    SrmEventEnum.STOCK_ADJUSTMENT,
-                    SrmPurchaseInCountDTO.builder().inItemId(inbound.getUpstreamBillId()).inCount(BigDecimal.valueOf(inbound.getPlanQty())).build()
-            ));
+            this.getInboundList(billType, id).forEach(inbound -> {
+                WmsInboundItemDO inboundItem = wmsInboundItemService.getInboundItem(inbound.getId());
+                purchaseInCountDTOStateMachine.fireEvent(
+                        SrmStorageStatus.PARTIALLY_IN_STORAGE,
+                        SrmEventEnum.STOCK_ADJUSTMENT,
+                        SrmPurchaseInCountDTO.builder().inItemId(inbound.getUpstreamBillId()).inCount(BigDecimal.valueOf(inboundItem.getPlanQty())).build()
+                );
+            });
 
         }
 

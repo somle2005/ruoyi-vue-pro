@@ -42,6 +42,7 @@ public interface WmsInboundApi {
      * 作废入库单
      * @param id 入库单ID
      * @param comment 作废原因
+     * @param billType 单据类型
      **/
     void abandonInbound(Long id, String comment, Integer billType);
 

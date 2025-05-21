@@ -749,7 +749,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                     .collect(Collectors.toList());
 
             // 5.2 创建入库单
-            wmsInboundApi.createInbound(
+            Long inbound = wmsInboundApi.createInbound(
                     WmsInboundSaveReqDTO.builder()
                             .type(WmsInboundType.PURCHASE.getValue())
                             .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
@@ -760,6 +760,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                             .itemList(inboundItems)
                             .build()
             );
+            log.info("采购到货单[{}]审核通过，创建入库单，ID: {}", inDO.getCode(), inbound);
         });
 
 
