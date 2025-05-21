@@ -136,7 +136,7 @@ public class WmsInboundItemController {
         inboundItemService.assembleInbound(voPageResult.getList());
         inboundItemService.assembleProducts(voPageResult.getList());
         inboundItemService.assembleWarehouse(voPageResult.getList());
-         inboundItemService.assembleStockType(voPageResult.getList());
+        inboundItemService.assembleStockType(voPageResult.getList());
         inboundItemService.assembleCompany(voPageResult.getList());
         inboundItemService.assembleStockWarehouse(voPageResult.getList());
         //

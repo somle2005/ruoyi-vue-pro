@@ -275,6 +275,10 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
         }
         PageResult<WmsStockWarehouseProductRespVO> voPageResult = BeanUtils.toBean(pageResult, WmsStockWarehouseProductRespVO.class);
         List<WmsStockWarehouseDO> list = stockWarehouseMapper.selectByProductIds(StreamX.from(pageResult.getList()).toSet(WmsProductDO::getId));
+        //筛选仓库
+        if(pageReqVO.getWarehouseId() != null) {
+            list = list.stream().filter(v -> v.getWarehouseId().equals(pageReqVO.getWarehouseId())).toList();
+        }
         List<WmsStockWarehouseRespVO> voList = BeanUtils.toBean(list, WmsStockWarehouseRespVO.class);
         this.assembleProducts(voList);
         this.assembleWarehouse(voList);
