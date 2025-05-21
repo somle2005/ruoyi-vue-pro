@@ -89,6 +89,11 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
         @Schema(description = "型号规格(产品带出)")
         private String model;
 
+        @Schema(description = "入库状态")
+        private Integer inStatus;
+
+
+
         // ========== 产品扩展字段 ==========
 
         @Schema(description = "报关品名")
@@ -154,6 +159,9 @@ public class SrmPurchaseInBaseRespVO extends SrmPurchaseBaseRespVO {
 
         @Schema(description = "采购订单项id")
         private Long orderItemId;
+
+        @Schema(description = "采购订单code")
+        private String orderCode;
 
         @Schema(description = "单据来源")
         private String source;

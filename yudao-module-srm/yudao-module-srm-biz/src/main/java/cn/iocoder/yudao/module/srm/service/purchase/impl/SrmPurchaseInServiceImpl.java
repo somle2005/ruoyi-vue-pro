@@ -3,12 +3,14 @@ package cn.iocoder.yudao.module.srm.service.purchase.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
@@ -18,6 +20,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurcha
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInSaveReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInItemMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInMapper;
@@ -33,6 +36,8 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import com.mzt.logapi.context.LogRecordContext;
@@ -98,15 +103,18 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             bizNo = "{{#id}}",
             extra = "{{#vo.code}}",
             success = "创建了采购入库单【{{#vo.code}}】")
+    @Idempotent
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
         vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
-        // 1.2.1 校验到货项对应的采购项可入库数量是否充足。
+        // 1.1 校验到货项对应的采购项可入库数量是否充足。
         validatePurchaseOrderItemQty(vo.getItems());
         // 1.2 校验入库项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
-        // 1.3 校验结算账户
+        // 1.3 校验币种一致性
+        validateOrderItemsCurrency(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
+        // 1.4 校验结算账户
 //        erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 生成入库单号，并校验唯一性
         String no;
@@ -250,8 +258,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         SrmPurchaseInDO purchaseIn = validatePurchaseInExists(vo.getId());
         // 1.2 校验采购到货审核状态可以修改
         updateStatusCheck(purchaseIn);
-        // 1.3 校验结算账户
-        erpAccountApi.validateAccount(vo.getAccountId());
+        // 1.3 校验币种一致性
+        validateOrderItemsCurrency(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
+        // 1.4 校验结算账户
+//        erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 校验编号
         if (vo.getCode() != null && !vo.getCode().equals(purchaseIn.getCode())) {
             validateAndUpdateCode(vo.getCode(), purchaseIn.getCode());
@@ -349,8 +359,17 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
      */
     private List<SrmPurchaseInItemDO> validatePurchaseInItemsAndCopyProperty(List<SrmPurchaseInSaveReqVO.Item> voItems) {
         // 1.1 批量获取订单项,根据入库项的订单项id
-        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(convertSet(voItems, SrmPurchaseInSaveReqVO.Item::getOrderItemId)), SrmPurchaseOrderItemDO::getId);
-        //
+        List<Long> orderItemIds = convertList(voItems, SrmPurchaseInSaveReqVO.Item::getOrderItemId);
+        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(orderItemIds), SrmPurchaseOrderItemDO::getId);
+
+        // 1.2 批量获取采购订单信息
+        List<Long> orderIds = orderItemMap.values().stream()
+                .map(SrmPurchaseOrderItemDO::getOrderId)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, String> orderCodeMap = convertMap(purchaseOrderService.getPurchaseOrderList(orderIds),
+                SrmPurchaseOrderDO::getId, SrmPurchaseOrderDO::getCode);
+        
         return convertList(voItems, voItem -> BeanUtils.toBean(voItem, SrmPurchaseInItemDO.class, inItemDO -> {
             //总价
             inItemDO.setTotalPrice(MoneyUtils.priceMultiply(inItemDO.getProductPrice(), inItemDO.getQty()));
@@ -360,7 +379,13 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             }
             // 存在关联 -> 填充订单项字段
             Optional.ofNullable(inItemDO.getOrderItemId())
-                .flatMap(orderItemId -> Optional.ofNullable(orderItemMap.get(orderItemId))).ifPresent(orderItemDO -> copyOrderItemToInItem(orderItemDO, inItemDO));
+                    .flatMap(orderItemId -> Optional.ofNullable(orderItemMap.get(orderItemId)))
+                    .ifPresent(orderItemDO -> {
+                        copyOrderItemToInItem(orderItemDO, inItemDO);
+                        // 填充采购订单编号
+                        Optional.ofNullable(orderCodeMap.get(orderItemDO.getOrderId()))
+                                .ifPresent(inItemDO::setOrderCode);
+                    });
         }));
     }
 
@@ -390,6 +415,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         inItemDO.setActTaxPrice(orderItemDO.getActTaxPrice());
         // 复制税率相关
         inItemDO.setTaxPercent(orderItemDO.getTaxPercent());
+        //申请人
+        inItemDO.setApplicantId(orderItemDO.getApplicantId());
+        //申请部门
+        inItemDO.setApplicationDeptId(orderItemDO.getApplicationDeptId());
 
         // 复制规格型号等信息
         // 不需要复制ID和入库单ID等字段，这些应该是新生成的
@@ -579,8 +608,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 //联动状态
                 auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
                 linkSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
-                //生成入库单
-                generateInBoundData(inDO);
+                //按仓库分组生成入库单
+                generateInBoundDataByWarehouse(inDO);
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", inDO.getId());
                 auditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
@@ -601,34 +630,65 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             rollbackSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
             log.debug("采购订单撤回审核，ID: {}", inDO.getId());
             auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
-            // 1.4 删除入库单
-            //如果未入库(草稿)则 -> 作废删除，已入库-> e
-            Optional.ofNullable(wmsInboundApi.getInboundList(BillType.WMS_INBOUND.getValue(), inDO.getId())).ifPresent(inbounds -> {
-                inbounds.forEach(inbound -> {
+
+            // 处理关联的入库单
+            List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.WMS_INBOUND.getValue(), inDO.getId());
+            if (CollUtil.isNotEmpty(inbounds)) {
+                for (WmsInboundDTO inbound : inbounds) {
                     if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())) {
-                        //TODO 未入库 -> 作废
-//                        wmsInboundApi.deleteInbound(inDO.getId());
+                        // 未入库状态，作废入库单
+                        wmsInboundApi.abandonInbound(inbound.getId(), "采购到货单反审核，作废入库单");
                     } else {
-                        //已入库 -> 拒绝
-                        throw exception(PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS);
+                        // 已入库状态，抛出异常
+                        throw exception(PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS, inbound.getId());
                     }
-                });
-            });
+                }
+            }
         }
     }
 
-    //生成入库单
-    private void generateInBoundData(SrmPurchaseInDO inDO) {
-        wmsInboundApi.createInbound(
-            WmsInboundSaveReqDTO.builder()
-                .type(BillType.WMS_INBOUND.getValue())
-                .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
-                .upstreamBillId(inDO.getId())
-                .upstreamBillCode(inDO.getCode())
-                //归属部门
-                .traceNo(inDO.getCode())
-                .build()
-        );
+    /**
+     * 按仓库分组生成入库单
+     *
+     * @param inDO 采购到货单
+     */
+    private void generateInBoundDataByWarehouse(SrmPurchaseInDO inDO) {
+        // 1. 获取到货单明细
+        List<SrmPurchaseInItemDO> inItems = purchaseInItemMapper.selectListByInId(inDO.getId());
+        if (CollUtil.isEmpty(inItems)) {
+            return;
+        }
+
+        // 2. 按仓库ID分组
+        Map<Long, List<SrmPurchaseInItemDO>> warehouseItemMap = inItems.stream()
+                .collect(Collectors.groupingBy(SrmPurchaseInItemDO::getWarehouseId));
+
+        // 3. 为每个仓库生成入库单
+        warehouseItemMap.forEach((warehouseId, items) -> {
+            // 3.1 构建入库单明细项
+            List<WmsInboundItemSaveReqDTO> inboundItems = items.stream()
+                    .map(item -> WmsInboundItemSaveReqDTO.builder()
+                            .productId(item.getProductId())
+                            .planQty(item.getQty().intValue())
+                            .deptId(item.getApplicationDeptId())
+//                            .companyId(item.getCompanyId()) //TODO 库存财务公司
+                            .remark(item.getRemark())
+                            .build())
+                    .collect(Collectors.toList());
+
+            // 3.2 创建入库单
+            wmsInboundApi.createInbound(
+                    WmsInboundSaveReqDTO.builder()
+                            .type(BillType.WMS_INBOUND.getValue())
+                            .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
+                            .upstreamBillId(inDO.getId())
+                            .upstreamBillCode(inDO.getCode())
+                            .warehouseId(warehouseId)
+                            .traceNo(inDO.getCode())
+                            .itemList(inboundItems) // 设置入库单明细项
+                            .build()
+            );
+        });
     }
 
     @Override
@@ -680,5 +740,44 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         }
         // 更新 Redis 中的最大编号
         noRedisDAO.setManualSerial(SrmNoRedisDAO.PURCHASE_IN_NO_PREFIX, newCode);
+    }
+
+    /**
+     * 校验入库单下所有关联的采购订单项的币种是否一致
+     *
+     * @param orderItemIds 采购订单项ID列表
+     */
+    private void validateOrderItemsCurrency(List<Long> orderItemIds) {
+        if (CollUtil.isEmpty(orderItemIds)) {
+            return;
+        }
+
+        // 获取所有关联的采购订单项
+        List<SrmPurchaseOrderItemDO> orderItems = purchaseOrderService.getPurchaseOrderItemList(orderItemIds);
+        if (CollUtil.isEmpty(orderItems)) {
+            return;
+        }
+
+        // 获取第一个非空币种的订单项作为基准
+        SrmPurchaseOrderItemDO baseItem = orderItems.stream()
+                .filter(item -> StrUtil.isNotBlank(item.getCurrencyName()))
+                .findFirst()
+                .orElse(null);
+
+        if (baseItem == null) {
+            return; // 如果没有找到任何有币种的订单项，则不校验
+        }
+
+        // 校验其他订单项的币种是否与基准币种一致
+        orderItems.stream()
+                .filter(item -> StrUtil.isNotBlank(item.getCurrencyName()) && !item.getId().equals(baseItem.getId()))
+                .forEach(item -> {
+                    if (!StrUtil.equals(item.getCurrencyName(), baseItem.getCurrencyName())) {
+                        throw exception(PURCHASE_IN_ITEM_CURRENCY_NOT_MATCH,
+                                item.getId(),
+                                item.getCurrencyName(),
+                                baseItem.getCurrencyName());
+                    }
+                });
     }
 }

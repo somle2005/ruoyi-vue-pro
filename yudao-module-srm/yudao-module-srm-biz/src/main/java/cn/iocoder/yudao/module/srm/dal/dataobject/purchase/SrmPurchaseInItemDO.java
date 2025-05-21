@@ -103,6 +103,10 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
      */
     private Long orderItemId;
     /**
+     * 采购订单编号 关联 {@link SrmPurchaseOrderDO#getCode()}
+     */
+    private String orderCode;
+    /**
      * 付款状态
      */
     private Integer payStatus;

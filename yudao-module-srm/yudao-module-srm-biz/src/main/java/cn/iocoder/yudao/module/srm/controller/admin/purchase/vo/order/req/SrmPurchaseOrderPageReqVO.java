@@ -67,6 +67,9 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] billTime;
 
+    @Schema(description = "制单人ID,创建人ID")
+    private Long creator;
+
     @Schema(description = "创建时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;
@@ -118,6 +121,8 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     @Schema(description = "采购状态")
     private Integer orderStatus;
 
+    @Schema(description = "原单单号（采购申请单code）")
+    private String purchaseApplyCode;
     //子表分割线
 
     @Schema(description = "产品id")

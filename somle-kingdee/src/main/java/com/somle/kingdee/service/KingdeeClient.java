@@ -248,7 +248,7 @@ public class KingdeeClient {
     }
 
     public KingdeeResponse getSupplier(String number) {
-        String endUrl = "/jdy/v2/bd/supplier";
+        String endUrl = "/jdy/v2/bd/supplier_detail";
         TreeMap<String, String> params = new TreeMap<>();
         params.put("number", number);
         return getResponse(endUrl, params);

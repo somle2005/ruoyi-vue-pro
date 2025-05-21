@@ -157,6 +157,10 @@ public class SrmPurchaseOrderItemDO extends TenantBaseDO {
      * 采购申请项ID {@link SrmPurchaseRequestItemsDO#getId()}
      */
     private Long purchaseApplyItemId;
+    /**
+     * 采购申请单code,冗余  {@link SrmPurchaseRequestDO#getCode()}
+     */
+    private String purchaseApplyCode;
 
 
     private String xcode;//x码
@@ -205,7 +209,7 @@ public class SrmPurchaseOrderItemDO extends TenantBaseDO {
     private String productUnitName;
 
     /**
-     * 单据来源
+     * 单据来源描述,例如：web引入
      */
     private String source;
 

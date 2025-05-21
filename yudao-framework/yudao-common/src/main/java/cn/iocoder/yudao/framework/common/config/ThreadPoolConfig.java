@@ -33,7 +33,7 @@ public class ThreadPoolConfig {
      * 供应商任务线程池
      */
     @Bean
-    public static ThreadPoolTaskExecutor TaskExecutor() {
+    public ThreadPoolTaskExecutor TaskExecutor() {
         return AsyncTask.DEFAULT.getExecutor();
     }
 }

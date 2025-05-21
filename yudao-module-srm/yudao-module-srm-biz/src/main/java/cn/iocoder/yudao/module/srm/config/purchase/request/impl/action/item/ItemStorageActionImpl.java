@@ -37,11 +37,13 @@ public class ItemStorageActionImpl implements Action<SrmStorageStatus, SrmEventE
     public void execute(SrmStorageStatus f, SrmStorageStatus t, SrmEventEnum event, SrmOrderInCountDTO context) {
         SrmPurchaseRequestItemsDO itemsDO = mapper.selectById(context.getApplyItemId());
         if (event == SrmEventEnum.STOCK_ADJUSTMENT) {
+            //1.0 更新入库数量
             BigDecimal oldCount = itemsDO.getInboundClosedQty() == null ? BigDecimal.ZERO : itemsDO.getInboundClosedQty();
             BigDecimal changeCount = context.getInCount();
             itemsDO.setInboundClosedQty(oldCount.add(changeCount));//入库数量
             //根据入库数量来动态计算当前状态
 
+            //2.0 更新入库状态
             if (itemsDO.getInboundClosedQty().compareTo(BigDecimal.valueOf(itemsDO.getQty())) >= 0) {
                 //入库量 >= 申请量
                 t = SrmStorageStatus.ALL_IN_STORAGE;

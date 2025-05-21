@@ -266,6 +266,9 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
         @Schema(description = "采购申请项ID")
         private Long purchaseApplyItemId;
 
+        @Schema(description = "原单单号（采购申请单code）")
+        private String purchaseApplyCode;
+
         @Schema(description = "交货日期")
         private LocalDateTime deliveryTime;
 

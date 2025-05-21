@@ -75,6 +75,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_IN_ITEM_ORDER_ITEM_NOT_AUDIT_PASS = new ErrorCode(1_030_102_018, "订单项({})关联的到货单({})未审核，无法创建");
     ErrorCode PURCHASE_IN_FAIL_PAYMENT_ITEM_PRICE_EXCEED = new ErrorCode(1_030_102_019, "付款金额({})超过采购入库项总金额({})");
     ErrorCode PURCHASE_IN_NO_OUT_OF_BOUNDS = new ErrorCode(1_030_102_020, "采购到货单号编码大于999999,生成失败");
+    ErrorCode PURCHASE_IN_ITEM_CURRENCY_NOT_MATCH = new ErrorCode(1_030_102_021, "采购订单项编号[{}]的币种[{}]与基准币种[{}]不一致");
 
     // ========== ERP 采购退货（1-030-103-000） ==========
     ErrorCode PURCHASE_RETURN_NOT_EXISTS = new ErrorCode(1_030_103_000, "采购退货单({})不存在");
@@ -116,7 +117,7 @@ public interface SrmErrorCodeConstants {
 
     // ========== ERP 采购申请单 1-030-603-000 ==========
     ErrorCode PURCHASE_REQUEST_NOT_EXISTS = new ErrorCode(1_030_603_100, "采购申请单不存在");
-    ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS = new ErrorCode(1_030_603_101, "采购申请编号({})不存在");
+    ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS = new ErrorCode(1_030_603_101, "采购申请明细行编号({})不存在");
     ErrorCode PURCHASE_REQUEST_ITEM_NOT_FOUND = new ErrorCode(1_030_603_102, "未找到对应的采购申请项,订单项编号={},申请项编号={}");
     ErrorCode PURCHASE_REQUEST_OPENED = new ErrorCode(1_030_603_110, "采购申请单({})已开启");
     ErrorCode PURCHASE_REQUEST_CLOSED = new ErrorCode(1_030_603_111, "采购申请单({})已关闭");

@@ -54,6 +54,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -68,6 +70,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.iocoder.yudao.framework.common.enums.ChannelEnum.PURCHASE_ORDER;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
@@ -126,6 +129,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Autowired
     @Lazy
     private SrmPurchaseRequestService srmPurchaseRequestService;
+    @Resource(name = PURCHASE_ORDER)
+    MessageChannel purchaseOrderChannel;
 
     /**
      * 校验是否存在入库项
@@ -240,10 +245,11 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         if (vo.getAccountId() != null) {
             erpAccountApi.validateAccount(vo.getAccountId());
         }
-        // 1.3.1 校验订单项是否可以被创建
+        // 1.3.1 校验订单项是否可以被创建,数量够不够
         List<Long> purchaseApplyItemIds = orderItems.stream().map(SrmPurchaseOrderItemDO::getPurchaseApplyItemId).distinct().toList();
         //构造purchaseApplyItemIds:count 的Map
         validPurchaseApplyItemId(purchaseApplyItemIds, orderItems);
+        // 1.3.2
         // 1.4 生成订单号，并校验唯一性
         voSetNo(vo);
         // 2.1 插入订单
@@ -265,6 +271,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         initSlaveStatus(orderItems);
         //回填log记录
         LogRecordContext.putVariable("id", orderDO.getId());
+        //发送消息
+        purchaseOrderChannel.send(MessageBuilder.withPayload(Collections.singletonList(orderDO.getId())).build());
         return orderDO.getId();
     }
 
@@ -308,6 +316,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 2.2 更新订单项
         updatePurchaseOrderItemList(vo.getId(), purchaseOrderItems);
         vo.getItems().sort(Comparator.comparing(SrmPurchaseOrderSaveReqVO.Item::getId, Comparator.nullsFirst(Long::compareTo)));
+        //发送消息
+        purchaseOrderChannel.send(MessageBuilder.withPayload(Collections.singletonList(vo.getId())).build());
     }
 
     @Override
@@ -366,9 +376,21 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 1. 校验产品存在
         List<ErpProductDTO> productList = erpProductApi.validProductList(convertSet(list, SrmPurchaseOrderSaveReqVO.Item::getProductId));
         Map<Long, ErpProductDTO> dtoMap = convertMap(productList, ErpProductDTO::getId);
-        // 2. 转化为 SrmPurchaseOrderItemDO 列表
+
+        // 2. 获取并校验采购申请项信息
+        Set<Long> purchaseApplyItemIds = list.stream()
+                .map(SrmPurchaseOrderSaveReqVO.Item::getPurchaseApplyItemId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+        // 使用不可变的 Map
+        final Map<Long, SrmPurchaseRequestItemsDO> requestItemMap = CollUtil.isEmpty(purchaseApplyItemIds) ?
+                Collections.emptyMap() :
+                Collections.unmodifiableMap(convertMap(srmPurchaseRequestService.validItemIdsExist(purchaseApplyItemIds),
+                        SrmPurchaseRequestItemsDO::getId));
+
+        // 3. 转化为 SrmPurchaseOrderItemDO 列表
         return convertList(list, o -> BeanUtils.toBean(o, SrmPurchaseOrderItemDO.class, item -> {
-            //            item = SrmOrderConvert.INSTANCE.convertToErpPurchaseOrderItemDO(o);//convert转换一下
+            // 计算总价和税费
             item.setTotalPrice(MoneyUtils.priceMultiply(item.getProductPrice(), item.getQty()));
             if (item.getTotalPrice() == null) {
                 return;
@@ -376,13 +398,23 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             if (item.getTaxPercent() != null) {
                 item.setTaxPrice(MoneyUtils.priceMultiplyPercent(item.getTotalPrice(), item.getTaxPercent()));
             }
-            //根据产品来设置产品单位
-            item.setProductUnitId(dtoMap.get(item.getProductId()).getUnitId());
-            //产品名称
-            item.setProductName(dtoMap.get(item.getProductId()).getName());
-            item.setBarCode(dtoMap.get(item.getProductId()).getBarCode());
-            //产品单位名称(产品必有单位)
-            item.setProductUnitName(erpProductUnitApi.getProductUnitList(Collections.singleton(dtoMap.get(item.getProductId()).getUnitId())).get(0).getName());
+
+            // 设置产品相关信息
+            ErpProductDTO product = dtoMap.get(item.getProductId());
+            item.setProductUnitId(product.getUnitId());
+            item.setProductName(product.getName());
+            item.setBarCode(product.getBarCode());
+            item.setProductUnitName(erpProductUnitApi.getProductUnitList(Collections.singleton(product.getUnitId())).get(0).getName());
+
+            // 设置采购申请单相关信息
+            if (item.getPurchaseApplyItemId() != null) {
+                SrmPurchaseRequestItemsDO requestItem = requestItemMap.get(item.getPurchaseApplyItemId());
+                if (requestItem == null) {
+                    throw exception(PURCHASE_REQUEST_ITEM_NOT_EXISTS, item.getPurchaseApplyItemId());
+                }
+                // 获取并设置采购申请单编号
+                item.setPurchaseApplyCode(srmPurchaseRequestService.getPurchaseRequest(requestItem.getRequestId()).getCode());
+            }
         }));
     }
 
