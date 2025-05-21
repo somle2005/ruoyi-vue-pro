@@ -127,12 +127,9 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             //传递给申请项入库状态机
             SrmPurchaseRequestItemsDO applyItemDO = erpPurchaseRequestItemsMapper.selectById(applyItemId);
             ThrowUtil.ifThrow(applyItemDO == null, PURCHASE_REQUEST_ITEM_NOT_FOUND, oldData.getId(), applyItemId);
-            BigDecimal oldCount = applyItemDO.getInboundClosedQty();
-            //                BigDecimal result = (oldCount != null && oldCount.compareTo(BigDecimal.ZERO) == 0) ? BigDecimal.ZERO : oldCount;
-            BigDecimal result = oldCount == null ? BigDecimal.ZERO : oldCount;
-            BigDecimal changeCount = result.subtract(dtoCount);
+            //
             purchaseRequestItemStateMachine.fireEvent(SrmStorageStatus.fromCode(applyItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT,
-                SrmOrderInCountDTO.builder().applyItemId(applyItemId).inCount(changeCount).build());
+                    SrmOrderInCountDTO.builder().applyItemId(applyItemId).inCount(dtoCount).build());
         });
     }
 

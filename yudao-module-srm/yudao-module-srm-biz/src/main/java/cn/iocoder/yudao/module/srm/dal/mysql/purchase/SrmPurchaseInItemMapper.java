@@ -42,4 +42,9 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
     default boolean existsByOrderItemId(Long orderItemId) {
         return selectCount(SrmPurchaseInItemDO::getOrderItemId, orderItemId) > 0;
     }
+
+    //根据oderItemId找对应的入库项 list
+    default List<SrmPurchaseInItemDO> selectListByOrderItemId(Long orderItemId) {
+        return selectList(SrmPurchaseInItemDO::getOrderItemId, orderItemId);
+    }
 }

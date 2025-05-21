@@ -22,6 +22,8 @@ import java.util.Collections;
 import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME;
 
 /**
+ * 到货单明细行 入库状态机
+ * <p>
  * 更改item实际入库数量+入库状态
  */
 @Slf4j

@@ -9,9 +9,9 @@ import java.math.BigDecimal;
 @Builder
 public class SrmPurchaseInCountDTO {
 
-    //入库项ID
+    //到货项ID
     private Long inItemId;
 
-    //入库项差额
+    //到货项差额
     private BigDecimal inCount;
 }
