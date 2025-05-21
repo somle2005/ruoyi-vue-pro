@@ -1,28 +1,44 @@
 package cn.iocoder.yudao.module.srm.config.purchase.in.impl.action.item;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPuchaseInCountDTO;
+import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPurchaseInCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInItemMapper;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
+import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
+import java.util.Collections;
+
+import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME;
 
 /**
  * 更改item实际入库数量+入库状态
  */
 @Slf4j
 @Component
-public class inItemActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmPuchaseInCountDTO> {
+public class inItemActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> {
     @Autowired
     private SrmPurchaseInItemMapper srmPurchaseInItemMapper;
 
+    @Resource(name = PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
+    @Lazy
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemStorageStateMachine;
+    @Autowired
+    @Lazy
+    private SrmPurchaseOrderService srmPurchaseOrderService;
+
     @Override
-    public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmPuchaseInCountDTO context) {
+    public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmPurchaseInCountDTO context) {
         SrmPurchaseInItemDO srmPurchaseInItemDO = srmPurchaseInItemMapper.selectById(context.getInItemId());
 
         //调整库存
@@ -52,9 +68,14 @@ public class inItemActionImpl implements Action<SrmStorageStatus, SrmEventEnum, 
         //
         srmPurchaseInItemMapper.updateById(srmPurchaseInItemDO.setInStatus(to.getCode()));
 
+        //1. 转递给主单?
+        //2. 传递事件给订单项, 入库状态
         if (event != SrmEventEnum.ORDER_INIT) {
-            //TODO 传递事件给订单项
-
+            SrmPurchaseOrderItemDO srmPurchaseOrderItemDO = srmPurchaseOrderService.getPurchaseOrderItemList(Collections.singleton(srmPurchaseInItemDO.getOrderItemId())).get(0);
+            orderItemStorageStateMachine.fireEvent(SrmStorageStatus.fromCode(srmPurchaseOrderItemDO.getInStatus())
+                    , SrmEventEnum.ORDER_ADJUSTMENT
+                    , SrmOrderInCountDTO.builder().orderItemId(srmPurchaseInItemDO.getOrderItemId()).returnCount(context.getInCount()).build());
         }
+
     }
 }

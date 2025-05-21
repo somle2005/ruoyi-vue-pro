@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class SrmPuchaseInCountDTO {
+public class SrmPurchaseInCountDTO {
 
     //入库项ID
     private Long inItemId;
