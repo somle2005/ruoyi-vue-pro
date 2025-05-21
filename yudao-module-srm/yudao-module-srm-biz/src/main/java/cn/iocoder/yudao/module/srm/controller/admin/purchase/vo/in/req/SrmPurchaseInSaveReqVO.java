@@ -59,6 +59,16 @@ public class SrmPurchaseInSaveReqVO {
     @DiffLogField(name = "附件地址")
     private String fileUrl;
 
+
+    @Schema(description = "总毛重")
+    @DiffLogField(name = "总毛重")
+    private BigDecimal totalWeight;
+
+
+    @Schema(description = "总体积")
+    @DiffLogField(name = "总体积")
+    private BigDecimal totalVolume;
+
     @Schema(description = "备注")
     @DiffLogField(name = "备注")
     private String remark;

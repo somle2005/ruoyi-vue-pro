@@ -67,6 +67,7 @@ public class SrmPurchaseOrderSaveReqVO {
 
     @Schema(description = "采购主体编号")
     @DiffLogField(name = "采购主体编号")
+    @NotNull(message = "采购主体编号不能为空")
     private Long purchaseCompanyId;
 
     @Schema(description = "装运港")

@@ -39,6 +39,7 @@ import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
@@ -635,11 +636,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.WMS_INBOUND.getValue(), inDO.getId());
             if (CollUtil.isNotEmpty(inbounds)) {
                 for (WmsInboundDTO inbound : inbounds) {
-                    if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())) {
+                    if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue()) && Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue())) {
                         // 未入库状态，作废入库单
                         wmsInboundApi.abandonInbound(inbound.getId(), "采购到货单反审核，作废入库单");
                     } else {
-                        // 已入库状态，抛出异常
+                        //抛出异常
                         throw exception(PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS, inbound.getId());
                     }
                 }
@@ -659,24 +660,47 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             return;
         }
 
-        // 2. 按仓库ID分组
+        // 2. 获取关联的采购订单项信息，用于获取订单主表ID
+        List<Long> orderItemIds = convertList(inItems, SrmPurchaseInItemDO::getOrderItemId);
+        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(
+                purchaseOrderService.getPurchaseOrderItemList(orderItemIds),
+                SrmPurchaseOrderItemDO::getId
+        );
+
+        // 3. 获取采购订单主表信息，用于获取 purchaseCompanyId
+        List<Long> orderIds = orderItemMap.values().stream()
+                .map(SrmPurchaseOrderItemDO::getOrderId)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, SrmPurchaseOrderDO> orderMap = convertMap(
+                purchaseOrderService.getPurchaseOrderList(orderIds),
+                SrmPurchaseOrderDO::getId
+        );
+
+        // 4. 按仓库ID分组
         Map<Long, List<SrmPurchaseInItemDO>> warehouseItemMap = inItems.stream()
                 .collect(Collectors.groupingBy(SrmPurchaseInItemDO::getWarehouseId));
 
-        // 3. 为每个仓库生成入库单
+        // 5. 为每个仓库生成入库单
         warehouseItemMap.forEach((warehouseId, items) -> {
-            // 3.1 构建入库单明细项
+            // 5.1 构建入库单明细项
             List<WmsInboundItemSaveReqDTO> inboundItems = items.stream()
-                    .map(item -> WmsInboundItemSaveReqDTO.builder()
-                            .productId(item.getProductId())
-                            .planQty(item.getQty().intValue())
-                            .deptId(item.getApplicationDeptId())
-//                            .companyId(item.getCompanyId()) //TODO 库存财务公司
-                            .remark(item.getRemark())
-                            .build())
+                    .map(item -> {
+                        // 获取关联的采购订单项和订单主表信息
+                        SrmPurchaseOrderItemDO orderItem = orderItemMap.get(item.getOrderItemId());
+                        SrmPurchaseOrderDO order = orderItem != null ? orderMap.get(orderItem.getOrderId()) : null;
+
+                        return WmsInboundItemSaveReqDTO.builder()
+                                .productId(item.getProductId())
+                                .planQty(item.getQty().intValue())
+                                .deptId(item.getApplicationDeptId())
+                                .companyId(order != null ? order.getPurchaseCompanyId() : null) // 设置库存财务公司ID
+                                .remark(item.getRemark())
+                                .build();
+                    })
                     .collect(Collectors.toList());
 
-            // 3.2 创建入库单
+            // 5.2 创建入库单
             wmsInboundApi.createInbound(
                     WmsInboundSaveReqDTO.builder()
                             .type(BillType.WMS_INBOUND.getValue())
@@ -685,7 +709,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                             .upstreamBillCode(inDO.getCode())
                             .warehouseId(warehouseId)
                             .traceNo(inDO.getCode())
-                            .itemList(inboundItems) // 设置入库单明细项
+                            .itemList(inboundItems)
                             .build()
             );
         });

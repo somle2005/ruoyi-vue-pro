@@ -159,6 +159,15 @@ public class SrmPurchaseInDO extends TenantBaseDO {
     private Boolean reconciliationStatus;
 
     // ========= 附加信息 =========
+    /**
+     * 总毛重
+     */
+    private BigDecimal totalWeight;
+
+    /**
+     * 总体积
+     */
+    private BigDecimal totalVolume;
 
     /**
      * 附件地址

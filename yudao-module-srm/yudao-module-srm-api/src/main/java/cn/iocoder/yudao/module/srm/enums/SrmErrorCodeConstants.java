@@ -38,7 +38,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_REQUEST_DELETE_FAIL = new ErrorCode(1_030_101_016, "存在关联的采购订单，不能删除采购申请单");
     ErrorCode PURCHASE_REQUEST_CLOSE_FAIL = new ErrorCode(1_030_101_014, "未审核的采购申请单不能进行({})");
     ErrorCode PURCHASE_ORDER_ITEM_NOT_EXISTS = new ErrorCode(1_030_101_017, "采购订单项编号({})不存在");
-    ErrorCode PURCHASE_ORDER_ITEM_NOT_OPEN = new ErrorCode(1_030_101_018, "采购订单项({})非开启状态");
+    ErrorCode PURCHASE_ORDER_ITEM_NOT_OPEN = new ErrorCode(1_030_101_018, "采购订单项({})非开启状态,无法合并");
     ErrorCode PURCHASE_ORDER_IN_ITEM_NOT_OPEN = new ErrorCode(1_030_101_019, "采购订单项({})已完全到货，无法再次加入到货项");
     ErrorCode PURCHASE_ORDER_ITEM_NOT_AUDIT = new ErrorCode(1_030_101_020, "采购订单项({})的订单不是已审核状态，无法合并");
     ErrorCode PURCHASE_ORDER_DELETE_FAIL = new ErrorCode(1_030_101_021, "该订单存在关联到货项，无法删除");
