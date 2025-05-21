@@ -20,6 +20,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurcha
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInSaveReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInItemMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInMapper;
@@ -36,6 +37,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import com.mzt.logapi.context.LogRecordContext;
@@ -357,8 +359,17 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
      */
     private List<SrmPurchaseInItemDO> validatePurchaseInItemsAndCopyProperty(List<SrmPurchaseInSaveReqVO.Item> voItems) {
         // 1.1 批量获取订单项,根据入库项的订单项id
-        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(convertSet(voItems, SrmPurchaseInSaveReqVO.Item::getOrderItemId)), SrmPurchaseOrderItemDO::getId);
-        //
+        List<Long> orderItemIds = convertList(voItems, SrmPurchaseInSaveReqVO.Item::getOrderItemId);
+        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(orderItemIds), SrmPurchaseOrderItemDO::getId);
+
+        // 1.2 批量获取采购订单信息
+        List<Long> orderIds = orderItemMap.values().stream()
+                .map(SrmPurchaseOrderItemDO::getOrderId)
+                .distinct()
+                .collect(Collectors.toList());
+        Map<Long, String> orderCodeMap = convertMap(purchaseOrderService.getPurchaseOrderList(orderIds),
+                SrmPurchaseOrderDO::getId, SrmPurchaseOrderDO::getCode);
+        
         return convertList(voItems, voItem -> BeanUtils.toBean(voItem, SrmPurchaseInItemDO.class, inItemDO -> {
             //总价
             inItemDO.setTotalPrice(MoneyUtils.priceMultiply(inItemDO.getProductPrice(), inItemDO.getQty()));
@@ -368,7 +379,13 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             }
             // 存在关联 -> 填充订单项字段
             Optional.ofNullable(inItemDO.getOrderItemId())
-                .flatMap(orderItemId -> Optional.ofNullable(orderItemMap.get(orderItemId))).ifPresent(orderItemDO -> copyOrderItemToInItem(orderItemDO, inItemDO));
+                    .flatMap(orderItemId -> Optional.ofNullable(orderItemMap.get(orderItemId)))
+                    .ifPresent(orderItemDO -> {
+                        copyOrderItemToInItem(orderItemDO, inItemDO);
+                        // 填充采购订单编号
+                        Optional.ofNullable(orderCodeMap.get(orderItemDO.getOrderId()))
+                                .ifPresent(inItemDO::setOrderCode);
+                    });
         }));
     }
 
@@ -398,6 +415,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         inItemDO.setActTaxPrice(orderItemDO.getActTaxPrice());
         // 复制税率相关
         inItemDO.setTaxPercent(orderItemDO.getTaxPercent());
+        //申请人
+        inItemDO.setApplicantId(orderItemDO.getApplicantId());
+        //申请部门
+        inItemDO.setApplicationDeptId(orderItemDO.getApplicationDeptId());
 
         // 复制规格型号等信息
         // 不需要复制ID和入库单ID等字段，这些应该是新生成的
@@ -644,14 +665,27 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
         // 3. 为每个仓库生成入库单
         warehouseItemMap.forEach((warehouseId, items) -> {
+            // 3.1 构建入库单明细项
+            List<WmsInboundItemSaveReqDTO> inboundItems = items.stream()
+                    .map(item -> WmsInboundItemSaveReqDTO.builder()
+                            .productId(item.getProductId())
+                            .planQty(item.getQty().intValue())
+                            .deptId(item.getApplicationDeptId())
+//                            .companyId(item.getCompanyId()) //TODO 库存财务公司
+                            .remark(item.getRemark())
+                            .build())
+                    .collect(Collectors.toList());
+
+            // 3.2 创建入库单
             wmsInboundApi.createInbound(
                     WmsInboundSaveReqDTO.builder()
                             .type(BillType.WMS_INBOUND.getValue())
                             .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
                             .upstreamBillId(inDO.getId())
                             .upstreamBillCode(inDO.getCode())
-                            .warehouseId(warehouseId) // 设置仓库ID
+                            .warehouseId(warehouseId)
                             .traceNo(inDO.getCode())
+                            .itemList(inboundItems) // 设置入库单明细项
                             .build()
             );
         });

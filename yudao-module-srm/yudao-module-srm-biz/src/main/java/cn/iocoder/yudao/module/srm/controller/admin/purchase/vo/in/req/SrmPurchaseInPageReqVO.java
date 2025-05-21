@@ -67,8 +67,8 @@ public class SrmPurchaseInPageReqVO extends PageParam {
     @Schema(description = "是否可付款")
     private Boolean paymentEnable;
 
-    @Schema(description = "采购单号")
-    private String orderNo;
+    @Schema(description = "采购订单code")
+    private String orderCode;
 
     @Schema(description = "是否对账")
     private Boolean reconciliationEnable;
