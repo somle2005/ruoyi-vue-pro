@@ -35,6 +35,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import com.mzt.logapi.context.LogRecordContext;
@@ -586,8 +587,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 //联动状态
                 auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
                 linkSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
-                //生成入库单
-                generateInBoundData(inDO);
+                //按仓库分组生成入库单
+                generateInBoundDataByWarehouse(inDO);
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", inDO.getId());
                 auditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
@@ -608,34 +609,52 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             rollbackSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
             log.debug("采购订单撤回审核，ID: {}", inDO.getId());
             auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
-            // 1.4 删除入库单
-            //如果未入库(草稿)则 -> 作废删除，已入库-> e
-            Optional.ofNullable(wmsInboundApi.getInboundList(BillType.WMS_INBOUND.getValue(), inDO.getId())).ifPresent(inbounds -> {
-                inbounds.forEach(inbound -> {
+
+            // 处理关联的入库单
+            List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.WMS_INBOUND.getValue(), inDO.getId());
+            if (CollUtil.isNotEmpty(inbounds)) {
+                for (WmsInboundDTO inbound : inbounds) {
                     if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())) {
-                        //TODO 未入库 -> 作废
-//                        wmsInboundApi.deleteInbound(inDO.getId());
+                        // 未入库状态，作废入库单
+                        wmsInboundApi.abandonInbound(inbound.getId(), "采购到货单反审核，作废入库单");
                     } else {
-                        //已入库 -> 拒绝
-                        throw exception(PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS);
+                        // 已入库状态，抛出异常
+                        throw exception(PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS, inbound.getId());
                     }
-                });
-            });
+                }
+            }
         }
     }
 
-    //生成入库单
-    private void generateInBoundData(SrmPurchaseInDO inDO) {
-        wmsInboundApi.createInbound(
-            WmsInboundSaveReqDTO.builder()
-                .type(BillType.WMS_INBOUND.getValue())
-                .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
-                .upstreamBillId(inDO.getId())
-                .upstreamBillCode(inDO.getCode())
-                //归属部门
-                .traceNo(inDO.getCode())
-                .build()
-        );
+    /**
+     * 按仓库分组生成入库单
+     *
+     * @param inDO 采购到货单
+     */
+    private void generateInBoundDataByWarehouse(SrmPurchaseInDO inDO) {
+        // 1. 获取到货单明细
+        List<SrmPurchaseInItemDO> inItems = purchaseInItemMapper.selectListByInId(inDO.getId());
+        if (CollUtil.isEmpty(inItems)) {
+            return;
+        }
+
+        // 2. 按仓库ID分组
+        Map<Long, List<SrmPurchaseInItemDO>> warehouseItemMap = inItems.stream()
+                .collect(Collectors.groupingBy(SrmPurchaseInItemDO::getWarehouseId));
+
+        // 3. 为每个仓库生成入库单
+        warehouseItemMap.forEach((warehouseId, items) -> {
+            wmsInboundApi.createInbound(
+                    WmsInboundSaveReqDTO.builder()
+                            .type(BillType.WMS_INBOUND.getValue())
+                            .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
+                            .upstreamBillId(inDO.getId())
+                            .upstreamBillCode(inDO.getCode())
+                            .warehouseId(warehouseId) // 设置仓库ID
+                            .traceNo(inDO.getCode())
+                            .build()
+            );
+        });
     }
 
     @Override
