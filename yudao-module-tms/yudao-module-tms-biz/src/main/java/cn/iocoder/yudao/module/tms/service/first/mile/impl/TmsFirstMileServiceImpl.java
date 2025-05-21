@@ -109,7 +109,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             bizNo = "{{#id}}",
             success = "创建了头程单【{{#vo.code}}】")
     public Long createFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
-        vo.initId(); //初始化上游ID
+
         //1.0 校验
         warehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
 
@@ -127,6 +127,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         firstMileMapper.insert(firstMile);
 
         Long firstMileId = firstMile.getId();
+        vo.initId(); //初始化上游ID
 
         // 保存头程明细
         createFirstMileItemList(firstMileId, vo.getFirstMileItems());
