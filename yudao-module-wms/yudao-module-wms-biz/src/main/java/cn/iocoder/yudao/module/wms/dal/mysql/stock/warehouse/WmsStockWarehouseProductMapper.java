@@ -28,11 +28,10 @@ public interface WmsStockWarehouseProductMapper extends BaseMapperX<WmsProductDO
 
         // 连接产品视图
         wrapper.innerJoin(WmsStockWarehouseDO.class, WmsStockWarehouseDO::getProductId,WmsProductDO::getId)
-        // 按仓库
+        // 按仓库ID
         .eqIfExists(WmsStockWarehouseDO::getWarehouseId, reqVO.getWarehouseId())
-            // 按产品ID
-            .eqIfExists(WmsStockWarehouseDO::getProductId, reqVO.getProductId())
-
+        // 按产品ID
+        .eqIfExists(WmsStockWarehouseDO::getProductId, reqVO.getProductId())
         .between(WmsStockWarehouseDO::getAvailableQty,getMin(reqVO.getAvailableQty()),getMax(reqVO.getAvailableQty()))
         .between(WmsStockWarehouseDO::getDefectiveQty,getMin(reqVO.getDefectiveQty()),getMax(reqVO.getDefectiveQty()))
         .between(WmsStockWarehouseDO::getOutboundPendingQty,getMin(reqVO.getOutboundPendingQty()),getMax(reqVO.getOutboundPendingQty()))

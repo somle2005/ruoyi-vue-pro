@@ -1,10 +1,12 @@
 package cn.iocoder.yudao.module.wms.service.quantity;
 
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
@@ -17,6 +19,8 @@ import org.springframework.stereotype.Component;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
+
+import static java.lang.Boolean.FALSE;
 
 /**
  * @author: LeeFJ
@@ -69,11 +73,19 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
             item.setInboundStatus(inboundStatus.getValue());
             item.setInboundCompanyId(companyId);
             item.setInboundDeptId(deptId);
-
+            //仓库信息更新
+            this.updateStockWarehouse(inboundRespVO, item);
         }
         // 完成最终的入库
         inboundService.finishInbound(inboundRespVO);
 
+    }
+
+    private void updateStockWarehouse(WmsInboundRespVO inboundRespVO, WmsInboundItemRespVO item) {
+        WmsStockWarehouseDO stockWarehouse = stockWarehouseService.getStockWarehouse(inboundRespVO.getWarehouseId(), item.getProductId(), FALSE);
+        WmsStockWarehouseSaveReqVO createReqVO = BeanUtils.toBean(stockWarehouse, WmsStockWarehouseSaveReqVO.class);
+        createReqVO.setTransitQty(item.getPlanQty());
+        stockWarehouseService.updateStockWarehouse(createReqVO);
     }
 
     /**

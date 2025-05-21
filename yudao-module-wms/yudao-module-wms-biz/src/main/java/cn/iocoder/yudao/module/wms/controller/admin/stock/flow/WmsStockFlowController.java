@@ -144,6 +144,8 @@ public class WmsStockFlowController {
         stockFlowService.assembleInventory(voPageResult.getList());
         stockFlowService.assembleBinMove(voPageResult.getList());
         stockFlowService.assembleOwnershipMove(voPageResult.getList());
+        //批次可用库存数量显示为库存变更前数量
+        stockFlowService.assembleBatchAvailableQty(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
 			.mapping(WmsStockFlowRespVO::getCreator, WmsStockFlowRespVO::setCreatorName)

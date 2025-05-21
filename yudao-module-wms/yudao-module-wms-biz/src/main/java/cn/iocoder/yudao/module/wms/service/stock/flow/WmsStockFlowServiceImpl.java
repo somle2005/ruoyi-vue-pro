@@ -420,7 +420,10 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     public void assembleBatchAvailableQty(List<WmsStockFlowRespVO> list) {
         for (WmsStockFlowRespVO respVO : list) {
             WmsInboundItemFlowSimpleVO inboundItemFlowSimpleVO = respVO.getInboundItemFlow();
-            Integer getOutboundAvailableQty = Objects.isNull(inboundItemFlowSimpleVO)? 0 : inboundItemFlowSimpleVO.getOutboundAvailableQty();
+            if(inboundItemFlowSimpleVO == null) {
+                continue;
+            }
+            Integer getOutboundAvailableQty = inboundItemFlowSimpleVO.getOutboundAvailableQty();
             respVO.setAvailableQty(getOutboundAvailableQty - respVO.getDeltaQty());
         }
     }

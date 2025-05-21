@@ -233,6 +233,7 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
         StreamX.from(list).assemble(warehouseVOMap, WmsStockWarehouseRespVO::getWarehouseId, WmsStockWarehouseRespVO::setWarehouse);
     }
 
+    @Override
     public String getWarehouseProductKey(Long warehouseId, Long productId) {
         return warehouseId + "_" + productId;
     }
@@ -275,6 +276,10 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
         }
         PageResult<WmsStockWarehouseProductRespVO> voPageResult = BeanUtils.toBean(pageResult, WmsStockWarehouseProductRespVO.class);
         List<WmsStockWarehouseDO> list = stockWarehouseMapper.selectByProductIds(StreamX.from(pageResult.getList()).toSet(WmsProductDO::getId));
+        //筛选仓库
+        if(pageReqVO.getWarehouseId() != null) {
+            list = list.stream().filter(v -> v.getWarehouseId().equals(pageReqVO.getWarehouseId())).toList();
+        }
         List<WmsStockWarehouseRespVO> voList = BeanUtils.toBean(list, WmsStockWarehouseRespVO.class);
         this.assembleProducts(voList);
         this.assembleWarehouse(voList);
@@ -290,6 +295,7 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
     /**
      * 按 ID 集合查询 WmsStockWarehouseDO
      */
+    @Override
     public List<WmsStockWarehouseDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();

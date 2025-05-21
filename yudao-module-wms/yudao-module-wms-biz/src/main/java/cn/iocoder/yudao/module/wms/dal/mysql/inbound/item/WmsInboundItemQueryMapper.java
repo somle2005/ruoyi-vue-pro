@@ -32,7 +32,7 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         //
         wrapper.selectAll(WmsInboundItemDO.class);
         wrapper.select(WmsInboundDO::getWarehouseId);
-        wrapper.select(WmsPickupItemDO::getBinId);
+//        wrapper.select(WmsPickupItemDO::getBinId);
         wrapper.select(AGE_COL_EXPR);
 
         //
