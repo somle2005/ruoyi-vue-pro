@@ -246,10 +246,13 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             vo.setItems(voItemList);
             //            vo.setRemark("申请人期望采购日期: " + DateUtil.format(reqVO.getOrderTime(), DatePattern.CHINESE_DATE_PATTERN));
         });
-        //3.0 持久化
-        //        saveReqVO.setId(orderId);
-        //        srmPurchaseOrderService.updatePurchaseOrder(saveReqVO);
-        return srmPurchaseOrderService.createPurchaseOrder(saveReqVO);
+        Long purchaseOrder = null;
+        try {
+            purchaseOrder = srmPurchaseOrderService.createPurchaseOrder(saveReqVO);
+        } catch (Exception e) {
+            throw exception(PURCHASE_REQUEST_MERGE_FAIL_REASON, e.getMessage());
+        }
+        return purchaseOrder;
     }
 
     private void validMerge(List<SrmPurchaseRequestItemsDO> itemsDOS) {

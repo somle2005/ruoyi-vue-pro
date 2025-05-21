@@ -152,6 +152,7 @@ public interface SrmErrorCodeConstants {
     //存在对应订单，无法手动关闭
     ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS_BY_MANUAL_CLOSE = new ErrorCode(1_030_603_147, "申请单存在关联订单,无法手动关闭状态");
     ErrorCode PURCHASE_REQUEST_NO_EXISTS_BY_NO = new ErrorCode(1_030_603_148, "采购申请单号({})已存在");
+    ErrorCode PURCHASE_REQUEST_MERGE_FAIL_REASON = new ErrorCode(1_030_603_149, "采购申请单合并失败，原因:{}");
 
     // ========== ERP 采购入库单 1-030-605-300 ==========
     // ========== ERP 采购退货单 1-030-606-300 ==========

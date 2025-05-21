@@ -33,7 +33,7 @@ public class TmsVesselTrackingServiceImpl implements TmsVesselTrackingService {
     private TmsVesselTrackingLogMapper vesselTrackingLogMapper;
 
     @Override
-    public Long createVesselTracking(TmsVesselTrackingSaveReqVO createReqVO) {
+    public Long createVesselTracking(@Validated TmsVesselTrackingSaveReqVO createReqVO) {
         // 插入
         TmsVesselTrackingDO vesselTracking = BeanUtils.toBean(createReqVO, TmsVesselTrackingDO.class);
         vesselTrackingMapper.insert(vesselTracking);
