@@ -77,6 +77,7 @@ import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.
 import static cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO.PURCHASE_ORDER_NO_PREFIX;
 import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
+import static jodd.util.StringUtil.truncate;
 
 /**
  * ERP 采购订单 Service 实现类
@@ -810,7 +811,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             Long purchaseIn = purchaseInService.createPurchaseIn(vo);
         } catch (Exception e) {
             log.error("合并采购订单生成到货单失败，参数：{}，异常：{}", vo, e.getMessage(), e);
-            throw exception(PURCHASE_ORDER_MERGE_IN_FAIL, "合并到货单", e.getMessage());
+            throw exception(PURCHASE_ORDER_MERGE_IN_FAIL, "合并到货单", truncate(e.getMessage(), 200));
         }
     }
 

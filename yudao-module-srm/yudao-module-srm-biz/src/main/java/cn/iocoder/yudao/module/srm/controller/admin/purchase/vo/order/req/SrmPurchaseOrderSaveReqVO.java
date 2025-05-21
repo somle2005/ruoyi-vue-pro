@@ -148,7 +148,7 @@ public class SrmPurchaseOrderSaveReqVO {
         private BigDecimal productPrice;
 
         @Schema(description = "产品单位ID")
-        @NotNull(message = "产品单位ID不能为空")
+//        @NotNull(message = "产品单位ID不能为空")
         @DiffLogField(name = "产品单位编号")
         private Long productUnitId;
 

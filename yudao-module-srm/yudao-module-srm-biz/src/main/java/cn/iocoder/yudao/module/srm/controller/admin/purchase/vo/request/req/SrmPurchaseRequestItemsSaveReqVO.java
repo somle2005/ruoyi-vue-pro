@@ -70,7 +70,6 @@ public class SrmPurchaseRequestItemsSaveReqVO {
     //是否计算得到？待确认
     @Schema(description = "税额，单位：元")
     @DecimalMin(value = "0.0", message = "税额必须大于0")
-    @NotNull(message = "税额不能为空")
     private BigDecimal taxPrice;
 
     @Schema(description = "增值税税率，百分比")

@@ -56,6 +56,7 @@ import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.
 import static cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO.PURCHASE_REQUEST_NO_PREFIX;
 import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
+import static jodd.util.StringUtil.truncate;
 
 /**
  * ERP采购申请单 Service 实现类
@@ -220,8 +221,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             itemsDOS.stream().collect(Collectors.toMap(SrmPurchaseRequestItemsDO::getId, Function.identity()));
 
         // SrmPurchaseRequestItemsDO item -> 订单vo item
-        List<SrmPurchaseOrderSaveReqVO.Item> voItemList =
-            SrmOrderConvert.INSTANCE.convertToErpPurchaseOrderSaveReqVOItemList(itemsDOS, itemsMap, requestItemDOMap);
+        List<SrmPurchaseOrderSaveReqVO.Item> voItemList = SrmOrderConvert.INSTANCE.convertToErpPurchaseOrderSaveReqVOItemList(itemsDOS, itemsMap, requestItemDOMap);
         // 获取申请单编号映射
         Set<Long> requestIds = itemsDOS.stream().map(SrmPurchaseRequestItemsDO::getRequestId).collect(Collectors.toSet());
         Map<Long, SrmPurchaseRequestDO> rDOMap =
@@ -250,7 +250,8 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         try {
             purchaseOrder = srmPurchaseOrderService.createPurchaseOrder(saveReqVO);
         } catch (Exception e) {
-            throw exception(PURCHASE_REQUEST_MERGE_FAIL_REASON, e.getMessage());
+            log.error("[merge][合并采购申请单失败，申请单编号({})，原因({})]", saveReqVO.getId(), e.getMessage());
+            throw exception(PURCHASE_REQUEST_MERGE_FAIL_REASON, truncate(e.getMessage(), 200));
         }
         return purchaseOrder;
     }
