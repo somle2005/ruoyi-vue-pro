@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 
 /**
  * @author: LeeFJ
@@ -175,5 +176,12 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
         });
     }
 
-
+    public void updateTransitQty(WmsInboundRespVO inbound) {
+        List<WmsInboundItemRespVO> itemList = inbound.getItemList();
+        for (WmsInboundItemRespVO item : itemList) {
+            WmsStockWarehouseDO stockWarehouseDO = stockWarehouseService.getStockWarehouse(inbound.getWarehouseId(), item.getProductId(), TRUE);
+            stockWarehouseDO.setTransitQty(stockWarehouseDO.getTransitQty() + item.getPlanQty());
+            stockWarehouseService.updateStockWarehouse(BeanUtils.toBean(stockWarehouseDO, WmsStockWarehouseSaveReqVO.class));
+        }
+    }
 }

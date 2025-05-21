@@ -27,8 +27,8 @@ public class WmsInventoryBinExcelVO {
     @ExcelIgnore
     private Long binId;
 
-    @Schema(description = "仓位代码", example = "")
-    @ExcelProperty("仓位代码")
+    @Schema(description = "仓位代码", requiredMode = Schema.RequiredMode.REQUIRED, example = "")
+    @ExcelProperty("库位")
     private String binCode;
 
     @Schema(description = "仓位名称", example = "")
@@ -47,8 +47,8 @@ public class WmsInventoryBinExcelVO {
     private Integer expectedQty;
 
 
-    @Schema(description = "实际库存，实盘数量", example = "")
-    @ExcelProperty("实际库存")
+    @Schema(description = "实际库存，实盘数量", example = "100")
+    @ExcelProperty("实盘数量")
     private Integer actualQty;
 
     @Schema(description = "备注", example = "")

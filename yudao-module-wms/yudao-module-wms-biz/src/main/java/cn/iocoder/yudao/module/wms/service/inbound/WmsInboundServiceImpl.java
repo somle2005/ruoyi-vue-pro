@@ -21,15 +21,20 @@ import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundIt
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemOwnershipDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.WmsInboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemOwnershipQueryMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsInboundItemFlowMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.stock.flow.WmsStockFlowMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
@@ -39,7 +44,9 @@ import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundType;
 import cn.iocoder.yudao.module.wms.service.approval.history.WmsApprovalHistoryService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
+import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -47,9 +54,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static com.fhs.common.constant.Constant.ONE;
+import static java.lang.Boolean.FALSE;
 
 /**
  * 入库单 Service 实现类
@@ -78,11 +88,17 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     private WmsNoRedisDAO noRedisDAO;
 
     @Resource
+    private WmsStockWarehouseService stockWarehouseService;
+
+    @Resource
     @Lazy
     private WmsWarehouseService warehouseService;
 
     @Resource
     private WmsInboundMapper inboundMapper;
+
+    @Resource
+    private WmsStockFlowMapper stockFlowMapper;
 
     @Resource
     @Lazy
@@ -200,8 +216,12 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             if(!toUpdateList.isEmpty()) {
                 inboundItemMapper.updateBatch(toUpdateList);
             }
-            if(!toDeleteList.isEmpty()) {
-                inboundItemMapper.deleteBatchIds(toDeleteList);
+//            if(!toDeleteList.isEmpty()) {
+//                inboundItemMapper.deleteBatchIds(toDeleteList);
+//            }
+            if (!toDeleteList.isEmpty()) {
+                List<Long> idList = toDeleteList.stream().map(WmsInboundItemDO::getId).collect(Collectors.toList());
+                inboundItemMapper.delete(new QueryWrapper<WmsInboundItemDO>().in("id", idList));
             }
         }
         // 更新
@@ -242,6 +262,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     /**
      * @sign : 6549448A5F16EE5E
      */
+    @Override
     public WmsInboundDO validateInboundExists(Long id) {
         WmsInboundDO inbound = inboundMapper.selectById(id);
         if (inbound == null) {
@@ -263,6 +284,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     /**
      * 按 warehouseId 查询 WmsInboundDO
      */
+    @Override
     public List<WmsInboundDO> selectByWarehouseId(Long warehouseId, int limit) {
         return inboundMapper.selectByWarehouseId(warehouseId, limit);
     }
@@ -364,6 +386,49 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         }
         inboundDO.setInboundTime(LocalDateTime.now());
         inboundMapper.updateById(inboundDO);
+        updateStockFlow(inboundRespVO, inboundDO);
+        //更新在途数
+        updateTransitQty(inboundDO, itemList);
+
+    }
+
+    private void updateTransitQty(WmsInboundDO inbound, List<WmsInboundItemDO> itemList) {
+        for(WmsInboundItemDO item : itemList) {
+            WmsStockWarehouseDO stockWarehouseDO = stockWarehouseService.getStockWarehouse(inbound.getWarehouseId(), item.getProductId(), FALSE);
+            stockWarehouseDO.setTransitQty(stockWarehouseDO.getTransitQty() - item.getActualQty());
+            stockWarehouseService.updateStockWarehouse(BeanUtils.toBean(stockWarehouseDO, WmsStockWarehouseSaveReqVO.class));
+        }
+    }
+
+    //生成批次可用库存流水表wms_inbound_item_flow，并把id更新到库存流水表wms_stock_flow
+    private void updateStockFlow(WmsInboundRespVO inboundRespVO, WmsInboundDO inboundDO) {
+        List<WmsInboundItemRespVO> itemList = inboundRespVO.getItemList();
+        if(CollectionUtils.isEmpty(itemList)) {
+            return;
+        }
+        //获取正确的对象并赋值
+        for (WmsInboundItemRespVO respVO : itemList) {
+            WmsInboundItemFlowDO inboundItemFlow = new WmsInboundItemFlowDO();
+            inboundItemFlow.setInboundId(respVO.getInboundId());
+            inboundItemFlow.setInboundItemId(respVO.getId());
+            inboundItemFlow.setProductId(respVO.getProductId());
+            inboundItemFlow.setActualQty(respVO.getActualQty());
+            inboundItemFlow.setBillType(inboundDO.getType());
+            inboundItemFlow.setDirection(ONE);
+            inboundItemFlow.setOutboundAvailableQty(respVO.getActualQty());
+            inboundItemFlow.setOutboundAvailableDeltaQty(respVO.getActualQty());
+            inboundItemFlow.setInboundItemId(inboundDO.getId());
+            inboundItemFlow.setActualQty(respVO.getActualQty());
+            inboundItemFlow.setShelvedQty(respVO.getShelvedQty());
+            inboundItemFlowMapper.insert(inboundItemFlow);
+            List<WmsStockFlowDO> wmsStockFlowDOList = stockFlowMapper.selectByReasonItemIdAndReasonBillId(respVO.getId(), respVO.getInboundId());
+            assert wmsStockFlowDOList != null;
+            for (WmsStockFlowDO stockFlow : wmsStockFlowDOList) {
+                stockFlow.setInboundItemFlowId(inboundItemFlow.getId());
+                stockFlowMapper.updateById(stockFlow);
+            }
+        }
+
     }
 
     /**
@@ -432,6 +497,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      * @param productId
      * @param olderFirst 是否按入库时间升序
      */
+    @Override
     public WmsInboundItemOwnershipDO getInboundItemOwnership(Long warehouseId, Long productId, boolean olderFirst) {
         return inboundItemOwnershipQueryMapper.getInboundItemOwnership(warehouseId, productId, olderFirst);
     }
@@ -442,6 +508,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      * @param productIds
      * @param olderFirst 是否按入库时间升序
      */
+    @Override
     public Map<Long, WmsInboundItemOwnershipDO> getInboundItemOwnershipMap(Long warehouseId, List<Long> productIds, boolean olderFirst) {
         return inboundItemOwnershipQueryMapper.selectInboundItemOwnershipMap(warehouseId, productIds, olderFirst);
     }
@@ -452,6 +519,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      * @param productId
      * @param olderFirst 是否按入库时间升序
      */
+    @Override
     public List<WmsInboundItemOwnershipDO> selectInboundItemOwnershipList(Long warehouseId, Long productId, boolean olderFirst) {
         Map<Long, List<WmsInboundItemOwnershipDO>> longListMap = inboundItemOwnershipQueryMapper.selectInboundItemOwnershipGroupedMap(warehouseId, Collections.singletonList(productId), olderFirst);
         return longListMap.get(productId);
