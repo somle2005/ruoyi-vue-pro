@@ -43,6 +43,6 @@ public interface WmsInboundApi {
      * @param id 入库单ID
      * @param comment 作废原因
      **/
-    void abandonInbound(Long id,String comment);
+    void abandonInbound(Long id, String comment, Integer billType);
 
 }

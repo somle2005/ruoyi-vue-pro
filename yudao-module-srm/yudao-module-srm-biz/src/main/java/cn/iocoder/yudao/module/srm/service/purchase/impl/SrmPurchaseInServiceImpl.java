@@ -682,9 +682,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.SRM_PURCHASE_IN.getValue(), inDO.getId());
             if (CollUtil.isNotEmpty(inbounds)) {
                 for (WmsInboundDTO inbound : inbounds) {
+                    //未审核+未入库 -> 作废入库单
                     if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue()) && Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue())) {
-                        // 未入库状态，作废入库单
-                        wmsInboundApi.abandonInbound(inbound.getId(), "采购到货单反审核，作废入库单");
+                        wmsInboundApi.abandonInbound(inbound.getId(), "采购到货单反审核，作废入库单", BillType.SRM_PURCHASE_IN.getValue());
                     } else {
                         //抛出异常
                         throw exception(PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS, inbound.getId());
@@ -759,6 +759,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                             .build()
             );
         });
+
+
     }
 
     @Override

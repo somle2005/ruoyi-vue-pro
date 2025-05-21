@@ -1,6 +1,12 @@
 package cn.iocoder.yudao.module.wms.api.inbound;
 
+import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPurchaseInCountDTO;
+import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
+import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
+import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
@@ -12,6 +18,7 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -25,10 +32,24 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     @Resource
     @Lazy
     private WmsInboundService inboundService;
+    @Resource(name = SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> purchaseInCountDTOStateMachine;
 
     public Long createInbound(WmsInboundSaveReqDTO createReqDTO) {
         WmsInboundSaveReqVO createReqVO = BeanUtils.toBean(createReqDTO, WmsInboundSaveReqVO.class);
         WmsInboundDO inbound = inboundService.createInbound(createReqVO);
+        //处理到货单逻辑
+        if (createReqDTO.getUpstreamBillType() != null && createReqDTO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
+            //触发到货单明细行 状态机
+            //如果成功创建入库单-触发SRM入库数量联动
+            createReqDTO.getItemList().forEach(inItem -> {
+                purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE
+                        , SrmEventEnum.STOCK_ADJUSTMENT
+                        , SrmPurchaseInCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build());
+            });
+
+        }
+        //处理xx单逻辑
         return inbound.getId();
     }
 
@@ -45,11 +66,22 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     /**
      * 入库单作废
      **/
-    public void abandonInbound(Long id,String comment) {
+    public void abandonInbound(Long id, String comment, Integer billType) {
         WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
         approvalReqVO.setBillId(id);
         approvalReqVO.setComment(comment);
         inboundService.approve(WmsInboundAuditStatus.Event.ABANDON, approvalReqVO);
+        //处理到货单逻辑
+        if (billType != null && billType.equals(BillType.SRM_PURCHASE_IN.getValue())) {
+            //触发到货单明细行-入库-状态机
+            this.getInboundList(billType, id).forEach(inbound -> purchaseInCountDTOStateMachine.fireEvent(
+                    SrmStorageStatus.PARTIALLY_IN_STORAGE,
+                    SrmEventEnum.STOCK_ADJUSTMENT,
+                    SrmPurchaseInCountDTO.builder().inItemId(inbound.getUpstreamBillId()).inCount(BigDecimal.valueOf(inbound.getPlanQty())).build()
+            ));
+
+        }
+
     }
 
 }
