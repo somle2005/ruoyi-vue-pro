@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -22,23 +23,23 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
     default PageResult<WmsInboundDO> selectPage(WmsInboundPageReqVO reqVO) {
 
         LambdaQueryWrapperX query = new LambdaQueryWrapperX<WmsInboundDO>()
-            .eqIfPresent(WmsInboundDO::getCode, reqVO.getCode())
-            .eqIfPresent(WmsInboundDO::getType, reqVO.getType())
-            .eqIfPresent(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())
-            .eqIfPresent(WmsInboundDO::getAuditStatus, reqVO.getAuditStatus())
-            .eqIfPresent(WmsInboundDO::getInboundStatus, reqVO.getInboundStatus())
-            .eqIfPresent(WmsInboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
-            .eqIfPresent(WmsInboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
-            .eqIfPresent(WmsInboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
-            .eqIfPresent(WmsInboundDO::getTraceNo, reqVO.getTraceNo())
-            .eqIfPresent(WmsInboundDO::getShippingMethod, reqVO.getShippingMethod())
-            .likeIfPresent(WmsInboundDO::getRemark, reqVO.getRemark())
-            .eqIfPresent(WmsInboundDO::getInitAge, reqVO.getInitAge())
-            .betweenIfPresent(WmsInboundDO::getCreateTime, reqVO.getCreateTime())
-            .orderByDesc(WmsInboundDO::getId);
+                .eqIfPresent(WmsInboundDO::getCode, reqVO.getCode())
+                .eqIfPresent(WmsInboundDO::getType, reqVO.getType())
+                .eqIfPresent(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())
+                .eqIfPresent(WmsInboundDO::getAuditStatus, reqVO.getAuditStatus())
+                .eqIfPresent(WmsInboundDO::getInboundStatus, reqVO.getInboundStatus())
+                .eqIfPresent(WmsInboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
+                .eqIfPresent(WmsInboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
+                .eqIfPresent(WmsInboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
+                .eqIfPresent(WmsInboundDO::getTraceNo, reqVO.getTraceNo())
+                .eqIfPresent(WmsInboundDO::getShippingMethod, reqVO.getShippingMethod())
+                .likeIfPresent(WmsInboundDO::getRemark, reqVO.getRemark())
+                .eqIfPresent(WmsInboundDO::getInitAge, reqVO.getInitAge())
+                .betweenIfPresent(WmsInboundDO::getCreateTime, reqVO.getCreateTime())
+                .orderByDesc(WmsInboundDO::getId);
 
-        if(reqVO.getProductId()!=null) {
-            query.exists(PRODUCT_EXISTS_SQL,reqVO.getProductId());
+        if (reqVO.getProductId() != null) {
+            query.exists(PRODUCT_EXISTS_SQL, reqVO.getProductId());
         }
 
 
@@ -95,6 +96,8 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
         LambdaQueryWrapperX<WmsInboundDO> wrapper = new LambdaQueryWrapperX<>();
         wrapper.eq(WmsInboundDO::getUpstreamBillId, upstreamBillId);
         wrapper.eq(WmsInboundDO::getUpstreamBillType, upstreamBillType);
+        //非作废审核状态
+        wrapper.ne(WmsInboundDO::getAuditStatus, WmsInboundAuditStatus.ABANDONED.getValue());
         return selectList(wrapper);
     }
 }
