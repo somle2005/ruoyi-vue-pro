@@ -45,7 +45,7 @@ public class OrderItemExecuteActionImpl implements Action<SrmExecutionStatus, Sr
         Optional.ofNullable(aDo.getOrderId()).ifPresent(orderId -> {
             if (event != SrmEventEnum.EXECUTION_INIT) {
                 SrmPurchaseOrderDO purchaseOrder = srmPurchaseOrderService.getPurchaseOrder(orderId);
-                stateMachine.fireEvent(SrmExecutionStatus.fromCode(purchaseOrder.getExecuteStatus()), event, purchaseOrder);
+                stateMachine.fireEvent(SrmExecutionStatus.fromCode(purchaseOrder.getExecuteStatus()), SrmEventEnum.EXECUTION_ADJUSTMENT, purchaseOrder);
             }
         });
     }
