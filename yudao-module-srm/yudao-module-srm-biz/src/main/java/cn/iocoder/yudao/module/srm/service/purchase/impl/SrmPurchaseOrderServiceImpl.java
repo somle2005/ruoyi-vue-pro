@@ -54,6 +54,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.core.io.support.ResourcePatternResolver;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -68,6 +70,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static cn.iocoder.yudao.framework.common.enums.ChannelEnum.PURCHASE_ORDER;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
@@ -126,6 +129,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Autowired
     @Lazy
     private SrmPurchaseRequestService srmPurchaseRequestService;
+    @Resource(name = PURCHASE_ORDER)
+    MessageChannel purchaseOrderChannel;
 
     /**
      * 校验是否存在入库项
@@ -265,6 +270,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         initSlaveStatus(orderItems);
         //回填log记录
         LogRecordContext.putVariable("id", orderDO.getId());
+        //发送消息
+        purchaseOrderChannel.send(MessageBuilder.withPayload(Collections.singletonList(orderDO.getId())).build());
         return orderDO.getId();
     }
 
@@ -308,6 +315,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 2.2 更新订单项
         updatePurchaseOrderItemList(vo.getId(), purchaseOrderItems);
         vo.getItems().sort(Comparator.comparing(SrmPurchaseOrderSaveReqVO.Item::getId, Comparator.nullsFirst(Long::compareTo)));
+        //发送消息
+        purchaseOrderChannel.send(MessageBuilder.withPayload(Collections.singletonList(vo.getId())).build());
     }
 
     @Override
