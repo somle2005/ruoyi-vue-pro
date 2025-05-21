@@ -25,7 +25,7 @@ public enum SrmEventEnum {
 
     // 执行事件
     EXECUTION_INIT("执行初始化"), START_EXECUTION("开始执行"), COMPLETE_EXECUTION("执行完成"), PAUSE_EXECUTION("暂停执行"), RESUME_EXECUTION("恢复执行"),
-    CANCEL_EXECUTION("取消执行"), EXECUTION_FAILED("执行失败"),
+    CANCEL_EXECUTION("取消执行"), EXECUTION_FAILED("执行失败"), EXECUTION_ADJUSTMENT("执行调整"),
 
     //付款事件
     PAYMENT_INIT("付款初始化"), // PARTIAL_PAYMENT("部分付款"),

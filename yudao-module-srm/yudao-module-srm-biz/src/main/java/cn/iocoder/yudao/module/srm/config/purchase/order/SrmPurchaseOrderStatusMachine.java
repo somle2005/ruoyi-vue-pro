@@ -133,6 +133,10 @@ public class SrmPurchaseOrderStatusMachine {
         // 执行失败
         builder.externalTransition().from(SrmExecutionStatus.IN_PROGRESS).to(SrmExecutionStatus.FAILED).on(SrmEventEnum.EXECUTION_FAILED)
             .perform(orderExecuteActionImpl);
+        // 执行状态动态调整,不限制起始执行状态
+        builder.externalTransitions().fromAmong(SrmExecutionStatus.PENDING, SrmExecutionStatus.IN_PROGRESS, SrmExecutionStatus.PAUSED, SrmExecutionStatus.COMPLETED, SrmExecutionStatus.FAILED)
+                .to(SrmExecutionStatus.IN_PROGRESS).on(SrmEventEnum.EXECUTION_ADJUSTMENT).perform(orderExecuteActionImpl);
+
 
         // 设置错误回调
         builder.setFailCallback(baseFailCallbackImpl);
