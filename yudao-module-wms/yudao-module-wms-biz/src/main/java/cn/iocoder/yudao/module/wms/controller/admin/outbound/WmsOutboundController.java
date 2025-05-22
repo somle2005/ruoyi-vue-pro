@@ -9,10 +9,7 @@ import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundPageReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.*;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
@@ -60,6 +57,16 @@ public class WmsOutboundController {
     @PreAuthorize("@ss.hasPermission('wms:outbound:create')")
     public CommonResult<Long> createOutbound(@Validated(ValidationGroup.create.class) @RequestBody WmsOutboundSaveReqVO createReqVO) {
         return success(outboundService.createOutbound(createReqVO).getId());
+    }
+
+    /**
+     * @sign : 3E40A4073A9BDC00
+     */
+    @PostMapping("/generate")
+    @Operation(summary = "根据入库单号生成出库单")
+    @PreAuthorize("@ss.hasPermission('wms:outbound:generate')")
+    public CommonResult<Long> generateOutbound(@Validated(ValidationGroup.create.class) @RequestBody WmsOutboundImportReqVO importReqVO) {
+        return success(outboundService.generateOutbound(importReqVO).getId());
     }
 
     /**

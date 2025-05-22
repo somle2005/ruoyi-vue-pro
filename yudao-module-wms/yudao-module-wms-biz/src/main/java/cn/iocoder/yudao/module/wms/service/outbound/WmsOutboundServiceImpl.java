@@ -21,19 +21,26 @@ import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsAppro
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundImportReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.item.WmsOutboundItemDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
+import cn.iocoder.yudao.module.wms.dal.mysql.inbound.WmsInboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.WmsOutboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.item.WmsOutboundItemMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.pickup.WmsPickupMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.pickup.item.WmsPickupItemMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
@@ -41,6 +48,7 @@ import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
 import cn.iocoder.yudao.module.wms.service.approval.history.WmsApprovalHistoryService;
+import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.outbound.item.WmsOutboundItemService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
@@ -78,6 +86,9 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     protected WmsLockRedisDAO lockRedisDAO;
 
     @Resource
+    private WmsInboundMapper inboundMapper;
+
+    @Resource
     private WmsOutboundMapper outboundMapper;
 
     @Resource
@@ -99,7 +110,14 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     private FmsCompanyApi companyApi;
 
     @Resource
+    @Lazy
+    private WmsInboundService inboundService;
+
+    @Resource
     private ErpProductApi productApi;
+
+    @Resource
+    private WmsPickupItemMapper pickupItemMapper;
 
     @Resource
     private WmsApprovalHistoryService approvalHistoryService;
@@ -175,6 +193,35 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             }
         }
     }
+
+    /**
+     * 处理从外部模块发起的出库申请单
+     */
+    @Override
+    public WmsOutboundDO generateOutbound(WmsOutboundImportReqVO importReqVO) {
+
+        WmsOutboundSaveReqVO createReqVO = BeanUtils.toBean(importReqVO, WmsOutboundSaveReqVO.class);
+        createReqVO.setId(null);
+        //设置入库单号
+        Long inboundId = importReqVO.getUpstreamBillId();
+        WmsInboundDO inbound = inboundMapper.selectById(inboundId);
+        if (inbound == null) {
+            throw exception(INBOUND_NOT_EXISTS);
+        }
+        WmsInboundRespVO inboundVO = inboundService.getInboundWithItemList(inboundId);
+        List<WmsOutboundItemSaveReqVO> itemList = BeanUtils.toBean(inboundVO.getItemList(), WmsOutboundItemSaveReqVO.class);
+
+        //查库位
+        for(WmsOutboundItemSaveReqVO item : itemList) {
+            WmsPickupItemDO pickupItemDO = pickupItemMapper.getByInboundIdAndProductId(inboundVO.getId(), itemList.get(0).getProductId());
+            item.setBinId(pickupItemDO.getBinId());
+        }
+        createReqVO.setItemList(itemList);
+        createReqVO.setUpstreamBillCode(inbound.getCode());
+        createReqVO.setWarehouseId(inboundVO.getWarehouseId());
+        return createOutbound(createReqVO);
+    }
+
 
     /**
      * @sign : E1DA4E6302BF0EFA
@@ -264,6 +311,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     /**
      * @sign : 87FB607B65309CC4
      */
+    @Override
     public WmsOutboundDO validateOutboundExists(Long id) {
         WmsOutboundDO outbound = outboundMapper.selectById(id);
         if (outbound == null) {

@@ -40,4 +40,9 @@ public interface WmsPickupItemMapper extends BaseMapperX<WmsPickupItemDO> {
     default List<WmsPickupItemDO> getPickupItemListByInboundItemIds(Set<Long> inboundItemIds) {
         return selectList(new LambdaQueryWrapperX<WmsPickupItemDO>().in(WmsPickupItemDO::getInboundItemId, inboundItemIds));
     }
+
+    default WmsPickupItemDO getByInboundIdAndProductId(Long inboundId, Long productId) {
+        return selectOne(new LambdaQueryWrapperX<WmsPickupItemDO>().eq(WmsPickupItemDO::getInboundId, inboundId)
+                .eq(WmsPickupItemDO::getProductId, productId));
+    }
 }

@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.wms.dal.dataobject.outbound;
 
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemSaveReqVO;
 import lombok.*;
 import java.util.*;
 import java.time.LocalDateTime;
@@ -93,4 +94,11 @@ public class WmsOutboundDO extends BaseDO {
      * WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单
      */
     private Integer upstreamBillType;
+
+    /**
+     * 产品清单
+     */
+    private List<WmsOutboundItemSaveReqVO> itemList;
+
+
 }
