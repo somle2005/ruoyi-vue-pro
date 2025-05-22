@@ -1,6 +1,9 @@
 package cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo;
 
 import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.bin.WmsInventoryBinDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import jakarta.validation.constraints.*;
@@ -10,8 +13,9 @@ import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 /**
  * @table-fields : company_id,outbound_status,actual_qty,bin_id,plan_qty,product_id,upstream_item_id,remark,id,dept_id,outbound_id
  */
-@Schema(description = "管理后台 - 出库单详情新增/修改 Request VO")
 @Data
+@JsonIgnoreProperties(ignoreUnknown = true)
+@Schema(description = "管理后台 - 出库单详情新增/修改 Request VO")
 public class WmsOutboundItemSaveReqVO {
 
     @Schema(description = "主键", requiredMode = Schema.RequiredMode.REQUIRED, example = "27153")
@@ -49,4 +53,10 @@ public class WmsOutboundItemSaveReqVO {
 
     @Schema(description = "来源详情ID", example = "")
     private Long upstreamItemId;
+
+    @Schema(description = "产品信息")
+    private WmsProductDO product;
+
+    @Schema(description = "库位信息")
+    private WmsInventoryBinDO bin;
 }

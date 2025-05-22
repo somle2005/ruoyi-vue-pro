@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.wms.service.outbound;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundImportReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
@@ -81,4 +82,6 @@ public interface WmsOutboundService {
     WmsOutboundDO createForInventory(WmsOutboundSaveReqVO outboundSaveReqVO);
 
     List<WmsOutboundDO> getOutboundList(Integer upstreamBillType, Long upstreamBillId);
+
+    WmsOutboundDO generateOutbound(WmsOutboundImportReqVO importReqVO);
 }

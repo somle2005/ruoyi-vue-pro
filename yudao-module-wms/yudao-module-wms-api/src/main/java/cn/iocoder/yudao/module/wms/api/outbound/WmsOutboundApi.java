@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.api.outbound;
 
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundSaveReqDTO;
 
 import java.util.List;
@@ -44,4 +45,10 @@ public interface WmsOutboundApi {
      **/
     void abandonOutbound(Long id,String comment);
 
+    /**
+     * 根据入库单生成出库单
+     * @param importReqVO
+     * @return
+     */
+    WmsOutboundDTO generateOutbound(WmsOutboundImportReqDTO importReqVO);
 }

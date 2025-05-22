@@ -1,13 +1,20 @@
 package cn.iocoder.yudao.module.wms.api.outbound;
 
+import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPurchaseInCountDTO;
+import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
+import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
+import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundImportReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemBinQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
@@ -18,6 +25,7 @@ import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +47,10 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     @Lazy
     private WmsInboundItemService inboundItemService;
 
+    @Resource(name = SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> purchaseInCountDTOStateMachine;
+
+    @Override
     public Long createOutbound(WmsOutboundSaveReqDTO createReqDTO) {
 
         BillType billType = BillType.parse(createReqDTO.getUpstreamBillType());
@@ -129,11 +141,28 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     /**
      * 出库单作废
      **/
+    @Override
     public void abandonOutbound(Long id,String comment) {
         WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
         approvalReqVO.setBillId(id);
         approvalReqVO.setComment(comment);
         outboundService.approve(WmsOutboundAuditStatus.Event.ABANDON, approvalReqVO);
+    }
+
+    @Override
+    public WmsOutboundDTO generateOutbound(WmsOutboundImportReqDTO importReqVO) {
+        WmsOutboundDO wmsOutboundDO = outboundService.generateOutbound(BeanUtils.toBean(importReqVO, WmsOutboundImportReqVO.class));
+        //处理出货单逻辑
+        if (wmsOutboundDO.getUpstreamBillType() != null && wmsOutboundDO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
+            //触发出货单明细行 状态机
+            //如果成功创建出库单-触发SRM入库数量联动
+            wmsOutboundDO.getItemList().forEach(inItem -> {
+                purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.ALL_IN_STORAGE
+                        , SrmEventEnum.CANCEL_STORAGE
+                        , SrmPurchaseInCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build());
+            });
+        }
+        return BeanUtils.toBean(wmsOutboundDO, WmsOutboundDTO.class);
     }
 
 }
