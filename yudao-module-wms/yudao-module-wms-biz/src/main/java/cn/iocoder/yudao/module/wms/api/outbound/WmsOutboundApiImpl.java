@@ -4,7 +4,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPurchaseInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.inItem.SrmPurchaseInItemCountDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
@@ -48,7 +48,7 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     private WmsInboundItemService inboundItemService;
 
     @Resource(name = SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> purchaseInCountDTOStateMachine;
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> purchaseInCountDTOStateMachine;
 
     @Override
     public Long createOutbound(WmsOutboundSaveReqDTO createReqDTO) {
@@ -159,7 +159,7 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
             wmsOutboundDO.getItemList().forEach(inItem -> {
                 purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.ALL_IN_STORAGE
                         , SrmEventEnum.CANCEL_STORAGE
-                        , SrmPurchaseInCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build());
+                    , SrmPurchaseInItemCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build());
             });
         }
         return BeanUtils.toBean(wmsOutboundDO, WmsOutboundDTO.class);

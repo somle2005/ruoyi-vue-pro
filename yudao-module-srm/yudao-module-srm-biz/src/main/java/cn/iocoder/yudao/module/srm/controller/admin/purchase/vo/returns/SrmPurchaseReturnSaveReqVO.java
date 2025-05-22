@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns;
 
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
@@ -44,6 +45,7 @@ public class SrmPurchaseReturnSaveReqVO {
     private String remark;
 
     @Schema(description = "退货清单列表")
+    @Min(value = 1, message = "至少选择一个到货明细行")
     private List<Item> items;
 
 
