@@ -45,6 +45,10 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
      * 入库项id
      */
     private Long inItemId;
+    /**
+     * 入库单code
+     */
+    private String inCode;
 
     /**
      * 仓库编号
@@ -118,6 +122,10 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
      * 报关品名
      */
     private String declaredType;
+    /**
+     * 报关品名英文
+     */
+    private String declaredTypeEn;
     /**
      * 产品sku
      */

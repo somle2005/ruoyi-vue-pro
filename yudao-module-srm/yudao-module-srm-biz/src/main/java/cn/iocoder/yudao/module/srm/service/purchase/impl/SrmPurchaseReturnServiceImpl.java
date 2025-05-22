@@ -80,23 +80,83 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         checkInItemId(item);
 
         // 1.3 校验结算账户
-        erpAccountApi.validateAccount(vo.getAccountId());
+//        erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 生成退货单号，并校验唯一性
-        String no = noRedisDAO.generate(SrmNoRedisDAO.PURCHASE_RETURN_NO_PREFIX, PURCHASE_RETURN_NO_OUT_OF_BOUNDS);
-        ThrowUtil.ifThrow(purchaseReturnMapper.selectByNo(no) != null, PURCHASE_RETURN_NO_EXISTS);
+        voSetNo(vo);
+
         // 2.1 插入退货
-        SrmPurchaseReturnDO purchaseReturn = BeanUtils.toBean(vo, SrmPurchaseReturnDO.class, in -> in.setCode(no).setAuditStatus(SrmAuditStatus.PENDING_REVIEW.getCode()));
-        //                .setOrderNo(purchaseOrder.getCode()).setSupplierId(purchaseOrder.getSupplierId());
+        SrmPurchaseReturnDO purchaseReturn = BeanUtils.toBean(vo, SrmPurchaseReturnDO.class, in -> in.setCode(vo.getCode()));
+        // 2.2 计算总价、总体积、总重量
         calculateTotalPrice(purchaseReturn, item);
+        calculateTotalVolumeAndWeight(purchaseReturn, item);
         purchaseReturnMapper.insert(purchaseReturn);
-        // 2.2 插入退货项
+
+        // 2.3 插入退货项
         item.forEach(o -> o.setReturnId(purchaseReturn.getId()));
         purchaseReturnItemMapper.insertBatch(item);
-        //更新主子表状态
+
+        // 3. 更新主子表状态
         initMasterStatus(purchaseReturn);
-        //子表-入库状态机
-        //        linkSlaveStatus(item);
         return purchaseReturn.getId();
+    }
+
+    /**
+     * 设置退货单号
+     *
+     * @param vo 退货单创建请求 VO
+     */
+    private void voSetNo(SrmPurchaseReturnSaveReqVO vo) {
+        // 生成单据编号
+        if (vo.getCode() != null) {
+            // 手动输入编号
+            ThrowUtil.ifThrow(purchaseReturnMapper.selectByNo(vo.getCode()) != null, PURCHASE_RETURN_NO_EXISTS, vo.getCode());
+            noRedisDAO.setManualSerial(SrmNoRedisDAO.PURCHASE_RETURN_NO_PREFIX, vo.getCode());
+        } else {
+            // 自动生成编号
+            vo.setCode(noRedisDAO.generate(SrmNoRedisDAO.PURCHASE_RETURN_NO_PREFIX, PURCHASE_RETURN_NO_OUT_OF_BOUNDS));
+            // 校验编号是否已存在
+            ThrowUtil.ifThrow(purchaseReturnMapper.selectByNo(vo.getCode()) != null, PURCHASE_RETURN_NO_EXISTS);
+        }
+    }
+
+    /**
+     * 计算总体积和总重量
+     *
+     * @param purchaseReturn 退货单
+     * @param items          退货项列表
+     */
+    private void calculateTotalVolumeAndWeight(SrmPurchaseReturnDO purchaseReturn, List<SrmPurchaseReturnItemDO> items) {
+        // 1. 获取所有产品信息
+        Set<Long> productIds = convertSet(items, SrmPurchaseReturnItemDO::getProductId);
+        Map<Long, ErpProductDTO> productMap = convertMap(erpProductApi.listProductDTOs(productIds.stream().toList()), ErpProductDTO::getId);
+
+        // 2. 计算总体积和总重量
+        BigDecimal totalVolume = BigDecimal.ZERO;
+        BigDecimal totalWeight = BigDecimal.ZERO;
+        for (SrmPurchaseReturnItemDO item : items) {
+            ErpProductDTO product = productMap.get(item.getProductId());
+            if (product == null) {
+                continue;
+            }
+            // 计算单个产品的体积和重量
+            // 计算单个产品的总体积 = (长 * 宽 * 高) * 数量（单位：立方毫米）
+            if (product.getLength() != null && product.getWidth() != null && product.getHeight() != null) {
+                BigDecimal itemVolume = new BigDecimal(product.getLength())
+                    .multiply(new BigDecimal(product.getWidth()))
+                    .multiply(new BigDecimal(product.getHeight()));
+                totalVolume = totalVolume.add(
+                    MoneyUtils.priceMultiply(itemVolume, item.getQty())
+                );
+            }
+            // 计算单个产品的总重量 = 产品重量 * 数量
+            if (product.getWeight() != null) {
+                totalWeight = totalWeight.add(
+                    MoneyUtils.priceMultiply(product.getWeight(), item.getQty())
+                );
+            }
+        }
+        purchaseReturn.setTotalVolume(totalVolume);
+        purchaseReturn.setTotalWeight(totalWeight);
     }
 
     /**
@@ -150,18 +210,26 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseReturn(SrmPurchaseReturnSaveReqVO vo) {
+        // 1.1 校验已审核
         ThrowUtil.ifThrow(validAudit(vo.getId()), PURCHASE_RETURN_UPDATE_FAIL_APPROVE);
+        // 1.2 校验入库单已审核，已开启
         validReqItemsAuditStatus(vo);
-        // 1.2 校验退货单已审核
         // 1.3 校验结算账户
-        erpAccountApi.validateAccount(vo.getAccountId());
-        // 1.4 校验订单项的有效性
+//        erpAccountApi.validateAccount(vo.getAccountId());
+        // 1.4 校验退货项的有效性
         List<SrmPurchaseReturnItemDO> purchaseReturnItems = validatePurchaseReturnItems(vo.getItems());
-        //校验 唯一入库单
+        // 1.5 校验退货项是否同一个入库单
         checkInItemId(purchaseReturnItems);
+        // 1.6 校验单号
+        SrmPurchaseReturnDO oldReturn = validatePurchaseReturnExists(vo.getId());
+        if (vo.getCode() != null && !vo.getCode().equals(oldReturn.getCode())) {
+            voSetNo(vo);
+        }
+
         // 2.1 更新退货
         SrmPurchaseReturnDO updateObj = BeanUtils.toBean(vo, SrmPurchaseReturnDO.class);
         calculateTotalPrice(updateObj, purchaseReturnItems);
+        calculateTotalVolumeAndWeight(updateObj, purchaseReturnItems);
         purchaseReturnMapper.updateById(updateObj);
         // 2.2 更新退货项
         updatePurchaseReturnItemList(vo.getId(), purchaseReturnItems);
@@ -200,27 +268,41 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     private List<SrmPurchaseReturnItemDO> validatePurchaseReturnItems(List<SrmPurchaseReturnSaveReqVO.Item> list) {
-        // 1. 校验产品存在
-        List<ErpProductDTO> productList = erpProductApi.validProductList(convertSet(list, SrmPurchaseReturnSaveReqVO.Item::getProductId));
-        Map<Long, ErpProductDTO> productMap = convertMap(productList, ErpProductDTO::getId);
-        // 1.1 校验入库项存在
-        //收集inItemId集合
+        // 1. 校验入库项存在，并获取入库项信息
         Set<Long> inItemIdSet = list.stream().map(SrmPurchaseReturnSaveReqVO.Item::getInItemId).collect(Collectors.toSet());
-        for (Long aLong : inItemIdSet) {
-            SrmPurchaseInItemDO inItemDO = inItemMapper.selectById(aLong);
-            ThrowUtil.ifThrow(inItemDO == null, PURCHASE_IN_ITEM_NOT_EXISTS, aLong);
+        Map<Long, SrmPurchaseInItemDO> inItemMap = new HashMap<>();
+        for (Long inItemId : inItemIdSet) {
+            SrmPurchaseInItemDO inItemDO = inItemMapper.selectById(inItemId);
+            ThrowUtil.ifThrow(inItemDO == null, PURCHASE_IN_ITEM_NOT_EXISTS, inItemId);
+            inItemMap.put(inItemId, inItemDO);
         }
-        // 2. 转化为 SrmPurchaseReturnItemDO 列表
-        return convertList(list, o -> BeanUtils.toBean(o, SrmPurchaseReturnItemDO.class, item -> {
-            item.setProductUnitId(productMap.get(item.getProductId()).getUnitId());
+
+        // 2. 获取所有产品信息，用于后续计算
+        Set<Long> productIds = convertSet(inItemMap.values(), SrmPurchaseInItemDO::getProductId);
+        Map<Long, ErpProductDTO> productMap = convertMap(erpProductApi.listProductDTOs(productIds.stream().toList()), ErpProductDTO::getId);
+
+        // 3. 转化为 SrmPurchaseReturnItemDO 列表，并从入库项复制信息
+        return convertList(list, o -> {
+            // 3.1 从入库项复制基础信息
+            SrmPurchaseInItemDO inItem = inItemMap.get(o.getInItemId());
+            SrmPurchaseReturnItemDO item = BeanUtils.toBean(inItem, SrmPurchaseReturnItemDO.class);
+
+            // 3.2 设置退货项特有信息
+            item.setQty(o.getQty()) // 退货数量
+                .setRemark(o.getRemark()) // 备注
+                .setApplicantId(o.getApplicantId()) // 申请人ID
+                .setApplicationDeptId(o.getApplicationDeptId()); // 申请部门ID
+
+            // 3.3 设置产品单位（从入库项中获取）
+            item.setProductUnitId(inItem.getProductUnitId());
+
+            // 3.4 计算总价和税额
             item.setTotalPrice(MoneyUtils.priceMultiply(item.getProductPrice(), item.getQty()));
-            if (item.getTotalPrice() == null) {
-                return;
-            }
-            if (item.getTaxPercent() != null) {
+            if (item.getTotalPrice() != null && item.getTaxPercent() != null) {
                 item.setTaxPrice(MoneyUtils.priceMultiplyPercent(item.getTotalPrice(), item.getTaxPercent()));
             }
-        }));
+            return item;
+        });
     }
 
     private void updatePurchaseReturnItemList(Long id, List<SrmPurchaseReturnItemDO> newList) {

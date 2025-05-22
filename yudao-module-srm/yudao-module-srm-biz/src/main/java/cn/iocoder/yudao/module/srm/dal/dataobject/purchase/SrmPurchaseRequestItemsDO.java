@@ -108,20 +108,11 @@ public class SrmPurchaseRequestItemsDO extends TenantBaseDO {
      * 税率，百分比
      */
     private BigDecimal taxPercent;
-    //    /**
-    //     * ERP 采购订单ID
-    //     * {@link SrmPurchaseOrderDO#getId()} ()}
-    //     */
-    //    private Long purchaseOrderId;
+
     /**
      * 产品已订购数量
      */
     private Integer orderClosedQty;
-    //    /**
-    //     * ERP 采购订单项ID
-    //     * {@link SrmPurchaseOrderItemDO#getId()} ()}
-    //     */
-    //    private Long purchaseOrderItemId;
     /**
      * 期望到货日期
      */

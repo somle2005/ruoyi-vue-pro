@@ -96,6 +96,14 @@ public class SrmPurchaseReturnDO extends TenantBaseDO {
      */
     private BigDecimal totalPrice;
     /**
+     * 总毛重，单位：kg
+     */
+    private BigDecimal totalWeight;
+    /**
+     * 总体积,毫米，单位：mm³
+     */
+    private BigDecimal totalVolume;
+    /**
      * 已退款金额，单位：元
      * <p>
      * 目的：和 {@link cn.iocoder.yudao.module.erp.dal.dataobject.finance.ErpFinancePaymentDO} 结合，记录已支付金额
