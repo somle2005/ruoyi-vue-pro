@@ -15,6 +15,7 @@ import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundImportReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemBinQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
@@ -151,18 +152,18 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
 
     @Override
     public WmsOutboundDTO generateOutbound(WmsOutboundImportReqDTO importReqVO) {
-        WmsOutboundDO wmsOutboundDO = outboundService.generateOutbound(BeanUtils.toBean(importReqVO, WmsOutboundImportReqVO.class));
+        WmsOutboundRespVO wmsOutboundRespVO = outboundService.generateOutbound(BeanUtils.toBean(importReqVO, WmsOutboundImportReqVO.class));
         //处理出货单逻辑
-        if (wmsOutboundDO.getUpstreamBillType() != null && wmsOutboundDO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
+        if (wmsOutboundRespVO.getUpstreamBillType() != null && wmsOutboundRespVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
             //触发出货单明细行 状态机
             //如果成功创建出库单-触发SRM入库数量联动
-            wmsOutboundDO.getItemList().forEach(inItem -> {
+            wmsOutboundRespVO.getItemList().forEach(inItem -> {
                 purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.ALL_IN_STORAGE
                         , SrmEventEnum.CANCEL_STORAGE
                     , SrmPurchaseInItemCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build());
             });
         }
-        return BeanUtils.toBean(wmsOutboundDO, WmsOutboundDTO.class);
+        return BeanUtils.toBean(wmsOutboundRespVO, WmsOutboundDTO.class);
     }
 
 }

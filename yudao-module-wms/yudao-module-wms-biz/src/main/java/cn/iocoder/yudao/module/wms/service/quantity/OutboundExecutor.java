@@ -102,12 +102,12 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
 
 
 
-            // 执行入库的原子操作
+            // 执行出库的原子操作
             Integer quantity= getExecuteQty(item);
             outboundSingleItem(outboundRespVO,item,companyId, deptId, warehouseId, item.getBinId(),productId, quantity, outboundRespVO.getId(), item.getId());
         }
         updateOutbound(outboundRespVO);
-        // 完成最终的入库
+        // 完成最终的出库
         outboundService.finishOutbound(outboundRespVO);
 
     }
