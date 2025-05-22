@@ -86,6 +86,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 // ========== 审核信息 ==========
                 .eqIfPresent(SrmPurchaseInDO::getAuditorId, mainQuery.getAuditorId())
                 .betweenIfPresent(SrmPurchaseInDO::getAuditTime, mainQuery.getAuditTime())
+                .eqIfPresent(SrmPurchaseInDO::getAuditStatus, mainQuery.getAuditStatus())
                 // ========== 状态信息 ==========
                 .eqIfPresent(SrmPurchaseInDO::getInStatus, mainQuery.getInStatus())
                 // ========== 时间范围 ==========

@@ -17,6 +17,7 @@ public class SrmPurchaseReturnSaveReqVO {
 
     @Schema(description = "编号", requiredMode = Schema.RequiredMode.REQUIRED)
     @Null(groups = Validation.OnCreate.class, message = "创建时，退货单id必须为空")
+    @NotNull(groups = Validation.OnUpdate.class, message = "更新时，退货单id不能为空")
     private Long id;
 
     @Schema(description = "退货单编号")
@@ -53,6 +54,7 @@ public class SrmPurchaseReturnSaveReqVO {
     public static class Item {
 
         @Schema(description = "退货项编号")
+        @Null(groups = Validation.OnCreate.class, message = "创建时，退货单明细行id必须为空")
         private Long id;
 
 

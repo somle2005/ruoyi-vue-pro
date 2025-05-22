@@ -92,7 +92,6 @@ public class SrmPurchaseInSaveReqVO {
         @Schema(description = "到货项编号")
         @DiffLogField(name = "到货项编号")
         @Null(groups = Validation.OnCreate.class, message = "到货id创建时要为null")
-        @NotNull(groups = Validation.OnUpdate.class, message = "更新时到货id不能为null")
         @Size(min = 1, groups = Validation.OnUpdate.class, message = "更新时至少存在一项到货单")
         private Long id;
 

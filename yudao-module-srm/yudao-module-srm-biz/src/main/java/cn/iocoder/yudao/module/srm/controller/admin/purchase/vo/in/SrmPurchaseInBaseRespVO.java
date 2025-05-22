@@ -217,6 +217,9 @@ public class SrmPurchaseInBaseRespVO {
         @Schema(description = "实际入库数量")
         private BigDecimal actualQty;
 
+        @Schema(description = "关联订单行的采购数")
+        private BigDecimal orderQty;
+
         @Schema(description = "总价")
         private BigDecimal totalPrice;
 

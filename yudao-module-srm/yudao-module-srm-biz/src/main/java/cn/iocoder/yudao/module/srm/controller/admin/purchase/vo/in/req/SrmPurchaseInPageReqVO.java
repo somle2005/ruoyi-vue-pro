@@ -70,6 +70,9 @@ public class SrmPurchaseInPageReqVO extends PageParam {
         @Schema(description = "到货状态")
         private Integer inStatus;
 
+        @Schema(description = "审核状态")
+        private Integer auditStatus;
+
         // ========== 时间范围 ==========
         @Schema(description = "创建时间")
         @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)

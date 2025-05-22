@@ -71,7 +71,7 @@ public class SrmPurchaseInController {
     @PostMapping("/create")
     @Operation(summary = "创建采购到货")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:create')")
-    public CommonResult<Long> createPurchaseIn(@Valid @RequestBody SrmPurchaseInSaveReqVO createReqVO) {
+    public CommonResult<Long> createPurchaseIn(@Validated(Validation.OnCreate.class) @RequestBody SrmPurchaseInSaveReqVO createReqVO) {
         createReqVO.getItems().forEach(item -> item.setSource(SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc()));
         return success(purchaseInService.createPurchaseIn(createReqVO));
     }
@@ -79,7 +79,7 @@ public class SrmPurchaseInController {
     @PutMapping("/update")
     @Operation(summary = "更新采购到货")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:update')")
-    public CommonResult<Boolean> updatePurchaseIn(@Valid @RequestBody SrmPurchaseInSaveReqVO updateReqVO) {
+    public CommonResult<Boolean> updatePurchaseIn(@Validated(Validation.OnUpdate.class) @RequestBody SrmPurchaseInSaveReqVO updateReqVO) {
         purchaseInService.updatePurchaseIn(updateReqVO);
         return success(true);
     }
@@ -206,6 +206,8 @@ public class SrmPurchaseInController {
                     MapUtils.findAndThen(userMap, item.getApplicantId(), user -> itemVO.setApplicantName(user.getNickname()));
                     // 设置部门信息
                     MapUtils.findAndThen(deptMap, item.getApplicationDeptId(), dept -> itemVO.setApplicationDeptName(dept.getName()));
+                    //关联订单行的采购数
+                    MapUtils.findAndThen(orderItemMap, item.getOrderItemId(), orderItem -> itemVO.setOrderQty(orderItem.getQty()));
                     return itemVO;
                 }).collect(Collectors.toList()));
             }

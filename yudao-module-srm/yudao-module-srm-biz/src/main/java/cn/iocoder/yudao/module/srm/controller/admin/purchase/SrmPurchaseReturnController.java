@@ -23,6 +23,7 @@ import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -65,14 +66,14 @@ public class SrmPurchaseReturnController {
     @Operation(summary = "创建采购退货")
     @Idempotent
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:create')")
-    public CommonResult<Long> createPurchaseReturn(@Valid @RequestBody SrmPurchaseReturnSaveReqVO createReqVO) {
+    public CommonResult<Long> createPurchaseReturn(@Validated(Validation.OnCreate.class) @RequestBody SrmPurchaseReturnSaveReqVO createReqVO) {
         return success(purchaseReturnService.createPurchaseReturn(createReqVO));
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新采购退货")
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:update')")
-    public CommonResult<Boolean> updatePurchaseReturn(@Valid @RequestBody SrmPurchaseReturnSaveReqVO updateReqVO) {
+    public CommonResult<Boolean> updatePurchaseReturn(@Validated(Validation.OnUpdate.class) @RequestBody SrmPurchaseReturnSaveReqVO updateReqVO) {
         purchaseReturnService.updatePurchaseReturn(updateReqVO);
         return success(true);
     }

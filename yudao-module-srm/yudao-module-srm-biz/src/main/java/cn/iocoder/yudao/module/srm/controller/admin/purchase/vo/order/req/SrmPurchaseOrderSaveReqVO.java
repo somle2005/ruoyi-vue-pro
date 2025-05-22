@@ -20,6 +20,7 @@ public class SrmPurchaseOrderSaveReqVO {
 
     @Schema(description = "id")
     @Null(groups = Validation.OnCreate.class, message = "创建时，订单id必须为空")
+    @NotNull(groups = Validation.OnUpdate.class, message = "更新时订单id不能为null")
     @DiffLogField(name = "订单编号")
     private Long id;
 
