@@ -47,11 +47,9 @@ public class WmsInboundApiImpl implements WmsInboundApi {
         if (createReqDTO.getUpstreamBillType() != null && createReqDTO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
             //触发到货单明细行 状态机
             //如果成功创建入库单-触发SRM入库数量联动
-            createReqDTO.getItemList().forEach(inItem -> {
-                purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE
-                        , SrmEventEnum.STOCK_ADJUSTMENT
-                        , SrmPurchaseInCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build());
-            });
+            createReqDTO.getItemList().forEach(inItem -> purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE
+                    , SrmEventEnum.STOCK_ADJUSTMENT
+                    , SrmPurchaseInCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build()));
 
         }
         //处理xx单逻辑
