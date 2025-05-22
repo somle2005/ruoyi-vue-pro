@@ -36,7 +36,7 @@ public class SrmPurchaseInDO extends TenantBaseDO {
     private Integer version;
 
     /**
-     * 采购入库单据编号
+     * 采购到货单据编号
      */
     private String code;
 

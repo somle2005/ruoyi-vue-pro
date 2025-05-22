@@ -20,6 +20,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurcha
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPayReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInSaveReqVO;
+import cn.iocoder.yudao.module.srm.convert.purchase.SrmPurchaseInConvert;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
@@ -36,6 +37,8 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInItemBO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
@@ -589,11 +592,27 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     @Override
-    public PageResult<SrmPurchaseInDO> getPurchaseInPage(SrmPurchaseInPageReqVO pageReqVO) {
-        return purchaseInMapper.selectPage(pageReqVO);
+    public PageResult<SrmPurchaseInBO> getPurchaseInBOPage(SrmPurchaseInPageReqVO pageReqVO) {
+        // 1. 查询分页数据（子表+主表）
+        PageResult<SrmPurchaseInItemBO> pageResult = purchaseInItemMapper.selectBOPage(pageReqVO);
+
+        // 2. 转换为目标结构（主表+子表列表）
+        return SrmPurchaseInConvert.INSTANCE.convertPage(pageResult);
     }
 
-    // ==================== 采购入库项 ====================
+    @Override
+    public List<SrmPurchaseInBO> getPurchaseInBOList(List<Long> ids) {
+        List<SrmPurchaseInItemBO> srmPurchaseInItemBOS = purchaseInItemMapper.selectBOList(new HashSet<>(ids));
+        return SrmPurchaseInConvert.INSTANCE.convertList(srmPurchaseInItemBOS);
+    }
+
+    @Override
+    public SrmPurchaseInBO getPurchaseInBOById(Long id) {
+        SrmPurchaseInItemBO srmPurchaseInItemBO = purchaseInItemMapper.selectBOById(id);
+        List<SrmPurchaseInBO> srmPurchaseInBOS = SrmPurchaseInConvert.INSTANCE.convertList(List.of(srmPurchaseInItemBO));
+        return srmPurchaseInBOS.get(0);
+    }
+// ==================== 采购入库项 ====================
 
     @Override
     public List<SrmPurchaseInItemDO> getPurchaseInItemListByInId(Long inId) {

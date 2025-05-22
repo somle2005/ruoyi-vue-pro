@@ -7,6 +7,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurcha
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInSaveReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInBO;
 import jakarta.validation.Valid;
 
 import java.math.BigDecimal;
@@ -78,8 +79,13 @@ public interface SrmPurchaseInService {
      * @param pageReqVO 分页查询
      * @return 采购入库分页
      */
-    PageResult<SrmPurchaseInDO> getPurchaseInPage(SrmPurchaseInPageReqVO pageReqVO);
+    PageResult<SrmPurchaseInBO> getPurchaseInBOPage(SrmPurchaseInPageReqVO pageReqVO);
 
+    //list
+    List<SrmPurchaseInBO> getPurchaseInBOList(List<Long> ids);
+
+    //id
+    SrmPurchaseInBO getPurchaseInBOById(Long id);
     // ==================== 采购入库项 ====================
 
     /**
