@@ -22,6 +22,7 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmReturnStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
+import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,6 +32,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -59,6 +61,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     private final SrmPurchaseInMapper inMapper;
     private final SrmPurchaseOrderItemMapper orderItemMapper;
     private final ErpProductApi erpProductApi;
+    private final SrmSupplierService supplierService;
     @Resource
     private final FmsAccountApi erpAccountApi;
 
@@ -69,35 +72,11 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     @Resource(name = PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME)
     StateMachine<SrmReturnStatus, SrmEventEnum, SrmPurchaseReturnDO> refundStateMachine;
 
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Long createPurchaseReturn(SrmPurchaseReturnSaveReqVO vo) {
-        // 1.1 校验入库单已审核，已开启
-        validReqItemsAuditStatus(vo);
-        // 1.2 校验退货项的有效性
-        List<SrmPurchaseReturnItemDO> item = validatePurchaseReturnItems(vo.getItems());
-        // 1.2.1 校验退货项是否同一个入库单
-        checkInItemId(item);
-
-        // 1.3 校验结算账户
-//        erpAccountApi.validateAccount(vo.getAccountId());
-        // 1.4 生成退货单号，并校验唯一性
-        voSetNo(vo);
-
-        // 2.1 插入退货
-        SrmPurchaseReturnDO purchaseReturn = BeanUtils.toBean(vo, SrmPurchaseReturnDO.class, in -> in.setCode(vo.getCode()));
-        // 2.2 计算总价、总体积、总重量
-        calculateTotalPrice(purchaseReturn, item);
-        calculateTotalVolumeAndWeight(purchaseReturn, item);
-        purchaseReturnMapper.insert(purchaseReturn);
-
-        // 2.3 插入退货项
-        item.forEach(o -> o.setReturnId(purchaseReturn.getId()));
-        purchaseReturnItemMapper.insertBatch(item);
-
-        // 3. 更新主子表状态
-        initMasterStatus(purchaseReturn);
-        return purchaseReturn.getId();
+    /**
+     * 安全处理 BigDecimal 值，避免空指针
+     */
+    private static BigDecimal safe(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
     }
 
     /**
@@ -176,6 +155,41 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         }
     }
 
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public Long createPurchaseReturn(SrmPurchaseReturnSaveReqVO vo) {
+        // 1.1 校验入库单已审核，已开启
+        validReqItemsAuditStatus(vo);
+        // 1.2 校验退货项的有效性
+        List<SrmPurchaseReturnItemDO> item = validatePurchaseReturnItems(vo.getItems());
+        // 1.2.1 校验退货项是否同一个入库单
+        checkInItemId(item);
+        // 1.2.2 校验退货项对应的入库单供应商是否一致
+        checkInSupplierConsistent(item);
+
+        // 1.3 校验结算账户
+//        erpAccountApi.validateAccount(vo.getAccountId());
+        // 1.4 生成退货单号，并校验唯一性
+        voSetNo(vo);
+        //兜底设置退货时间
+        vo.setReturnTime(vo.getReturnTime() == null ? LocalDateTime.now() : vo.getReturnTime());
+
+        // 2.1 插入退货
+        SrmPurchaseReturnDO purchaseReturn = BeanUtils.toBean(vo, SrmPurchaseReturnDO.class, in -> in.setCode(vo.getCode()));
+        // 2.2 计算总价、总体积、总重量
+        calculateTotalPrice(purchaseReturn, item);
+        calculateTotalVolumeAndWeight(purchaseReturn, item);
+        purchaseReturnMapper.insert(purchaseReturn);
+
+        // 2.3 插入退货项
+        item.forEach(o -> o.setReturnId(purchaseReturn.getId()));
+        purchaseReturnItemMapper.insertBatch(item);
+
+        // 3. 更新主子表状态
+        initMasterStatus(purchaseReturn);
+        return purchaseReturn.getId();
+    }
+
     /**
      * 校验申请项里面是否符合状态要求
      *
@@ -207,6 +221,68 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         refundStateMachine.fireEvent(SrmReturnStatus.NOT_RETURN, SrmEventEnum.RETURN_INIT, purchaseReturn);
     }
 
+    /**
+     * 校验退货项对应的入库单供应商是否一致
+     *
+     * @param items 退货项列表
+     */
+    private void checkInSupplierConsistent(List<SrmPurchaseReturnItemDO> items) {
+        if (CollUtil.isEmpty(items)) {
+            return;
+        }
+        // 1. 获取所有入库项ID
+        Set<Long> inItemIds = items.stream().map(SrmPurchaseReturnItemDO::getInItemId).collect(Collectors.toSet());
+        // 2. 获取入库项信息
+        List<SrmPurchaseInItemDO> inItems = inItemMapper.selectByIds(inItemIds);
+        if (CollUtil.isEmpty(inItems)) {
+            return;
+        }
+        // 3. 获取入库单ID
+        Set<Long> inIds = inItems.stream().map(SrmPurchaseInItemDO::getInId).collect(Collectors.toSet());
+        // 4. 获取入库单信息
+        List<SrmPurchaseInDO> inList = inMapper.selectByIds(inIds);
+        if (CollUtil.isEmpty(inList)) {
+            return;
+        }
+        // 5. 校验供应商是否一致
+        Map<Long, SrmPurchaseInDO> inMap = convertMap(inList, SrmPurchaseInDO::getId);
+        Map<Long, Long> inItemToInMap = convertMap(inItems, SrmPurchaseInItemDO::getId, SrmPurchaseInItemDO::getInId);
+
+        // 获取所有供应商信息
+        Set<Long> supplierIds = inList.stream().map(SrmPurchaseInDO::getSupplierId).collect(Collectors.toSet());
+        Map<Long, SrmSupplierDO> supplierMap = supplierService.getSupplierMap(supplierIds);
+
+        // 获取第一个入库单的供应商作为基准
+        Long firstSupplierId = inList.get(0).getSupplierId();
+        SrmSupplierDO firstSupplier = supplierMap.get(firstSupplierId);
+        if (firstSupplier == null) {
+            throw exception(SUPPLIER_NOT_EXISTS, firstSupplierId);
+        }
+
+        // 遍历所有入库项，检查供应商是否一致
+        for (SrmPurchaseReturnItemDO item : items) {
+            Long inId = inItemToInMap.get(item.getInItemId());
+            SrmPurchaseInDO inDO = inMap.get(inId);
+            if (!firstSupplierId.equals(inDO.getSupplierId())) {
+                SrmSupplierDO supplier = supplierMap.get(inDO.getSupplierId());
+                if (supplier == null) {
+                    throw exception(SUPPLIER_NOT_EXISTS, inDO.getSupplierId());
+                }
+                throw exception(PURCHASE_RETURN_IN_SUPPLIER_NOT_SAME,
+                    firstSupplier.getName(), // 第一个供应商名称
+                    inDO.getCode(), // 不一致的入库单编号
+                    supplier.getName()); // 不一致的供应商名称
+            }
+        }
+    }
+
+
+    private Boolean validAudit(Long returnId) {
+        // 1.1 校验已审核
+        SrmPurchaseReturnDO purchaseReturn = validatePurchaseReturnExists(returnId);
+        return SrmAuditStatus.APPROVED.getCode().equals(purchaseReturn.getAuditStatus());
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseReturn(SrmPurchaseReturnSaveReqVO vo) {
@@ -220,7 +296,9 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         List<SrmPurchaseReturnItemDO> purchaseReturnItems = validatePurchaseReturnItems(vo.getItems());
         // 1.5 校验退货项是否同一个入库单
         checkInItemId(purchaseReturnItems);
-        // 1.6 校验单号
+        // 1.6 校验退货项对应的入库单供应商是否一致
+        checkInSupplierConsistent(purchaseReturnItems);
+        // 1.7 校验单号
         SrmPurchaseReturnDO oldReturn = validatePurchaseReturnExists(vo.getId());
         if (vo.getCode() != null && !vo.getCode().equals(oldReturn.getCode())) {
             voSetNo(vo);
@@ -235,24 +313,19 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         updatePurchaseReturnItemList(vo.getId(), purchaseReturnItems);
     }
 
-
-    private Boolean validAudit(Long returnId) {
-        // 1.1 校验已审核
-        SrmPurchaseReturnDO purchaseReturn = validatePurchaseReturnExists(returnId);
-        return SrmAuditStatus.APPROVED.getCode().equals(purchaseReturn.getAuditStatus());
-    }
-
     private void calculateTotalPrice(SrmPurchaseReturnDO purchaseReturn, List<SrmPurchaseReturnItemDO> purchaseReturnItems) {
-        purchaseReturn.setTotalCount(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getQty, BigDecimal::add));
+        // 1. 计算总数量、总价等
+        purchaseReturn.setTotalCount(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getQty, BigDecimal::add, BigDecimal.ZERO));
         purchaseReturn.setTotalProductPrice(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
         purchaseReturn.setTotalTaxPrice(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getTaxPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseReturn.setTotalPrice(purchaseReturn.getTotalProductPrice().add(purchaseReturn.getTotalTaxPrice()));
-        // 计算优惠价格
+        purchaseReturn.setTotalPrice(safe(purchaseReturn.getTotalProductPrice()).add(safe(purchaseReturn.getTotalTaxPrice())));
+
+        // 2. 计算优惠价格
         if (purchaseReturn.getDiscountPercent() == null) {
             purchaseReturn.setDiscountPercent(BigDecimal.ZERO);
         }
         purchaseReturn.setDiscountPrice(MoneyUtils.priceMultiplyPercent(purchaseReturn.getTotalPrice(), purchaseReturn.getDiscountPercent()));
-        purchaseReturn.setTotalPrice(purchaseReturn.getTotalPrice().subtract(purchaseReturn.getDiscountPrice()).add(purchaseReturn.getOtherPrice()));
+        purchaseReturn.setTotalPrice(safe(purchaseReturn.getTotalPrice()).subtract(safe(purchaseReturn.getDiscountPrice())).add(safe(purchaseReturn.getOtherPrice())));
     }
 
     @Override
@@ -281,22 +354,34 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         Set<Long> productIds = convertSet(inItemMap.values(), SrmPurchaseInItemDO::getProductId);
         Map<Long, ErpProductDTO> productMap = convertMap(erpProductApi.listProductDTOs(productIds.stream().toList()), ErpProductDTO::getId);
 
-        // 3. 转化为 SrmPurchaseReturnItemDO 列表，并从入库项复制信息
+        // 3. 获取入库单信息，用于填充 inCode
+        Set<Long> inIds = convertSet(inItemMap.values(), SrmPurchaseInItemDO::getInId);
+        Map<Long, SrmPurchaseInDO> inMap = convertMap(inMapper.selectByIds(inIds), SrmPurchaseInDO::getId);
+
+        // 4. 转化为 SrmPurchaseReturnItemDO 列表，并从入库项复制信息
         return convertList(list, o -> {
-            // 3.1 从入库项复制基础信息
+            // 4.1 从入库项复制基础信息
             SrmPurchaseInItemDO inItem = inItemMap.get(o.getInItemId());
             SrmPurchaseReturnItemDO item = BeanUtils.toBean(inItem, SrmPurchaseReturnItemDO.class);
 
-            // 3.2 设置退货项特有信息
-            item.setQty(o.getQty()) // 退货数量
+            // 4.2 设置退货项特有信息
+            item
+                .setInItemId(o.getInItemId()) // 入库项ID
+                .setQty(o.getQty()) // 退货数量
                 .setRemark(o.getRemark()) // 备注
                 .setApplicantId(o.getApplicantId()) // 申请人ID
                 .setApplicationDeptId(o.getApplicationDeptId()); // 申请部门ID
 
-            // 3.3 设置产品单位（从入库项中获取）
+            // 4.3 设置入库单编号
+            SrmPurchaseInDO inDO = inMap.get(inItem.getInId());
+            if (inDO != null) {
+                item.setInCode(inDO.getCode());
+            }
+
+            // 4.4 设置产品单位（从入库项中获取）
             item.setProductUnitId(inItem.getProductUnitId());
 
-            // 3.4 计算总价和税额
+            // 4.5 计算总价和税额
             item.setTotalPrice(MoneyUtils.priceMultiply(item.getProductPrice(), item.getQty()));
             if (item.getTotalPrice() != null && item.getTaxPercent() != null) {
                 item.setTaxPrice(MoneyUtils.priceMultiplyPercent(item.getTotalPrice(), item.getTaxPercent()));
@@ -394,6 +479,9 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
 
     @Override
     public PageResult<SrmPurchaseReturnDO> getPurchaseReturnPage(SrmPurchaseReturnPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new SrmPurchaseReturnPageReqVO();
+        }
         return purchaseReturnMapper.selectPage(pageReqVO);
     }
 

@@ -100,6 +100,9 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
 
     //page
     default PageResult<SrmPurchaseInItemBO> selectBOPage(SrmPurchaseInPageReqVO reqVO) {
+        if (reqVO == null) {
+            reqVO = new SrmPurchaseInPageReqVO();
+        }
         MPJLambdaWrapper<SrmPurchaseInItemDO> wrapper = buildBOWrapper(reqVO).selectAssociation(SrmPurchaseInDO.class, SrmPurchaseInItemBO::getSrmPurchaseInDO);
         return selectJoinPage(reqVO, SrmPurchaseInItemBO.class, wrapper);
     }

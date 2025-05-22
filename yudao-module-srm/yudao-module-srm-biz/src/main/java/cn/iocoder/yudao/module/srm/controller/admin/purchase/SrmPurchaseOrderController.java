@@ -109,10 +109,13 @@ public class SrmPurchaseOrderController {
         return success(respVOS.get(0));
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得采购订单分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-order:query')")
-    public CommonResult<PageResult<SrmPurchaseOrderBaseRespVO>> getPurchaseOrderPage(@Valid SrmPurchaseOrderPageReqVO pageReqVO) {
+    public CommonResult<PageResult<SrmPurchaseOrderBaseRespVO>> getPurchaseOrderPage(@Valid @RequestBody(required = false) SrmPurchaseOrderPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new SrmPurchaseOrderPageReqVO();
+        }
         PageResult<SrmPurchaseOrderBO> pageResult = purchaseOrderService.getPurchaseOrderPageBO(pageReqVO);
         return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
     }

@@ -2,9 +2,9 @@ package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns;
 
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -46,7 +46,7 @@ public class SrmPurchaseReturnSaveReqVO {
     private String remark;
 
     @Schema(description = "退货清单列表")
-    @Min(value = 1, message = "至少选择一个到货明细行")
+    @Size(min = 1, message = "至少选择一个到货明细行")
     private List<Item> items;
 
 
@@ -58,8 +58,8 @@ public class SrmPurchaseReturnSaveReqVO {
         private Long id;
 
 
-        @Schema(description = "入库项id", requiredMode = Schema.RequiredMode.REQUIRED)
-        @NotNull(message = "入库项id不能为空")
+        @Schema(description = "到货项id", requiredMode = Schema.RequiredMode.REQUIRED)
+        @NotNull(message = "到货项id不能为空")
         private Long inItemId;
 
         @Schema(description = "退货数量", requiredMode = Schema.RequiredMode.REQUIRED)
