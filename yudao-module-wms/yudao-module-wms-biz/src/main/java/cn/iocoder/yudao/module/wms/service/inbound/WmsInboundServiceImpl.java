@@ -10,6 +10,10 @@ import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.inItem.SrmPurchaseInItemCountDTO;
+import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
+import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
+import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.config.InboundStateMachineConfigure;
@@ -52,6 +56,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -112,6 +117,9 @@ public class WmsInboundServiceImpl implements WmsInboundService {
 
     @Resource(name = InboundStateMachineConfigure.STATE_MACHINE_NAME)
     private StateMachine<Integer, WmsInboundAuditStatus.Event, TransitionContext<WmsInboundDO>> inboundStateMachine;
+
+    @Resource(name = SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> purchaseInCountDTOStateMachine;
 
     /**
      * @sign : 5D2F5734A2A97234
@@ -389,6 +397,14 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         updateStockFlow(inboundRespVO, inboundDO);
         //更新在途数
         updateTransitQty(inboundDO, itemList);
+        //处理到货单逻辑
+        if (inboundRespVO.getUpstreamBillType() != null && inboundRespVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
+            //触发到货单明细行 状态机
+            //如果成功创建入库单-触发SRM入库数量联动
+            inboundRespVO.getItemList().forEach(inItem -> purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE
+                    , SrmEventEnum.STOCK_ADJUSTMENT
+                    , SrmPurchaseInItemCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build()));
+        }
 
     }
 

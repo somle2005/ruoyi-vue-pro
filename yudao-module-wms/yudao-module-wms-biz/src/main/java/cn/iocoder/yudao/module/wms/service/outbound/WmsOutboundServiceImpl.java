@@ -198,7 +198,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
      * 处理从外部模块发起的出库申请单
      */
     @Override
-    public WmsOutboundDO generateOutbound(WmsOutboundImportReqVO importReqVO) {
+    public WmsOutboundRespVO generateOutbound(WmsOutboundImportReqVO importReqVO) {
 
         WmsOutboundSaveReqVO createReqVO = BeanUtils.toBean(importReqVO, WmsOutboundSaveReqVO.class);
         createReqVO.setId(null);
@@ -219,7 +219,8 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         createReqVO.setItemList(itemList);
         createReqVO.setUpstreamBillCode(inbound.getCode());
         createReqVO.setWarehouseId(inboundVO.getWarehouseId());
-        return createOutbound(createReqVO);
+        WmsOutboundDO outboundDO = createOutbound(createReqVO);
+        return BeanUtils.toBean(outboundDO, WmsOutboundRespVO.class);
     }
 
 
@@ -273,7 +274,8 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
                 outboundItemMapper.updateBatch(toUpdateList);
             }
             if (!toDeleteList.isEmpty()) {
-                outboundItemMapper.deleteBatchIds(toDeleteList);
+                List<Long> deleteIds = StreamX.from(toDeleteList).toList(WmsOutboundItemDO::getId);
+                outboundItemMapper.deleteBatchIds(deleteIds);
             }
         }
         // 返回
@@ -424,7 +426,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         // 处理明细的出库状态
         List<WmsOutboundItemDO> itemList = BeanUtils.toBean(outboundRespVO.getItemList(), WmsOutboundItemDO.class);
         outboundItemMapper.updateBatch(itemList);
-        // 处理入库单状态
+        // 处理出库单状态
         WmsOutboundDO outboundDO = BeanUtils.toBean(outboundRespVO, WmsOutboundDO.class);
         outboundMapper.updateById(outboundDO);
     }
@@ -440,11 +442,11 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         approvalReqVO.setBillType(BillType.WMS_OUTBOUND.getValue());
         approvalReqVO.setStatusType(WmsOutboundAuditStatus.getType());
         // 获得业务对象
-        WmsOutboundDO inbound = validateOutboundExists(approvalReqVO.getBillId());
+        WmsOutboundDO outbound = validateOutboundExists(approvalReqVO.getBillId());
         // 锁在外，事务在锁内
         WmsOutboundServiceImpl proxy = SpringUtils.getBeanByExactType(WmsOutboundServiceImpl.class);
-        lockRedisDAO.lockByWarehouse(inbound.getWarehouseId(), () -> {
-            proxy.fireEvent(event, approvalReqVO, inbound);
+        lockRedisDAO.lockByWarehouse(outbound.getWarehouseId(), () -> {
+            proxy.fireEvent(event, approvalReqVO, outbound);
         });
     }
 

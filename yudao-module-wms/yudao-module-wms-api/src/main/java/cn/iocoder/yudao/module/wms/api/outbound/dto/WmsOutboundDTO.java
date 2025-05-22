@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.wms.api.outbound.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data
@@ -77,4 +78,6 @@ public class WmsOutboundDTO {
      * WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单
      */
     private Integer upstreamBillType;
+
+    private List<WmsOutboundItemRespDTO> itemList;
 }

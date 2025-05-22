@@ -95,10 +95,6 @@ public class WmsOutboundDO extends BaseDO {
      */
     private Integer upstreamBillType;
 
-    /**
-     * 产品清单
-     */
-    private List<WmsOutboundItemSaveReqVO> itemList;
 
 
 }
