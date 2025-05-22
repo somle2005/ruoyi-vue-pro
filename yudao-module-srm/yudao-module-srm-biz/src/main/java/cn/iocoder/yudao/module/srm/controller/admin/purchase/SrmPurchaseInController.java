@@ -102,10 +102,10 @@ public class SrmPurchaseInController {
         return success(bindList(List.of(purchaseInBO)).get(0));
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得采购到货分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:query')")
-    public CommonResult<PageResult<SrmPurchaseInBaseRespVO>> getPurchaseInPage(@Valid SrmPurchaseInPageReqVO pageReqVO) {
+    public CommonResult<PageResult<SrmPurchaseInBaseRespVO>> getPurchaseInPage(@Valid @RequestBody SrmPurchaseInPageReqVO pageReqVO) {
         PageResult<SrmPurchaseInBO> pageResult = purchaseInService.getPurchaseInBOPage(pageReqVO);
         List<SrmPurchaseInBaseRespVO> respVOS = bindList(pageResult.getList());
         return success(new PageResult<>(respVOS, pageResult.getTotal()));
