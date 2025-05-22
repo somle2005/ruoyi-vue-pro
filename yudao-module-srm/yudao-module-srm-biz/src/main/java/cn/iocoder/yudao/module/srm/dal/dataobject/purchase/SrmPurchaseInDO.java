@@ -160,6 +160,10 @@ public class SrmPurchaseInDO extends TenantBaseDO {
 
     // ========= 附加信息 =========
     /**
+     * 入库状态
+     */
+    private Integer inStatus;
+    /**
      * 总毛重，单位：kg
      */
     private BigDecimal totalWeight;

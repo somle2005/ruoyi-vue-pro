@@ -15,6 +15,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPurchaseInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPayReqVO;
@@ -99,6 +100,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     private StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemStorageMachine;
     @Resource(name = PURCHASE_IN_AUDIT_STATE_MACHINE)
     private StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseInAuditReqVO> purchaseInAuditStateMachine;
+    @Resource(name = PURCHASE_IN_STORAGE_STATE_MACHINE)
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> purchaseInStorageMachine;
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
@@ -223,6 +226,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     private void initMasterStatus(SrmPurchaseInDO purchaseIn) {
         auditMachine.fireEvent(SrmAuditStatus.DRAFT, SrmEventEnum.AUDIT_INIT, SrmPurchaseInAuditReqVO.builder().inId(purchaseIn.getId()).build());
         paymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, purchaseIn);
+        //主表初始化入库状态
+        purchaseInStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmPurchaseInCountDTO.builder().inId(purchaseIn.getId()).build());
     }
 
     private void rollbackSlaveStatus(List<SrmPurchaseInItemDO> diffList) {

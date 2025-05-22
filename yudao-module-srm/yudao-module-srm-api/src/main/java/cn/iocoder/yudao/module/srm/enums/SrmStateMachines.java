@@ -49,6 +49,8 @@ public interface SrmStateMachines {
     // ========== SRM 到货单主项 ==========
     String PURCHASE_IN_AUDIT_STATE_MACHINE = "purchaseInAudit";
     String PURCHASE_IN_PAYMENT_STATE_MACHINE = "purchaseInPay";
+    //单货单入库
+    String PURCHASE_IN_STORAGE_STATE_MACHINE = "purchaseInStorage";
     // ========== SRM 到货单明细 ==========
     String PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE = "purchaseInItemPay";
     //到货单入库状态机

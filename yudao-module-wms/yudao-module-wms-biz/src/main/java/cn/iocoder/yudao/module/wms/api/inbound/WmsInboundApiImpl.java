@@ -2,7 +2,7 @@ package cn.iocoder.yudao.module.wms.api.inbound;
 
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPurchaseInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.inItem.SrmPurchaseInItemCountDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
@@ -35,7 +35,7 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     @Lazy
     private WmsInboundService inboundService;
     @Resource(name = SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> purchaseInCountDTOStateMachine;
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> purchaseInCountDTOStateMachine;
     @Resource
     @Lazy
     WmsInboundItemService wmsInboundItemService;
@@ -49,7 +49,7 @@ public class WmsInboundApiImpl implements WmsInboundApi {
             //如果成功创建入库单-触发SRM入库数量联动
             createReqDTO.getItemList().forEach(inItem -> purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE
                     , SrmEventEnum.STOCK_ADJUSTMENT
-                    , SrmPurchaseInCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build()));
+                    , SrmPurchaseInItemCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build()));
 
         }
         //处理xx单逻辑
@@ -85,7 +85,7 @@ public class WmsInboundApiImpl implements WmsInboundApi {
                 purchaseInCountDTOStateMachine.fireEvent(
                         SrmStorageStatus.PARTIALLY_IN_STORAGE,
                         SrmEventEnum.STOCK_ADJUSTMENT,
-                        SrmPurchaseInCountDTO.builder().inItemId(inbound.getUpstreamBillId()).inCount(BigDecimal.valueOf(inboundItem.getPlanQty())).build()
+                        SrmPurchaseInItemCountDTO.builder().inItemId(inbound.getUpstreamBillId()).inCount(BigDecimal.valueOf(inboundItem.getPlanQty())).build()
                 );
             });
 

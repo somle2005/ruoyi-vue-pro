@@ -40,6 +40,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -173,17 +174,16 @@ public class SrmPurchaseInController {
         // 1.6 获取仓库信息
         Map<Long, WmsWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(convertSet(purchaseInItemList, SrmPurchaseInItemDO::getWarehouseId));
         //1.7 订单项map orderItemId
-        Map<Long, SrmPurchaseOrderDO> orderItemMap =
-            srmPurchaseOrderService.getPurchaseOrderItemMap(purchaseInItemList.stream().map(SrmPurchaseInItemDO::getOrderItemId).collect(Collectors.toSet()));
+        Map<Long, SrmPurchaseOrderDO> orderItemMap = srmPurchaseOrderService.getPurchaseOrderItemMap(purchaseInItemList.stream().map(SrmPurchaseInItemDO::getOrderItemId).collect(Collectors.toSet()));
         // 2. 开始拼接
         return BeanUtils.toBean(list, SrmPurchaseInBaseRespVO.class, purchaseIn -> {
             purchaseIn.setItems(BeanUtils.toBean(purchaseInItemMap.get(purchaseIn.getId()), SrmPurchaseInBaseRespVO.Item.class, item -> {
                 //设置产品信息-带出相关字段
                 MapUtils.findAndThen(productMap, item.getProductId(), product -> purchaseIn
                     //总体积=数量*产品体积
-                    .setTotalVolume(product.getLength() * product.getHeight() * product.getWidth() * Double.parseDouble(String.valueOf(item.getQty())))
+                        .setTotalVolume(BigDecimal.valueOf(product.getLength() * product.getHeight() * product.getWidth() * Double.parseDouble(String.valueOf(item.getQty()))))
                     //总重量=数量*产品重量
-                    .setTotalWeight(product.getWeight().setScale(4, RoundingMode.HALF_UP).longValue() * Double.parseDouble(String.valueOf(item.getQty())))
+                        .setTotalWeight(BigDecimal.valueOf(product.getWeight().setScale(4, RoundingMode.HALF_UP).longValue() * Double.parseDouble(String.valueOf(item.getQty()))))
                 );
                 // 设置仓库信息
                 MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), dto -> item.setWarehouseName(dto.getName()));
@@ -199,9 +199,9 @@ public class SrmPurchaseInController {
             MapUtils.findAndThen(supplierMap, purchaseIn.getSupplierId(), supplier -> purchaseIn.setSupplierName(supplier.getName()));
 
             //人员
-            MapUtils.findAndThen(userMap, safeParseLong(purchaseIn.getCreator()), user -> purchaseIn.setCreator(user.getNickname()));
-            MapUtils.findAndThen(userMap, safeParseLong(purchaseIn.getAuditor()), user -> purchaseIn.setAuditor(user.getNickname()));
-
+            MapUtils.findAndThen(userMap, safeParseLong(purchaseIn.getCreator()), user -> purchaseIn.setCreatorName(user.getNickname()));
+            MapUtils.findAndThen(userMap, safeParseLong(purchaseIn.getUpdater()), user -> purchaseIn.setUpdaterName(user.getNickname()));
+            MapUtils.findAndThen(userMap, purchaseIn.getAuditorId(), user -> purchaseIn.setAuditorName(user.getNickname()));
         });
     }
 
