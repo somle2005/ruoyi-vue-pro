@@ -2,14 +2,19 @@ package cn.iocoder.yudao.module.wms.api.inbound;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemRespDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
+import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
+import cn.iocoder.yudao.module.wms.service.quantity.InboundExecutor;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -31,6 +36,10 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     @Resource
     @Lazy
     private WmsOutboundService outboundService;
+
+    @Resource
+    @Lazy
+    private WmsInboundItemService inboundItemService;
 
     @Override
     public Long createInbound(WmsInboundSaveReqDTO createReqDTO) {
@@ -64,6 +73,18 @@ public class WmsInboundApiImpl implements WmsInboundApi {
         approvalReqVO.setBillId(id);
         approvalReqVO.setComment(comment);
         inboundService.approve(WmsInboundAuditStatus.Event.ABANDON, approvalReqVO);
+    }
+
+    @Override
+    public List<WmsInboundItemRespDTO> getInboundItemList(Long companyId, List<Long> productIds) {
+        // 查询数据
+        List<WmsInboundItemQueryDO> doListResult = inboundItemService.getInboundItemList(companyId, productIds);
+        // 转换
+        List<WmsInboundItemRespVO> voListResult = BeanUtils.toBean(doListResult, WmsInboundItemRespVO.class);
+        inboundItemService.assembleStockWarehouse(voListResult);
+        InboundExecutor.setShelveAvailableQty(voListResult);
+        // 返回
+        return BeanUtils.toBean(voListResult, WmsInboundItemRespDTO.class);
     }
 
 }

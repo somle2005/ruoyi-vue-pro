@@ -14,6 +14,8 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWareho
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 入库单详情 Mapper
  *
@@ -73,6 +75,16 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
 
 
     }
+
+    default List<WmsInboundItemQueryDO> selectListByCompany(Long companyId, List<Long> productIds){
+        MPJLambdaWrapperX<WmsInboundItemQueryDO> wrapper = new MPJLambdaWrapperX<>();
+        wrapper.in(WmsInboundItemDO::getProductId, productIds);
+        wrapper.eq(WmsInboundItemDO::getCompanyId, companyId);
+        wrapper.selectAll(WmsInboundItemDO.class);
+        wrapper.select(WmsInboundDO::getWarehouseId);
+        wrapper.leftJoin(WmsInboundDO.class,WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId);
+        return selectList(wrapper);
+    };
 
     default PageResult<WmsInboundItemQueryDO> getPickupPending(WmsPickupPendingPageReqVO reqVO) {
         MPJLambdaWrapperX<WmsInboundItemQueryDO> query = new MPJLambdaWrapperX<>();

@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.api.inbound;
 
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemRespDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 
 import java.util.List;
@@ -46,4 +47,12 @@ public interface WmsInboundApi {
      **/
     void abandonInbound(Long id, String comment, Integer billType);
 
+    /**
+     * 常规批次库存列表查询
+     *
+     * @param companyId 公司ID
+     * @param productIds 产品ID列表
+     * @return 出库单列表
+     */
+    List<WmsInboundItemRespDTO> getInboundItemList(Long companyId, List<Long> productIds);
 }

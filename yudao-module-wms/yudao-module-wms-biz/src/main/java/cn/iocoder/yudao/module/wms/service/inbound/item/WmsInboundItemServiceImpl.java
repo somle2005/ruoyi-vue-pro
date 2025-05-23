@@ -187,9 +187,15 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         return inboundItemQueryMapper.selectPage(pageReqVO);
     }
 
+    @Override
+    public List<WmsInboundItemQueryDO> getInboundItemList(Long companyId, List<Long> productIds) {
+        return inboundItemQueryMapper.selectListByCompany(companyId, productIds);
+    }
+
     /**
      * 按 inboundId 查询 WmsInboundItemDO
      */
+    @Override
     public List<WmsInboundItemDO> selectByInboundId(Long inboundId, int limit) {
         return inboundItemMapper.selectByInboundId(inboundId, limit);
     }
