@@ -9,6 +9,7 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
@@ -29,6 +30,11 @@ public class WmsOutboundImportReqDTO {
     @NotNull(message = "WMS出库单类型不能为空", groups = { ValidationGroup.create.class })
     @InEnum(WmsOutboundType.class)
     private Integer type;
+
+    /**
+     * 详情清单
+     */
+    private List<WmsOutboundItemSaveReqDTO> itemList;
 
     /**
      * WMS出库状态 ; WmsOutboundStatus : 0-未出库 , 1-部分出库 , 2-已出库
