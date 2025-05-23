@@ -62,6 +62,14 @@ public interface WmsInboundItemService {
     PageResult<WmsInboundItemQueryDO> getInboundItemPage(WmsInboundItemPageReqVO pageReqVO);
 
     /**
+     * 获得入库单详情列表
+     *
+     * @param companyId 公司ID
+     * @param productIds 商品ID
+     * @return 入库单详情分页
+     */
+    List<WmsInboundItemQueryDO> getInboundItemList(Long companyId, List<Long> productIds);
+    /**
      * 按 inboundId 查询 WmsInboundItemDO
      */
     List<WmsInboundItemDO> selectByInboundId(Long inboundId, int limit);
