@@ -26,7 +26,7 @@ public class WmsOutboundItemRespVO {
     private Long id;
 
     @Schema(description = "入库单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "6602")
-    @ExcelProperty("入库单ID")
+    @ExcelProperty("出库单ID")
     private Long outboundId;
 
     @Schema(description = "标准产品ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "20572")
