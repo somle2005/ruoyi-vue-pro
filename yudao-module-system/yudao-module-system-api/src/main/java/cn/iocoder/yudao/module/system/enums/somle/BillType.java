@@ -29,6 +29,7 @@ public enum BillType implements ArrayValuable<Integer>, DictEnum {
     TMS_FIRST_MILE_REQUEST(103, "头程单申请"),
     // ========== SRM  编码段 201~300 ==========
     SRM_PURCHASE_IN(201, "到货单"),
+    SRM_PURCHASE_RETURN(202, "退货单"),
     ;
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(BillType::getValue).toArray(Integer[]::new);

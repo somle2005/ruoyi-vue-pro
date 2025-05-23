@@ -1,11 +1,13 @@
 package cn.iocoder.yudao.module.wms.api.outbound.dto;
 
+import lombok.Builder;
 import lombok.Data;
 
 import java.util.List;
 
 
 @Data
+@Builder
 public class WmsOutboundSaveReqDTO {
 
 
