@@ -31,6 +31,7 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .eqIfPresent(SrmPurchaseOrderItemDO::getApplicantId, reqVO.getApplicantId()) // 申请人ID
             .eqIfPresent(SrmPurchaseOrderItemDO::getApplicationDeptId, reqVO.getApplicationDeptId()) // 申请部门ID
             .eqIfPresent(SrmPurchaseOrderItemDO::getXcode, reqVO.getXCode()) // X码
+            .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
             ;
     }
 

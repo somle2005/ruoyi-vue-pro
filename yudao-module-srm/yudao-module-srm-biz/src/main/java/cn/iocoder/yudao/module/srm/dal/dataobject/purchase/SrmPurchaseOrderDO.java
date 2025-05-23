@@ -56,6 +56,10 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
      */
     private BigDecimal totalCount;
     /**
+     * 币别id(财务管理-币别维护)
+     */
+    private Long currencyId;
+    /**
      * 币别名称
      */
     private String currencyName;

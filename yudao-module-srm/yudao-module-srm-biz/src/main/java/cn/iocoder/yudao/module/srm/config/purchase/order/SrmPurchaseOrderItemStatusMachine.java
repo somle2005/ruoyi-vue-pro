@@ -75,29 +75,8 @@ public class SrmPurchaseOrderItemStatusMachine {
         // 初始化入库
         builder.externalTransition().from(SrmStorageStatus.NONE_IN_STORAGE).to(SrmStorageStatus.NONE_IN_STORAGE).on(SrmEventEnum.STORAGE_INIT).perform(orderItemInActionImpl);
 
-        // 部分入库
-        //        builder.externalTransition()
-        //            .from(SrmStorageStatus.NONE_IN_STORAGE)
-        //            .to(SrmStorageStatus.PARTIALLY_IN_STORAGE)
-        //            .on(SrmEventEnum.PARTIAL_STORAGE)
-        //            .perform(actionOrderItemInImpl);
-        //
-        //        // 完成入库
-        //        builder.externalTransitions()
-        //            .fromAmong(SrmStorageStatus.NONE_IN_STORAGE, SrmStorageStatus.PARTIALLY_IN_STORAGE)
-        //            .to(SrmStorageStatus.ALL_IN_STORAGE)
-        //            .on(SrmEventEnum.COMPLETE_STORAGE)
-        //            .perform(actionOrderItemInImpl);
-
         // 取消入库
         builder.externalTransitions().fromAmong(SrmStorageStatus.NONE_IN_STORAGE, SrmStorageStatus.PARTIALLY_IN_STORAGE).to(SrmStorageStatus.NONE_IN_STORAGE).on(SrmEventEnum.CANCEL_STORAGE).perform(orderItemInActionImpl);
-
-        //        // 入库异常
-        //        builder.externalTransitions()
-        //            .fromAmong(SrmStorageStatus.NONE_IN_STORAGE, SrmStorageStatus.PARTIALLY_IN_STORAGE, SrmStorageStatus.ALL_IN_STORAGE)
-        //            .to(SrmStorageStatus.NONE_IN_STORAGE)
-        //            .on(SrmEventEnum.STORAGE_EXCEPTION)
-        //            .perform(actionOrderItemInImpl);
 
         // 库存调整
         builder.externalTransitions().fromAmong(SrmStorageStatus.NONE_IN_STORAGE, SrmStorageStatus.PARTIALLY_IN_STORAGE, SrmStorageStatus.ALL_IN_STORAGE).to(SrmStorageStatus.NONE_IN_STORAGE).on(SrmEventEnum.STOCK_ADJUSTMENT).perform(orderItemInActionImpl);
@@ -132,20 +111,6 @@ public class SrmPurchaseOrderItemStatusMachine {
 
         // 初始化付款状态
         builder.internalTransition().within(SrmPaymentStatus.NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(orderItemPayActionImpl);
-
-        //        // 部分付款
-        //        builder.externalTransition()
-        //            .from(SrmPaymentStatus.NONE_PAYMENT)
-        //            .to(SrmPaymentStatus.PARTIALLY_PAYMENT)
-        //            .on(SrmEventEnum.PARTIAL_PAYMENT)
-        //            .perform(actionOrderItemPayImpl);
-        //
-        //        // 完成付款
-        //        builder.externalTransitions()
-        //            .fromAmong(SrmPaymentStatus.NONE_PAYMENT, SrmPaymentStatus.PARTIALLY_PAYMENT)
-        //            .to(SrmPaymentStatus.ALL_PAYMENT)
-        //            .on(SrmEventEnum.COMPLETE_PAYMENT)
-        //            .perform(actionOrderItemPayImpl);
 
         // 取消付款
         builder.externalTransitions().fromAmong(SrmPaymentStatus.NONE_PAYMENT, SrmPaymentStatus.PARTIALLY_PAYMENT).to(SrmPaymentStatus.NONE_PAYMENT).on(SrmEventEnum.CANCEL_PAYMENT).perform(orderItemPayActionImpl);

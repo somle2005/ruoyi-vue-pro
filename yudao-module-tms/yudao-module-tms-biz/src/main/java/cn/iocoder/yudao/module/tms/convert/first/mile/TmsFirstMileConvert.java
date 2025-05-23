@@ -2,7 +2,6 @@ package cn.iocoder.yudao.module.tms.convert.first.mile;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
@@ -15,6 +14,7 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundSaveReqDTO;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.List;
@@ -149,13 +149,14 @@ public class TmsFirstMileConvert {
     }
 
     /**
-     * 出库单转换 BO -> WmsOutboundSaveReqDTO
+     * 头程单 BO -> 出库单DTO
      */
     public static WmsOutboundSaveReqDTO convertOutbound(TmsFirstMileBO firstMileBO) {
         WmsOutboundSaveReqDTO dto = new WmsOutboundSaveReqDTO();
         dto.setUpstreamBillId(firstMileBO.getId());
         dto.setUpstreamBillCode(firstMileBO.getCode());
-        dto.setType(BillType.TMS_FIRST_MILE.getValue());
+//        dto.setType(BillType.TMS_FIRST_MILE.getValue());
+        dto.setType(WmsOutboundType.OUTBOUND_BILL.getValue()); //出库单类型
         //子项映射，upstreamItemId是item的id
         // 设置明细项
         if (CollUtil.isNotEmpty(firstMileBO.getItems())) {
@@ -164,7 +165,12 @@ public class TmsFirstMileConvert {
                     WmsOutboundItemSaveReqDTO itemDTO = new WmsOutboundItemSaveReqDTO();
                     itemDTO.setUpstreamItemId(item.getId());
                     itemDTO.setProductId(item.getProductId());
-//                        itemDTO.setRemark(item.getRemark());
+                    itemDTO.setPlanQty(item.getQty());//计划出库量
+                    itemDTO.setActualQty(item.getQty());//实际出库量
+                    itemDTO.setCompanyId(item.getCompanyId());//库存公司
+                    itemDTO.setDeptId(item.getDeptId()); //库存归属部门ID
+//                    itemDTO.setBinId(item.getBinId());   //TODO 出库库位
+                    itemDTO.setRemark(item.getRemark());
                     return itemDTO;
                 }).collect(Collectors.toList());
             dto.setItemList(items);

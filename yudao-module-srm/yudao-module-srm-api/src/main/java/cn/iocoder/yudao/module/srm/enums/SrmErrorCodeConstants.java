@@ -160,4 +160,8 @@ public interface SrmErrorCodeConstants {
     // ========== 付款条款  ==========
     ErrorCode PAYMENT_TERM_NOT_EXISTS = new ErrorCode(1_030_607_001, "付款条款不存在");
 
+    // ========== 采购到货单 1002016000-1002016999 ==========
+    ErrorCode PURCHASE_IN_ORDER_SUPPLIER_NOT_SAME = new ErrorCode(1002016000, "采购到货单明细关联的采购订单供应商不一致，明细项：{}，供应商：{}，采购订单：{}");
+    ErrorCode PURCHASE_IN_ORDER_COMPANY_NOT_SAME = new ErrorCode(1002016001, "采购到货单明细关联的采购订单采购公司不一致，明细项：{}，采购公司：{}，采购订单：{}");
+
 }

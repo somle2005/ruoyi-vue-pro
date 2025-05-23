@@ -9,6 +9,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -41,16 +42,17 @@ public interface SrmPurchaseRequestItemsConvert {
             SrmPurchaseRequestItemsBO firstItem = srmPurchaseRequestItemsBOS.get(0);
 
             // 将主表 DO 转为 BO
-            SrmPurchaseRequestBO requestBO =
-                BeanUtils.toBean(firstItem.getPurchaseRequest(), SrmPurchaseRequestBO.class);
+            SrmPurchaseRequestBO requestBO = BeanUtils.toBean(firstItem.getPurchaseRequest(), SrmPurchaseRequestBO.class);
+
+            // 子项按创建时间降序排序
+            srmPurchaseRequestItemsBOS.sort(Comparator.comparing(SrmPurchaseRequestItemsBO::getCreateTime, Comparator.nullsLast(Comparator.reverseOrder())));
 
             // 将该主表对应的子项列表转为 DO，并设置到 BO 中
             requestBO.setItems(BeanUtils.toBean(srmPurchaseRequestItemsBOS, SrmPurchaseRequestItemsDO.class));
 
             return requestBO;
-        }).collect(Collectors.toList());
+        }).sorted(Comparator.comparing(SrmPurchaseRequestBO::getCreateTime, Comparator.nullsLast(Comparator.reverseOrder()))).collect(Collectors.toList());
     }
-
 
 
 }

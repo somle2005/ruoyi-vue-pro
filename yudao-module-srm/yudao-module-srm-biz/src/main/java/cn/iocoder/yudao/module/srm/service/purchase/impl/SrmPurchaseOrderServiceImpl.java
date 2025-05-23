@@ -195,12 +195,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             //开关
             orderItemOffMachine.fireEvent(SrmOffStatus.OPEN, SrmEventEnum.OFF_INIT, orderItemDO);
             //付款
-            requestItemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT,
-                SrmPayCountDTO.builder().orderItemId(orderItemDO.getId()).build());
+            requestItemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, SrmPayCountDTO.builder().orderItemId(orderItemDO.getId()).build());
             //入库
-            requestItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT,
-                SrmOrderInCountDTO.builder().orderItemId(orderItemDO.getId()).build());
-            //            requestItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmInCountDTO.builder().orderItemId(orderItemDO.getId()).inCount(orderItemDO.getCount()).build());
+            requestItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmOrderInCountDTO.builder().orderItemId(orderItemDO.getId()).build());
             //执行
             requestItemExecutionMachine.fireEvent(SrmExecutionStatus.PENDING, SrmEventEnum.EXECUTION_INIT, orderItemDO);
         }
@@ -248,7 +245,6 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         }
         // 1.3.1 校验订单项是否可以被创建,数量够不够
         List<Long> purchaseApplyItemIds = orderItems.stream().map(SrmPurchaseOrderItemDO::getPurchaseApplyItemId).distinct().toList();
-        //构造purchaseApplyItemIds:count 的Map
         validPurchaseApplyItemId(purchaseApplyItemIds, orderItems);
         // 1.3.2
         // 1.4 生成订单号，并校验唯一性
@@ -306,9 +302,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
 
         // 1.5 设置旧值
         // 3. 设置日志上下文
-        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(purchaseOrder, SrmPurchaseOrderSaveReqVO.class, spk -> {
-            spk.setItems(BeanUtils.toBean(purchaseOrderItems, SrmPurchaseOrderSaveReqVO.Item.class));
-        }));
+        LogRecordContext.putVariable(DiffParseFunction.OLD_OBJECT, BeanUtils.toBean(purchaseOrder, SrmPurchaseOrderSaveReqVO.class, spk -> spk.setItems(BeanUtils.toBean(purchaseOrderItems, SrmPurchaseOrderSaveReqVO.Item.class))));
 
         // 2.1 更新订单
         SrmPurchaseOrderDO updateObj = BeanUtils.toBean(vo, SrmPurchaseOrderDO.class);

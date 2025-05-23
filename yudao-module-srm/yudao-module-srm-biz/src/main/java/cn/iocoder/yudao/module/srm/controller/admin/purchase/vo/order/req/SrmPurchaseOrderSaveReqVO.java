@@ -160,9 +160,13 @@ public class SrmPurchaseOrderSaveReqVO {
         @Schema(description = "税额")
         @DiffLogField(name = "税额")
         private BigDecimal taxPrice;
-        //
-        //        @Schema(description = "币别id(财务管理-币别维护)")
-        //        private Long currencyId;
+
+        @Schema(description = "币别编号")
+        private Long currencyId;
+
+        @Schema(description = "币别名称")
+        @DiffLogField(name = "币别名称")
+        private String currencyName;
 
         @Schema(description = "含税单价")
         @DecimalMin(value = "0.00", message = "含税单价不能小于0")
@@ -209,6 +213,7 @@ public class SrmPurchaseOrderSaveReqVO {
 
         @Schema(description = "仓库编号")
         @DiffLogField(name = "仓库编号")
+        @NotNull(message = "仓库编号不能为空") //合并入库时必须要仓库ID
         private Long warehouseId; // 仓库编号
 
         @Schema(description = "交货日期")

@@ -19,10 +19,7 @@ import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
 import java.math.RoundingMode;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
@@ -124,6 +121,10 @@ public interface SrmOrderConvert {
             if (CollUtil.isEmpty(orderItems)) {
                 return null;
             }
+            // 子项按创建时间降序
+            orderItems.sort(
+                Comparator.comparing(SrmPurchaseOrderItemBO::getCreateTime, Comparator.nullsLast(Comparator.reverseOrder()))
+            );
 
             SrmPurchaseOrderBO orderBO = new SrmPurchaseOrderBO();
             // 获取第一个子项来设置主表信息
@@ -135,7 +136,8 @@ public interface SrmOrderConvert {
             BeanUtils.copyProperties(firstItem.getSrmPurchaseOrderDO(), orderBO);
             // 设置子表信息
             orderBO.setSrmPurchaseOrderItemDOS(BeanUtils.toBean(orderItems, SrmPurchaseOrderItemDO.class));
+
             return orderBO;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }).filter(Objects::nonNull).sorted(Comparator.comparing(SrmPurchaseOrderBO::getCreateTime, Comparator.nullsLast(Comparator.reverseOrder()))).collect(Collectors.toList());
     }
 }

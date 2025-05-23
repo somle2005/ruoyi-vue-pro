@@ -123,7 +123,7 @@ public class SrmPurchaseReturnController {
     @PutMapping("/submitAudit")
     @Operation(summary = "提交审核")
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:submit')")
-    public CommonResult<Boolean> submitPurchaseReturn(@Valid SrmPurchaseReturnAuditReqVO reqVO) {
+    public CommonResult<Boolean> submitPurchaseReturn(@Validated(Validation.OnSubmitAudit.class) @RequestBody SrmPurchaseReturnAuditReqVO reqVO) {
         purchaseReturnService.submitAudit(reqVO.getIds());
         return success(true);
     }
@@ -132,7 +132,7 @@ public class SrmPurchaseReturnController {
     @PutMapping("/auditStatus")
     @Operation(summary = "审核/反审核")
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:review')")
-    public CommonResult<Boolean> auditPurchaseReturn(@Valid SrmPurchaseReturnAuditReqVO reqVO) {
+    public CommonResult<Boolean> auditPurchaseReturn(@Validated(Validation.OnAudit.class) @RequestBody SrmPurchaseReturnAuditReqVO reqVO) {
         purchaseReturnService.review(reqVO);
         return success(true);
     }
@@ -141,7 +141,7 @@ public class SrmPurchaseReturnController {
     @PutMapping("/refundStatus")
     @Operation(summary = "切换退款状态")
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:refund')")
-    public CommonResult<Boolean> refundPurchaseReturn(@Valid SrmPurchaseReturnAuditReqVO reqVO) {
+    public CommonResult<Boolean> refundPurchaseReturn(@Validated(Validation.OnSwitch.class) @RequestBody SrmPurchaseReturnAuditReqVO reqVO) {
         purchaseReturnService.refund(reqVO);
         return success(true);
     }
