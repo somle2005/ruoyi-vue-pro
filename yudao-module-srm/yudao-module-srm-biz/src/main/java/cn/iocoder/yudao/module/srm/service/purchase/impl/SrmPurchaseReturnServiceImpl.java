@@ -523,6 +523,25 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         });
     }
 
+    /**
+     * 作废采购退货单关联的WMS出库单
+     *
+     * @param returnId 采购退货单ID
+     */
+    private void abandonWmsOutbound(Long returnId) {
+        List<WmsOutboundDTO> dtoList = wmsOutboundApi.getOutboundList(BillType.SRM_PURCHASE_RETURN.getValue(), returnId);
+        dtoList.forEach(wmsOutboundDTO -> {
+            //如果出库单是草稿状态 -> 作废
+            if (Objects.equals(wmsOutboundDTO.getAuditStatus(), WmsOutboundAuditStatus.DRAFT.getValue())) {
+                // 作废 WMS 出库单
+                wmsOutboundApi.abandonOutbound(wmsOutboundDTO.getId(), "采购退货反审核");
+            } else {
+                //提示
+                throw exception(PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON, wmsOutboundDTO.getCode());
+            }
+        });
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void review(SrmPurchaseReturnAuditReqVO req) {
@@ -555,21 +574,12 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                     auditStatusMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
                     //联动
                     rollBackStatus(returnItemDOS);
-                    // 作废 WMS 出库单
-                    List<WmsOutboundDTO> dtoList = wmsOutboundApi.getOutboundList(BillType.SRM_PURCHASE_RETURN.getValue(), purchaseReturnDO.getId());
-                    dtoList.forEach(wmsOutboundDTO -> {
-                        //如果出库单是草稿状态 -> 作废
-                        if (Objects.equals(wmsOutboundDTO.getAuditStatus(), WmsOutboundAuditStatus.DRAFT.getValue())) {
-                            wmsOutboundApi.abandonOutbound(wmsOutboundDTO.getId(), "采购退货反审核");
-                        } else {
-                            //提示
-                            throw exception(PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON, wmsOutboundDTO.getCode());
-                        }
-                    });
                 }
             } else {
                 log.debug("退货单撤回审核，ID: {}", purchaseReturnDO.getId());
                 auditStatusMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
+                // 作废WMS出库单
+                abandonWmsOutbound(purchaseReturnDO.getId());
             }
         });
     }
