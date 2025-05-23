@@ -9,10 +9,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInItemBO;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Mapper
@@ -71,6 +68,10 @@ public interface SrmPurchaseInConvert {
             if (CollUtil.isEmpty(inItems)) {
                 return null;
             }
+            // 子项按创建时间降序排序
+            inItems.sort(Comparator.comparing(
+                SrmPurchaseInItemBO::getCreateTime, Comparator.nullsLast(Comparator.reverseOrder())
+            ));
 
             SrmPurchaseInBO inBO = new SrmPurchaseInBO();
             // 获取第一个子项来设置主表信息
@@ -83,6 +84,6 @@ public interface SrmPurchaseInConvert {
             // 设置子表信息
             inBO.setSrmPurchaseInItemDOS(BeanUtils.toBean(inItems, SrmPurchaseInItemDO.class));
             return inBO;
-        }).filter(Objects::nonNull).collect(Collectors.toList());
+        }).filter(Objects::nonNull).sorted(Comparator.comparing(SrmPurchaseInBO::getCreateTime, Comparator.nullsLast(Comparator.reverseOrder()))).collect(Collectors.toList());
     }
 } 

@@ -125,6 +125,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         validateOrderItemsCurrency(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
         // 1.4 校验结算账户
 //        erpAccountApi.validateAccount(vo.getAccountId());
+        //1.5 校验 同一个供应商  同一个采购公司,校验关联的orderItemId的采购订单 必须是同一个供应商+采购公司
         // 1.4 生成入库单号，并校验唯一性
         String no;
         if (vo.getCode() != null) {

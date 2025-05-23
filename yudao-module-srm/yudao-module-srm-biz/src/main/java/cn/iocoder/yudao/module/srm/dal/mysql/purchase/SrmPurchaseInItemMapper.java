@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPageReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInItemBO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import de.danielbechler.util.Collections;
@@ -52,7 +53,9 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 .eqIfPresent(SrmPurchaseInItemDO::getApplicationDeptId, itemQuery.getApplicationDeptId())
                 // ========== 状态信息 ==========
                 .eqIfPresent(SrmPurchaseInItemDO::getInStatus, itemQuery.getInStatus())
-                .eqIfPresent(SrmPurchaseInItemDO::getPayStatus, itemQuery.getPayStatus());
+                .eqIfPresent(SrmPurchaseInItemDO::getPayStatus, itemQuery.getPayStatus())
+                .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
+            ;
         }
 
         return wrapper.orderByDesc(SrmPurchaseInItemDO::getCreateTime);
