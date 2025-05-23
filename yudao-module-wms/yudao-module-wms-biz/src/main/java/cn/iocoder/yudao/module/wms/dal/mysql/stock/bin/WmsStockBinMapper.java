@@ -69,6 +69,23 @@ public interface WmsStockBinMapper extends BaseMapperX<WmsStockBinDO> {
     }
 
     /**
+     * 按 product_id 查询 WmsStockBinDO 清单
+     */
+    default WmsStockBinDO selectByProductId(Long productId, int planQty) {
+        MPJLambdaWrapperX<WmsStockBinDO> wrapper = new MPJLambdaWrapperX();
+        wrapper.eq(WmsStockBinDO::getProductId, productId)
+               .ge(WmsStockBinDO::getSellableQty, planQty)
+               .leftJoin(WmsWarehouseBinDO.class, on -> on
+                       .eq(WmsWarehouseBinDO::getId, WmsStockBinDO::getBinId)
+                       .eq(WmsWarehouseBinDO::getWarehouseId, WmsStockBinDO::getWarehouseId))
+                .selectAll(WmsStockBinDO.class)
+                .select(WmsWarehouseBinDO::getPickingOrder)
+                .orderByAsc(WmsWarehouseBinDO::getPickingOrder)
+               .orderByDesc(WmsStockBinDO::getUpdateTime);
+        return selectOne(wrapper);
+    }
+
+    /**
      * 按 bin_id,product_id 查询唯一的 WmsStockBinDO
      */
     default WmsStockBinDO getByBinIdAndProductId(Long binId, Long productId) {

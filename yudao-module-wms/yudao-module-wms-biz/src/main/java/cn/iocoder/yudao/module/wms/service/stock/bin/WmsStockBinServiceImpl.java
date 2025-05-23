@@ -228,6 +228,7 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
         }
     }
 
+    @Override
     public List<WmsStockBinRespVO> selectStockBinList(List<WmsWarehouseProductVO> warehouseProductList, Boolean withBin) {
         if(CollectionUtils.isEmpty(warehouseProductList)) {
             return List.of();
@@ -302,13 +303,14 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
         if(CollectionUtils.isEmpty(stockBinIds)) {
             return List.of();
         }
-        return stockBinMapper.selectBatchIds(stockBinIds);
+        return stockBinMapper.selectByIds(stockBinIds);
 
     }
 
     /**
      * 按库存批次详情ID 查询仓位库存清单
      **/
+    @Override
     public List<WmsStockBinDO> selectBinsByInboundItemId(Long warehouseId, Long productId, Long inboundItemId) {
         return stockBinMapper.selectBinsByInboundItemId(warehouseId, productId, inboundItemId);
     }

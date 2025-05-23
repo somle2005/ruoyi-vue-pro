@@ -32,15 +32,14 @@ import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSim
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.item.WmsOutboundItemDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.WmsInboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.WmsOutboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.item.WmsOutboundItemMapper;
-import cn.iocoder.yudao.module.wms.dal.mysql.pickup.WmsPickupMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.pickup.item.WmsPickupItemMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.stock.bin.WmsStockBinMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
@@ -90,6 +89,9 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
 
     @Resource
     private WmsOutboundMapper outboundMapper;
+
+    @Resource
+    private WmsStockBinMapper stockBinMapper;
 
     @Resource
     @Lazy
@@ -210,11 +212,14 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         }
         WmsInboundRespVO inboundVO = inboundService.getInboundWithItemList(inboundId);
         List<WmsOutboundItemSaveReqVO> itemList = BeanUtils.toBean(inboundVO.getItemList(), WmsOutboundItemSaveReqVO.class);
-
         //查库位
         for(WmsOutboundItemSaveReqVO item : itemList) {
-            WmsPickupItemDO pickupItemDO = pickupItemMapper.getByInboundIdAndProductId(inboundVO.getId(), itemList.get(0).getProductId());
-            item.setBinId(pickupItemDO.getBinId());
+            //查询仓位库存表 规则1.根据后进先出筛选出最近入库批次 2.同一批次下，多个库位，根据自带优先级进行选择 3.该库位必须有足够货量
+            WmsStockBinDO stockBin = stockBinMapper.selectByProductId(item.getProductId(), item.getPlanQty());
+            if(stockBin == null) {
+                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, item.getProductId());
+            }
+            item.setBinId(stockBin.getBinId());
         }
         createReqVO.setItemList(itemList);
         createReqVO.setUpstreamBillCode(inbound.getCode());
@@ -275,7 +280,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             }
             if (!toDeleteList.isEmpty()) {
                 List<Long> deleteIds = StreamX.from(toDeleteList).toList(WmsOutboundItemDO::getId);
-                outboundItemMapper.deleteBatchIds(deleteIds);
+                outboundItemMapper.deleteByIds(deleteIds);
             }
         }
         // 返回

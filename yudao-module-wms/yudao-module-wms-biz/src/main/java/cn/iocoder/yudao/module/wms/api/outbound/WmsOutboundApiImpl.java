@@ -158,6 +158,7 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
             //触发出货单明细行 状态机
             //如果成功创建出库单-触发SRM入库数量联动
             wmsOutboundRespVO.getItemList().forEach(inItem -> {
+                //todo 如何判断from status是全部入库还是部分入库
                 purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.ALL_IN_STORAGE
                         , SrmEventEnum.CANCEL_STORAGE
                     , SrmPurchaseInItemCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build());
