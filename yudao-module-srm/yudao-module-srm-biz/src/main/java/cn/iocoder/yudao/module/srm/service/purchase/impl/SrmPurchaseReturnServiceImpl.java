@@ -9,7 +9,6 @@ import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
@@ -23,7 +22,12 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmReturnStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.outbound.WmsOutboundApi;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundItemSaveReqDTO;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -58,15 +62,12 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     private final SrmPurchaseReturnMapper purchaseReturnMapper;
     private final SrmPurchaseReturnItemMapper purchaseReturnItemMapper;
     private final SrmPurchaseInItemMapper inItemMapper;
-    private final SrmNoRedisDAO noRedisDAO;
-    private final SrmPurchaseInMapper inMapper;
     private final SrmPurchaseOrderItemMapper orderItemMapper;
+    private final SrmPurchaseInMapper inMapper;
+    private final SrmPurchaseOrderMapper orderMapper;
+    private final SrmNoRedisDAO noRedisDAO;
     private final ErpProductApi erpProductApi;
     private final SrmSupplierService supplierService;
-    @Resource
-    private final FmsAccountApi erpAccountApi;
-    @Resource
-    private final WmsOutboundApi wmsOutboundApi;
 
     @Resource(name = PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
     StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemStorageMachine;
@@ -74,6 +75,8 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseReturnAuditReqVO> auditStatusMachine;
     @Resource(name = PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME)
     StateMachine<SrmReturnStatus, SrmEventEnum, SrmPurchaseReturnDO> refundStateMachine;
+    @Autowired
+    private WmsOutboundApi wmsOutboundApi;
 
     /**
      * 安全处理 BigDecimal 值，避免空指针
@@ -538,15 +541,25 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                     //联动
                     linkSlaveStatus(returnItemDOS);
 
-                    // TODO 创建 WMS 出库单
-//                    createWmsOutbound(purchaseReturnDO, returnItemDOS);
+                    //创建 WMS 出库单
+                    createWmsOutbound(purchaseReturnDO, returnItemDOS);
                 } else {
                     //反审核
                     log.debug("退货单拒绝审核，ID: {}", purchaseReturnDO.getId());
                     auditStatusMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
                     //联动
                     rollBackStatus(returnItemDOS);
-                    // TODO 作废 WMS 出库单
+                    // 作废 WMS 出库单
+                    List<WmsOutboundDTO> dtoList = wmsOutboundApi.getOutboundList(BillType.SRM_PURCHASE_RETURN.getValue(), purchaseReturnDO.getId());
+                    dtoList.forEach(wmsOutboundDTO -> {
+                        //如果出库单是草稿状态 -> 作废
+                        if (Objects.equals(wmsOutboundDTO.getAuditStatus(), WmsOutboundAuditStatus.DRAFT.getValue())) {
+                            wmsOutboundApi.abandonOutbound(wmsOutboundDTO.getId(), "采购退货反审核");
+                        } else {
+                            //提示
+                            throw exception(PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON, wmsOutboundDTO.getCode());
+                        }
+                    });
                 }
             } else {
                 log.debug("退货单撤回审核，ID: {}", purchaseReturnDO.getId());
@@ -555,73 +568,6 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         });
     }
 
-    /**
-     * 创建 WMS 出库单
-     *
-     * @param purchaseReturn 退货单
-     * @param returnItems    退货项列表
-     */
-    private void createWmsOutbound(SrmPurchaseReturnDO purchaseReturn, List<SrmPurchaseReturnItemDO> returnItems) {
-        // 1. 获取入库单信息，用于获取仓库信息
-        Set<Long> inItemIds = returnItems.stream().map(SrmPurchaseReturnItemDO::getInItemId).collect(Collectors.toSet());
-        List<SrmPurchaseInItemDO> inItems = inItemMapper.selectByIds(inItemIds);
-        if (CollUtil.isEmpty(inItems)) {
-            throw exception(PURCHASE_IN_ITEM_NOT_EXISTS);
-        }
-        // 获取入库单ID
-        Set<Long> inIds = inItems.stream().map(SrmPurchaseInItemDO::getInId).collect(Collectors.toSet());
-        if (inIds.size() > 1) {
-            throw exception(PURCHASE_RETURN_IN_ITEM_IN_ID_NOT_SAME);
-        }
-        // 获取入库单信息
-        SrmPurchaseInDO inDO = inMapper.selectById(inIds.iterator().next());
-        if (inDO == null) {
-            throw exception(PURCHASE_IN_NOT_EXISTS);
-        }
-
-     /*   // 2. 构建出库单基本信息
-        WmsOutboundSaveReqDTO outboundReq = WmsOutboundSaveReqDTO.builder()
-            .warehouseId(inDO.getWarehouseId()) // 从入库单获取仓库ID
-            .type(WmsOutboundType.RETURN.getType()) // 设置出库类型为退货
-            .upstreamBillId(purchaseReturn.getId()) // 来源单据ID
-            .upstreamBillCode(purchaseReturn.getCode()) // 来源单据号
-            .upstreamBillType(BillType.SRM_PURCHASE_RETURN.getValue()) // 来源单据类型
-            .companyId(inDO.getCompanyId()) // 从入库单获取库存财务公司ID
-            .deptId(inDO.getDeptId()) // 从入库单获取库存归属部门ID
-            .remark(purchaseReturn.getRemark()) // 备注
-            .build();
-
-        // 3. 构建出库项列表
-        List<WmsOutboundItemSaveReqDTO> outboundItems = returnItems.stream()
-            .map(item -> {
-                // 3.1 获取入库项信息，用于获取产品信息
-                SrmPurchaseInItemDO inItem = inItemMapper.selectById(item.getInItemId());
-                if (inItem == null) {
-                    throw exception(PURCHASE_IN_ITEM_NOT_EXISTS, item.getInItemId());
-                }
-
-                // 3.2 构建出库项
-                return WmsOutboundItemSaveReqDTO.builder()
-                    .productId(item.getProductId()) // 产品编号
-                    .planQty(item.getQty().intValue()) // 计划出库数量
-                    .companyId(inDO.getCompanyId()) // 从入库单获取库存财务公司ID
-                    .deptId(inDO.getDeptId()) // 从入库单获取库存归属部门ID
-                    .remark(item.getRemark()) // 备注
-                    .upstreamItemId(item.getId()) // 来源详情ID
-                    .build();
-            })
-            .collect(Collectors.toList());
-        outboundReq.setItemList(outboundItems);
-
-        // 4. 调用 WMS 出库接口
-        try {
-            wmsOutboundApi.createOutbound(outboundReq);
-            log.info("[createWmsOutbound][退货单({}) 创建出库单成功]", purchaseReturn.getCode());
-        } catch (Exception e) {
-            log.error("[createWmsOutbound][退货单({}) 创建出库单失败]", purchaseReturn.getCode(), e);
-            throw exception(WMS_OUTBOUND_CREATE_FAIL);
-        }*/
-    }
 
     private void rollBackStatus(List<SrmPurchaseReturnItemDO> returnItemDOS) {
         Optional.ofNullable(returnItemDOS).ifPresent(item -> {
@@ -653,5 +599,77 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
             //校验
             refundStateMachine.fireEvent(SrmReturnStatus.fromCode(orderDO.getRefundStatus()), finalEventEnum, orderDO);
         });
+    }
+
+    /**
+     * 创建 WMS 出库单
+     *
+     * @param purchaseReturn 采购退货单
+     * @param returnItems    采购退货单明细
+     */
+    private void createWmsOutbound(SrmPurchaseReturnDO purchaseReturn, List<SrmPurchaseReturnItemDO> returnItems) {
+        // 1. 构建出库单基本信息
+        WmsOutboundImportReqDTO importReqDTO = buildOutboundBaseInfo(purchaseReturn);
+        // 2. 构建出库单明细信息
+        importReqDTO.setItemList(buildOutboundItems(returnItems));
+        // 3. 生成出库单
+        wmsOutboundApi.generateOutbound(importReqDTO);
+    }
+
+    /**
+     * 构建出库单基本信息
+     *
+     * @param purchaseReturn 采购退货单
+     * @return 出库单基本信息
+     */
+    private WmsOutboundImportReqDTO buildOutboundBaseInfo(SrmPurchaseReturnDO purchaseReturn) {
+        WmsOutboundImportReqDTO importReqDTO = new WmsOutboundImportReqDTO();
+        importReqDTO.setType(cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType.ORDER.getValue()); // 订单出库
+        importReqDTO.setUpstreamBillId(purchaseReturn.getId()); // 来源单据ID
+        importReqDTO.setUpstreamBillCode(purchaseReturn.getCode()); // 来源单据号
+        importReqDTO.setUpstreamBillType(BillType.SRM_PURCHASE_RETURN.getValue()); // 来源单据类型
+        //甲方(财务公司ID)，取第一个退货项 -> 到货项 -> 订单项 -> 订单(purchaseCompanyId)
+        // 获取甲方(财务公司ID)，从退货项追溯到订单的财务公司ID
+        List<SrmPurchaseReturnItemDO> returnItems = purchaseReturnItemMapper.selectListByReturnId(purchaseReturn.getId());
+        if (CollUtil.isNotEmpty(returnItems)) {
+            // 获取第一个退货项
+            SrmPurchaseReturnItemDO firstItem = returnItems.get(0);
+            // 获取对应的入库项
+            SrmPurchaseInItemDO inItem = inItemMapper.selectById(firstItem.getInItemId());
+            if (inItem != null) {
+                // 获取对应的订单项
+                SrmPurchaseOrderItemDO orderItem = orderItemMapper.selectById(inItem.getOrderItemId());
+                if (orderItem != null) {
+                    // 获取订单
+                    SrmPurchaseOrderDO order = orderMapper.selectById(orderItem.getOrderId());
+                    if (order != null) {
+                        // 获取订单的财务公司ID
+                        importReqDTO.setCompanyId(order.getPurchaseCompanyId());
+                    }
+                }
+            }
+        }
+
+        importReqDTO.setRemark(purchaseReturn.getRemark()); // 备注
+        importReqDTO.setOutboundTime(purchaseReturn.getReturnTime()); // 出库时间
+        return importReqDTO;
+    }
+
+    /**
+     * 构建出库单明细信息
+     *
+     * @param returnItems 采购退货单明细
+     * @return 出库单明细列表
+     */
+    private List<WmsOutboundItemSaveReqDTO> buildOutboundItems(List<SrmPurchaseReturnItemDO> returnItems) {
+        return returnItems.stream().map(item -> {
+            WmsOutboundItemSaveReqDTO itemDTO = new WmsOutboundItemSaveReqDTO();
+            itemDTO.setProductId(item.getProductId()); // 产品ID
+            itemDTO.setPlanQty(item.getQty().intValue()); // 计划出库量
+            itemDTO.setActualQty(item.getQty().intValue()); // 实际出库量
+            itemDTO.setRemark(item.getRemark()); // 备注
+            itemDTO.setUpstreamItemId(item.getId()); // 来源详情ID
+            return itemDTO;
+        }).collect(Collectors.toList());
     }
 }

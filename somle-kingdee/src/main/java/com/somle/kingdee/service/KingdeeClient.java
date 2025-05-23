@@ -612,6 +612,8 @@ public class KingdeeClient {
      * @return Map<String, KingdeeSupplier> key为供应商名称，value为供应商信息
      */
     public Map<String, KingdeeSupplier> getAllSupplierList(KingdeeSupplierQueryReqVO queryReqVO) {
+        //TODO 双端锁校验，防止并发，等待批量查询。
+
         // 生成缓存key，使用查询参数的hash值作为key的一部分
         String cacheKey = ErpRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + Objects.hash(JsonUtilsX.toJsonString(queryReqVO));
 

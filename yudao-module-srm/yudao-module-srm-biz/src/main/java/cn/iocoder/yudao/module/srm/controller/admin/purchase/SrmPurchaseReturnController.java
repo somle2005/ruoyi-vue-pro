@@ -60,6 +60,7 @@ public class SrmPurchaseReturnController {
     private final AdminUserApi adminUserApi;
     private final DeptApi deptApi;
     private final WmsWarehouseApi wmsWarehouseApi;
+    private final SrmPurchaseReturnService srmPurchaseReturnService;
 
 
     @PostMapping("/create")
@@ -194,7 +195,6 @@ public class SrmPurchaseReturnController {
         // 1.5 仓库信息
         Map<Long, WmsWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(
             convertSet(purchaseReturnItemList, SrmPurchaseReturnItemDO::getWarehouseId));
-
         // 2. 开始拼接
         return BeanUtils.toBean(list, SrmPurchaseReturnBaseRespVO.class, purchaseReturn -> {
             // 2.1 设置退货项

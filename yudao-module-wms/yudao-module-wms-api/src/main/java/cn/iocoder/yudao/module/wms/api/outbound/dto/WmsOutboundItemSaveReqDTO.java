@@ -12,11 +12,6 @@ public class WmsOutboundItemSaveReqDTO {
     private Long productId;
 
     /**
-     * 出库库位ID
-     **/
-    private Long binId;
-
-    /**
      * 实际出库量
      **/
     private Integer actualQty;
@@ -26,15 +21,15 @@ public class WmsOutboundItemSaveReqDTO {
      **/
     private Integer planQty;
 
-    /**
-     * 库存财务公司ID
-     **/
-    private Long companyId;
-
-    /**
-     * 库存归属部门ID
-     **/
-    private Long deptId;
+//    /**
+//     * 库存财务公司ID
+//     **/
+//    private Long companyId;
+//
+//    /**
+//     * 库存归属部门ID
+//     **/
+//    private Long deptId;
 
     /**
      * 备注

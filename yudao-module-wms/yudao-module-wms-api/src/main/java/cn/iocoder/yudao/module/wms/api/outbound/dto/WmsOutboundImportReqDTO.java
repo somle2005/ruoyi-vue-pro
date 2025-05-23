@@ -19,10 +19,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Data
 public class WmsOutboundImportReqDTO {
 
-    /**
-     * 主键
-     */
-    private Long id;
+
 
     /**
      * WMS出库单类型 ; WmsOutboundType : 1-手工出库 , 2-订单出库 , 3-盘点出库
@@ -47,10 +44,10 @@ public class WmsOutboundImportReqDTO {
      */
     private Long companyId;
 
-    /**
-     * 库存归属部门ID
-     */
-    private Long deptId;
+//    /**
+//     * 库存归属部门ID
+//     */
+//    private Long deptId;
 
     /**
      * 出库时间
@@ -68,10 +65,6 @@ public class WmsOutboundImportReqDTO {
      */
     private String remark;
 
-    /**
-     * 单据号
-     */
-    private String code;
 
     /**
      * 来源单据ID

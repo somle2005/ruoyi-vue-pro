@@ -39,7 +39,7 @@ public interface SrmPurchaseReturnService {
     /**
      * 更新采购退货的退款金额
      *
-     * @param id 编号
+     * @param id          编号
      * @param refundPrice 退款金额
      */
     void updatePurchaseReturnRefundPrice(Long id, BigDecimal refundPrice);
@@ -66,6 +66,7 @@ public interface SrmPurchaseReturnService {
      * @return 采购退货列表
      */
     List<SrmPurchaseReturnDO> getPurchaseReturnList(List<Long> ids);
+
     /**
      * 校验采购退货，已经审核通过
      *
@@ -118,6 +119,5 @@ public interface SrmPurchaseReturnService {
      * 切换退款状态
      */
     void refund(SrmPurchaseReturnAuditReqVO vo);
-
 
 }

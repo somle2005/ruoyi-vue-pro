@@ -91,6 +91,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_RETURN_NO_OUT_OF_BOUNDS = new ErrorCode(1_030_103_009, "采购退货单号编码大于999999,生成失败");
     ErrorCode PURCHASE_RETURN_PROCESS_FAIL_PAYMENT_STATUS = new ErrorCode(1_030_103_010, "已审核的退货单才可以退款");
     ErrorCode PURCHASE_RETURN_IN_ITEM_IN_ID_NOT_SAME = new ErrorCode(1_030_103_011, "退货项中存在多个入库单的入库项");
+    ErrorCode PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON = new ErrorCode(1_030_103_012, "反审核失败，退货单已生成出库单({}),不处于草稿状态,无法撤销");
 
     // ========== ERP 产品 1-030-500-000 ==========
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(1_030_500_000, "产品不存在");

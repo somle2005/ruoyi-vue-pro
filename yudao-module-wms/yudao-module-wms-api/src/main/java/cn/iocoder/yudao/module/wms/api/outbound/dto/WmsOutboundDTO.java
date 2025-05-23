@@ -15,6 +15,11 @@ import java.util.List;
 public class WmsOutboundDTO {
 
     /**
+     * 出库单ID
+     */
+    private Long id;
+
+    /**
      * 仓库ID
      */
     private Long warehouseId;
