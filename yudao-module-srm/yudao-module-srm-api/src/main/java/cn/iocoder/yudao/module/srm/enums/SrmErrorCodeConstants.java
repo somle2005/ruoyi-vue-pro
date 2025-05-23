@@ -93,29 +93,8 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_RETURN_IN_ITEM_IN_ID_NOT_SAME = new ErrorCode(1_030_103_011, "退货项中存在多个入库单的入库项");
     ErrorCode PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON = new ErrorCode(1_030_103_012, "反审核失败，退货单已生成出库单({}),不处于草稿状态,无法撤销");
     ErrorCode PURCHASE_RETURN_PROCESS_FAIL_WMS_OUTBOUND_EXISTS = new ErrorCode(1_030_103_013, "创建出库单失败，原因:{}");
-
-    // ========== ERP 产品 1-030-500-000 ==========
-    ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(1_030_500_000, "产品不存在");
-    ErrorCode PRODUCT_NOT_ENABLE = new ErrorCode(1_030_500_001, "产品({})未启用");
-    ErrorCode PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_500_002, "产品编码已存在");
-    ErrorCode DEPT_LEVEL_NOT_MATCH = new ErrorCode(1_030_500_003, "部门等级不符合要求");
-    ErrorCode PRODUCT_FIELD_NOT_MATCH = new ErrorCode(1_030_500_004, "传入的字段值和品类实际字段不匹配");
-    ErrorCode PRODUCT_NAME_DUPLICATE = new ErrorCode(1_030_500_005, "产品名称已存在");
-    ErrorCode PRODUCT_SERIAL_OVER_LIMIT = new ErrorCode(1_030_500_006, "相同颜色、型号、系列的产品个数产过两位数");
-
-    // ========== ERP 产品分类 1-030-501-000 ==========
-    ErrorCode PRODUCT_CATEGORY_NOT_EXISTS = new ErrorCode(1_030_501_000, "产品分类不存在");
-    ErrorCode PRODUCT_CATEGORY_EXITS_CHILDREN = new ErrorCode(1_030_501_001, "存在存在子产品分类，无法删除");
-    ErrorCode PRODUCT_CATEGORY_PARENT_NOT_EXITS = new ErrorCode(1_030_501_002, "父级产品分类不存在");
-    ErrorCode PRODUCT_CATEGORY_PARENT_ERROR = new ErrorCode(1_030_501_003, "不能设置自己为父产品分类");
-    ErrorCode PRODUCT_CATEGORY_NAME_DUPLICATE = new ErrorCode(1_030_501_004, "已经存在该分类名称的产品分类");
-    ErrorCode PRODUCT_CATEGORY_PARENT_IS_CHILD = new ErrorCode(1_030_501_005, "不能设置自己的子分类为父分类");
-    ErrorCode PRODUCT_CATEGORY_EXITS_PRODUCT = new ErrorCode(1_030_502_002, "存在产品使用该分类，无法删除");
-
-    // ========== ERP 产品单位 1-030-502-000 ==========
-    ErrorCode PRODUCT_UNIT_NOT_EXISTS = new ErrorCode(1_030_502_000, "产品单位不存在");
-    ErrorCode PRODUCT_UNIT_NAME_DUPLICATE = new ErrorCode(1_030_502_001, "已存在该名字的产品单位");
-    ErrorCode PRODUCT_UNIT_EXITS_PRODUCT = new ErrorCode(1_030_502_002, "存在产品使用该单位，无法删除");
+    //PURCHASE_RETURN_WAREHOUSE_NOT_EXISTS
+    ErrorCode PURCHASE_RETURN_PROCESS_FAIL_WAREHOUSE_ID_DONT_EXISTS = new ErrorCode(1_030_103_014, "创建出库单需要退货明细中仓库ID不为空");
 
     // ========== ERP 采购申请单 1-030-603-000 ==========
     ErrorCode PURCHASE_REQUEST_NOT_EXISTS = new ErrorCode(1_030_603_100, "采购申请单不存在");

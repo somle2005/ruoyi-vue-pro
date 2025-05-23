@@ -9,7 +9,6 @@ import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
-import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnBaseRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
@@ -56,11 +55,9 @@ public class SrmPurchaseReturnController {
 
     private final SrmPurchaseReturnService purchaseReturnService;
     private final SrmSupplierService supplierService;
-    private final ErpProductApi erpProductApi;
     private final AdminUserApi adminUserApi;
     private final DeptApi deptApi;
     private final WmsWarehouseApi wmsWarehouseApi;
-    private final SrmPurchaseReturnService srmPurchaseReturnService;
 
 
     @PostMapping("/create")

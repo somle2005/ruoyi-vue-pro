@@ -26,7 +26,9 @@ import java.util.Map;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
-import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.PRODUCT_CODE_DUPLICATE;
+import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.PRODUCT_UNIT_NAME_DUPLICATE;
+import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_PRODUCT_NOT_EXISTS;
 
 /**
  * ERP 供应商产品 Service 实现类

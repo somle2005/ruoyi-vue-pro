@@ -614,12 +614,27 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
      * @param returnItems    采购退货单明细
      */
     private void createWmsOutbound(SrmPurchaseReturnDO purchaseReturn, List<SrmPurchaseReturnItemDO> returnItems) {
-        // 1. 构建出库单基本信息
-        WmsOutboundImportReqDTO importReqDTO = buildOutboundBaseInfo(purchaseReturn);
-        // 2. 构建出库单明细信息
-        importReqDTO.setItemList(buildOutboundItems(returnItems));
-        // 3. 生成出库单
-        wmsOutboundApi.generateOutbound(importReqDTO);
+        // 1. 按仓库分组退货项
+        Map<Long, List<SrmPurchaseReturnItemDO>> warehouseItemsMap = returnItems.stream()
+            .collect(Collectors.groupingBy(item -> {
+                // 获取入库项
+                SrmPurchaseInItemDO inItem = inItemMapper.selectById(item.getInItemId());
+                if (inItem == null || inItem.getWarehouseId() == null) {
+                    throw exception(PURCHASE_RETURN_PROCESS_FAIL_WAREHOUSE_ID_DONT_EXISTS);
+                }
+                return inItem.getWarehouseId();
+            }));
+
+        // 2. 为每个仓库创建出库单
+        warehouseItemsMap.forEach((warehouseId, items) -> {
+            // 构建出库单基本信息
+            WmsOutboundImportReqDTO importReqDTO = buildOutboundBaseInfo(purchaseReturn);
+            importReqDTO.setWarehouseId(warehouseId); // 设置仓库ID
+            // 构建出库单明细信息，将相同仓库的退货项合并到一个出库单中
+            importReqDTO.setItemList(buildOutboundItems(items));
+            // 生成出库单
+            wmsOutboundApi.generateOutbound(importReqDTO);
+        });
     }
 
     /**
