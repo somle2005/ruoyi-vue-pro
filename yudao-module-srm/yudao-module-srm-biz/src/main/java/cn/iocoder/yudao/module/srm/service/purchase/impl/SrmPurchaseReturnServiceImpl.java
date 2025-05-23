@@ -47,6 +47,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.srm.enums.SrmEventEnum.RETURN_CANCEL;
 import static cn.iocoder.yudao.module.srm.enums.SrmEventEnum.RETURN_COMPLETE;
 import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
+import static jodd.util.StringUtil.truncate;
 
 /**
  * ERP 采购退货 Service 实现类
@@ -523,6 +524,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void review(SrmPurchaseReturnAuditReqVO req) {
         // 查询退货单信息
         req.getIds().stream().findFirst().ifPresent(id -> {
@@ -542,7 +544,11 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                     linkSlaveStatus(returnItemDOS);
 
                     //创建 WMS 出库单
-                    createWmsOutbound(purchaseReturnDO, returnItemDOS);
+                    try {
+                        createWmsOutbound(purchaseReturnDO, returnItemDOS);
+                    } catch (Exception e) {
+                        throw exception(PURCHASE_RETURN_PROCESS_FAIL_WMS_OUTBOUND_EXISTS, truncate(e.getMessage(), 200));
+                    }
                 } else {
                     //反审核
                     log.debug("退货单拒绝审核，ID: {}", purchaseReturnDO.getId());
