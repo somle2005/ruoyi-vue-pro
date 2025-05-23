@@ -68,4 +68,7 @@ public class WmsOutboundImportReqVO {
     @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
     @InEnum(BillType.class)
     private Integer upstreamBillType;
+
+    @Schema(description = "仓库ID", example = "")
+    private Long warehouseId;
 }

@@ -48,8 +48,8 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     @Lazy
     private WmsInboundItemService inboundItemService;
 
-    @Resource(name = SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> purchaseInCountDTOStateMachine;
+//    @Resource(name = SrmStateMachines.PURCHASE_OUT_ITEM_STORAGE_STATE_MACHINE)
+//    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> purchaseOutCountDTOStateMachine;
 
     @Override
     public Long createOutbound(WmsOutboundSaveReqDTO createReqDTO) {
@@ -153,17 +153,6 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     @Override
     public WmsOutboundDTO generateOutbound(WmsOutboundImportReqDTO importReqVO) {
         WmsOutboundRespVO wmsOutboundRespVO = outboundService.generateOutbound(BeanUtils.toBean(importReqVO, WmsOutboundImportReqVO.class));
-        //处理出货单逻辑
-        if (wmsOutboundRespVO.getUpstreamBillType() != null && wmsOutboundRespVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
-            //触发出货单明细行 状态机
-            //如果成功创建出库单-触发SRM入库数量联动
-            wmsOutboundRespVO.getItemList().forEach(inItem -> {
-                //todo 如何判断from status是全部入库还是部分入库
-                purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.ALL_IN_STORAGE
-                        , SrmEventEnum.CANCEL_STORAGE
-                    , SrmPurchaseInItemCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build());
-            });
-        }
         return BeanUtils.toBean(wmsOutboundRespVO, WmsOutboundDTO.class);
     }
 

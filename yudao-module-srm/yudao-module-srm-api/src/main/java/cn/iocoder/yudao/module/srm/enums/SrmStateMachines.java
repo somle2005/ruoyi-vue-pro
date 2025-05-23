@@ -55,6 +55,8 @@ public interface SrmStateMachines {
     String PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE = "purchaseInItemPay";
     //到货单入库状态机
     String PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE = "purchaseInItemStorage";
+    //到货项退货状态机
+    String PURCHASE_OUT_ITEM_STORAGE_STATE_MACHINE = "purchaseOutItemStorage";
 
     // ========== SRM 退货单 ==========
     //审核
