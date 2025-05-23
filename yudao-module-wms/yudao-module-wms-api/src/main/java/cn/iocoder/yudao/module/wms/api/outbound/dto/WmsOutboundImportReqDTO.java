@@ -53,6 +53,11 @@ public class WmsOutboundImportReqDTO {
     private Long deptId;
 
     /**
+     * 仓库ID
+     */
+    private Long warehouseId;
+
+    /**
      * 出库时间
      */
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)

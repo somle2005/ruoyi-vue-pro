@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.api.purchase.machine.inItem;
+package cn.iocoder.yudao.module.srm.api.purchase.machine.outItem;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,10 +7,9 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class SrmPurchaseInItemCountDTO {
-
+public class SrmPurchaseOutItemCountDTO {
     //到货项ID
-    private Long inItemId;
+    private Long outItemId;
 
     //到货项差额
     private BigDecimal inCount;

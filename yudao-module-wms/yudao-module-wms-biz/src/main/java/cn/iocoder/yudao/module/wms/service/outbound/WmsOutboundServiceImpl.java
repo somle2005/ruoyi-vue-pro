@@ -12,6 +12,11 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.inItem.SrmPurchaseInItemCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutItemCountDTO;
+import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
+import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
+import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -57,6 +62,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -127,6 +133,9 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Resource(name = OutboundStateMachineConfigure.STATE_MACHINE_NAME)
     private StateMachine<Integer, WmsOutboundAuditStatus.Event, TransitionContext<WmsOutboundDO>> outboundStateMachine;
 
+//    @Resource(name = SrmStateMachines.PURCHASE_OUT_ITEM_STORAGE_STATE_MACHINE)
+//    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> purchaseOutCountDTOStateMachine;
+//
     /**
      * @sign : A523E13094CD30CE
      */
@@ -204,14 +213,14 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
 
         WmsOutboundSaveReqVO createReqVO = BeanUtils.toBean(importReqVO, WmsOutboundSaveReqVO.class);
         createReqVO.setId(null);
-        //设置入库单号
-        Long inboundId = importReqVO.getUpstreamBillId();
-        WmsInboundDO inbound = inboundMapper.selectById(inboundId);
-        if (inbound == null) {
-            throw exception(INBOUND_NOT_EXISTS);
-        }
-        WmsInboundRespVO inboundVO = inboundService.getInboundWithItemList(inboundId);
-        List<WmsOutboundItemSaveReqVO> itemList = BeanUtils.toBean(inboundVO.getItemList(), WmsOutboundItemSaveReqVO.class);
+//        //设置入库单号
+//        Long inboundId = importReqVO.getUpstreamBillId();
+//        WmsInboundDO inbound = inboundMapper.selectById(inboundId);
+//        if (inbound == null) {
+//            throw exception(INBOUND_NOT_EXISTS);
+//        }
+//        WmsInboundRespVO inboundVO = inboundService.getInboundWithItemList(inboundId);
+        List<WmsOutboundItemSaveReqVO> itemList = BeanUtils.toBean(importReqVO.getItemList(), WmsOutboundItemSaveReqVO.class);
         //查库位
         for(WmsOutboundItemSaveReqVO item : itemList) {
             //查询仓位库存表 规则1.根据后进先出筛选出最近入库批次 2.同一批次下，多个库位，根据自带优先级进行选择 3.该库位必须有足够货量
@@ -222,8 +231,8 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             item.setBinId(stockBin.getBinId());
         }
         createReqVO.setItemList(itemList);
-        createReqVO.setUpstreamBillCode(inbound.getCode());
-        createReqVO.setWarehouseId(inboundVO.getWarehouseId());
+        createReqVO.setUpstreamBillCode(importReqVO.getUpstreamBillCode());
+        createReqVO.setWarehouseId(importReqVO.getWarehouseId());
         WmsOutboundDO outboundDO = createOutbound(createReqVO);
         return BeanUtils.toBean(outboundDO, WmsOutboundRespVO.class);
     }
@@ -434,6 +443,17 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         // 处理出库单状态
         WmsOutboundDO outboundDO = BeanUtils.toBean(outboundRespVO, WmsOutboundDO.class);
         outboundMapper.updateById(outboundDO);
+        //处理出货单逻辑
+
+//        if (outboundRespVO.getUpstreamBillType() != null && outboundRespVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
+//            //触发出货单明细行 状态机
+//            //如果成功创建出库单-触发SRM入库数量联动
+//            outboundRespVO.getItemList().forEach(outItem -> {
+//                purchaseOutCountDTOStateMachine.fireEvent(SrmStorageStatus.ALL_IN_STORAGE
+//                        , SrmEventEnum.STOCK_ADJUSTMENT
+//                        , SrmPurchaseOutItemCountDTO.builder().outItemId(outItem.getUpstreamItemId()).outCount(BigDecimal.valueOf(outItem.getActualQty())).build());
+//            });
+//        }
     }
 
     @Override
