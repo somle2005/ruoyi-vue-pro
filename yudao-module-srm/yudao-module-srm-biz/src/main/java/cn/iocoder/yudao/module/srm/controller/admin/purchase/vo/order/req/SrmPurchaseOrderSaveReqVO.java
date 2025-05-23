@@ -213,7 +213,6 @@ public class SrmPurchaseOrderSaveReqVO {
 
         @Schema(description = "仓库编号")
         @DiffLogField(name = "仓库编号")
-        @NotNull(message = "仓库编号不能为空") //合并入库时必须要仓库ID
         private Long warehouseId; // 仓库编号
 
         @Schema(description = "交货日期")

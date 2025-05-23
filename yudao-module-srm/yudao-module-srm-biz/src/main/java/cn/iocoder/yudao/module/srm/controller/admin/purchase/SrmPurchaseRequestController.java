@@ -28,6 +28,7 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
+import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -69,6 +70,7 @@ public class SrmPurchaseRequestController {
     private final DeptApi deptApi;
     private final SrmSupplierService srmSupplierService;
     private final ErpProductUnitApi erpProductUnitApi;
+    private final WmsInboundApi wmsInboundApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建ERP采购申请单")
@@ -194,6 +196,10 @@ public class SrmPurchaseRequestController {
         Map<Long, SrmSupplierDO> supplierMap = srmSupplierService.getSupplierMap(convertSet(oldList, SrmPurchaseRequestDO::getSupplierId));
         //1.6 收集单位id map，从product里面
         Map<Long, ErpProductUnitDTO> unitMap = erpProductUnitApi.getProductUnitMap(productMap.values().stream().map(ErpProductDTO::getUnitId).collect(Collectors.toSet()));
+        //1.7 获取产品可售库存Map
+        //inItemIds
+        Set<Long> inItemIds = purchaseRequestItemMap.values().stream().flatMap(Collection::stream).map(SrmPurchaseRequestItemsDO::getProductId).collect(Collectors.toSet());
+//        wmsInboundApi.getInboundItemList(purchaseRequest.getCompanyId(), purchaseRequest.getItems().stream().map(SrmPurchaseRequestItemsDO::getProductId).collect(Collectors.toList()))
         //2 开始拼接
         return BeanUtils.toBean(oldList, SrmPurchaseRequestRespVO.class, purchaseRequest -> {
             //2.1 申请单填充

@@ -44,7 +44,7 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
      */
     private Integer status;
     /**
-     * 供应商编号
+     * 供应商编号(乙方)
      */
     private Long supplierId;
     /**
@@ -120,7 +120,7 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
      */
     private LocalDateTime auditTime;
     /**
-     * 财务主体id
+     * 财务主体id(采购公司，甲方)
      */
     private Long purchaseCompanyId;
     /**

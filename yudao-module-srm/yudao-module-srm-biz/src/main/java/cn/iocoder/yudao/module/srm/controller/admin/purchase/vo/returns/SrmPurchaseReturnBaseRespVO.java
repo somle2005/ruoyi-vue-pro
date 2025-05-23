@@ -184,6 +184,11 @@ public class SrmPurchaseReturnBaseRespVO {
         @NotNull(message = "产品数量不能为空")
         private BigDecimal qty;
 
+        //产品可售库存
+        @Schema(description = "仓库产品可售库存")
+        private BigDecimal sellableQty;
+
+
         @Schema(description = "产品单价，单位：元")
         private BigDecimal productPrice;
 

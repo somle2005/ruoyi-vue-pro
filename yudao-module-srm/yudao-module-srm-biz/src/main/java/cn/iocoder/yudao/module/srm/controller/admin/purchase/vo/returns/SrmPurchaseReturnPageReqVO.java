@@ -17,45 +17,41 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @ToString(callSuper = true)
 public class SrmPurchaseReturnPageReqVO extends PageParam {
 
-    public static final Integer REFUND_STATUS_NONE = 0;
-    public static final Integer REFUND_STATUS_PART = 1;
-    public static final Integer REFUND_STATUS_ALL = 2;
-
-    @Schema(description = "采购单编号", example = "XS001")
+    @Schema(description = "到货单")
     private String code;
 
-    @Schema(description = "供应商编号", example = "1724")
+    @Schema(description = "供应商编号")
     private Long supplierId;
 
     @Schema(description = "退货时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] returnTime;
 
-    @Schema(description = "备注", example = "你猜")
+    @Schema(description = "备注")
     private String remark;
 
-    @Schema(description = "退货状态", example = "2")
+    @Schema(description = "退货状态")
     private Integer status;
 
     @Schema(description = "创建者")
     private String creator;
 
-    @Schema(description = "产品编号", example = "1")
+    @Schema(description = "产品编号")
     private Long productId;
 
-    @Schema(description = "仓库编号", example = "1")
+    @Schema(description = "仓库编号")
     private Long warehouseId;
 
-    @Schema(description = "结算账号编号", example = "1")
+    @Schema(description = "结算账号编号")
     private Long accountId;
 
-    @Schema(description = "采购单号", example = "1")
+    @Schema(description = "采购单号")
     private String orderNo;
 
-    @Schema(description = "退款状态", example = "1")
+    @Schema(description = "退款状态")
     private Integer refundStatus;
 
-    @Schema(description = "是否可退款", example = "true")
+    @Schema(description = "是否可退款")
     private Boolean refundEnable; // 对应 refundStatus = [0, 1]
 
 }
