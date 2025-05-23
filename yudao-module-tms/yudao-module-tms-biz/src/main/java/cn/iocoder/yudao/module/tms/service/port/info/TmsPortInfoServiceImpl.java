@@ -32,6 +32,7 @@ public class TmsPortInfoServiceImpl implements TmsPortInfoService {
         // 插入
         TmsPortInfoDO portInfo = BeanUtils.toBean(createReqVO, TmsPortInfoDO.class);
         portInfoMapper.insert(portInfo);
+        //校验港口name 重复
         // 返回
         return portInfo.getId();
     }
@@ -40,6 +41,7 @@ public class TmsPortInfoServiceImpl implements TmsPortInfoService {
     public void updatePortInfo(TmsPortInfoSaveReqVO updateReqVO) {
         // 校验存在
         validatePortInfoExists(updateReqVO.getId());
+        //校验港口name 重复
         // 更新
         TmsPortInfoDO updateObj = BeanUtils.toBean(updateReqVO, TmsPortInfoDO.class);
         portInfoMapper.updateById(updateObj);

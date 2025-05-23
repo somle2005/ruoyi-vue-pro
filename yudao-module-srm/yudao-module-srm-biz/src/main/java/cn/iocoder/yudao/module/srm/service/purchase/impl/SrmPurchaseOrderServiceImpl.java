@@ -195,12 +195,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             //开关
             orderItemOffMachine.fireEvent(SrmOffStatus.OPEN, SrmEventEnum.OFF_INIT, orderItemDO);
             //付款
-            requestItemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT,
-                SrmPayCountDTO.builder().orderItemId(orderItemDO.getId()).build());
+            requestItemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, SrmPayCountDTO.builder().orderItemId(orderItemDO.getId()).build());
             //入库
-            requestItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT,
-                SrmOrderInCountDTO.builder().orderItemId(orderItemDO.getId()).build());
-            //            requestItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmInCountDTO.builder().orderItemId(orderItemDO.getId()).inCount(orderItemDO.getCount()).build());
+            requestItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmOrderInCountDTO.builder().orderItemId(orderItemDO.getId()).build());
             //执行
             requestItemExecutionMachine.fireEvent(SrmExecutionStatus.PENDING, SrmEventEnum.EXECUTION_INIT, orderItemDO);
         }

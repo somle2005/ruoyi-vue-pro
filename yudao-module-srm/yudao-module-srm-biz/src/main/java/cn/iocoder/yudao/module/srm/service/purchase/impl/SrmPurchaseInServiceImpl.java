@@ -14,6 +14,8 @@ import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
+import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
+import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPurchaseInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInAuditReqVO;
@@ -21,10 +23,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurcha
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPayReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInSaveReqVO;
 import cn.iocoder.yudao.module.srm.convert.purchase.SrmPurchaseInConvert;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.*;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInItemMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInMapper;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseReturnItemMapper;
@@ -37,6 +36,7 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
+import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInItemBO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
@@ -89,6 +89,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     private final FmsAccountApi erpAccountApi;
     private final SrmPurchaseReturnItemMapper srmPurchaseReturnItemMapper;
     private final WmsInboundApi wmsInboundApi;
+    private final SrmSupplierService supplierService;
     @Resource
     @Lazy // 延迟加载，避免循环依赖
     SrmPurchaseOrderService purchaseOrderService;
@@ -105,6 +106,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     private StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseInAuditReqVO> purchaseInAuditStateMachine;
     @Resource(name = PURCHASE_IN_STORAGE_STATE_MACHINE)
     private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> purchaseInStorageMachine;
+    @Autowired
+    private FmsCompanyApi fmsCompanyApi;
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
@@ -125,15 +128,16 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         validateOrderItemsCurrency(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
         // 1.4 校验结算账户
 //        erpAccountApi.validateAccount(vo.getAccountId());
-        //1.5 校验 同一个供应商  同一个采购公司,校验关联的orderItemId的采购订单 必须是同一个供应商+采购公司
-        // 1.4 生成入库单号，并校验唯一性
+        // 1.5 校验关联的采购订单项是否属于同一个供应商和采购公司
+        validateOrderItemsSupplierAndCompany(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
+        // 1.6 生成入库单号，并校验唯一性
         String no;
         if (vo.getCode() != null) {
-            // 1.4.1 手动输入编号
+            // 1.6.1 手动输入编号
             no = vo.getCode();
             validateAndUpdateCode(no, null);
         } else {
-            // 1.4.2 自动生成编号
+            // 1.6.2 自动生成编号
             no = noRedisDAO.generate(SrmNoRedisDAO.PURCHASE_IN_NO_PREFIX, PURCHASE_IN_NO_OUT_OF_BOUNDS);
             // 校验编号是否已存在
             ThrowUtil.ifThrow(purchaseInMapper.selectByNo(no) != null, PURCHASE_IN_NO_EXISTS);
@@ -274,13 +278,15 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         validateOrderItemsCurrency(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
         // 1.4 校验结算账户
 //        erpAccountApi.validateAccount(vo.getAccountId());
-        // 1.4 校验编号
+        // 1.5 校验关联的采购订单项是否属于同一个供应商和采购公司
+        validateOrderItemsSupplierAndCompany(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
+        // 1.6 校验编号
         if (vo.getCode() != null && !vo.getCode().equals(purchaseIn.getCode())) {
             validateAndUpdateCode(vo.getCode(), purchaseIn.getCode());
         }
-        // 1.5 校验订单项的有效性
+        // 1.7 校验订单项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
-        // 1.6 如果vo和旧item不同,则校验订单项到货数量是否超过采购订单的采购项入库数量
+        // 1.8 如果vo和旧item不同,则校验订单项到货数量是否超过采购订单的采购项入库数量
         validQtyWhenUpdate(vo);
 
         // 2.1 更新入库
@@ -880,5 +886,83 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                                 baseItem.getCurrencyName());
                     }
                 });
+    }
+
+    /**
+     * 校验关联的采购订单项是否属于同一个供应商和采购公司
+     *
+     * @param orderItemIds 采购订单项ID列表
+     */
+    private void validateOrderItemsSupplierAndCompany(List<Long> orderItemIds) {
+        if (CollUtil.isEmpty(orderItemIds)) {
+            return;
+        }
+
+        // 1. 获取所有采购订单项信息
+        List<SrmPurchaseOrderItemDO> orderItems = purchaseOrderService.getPurchaseOrderItemList(orderItemIds);
+        if (CollUtil.isEmpty(orderItems)) {
+            return;
+        }
+
+        // 2. 获取所有采购订单ID
+        Set<Long> orderIds = orderItems.stream()
+            .map(SrmPurchaseOrderItemDO::getOrderId)
+            .collect(Collectors.toSet());
+
+        // 3. 获取所有采购订单信息
+        List<SrmPurchaseOrderDO> orders = purchaseOrderService.getPurchaseOrderList(orderIds).stream().toList();
+        if (CollUtil.isEmpty(orders)) {
+            return;
+        }
+
+        // 4. 获取第一个采购订单的供应商和采购公司作为基准
+        SrmPurchaseOrderDO firstOrder = orders.get(0);
+        Long firstSupplierId = firstOrder.getSupplierId();
+        Long firstCompanyId = firstOrder.getPurchaseCompanyId();
+
+        // 5. 获取所有供应商信息
+        Set<Long> supplierIds = orders.stream().map(SrmPurchaseOrderDO::getSupplierId).collect(Collectors.toSet());
+        Map<Long, SrmSupplierDO> supplierMap = supplierService.getSupplierMap(supplierIds);
+
+        // 6. 遍历所有采购订单，分别检查供应商和采购公司是否一致
+        for (SrmPurchaseOrderDO order : orders) {
+            // 6.1 检查供应商是否一致
+            if (!firstSupplierId.equals(order.getSupplierId())) {
+                SrmSupplierDO supplier = supplierMap.get(order.getSupplierId());
+                if (supplier == null) {
+                    throw exception(SUPPLIER_NOT_EXISTS, order.getSupplierId());
+                }
+                // 找到对应的订单项
+                SrmPurchaseOrderItemDO orderItem = orderItems.stream()
+                    .filter(item -> item.getOrderId().equals(order.getId()))
+                    .findFirst()
+                    .orElse(null);
+                String orderItemInfo = orderItem != null ?
+                    String.format("订单项[%s-编号:%s]", orderItem.getProductName(), orderItem.getId()) :
+                    String.format("订单项ID[%s]", orderItemIds);
+                throw exception(PURCHASE_IN_ORDER_SUPPLIER_NOT_SAME,
+                    orderItemInfo, // 订单项信息
+                    supplier.getName(), // 不一致的供应商名称
+                    order.getCode()); // 不一致的采购订单编号
+            }
+
+            // 6.2 检查采购公司是否一致
+            if (!firstCompanyId.equals(order.getPurchaseCompanyId())) {
+                // 找到对应的订单项
+                SrmPurchaseOrderItemDO orderItem = orderItems.stream()
+                    .filter(item -> item.getOrderId().equals(order.getId()))
+                    .findFirst()
+                    .orElse(null);
+                String orderItemInfo = orderItem != null ?
+                    String.format("订单项[%s-编号:%s]", orderItem.getProductName(), orderItem.getId()) :
+                    String.format("订单项ID[%s]", orderItemIds);
+                //采购公司名称
+                FmsCompanyDTO fmsCompanyDTO = fmsCompanyApi.validateCompany(Set.of(order.getPurchaseCompanyId())).get(0);
+                throw exception(PURCHASE_IN_ORDER_COMPANY_NOT_SAME,
+                    orderItemInfo, // 订单项信息
+                    fmsCompanyDTO.getName(), // 不一致的采购公司名称
+                    order.getCode()); // 不一致的采购订单编号
+            }
+        }
     }
 }

@@ -13,12 +13,12 @@ import java.util.List;
 @Builder
 public class SrmPurchaseReturnAuditReqVO {
     @NotNull(groups = {Validation.OnSubmitAudit.class, Validation.OnAudit.class}, message = "退货单ids不能为空")
-    @Size(min = 1, groups = Validation.OnAudit.class, message = "退货单id审核时候只能传一个")
+    @Size(max = 1, groups = Validation.OnAudit.class, message = "退货单id审核时候只能传一个")
     @Schema(description = "退货单")
     private List<Long> ids;
 
     // 审核/反审核
-    @NotNull(groups = Validation.OnAudit.class, message = "审核状态不能为空")
+    @NotNull(groups = Validation.OnAudit.class, message = "审核是否通过布尔值不能为空")
     @Schema(description = "审核/反审核")
     private Boolean reviewed;
     //通过与否
