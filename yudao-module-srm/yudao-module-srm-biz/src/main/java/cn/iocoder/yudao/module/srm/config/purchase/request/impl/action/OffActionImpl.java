@@ -42,7 +42,7 @@ public class OffActionImpl implements Action<SrmOffStatus, SrmEventEnum, SrmPurc
     }
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void execute(SrmOffStatus from, SrmOffStatus to, SrmEventEnum event, SrmPurchaseRequestDO context) {
         validate(from, to, event, context);
         SrmPurchaseRequestDO aDo = mapper.selectById(context.getId());

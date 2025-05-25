@@ -146,4 +146,8 @@ public class SrmPurchaseReturnDO extends TenantBaseDO {
      * 退款状态
      */
     private Integer refundStatus;
+    /**
+     * 出库状态
+     */
+    private Integer outboundStatus;
 }

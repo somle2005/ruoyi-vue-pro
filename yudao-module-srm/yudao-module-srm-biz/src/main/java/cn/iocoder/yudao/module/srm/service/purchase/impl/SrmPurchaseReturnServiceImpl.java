@@ -372,7 +372,20 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         return convertList(list, o -> {
             // 4.1 从入库项复制基础信息
             SrmPurchaseInItemDO inItem = inItemMap.get(o.getInItemId());
-            SrmPurchaseReturnItemDO item = BeanUtils.toBean(inItem, SrmPurchaseReturnItemDO.class);
+            SrmPurchaseReturnItemDO item = new SrmPurchaseReturnItemDO(); // 创建新对象
+            // 手动复制需要的字段，避免复制 id
+            item.setProductId(inItem.getProductId())
+                .setProductName(inItem.getProductName())
+                .setProductPrice(inItem.getProductPrice())
+                .setTaxPercent(inItem.getTaxPercent())
+                .setProductUnitId(inItem.getProductUnitId())
+                .setProductUnitName(inItem.getProductUnitName())
+                .setWarehouseId(inItem.getWarehouseId())
+                .setBarCode(inItem.getBarCode())
+                .setDeclaredType(inItem.getDeclaredType())
+                .setDeclaredTypeEn(inItem.getDeclaredTypeEn())
+                .setContainerRate(inItem.getContainerRate())
+                .setActTaxPrice(inItem.getActTaxPrice());
 
             // 4.2 设置退货项特有信息
             item

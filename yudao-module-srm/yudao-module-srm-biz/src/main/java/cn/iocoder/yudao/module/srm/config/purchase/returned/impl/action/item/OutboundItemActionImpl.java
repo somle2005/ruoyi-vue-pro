@@ -1,0 +1,93 @@
+package cn.iocoder.yudao.module.srm.config.purchase.returned.impl.action.item;
+
+
+import cn.iocoder.yudao.framework.cola.statemachine.Action;
+import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutItemCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutMachineDTO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
+import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInItemMapper;
+import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderItemMapper;
+import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseReturnItemMapper;
+import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
+import cn.iocoder.yudao.module.srm.enums.status.SrmOutboundStatus;
+import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
+import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
+import java.util.Map;
+
+import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN_OUT_STORAGE_STATE_MACHINE_NAME;
+
+@Slf4j
+@Component
+public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> {
+
+    @Resource(name = PURCHASE_RETURN_OUT_STORAGE_STATE_MACHINE_NAME)
+    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineDTO> stateMachine;
+    @Autowired
+    private SrmPurchaseReturnItemMapper srmPurchaseReturnItemMapper;
+    @Autowired
+    @Lazy
+    private SrmPurchaseOrderService srmPurchaseOrderService;
+    @Autowired
+    private SrmPurchaseInItemMapper srmPurchaseInItemMapper;
+    @Autowired
+    private SrmPurchaseOrderItemMapper srmPurchaseOrderItemMapper;
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void execute(SrmOutboundStatus from, SrmOutboundStatus to, SrmEventEnum event, SrmPurchaseOutItemCountDTO context) {
+        SrmPurchaseReturnItemDO returnItemDO = srmPurchaseReturnItemMapper.selectById(context.getOutItemId());
+
+        if (event == SrmEventEnum.RETURN_ADJUSTMENT) {
+            if (context.getOutCount() == null) {
+                throw new IllegalArgumentException("退货数量调整事件下，dto退货数量不能为空");
+            }
+            //实际退货数量
+            BigDecimal outboundQty = returnItemDO.getOutboundQty();
+            if (outboundQty == null) {
+                outboundQty = BigDecimal.ZERO;
+            }
+            BigDecimal changedOutboundQty = outboundQty.add(context.getOutCount());
+            //计划退货数量
+            BigDecimal qty = returnItemDO.getQty();
+
+            // 根据实际退货数量确定状态
+            if (changedOutboundQty.compareTo(BigDecimal.ZERO) <= 0) {
+                // 实际退货数量为0或负数，设置为未出库状态
+                to = SrmOutboundStatus.NONE_OUTBOUND;
+            } else if (changedOutboundQty.compareTo(qty) >= 0) {
+                // 实际退货数量大于等于计划数量，设置为已出库状态
+                to = SrmOutboundStatus.ALL_OUTBOUND;
+            } else {
+                // 实际退货数量小于计划数量，设置为部分出库状态
+                to = SrmOutboundStatus.PARTIALLY_OUTBOUND;
+            }
+            returnItemDO.setOutboundQty(changedOutboundQty);
+            // 1.0 传递给主单
+            stateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.ORDER_ADJUSTMENT, SrmPurchaseOutMachineDTO.builder().returnId(returnItemDO.getReturnId()).build());
+            // 2.0 传给订单项，同步当前的退货数量给订单项(暂不使用状态机)
+            toOrderReturnCount(returnItemDO);
+        }
+
+        srmPurchaseReturnItemMapper.updateById(returnItemDO.setOutboundStatus(to.getCode()));//更新状态
+        //log
+        log.debug("子项退货状态机触发({})事件：对象outItemId={}，状态 {} -> {}", event.getDesc(), returnItemDO.getId(), from.getDesc(), to.getDesc());
+    }
+
+    private void toOrderReturnCount(SrmPurchaseReturnItemDO returnItemDO) {
+        //到货项 -> 订单项
+        SrmPurchaseInItemDO inItemDO = srmPurchaseInItemMapper.selectById(returnItemDO.getInItemId());
+        SrmPurchaseOrderItemDO srmPurchaseOrderItemDO = srmPurchaseOrderItemMapper.selectById(inItemDO.getOrderItemId());
+        srmPurchaseOrderService.updatePurchaseOrderReturnCount(srmPurchaseOrderItemDO.getOrderId(), Map.of(returnItemDO.getInItemId(), returnItemDO.getOutboundQty()));
+//        srmPurchaseOrderService.updatePurchaseOrderReturnCount();
+    }
+}

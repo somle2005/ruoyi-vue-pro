@@ -13,7 +13,6 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseRequestItemsMap
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmExecutionStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmOffStatus;
-import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -150,9 +149,10 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
 
     private void checkStatusAndClose(Long orderItemId) {
         SrmPurchaseOrderItemDO orderItemDO = itemMapper.selectById(orderItemId);
-        if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()) && Objects.equals(orderItemDO.getPayStatus(),
-            SrmPaymentStatus.ALL_PAYMENT.getCode())) {
-            // 当前订单项，完全入库 + 完全付款 -> 关闭订单项
+        // 当前订单项，完全入库 + 完全付款 -> 关闭订单项
+        //&& Objects.equals(orderItemDO.getPayStatus(),SrmPaymentStatus.ALL_PAYMENT.getCode())
+        if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode())) {
+            // 当前订单项，完全入库  -> 关闭订单项
             purchaseOrderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, orderItemDO);
         }
     }

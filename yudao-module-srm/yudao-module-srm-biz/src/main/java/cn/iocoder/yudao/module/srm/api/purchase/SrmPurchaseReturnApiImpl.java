@@ -1,17 +1,24 @@
 package cn.iocoder.yudao.module.srm.api.purchase;
 
+import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnItemDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutItemCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
+import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
+import cn.iocoder.yudao.module.srm.enums.status.SrmOutboundStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME;
 
 /**
  * 采购退货单 API 实现类
@@ -22,6 +29,8 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
 
     @Resource
     private SrmPurchaseReturnService purchaseReturnService;
+    @Resource(name = PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME)
+    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> stateMachine;
 
     @Override
     public List<SrmPurchaseReturnDTO> getPurchaseReturnList(List<Long> ids) {
@@ -91,4 +100,10 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
         dto.setApplicationDeptId(item.getApplicationDeptId());
         return dto;
     }
-} 
+
+
+    @Override
+    public void updatePurchaseReturnItemQty(Long returnItemId, BigDecimal qty) {
+        stateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.OUT_STORAGE_ADJUSTMENT, SrmPurchaseOutItemCountDTO.builder().outItemId(returnItemId).outCount(qty).build());
+    }
+}

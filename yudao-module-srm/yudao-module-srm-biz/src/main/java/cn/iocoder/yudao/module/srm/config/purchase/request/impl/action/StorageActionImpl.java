@@ -27,7 +27,7 @@ public class StorageActionImpl implements Action<SrmStorageStatus, SrmEventEnum,
     SrmPurchaseRequestMapper requestMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmPurchaseRequestDO context) {
         //如果所有的子项都是已入库，则主单已入库
         SrmPurchaseRequestDO requestDO = requestMapper.selectById(context.getId());

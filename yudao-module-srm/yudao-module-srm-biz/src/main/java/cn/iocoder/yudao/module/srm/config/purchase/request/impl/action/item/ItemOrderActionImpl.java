@@ -46,7 +46,7 @@ public class ItemOrderActionImpl implements Action<SrmOrderStatus, SrmEventEnum,
     private SrmPurchaseRequestItemsMapper itemsMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void execute(SrmOrderStatus from, SrmOrderStatus to, SrmEventEnum event, SrmQuantityOrderedCountDTO context) {
         //更新采购申请项的下单数量
         //更新采购申请项的采购状态(暂无)

@@ -38,7 +38,7 @@ public class ItemOffActionImpl implements Action<SrmOffStatus, SrmEventEnum, Srm
     private StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseRequestDO> machine;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void execute(SrmOffStatus from, SrmOffStatus to, SrmEventEnum event, SrmPurchaseRequestItemsDO context) {
         // 查询当前 Item
         SrmPurchaseRequestItemsDO itemsDO = mapper.selectById(context.getId());

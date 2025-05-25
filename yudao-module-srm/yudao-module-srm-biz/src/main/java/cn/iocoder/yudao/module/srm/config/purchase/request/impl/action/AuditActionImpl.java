@@ -39,7 +39,7 @@ public class AuditActionImpl implements Action<SrmAuditStatus, SrmEventEnum, Srm
     private SrmPurchaseOrderItemMapper srmPurchaseOrderItemMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void execute(SrmAuditStatus from, SrmAuditStatus to, SrmEventEnum event, SrmPurchaseRequestAuditReqVO req) {
         SrmPurchaseRequestDO data = mapper.selectById(req.getRequestId());
         List<SrmPurchaseRequestItemsDO> itemsDOS = itemsMapper.selectListByRequestId(req.getRequestId());
