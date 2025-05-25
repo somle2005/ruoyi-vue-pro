@@ -25,7 +25,6 @@ public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> 
             .eqIfPresent(SrmPurchaseOrderDO::getTotalTaxPrice, vo.getTotalTaxPrice())
             .eqIfPresent(SrmPurchaseOrderDO::getDiscountPercent, vo.getDiscountPercent())
             .eqIfPresent(SrmPurchaseOrderDO::getDiscountPrice, vo.getDiscountPrice())
-            .eqIfPresent(SrmPurchaseOrderDO::getDepositPrice, vo.getDepositPrice()).eqIfPresent(SrmPurchaseOrderDO::getFileUrl, vo.getFileUrl())
             .eqIfPresent(SrmPurchaseOrderDO::getRemark, vo.getRemark()).eqIfPresent(SrmPurchaseOrderDO::getTotalInCount, vo.getTotalInCount())
             .eqIfPresent(SrmPurchaseOrderDO::getTotalReturnCount, vo.getTotalReturnCount())
             .betweenIfPresent(SrmPurchaseOrderDO::getBillTime, vo.getBillTime()).betweenIfPresent(SrmPurchaseOrderDO::getCreateTime, vo.getCreateTime())
