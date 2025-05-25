@@ -85,6 +85,9 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
     }
 
     default PageResult<SrmPurchaseReturnItemBO> selectBOPage(SrmPurchaseReturnPageReqVO vo) {
+        if (vo == null) {
+            vo = new SrmPurchaseReturnPageReqVO();
+        }
         MPJLambdaWrapper<SrmPurchaseReturnItemDO> wrapper = buildBOWrapper(vo).selectAssociation(SrmPurchaseReturnDO.class, SrmPurchaseReturnItemBO::getSrmPurchaseReturnDO);
         return selectJoinPage(vo, SrmPurchaseReturnItemBO.class, wrapper);
     }

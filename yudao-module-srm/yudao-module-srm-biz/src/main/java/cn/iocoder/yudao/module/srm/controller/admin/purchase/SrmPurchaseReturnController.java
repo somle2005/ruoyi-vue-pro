@@ -192,11 +192,15 @@ public class SrmPurchaseReturnController {
             convertSet(list.stream().flatMap(returnDO -> returnDO.getSrmPurchaseReturnItemDOs().stream()).collect(Collectors.toList()),
                 SrmPurchaseReturnItemDO::getWarehouseId));
 
+        //MAP
+        Map<Long, List<SrmPurchaseReturnItemDO>> returnItemMap = list.stream()
+            .flatMap(returnDO -> returnDO.getSrmPurchaseReturnItemDOs().stream())
+            .collect(Collectors.groupingBy(SrmPurchaseReturnItemDO::getReturnId));
         // 2. 开始拼接
         return BeanUtils.toBean(list, SrmPurchaseReturnBaseRespVO.class, purchaseReturn -> {
             // 2.1 设置退货项
             List<SrmPurchaseReturnBaseRespVO.Item> items = BeanUtils.toBean(
-                purchaseReturn.getItems(),
+                returnItemMap.get(purchaseReturn.getId()),
                 SrmPurchaseReturnBaseRespVO.Item.class,
                 item -> {
                     // 2.1.1 设置仓库信息
