@@ -31,7 +31,7 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .eqIfPresent(SrmPurchaseOrderItemDO::getApplicantId, reqVO.getApplicantId()) // 申请人ID
             .eqIfPresent(SrmPurchaseOrderItemDO::getApplicationDeptId, reqVO.getApplicationDeptId()) // 申请部门ID
             .eqIfPresent(SrmPurchaseOrderItemDO::getXcode, reqVO.getXCode()) // X码
-            .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
+            .likeIfPresent(SrmPurchaseOrderItemDO::getContainerRate, reqVO.getContainerRate()) // 箱率
             ;
     }
 
@@ -73,7 +73,8 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .likeIfPresent(SrmPurchaseOrderDO::getAddress, reqVO.getAddress()) // 收货地址
             .likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, reqVO.getPaymentTerms()) // 付款条款
             .eqIfPresent(SrmPurchaseOrderDO::getOrderStatus, reqVO.getOrderStatus()) // 订单状态
-            .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
+            .likeIfPresent(SrmPurchaseOrderDO::getCode, reqVO.getPurchaseApplyCode()) // 原单单号
+            .eqIfPresent(SrmPurchaseOrderDO::getCreator, reqVO.getCreator())
             ;
     }
 

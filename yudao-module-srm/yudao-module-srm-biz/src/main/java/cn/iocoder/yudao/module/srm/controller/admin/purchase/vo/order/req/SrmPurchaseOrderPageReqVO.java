@@ -51,9 +51,6 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     @Schema(description = "定金金额，单位：元")
     private BigDecimal depositPrice;
 
-    @Schema(description = "附件地址")
-    private String fileUrl;
-
     @Schema(description = "备注")
     private String remark;
 
