@@ -615,9 +615,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
     @Override
     public SrmPurchaseInBO getPurchaseInBOById(Long id) {
-        SrmPurchaseInItemBO srmPurchaseInItemBO = purchaseInItemMapper.selectBOById(id);
-        List<SrmPurchaseInBO> srmPurchaseInBOS = SrmPurchaseInConvert.INSTANCE.convertList(List.of(srmPurchaseInItemBO));
-        return srmPurchaseInBOS.get(0);
+        SrmPurchaseInDO purchaseInDO = purchaseInMapper.selectById(id);
+        List<SrmPurchaseInItemDO> itemDOS = purchaseInItemMapper.selectListByInId(purchaseInDO.getId());
+        SrmPurchaseInBO bean = BeanUtils.toBean(purchaseInDO, SrmPurchaseInBO.class);
+        bean.setSrmPurchaseInItemDOS(itemDOS);
+        return bean;
     }
 // ==================== 采购入库项 ====================
 
