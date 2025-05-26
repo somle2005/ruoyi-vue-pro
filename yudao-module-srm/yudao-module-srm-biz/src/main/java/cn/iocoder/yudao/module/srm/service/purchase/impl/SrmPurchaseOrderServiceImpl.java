@@ -768,7 +768,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Transactional(rollbackFor = Exception.class)
     public void merge(SrmPurchaseOrderMergeReqVO reqVO) {
         // 校验
-        for (SrmPurchaseOrderMergeReqVO.item item : reqVO.getItems()) {
+        for (SrmPurchaseOrderMergeReqVO.Item item : reqVO.getItems()) {
             Long itemId = item.getItemId();
             SrmPurchaseOrderItemDO aDo = validatePurchaseOrderItemExists(itemId);
             SrmPurchaseOrderDO order = getPurchaseOrder(aDo.getOrderId());
@@ -777,12 +777,12 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
 //            ThrowUtil.ifThrow(!Objects.equals(aDo.getOffStatus(), SrmOffStatus.OPEN.getCode()), PURCHASE_ORDER_ITEM_NOT_OPEN, itemId);
             ThrowUtil.ifThrow(Objects.equals(aDo.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()), PURCHASE_ORDER_IN_ITEM_NOT_OPEN, itemId);
         }
-        List<Long> itemIds = reqVO.getItems().stream().map(SrmPurchaseOrderMergeReqVO.item::getItemId).collect(Collectors.toList());
+        List<Long> itemIds = reqVO.getItems().stream().map(SrmPurchaseOrderMergeReqVO.Item::getItemId).collect(Collectors.toList());
         List<SrmPurchaseOrderItemDO> orderItemDOS = purchaseOrderItemMapper.selectListByItemIds(itemIds);
 
         // 1. 构建 itemId -> qty 的映射
         Map<Long, BigDecimal> itemIdToQtyMap = reqVO.getItems().stream()
-            .collect(Collectors.toMap(SrmPurchaseOrderMergeReqVO.item::getItemId, SrmPurchaseOrderMergeReqVO.item::getQty));
+            .collect(Collectors.toMap(SrmPurchaseOrderMergeReqVO.Item::getItemId, SrmPurchaseOrderMergeReqVO.Item::getQty));
 
         // 2. 转换并赋值到货数量
         List<SrmPurchaseInSaveReqVO.Item> inItems = SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS);
