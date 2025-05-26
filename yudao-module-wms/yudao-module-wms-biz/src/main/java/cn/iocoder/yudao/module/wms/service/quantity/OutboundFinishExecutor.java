@@ -79,6 +79,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
     /**
      * 更新入库单库存
      */
+    @Override
     protected List<WmsInboundItemFlowDO> processInboundItem(WmsOutboundRespVO outboundRespVO, WmsOutboundItemRespVO item, Long companyId, Long deptId, Long warehouseId, Long binId, Long productId, Integer quantity, Long outboundId, Long outboundItemId) {
 
         List<WmsInboundItemFlowDO> flowDOList = inboundItemFlowService.selectByActionId(outboundRespVO.getLatestOutboundActionId());

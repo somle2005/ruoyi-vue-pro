@@ -107,7 +107,7 @@ public class WmsPickupController {
     @PostMapping("/page")
     @Operation(summary = "获得拣货单分页")
     @PreAuthorize("@ss.hasPermission('wms:pickup:query')")
-    public CommonResult<PageResult<WmsPickupRespVO>> getPickupPage(@Valid WmsPickupPageReqVO pageReqVO) {
+    public CommonResult<PageResult<WmsPickupRespVO>> getPickupPage(@Valid @RequestBody WmsPickupPageReqVO pageReqVO) {
         // 查询数据
         PageResult<WmsPickupDO> doPageResult = pickupService.getPickupPage(pageReqVO);
         // 转换

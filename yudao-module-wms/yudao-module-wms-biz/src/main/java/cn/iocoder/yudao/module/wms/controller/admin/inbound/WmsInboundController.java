@@ -149,7 +149,7 @@ public class WmsInboundController {
     @PostMapping("/page")
     @Operation(summary = "获得入库单分页")
     @PreAuthorize("@ss.hasPermission('wms:inbound:query')")
-    public CommonResult<PageResult<WmsInboundRespVO>> getInboundPage(@Valid WmsInboundPageReqVO pageReqVO) {
+    public CommonResult<PageResult<WmsInboundRespVO>> getInboundPage(@Valid @RequestBody WmsInboundPageReqVO pageReqVO) {
         // 查询数据
         PageResult<WmsInboundDO> doPageResult = inboundService.getInboundPage(pageReqVO);
         // 转换
