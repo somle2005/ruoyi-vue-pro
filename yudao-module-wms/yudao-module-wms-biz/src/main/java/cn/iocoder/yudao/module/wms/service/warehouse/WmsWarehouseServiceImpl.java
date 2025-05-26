@@ -142,6 +142,7 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
     /**
      * @sign : 8F00B204E9800998
      */
+    @Override
     public WmsWarehouseDO validateWarehouseExists(Long id) {
         WmsWarehouseDO warehouse = warehouseMapper.selectById(id);
         if (warehouse == null) {
@@ -163,6 +164,7 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
     /**
      * 按 externalStorageId 查询 WmsWarehouseDO
      */
+    @Override
     public List<WmsWarehouseDO> selectByExternalStorageId(Long externalStorageId, int limit) {
         return warehouseMapper.selectByExternalStorageId(externalStorageId, limit);
     }

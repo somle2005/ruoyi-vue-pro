@@ -195,6 +195,7 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     /**
      * @sign : CCF673C00F6357F0
      */
+    @Override
     public WmsInventoryDO validateInventoryExists(Long id) {
         WmsInventoryDO inventory = inventoryMapper.selectById(id);
         if (inventory == null) {
@@ -216,6 +217,7 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     /**
      * 按 ID 集合查询 WmsInventoryDO
      */
+    @Override
     public List<WmsInventoryDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();
