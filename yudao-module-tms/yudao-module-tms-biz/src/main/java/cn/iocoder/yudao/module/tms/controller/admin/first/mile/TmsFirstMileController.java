@@ -79,7 +79,6 @@ public class TmsFirstMileController {
     @Operation(summary = "创建头程单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:create')")
     public CommonResult<Long> createFirstMile(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileSaveReqVO vo) {
-        vo.initId(); //初始化上游ID
         return success(firstMileService.createFirstMile(vo));
     }
 
@@ -87,7 +86,6 @@ public class TmsFirstMileController {
     @Operation(summary = "更新头程单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:update')")
     public CommonResult<Boolean> updateFirstMile(@Validated(Validation.OnUpdate.class) @RequestBody TmsFirstMileSaveReqVO vo) {
-        vo.initId(); //初始化上游ID
         firstMileService.updateFirstMile(vo);
         return success(true);
     }
@@ -117,7 +115,7 @@ public class TmsFirstMileController {
     @PostMapping("/page")
     @Operation(summary = "获得头程单分页")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
-    public CommonResult<PageResult<TmsFirstMileRespVO>> getFirstMilePage(@Valid @RequestBody TmsFirstMilePageReqVO pageReqVO) {
+    public CommonResult<PageResult<TmsFirstMileRespVO>> getFirstMilePage(@Valid @RequestBody(required = false) TmsFirstMilePageReqVO pageReqVO) {
         PageResult<TmsFirstMileBO> pageResult = firstMileService.getFirstMileBOPage(pageReqVO);
         return success(new PageResult<>(bindResult(pageResult.getList()), pageResult.getTotal()));
     }

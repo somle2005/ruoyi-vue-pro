@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.api.first.mile.request.FistMileRequestItemDTO;
@@ -19,6 +20,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstM
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingSaveReqVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
@@ -59,6 +61,7 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_AUDIT_STATE_MACHINE;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE;
+import static jodd.util.StringUtil.truncate;
 
 /**
  * 头程单 Service 实现类
@@ -108,7 +111,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             subType = LogRecordConstants.TMS_FIRST_MILE_CREATE_SUB_TYPE,
             bizNo = "{{#id}}",
             success = "创建了头程单【{{#vo.code}}】")
-    public Long createFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
+    public Long createFirstMile(@Validated(Validation.OnCreate.class) TmsFirstMileSaveReqVO vo) {
 
         //1.0 校验
         warehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
@@ -127,7 +130,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         firstMileMapper.insert(firstMile);
 
         Long firstMileId = firstMile.getId();
-        vo.initId(); //初始化上游ID
 
         // 保存头程明细
         createFirstMileItemList(firstMileId, vo.getFirstMileItems());
@@ -135,7 +137,12 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         // 保存费用项
         createFeeList(firstMileId, BeanUtils.toBean(vo.getFees(), TmsFeeSaveReqVO.class));
         // 保存船期信息
-        tmsVesselTrackingService.createVesselTracking(vo.getVesselTracking());
+        try {
+//            tmsVesselTrackingService.createVesselTracking(vo.getVesselTracking().setUpstreamId(firstMileId));
+            tmsVesselTrackingService.createVesselTracking(BeanUtils.toBean(vo.getVesselTracking().setUpstreamId(firstMileId), TmsVesselTrackingSaveReqVO.class));
+        } catch (Exception e) {
+            throw exception(FIRST_MILE_CREATE_FAIL, truncate(e.getMessage(), 200));
+        }
 
         auditStateMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, TmsFirstMileAuditReqVO.builder().id(firstMileId).build());
         //
@@ -360,6 +367,10 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         });
     }
 
+    /**
+     * @param firstMileId 上游ID
+     * @param list        list
+     */
     private void updateFirstMileItemList(Long firstMileId, List<TmsFirstMileItemSaveReqVO> list) {
         if (CollUtil.isEmpty(list)) {
             return;
@@ -425,6 +436,10 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         feeService.createFeeList(feeList, BillType.TMS_FIRST_MILE.getValue());
     }
 
+    /**
+     * @param sourceId 上游ID
+     * @param list     list
+     */
     private void updateFeeList(Long sourceId, List<TmsFeeSaveReqVO> list) {
         if (CollUtil.isEmpty(list)) {
             return;

@@ -56,6 +56,7 @@ public interface TmsErrorCodeConstants {
     ErrorCode FIRST_MILE_ITEM_LIST_NOT_EMPTY = new ErrorCode(1_030_670_013, "头程单明细列表不能为空");
     ErrorCode FIRST_MILE_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_670_014, "头程单({})状态为({})，不允许修改");
     ErrorCode FIRST_MILE_DELETE_FAIL_APPROVE = new ErrorCode(1_030_670_015, "头程单({})状态为({})，不允许删除");
+    ErrorCode FIRST_MILE_CREATE_FAIL = new ErrorCode(1_030_670_016, "头程单创建子项失败，原因({})");
 
     // ========== 出运订单费用明细 1_030_902_008 ==========
     ErrorCode FEE_NOT_EXISTS = new ErrorCode(1_030_670_008, "费用不存在");

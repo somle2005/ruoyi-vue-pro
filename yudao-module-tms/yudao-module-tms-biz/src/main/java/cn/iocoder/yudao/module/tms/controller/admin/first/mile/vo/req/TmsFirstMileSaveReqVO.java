@@ -106,6 +106,12 @@ public class TmsFirstMileSaveReqVO {
     @DiffLogField(name = "备注")
     private String remark;
 
+    @Schema(description = "出口公司ID")
+    private Long exportCompanyId;
+
+    @Schema(description = "中转公司ID")
+    private Long transitCompanyId;
+
     @Schema(description = "版本号")
     @NotNull(groups = {Validation.OnUpdate.class}, message = "更新时版本号不能为空")
     private Integer revision;
@@ -143,7 +149,7 @@ public class TmsFirstMileSaveReqVO {
         private final Integer upstreamType = BillType.TMS_FIRST_MILE.getValue();
 
         @Schema(description = "上游业务单ID，如调拨单ID(前端不填入)")
-        @Null(message = "上游业务单ID必须为空，前端创建头程时不传递")
+        @Null(groups = {Validation.OnCreate.class}, message = "上游业务单ID必须为空，前端创建头程时不传递")
         private Long upstreamId;
     }
 
@@ -153,7 +159,7 @@ public class TmsFirstMileSaveReqVO {
         private final Integer sourceType = BillType.TMS_FIRST_MILE.getValue();
 
         @Schema(description = "上游业务单ID，如调拨单ID(前端不填入)")
-        @Null(message = "上游业务单ID必须为空，前端创建头程时不传递")
+        @Null(groups = {Validation.OnCreate.class}, message = "上游业务单ID必须为空，前端创建头程时不传递")
         private Long sourceId;
     }
 }

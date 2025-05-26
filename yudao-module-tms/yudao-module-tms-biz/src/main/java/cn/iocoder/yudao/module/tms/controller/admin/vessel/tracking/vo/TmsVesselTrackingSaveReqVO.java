@@ -20,7 +20,7 @@ public class TmsVesselTrackingSaveReqVO {
     private Integer upstreamType;
 
     @Schema(description = "上游业务单ID，如调拨单ID", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotNull(message = "上游业务单ID，如调拨单ID不能为空")
+    @NotNull(message = "出运跟踪信息上游单据ID不能为空")
     private Long upstreamId;
 
     @Schema(description = "预计到港时间（ETA）")
