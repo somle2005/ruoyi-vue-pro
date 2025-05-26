@@ -58,6 +58,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.system.enums.somle.BillType.SRM_PURCHASE_RETURN;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 /**
@@ -174,9 +175,11 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         if (warehouseIdSetOfBin.size() != 1) {
             throw exception(OUTBOUND_WAREHOUSE_ERROR);
         }
-        Long warehouseId = StreamX.from(warehouseIdSetOfBin).first();
-        if (!Objects.equals(warehouseId, outboundDO.getWarehouseId())) {
-            throw exception(OUTBOUND_WAREHOUSE_ERROR);
+        if(!outboundDO.getUpstreamBillType().equals(SRM_PURCHASE_RETURN.getValue())) {
+            Long warehouseId = StreamX.from(warehouseIdSetOfBin).first();
+            if (!Objects.equals(warehouseId, outboundDO.getWarehouseId())) {
+                throw exception(OUTBOUND_WAREHOUSE_ERROR);
+            }
         }
         Map<Long, Map<Long, WmsStockBinDO>> binMap = stockBinService.getStockBinMap(binIdList, StreamX.from(itemList).toList(WmsOutboundItemDO::getProductId));
         // 校验仓位库存
@@ -201,10 +204,10 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
      * 处理从外部模块发起的出库申请单
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public WmsOutboundRespVO generateOutbound(WmsOutboundImportReqVO importReqVO) {
 
         WmsOutboundSaveReqVO createReqVO = BeanUtils.toBean(importReqVO, WmsOutboundSaveReqVO.class);
-        createReqVO.setId(null);
 //        //设置入库单号
 //        Long inboundId = importReqVO.getUpstreamBillId();
 //        WmsInboundDO inbound = inboundMapper.selectById(inboundId);
@@ -216,7 +219,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         //查库位
         for(WmsOutboundItemSaveReqVO item : itemList) {
             //查询仓位库存表 规则1.根据后进先出筛选出最近入库批次 2.同一批次下，多个库位，根据自带优先级进行选择 3.该库位必须有足够货量
-            WmsStockBinDO stockBin = stockBinMapper.selectByProductId(item.getProductId(), item.getPlanQty());
+            WmsStockBinDO stockBin = stockBinMapper.selectByProductId(item.getProductId(), item.getPlanQty(), importReqVO.getWarehouseId());
             if(stockBin == null) {
                 throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, item.getProductId());
             }

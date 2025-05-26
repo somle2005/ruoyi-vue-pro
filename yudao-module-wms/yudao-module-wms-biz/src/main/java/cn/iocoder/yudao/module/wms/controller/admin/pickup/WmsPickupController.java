@@ -104,7 +104,7 @@ public class WmsPickupController {
     /**
      * @sign : 5D5029FCDD560031
      */
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得拣货单分页")
     @PreAuthorize("@ss.hasPermission('wms:pickup:query')")
     public CommonResult<PageResult<WmsPickupRespVO>> getPickupPage(@Valid WmsPickupPageReqVO pageReqVO) {

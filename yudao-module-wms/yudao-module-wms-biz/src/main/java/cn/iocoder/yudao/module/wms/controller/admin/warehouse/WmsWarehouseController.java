@@ -108,7 +108,7 @@ public class WmsWarehouseController {
     /**
      * @sign : 225F7C4E91ACF511
      */
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得仓库分页")
     @PreAuthorize("@ss.hasPermission('wms:warehouse:query')")
     public CommonResult<PageResult<WmsWarehouseRespVO>> getWarehousePage(@Valid WmsWarehousePageReqVO pageReqVO) {

@@ -146,7 +146,7 @@ public class WmsInboundController {
     /**
      * @sign : 1F430B4B7632C52B
      */
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得入库单分页")
     @PreAuthorize("@ss.hasPermission('wms:inbound:query')")
     public CommonResult<PageResult<WmsInboundRespVO>> getInboundPage(@Valid WmsInboundPageReqVO pageReqVO) {
@@ -191,4 +191,4 @@ public class WmsInboundController {
         // 导出 Excel
         ExcelUtils.write(response, "入库单.xls", "数据", WmsInboundRespVO.class, BeanUtils.toBean(list, WmsInboundRespVO.class));
     }
-}
+}

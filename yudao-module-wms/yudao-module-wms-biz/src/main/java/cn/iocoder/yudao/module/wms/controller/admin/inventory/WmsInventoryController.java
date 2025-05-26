@@ -121,7 +121,7 @@ public class WmsInventoryController {
     /**
      * @sign : B1908BBFDE62B4FB
      */
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得盘点分页")
     @PreAuthorize("@ss.hasPermission('wms:inventory:query')")
     public CommonResult<PageResult<WmsInventoryRespVO>> getInventoryPage(@Valid WmsInventoryPageReqVO pageReqVO) {
