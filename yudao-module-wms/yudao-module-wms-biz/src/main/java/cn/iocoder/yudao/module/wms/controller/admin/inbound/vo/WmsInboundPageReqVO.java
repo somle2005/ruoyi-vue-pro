@@ -53,11 +53,11 @@ public class WmsInboundPageReqVO extends PageParam {
 
     @Schema(description = "实际到货时间", example = "")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime arrivalActualTime;
+    private LocalDateTime[] arrivalActualTime;
 
     @Schema(description = "预计到货时间", example = "")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime arrivalPlanTime;
+    private LocalDateTime[] arrivalPlanTime;
 
     @Schema(description = "入库时间", example = "")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
