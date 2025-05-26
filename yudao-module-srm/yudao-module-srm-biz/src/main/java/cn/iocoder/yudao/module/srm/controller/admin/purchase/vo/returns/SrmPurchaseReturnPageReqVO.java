@@ -84,6 +84,9 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
 
         @Schema(description = "创建人")
         private Long creator;
+
+        @Schema(description = "出库状态")
+        private Integer outboundStatus;
     }
 
     @Data
@@ -147,5 +150,8 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
 
         @Schema(description = "产品名称")
         private String productName;
+
+        @Schema(description = "出库状态")
+        private Integer outboundStatus;
     }
 }

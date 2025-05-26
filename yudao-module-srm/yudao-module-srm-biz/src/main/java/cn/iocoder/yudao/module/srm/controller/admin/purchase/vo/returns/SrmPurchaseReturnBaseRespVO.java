@@ -117,6 +117,9 @@ public class SrmPurchaseReturnBaseRespVO {
     @Schema(description = "已退款金额，单位：元")
     private BigDecimal refundPrice;
 
+    @Schema(description = "出库状态")
+    private Integer outboundStatus;
+
     // ========== 物理信息 ==========
     @Schema(description = "总毛重，单位：kg")
     private BigDecimal totalWeight;
@@ -221,6 +224,9 @@ public class SrmPurchaseReturnBaseRespVO {
         private String applicationDeptName;
 
         // ========== 其他信息 ==========
+        @Schema(description = "出库状态")
+        private Integer outboundStatus;
+
         @Schema(description = "备注")
         private String remark;
 
