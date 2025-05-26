@@ -59,6 +59,8 @@ public class SrmPurchaseInSaveReqVO {
     @DiffLogField(name = "附件地址")
     private String fileUrl;
 
+    @Schema(description = "币别ID")
+    private Long currencyId;
 
     @Schema(description = "总毛重")
     @DiffLogField(name = "总毛重")

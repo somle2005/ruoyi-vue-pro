@@ -51,6 +51,7 @@ public class SrmPurchaseOrderSaveReqVO {
 
     @Schema(description = "币别id(财务管理-币别维护)")
     @DiffLogField(name = "币别编号")
+    @NotNull(message = "币别编号不能为空")
     private Long currencyId;
 
     @Schema(description = "币别名称")

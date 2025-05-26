@@ -767,6 +767,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void merge(SrmPurchaseOrderMergeReqVO reqVO) {
+        //TODO 逻辑处理待优化
+
         // 校验
         for (SrmPurchaseOrderMergeReqVO.Item item : reqVO.getItems()) {
             Long itemId = item.getItemId();
@@ -781,24 +783,37 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         List<SrmPurchaseOrderItemDO> orderItemDOS = purchaseOrderItemMapper.selectListByItemIds(itemIds);
 
         // 1. 构建 itemId -> qty 的映射
-        Map<Long, BigDecimal> itemIdToQtyMap = reqVO.getItems().stream()
-            .collect(Collectors.toMap(SrmPurchaseOrderMergeReqVO.Item::getItemId, SrmPurchaseOrderMergeReqVO.Item::getQty));
+        Map<Long, BigDecimal> itemIdToQtyMap = reqVO.getItems().stream().collect(Collectors.toMap(SrmPurchaseOrderMergeReqVO.Item::getItemId, SrmPurchaseOrderMergeReqVO.Item::getQty));
 
-        // 2. 转换并赋值到货数量
+        //convert
         List<SrmPurchaseInSaveReqVO.Item> inItems = SrmOrderInConvert.INSTANCE.convertToErpPurchaseInSaveReqVOItems(orderItemDOS);
+        // 2. 转换并赋值到货数量
         for (SrmPurchaseInSaveReqVO.Item inItem : inItems) {
             BigDecimal qty = itemIdToQtyMap.get(inItem.getOrderItemId());
             if (qty != null) {
                 inItem.setQty(qty);
             }
         }
+        //3 转换赋值仓库编号
+        Map<Long, Long> itemIdToWarehouseIdMap = reqVO.getItems().stream().collect(Collectors.toMap(SrmPurchaseOrderMergeReqVO.Item::getItemId, SrmPurchaseOrderMergeReqVO.Item::getWarehouseId));
+        for (SrmPurchaseInSaveReqVO.Item inItem : inItems) {
+            inItem.setWarehouseId(itemIdToWarehouseIdMap.get(inItem.getOrderItemId()));
+        }
+        //4.0 因为同一个供应商的币种都是相同的，而明细行只允许同一个供应商，所以取第一个关联订单的币种信息
+        AtomicReference<Long> currencyId = new AtomicReference<>();
+        reqVO.getItems().stream().findFirst().ifPresent(inItem -> {
+            Long orderItemId = inItem.getItemId();
+            SrmPurchaseOrderDO srmPurchaseOrderDO = this.getPurchaseOrderByItemId(orderItemId);
+            currencyId.set(srmPurchaseOrderDO.getCurrencyId());
+        });
 
         // 3. 构建 saveVO
         SrmPurchaseInSaveReqVO vo = BeanUtils.toBean(reqVO, SrmPurchaseInSaveReqVO.class, saveReqVO ->
             saveReqVO.setCode(null)
                 .setItems(inItems)
                 .setId(null)
-                .setInTime(LocalDateTime.now())
+                .setInTime(reqVO.getBillTime() == null ? LocalDateTime.now() : reqVO.getBillTime())
+                .setCurrencyId(currencyId.get()) // 币别
         );
         // service持久化
         try {
