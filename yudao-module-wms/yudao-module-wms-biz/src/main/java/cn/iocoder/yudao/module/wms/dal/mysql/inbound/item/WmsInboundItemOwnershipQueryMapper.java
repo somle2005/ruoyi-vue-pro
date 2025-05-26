@@ -95,11 +95,8 @@ public interface WmsInboundItemOwnershipQueryMapper extends BaseMapperX<WmsInbou
         wrapper.select(WmsInboundDO::getInboundTime);
         wrapper.select(AGE_COL_EXPR);
 
-
         //
         wrapper.innerJoin(WmsInboundDO.class,WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId);
-        wrapper.eq(WmsInboundDO::getWarehouseId, warehouseId)
-            .in(WmsInboundItemQueryDO::getInboundStatus, WmsInboundStatus.ALL.getValue(),WmsInboundStatus.PART.getValue());
         // 控制顺序
         if(olderFirst) {
             wrapper.orderByAsc(WmsInboundDO::getInboundTime);
