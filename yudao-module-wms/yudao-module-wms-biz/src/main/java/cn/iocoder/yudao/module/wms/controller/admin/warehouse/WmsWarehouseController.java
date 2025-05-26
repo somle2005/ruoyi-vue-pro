@@ -111,7 +111,7 @@ public class WmsWarehouseController {
     @PostMapping("/page")
     @Operation(summary = "获得仓库分页")
     @PreAuthorize("@ss.hasPermission('wms:warehouse:query')")
-    public CommonResult<PageResult<WmsWarehouseRespVO>> getWarehousePage(@Valid WmsWarehousePageReqVO pageReqVO) {
+    public CommonResult<PageResult<WmsWarehouseRespVO>> getWarehousePage(@Valid @RequestBody WmsWarehousePageReqVO pageReqVO) {
         // 查询数据
         PageResult<WmsWarehouseDO> doPageResult = warehouseService.getWarehousePage(pageReqVO);
         // 转换

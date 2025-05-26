@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.service.quantity;
 
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemOwnershipDO;
@@ -17,6 +18,7 @@ import cn.iocoder.yudao.module.wms.service.quantity.context.OutboundContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -29,6 +31,8 @@ import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
  */
 @Slf4j
 public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext> {
+
+    private SrmPurchaseReturnApi srmPurchaseReturnApi;
 
     @Resource
     protected WmsOutboundService outboundService;
@@ -105,6 +109,7 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
             // 执行出库的原子操作
             Integer quantity= getExecuteQty(item);
             outboundSingleItem(outboundRespVO,item,companyId, deptId, warehouseId, item.getBinId(),productId, quantity, outboundRespVO.getId(), item.getId());
+            srmPurchaseReturnApi.updatePurchaseReturnItemQty(item.getUpstreamItemId(), BigDecimal.valueOf(item.getActualQty()));
         }
         updateOutbound(outboundRespVO);
         // 完成最终的出库
