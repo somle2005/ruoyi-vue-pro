@@ -7,51 +7,145 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
-@Schema(description = "管理后台 - ERP 采购退货分页 Request VO")
+@Schema(description = "管理后台 - 采购退货单分页 Request VO")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
 public class SrmPurchaseReturnPageReqVO extends PageParam {
 
-    @Schema(description = "到货单")
-    private String code;
+    // ========== 主表查询参数 ==========
+    @Schema(description = "主表查询参数")
+    private MainQuery mainQuery;
 
-    @Schema(description = "供应商编号")
-    private Long supplierId;
+    // ========== 明细表查询参数 ==========
+    @Schema(description = "明细表查询参数")
+    private ItemQuery itemQuery;
 
-    @Schema(description = "退货时间")
-    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-    private LocalDateTime[] returnTime;
+    @Data
+    public static class MainQuery {
 
-    @Schema(description = "备注")
-    private String remark;
+        @Schema(description = "退货单id")
+        private Long id;
 
-    @Schema(description = "退货状态")
-    private Integer status;
+        @Schema(description = "退货单编号")
+        private String code;
 
-    @Schema(description = "创建者")
-    private String creator;
+        @Schema(description = "审核状态")
+        private Integer auditStatus;
 
-    @Schema(description = "产品编号")
-    private Long productId;
+        @Schema(description = "审核人id")
+        private Long auditorId;
 
-    @Schema(description = "仓库编号")
-    private Long warehouseId;
+        @Schema(description = "审核时间")
+        @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+        private LocalDateTime[] auditTime;
 
-    @Schema(description = "结算账号编号")
-    private Long accountId;
+        @Schema(description = "供应商编号")
+        private Long supplierId;
 
-    @Schema(description = "采购单号")
-    private String orderNo;
+        @Schema(description = "结算账户编号")
+        private Long accountId;
 
-    @Schema(description = "退款状态")
-    private Integer refundStatus;
+        @Schema(description = "退货时间")
+        @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+        private LocalDateTime[] returnTime;
 
-    @Schema(description = "是否可退款")
-    private Boolean refundEnable; // 对应 refundStatus = [0, 1]
+        @Schema(description = "币种编号")
+        private Long currencyId;
 
+        @Schema(description = "价税合计")
+        private BigDecimal allAmount;
+
+        @Schema(description = "合计数量")
+        private BigDecimal totalCount;
+
+        @Schema(description = "最终合计价格")
+        private BigDecimal totalPrice;
+
+        @Schema(description = "总毛重")
+        private BigDecimal totalWeight;
+
+        @Schema(description = "总体积")
+        private BigDecimal totalVolume;
+
+        @Schema(description = "已退款金额")
+        private BigDecimal refundPrice;
+
+        @Schema(description = "合计产品价格")
+        private BigDecimal totalProductPrice;
+
+        @Schema(description = "合计税额")
+        private BigDecimal totalTaxPrice;
+
+        @Schema(description = "创建人")
+        private Long creator;
+    }
+
+    @Data
+    public static class ItemQuery {
+        @Schema(description = "入库项id")
+        private Long inItemId;
+
+        @Schema(description = "入库单code")
+        private String inCode;
+
+        @Schema(description = "仓库编号")
+        private Long warehouseId;
+
+        @Schema(description = "产品编号")
+        private Long productId;
+
+        @Schema(description = "产品单位单位")
+        private Long productUnitId;
+
+        @Schema(description = "产品单位单价")
+        private BigDecimal productPrice;
+
+        @Schema(description = "产品单位名称")
+        private String productUnitName;
+
+        @Schema(description = "数量")
+        private BigDecimal qty;
+
+        @Schema(description = "总价")
+        private BigDecimal totalPrice;
+
+        @Schema(description = "税率")
+        private BigDecimal taxPercent;
+
+        @Schema(description = "税额")
+        private BigDecimal taxPrice;
+
+        @Schema(description = "备注")
+        private String remark;
+
+        @Schema(description = "含税单价")
+        private BigDecimal actTaxPrice;
+
+        @Schema(description = "箱率")
+        private String containerRate;
+
+        @Schema(description = "申请人id")
+        private Long applicantId;
+
+        @Schema(description = "申请部门id")
+        private Long applicationDeptId;
+
+        @Schema(description = "报关品名")
+        private String declaredType;
+
+        @Schema(description = "报关品名英文")
+        private String declaredTypeEn;
+
+        @Schema(description = "产品sku")
+        private String barCode;
+
+        @Schema(description = "产品名称")
+        private String productName;
+    }
 }

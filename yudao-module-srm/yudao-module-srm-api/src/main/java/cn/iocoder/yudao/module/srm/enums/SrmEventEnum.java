@@ -40,6 +40,9 @@ public enum SrmEventEnum {
     //    COMPLETE_STORAGE("完成入库"),
     CANCEL_STORAGE("取消入库"),
     //    STORAGE_EXCEPTION("入库异常"),
+
+    //出库事件
+    OUT_STORAGE_INIT("出库初始化"), OUT_STORAGE_ADJUSTMENT("出库数量调整"), OUT_STORAGE_CANCEL("作废出库"),
     ;
     private final String desc;
 

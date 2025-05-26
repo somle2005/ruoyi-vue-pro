@@ -63,7 +63,11 @@ public interface SrmStateMachines {
     String PURCHASE_RETURN_AUDIT_STATE_MACHINE_NAME = "purchaseReturnAudit";
     //退款
     String PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME = "purchaseReturnRefund";
+    //出库
+    String PURCHASE_RETURN_OUT_STORAGE_STATE_MACHINE_NAME = "purchaseReturnOutStorage";
     // ========== SRM 退货单明细 ==========
+    //退款
     String PURCHASE_RETURN_ITEM_REFUND_STATE_MACHINE_NAME = "purchaseReturnItemRefund";
-
+    //出库
+    String PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME = "purchaseReturnItemOutStorage";
 }

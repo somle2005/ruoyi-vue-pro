@@ -13,6 +13,7 @@ import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnSaveReqVO;
+import cn.iocoder.yudao.module.srm.convert.purchase.SrmPurchaseReturnConvert;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.*;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.*;
 import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
@@ -22,6 +23,8 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmReturnStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
+import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnBO;
+import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnItemBO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.outbound.WmsOutboundApi;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
@@ -369,7 +372,20 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         return convertList(list, o -> {
             // 4.1 从入库项复制基础信息
             SrmPurchaseInItemDO inItem = inItemMap.get(o.getInItemId());
-            SrmPurchaseReturnItemDO item = BeanUtils.toBean(inItem, SrmPurchaseReturnItemDO.class);
+            SrmPurchaseReturnItemDO item = new SrmPurchaseReturnItemDO(); // 创建新对象
+            // 手动复制需要的字段，避免复制 id
+            item.setProductId(inItem.getProductId())
+                .setProductName(inItem.getProductName())
+                .setProductPrice(inItem.getProductPrice())
+                .setTaxPercent(inItem.getTaxPercent())
+                .setProductUnitId(inItem.getProductUnitId())
+                .setProductUnitName(inItem.getProductUnitName())
+                .setWarehouseId(inItem.getWarehouseId())
+                .setBarCode(inItem.getBarCode())
+                .setDeclaredType(inItem.getDeclaredType())
+                .setDeclaredTypeEn(inItem.getDeclaredTypeEn())
+                .setContainerRate(inItem.getContainerRate())
+                .setActTaxPrice(inItem.getActTaxPrice());
 
             // 4.2 设置退货项特有信息
             item
@@ -468,6 +484,15 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     @Override
+    public SrmPurchaseReturnBO getPurchaseBOReturn(Long id) {
+        //主表
+        SrmPurchaseReturnDO srmPurchaseReturnDO = purchaseReturnMapper.selectById(id);
+        //子表
+        List<SrmPurchaseReturnItemDO> srmPurchaseReturnItemDOS = purchaseReturnItemMapper.selectListByReturnId(id);
+        return BeanUtils.toBean(srmPurchaseReturnDO, SrmPurchaseReturnBO.class, peek -> peek.setSrmPurchaseReturnItemDOs(srmPurchaseReturnItemDOS));
+    }
+
+    @Override
     public List<SrmPurchaseReturnDO> getPurchaseReturnList(List<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return new ArrayList<>();
@@ -484,12 +509,14 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         return purchaseReturn;
     }
 
+
     @Override
-    public PageResult<SrmPurchaseReturnDO> getPurchaseReturnPage(SrmPurchaseReturnPageReqVO pageReqVO) {
-        if (pageReqVO == null) {
-            pageReqVO = new SrmPurchaseReturnPageReqVO();
-        }
-        return purchaseReturnMapper.selectPage(pageReqVO);
+    public PageResult<SrmPurchaseReturnBO> getPurchaseReturnBOPage(SrmPurchaseReturnPageReqVO pageReqVO) {
+        // 1. 查询分页数据
+        PageResult<SrmPurchaseReturnItemBO> page = purchaseReturnItemMapper.selectBOPage(pageReqVO);
+
+        // 2. 转换为目标BO
+        return SrmPurchaseReturnConvert.INSTANCE.convertPage(page);
     }
 
     // ==================== 采购退货项 ====================

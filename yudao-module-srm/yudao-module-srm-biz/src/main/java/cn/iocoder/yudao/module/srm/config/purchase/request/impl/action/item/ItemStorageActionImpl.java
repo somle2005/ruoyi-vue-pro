@@ -33,7 +33,7 @@ public class ItemStorageActionImpl implements Action<SrmStorageStatus, SrmEventE
     private SrmPurchaseRequestMapper srmPurchaseRequestMapper;
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void execute(SrmStorageStatus f, SrmStorageStatus t, SrmEventEnum event, SrmOrderInCountDTO context) {
         SrmPurchaseRequestItemsDO itemsDO = mapper.selectById(context.getApplyItemId());
         if (event == SrmEventEnum.STOCK_ADJUSTMENT) {

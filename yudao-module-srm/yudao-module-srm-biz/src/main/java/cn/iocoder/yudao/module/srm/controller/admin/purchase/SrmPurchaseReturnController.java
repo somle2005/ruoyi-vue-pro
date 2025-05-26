@@ -18,6 +18,7 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItem
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
+import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -43,7 +44,6 @@ import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMultiMap;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 
 @Tag(name = "管理后台 - ERP 采购退货")
@@ -90,7 +90,7 @@ public class SrmPurchaseReturnController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:query')")
     public CommonResult<SrmPurchaseReturnBaseRespVO> getPurchaseReturn(@RequestParam("id") Long id) {
-        SrmPurchaseReturnDO purchaseReturn = purchaseReturnService.getPurchaseReturn(id);
+        SrmPurchaseReturnBO purchaseReturn = purchaseReturnService.getPurchaseBOReturn(id);
         if (purchaseReturn == null) {
             return success(null);
         }
@@ -101,7 +101,7 @@ public class SrmPurchaseReturnController {
     @Operation(summary = "获得采购退货分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:query')")
     public CommonResult<PageResult<SrmPurchaseReturnBaseRespVO>> getPurchaseReturnPage(@Valid @RequestBody(required = false) SrmPurchaseReturnPageReqVO pageReqVO) {
-        PageResult<SrmPurchaseReturnDO> pageResult = purchaseReturnService.getPurchaseReturnPage(pageReqVO);
+        PageResult<SrmPurchaseReturnBO> pageResult = purchaseReturnService.getPurchaseReturnBOPage(pageReqVO);
         return success(new PageResult<>(bindResult(pageResult.getList()), pageResult.getTotal()));
     }
 
@@ -112,7 +112,7 @@ public class SrmPurchaseReturnController {
     public void exportPurchaseReturnExcel(@Valid SrmPurchaseReturnPageReqVO pageReqVO,
                                           HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        PageResult<SrmPurchaseReturnDO> page = purchaseReturnService.getPurchaseReturnPage(pageReqVO);
+        PageResult<SrmPurchaseReturnBO> page = purchaseReturnService.getPurchaseReturnBOPage(pageReqVO);
         // 导出 Excel
         ExcelUtils.write(response, "采购退货.xls", "数据", SrmPurchaseReturnBaseRespVO.class, bindResult(page.getList()));
     }
@@ -155,48 +155,52 @@ public class SrmPurchaseReturnController {
         }
     }
 
-    private List<SrmPurchaseReturnBaseRespVO> bindResult(List<SrmPurchaseReturnDO> list) {
+
+    private List<SrmPurchaseReturnBaseRespVO> bindResult(List<SrmPurchaseReturnBO> list) {
         if (CollUtil.isEmpty(list)) {
             return Collections.emptyList();
         }
 
         // 1. 获取关联数据
-        // 1.1 退货项
-        List<SrmPurchaseReturnItemDO> purchaseReturnItemList = purchaseReturnService.getPurchaseReturnItemListByReturnIds(
-            convertSet(list, SrmPurchaseReturnDO::getId));
-        Map<Long, List<SrmPurchaseReturnItemDO>> purchaseReturnItemMap = convertMultiMap(purchaseReturnItemList, SrmPurchaseReturnItemDO::getReturnId);
-
-        // 1.2 供应商信息
+        // 1.1 供应商信息
         Map<Long, SrmSupplierDO> supplierMap = supplierService.getSupplierMap(
             convertSet(list, SrmPurchaseReturnDO::getSupplierId));
 
-        // 1.3 人员信息
+        // 1.2 人员信息
         Set<Long> userIds = Stream.concat(
             list.stream().flatMap(returnDO -> Stream.of(
                 returnDO.getAuditorId(), // 审核者
                 safeParseLong(returnDO.getCreator()), // 创建者
                 safeParseLong(returnDO.getUpdater())  // 更新者
             )),
-            purchaseReturnItemList.stream().flatMap(itemDO -> Stream.of(
-                safeParseLong(itemDO.getCreator()), // 创建者
-                safeParseLong(itemDO.getUpdater()), // 更新者
-                itemDO.getApplicantId() // 申请人
-            ))
+            list.stream().flatMap(returnDO -> returnDO.getSrmPurchaseReturnItemDOs().stream())
+                .flatMap(itemDO -> Stream.of(
+                    safeParseLong(itemDO.getCreator()), // 创建者
+                    safeParseLong(itemDO.getUpdater()), // 更新者
+                    itemDO.getApplicantId() // 申请人
+                ))
         ).distinct().filter(Objects::nonNull).collect(Collectors.toSet());
         Map<Long, AdminUserRespDTO> userMap = adminUserApi.getUserMap(userIds);
 
-        // 1.4 部门信息
+        // 1.3 部门信息
         Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(
-            convertSet(purchaseReturnItemList, SrmPurchaseReturnItemDO::getApplicationDeptId));
+            convertSet(list.stream().flatMap(returnDO -> returnDO.getSrmPurchaseReturnItemDOs().stream()).collect(Collectors.toList()),
+                SrmPurchaseReturnItemDO::getApplicationDeptId));
 
-        // 1.5 仓库信息
+        // 1.4 仓库信息
         Map<Long, WmsWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(
-            convertSet(purchaseReturnItemList, SrmPurchaseReturnItemDO::getWarehouseId));
+            convertSet(list.stream().flatMap(returnDO -> returnDO.getSrmPurchaseReturnItemDOs().stream()).collect(Collectors.toList()),
+                SrmPurchaseReturnItemDO::getWarehouseId));
+
+        //MAP
+        Map<Long, List<SrmPurchaseReturnItemDO>> returnItemMap = list.stream()
+            .flatMap(returnDO -> returnDO.getSrmPurchaseReturnItemDOs().stream())
+            .collect(Collectors.groupingBy(SrmPurchaseReturnItemDO::getReturnId));
         // 2. 开始拼接
         return BeanUtils.toBean(list, SrmPurchaseReturnBaseRespVO.class, purchaseReturn -> {
             // 2.1 设置退货项
             List<SrmPurchaseReturnBaseRespVO.Item> items = BeanUtils.toBean(
-                purchaseReturnItemMap.get(purchaseReturn.getId()),
+                returnItemMap.get(purchaseReturn.getId()),
                 SrmPurchaseReturnBaseRespVO.Item.class,
                 item -> {
                     // 2.1.1 设置仓库信息
@@ -226,7 +230,6 @@ public class SrmPurchaseReturnController {
             // 2.2 设置供应商信息
             MapUtils.findAndThen(supplierMap, purchaseReturn.getSupplierId(), supplier -> {
                 purchaseReturn.setSupplierName(supplier.getName());
-//                purchaseReturn.setSupplierCode(supplier.getCode());
             });
 
             // 2.3 设置审核人信息

@@ -152,10 +152,10 @@ public class SrmPurchaseRequestController {
         return success(vos.get(0));
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得ERP采购申请单分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-request:query')")
-    public CommonResult<PageResult<SrmPurchaseRequestRespVO>> getPurchaseRequestPage(@Valid SrmPurchaseRequestPageReqVO pageReqVO) {
+    public CommonResult<PageResult<SrmPurchaseRequestRespVO>> getPurchaseRequestPage(@RequestBody @Validated SrmPurchaseRequestPageReqVO pageReqVO) {
         PageResult<SrmPurchaseRequestBO> pageResult = srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO);
         return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
     }
@@ -181,6 +181,7 @@ public class SrmPurchaseRequestController {
         // 1.2 产品信息
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(convertSet(items, SrmPurchaseRequestItemsDO::getProductId));
         //1.3 获取用户信息
+
         Set<Long> userIds = Stream.concat(oldList.stream().flatMap(purchaseRequest -> Stream.of(purchaseRequest.getApplicantId(),//申请人
                 purchaseRequest.getAuditorId(),//审核者
                         safeParseLong(purchaseRequest.getCreator()), safeParseLong(purchaseRequest.getUpdater()))), items.stream()

@@ -18,14 +18,14 @@ import static cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUti
 
 @Slf4j
 @Component
-public class RefundAuditActionImpl implements Action<SrmAuditStatus, SrmEventEnum, SrmPurchaseReturnAuditReqVO> {
+public class ReturnAuditActionImpl implements Action<SrmAuditStatus, SrmEventEnum, SrmPurchaseReturnAuditReqVO> {
 
     @Autowired
     SrmPurchaseReturnMapper srmPurchaseReturnMapper;
 
 
     @Override
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public void execute(SrmAuditStatus from, SrmAuditStatus to, SrmEventEnum event, SrmPurchaseReturnAuditReqVO req) {
         req.getIds().stream().findFirst().ifPresent(id -> {
             SrmPurchaseReturnDO data = srmPurchaseReturnMapper.selectById(id);

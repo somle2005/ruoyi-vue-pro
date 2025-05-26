@@ -42,7 +42,7 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
     private Long returnId;
 
     /**
-     * 入库项id
+     * 到货项id
      */
     private Long inItemId;
     /**
@@ -134,4 +134,12 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
      * 产品名称
      */
     private String productName;
+    /**
+     * 出库状态
+     */
+    private Integer outboundStatus;
+    /**
+     * 出库数量
+     */
+    private BigDecimal outboundQty;
 }
