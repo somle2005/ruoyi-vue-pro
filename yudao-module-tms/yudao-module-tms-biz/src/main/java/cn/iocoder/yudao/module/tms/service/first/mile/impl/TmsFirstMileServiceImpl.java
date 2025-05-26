@@ -42,7 +42,11 @@ import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import cn.iocoder.yudao.module.tms.service.vessel.tracking.TmsVesselTrackingService;
 import cn.iocoder.yudao.module.wms.api.outbound.WmsOutboundApi;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
@@ -61,6 +65,7 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_AUDIT_STATE_MACHINE;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE;
+import static cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType.OUTBOUND_BILL;
 import static jodd.util.StringUtil.truncate;
 
 /**
@@ -334,19 +339,108 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
                 auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.AGREE, reqVO);
                 //2. 生成对应出库单
                 TmsFirstMileBO tmsFirstMileBO = getFirstMileBO(reqVO.getId());
-                wmsOutboundApi.createOutbound(TmsFirstMileConvert.convertOutbound(tmsFirstMileBO));
+                //3.0 创建出库单,为每个仓库创建不同得出库单。
+                createWmsOutbound(tmsFirstMileBO);
             } else {
                 //不通过
                 auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, reqVO);
             }
         } else {
-            //TODO api 校验是否存在出库单，出库单是否删除了？报废了？
             //反审核
             auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.WITHDRAW_REVIEW, reqVO);
+            //作废WMS出库单
+            abandonWmsOutbound(tmsFirstMileDO.getId());
         }
         //
         LogRecordContext.putVariable("code", tmsFirstMileDO.getCode());
     }
+
+    /**
+     * 创建 WMS 出库单
+     *
+     * @param firstMileBO 头程单
+     */
+    private void createWmsOutbound(TmsFirstMileBO firstMileBO) {
+        // 1. 按仓库分组头程项
+        Map<Long, List<TmsFirstMileItemDO>> warehouseItemsMap = firstMileBO.getItems().stream()
+            .collect(Collectors.groupingBy(item -> {
+                if (item.getFromWarehouseId() == null) {
+                    throw exception(FIRST_MILE_PROCESS_FAIL_WAREHOUSE_ID_DONT_EXISTS);
+                }
+                return item.getFromWarehouseId();
+            }));
+
+        // 2. 为每个仓库创建出库单
+        warehouseItemsMap.forEach((warehouseId, items) -> {
+            // 构建出库单基本信息
+            WmsOutboundImportReqDTO importReqDTO = buildOutboundBaseInfo(firstMileBO);
+            importReqDTO.setWarehouseId(warehouseId); // 设置仓库ID
+            // 构建出库单明细信息，将相同仓库的头程项合并到一个出库单中
+            importReqDTO.setItemList(buildOutboundItems(items));
+            // 生成出库单
+            try {
+                wmsOutboundApi.generateOutbound(importReqDTO);
+            } catch (Exception e) {
+                throw exception(FIRST_MILE_PROCESS_FAIL_WMS_OUTBOUND_EXISTS, truncate(e.getMessage(), 200));
+            }
+        });
+    }
+
+    /**
+     * 构建出库单基本信息
+     *
+     * @param firstMileBO 头程单
+     * @return 出库单基本信息
+     */
+    private WmsOutboundImportReqDTO buildOutboundBaseInfo(TmsFirstMileBO firstMileBO) {
+        WmsOutboundImportReqDTO importReqDTO = new WmsOutboundImportReqDTO();
+        importReqDTO.setType(OUTBOUND_BILL.getValue()); // 订单出库
+        importReqDTO.setUpstreamBillId(firstMileBO.getId()); // 来源单据ID
+        importReqDTO.setUpstreamBillCode(firstMileBO.getCode()); // 来源单据号
+        importReqDTO.setUpstreamBillType(BillType.TMS_FIRST_MILE.getValue()); // 来源单据类型
+        importReqDTO.setRemark(firstMileBO.getRemark()); // 备注
+        importReqDTO.setOutboundTime(firstMileBO.getOutboundTime()); // 出库时间
+        return importReqDTO;
+    }
+
+    /**
+     * 构建出库单明细信息
+     *
+     * @param items 头程单明细
+     * @return 出库单明细列表
+     */
+    private List<WmsOutboundItemSaveReqDTO> buildOutboundItems(List<TmsFirstMileItemDO> items) {
+        return items.stream().map(item -> {
+            WmsOutboundItemSaveReqDTO itemDTO = new WmsOutboundItemSaveReqDTO();
+            itemDTO.setProductId(item.getProductId()); // 产品ID
+            itemDTO.setPlanQty(item.getQty()); // 计划出库量
+            itemDTO.setActualQty(item.getQty()); // 实际出库量
+            itemDTO.setRemark(item.getRemark()); // 备注
+            itemDTO.setUpstreamItemId(item.getId()); // 来源详情ID
+            itemDTO.setCompanyId(item.getCompanyId()); // 设置库存公司ID
+            return itemDTO;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 作废头程单关联的WMS出库单
+     *
+     * @param firstMileId 头程单ID
+     */
+    private void abandonWmsOutbound(Long firstMileId) {
+        List<WmsOutboundDTO> dtoList = wmsOutboundApi.getOutboundList(BillType.TMS_FIRST_MILE.getValue(), firstMileId);
+        dtoList.forEach(wmsOutboundDTO -> {
+            //如果出库单是草稿状态 -> 作废
+            if (Objects.equals(wmsOutboundDTO.getAuditStatus(), WmsOutboundAuditStatus.DRAFT.getValue())) {
+                // 作废 WMS 出库单
+                wmsOutboundApi.abandonOutbound(wmsOutboundDTO.getId(), "头程单反审核");
+            } else {
+                //提示
+                throw exception(FIRST_MILE_WMS_OUTBOUND_NOT_CAN_ABANDON, wmsOutboundDTO.getCode());
+            }
+        });
+    }
+
     // ==================== 子表（头程单明细） ====================
     @Override
     public List<TmsFirstMileItemDO> getFirstMileItemListByFirstMileId(Long firstMileId) {

@@ -596,13 +596,14 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                         throw exception(PURCHASE_RETURN_PROCESS_FAIL_WMS_OUTBOUND_EXISTS, truncate(e.getMessage(), 200));
                     }
                 } else {
-                    //反审核
+                    //审核不通过
                     log.debug("退货单拒绝审核，ID: {}", purchaseReturnDO.getId());
                     auditStatusMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
                     //联动
                     rollBackStatus(returnItemDOS);
                 }
             } else {
+                // 反审核
                 log.debug("退货单撤回审核，ID: {}", purchaseReturnDO.getId());
                 auditStatusMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
                 // 作废WMS出库单
