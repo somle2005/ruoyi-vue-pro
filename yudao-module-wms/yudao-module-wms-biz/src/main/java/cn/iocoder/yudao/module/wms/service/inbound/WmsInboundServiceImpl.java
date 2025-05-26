@@ -416,29 +416,29 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         }
     }
 
-    //生成批次可用库存流水表wms_inbound_item_flow，并把id更新到库存流水表wms_stock_flow
+    //生成批次可用库存流水，并把id更新到库存流水表
     private void updateStockFlow(WmsInboundRespVO inboundRespVO, WmsInboundDO inboundDO) {
         List<WmsInboundItemRespVO> itemList = inboundRespVO.getItemList();
         if(CollectionUtils.isEmpty(itemList)) {
             return;
         }
-        //获取正确的对象并赋值
         for (WmsInboundItemRespVO respVO : itemList) {
-            WmsInboundItemFlowDO inboundItemFlow = new WmsInboundItemFlowDO();
-            inboundItemFlow.setInboundId(respVO.getInboundId());
-            inboundItemFlow.setInboundItemId(respVO.getId());
-            inboundItemFlow.setProductId(respVO.getProductId());
-            inboundItemFlow.setActualQty(respVO.getActualQty());
-            inboundItemFlow.setBillType(inboundDO.getType());
-            inboundItemFlow.setDirection(ONE);
-            inboundItemFlow.setOutboundAvailableQty(respVO.getActualQty());
-            inboundItemFlow.setOutboundAvailableDeltaQty(respVO.getActualQty());
-            inboundItemFlow.setInboundItemId(inboundDO.getId());
-            inboundItemFlow.setActualQty(respVO.getActualQty());
-            inboundItemFlow.setShelvedQty(respVO.getShelvedQty());
+            WmsInboundItemFlowDO inboundItemFlow = WmsInboundItemFlowDO.builder()
+                    .inboundId(respVO.getInboundId())
+                    .inboundItemId(respVO.getId())
+                    .productId(respVO.getProductId())
+                    .actualQty(respVO.getActualQty())
+                    .billType(inboundDO.getType())
+                    .direction(ONE)
+                    .outboundAvailableQty(respVO.getActualQty())
+                    .outboundAvailableDeltaQty(respVO.getActualQty())
+                    .shelvedQty(respVO.getShelvedQty())
+                    .build();
             inboundItemFlowMapper.insert(inboundItemFlow);
             List<WmsStockFlowDO> wmsStockFlowDOList = stockFlowMapper.selectByReasonItemIdAndReasonBillId(respVO.getId(), respVO.getInboundId());
-            assert wmsStockFlowDOList != null;
+            if(wmsStockFlowDOList == null){
+                throw exception(INBOUND_ITEM_FLOW_NOT_EXISTS);
+            }
             for (WmsStockFlowDO stockFlow : wmsStockFlowDOList) {
                 stockFlow.setInboundItemFlowId(inboundItemFlow.getId());
                 stockFlowMapper.updateById(stockFlow);
