@@ -91,6 +91,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Resource(name = FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE)
     StateMachine<TmsOrderStatus, TmsEventEnum, FistMileRequestItemDTO> requestItemOrderStateMachine;
 
+
     //校验code中间日期是否是当天
     private static void validCodeDateIsToday(TmsFirstMileSaveReqVO vo) {
         String[] parts = vo.getCode().split("-");
@@ -131,17 +132,24 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         Long firstMileId = firstMile.getId();
 
-        // 保存头程明细
+        //2.0 保存头程明细
         createFirstMileItemList(firstMileId, vo.getFirstMileItems());
 
-        // 保存费用项
-        createFeeList(firstMileId, BeanUtils.toBean(vo.getFees(), TmsFeeSaveReqVO.class));
-        // 保存船期信息
-        try {
-//            tmsVesselTrackingService.createVesselTracking(vo.getVesselTracking().setUpstreamId(firstMileId));
-            tmsVesselTrackingService.createVesselTracking(BeanUtils.toBean(vo.getVesselTracking().setUpstreamId(firstMileId), TmsVesselTrackingSaveReqVO.class));
-        } catch (Exception e) {
-            throw exception(FIRST_MILE_CREATE_FAIL, truncate(e.getMessage(), 200));
+        //3.0 保存费用项
+        if (vo.getFees() != null) {
+            createFeeList(firstMileId, BeanUtils.toBean(vo.getFees(), TmsFeeSaveReqVO.class));
+        }
+
+        //4.0 保存船期信息
+        if (vo.getVesselTracking() != null) {
+            try {
+                tmsVesselTrackingService.createVesselTracking(BeanUtils.toBean(vo.getVesselTracking(), TmsVesselTrackingSaveReqVO.class, peek -> {
+                    peek.setUpstreamId(firstMileId);
+                    peek.setUpstreamType(BillType.TMS_FIRST_MILE.getValue());
+                }));
+            } catch (Exception e) {
+                throw exception(FIRST_MILE_CREATE_FAIL, truncate(e.getMessage(), 200));
+            }
         }
 
         auditStateMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, TmsFirstMileAuditReqVO.builder().id(firstMileId).build());
@@ -168,7 +176,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             subType = LogRecordConstants.TMS_FIRST_MILE_UPDATE_SUB_TYPE,
             bizNo = "{{#vo.id}}",
             success = "更新了头程单【{{#vo.code}}】: {_DIFF{#vo}}")
-    public void updateFirstMile(@Validated TmsFirstMileSaveReqVO vo) {
+    public void updateFirstMile(TmsFirstMileSaveReqVO vo) {
         vo.initId(); //初始化上游ID
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(vo.getId());
 
@@ -183,13 +191,27 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         //校验申请人
         statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_UPDATE_FAIL_APPROVE);
 
-        TmsFirstMileDO updateObj = BeanUtils.toBean(vo, TmsFirstMileDO.class);
-        firstMileMapper.updateById(updateObj);
+        //1.0 更新头程单
+        firstMileMapper.updateById(BeanUtils.toBean(vo, TmsFirstMileDO.class));
 
+        //2.0 更新头程单子表
         updateFirstMileItemList(vo.getId(), vo.getFirstMileItems());
-        updateFeeList(vo.getId(), BeanUtils.toBean(vo.getFees(), TmsFeeSaveReqVO.class));
-        //更新船运信息
-        tmsVesselTrackingService.updateVesselTracking(vo.getVesselTracking());
+
+        //3.0 更新头程单费用子表
+        if (vo.getFees() != null) {
+            updateFeeList(vo.getId(), BeanUtils.toBean(vo.getFees(), TmsFeeSaveReqVO.class));
+        } else {
+            // 如果费用列表为null，删除所有相关费用记录
+            deleteFeeBySourceId(vo.getId());
+        }
+
+        //4.0 更新船运信息
+        if (vo.getVesselTracking() != null) {
+            tmsVesselTrackingService.updateVesselTracking(BeanUtils.toBean(vo.getVesselTracking(), TmsVesselTrackingSaveReqVO.class));
+        } else {
+            // 如果船运信息为null，删除相关船运记录
+            tmsVesselTrackingService.deleteVesselTracking(vo.getId(), BillType.TMS_FIRST_MILE.getValue());
+        }
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -234,6 +256,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         bo.setItems(firstMileItemMapper.selectListByFirstMileId(id));
         //跟踪信息
         bo.setTracking(tmsVesselTrackingService.getVesselTrackingByUpstreamIdAndUpstreamType(id, BillType.TMS_FIRST_MILE.getValue()));
+        //fees
+        bo.setFees(feeService.getFee(id, BillType.TMS_FIRST_MILE.getValue()));
         return bo;
     }
 
@@ -244,6 +268,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             return new PageResult<>(Collections.emptyList(), itemPageResult.getTotal());
         }
         List<TmsFirstMileBO> firstMileBOList = TmsFirstMileConvert.convertBOList(itemPageResult.getList());
+        // 获取费用
+
 
         return new PageResult<>(firstMileBOList, itemPageResult.getTotal());
     }
@@ -341,7 +367,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        List<TmsFirstMileItemDO> itemList = TmsFirstMileConvert.convertItemList(list);
+        List<TmsFirstMileItemDO> itemList = BeanUtils.toBean(list, TmsFirstMileItemDO.class);
         itemList.forEach(item -> item.setFirstMileId(firstMileId));
         firstMileItemMapper.insertBatch(itemList);
         //item如果存在关联，则联动
@@ -376,7 +402,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             return;
         }
         List<TmsFirstMileItemDO> oldList = firstMileItemMapper.selectListByFirstMileId(firstMileId);
-        List<TmsFirstMileItemDO> newList = TmsFirstMileConvert.convertItemList(list);
+        List<TmsFirstMileItemDO> newList = BeanUtils.toBean(list, TmsFirstMileItemDO.class);
 
         List<List<TmsFirstMileItemDO>> diffedList = CollectionUtils.diffList(oldList, newList, (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
 
@@ -431,8 +457,10 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         if (CollUtil.isEmpty(list)) {
             return;
         }
-        List<TmsFeeDO> feeList = TmsFirstMileConvert.convertFeeListToDO(list);
-        feeList.forEach(fee -> fee.setSourceId(sourceId));
+        List<TmsFeeDO> feeList = BeanUtils.toBean(list, TmsFeeDO.class, peek -> {
+            peek.setSourceType(BillType.TMS_FIRST_MILE.getValue());
+            peek.setSourceId(sourceId);
+        });
         feeService.createFeeList(feeList, BillType.TMS_FIRST_MILE.getValue());
     }
 
@@ -445,7 +473,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             return;
         }
         List<TmsFeeDO> oldList = feeService.getFeeListBySourceId(sourceId, BillType.TMS_FIRST_MILE.getValue());
-        List<TmsFeeDO> newList = TmsFirstMileConvert.convertFeeListToDO(list);
+        List<TmsFeeDO> newList = BeanUtils.toBean(list, TmsFeeDO.class);
 
         List<List<TmsFeeDO>> diffedList = CollectionUtils.diffList(oldList, newList, Object::equals);
 
@@ -480,7 +508,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Override
     public void updateFirstMileStatus(FistMileDTO fistMileDTO) {
         validateFirstMileExists(fistMileDTO.getId());
-        TmsFirstMileDO firstMileDO = TmsFirstMileConvert.convertDO(fistMileDTO);
+        TmsFirstMileDO firstMileDO = BeanUtils.toBean(fistMileDTO, TmsFirstMileDO.class);
         firstMileMapper.updateById(firstMileDO);
     }
 

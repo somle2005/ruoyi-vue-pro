@@ -64,7 +64,7 @@ public interface TmsFeeService {
      * @param sourceType 源类型
      * @return 出运订单费用明细
      */
-    TmsFeeDO getFee(Long id, Integer sourceType);
+    List<TmsFeeDO> getFee(Long id, Integer sourceType);
 
     /**
      * 获得出运订单费用明细分页
@@ -94,7 +94,7 @@ public interface TmsFeeService {
     /**
      * 批量删除出运订单费用明细
      *
-     * @param ids        编号列表
+     * @param ids        费用ID
      * @param sourceType 源类型
      */
     void deleteFeeList(List<Long> ids, Integer sourceType);

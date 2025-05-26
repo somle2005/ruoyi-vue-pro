@@ -65,7 +65,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
     }
 
     @Override
-    public TmsFeeDO getFee(Long id, Integer sourceType) {
+    public List<TmsFeeDO> getFee(Long id, Integer sourceType) {
         return feeMapper.selectByIdAndType(id, sourceType);
     }
 
@@ -114,6 +114,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
 
     @Override
     public void deleteFeeList(List<Long> ids, Integer sourceType) {
+        ids = ids.stream().distinct().toList();
         if (CollUtil.isEmpty(ids)) {
             return;
         }

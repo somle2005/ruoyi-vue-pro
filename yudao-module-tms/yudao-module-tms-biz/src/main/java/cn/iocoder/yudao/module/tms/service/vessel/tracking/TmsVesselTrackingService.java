@@ -37,6 +37,7 @@ public interface TmsVesselTrackingService {
      */
     void deleteVesselTracking(Long id);
 
+    void deleteVesselTracking(Long upstreamId, Integer billType);
     /**
      * 获得出运跟踪信息表（由外部API更新）
      *

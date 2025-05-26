@@ -2,13 +2,9 @@ package cn.iocoder.yudao.module.tms.convert.first.mile;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
-import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileExcelVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
@@ -64,8 +60,6 @@ public class TmsFirstMileConvert {
             bo -> bo.setItems(List.of(BeanUtils.toBean(itemBO, TmsFirstMileItemDO.class))));
     }
 
-    //convertBO 单个
-
     /**
      * 将费用 DO 列表转换为 VO 列表
      *
@@ -74,56 +68,6 @@ public class TmsFirstMileConvert {
      */
     public static List<TmsFeeRespVO> convertFeeList(List<TmsFeeDO> feeList) {
         return BeanUtils.toBean(feeList, TmsFeeRespVO.class);
-    }
-
-    /**
-     * 将费用 VO 列表转换为 DO 列表
-     *
-     * @param feeList 费用 VO 列表
-     * @return 费用 DO 列表
-     */
-    public static List<TmsFeeDO> convertFeeListToDO(List<TmsFeeSaveReqVO> feeList) {
-        return BeanUtils.toBean(feeList, TmsFeeDO.class);
-    }
-
-    /**
-     * 将头程单明细 VO 列表转换为 DO 列表
-     *
-     * @param itemList 头程单明细 VO 列表
-     * @return 头程单明细 DO 列表
-     */
-    public static List<TmsFirstMileItemDO> convertItemList(List<TmsFirstMileItemSaveReqVO> itemList) {
-        return BeanUtils.toBean(itemList, TmsFirstMileItemDO.class);
-    }
-
-    /**
-     * 将头程单明细 DO 列表转换为 VO 列表
-     *
-     * @param itemList 头程单明细 DO 列表
-     * @return 头程单明细 VO 列表
-     */
-    public static List<TmsFirstMileItemSaveReqVO> convertItemListToVO(List<TmsFirstMileItemDO> itemList) {
-        return BeanUtils.toBean(itemList, TmsFirstMileItemSaveReqVO.class);
-    }
-
-    /**
-     * 将 DO 转换为 DTO
-     *
-     * @param firstMile DO
-     * @return DTO
-     */
-    public static FistMileDTO convertDTO(TmsFirstMileDO firstMile) {
-        return BeanUtils.toBean(firstMile, FistMileDTO.class);
-    }
-
-    /**
-     * 将 DTO 转换为 DO
-     *
-     * @param dto DTO
-     * @return DO
-     */
-    public static TmsFirstMileDO convertDO(FistMileDTO dto) {
-        return BeanUtils.toBean(dto, TmsFirstMileDO.class);
     }
 
     /**

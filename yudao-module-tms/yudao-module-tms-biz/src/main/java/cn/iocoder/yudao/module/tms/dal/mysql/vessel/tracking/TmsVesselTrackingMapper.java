@@ -62,4 +62,11 @@ public interface TmsVesselTrackingMapper extends BaseMapperX<TmsVesselTrackingDO
             .eq(TmsVesselTrackingDO::getUpstreamType, upstreamType)
         );
     }
+
+    default void deleteByUpstreamIdAndUpstreamType(Long upstreamId, Integer billType) {
+        delete(new MPJLambdaWrapperX<TmsVesselTrackingDO>()
+            .eq(TmsVesselTrackingDO::getUpstreamId, upstreamId)
+            .eq(TmsVesselTrackingDO::getUpstreamType, billType)
+        );
+    }
 }

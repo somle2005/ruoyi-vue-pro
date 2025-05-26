@@ -63,8 +63,8 @@ public interface TmsFeeMapper extends BaseMapperX<TmsFeeDO> {
             .collect(Collectors.toList());
     }
 
-    default TmsFeeDO selectByIdAndType(Long id, Integer sourceType) {
-        return selectOne(new MPJLambdaWrapperX<TmsFeeDO>()
+    default List<TmsFeeDO> selectByIdAndType(Long id, Integer sourceType) {
+        return selectList(new MPJLambdaWrapperX<TmsFeeDO>()
             .eq(TmsFeeDO::getId, id)
             .eq(TmsFeeDO::getSourceType, sourceType));
     }

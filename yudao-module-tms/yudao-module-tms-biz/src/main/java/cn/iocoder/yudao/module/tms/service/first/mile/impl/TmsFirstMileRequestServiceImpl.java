@@ -37,6 +37,7 @@ import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
@@ -67,10 +68,12 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private final TmsNoRedisDAO tmsNoRedisDAO;
     private final ErpProductApi erpProductApi;
     private final TmsFirstMileRequestItemService firstMileRequestItemService;
-    private final TmsFirstMileService firstMileService;
     private final AdminUserApi adminUserApi;
     private final DeptApi deptApi;
     private final WmsWarehouseApi wmsWarehouseApi;
+    @Autowired
+    @Lazy
+    TmsFirstMileService firstMileService;
 
     @Resource(name = FIRST_MILE_REQUEST_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileRequestAuditReqVO> tmsFirstMileRequestStatusMachine;
@@ -80,8 +83,6 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     private StateMachine<TmsOrderStatus, TmsEventEnum, TmsFirstMileRequestDO> orderStatusStatusMachine;
     @Resource(name = FIRST_MILE_REQUEST_ITEM_OFF_STATE_MACHINE)
     private StateMachine<TmsOffStatus, TmsEventEnum, TmsFirstMileRequestItemDO> offItemStatusMachine;
-    @Autowired
-    private TmsFirstMileService tmsFirstMileService;
 
     //校验code中间日期是否是当天
     private static void validCodeDateIsToday(String code) {
@@ -389,7 +390,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         List<TmsFirstMileRequestItemDO> tmsFirstMileRequestItemDOS = firstMileRequestItemMapper.selectListByRequestId(requestId);
         tmsFirstMileRequestItemDOS.forEach(item -> {
             //  判断是否存在关联
-            List<TmsFirstMileItemDO> firstMileItemDOList = tmsFirstMileService.getFirstMileItemListByRequestItemId(item.getId());
+            List<TmsFirstMileItemDO> firstMileItemDOList = firstMileService.getFirstMileItemListByRequestItemId(item.getId());
             if (firstMileItemDOList != null && !firstMileItemDOList.isEmpty()) {
                 throw exception(errorCode, item.getId());
             }

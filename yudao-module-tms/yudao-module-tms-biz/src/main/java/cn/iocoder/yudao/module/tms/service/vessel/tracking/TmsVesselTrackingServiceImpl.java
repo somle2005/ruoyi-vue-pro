@@ -62,6 +62,11 @@ public class TmsVesselTrackingServiceImpl implements TmsVesselTrackingService {
         deleteVesselTrackingLogByTrackingId(id);
     }
 
+    @Override
+    public void deleteVesselTracking(Long upstreamId, Integer billType) {
+        vesselTrackingMapper.deleteByUpstreamIdAndUpstreamType(upstreamId, billType);
+    }
+
     private void validateVesselTrackingExists(Long id) {
         if (vesselTrackingMapper.selectById(id) == null) {
             throw exception(VESSEL_TRACKING_NOT_EXISTS);
