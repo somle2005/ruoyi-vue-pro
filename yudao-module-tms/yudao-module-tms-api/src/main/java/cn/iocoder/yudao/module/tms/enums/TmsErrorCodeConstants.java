@@ -75,4 +75,10 @@ public interface TmsErrorCodeConstants {
 
     // ========== 港口信息 1-030-905-000 ==========
     ErrorCode PORT_INFO_NOT_EXISTS = new ErrorCode(1_030_905_001, "TMS港口信息不存在");
+
+    // ========== 调拨单 1-030-906-000 ==========
+    ErrorCode TRANSFER_NOT_EXISTS = new ErrorCode(1_030_906_001, "调拨单{}不存在");
+
+    // ========== 调拨单明细 1-030-907-000 ==========
+    ErrorCode TRANSFER_ITEM_NOT_EXISTS = new ErrorCode(1_030_907_001, "调拨单明细{}不存在");
 }
