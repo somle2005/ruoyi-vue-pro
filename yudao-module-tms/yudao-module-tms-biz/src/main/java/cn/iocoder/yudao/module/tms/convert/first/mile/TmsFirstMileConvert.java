@@ -113,7 +113,6 @@ public class TmsFirstMileConvert {
                     itemDTO.setActualQty(item.getQty());//实际出库量
                     itemDTO.setCompanyId(item.getCompanyId());//库存公司
                     itemDTO.setDeptId(item.getDeptId()); //库存归属部门ID
-//                    itemDTO.setBinId(item.getBinId());   //TODO 出库库位
                     itemDTO.setRemark(item.getRemark());
                     return itemDTO;
                 }).collect(Collectors.toList());

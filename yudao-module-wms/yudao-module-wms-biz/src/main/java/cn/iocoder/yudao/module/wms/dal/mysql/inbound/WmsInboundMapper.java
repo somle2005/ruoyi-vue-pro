@@ -29,7 +29,7 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
                 .eqIfPresent(WmsInboundDO::getAuditStatus, reqVO.getAuditStatus())
                 .eqIfPresent(WmsInboundDO::getInboundStatus, reqVO.getInboundStatus())
                 .eqIfPresent(WmsInboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
-                .eqIfPresent(WmsInboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
+                .likeIfPresent(WmsInboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
                 .eqIfPresent(WmsInboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
                 .eqIfPresent(WmsInboundDO::getTraceNo, reqVO.getTraceNo())
                 .eqIfPresent(WmsInboundDO::getShippingMethod, reqVO.getShippingMethod())
