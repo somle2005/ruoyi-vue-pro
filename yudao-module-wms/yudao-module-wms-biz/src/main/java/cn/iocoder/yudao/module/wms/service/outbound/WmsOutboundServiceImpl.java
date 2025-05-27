@@ -55,6 +55,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -175,6 +176,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         if (warehouseIdSetOfBin.size() != 1) {
             throw exception(OUTBOUND_WAREHOUSE_ERROR);
         }
+        outboundDO.setUpstreamBillType(outboundDO.getType());
         if(!outboundDO.getUpstreamBillType().equals(SRM_PURCHASE_RETURN.getValue())) {
             Long warehouseId = StreamX.from(warehouseIdSetOfBin).first();
             if (!Objects.equals(warehouseId, outboundDO.getWarehouseId())) {
@@ -430,6 +432,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         outboundItemMapper.updateBatch(itemList);
         // 处理出库单状态
         WmsOutboundDO outboundDO = BeanUtils.toBean(outboundRespVO, WmsOutboundDO.class);
+        outboundDO.setOutboundTime(LocalDateTime.now());
         outboundMapper.updateById(outboundDO);
         //处理出货单逻辑
 
