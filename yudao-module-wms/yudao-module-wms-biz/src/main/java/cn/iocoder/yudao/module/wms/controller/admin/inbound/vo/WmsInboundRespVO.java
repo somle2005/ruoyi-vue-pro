@@ -131,7 +131,7 @@ public class WmsInboundRespVO {
     @ExcelProperty("来源单据号")
     private String upstreamBillCode;
 
-    @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
+    @Schema(description = "SYSTEM单据类型 ; BillType : 0-手工入库 , 1-采购入库 , 2-盘点入库", example = "")
     @ExcelProperty("WMS来源单据类型")
     private Integer upstreamBillType;
 
