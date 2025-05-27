@@ -1,10 +1,9 @@
 package cn.iocoder.yudao.module.wms.dal.dataobject.outbound;
 
-import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemSaveReqVO;
 import lombok.*;
-import java.util.*;
+
 import java.time.LocalDateTime;
-import java.time.LocalDateTime;
+
 import com.baomidou.mybatisplus.annotation.*;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 
@@ -64,6 +63,11 @@ public class WmsOutboundDO extends BaseDO {
      * 出库时间
      */
     private LocalDateTime outboundTime;
+
+    /**
+     * 计划出库时间
+     */
+    private LocalDateTime outboundPlanTime;
 
     /**
      * 出库动作ID，与flow关联

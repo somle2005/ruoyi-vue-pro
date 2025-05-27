@@ -67,5 +67,9 @@ public class WmsOutboundSimpleRespVO {
     @ExcelProperty("出库时间")
     private LocalDateTime outboundTime;
 
+    @Schema(description = "计划出库时间", example = "")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    @ExcelProperty("计划出库时间")
+    private LocalDateTime outboundPlanTime;
 
 }

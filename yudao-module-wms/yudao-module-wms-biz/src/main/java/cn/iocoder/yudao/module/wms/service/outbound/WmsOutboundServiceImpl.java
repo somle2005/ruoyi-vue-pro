@@ -207,14 +207,6 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Transactional(rollbackFor = Exception.class)
     public WmsOutboundRespVO generateOutbound(WmsOutboundImportReqVO importReqVO) {
 
-        WmsOutboundSaveReqVO createReqVO = BeanUtils.toBean(importReqVO, WmsOutboundSaveReqVO.class);
-//        //设置入库单号
-//        Long inboundId = importReqVO.getUpstreamBillId();
-//        WmsInboundDO inbound = inboundMapper.selectById(inboundId);
-//        if (inbound == null) {
-//            throw exception(INBOUND_NOT_EXISTS);
-//        }
-//        WmsInboundRespVO inboundVO = inboundService.getInboundWithItemList(inboundId);
         List<WmsOutboundItemSaveReqVO> itemList = BeanUtils.toBean(importReqVO.getItemList(), WmsOutboundItemSaveReqVO.class);
         //查库位
         for(WmsOutboundItemSaveReqVO item : itemList) {
@@ -225,9 +217,10 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             }
             item.setBinId(stockBin.getBinId());
         }
+        WmsOutboundSaveReqVO createReqVO = BeanUtils.toBean(importReqVO, WmsOutboundSaveReqVO.class);
         createReqVO.setItemList(itemList);
-        createReqVO.setUpstreamBillCode(importReqVO.getUpstreamBillCode());
-        createReqVO.setWarehouseId(importReqVO.getWarehouseId());
+//        createReqVO.setUpstreamBillCode(importReqVO.getUpstreamBillCode());
+//        createReqVO.setWarehouseId(importReqVO.getWarehouseId());
         WmsOutboundDO outboundDO = createOutbound(createReqVO);
         return BeanUtils.toBean(outboundDO, WmsOutboundRespVO.class);
     }

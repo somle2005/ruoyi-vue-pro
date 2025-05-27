@@ -88,6 +88,11 @@ public class WmsOutboundRespVO {
     @ExcelProperty("出库时间")
     private LocalDateTime outboundTime;
 
+    @Schema(description = "计划出库时间", example = "")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    @ExcelProperty("计划出库时间")
+    private LocalDateTime outboundPlanTime;
+
     @Schema(description = "出库动作ID，与flow关联", example = "")
     @ExcelProperty("出库动作ID")
     private Long latestOutboundActionId;
