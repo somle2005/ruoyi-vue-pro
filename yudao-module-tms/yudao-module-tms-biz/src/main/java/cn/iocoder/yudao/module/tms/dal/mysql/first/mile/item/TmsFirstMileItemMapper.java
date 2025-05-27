@@ -69,7 +69,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
         MPJLambdaWrapper<TmsFirstMileItemDO> lambdaWrapper = buildWrapper(vo.getItemPageReqVO())
             .leftJoin(TmsFirstMileDO.class, TmsFirstMileDO::getId, TmsFirstMileItemDO::getFirstMileId)
             .selectAll(TmsFirstMileDO.class)
-            .inIfPresent(TmsFirstMileDO::getId, vo.getMainQueryVO().getId()) // 头程单IDs
+            .eqIfPresent(TmsFirstMileDO::getId, vo.getMainQueryVO().getId()) // 头程单IDs
             .betweenIfPresent(TmsFirstMileDO::getCreateTime, vo.getMainQueryVO().getCreateTime()) // 创建时间范围
             .likeIfPresent(TmsFirstMileDO::getCode, vo.getMainQueryVO().getCode()) // 单据编号
             .betweenIfPresent(TmsFirstMileDO::getBillTime, vo.getMainQueryVO().getBillTime()) // 单据日期范围

@@ -19,12 +19,17 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @ToString(callSuper = true)
 public class TmsFirstMilePageReqVO extends PageParam {
 
+    @Schema(description = "嵌套用 - 头程单查询条件")
     private mainQueryVO mainQueryVO;
-    @Schema(description = "嵌套用 - 头程单明细分页查询条件")
+
+    @Schema(description = "嵌套用 - 头程单明细查询条件")
     private TmsFirstMileItemPageReqVO itemPageReqVO;
 
+    @Schema(description = "嵌套用 - 跟踪信息筛选 VO")
+    private TmsVesselTrackingQueryVO trackingQueryVO;
+
     @Data
-    @Schema(description = "主查询条件")
+    @Schema(description = "嵌套用 - 头程单查询条件")
     public static class mainQueryVO {
         @Schema(description = "id")
         private Long id;
@@ -110,9 +115,6 @@ public class TmsFirstMilePageReqVO extends PageParam {
         @Schema(description = "入库时间")
         private LocalDateTime[] inboundTime;
     }
-
-    @Schema(description = "嵌套用 - 跟踪信息筛选 VO")
-    private TmsVesselTrackingQueryVO trackingQueryVO;
 
     @Schema(description = "嵌套用 - 跟踪信息筛选 VO")
     @Data

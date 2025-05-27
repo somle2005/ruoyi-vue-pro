@@ -87,7 +87,7 @@ public class TmsVesselTrackingServiceImpl implements TmsVesselTrackingService {
      */
     @Override
     public TmsVesselTrackingDO getVesselTrackingByUpstreamIdAndUpstreamType(Long upstreamId, Integer upstreamType) {
-        return null;
+        return vesselTrackingMapper.getVesselTrackingByUpstreamIdAndUpstreamType(upstreamId, upstreamType);
     }
 
     @Override

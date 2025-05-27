@@ -23,14 +23,6 @@ public interface TmsFeeService {
      */
     List<Long> selectFirstMileIdsByFeePageReqVO(TmsFeePageReqVO reqVO);
 
-    /**
-     * 根据源ID获取费用列表
-     *
-     * @param sourceId   源ID
-     * @param sourceType 源类型
-     * @return 费用列表
-     */
-    List<TmsFeeDO> getFeeListBySourceId(Long sourceId, Integer sourceType);
 
     /**
      * 创建出运订单费用明细
@@ -60,11 +52,11 @@ public interface TmsFeeService {
     /**
      * 获得出运订单费用明细
      *
-     * @param id 编号
+     * @param sourceId 原单ID
      * @param sourceType 源类型
      * @return 出运订单费用明细
      */
-    List<TmsFeeDO> getFee(Long id, Integer sourceType);
+    List<TmsFeeDO> getFee(Long sourceId, Integer sourceType);
 
     /**
      * 获得出运订单费用明细分页
@@ -94,9 +86,15 @@ public interface TmsFeeService {
     /**
      * 批量删除出运订单费用明细
      *
-     * @param ids        费用ID
+     * @param ids        fee表IDs
      * @param sourceType 源类型
      */
     void deleteFeeList(List<Long> ids, Integer sourceType);
-
+    /**
+     * 批量删除出运订单费用明细,通过原单ID，原单类型
+     *
+     * @param sourceId   费用ID
+     * @param sourceType 源类型
+     */
+    Integer deleteFeeListBySourceIdAndSourceType(Long sourceId, Integer sourceType);
 }

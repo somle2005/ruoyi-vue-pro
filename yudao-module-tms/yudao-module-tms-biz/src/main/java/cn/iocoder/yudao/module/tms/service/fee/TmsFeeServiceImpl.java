@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.FEE_NOT_EXISTS;
@@ -45,8 +46,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
         // 校验存在
         validateFeeExists(updateReqVO.getId(), sourceType);
         // 更新
-        TmsFeeDO updateObj = BeanUtils.toBean(updateReqVO, TmsFeeDO.class);
-        updateObj.setSourceType(sourceType);
+        TmsFeeDO updateObj = BeanUtils.toBean(updateReqVO, TmsFeeDO.class, peek -> peek.setSourceType(sourceType));
         feeMapper.updateById(updateObj);
     }
 
@@ -59,14 +59,14 @@ public class TmsFeeServiceImpl implements TmsFeeService {
     }
 
     private void validateFeeExists(Long id, Integer sourceType) {
-        if (feeMapper.selectByIdAndType(id, sourceType) == null) {
-            throw exception(FEE_NOT_EXISTS);
+        if (feeMapper.selectBySourceIdAndSourceType(id, sourceType) == null) {
+            throw exception(FEE_NOT_EXISTS, id, Objects.requireNonNull(BillType.parse(sourceType)).getLabel());
         }
     }
 
     @Override
-    public List<TmsFeeDO> getFee(Long id, Integer sourceType) {
-        return feeMapper.selectByIdAndType(id, sourceType);
+    public List<TmsFeeDO> getFee(Long sourceId, Integer sourceType) {
+        return feeMapper.selectBySourceIdAndSourceType(sourceId, sourceType);
     }
 
     @Override
@@ -76,14 +76,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
 
     @Override
     public List<Long> selectFirstMileIdsByFeePageReqVO(TmsFeePageReqVO reqVO) {
-        // 设置源类型为头程单
-        reqVO.setSourceType(BillType.TMS_FIRST_MILE.getValue());
         return feeMapper.selectFirstMileIdsByFeePageReqVO(reqVO);
-    }
-
-    @Override
-    public List<TmsFeeDO> getFeeListBySourceId(Long sourceId, Integer sourceType) {
-        return feeMapper.selectListBySourceIdAndType(sourceId, sourceType);
     }
 
     @Override
@@ -121,6 +114,11 @@ public class TmsFeeServiceImpl implements TmsFeeService {
         // 校验存在
         ids.forEach(id -> validateFeeExists(id, sourceType));
         // 批量删除
-        feeMapper.deleteByIds(ids);
+        feeMapper.deleteBatchIdsBySourceType(ids, sourceType);
+    }
+
+    @Override
+    public Integer deleteFeeListBySourceIdAndSourceType(Long sourceId, Integer sourceType) {
+        return feeMapper.deleteBySourceIdAndSourceType(sourceId, sourceType);
     }
 }

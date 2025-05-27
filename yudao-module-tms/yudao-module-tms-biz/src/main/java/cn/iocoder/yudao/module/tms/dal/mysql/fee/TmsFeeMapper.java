@@ -63,9 +63,9 @@ public interface TmsFeeMapper extends BaseMapperX<TmsFeeDO> {
             .collect(Collectors.toList());
     }
 
-    default List<TmsFeeDO> selectByIdAndType(Long id, Integer sourceType) {
+    default List<TmsFeeDO> selectBySourceIdAndSourceType(Long id, Integer sourceType) {
         return selectList(new MPJLambdaWrapperX<TmsFeeDO>()
-            .eq(TmsFeeDO::getId, id)
+            .eq(TmsFeeDO::getSourceId, id)
             .eq(TmsFeeDO::getSourceType, sourceType));
     }
 
@@ -75,9 +75,21 @@ public interface TmsFeeMapper extends BaseMapperX<TmsFeeDO> {
             .eq(TmsFeeDO::getSourceType, sourceType));
     }
 
+    default void deleteBatchIdsBySourceType(List<Long> ids, Integer sourceType) {
+        delete(new MPJLambdaWrapperX<TmsFeeDO>()
+            .in(TmsFeeDO::getId, ids)
+            .eq(TmsFeeDO::getSourceType, sourceType));
+    }
     default int deleteBySourceIdAndType(Long sourceId, Integer sourceType) {
         return delete(new MPJLambdaWrapperX<TmsFeeDO>()
             .eq(TmsFeeDO::getSourceId, sourceId)
             .eq(TmsFeeDO::getSourceType, sourceType));
     }
+
+    default int deleteBySourceIdAndSourceType(Long sourceId, Integer sourceType) {
+        return delete(new MPJLambdaWrapperX<TmsFeeDO>()
+            .eq(TmsFeeDO::getSourceId, sourceId)
+            .eq(TmsFeeDO::getSourceType, sourceType));
+    }
+
 }

@@ -46,6 +46,14 @@ public interface TmsFirstMileService {
     void deleteFirstMile(Long id);
 
     /**
+     * 校验是否存在
+     *
+     * @param id id
+     * @return tmsFirstMileDO
+     */
+    TmsFirstMileDO validateFirstMileExists(Long id);
+
+    /**
      * 获得头程单
      *
      * @param id 编号
@@ -57,6 +65,7 @@ public interface TmsFirstMileService {
      * 获得头程单BO
      */
     TmsFirstMileBO getFirstMileBO(Long id);
+
     /**
      * 获得头程单分页BO
      *
@@ -66,7 +75,7 @@ public interface TmsFirstMileService {
     PageResult<TmsFirstMileBO> getFirstMileBOPage(TmsFirstMilePageReqVO pageReqVO);
 
     /**
-     * 获取最新的单据编号
+     * 获取最新可用的单据编号
      *
      * @return 单据编号
      */

@@ -64,7 +64,7 @@ public interface TmsErrorCodeConstants {
     ErrorCode FIRST_MILE_WMS_OUTBOUND_NOT_CAN_ABANDON = new ErrorCode(1_030_901_014, "反审核失败，头程单已生成出库单({}),不处于草稿状态,无法撤销");
 
     // ========== 费用明细 1-030-902-000 ==========
-    ErrorCode FEE_NOT_EXISTS = new ErrorCode(1_030_902_001, "费用不存在");
+    ErrorCode FEE_NOT_EXISTS = new ErrorCode(1_030_902_001, "费用不存在,ID={},类型={}");
 
     // ========== 头程单明细 1-030-903-000 ==========
     ErrorCode FIRST_MILE_ITEM_NOT_EXISTS = new ErrorCode(1_030_903_001, "头程单明细不存在");

@@ -310,7 +310,7 @@ public class TmsFirstMileController {
             }
             // 设置费用信息 1:N
             if (CollUtil.isNotEmpty(bo.getFees())) {
-                List<TmsFeeRespVO> tmsFeeRespVOS = TmsFirstMileConvert.convertFeeList(bo.getFees());
+                List<TmsFeeRespVO> tmsFeeRespVOS = BeanUtils.toBean(bo.getFees(), TmsFeeRespVO.class);
                 tmsFeeRespVOS.forEach(tmsFeeRespVO -> {
                     MapUtils.findAndThen(userMap, safeParseLong(tmsFeeRespVO.getUpdater()), user -> tmsFeeRespVO.setUpdater(user.getNickname()));
                     MapUtils.findAndThen(userMap, safeParseLong(tmsFeeRespVO.getCreator()), user -> tmsFeeRespVO.setCreator(user.getNickname()));
