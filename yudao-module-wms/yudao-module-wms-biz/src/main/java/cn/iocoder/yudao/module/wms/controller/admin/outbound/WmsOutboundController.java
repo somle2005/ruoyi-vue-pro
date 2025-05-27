@@ -101,6 +101,11 @@ public class WmsOutboundController {
         WmsOutboundRespVO outboundVO = outboundService.getOutboundWithItemList(id);
         // 装配出库仓位
         outboundItemService.assembleBin(outboundVO.getItemList());
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(List.of(outboundVO))
+                .mapping(WmsOutboundRespVO::getCreator, WmsOutboundRespVO::setCreatorName)
+                .mapping(WmsOutboundRespVO::getUpdater, WmsOutboundRespVO::setUpdaterName)
+                .fill();
         // 返回
         return success(outboundVO);
     }
