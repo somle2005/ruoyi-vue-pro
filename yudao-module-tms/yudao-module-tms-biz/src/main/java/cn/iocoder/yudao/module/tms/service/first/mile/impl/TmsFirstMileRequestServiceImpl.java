@@ -7,6 +7,7 @@ import cn.iocoder.yudao.framework.common.exception.ErrorCode;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -106,7 +107,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
             success = "创建了头程申请单【{{#vo.code}}】")
     public Long createFirstMileRequest(@Validated TmsFirstMileRequestSaveReqVO vo) {
         // 插入
-        TmsFirstMileRequestDO firstMileRequest = TmsFirstMileRequestConvert.convert(vo);
+        TmsFirstMileRequestDO firstMileRequest = BeanUtils.toBean(vo, TmsFirstMileRequestDO.class);
 
         // 计算主表的总重量和总体积
         List<TmsFirstMileRequestItemDO> requestItemDOS = TmsFirstMileRequestConvert.convertItemList(vo.getItems());
@@ -470,7 +471,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     public void updateFirstMileRequest(@Validated TmsFirstMileRequestSaveReqVO vo) {
         // 校验存在
         TmsFirstMileRequestDO oldDo = validateFirstMileRequestExists(vo.getId());
-        TmsFirstMileRequestDO updateObj = TmsFirstMileRequestConvert.convert(vo);
+        TmsFirstMileRequestDO updateObj = BeanUtils.toBean(vo, TmsFirstMileRequestDO.class);
 
         if (!Objects.equals(oldDo.getCode(), vo.getCode())) {
             validCodeDateIsToday(vo.getCode());

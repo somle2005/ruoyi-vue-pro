@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.tms.service.first.mile.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.ErrorCode;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
@@ -207,7 +208,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         //3.0 更新头程单费用子表
         if (vo.getFees() != null) {
-            updateFeeList(vo.getId(), BeanUtils.toBean(vo.getFees(), TmsFeeSaveReqVO.class));
+            updateFeeList(vo.getId(), vo.getFees());
         } else {
             // 如果费用列表为null，删除所有相关费用记录
             tmsFeeService.deleteFeeListBySourceIdAndSourceType(vo.getId(), SOURCE_TYPE);
@@ -574,7 +575,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
      * @param sourceId 上游ID
      * @param list     list
      */
-    private void updateFeeList(Long sourceId, List<TmsFeeSaveReqVO> list) {
+    private void updateFeeList(Long sourceId, List<? extends TmsFeeSaveReqVO> list) {
         if (CollUtil.isEmpty(list)) {
             return;
         }
@@ -583,7 +584,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         List<TmsFeeDO> oldList = feeService.getFee(sourceId, SOURCE_TYPE);
         List<TmsFeeDO> newList = BeanUtils.toBean(list, TmsFeeDO.class, peek -> peek.setSourceType(SOURCE_TYPE));
 
-        List<List<TmsFeeDO>> diffedList = CollectionUtils.diffList(oldList, newList, Object::equals);
+        List<List<TmsFeeDO>> diffedList = CollectionUtils.diffList(oldList, newList, (oldVal, newVal) -> ObjectUtil.equal(oldVal.getId(), newVal.getId()));
 
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
             diffedList.get(0).forEach(fee -> fee.setSourceId(sourceId));
