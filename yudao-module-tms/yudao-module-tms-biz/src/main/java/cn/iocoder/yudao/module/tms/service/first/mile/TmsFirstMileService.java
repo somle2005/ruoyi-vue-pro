@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.first.mile;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
@@ -10,7 +11,8 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
-import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Map;
@@ -29,14 +31,14 @@ public interface TmsFirstMileService {
      * @param createReqVO 创建信息
      * @return 编号
      */
-    Long createFirstMile(@Valid TmsFirstMileSaveReqVO createReqVO);
+    Long createFirstMile(@Validated(Validation.OnCreate.class) TmsFirstMileSaveReqVO createReqVO);
 
     /**
      * 更新头程单
      *
      * @param updateReqVO 更新信息
      */
-    void updateFirstMile(@Valid TmsFirstMileSaveReqVO updateReqVO);
+    void updateFirstMile(@Validated(Validation.OnUpdate.class) TmsFirstMileSaveReqVO updateReqVO);
 
     /**
      * 删除头程单
@@ -86,7 +88,7 @@ public interface TmsFirstMileService {
      *
      * @param ids 头程单IDs
      */
-    void submitAudit(List<Long> ids);
+    void submitAudit(@Size(min = 1, message = "至少提交审核一个头程单") List<Long> ids);
 
     /**
      * 审核|反审核

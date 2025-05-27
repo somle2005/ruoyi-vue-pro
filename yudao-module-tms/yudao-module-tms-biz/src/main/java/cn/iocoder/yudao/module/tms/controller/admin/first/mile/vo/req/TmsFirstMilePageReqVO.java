@@ -2,16 +2,15 @@ package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req;
 
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemPageReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingPageReqVO;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-
-import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 @Schema(description = "管理后台 - 头程单分页 Request VO")
 @Data
@@ -26,7 +25,7 @@ public class TmsFirstMilePageReqVO extends PageParam {
     private TmsFirstMileItemPageReqVO itemPageReqVO;
 
     @Schema(description = "嵌套用 - 跟踪信息筛选 VO")
-    private TmsVesselTrackingQueryVO trackingQueryVO;
+    private TmsVesselTrackingFirstMileQueryVO trackingQueryVO;
 
     @Data
     @Schema(description = "嵌套用 - 头程单查询条件")
@@ -67,9 +66,6 @@ public class TmsFirstMilePageReqVO extends PageParam {
         @Schema(description = "目的仓ID")
         private Long toWarehouseId;
 
-        @Schema(description = "提单号")
-        private String ladingNo;
-
         @Schema(description = "柜型（字典）")
         private Integer cabinetType;
 
@@ -78,12 +74,6 @@ public class TmsFirstMilePageReqVO extends PageParam {
 
         @Schema(description = "预计到货日期")
         private LocalDateTime[] arrivePlanTime;
-
-        @Schema(description = "预计送仓时间")
-        private LocalDateTime[] deliveryEstimateTime;
-
-        @Schema(description = "实际送仓时间")
-        private LocalDateTime[] deliveryActualTime;
 
         @Schema(description = "货柜体积（m³）")
         private BigDecimal[] totalVolume;
@@ -118,62 +108,18 @@ public class TmsFirstMilePageReqVO extends PageParam {
 
     @Schema(description = "嵌套用 - 跟踪信息筛选 VO")
     @Data
-    public static class TmsVesselTrackingQueryVO {
+    public static class TmsVesselTrackingFirstMileQueryVO extends TmsVesselTrackingPageReqVO {
+        @Schema(hidden = true)
+        @JsonIgnore
+        private Long id;
 
-        @Schema(description = "预计到港时间（ETA）")
-        @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-        private LocalDateTime[] arriveEstimateTime;
+        @Schema(hidden = true)
+        @JsonIgnore
+        private Integer upstreamType;
 
-        @Schema(description = "预计离港时间（ETD）")
-        @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-        private LocalDateTime[] departEstimateTime;
-
-        @Schema(description = "实际到港时间（ATA）")
-        @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-        private LocalDateTime[] arriveActualTime;
-
-        @Schema(description = "实际离港时间（ATD）")
-        @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-        private LocalDateTime[] departActualTime;
-
-        @Schema(description = "提柜时间")
-        @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-        private LocalDateTime[] pickupTime;
-
-        @Schema(description = "还柜时间")
-        @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-        private LocalDateTime[] returnTime;
-
-        @Schema(description = "数据来源（API渠道标识）")
-        private String apiSource;
-
-        @Schema(description = "最近同步时间")
-        @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-        private LocalDateTime[] lastSyncTime;
-
-        @Schema(description = "中转港")
-        private Long transitPort;
-
-        @Schema(description = "目的港")
-        private Long toPort;
-
-        @Schema(description = "装运港")
-        private Long fromPort;
-
-        @Schema(description = "船公司（供应商id）")
-        private Long carrierCompanyId;
-
-        @Schema(description = "船名")
-        private String vessel;
-
-        @Schema(description = "航次")
-        private String voyage;
-
-        @Schema(description = "货代公司(供应商ID)")
-        private Long forwarderCompanyId;
-
-        @Schema(description = "箱号")
-        private String containerNo;
+        @Schema(hidden = true)
+        @JsonIgnore
+        private Long upstreamId;
     }
 
 }

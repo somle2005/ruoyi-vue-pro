@@ -1,7 +1,9 @@
 package cn.iocoder.yudao.module.tms.service.fee;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.util.ObjectUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeePageReqVO;
@@ -92,8 +94,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
         return feeList.stream().map(TmsFeeDO::getId).toList();
     }
 
-    @Override
-    public void updateFeeList(List<TmsFeeDO> feeList, Integer sourceType) {
+    private void updateFeeList(List<TmsFeeDO> feeList, Integer sourceType) {
         if (CollUtil.isEmpty(feeList)) {
             return;
         }
@@ -103,6 +104,29 @@ public class TmsFeeServiceImpl implements TmsFeeService {
         feeList.forEach(fee -> fee.setSourceType(sourceType));
         // 批量更新
         feeMapper.updateBatch(feeList);
+    }
+
+    @Override
+    public void updateFeeList(Long sourceId, Integer sourceType, List<? extends TmsFeeSaveReqVO> list) {
+        if (CollUtil.isEmpty(list)) {
+            return;
+        }
+        List<TmsFeeDO> oldList = this.getFee(sourceId, sourceType);
+        List<TmsFeeDO> newList = BeanUtils.toBean(list, TmsFeeDO.class, peek -> peek.setSourceType(sourceType));
+
+        //截取ID来区分新增、更新、删除
+        List<List<TmsFeeDO>> diffedList = CollectionUtils.diffList(oldList, newList, (oldVal, newVal) -> ObjectUtil.equal(oldVal.getId(), newVal.getId()));
+
+        if (CollUtil.isNotEmpty(diffedList.get(0))) {
+            this.createFeeList(diffedList.get(0), sourceType);
+        }
+        if (CollUtil.isNotEmpty(diffedList.get(1))) {
+            this.updateFeeList(diffedList.get(1), sourceType);
+        }
+        if (CollUtil.isNotEmpty(diffedList.get(2))) {
+            List<Long> deleteIds = CollectionUtils.convertList(diffedList.get(2), TmsFeeDO::getId);
+            this.deleteFeeList(deleteIds, sourceType);
+        }
     }
 
     @Override

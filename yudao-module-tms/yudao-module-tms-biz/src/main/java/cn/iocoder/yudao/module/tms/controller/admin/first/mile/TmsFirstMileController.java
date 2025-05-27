@@ -78,7 +78,7 @@ public class TmsFirstMileController {
     @PostMapping("/create")
     @Operation(summary = "创建头程单")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:create')")
-    public CommonResult<Long> createFirstMile(@Validated(Validation.OnCreate.class) @RequestBody TmsFirstMileSaveReqVO vo) {
+    public CommonResult<Long> createFirstMile(@RequestBody TmsFirstMileSaveReqVO vo) {
         return success(firstMileService.createFirstMile(vo));
     }
 
