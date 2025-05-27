@@ -790,7 +790,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                             .upstreamBillId(inDO.getId())
                             .upstreamBillCode(inDO.getCode())
                             .warehouseId(warehouseId)
-                            .traceNo(inDO.getCode())
                             .itemList(inboundItems)
                             .build()
             );

@@ -56,6 +56,10 @@ public class WmsOutboundSaveReqVO {
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime outboundTime;
 
+    @Schema(description = "计划出库时间", example = "")
+    @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
+    private LocalDateTime outboundPlanTime;
+
     @Schema(description = "出库动作ID，与flow关联", example = "")
     private Long latestOutboundActionId;
 
