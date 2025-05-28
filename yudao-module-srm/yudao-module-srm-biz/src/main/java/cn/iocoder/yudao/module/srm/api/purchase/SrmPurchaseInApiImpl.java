@@ -81,11 +81,11 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
         purchaseInService.validatePurchaseInItemExists(reqDTO.getItemList().stream().map(SrmInboundItemReqDTO::getUpstreamItemId).collect(Collectors.toList()));
         reqDTO.getItemList().forEach(item -> {
             //消费
-            SrmPurchaseInItemCountDTO.builder()
+            SrmPurchaseInItemCountDTO build = SrmPurchaseInItemCountDTO.builder()
                 .inItemId(item.getUpstreamItemId())
                 .inCount(BigDecimal.valueOf(item.getActualQty()))
                 .build();
-            purchaseInItemStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STOCK_ADJUSTMENT, null);
+            purchaseInItemStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STOCK_ADJUSTMENT, build);
         });
     }
 
