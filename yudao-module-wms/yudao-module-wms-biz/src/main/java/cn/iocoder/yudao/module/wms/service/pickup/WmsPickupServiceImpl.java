@@ -168,7 +168,7 @@ public class WmsPickupServiceImpl implements WmsPickupService {
         Set<Long> warehouseIdSetOfBin = StreamX.from(wmsWarehouseBinDOList).toSet(WmsWarehouseBinDO::getWarehouseId);
         // 校验仓库
         if (warehouseIdSetOfInboundItem.size() != 1) {
-            throw exception(PICKUP_ITEM_INBOUND_ITEM_ID_WAREHOUSE_ID_NOT_SAME);
+            throw exception(PICKUP_ITEM_SINGLE_WAREHOUSE_ALLOW);
         }
         if (warehouseIdSetOfBin.size() != 1) {
             throw exception(PICKUP_ITEM_INBOUND_ITEM_ID_WAREHOUSE_ID_NOT_SAME);
@@ -218,7 +218,7 @@ public class WmsPickupServiceImpl implements WmsPickupService {
             // 保存详情
             pickupItemMapper.insertBatch(toInsetList);
             pickupItemMapper.updateBatch(toUpdateList);
-            pickupItemMapper.deleteBatchIds(toDeleteList);
+            pickupItemMapper.deleteByIds(toDeleteList);
         }
         // 更新
         WmsPickupDO pickup = BeanUtils.toBean(updateReqVO, WmsPickupDO.class);

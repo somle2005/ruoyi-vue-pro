@@ -147,7 +147,7 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
         WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
         approvalReqVO.setBillId(id);
         approvalReqVO.setComment(comment);
-        outboundService.approve(WmsOutboundAuditStatus.Event.ABANDON, approvalReqVO);
+        outboundService.forceAbandon(approvalReqVO);
     }
 
     @Override

@@ -145,6 +145,7 @@ public interface WmsErrorCodeConstants {
     ErrorCode PICKUP_ITEM_INBOUND_ITEM_ID_NOT_SAME = new ErrorCode(2_001_013_008, "拣货明细错误");
     ErrorCode INBOUND_ITEM_PICKUP_LEFT_QUANTITY_NOT_ENOUGH = new ErrorCode(2_001_013_008, "入库单明细的待上架库存不足");
     ErrorCode PICKUP_ITEM_QTY_ERROR = new ErrorCode(2_001_013_009, "拣货数量错误");
+    ErrorCode PICKUP_ITEM_SINGLE_WAREHOUSE_ALLOW = new ErrorCode(2_001_013_010, "只允许使用一个仓库");
 
     // ========== WMS_OUTBOUND_ITEM 出库单详情表 2_001_014_000 ==========
     ErrorCode OUTBOUND_ITEM_NOT_EXISTS = new ErrorCode(2_001_014_001, "出库单详情不存在");

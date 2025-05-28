@@ -12,6 +12,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -28,6 +29,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundPageR
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.item.WmsOutboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
@@ -41,6 +43,7 @@ import cn.iocoder.yudao.module.wms.dal.mysql.stock.bin.WmsStockBinMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
@@ -55,12 +58,14 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.system.enums.somle.BillType.SRM_PURCHASE_RETURN;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus.*;
 
 /**
  * 出库单 Service 实现类
@@ -112,6 +117,9 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     private FmsCompanyApi companyApi;
 
     @Resource
+    private SrmPurchaseReturnApi srmPurchaseReturnApi;
+
+    @Resource
     @Lazy
     private WmsInboundService inboundService;
 
@@ -127,9 +135,6 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Resource(name = OutboundStateMachineConfigure.STATE_MACHINE_NAME)
     private StateMachine<Integer, WmsOutboundAuditStatus.Event, TransitionContext<WmsOutboundDO>> outboundStateMachine;
 
-//    @Resource(name = SrmStateMachines.PURCHASE_OUT_ITEM_STORAGE_STATE_MACHINE)
-//    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> purchaseOutCountDTOStateMachine;
-//
     /**
      * @sign : A523E13094CD30CE
      */
@@ -225,6 +230,23 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
 //        createReqVO.setWarehouseId(importReqVO.getWarehouseId());
         WmsOutboundDO outboundDO = createOutbound(createReqVO);
         return BeanUtils.toBean(outboundDO, WmsOutboundRespVO.class);
+    }
+
+    /**
+     * 强制作废出库单
+     */
+    @Override
+    public void forceAbandon(WmsApprovalReqVO approvalReqVO) {
+        // 获得业务对象
+        WmsOutboundDO outbound = validateOutboundExists(approvalReqVO.getBillId());
+        if(outbound.getAuditStatus().equals(AUDITING.getValue())){
+            approve(WmsOutboundAuditStatus.Event.REJECT, approvalReqVO);
+        }
+        if(outbound.getAuditStatus().equals(DRAFT.getValue())||outbound.getAuditStatus().equals(REJECT.getValue())){
+            approve(WmsOutboundAuditStatus.Event.ABANDON, approvalReqVO);
+        }else{
+            throw exception(OUTBOUND_ABANDON_NOT_ALLOWED);
+        }
     }
 
 
@@ -435,16 +457,12 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         outboundDO.setOutboundTime(LocalDateTime.now());
         outboundMapper.updateById(outboundDO);
         //处理出货单逻辑
-
-//        if (outboundRespVO.getUpstreamBillType() != null && outboundRespVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
-//            //触发出货单明细行 状态机
-//            //如果成功创建出库单-触发SRM入库数量联动
-//            outboundRespVO.getItemList().forEach(outItem -> {
-//                purchaseOutCountDTOStateMachine.fireEvent(SrmStorageStatus.ALL_IN_STORAGE
-//                        , SrmEventEnum.STOCK_ADJUSTMENT
-//                        , SrmPurchaseOutItemCountDTO.builder().outItemId(outItem.getUpstreamItemId()).outCount(BigDecimal.valueOf(outItem.getActualQty())).build());
-//            });
-//        }
+        itemList.forEach(
+            item -> {
+                //触发采购退货单明细行 状态机
+                srmPurchaseReturnApi.updatePurchaseReturnItemQty(item.getProductId(), BigDecimal.valueOf(item.getActualQty()));
+            }
+        );
     }
 
     @Override

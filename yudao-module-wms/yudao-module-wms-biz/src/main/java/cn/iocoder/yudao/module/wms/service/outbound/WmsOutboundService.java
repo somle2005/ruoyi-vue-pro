@@ -84,4 +84,6 @@ public interface WmsOutboundService {
     List<WmsOutboundDO> getOutboundList(Integer upstreamBillType, Long upstreamBillId);
 
     WmsOutboundRespVO generateOutbound(WmsOutboundImportReqVO importReqVO);
+
+    void forceAbandon(WmsApprovalReqVO approvalReqVO);
 }

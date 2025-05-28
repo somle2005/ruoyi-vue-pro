@@ -47,8 +47,8 @@ public interface WmsOutboundApi {
 
     /**
      * 根据入库单生成出库单
-     * @param importReqVO
-     * @return
+     * @param importReqVO 入参
+     * @return 出参
      */
     WmsOutboundDTO generateOutbound(WmsOutboundImportReqDTO importReqVO);
 }

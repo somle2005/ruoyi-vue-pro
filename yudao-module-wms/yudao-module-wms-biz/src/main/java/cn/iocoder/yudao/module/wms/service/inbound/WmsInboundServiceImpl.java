@@ -407,7 +407,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         if (inboundRespVO.getUpstreamBillType() != null && inboundRespVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
             //触发到货单明细行 状态机
             //如果成功创建入库单-触发SRM入库数量联动
-//            srmPurchaseInApi.updatePurchaseInItemQty(BeanUtils.toBean(inboundDO, WmsInboundDTO.class));
+            srmPurchaseInApi.updatePurchaseInItemQty(BeanUtils.toBean(inboundDO, WmsInboundDTO.class));
         }
 
     }

@@ -841,6 +841,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                             .itemList(inboundItems)
                             .auditStatus(WmsInboundAuditStatus.DRAFT.getValue())
                             .companyId(companyIds.iterator().next())
+                            .arrivalPlanTime(inDO.getInTime())
                             .build()
             );
             log.info("采购到货单[{}]审核通过，创建入库单，ID: {}", inDO.getCode(), inbound);
