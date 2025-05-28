@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.tms.controller.admin.transfer.vo;
 
+import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsWarehourseRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -8,11 +9,15 @@ import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Schema(description = "管理后台 - 调拨单 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class TmsTransferRespVO {
+
+    @Schema(description = "主键")
+    private Long id;
 
     @Schema(description = "乐观锁")
     @ExcelProperty("乐观锁")
@@ -34,17 +39,23 @@ public class TmsTransferRespVO {
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
 
-    @Schema(description = "调拨单编码", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "调拨单编码")
     @ExcelProperty("调拨单编码")
     private String code;
 
-    @Schema(description = "发出仓库ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "发出仓库ID")
     @ExcelProperty("发出仓库ID")
     private Long fromWarehouseId;
 
-    @Schema(description = "目的仓库ID", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "发出仓库")
+    private TmsWarehourseRespVO fromWarehouse;
+
+    @Schema(description = "目的仓库ID")
     @ExcelProperty("目的仓库ID")
     private Long toWarehouseId;
+
+    @Schema(description = "目的仓库")
+    private TmsWarehourseRespVO toWarehouse;
 
     @Schema(description = "审核人ID")
     @ExcelProperty("审核人ID")
@@ -123,5 +134,5 @@ public class TmsTransferRespVO {
     private String inboundCode;
 
     @Schema(description = "调拨单明细")
-    private TmsTransferItemRespVO item;
+    private List<TmsTransferItemRespVO> items;
 }

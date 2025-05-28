@@ -1,7 +1,5 @@
 package cn.iocoder.yudao.module.tms.service.transfer.item;
 
-import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemDO;
 import jakarta.validation.Valid;
@@ -45,13 +43,6 @@ public interface TmsTransferItemService {
      */
     TmsTransferItemDO getTransferItem(Long id);
 
-    /**
-     * 获得调拨单明细分页
-     *
-     * @param pageReqVO 分页查询
-     * @return 调拨单明细分页
-     */
-    PageResult<TmsTransferItemDO> getTransferItemPage(TmsTransferItemPageReqVO pageReqVO);
 
     /**
      * 根据调拨单ID获取明细列表

@@ -4,11 +4,9 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.tms.controller.admin.transfer.vo.*;
-import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.TmsTransferDO;
 import cn.iocoder.yudao.module.tms.service.transfer.TmsTransferService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -65,16 +63,14 @@ public class TmsTransferController {
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('tms:transfer:query')")
     public CommonResult<TmsTransferRespVO> getTransfer(@RequestParam("id") Long id) {
-        TmsTransferDO transfer = transferService.getTransfer(id);
-        return success(BeanUtils.toBean(transfer, TmsTransferRespVO.class));
+        return success(transferService.getTransferRespVO(id));
     }
 
     @PostMapping("/page")
     @Operation(summary = "获得调拨单分页")
     @PreAuthorize("@ss.hasPermission('tms:transfer:query')")
     public CommonResult<PageResult<TmsTransferRespVO>> getTransferPage(@RequestBody TmsTransferPageReqVO pageReqVO) {
-        PageResult<TmsTransferDO> pageResult = transferService.getTransferPage(pageReqVO);
-        return success(BeanUtils.toBean(pageResult, TmsTransferRespVO.class));
+        return success(transferService.getTmsTransferRespVOPage(pageReqVO));
     }
 
     @GetMapping("/export-excel")
@@ -83,9 +79,9 @@ public class TmsTransferController {
     @ApiAccessLog(operateType = EXPORT)
     public void exportTransferExcel(TmsTransferPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<TmsTransferDO> list = transferService.getTransferPage(pageReqVO).getList();
+        List<TmsTransferRespVO> respVOList = transferService.getTmsTransferRespVOPage(pageReqVO).getList();
         // 导出 Excel
-        ExcelUtils.write(response, "调拨单.xls", "数据", TmsTransferRespVO.class, BeanUtils.toBean(list, TmsTransferRespVO.class));
+        ExcelUtils.write(response, "调拨单.xls", "数据", TmsTransferRespVO.class, respVOList);
     }
 
     @PostMapping("/import-excel")

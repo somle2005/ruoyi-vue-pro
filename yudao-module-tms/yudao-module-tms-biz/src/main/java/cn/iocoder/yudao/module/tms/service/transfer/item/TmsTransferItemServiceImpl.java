@@ -1,9 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.transfer.item;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.transfer.item.TmsTransferItemMapper;
@@ -65,11 +63,6 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     @Override
     public TmsTransferItemDO getTransferItem(Long id) {
         return transferItemMapper.selectById(id);
-    }
-
-    @Override
-    public PageResult<TmsTransferItemDO> getTransferItemPage(TmsTransferItemPageReqVO pageReqVO) {
-        return transferItemMapper.selectPage(pageReqVO);
     }
 
     @Override

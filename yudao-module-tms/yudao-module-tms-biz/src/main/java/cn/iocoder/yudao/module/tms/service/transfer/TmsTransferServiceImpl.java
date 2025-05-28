@@ -2,27 +2,38 @@ package cn.iocoder.yudao.module.tms.service.transfer;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
+import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsCompanyRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsWarehourseRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemSaveReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.transfer.vo.TmsTransferAuditReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.transfer.vo.TmsTransferOffStatusReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.transfer.vo.TmsTransferPageReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.transfer.vo.TmsTransferSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.transfer.vo.*;
+import cn.iocoder.yudao.module.tms.convert.transfer.TmsTransferConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.TmsTransferDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.transfer.TmsTransferMapper;
+import cn.iocoder.yudao.module.tms.dal.mysql.transfer.item.TmsTransferItemMapper;
+import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferBO;
+import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferItemBO;
 import cn.iocoder.yudao.module.tms.service.transfer.item.TmsTransferItemService;
+import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
@@ -45,6 +56,12 @@ public class TmsTransferServiceImpl implements TmsTransferService {
 
     @Resource
     private ErpProductApi erpProductApi;
+    @Autowired
+    private TmsTransferItemMapper tmsTransferItemMapper;
+    @Autowired
+    private FmsCompanyApi fmsCompanyApi;
+    @Autowired
+    private WmsWarehouseApi wmsWarehouseApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -181,6 +198,107 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     }
 
     @Override
+    public TmsTransferBO getTransferBO(Long id) {
+        TmsTransferDO tmsTransferDO = transferMapper.selectById(id);
+        List<TmsTransferItemDO> itemDOList = transferItemService.getTransferItemListByTransferId(id);
+        return BeanUtils.toBean(tmsTransferDO, TmsTransferBO.class, p -> p.setTmsTransferItemDOList(itemDOList));
+    }
+
+    @Override
+    public TmsTransferRespVO getTransferRespVO(Long id) {
+        TmsTransferBO bo = getTransferBO(id);
+        if (bo == null) {
+            return null;
+        }
+
+        TmsTransferRespVO respVO = BeanUtils.toBean(bo, TmsTransferRespVO.class);
+        List<TmsTransferItemRespVO> itemVOs = BeanUtils.toBean(bo.getTmsTransferItemDOList(), TmsTransferItemRespVO.class);
+        respVO.setItems(itemVOs);
+
+        assembleProducts(itemVOs);
+        assembleCompany(itemVOs);
+        assembleWarehouse(Collections.singletonList(respVO));
+
+        return respVO;
+    }
+
+    /**
+     * 装配产品信息
+     */
+    private void assembleProducts(List<TmsTransferItemRespVO> itemList) {
+        Map<Long, ErpProductDTO> productDTOMap = erpProductApi.getProductMap(StreamX.from(itemList).map(TmsTransferItemRespVO::getProductId).toList());
+        Map<Long, TmsProductRespVO> productVOMap = StreamX.from(productDTOMap.values()).toMap(ErpProductDTO::getId, product -> BeanUtils.toBean(product, TmsProductRespVO.class));
+        StreamX.from(itemList).assemble(productVOMap, TmsTransferItemRespVO::getProductId, TmsTransferItemRespVO::setProduct);
+    }
+
+    /**
+     * 装配公司信息
+     */
+    private void assembleCompany(List<TmsTransferItemRespVO> itemList) {
+        Map<Long, FmsCompanyDTO> companyMap = fmsCompanyApi.getCompanyMap(StreamX.from(itemList).map(TmsTransferItemRespVO::getStockCompanyId).toSet());
+        Map<Long, TmsCompanyRespVO> companyVOMap = StreamX.from(companyMap.values()).toMap(FmsCompanyDTO::getId, company -> BeanUtils.toBean(company, TmsCompanyRespVO.class));
+        StreamX.from(itemList).assemble(companyVOMap, TmsTransferItemRespVO::getStockCompanyId, TmsTransferItemRespVO::setStockCompany);
+    }
+
+    /**
+     * 装配仓库信息
+     */
+    private void assembleWarehouse(List<TmsTransferRespVO> transferList) {
+        Set<Long> warehouseIds = transferList.stream()
+            .flatMap(transfer -> Stream.of(transfer.getFromWarehouseId(), transfer.getToWarehouseId()))
+            .collect(Collectors.toSet());
+
+        Map<Long, TmsWarehourseRespVO> warehouseMap = wmsWarehouseApi.getWarehouseMap(new ArrayList<>(warehouseIds)).entrySet().stream()
+            .collect(Collectors.toMap(Map.Entry::getKey, entry -> BeanUtils.toBean(entry.getValue(), TmsWarehourseRespVO.class)));
+
+        StreamX.from(transferList).assemble(warehouseMap, TmsTransferRespVO::getFromWarehouseId, TmsTransferRespVO::setFromWarehouse);
+        StreamX.from(transferList).assemble(warehouseMap, TmsTransferRespVO::getToWarehouseId, TmsTransferRespVO::setToWarehouse);
+    }
+
+    /**
+     * 装配调拨单VO的关联数据
+     *
+     * @param list 调拨单BO列表
+     * @return 装配后的VO列表
+     */
+    private List<TmsTransferRespVO> assembleTransferVOList(List<TmsTransferBO> list) {
+        if (CollUtil.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        List<TmsTransferRespVO> respVOList = list.stream().map(bo -> {
+            TmsTransferRespVO respVO = BeanUtils.toBean(bo, TmsTransferRespVO.class);
+            List<TmsTransferItemRespVO> itemVOs = BeanUtils.toBean(bo.getTmsTransferItemDOList(), TmsTransferItemRespVO.class);
+            respVO.setItems(itemVOs);
+            return respVO;
+        }).toList();
+
+        List<TmsTransferItemRespVO> allItems = respVOList.stream()
+            .flatMap(vo -> vo.getItems().stream())
+            .toList();
+
+        assembleProducts(allItems);
+        assembleCompany(allItems);
+        assembleWarehouse(respVOList);
+
+        return respVOList;
+    }
+
+    @Override
+    public PageResult<TmsTransferBO> getTransferBOPage(TmsTransferPageReqVO pageReqVO) {
+        // 1. 获取子表分页数据
+        PageResult<TmsTransferItemBO> pageResult = tmsTransferItemMapper.selectBOPage(pageReqVO);
+        if (pageResult.getList().isEmpty()) {
+            return new PageResult<>(Collections.emptyList(), pageResult.getTotal());
+        }
+
+        // 2. 转换为BO对象列表
+        List<TmsTransferBO> boList = TmsTransferConvert.convertBOList(pageResult.getList());
+
+        // 3. 返回分页结果
+        return new PageResult<>(boList, pageResult.getTotal());
+    }
+
+    @Override
     public TmsTransferDO validateTransferExists(Long id) {
         TmsTransferDO transfer = transferMapper.selectById(id);
         if (transfer == null) {
@@ -190,8 +308,15 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     }
 
     @Override
-    public PageResult<TmsTransferDO> getTransferPage(TmsTransferPageReqVO pageReqVO) {
-        return null;
+    public PageResult<TmsTransferRespVO> getTmsTransferRespVOPage(TmsTransferPageReqVO pageReqVO) {
+        PageResult<TmsTransferBO> boPageResult = this.getTransferBOPage(pageReqVO);
+        if (boPageResult.getList().isEmpty()) {
+            return new PageResult<>(Collections.emptyList(), boPageResult.getTotal());
+        }
+
+        List<TmsTransferRespVO> respVOList = assembleTransferVOList(boPageResult.getList());
+
+        return new PageResult<>(respVOList, boPageResult.getTotal());
     }
 
     @Override

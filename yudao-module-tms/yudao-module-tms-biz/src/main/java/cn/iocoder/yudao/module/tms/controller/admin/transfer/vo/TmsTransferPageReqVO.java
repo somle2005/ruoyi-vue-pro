@@ -25,7 +25,12 @@ public class TmsTransferPageReqVO extends PageParam {
     private TmsTransferItemPageReqVO itemQueryVo;
 
 
+    @Data
     public static class MainQueryVo {
+
+        @Schema(description = "主键")
+        private Long id;
+
         @Schema(description = "创建人ID")
         private String creator;
 
