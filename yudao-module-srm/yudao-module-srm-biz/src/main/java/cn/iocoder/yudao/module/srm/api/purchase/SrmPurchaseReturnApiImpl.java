@@ -1,14 +1,18 @@
 package cn.iocoder.yudao.module.srm.api.purchase;
 
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnItemDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmOutboundItemReqDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmOutboundReqDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutItemCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmOutboundStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
@@ -18,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME;
@@ -33,7 +38,7 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
     @Lazy
     private SrmPurchaseReturnService purchaseReturnService;
     @Resource(name = PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> stateMachine;
+    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> srmOutboundStateMachine;
 
     @Override
     public List<SrmPurchaseReturnDTO> getPurchaseReturnList(List<Long> ids) {
@@ -105,8 +110,30 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
     }
 
 
+    /**
+     * 状态机-变动退货项-退货数量
+     * <p>
+     * 出库单审核后回调
+     *
+     * @param reqDTO reqDTO
+     */
     @Override
-    public void updatePurchaseReturnItemQty(Long returnItemId, BigDecimal qty) {
-        stateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.OUT_STORAGE_ADJUSTMENT, SrmPurchaseOutItemCountDTO.builder().outItemId(returnItemId).outCount(qty).build());
+    public void updatePurchaseReturnItemQty(@Validated SrmOutboundReqDTO reqDTO) {
+        //校验
+        if (!Objects.equals(reqDTO.getUpstreamBillType(), BillType.SRM_PURCHASE_RETURN.getValue())) {
+            throw new IllegalArgumentException(StrUtil.format("出库单审核回调SrmOutboundReqDTO，上游类型({})不是退货单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamBillType())).getLabel()));
+        }
+        //校验item存在
+        List<Long> itemIds = reqDTO.getItems().stream().map(SrmOutboundItemReqDTO::getUpstreamItemId).collect(Collectors.toList());
+        List<SrmPurchaseReturnItemDO> items = purchaseReturnService.validatePurchaseReturnItemExists(itemIds);
+
+        //消费
+        reqDTO.getItems().forEach(item -> {
+            SrmPurchaseOutItemCountDTO build = SrmPurchaseOutItemCountDTO.builder()
+                .outItemId(item.getUpstreamItemId())
+                .outCount(BigDecimal.valueOf(item.getActualQty()))
+                .build();
+            srmOutboundStateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.STOCK_ADJUSTMENT, build);
+        });
     }
 }

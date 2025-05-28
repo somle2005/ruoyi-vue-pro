@@ -1,13 +1,15 @@
 package cn.iocoder.yudao.module.srm.api.purchase;
 
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmOutboundReqDTO;
+import org.springframework.validation.annotation.Validated;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 /**
  * 采购退货单 API 接口
  */
+@Validated
 public interface SrmPurchaseReturnApi {
 
     /**
@@ -21,9 +23,8 @@ public interface SrmPurchaseReturnApi {
 
     /**
      * 状态机-变动退货项-退货数量
-     *
-     * @param returnItemId 采购退货明细编号(上游明细ID)
-     * @param qty          退货数量(正进-负减)
+     *<p>
+     * 出库单审核后回调
      */
-    void updatePurchaseReturnItemQty(Long returnItemId, BigDecimal qty);
+    void updatePurchaseReturnItemQty(SrmOutboundReqDTO reqDTO);
 } 

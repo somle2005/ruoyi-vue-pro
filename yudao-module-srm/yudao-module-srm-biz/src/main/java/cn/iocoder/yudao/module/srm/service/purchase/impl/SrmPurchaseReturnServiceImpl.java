@@ -731,4 +731,17 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
             return itemDTO;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public List<SrmPurchaseReturnItemDO> validatePurchaseReturnItemExists(List<Long> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        List<SrmPurchaseReturnItemDO> items = purchaseReturnItemMapper.selectListByIds(ids);
+        //检验是否和ids数量一致，报错未对应退货项
+        if (items.size() != ids.size()) {
+            throw exception(PURCHASE_RETURN_ITEM_NOT_EXISTS, CollUtil.subtract(ids, CollUtil.newArrayList(items.stream().map(SrmPurchaseReturnItemDO::getId).collect(Collectors.toSet()))));
+        }
+        return items;
+    }
 }

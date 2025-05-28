@@ -87,6 +87,14 @@ public interface SrmPurchaseReturnService {
     // ==================== 采购退货项 ====================
 
     /**
+     * 校验采购退货项是否存在
+     *
+     * @param ids 采购退货项编号列表
+     * @return 采购退货项列表
+     */
+    List<SrmPurchaseReturnItemDO> validatePurchaseReturnItemExists(List<Long> ids);
+
+    /**
      * 获得采购退货项列表
      *
      * @param returnId 采购退货编号
