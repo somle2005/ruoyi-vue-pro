@@ -456,13 +456,6 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         WmsOutboundDO outboundDO = BeanUtils.toBean(outboundRespVO, WmsOutboundDO.class);
         outboundDO.setOutboundTime(LocalDateTime.now());
         outboundMapper.updateById(outboundDO);
-        //处理出货单逻辑
-        itemList.forEach(
-            item -> {
-                //触发采购退货单明细行 状态机
-                srmPurchaseReturnApi.updatePurchaseReturnItemQty(item.getProductId(), BigDecimal.valueOf(item.getActualQty()));
-            }
-        );
     }
 
     @Override

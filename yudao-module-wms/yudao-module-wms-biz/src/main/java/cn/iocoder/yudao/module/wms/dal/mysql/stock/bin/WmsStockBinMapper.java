@@ -82,7 +82,8 @@ public interface WmsStockBinMapper extends BaseMapperX<WmsStockBinDO> {
                 .selectAll(WmsStockBinDO.class)
                 .select(WmsWarehouseBinDO::getPickingOrder)
                 .orderByAsc(WmsWarehouseBinDO::getPickingOrder)
-               .orderByDesc(WmsStockBinDO::getUpdateTime);
+                .orderByDesc(WmsStockBinDO::getUpdateTime)
+                .last("limit 1");
         return selectOne(wrapper);
     }
 

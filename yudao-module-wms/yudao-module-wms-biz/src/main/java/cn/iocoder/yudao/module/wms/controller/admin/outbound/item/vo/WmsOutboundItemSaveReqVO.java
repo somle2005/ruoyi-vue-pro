@@ -10,6 +10,8 @@ import jakarta.validation.constraints.*;
 import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 
+import java.util.List;
+
 /**
  * @table-fields : company_id,outbound_status,actual_qty,bin_id,plan_qty,product_id,upstream_item_id,remark,id,dept_id,outbound_id
  */

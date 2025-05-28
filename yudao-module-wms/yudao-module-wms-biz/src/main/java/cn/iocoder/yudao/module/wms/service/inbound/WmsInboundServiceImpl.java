@@ -11,6 +11,7 @@ import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmInboundReqDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.inItem.SrmPurchaseInItemCountDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
@@ -75,8 +76,6 @@ import static java.lang.Boolean.FALSE;
  */
 @Service
 public class WmsInboundServiceImpl implements WmsInboundService {
-
-    private SrmPurchaseInApi srmPurchaseInApi;
 
     @Resource
     @Lazy
@@ -401,12 +400,6 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         updateStockFlow(inboundRespVO, inboundDO);
         //更新在途数
         updateTransitQty(inboundDO, itemList);
-        //处理到货单逻辑
-        if (inboundRespVO.getUpstreamBillType() != null && inboundRespVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
-            //触发到货单明细行 状态机
-            //如果成功创建入库单-触发SRM入库数量联动
-            srmPurchaseInApi.updatePurchaseInItemQty();
-        }
 
     }
 

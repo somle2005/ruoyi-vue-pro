@@ -32,8 +32,6 @@ import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 @Slf4j
 public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext> {
 
-    private SrmPurchaseReturnApi srmPurchaseReturnApi;
-
     @Resource
     protected WmsOutboundService outboundService;
 
@@ -104,12 +102,9 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
             }
 
 
-
-
             // 执行出库的原子操作
             Integer quantity= getExecuteQty(item);
             outboundSingleItem(outboundRespVO,item,companyId, deptId, warehouseId, item.getBinId(),productId, quantity, outboundRespVO.getId(), item.getId());
-            srmPurchaseReturnApi.updatePurchaseReturnItemQty(item.getUpstreamItemId(), BigDecimal.valueOf(item.getActualQty()));
         }
         updateOutbound(outboundRespVO);
         // 完成最终的出库

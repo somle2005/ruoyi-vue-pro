@@ -76,13 +76,13 @@ public class StorageInItemActionImpl implements Action<SrmStorageStatus, SrmEven
         srmPurchaseInItemMapper.updateById(srmPurchaseInItemDO.setInStatus(to.getCode()));
 
         //1. 转递给主单?
-        pushInStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.ORDER_ADJUSTMENT
+        pushInStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STOCK_ADJUSTMENT
                 , SrmPurchaseInCountDTO.builder().inId(srmPurchaseInItemDO.getInId()).build());
         //2. 传递事件给订单项, 入库状态
         if (event != SrmEventEnum.ORDER_INIT) {
             SrmPurchaseOrderItemDO srmPurchaseOrderItemDO = srmPurchaseOrderService.getPurchaseOrderItemList(Collections.singleton(srmPurchaseInItemDO.getOrderItemId())).get(0);
             orderItemStorageStateMachine.fireEvent(SrmStorageStatus.fromCode(srmPurchaseOrderItemDO.getInStatus())
-                    , SrmEventEnum.ORDER_ADJUSTMENT
+                    , SrmEventEnum.STOCK_ADJUSTMENT
                     , SrmOrderInCountDTO.builder().orderItemId(srmPurchaseInItemDO.getOrderItemId()).returnCount(context.getInCount()).build());
         }
 

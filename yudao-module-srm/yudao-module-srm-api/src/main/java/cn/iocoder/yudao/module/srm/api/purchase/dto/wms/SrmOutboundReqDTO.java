@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.srm.api.purchase.dto.wms;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 import org.springframework.validation.annotation.Validated;
 
@@ -57,5 +58,6 @@ public class SrmOutboundReqDTO {
     /**
      * 出库单明细
      */
+    @Size(min = 1, message = "SRM至WMS的出库单明细不能为空")
     private List<SrmOutboundItemReqDTO> items;
 }

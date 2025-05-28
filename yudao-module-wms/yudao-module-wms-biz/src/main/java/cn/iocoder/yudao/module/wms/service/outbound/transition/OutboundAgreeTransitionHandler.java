@@ -3,12 +3,23 @@ package cn.iocoder.yudao.module.wms.service.outbound.transition;
 
 
 import cn.iocoder.yudao.framework.cola.statemachine.builder.TransitionContext;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmOutboundReqDTO;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
+import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.quantity.OutboundSubmitExecutor;
 import cn.iocoder.yudao.module.wms.service.quantity.context.OutboundContext;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.List;
 
 
 /**
@@ -22,6 +33,9 @@ public class OutboundAgreeTransitionHandler extends BaseOutboundTransitionHandle
     @Resource
     private OutboundSubmitExecutor outboundSubmitExecutor;
 
+    @Resource
+    private SrmPurchaseReturnApi srmPurchaseReturnApi;
+
     @Override
     public void perform(Integer from, Integer to, WmsOutboundAuditStatus.Event event, TransitionContext<WmsOutboundDO> context) {
         super.perform(from, to, event, context);
@@ -29,6 +43,10 @@ public class OutboundAgreeTransitionHandler extends BaseOutboundTransitionHandle
         OutboundContext outboundContext = new OutboundContext();
         outboundContext.setOutboundId(context.data().getId());
         outboundSubmitExecutor.execute(outboundContext);
-
+        WmsOutboundRespVO outboundVO = outboundService.getOutboundWithItemList(context.data().getId());
+        //更新SRM退货状态机
+        if(outboundVO.getUpstreamBillType()!=null && outboundVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_RETURN.getValue())) {
+                srmPurchaseReturnApi.updatePurchaseReturnItemQty(BeanUtils.toBean(outboundVO, SrmOutboundReqDTO.class));
+        }
     }
 }
