@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.order.SrmOrderItemOffDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.request.SrmRequestInDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
@@ -51,7 +52,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     private StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecutionStateMachine;
 
     @Resource(name = PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
-    private StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemOffStateMachine;
+    private StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> orderItemOffStateMachine;
 
     //入库项(->入库主单)->订单项(->订单主单)->申请项(->订单主单)
     @Override
@@ -78,7 +79,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
         }
 
         if (event == SrmEventEnum.STORAGE_INIT) {
-
+            //
         }
 
         if (event == SrmEventEnum.STOCK_ADJUSTMENT) {
@@ -156,7 +157,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
         //&& Objects.equals(orderItemDO.getPayStatus(),SrmPaymentStatus.ALL_PAYMENT.getCode())
         if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode())) {
             // 当前订单项，完全入库  -> 关闭订单项
-            orderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, orderItemDO);
+            orderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, new SrmOrderItemOffDTO().setItemId(orderItemDO.getId()));
         }
     }
 }
