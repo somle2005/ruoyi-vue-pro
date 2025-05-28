@@ -10,7 +10,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductUnitApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmQuantityOrderedCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.request.SrmRequestInDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.request.SrmRequestInMachineDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.SrmPurchaseOrderSaveReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.*;
 import cn.iocoder.yudao.module.srm.convert.purchase.SrmOrderConvert;
@@ -95,7 +95,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     @Resource(name = PURCHASE_REQUEST_ITEM_ORDER_STATE_MACHINE_NAME)
     StateMachine<SrmOrderStatus, SrmEventEnum, SrmQuantityOrderedCountDTO> orderItemMachine;
     @Resource(name = PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInDTO> storageItemMachine;
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInMachineDTO> storageItemMachine;
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_REQUEST_TYPE,
@@ -149,7 +149,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             orderItemMachine.fireEvent(SrmOrderStatus.OT_ORDERED, SrmEventEnum.ORDER_INIT, SrmQuantityOrderedCountDTO.builder().purchaseRequestItemId(i.getId()).build());
             requestItemsDOStateMachine.fireEvent(SrmOffStatus.OPEN, SrmEventEnum.OFF_INIT, i);
             //入库状态初始化
-            storageItemMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmRequestInDTO.builder().applyItemId(i.getId()).build());
+            storageItemMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmRequestInMachineDTO.builder().applyItemId(i.getId()).build());
         });
     }
 

@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class SrmRequestInDTO {
+public class SrmRequestInMachineDTO {
 
     //入库差额
     private BigDecimal inCount;

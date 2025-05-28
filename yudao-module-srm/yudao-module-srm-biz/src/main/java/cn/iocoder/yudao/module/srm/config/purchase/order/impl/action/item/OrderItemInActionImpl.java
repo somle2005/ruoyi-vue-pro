@@ -5,7 +5,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.order.SrmOrderItemOffDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.request.SrmRequestInDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.request.SrmRequestInMachineDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
@@ -45,7 +45,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> orderStorageStateMachine;
 
     @Resource(name = PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME)
-    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInDTO> requestItemInStateMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInMachineDTO> requestItemInStateMachine;
 
     @Resource(name = PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
     @Lazy
@@ -132,7 +132,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             ThrowUtil.ifThrow(applyItemDO == null, PURCHASE_REQUEST_ITEM_NOT_FOUND, oldData.getId(), applyItemId);
             //
             requestItemInStateMachine.fireEvent(SrmStorageStatus.fromCode(applyItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT,
-                SrmRequestInDTO.builder().applyItemId(applyItemId).inCount(dtoCount).build());
+                SrmRequestInMachineDTO.builder().applyItemId(applyItemId).inCount(dtoCount).build());
         });
     }
 

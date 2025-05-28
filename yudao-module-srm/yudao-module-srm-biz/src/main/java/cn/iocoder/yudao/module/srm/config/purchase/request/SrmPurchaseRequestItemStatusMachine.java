@@ -5,7 +5,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmQuantityOrderedCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.request.SrmRequestInDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.request.SrmRequestInMachineDTO;
 import cn.iocoder.yudao.module.srm.config.BaseFailCallbackImpl;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
@@ -80,11 +80,11 @@ public class SrmPurchaseRequestItemStatusMachine {
 
 
     @Autowired
-    private Action<SrmStorageStatus, SrmEventEnum, SrmRequestInDTO> itemStorageActionImpl;
+    private Action<SrmStorageStatus, SrmEventEnum, SrmRequestInMachineDTO> itemStorageActionImpl;
 
     @Bean(PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME)
-    public StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInDTO> buildPurchaseOrderItemStorageStateMachine() {
-        StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmRequestInDTO> builder = StateMachineBuilderFactory.create();
+    public StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInMachineDTO> buildPurchaseOrderItemStorageStateMachine() {
+        StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmRequestInMachineDTO> builder = StateMachineBuilderFactory.create();
         // 初始化入库
         builder.externalTransition().from(SrmStorageStatus.NONE_IN_STORAGE).to(SrmStorageStatus.NONE_IN_STORAGE).on(SrmEventEnum.STORAGE_INIT).perform(itemStorageActionImpl);
         // 取消入库
