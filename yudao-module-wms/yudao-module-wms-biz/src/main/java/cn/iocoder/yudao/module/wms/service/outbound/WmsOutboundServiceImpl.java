@@ -305,7 +305,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         // 判断是否允许删除
         WmsOutboundAuditStatus auditStatus = WmsOutboundAuditStatus.parse(outbound.getAuditStatus());
         if (!auditStatus.matchAny(WmsOutboundAuditStatus.DRAFT, WmsOutboundAuditStatus.REJECT)) {
-            throw exception(INBOUND_CAN_NOT_EDIT);
+            throw exception(OUTBOUND_CAN_NOT_EDIT);
         }
         // 唯一索引去重
         outbound.setCode(outboundMapper.flagUKeyAsLogicDelete(outbound.getCode()));

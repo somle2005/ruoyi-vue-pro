@@ -97,4 +97,9 @@ public class WmsInboundSaveReqDTO {
      * 备注
      **/
     private String remark;
+
+    /**
+     * WMS入库单审批状态 ; WmsInboundAuditStatus : 0-草稿 , 1-待入库 , 2-驳回 , 3-已入库 , 4-强制入库 , 5-作废
+     **/
+    private Integer auditStatus;
 }

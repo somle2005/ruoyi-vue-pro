@@ -1,9 +1,13 @@
 package cn.iocoder.yudao.module.wms.api.warehouse;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWareHouseUpdateReqDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.vo.WmsWarehouseListReqDTO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSaveReqVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
+import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
@@ -27,6 +31,9 @@ public class wmsWarehouseApiImpl implements WmsWarehouseApi {
 
     @Resource
     private WmsWarehouseService warehouseService;
+
+    @Resource
+    private WmsStockWarehouseService stockWarehouseService;
 
     @Override
     public Map<Long, WmsWarehouseDTO> getWarehouseMap(Collection<Long> ids) {
@@ -53,5 +60,11 @@ public class wmsWarehouseApiImpl implements WmsWarehouseApi {
     public List<WmsWarehouseDTO> selectList(WmsWarehouseListReqDTO reqDTO) {
         List<WmsWarehouseDO> list = warehouseService.selectList(reqDTO);
         return BeanUtils.toBean(list, WmsWarehouseDTO.class);
+    }
+
+    @Override
+    public Boolean updateStockWarehouse(WmsWareHouseUpdateReqDTO updateReqVO){
+        stockWarehouseService.updateStockWarehouse(BeanUtils.toBean(updateReqVO, WmsStockWarehouseSaveReqVO.class));
+        return true;
     }
 }

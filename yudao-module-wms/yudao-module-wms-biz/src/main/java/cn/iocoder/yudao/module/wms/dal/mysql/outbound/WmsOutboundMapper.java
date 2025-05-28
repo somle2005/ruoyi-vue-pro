@@ -24,7 +24,7 @@ public interface WmsOutboundMapper extends BaseMapperX<WmsOutboundDO> {
         if (reqVO.getProductId() != null) {
             wrapperX.exists(PRODUCT_ID_EXISTS_SQL, reqVO.getProductId());
         }
-        wrapperX.eqIfPresent(WmsOutboundDO::getCode, reqVO.getCode())
+        wrapperX.likeIfPresent(WmsOutboundDO::getCode, reqVO.getCode())
 				.eqIfPresent(WmsOutboundDO::getWarehouseId, reqVO.getWarehouseId())
 				.eqIfPresent(WmsOutboundDO::getType, reqVO.getType())
 				.eqIfPresent(WmsOutboundDO::getOutboundStatus, reqVO.getOutboundStatus())
@@ -33,8 +33,9 @@ public interface WmsOutboundMapper extends BaseMapperX<WmsOutboundDO> {
 				.eqIfPresent(WmsOutboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
 				.eqIfPresent(WmsOutboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
 				.eqIfPresent(WmsOutboundDO::getRemark, reqVO.getRemark())
+                .eqIfPresent(WmsOutboundDO::getCompanyId, reqVO.getCompanyId())
 				.betweenIfPresent(WmsOutboundDO::getCreateTime, reqVO.getCreateTime())
-				.orderByDesc(WmsOutboundDO::getId);
+				.orderByDesc(WmsOutboundDO::getCreateTime);
         return selectPage(reqVO, wrapperX);
     }
 

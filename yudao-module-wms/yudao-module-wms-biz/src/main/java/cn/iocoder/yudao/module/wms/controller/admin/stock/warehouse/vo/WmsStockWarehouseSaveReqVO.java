@@ -20,7 +20,7 @@ public class WmsStockWarehouseSaveReqVO {
     private Long warehouseId;
 
     @Schema(description = "产品ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3153")
-    @NotEmpty(message = "产品ID不能为空")
+    @NotNull(message = "产品ID不能为空")
     private Long productId;
 
     @Schema(description = "可用量，在库的良品数量", example = "")
