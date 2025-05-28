@@ -9,8 +9,8 @@ import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.TRANSFER_ITEM_NOT_EXISTS;
@@ -61,6 +61,19 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     }
 
     @Override
+    public List<TmsTransferItemDO> validateTransferItemExists(List<Long> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return List.of();
+        }
+        List<TmsTransferItemDO> items = transferItemMapper.selectByIds(ids);
+        if (items.size() != ids.size()) {
+            throw exception(TRANSFER_ITEM_NOT_EXISTS,
+                CollUtil.subtract(ids, CollUtil.newArrayList(items.stream().map(TmsTransferItemDO::getId).collect(Collectors.toSet()))));
+        }
+        return items;
+    }
+
+    @Override
     public TmsTransferItemDO getTransferItem(Long id) {
         return transferItemMapper.selectById(id);
     }
@@ -68,6 +81,14 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     @Override
     public List<TmsTransferItemDO> getTransferItemListByTransferId(Long transferId) {
         return transferItemMapper.selectListByTransferId(transferId);
+    }
+
+    @Override
+    public List<TmsTransferItemDO> getTransferItemListByIds(List<Long> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return List.of();
+        }
+        return transferItemMapper.selectByIds(ids);
     }
 
     @Override
@@ -91,7 +112,7 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
         if (CollUtil.isEmpty(ids)) {
             return;
         }
-        transferItemMapper.deleteByIds(new HashSet<>(ids));
+        transferItemMapper.deleteByIds(ids);
     }
 
     @Override

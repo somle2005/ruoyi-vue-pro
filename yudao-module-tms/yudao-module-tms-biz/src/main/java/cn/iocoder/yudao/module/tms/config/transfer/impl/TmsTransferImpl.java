@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 @Slf4j
 @Component
@@ -20,6 +21,7 @@ public class TmsTransferImpl implements Action<TmsAuditStatus, TmsEventEnum, Tms
     private TmsTransferMapper tmsTransferMapper;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void execute(TmsAuditStatus from, TmsAuditStatus to, TmsEventEnum event, TmsTransferAuditReqVO context) {
 
         TmsTransferDO transfer = tmsTransferMapper.selectById(context.getId());

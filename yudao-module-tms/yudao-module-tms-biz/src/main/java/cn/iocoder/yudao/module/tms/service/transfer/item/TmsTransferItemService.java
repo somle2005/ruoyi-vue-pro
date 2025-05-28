@@ -43,7 +43,6 @@ public interface TmsTransferItemService {
      */
     TmsTransferItemDO getTransferItem(Long id);
 
-
     /**
      * 根据调拨单ID获取明细列表
      *
@@ -51,6 +50,22 @@ public interface TmsTransferItemService {
      * @return 明细列表
      */
     List<TmsTransferItemDO> getTransferItemListByTransferId(Long transferId);
+
+    /**
+     * 根据ID列表获取明细列表
+     *
+     * @param ids ID列表
+     * @return 明细列表
+     */
+    List<TmsTransferItemDO> getTransferItemListByIds(List<Long> ids);
+
+    /**
+     * 校验调拨单明细项是否存在
+     *
+     * @param ids 调拨单明细项编号列表
+     * @return 调拨单明细项列表
+     */
+    List<TmsTransferItemDO> validateTransferItemExists(List<Long> ids);
 
     /**
      * 批量创建调拨单明细

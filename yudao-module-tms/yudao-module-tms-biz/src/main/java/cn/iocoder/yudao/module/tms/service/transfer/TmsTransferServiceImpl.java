@@ -10,6 +10,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsCompanyRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsWarehourseRespVO;
@@ -26,7 +27,12 @@ import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferBO;
 import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferItemBO;
 import cn.iocoder.yudao.module.tms.service.transfer.item.TmsTransferItemService;
+import cn.iocoder.yudao.module.wms.api.outbound.WmsOutboundApi;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,16 +69,14 @@ public class TmsTransferServiceImpl implements TmsTransferService {
 
     @Resource(name = TRANSFER_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsTransferAuditReqVO> transferAuditStateMachine;
+    @Autowired
+    private WmsOutboundApi wmsOutboundApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createTransfer(TmsTransferSaveReqVO createReqVO) {
         // 1. 插入主表
         TmsTransferDO transfer = BeanUtils.toBean(createReqVO, TmsTransferDO.class);
-        // 设置初始状态
-//        transfer.setAuditStatus(0); // 待审核
-//        transfer.setOutboundStatus(0); // 待出库
-//        transfer.setInboundStatus(0); // 待入库
         // 计算总数量、总重量等信息
         calculateTotalInfo(transfer, createReqVO.getItems());
         transferMapper.insert(transfer);
@@ -84,6 +88,8 @@ public class TmsTransferServiceImpl implements TmsTransferService {
         });
 
         // 返回主表ID
+        //设置初始状态
+        transferAuditStateMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.AUDIT_INIT, new TmsTransferAuditReqVO().setId(transfer.getId()));
         return transfer.getId();
     }
 
@@ -336,18 +342,86 @@ public class TmsTransferServiceImpl implements TmsTransferService {
             if (reqVO.getPass()) {
                 //通过
                 //1.0 状态
-                //2.0 创建出库单(待审核)
                 transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.AGREE, reqVO);
+                //2.0 创建出库单(待审核)
+                TmsTransferBO tmsTransferBO = getTransferBO(reqVO.getId());
+                createWmsOutbound(tmsTransferBO);
             } else {
                 //不通过
+                transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.REJECT, reqVO);
             }
-
         } else {
-            //审核撤销
+            //反审核
             //1.0 更新状态
-            //2.0 存在对应得出库单 -> e
+            transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.WITHDRAW_REVIEW, reqVO);
+            //2.0 作废WMS出库单
+            abandonWmsOutbound(tmsTransferDO.getId());
         }
+    }
 
+    /**
+     * 创建 WMS 出库单
+     *
+     * @param transferBO 调拨单
+     */
+    private void createWmsOutbound(TmsTransferBO transferBO) {
+        // 1. 创建出库单
+        WmsOutboundImportReqDTO importReqDTO = buildOutboundBaseInfo(transferBO);
+        importReqDTO.setItemList(buildOutboundItems(transferBO.getTmsTransferItemDOList()));
+
+        // 生成出库单
+        wmsOutboundApi.generateOutbound(importReqDTO);
+    }
+
+    /**
+     * 构建出库单基本信息
+     *
+     * @param transferBO 调拨单
+     * @return 出库单基本信息
+     */
+    private WmsOutboundImportReqDTO buildOutboundBaseInfo(TmsTransferBO transferBO) {
+        WmsOutboundImportReqDTO importReqDTO = new WmsOutboundImportReqDTO();
+        importReqDTO.setType(WmsOutboundType.TRANSFER.getValue()); // 调拨出库
+        importReqDTO.setUpstreamBillId(transferBO.getId()); // 来源单据ID
+        importReqDTO.setUpstreamBillCode(transferBO.getCode()); // 来源单据号
+        importReqDTO.setUpstreamBillType(BillType.TMS_TRANSFER.getValue()); // 来源单据类型
+        importReqDTO.setRemark(transferBO.getRemark()); // 备注
+        importReqDTO.setOutboundTime(transferBO.getOutboundTime()); // 出库时间
+        importReqDTO.setWarehouseId(transferBO.getFromWarehouseId()); //起始仓
+        return importReqDTO;
+    }
+
+    /**
+     * 构建出库单明细信息
+     *
+     * @param items 调拨单明细
+     * @return 出库单明细列表
+     */
+    private List<WmsOutboundItemSaveReqDTO> buildOutboundItems(List<TmsTransferItemDO> items) {
+        return items.stream().map(item -> {
+            WmsOutboundItemSaveReqDTO itemDTO = new WmsOutboundItemSaveReqDTO();
+            itemDTO.setProductId(item.getProductId()); // 产品ID
+            itemDTO.setPlanQty(item.getQty()); // 计划出库量
+            itemDTO.setActualQty(item.getQty()); // 实际出库量
+            itemDTO.setRemark(item.getRemark()); // 备注
+            itemDTO.setUpstreamItemId(item.getId()); // 来源详情ID
+            itemDTO.setCompanyId(item.getStockCompanyId()); // 设置库存公司ID
+//            itemDTO.setDeptId(item.getDeptId()); //库存归属部门ID(哪个部门出库SKU)
+            return itemDTO;
+        }).collect(Collectors.toList());
+    }
+
+    /**
+     * 作废调拨单关联的WMS出库单
+     *
+     * @param transferId 调拨单ID
+     */
+    private void abandonWmsOutbound(Long transferId) {
+        List<WmsOutboundDTO> dtoList = wmsOutboundApi.getOutboundList(BillType.TMS_TRANSFER.getValue(), transferId);
+        dtoList.forEach(wmsOutboundDTO -> {
+            // 作废 WMS 出库单
+            wmsOutboundApi.abandonOutbound(wmsOutboundDTO.getId(), "调拨单反审核");
+        });
     }
 
     @Override
