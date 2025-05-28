@@ -9,7 +9,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.SrmPur
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.*;
-import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -24,25 +24,21 @@ import static cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus.*;
 
 @Slf4j
 @Configuration
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SrmPurchaseOrderStatusMachine {
 
-    @Resource
-    private Action<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> orderOffActionImpl;
-    @Resource
-    private Action<SrmAuditStatus, SrmEventEnum, SrmPurchaseOrderAuditReqVO> orderAuditActionImpl;
-    @Resource
-    private Action<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> orderInActionImpl;
-    @Resource
-    private Action<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderDO> orderExecuteActionImpl;
-    @Resource
-    private Action<SrmPaymentStatus, SrmEventEnum, SrmPurchaseOrderDO> orderPayActionImpl;
-    @Autowired
-    private BaseFailCallbackImpl baseFailCallbackImpl;
+
+    private final Action<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> orderOffActionImpl;
+    private final Action<SrmAuditStatus, SrmEventEnum, SrmPurchaseOrderAuditReqVO> orderAuditActionImpl;
+    private final Action<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> orderInActionImpl;
+    private final Action<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderDO> orderExecuteActionImpl;
+    private final Action<SrmPaymentStatus, SrmEventEnum, SrmPurchaseOrderDO> orderPayActionImpl;
+    private final BaseFailCallbackImpl baseFailCallbackImpl;
 
     //订单主项开关状态机
     @Bean(PURCHASE_ORDER_OFF_STATE_MACHINE_NAME)
-    public StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> getPurchaseOrderStateMachine() {
+    public StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> getPurchaseOrderItemStateMachine() {
         StateMachineBuilder<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> builder = StateMachineBuilderFactory.create();
         // 初始化状态
         builder.internalTransition().within(OPEN).on(SrmEventEnum.OFF_INIT).perform(orderOffActionImpl);

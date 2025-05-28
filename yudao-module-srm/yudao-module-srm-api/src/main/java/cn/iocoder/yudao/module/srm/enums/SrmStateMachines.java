@@ -1,73 +1,49 @@
 package cn.iocoder.yudao.module.srm.enums;
 
-
 public interface SrmStateMachines {
 
     // ========== SRM 采购申请单 ==========
-    //采购申请主表开关状态机
-    String PURCHASE_REQUEST_OFF_STATE_MACHINE_NAME = "purchaseRequestOff";
+    String PURCHASE_REQUEST_OFF_STATE_MACHINE = "purchase-request-main-off";
+    String PURCHASE_REQUEST_AUDIT_STATE_MACHINE = "purchase-request-main-audit";
+    String PURCHASE_REQUEST_ORDER_STATE_MACHINE = "purchase-request-main-order";
+    String PURCHASE_REQUEST_STORAGE_STATE_MACHINE = "purchase-request-main-storage";
 
-    //采购申请审核状态机
-    String PURCHASE_REQUEST_AUDIT_STATE_MACHINE_NAME = "purchaseRequestAudit";
-    //采购主表采购状态机
-    String PURCHASE_REQUEST_ORDER_STATE_MACHINE_NAME = "purchaseRequestOrder";
-    //采购主表入库状态机
-    String PURCHASE_REQUEST_STORAGE_STATE_MACHINE_NAME = "purchaseRequestStorage";
     // ========== SRM 采购申请单子表 ==========
-    //采购申请明细开关状态机
-    String PURCHASE_REQUEST_ITEM_OFF_STATE_MACHINE_NAME = "requestItemOff";
-    //采购明细采购状态机
-    String PURCHASE_REQUEST_ITEM_ORDER_STATE_MACHINE_NAME = "purchaseRequestItemAudit";
-    //采购申请项入库状态机
-    String PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME = "purchaseRequestItemStorage";
+    String PURCHASE_REQUEST_ITEM_OFF_STATE_MACHINE_NAME = "purchase-request-item-off";
+    String PURCHASE_REQUEST_ITEM_ORDER_STATE_MACHINE_NAME = "purchase-request-item-order";
+    String PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME = "purchase-request-item-storage";
 
     // ========== SRM 采购订单 ==========
-    //订单开关状态机
-    String PURCHASE_ORDER_OFF_STATE_MACHINE_NAME = "purchaseOrderOff";
-    //订单审核状态机
-    String PURCHASE_ORDER_AUDIT_STATE_MACHINE_NAME = "purchaseOrderAudit";
-    //订单执行状态机
-    String PURCHASE_ORDER_EXECUTION_STATE_MACHINE_NAME = "purchaseOrderExecution";
-    //订单入库状态机
-    String PURCHASE_ORDER_STORAGE_STATE_MACHINE_NAME = "purchaseOrderStorage";
-    //订单付款状态机
-    String PURCHASE_ORDER_PAYMENT_STATE_MACHINE_NAME = "purchaseOrderPayment";
-    //订单采购状态机
-    String PURCHASE_ORDER_PURCHASE_STATE_MACHINE_NAME = "purchaseOrderPurchase";
+    String PURCHASE_ORDER_OFF_STATE_MACHINE_NAME = "purchase-order-main-off";
+    String PURCHASE_ORDER_AUDIT_STATE_MACHINE_NAME = "purchase-order-main-audit";
+    String PURCHASE_ORDER_EXECUTION_STATE_MACHINE_NAME = "purchase-order-main-execution";
+    String PURCHASE_ORDER_STORAGE_STATE_MACHINE_NAME = "purchase-order-main-storage";
+    String PURCHASE_ORDER_PAYMENT_STATE_MACHINE_NAME = "purchase-order-main-payment";
+    String PURCHASE_ORDER_PURCHASE_STATE_MACHINE_NAME = "purchase-order-main-purchase";
+
     // ========== SRM 采购订单明细 ==========
-    //订单明细开关状态机
-    String PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME = "purchaseOrderItemOff";
-    //订单明细执行状态机
-    String PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME = "purchaseOrderItemExecution";
-    //订单明细入库状态机
-    String PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME = "purchaseOrderItemStorage";
-    //订单明细付款状态机
-    String PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME = "purchaseOrderItemPayment";
-    //订单明细采购状态机
-    String PURCHASE_ORDER_ITEM_PURCHASE_STATE_MACHINE_NAME = "purchaseOrderItemPurchase";
+    String PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME = "purchase-order-item-off";
+    String PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME = "purchase-order-item-execution";
+    String PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME = "purchase-order-item-storage";
+    String PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME = "purchase-order-item-payment";
+    String PURCHASE_ORDER_ITEM_PURCHASE_STATE_MACHINE_NAME = "purchase-order-item-purchase";
 
     // ========== SRM 到货单主项 ==========
-    String PURCHASE_IN_AUDIT_STATE_MACHINE = "purchaseInAudit";
-    String PURCHASE_IN_PAYMENT_STATE_MACHINE = "purchaseInPay";
-    //单货单入库
-    String PURCHASE_IN_STORAGE_STATE_MACHINE = "purchaseInStorage";
+    String PURCHASE_IN_AUDIT_STATE_MACHINE = "purchase-in-main-audit";
+    String PURCHASE_IN_PAYMENT_STATE_MACHINE = "purchase-in-main-payment";
+    String PURCHASE_IN_STORAGE_STATE_MACHINE = "purchase-in-main-storage";
+
     // ========== SRM 到货单明细 ==========
-    String PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE = "purchaseInItemPay";
-    //到货单入库状态机
-    String PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE = "purchaseInItemStorage";
-    //到货项退货状态机
-    String PURCHASE_OUT_ITEM_STORAGE_STATE_MACHINE = "purchaseOutItemStorage";
+    String PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE = "purchase-in-item-payment";
+    String PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE = "purchase-in-item-storage";
+    String PURCHASE_OUT_ITEM_STORAGE_STATE_MACHINE = "purchase-out-item-storage";
 
     // ========== SRM 退货单 ==========
-    //审核
-    String PURCHASE_RETURN_AUDIT_STATE_MACHINE_NAME = "purchaseReturnAudit";
-    //退款
-    String PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME = "purchaseReturnRefund";
-    //出库
-    String PURCHASE_RETURN_OUT_STORAGE_STATE_MACHINE_NAME = "purchaseReturnOutStorage";
+    String PURCHASE_RETURN_AUDIT_STATE_MACHINE_NAME = "purchase-return-main-audit";
+    String PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME = "purchase-return-main-refund";
+    String PURCHASE_RETURN_OUT_STORAGE_STATE_MACHINE_NAME = "purchase-return-main-out-storage";
+
     // ========== SRM 退货单明细 ==========
-    //退款
-    String PURCHASE_RETURN_ITEM_REFUND_STATE_MACHINE_NAME = "purchaseReturnItemRefund";
-    //出库
-    String PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME = "purchaseReturnItemOutStorage";
+    String PURCHASE_RETURN_ITEM_REFUND_STATE_MACHINE_NAME = "purchase-return-item-refund";
+    String PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME = "purchase-return-item-out-storage";
 }

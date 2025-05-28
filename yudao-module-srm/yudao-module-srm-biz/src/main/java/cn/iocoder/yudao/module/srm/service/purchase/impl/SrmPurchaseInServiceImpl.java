@@ -678,42 +678,93 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             success = "{{#req.reviewed ? (#req.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购到货单【{{#codes}}】")
     @Transactional(rollbackFor = Exception.class)
     public void review(SrmPurchaseInAuditReqVO req) {
-        // 查询采购订单信息
+        // 1. 获取并校验入库单信息
         SrmPurchaseInDO inDO = validatePurchaseInExists(req.getInId());
-        // 获取当前订单状态
         SrmAuditStatus currentStatus = SrmAuditStatus.fromCode(inDO.getAuditStatus());
         LogRecordContext.putVariable("codes", inDO.getCode());
+
+        // 2. 根据审核类型处理
         if (Boolean.TRUE.equals(req.getReviewed())) {
-            // 审核操作
-            if (req.getPass()) {
-                log.debug("采购订单通过审核，ID: {}", inDO.getId());
-                // 主单审核 联动状态
-                auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
-                // 子项状态机->数量
-                linkSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
-                //按仓库分组生成入库单
-                generateInBoundDataByWarehouse(inDO);
-            } else {
-                log.debug("采购订单拒绝审核，ID: {}", inDO.getId());
-                auditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
-            }
+            handleAuditReview(inDO, currentStatus, req);
         } else {
-            //撤销审核
-            //校验,入库项存在对应的退货项 -> 异常
-            purchaseInItemMapper.selectListByInId(inDO.getId()).forEach(purchaseInItem -> {
-                boolean b = srmPurchaseReturnItemMapper.existsByInItemId(purchaseInItem.getId());
-                ThrowUtil.ifThrow(b, PURCHASE_IN_PROCESS_FAIL_RETURN_ITEM_EXISTS, purchaseInItem.getId());
-            });
+            handleAuditRevoke(inDO, currentStatus, req);
+        }
+    }
 
-            // 1.3 校验已付款
-            if (!Objects.equals(inDO.getPayStatus(), SrmPaymentStatus.NONE_PAYMENT.getCode())) {
-                throw exception(PURCHASE_IN_PROCESS_FAIL_PAYMENT_STATUS);
+    /**
+     * 处理审核操作
+     */
+    private void handleAuditReview(SrmPurchaseInDO inDO, SrmAuditStatus currentStatus, SrmPurchaseInAuditReqVO req) {
+        if (req.getPass()) {
+            log.debug("采购订单通过审核，ID: {}", inDO.getId());
+            // 1. 更新主单审核状态
+            auditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
+            // 2. 生成入库单
+            generateInBoundDataByWarehouse(inDO);
+        } else {
+            log.debug("采购订单拒绝审核，ID: {}", inDO.getId());
+            auditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
+        }
+    }
+
+    /**
+     * 处理反审核操作
+     */
+    private void handleAuditRevoke(SrmPurchaseInDO inDO, SrmAuditStatus currentStatus, SrmPurchaseInAuditReqVO req) {
+        // 1. 校验是否可以反审核
+        validateAuditRevoke(inDO);
+
+        // 2. 回滚状态
+        rollbackSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
+
+        // 3. 更新审核状态
+        log.debug("采购订单撤回审核，ID: {}", inDO.getId());
+        auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
+
+        // 4. 处理关联的入库单
+        handleRelatedInboundOrders(inDO);
+    }
+
+    /**
+     * 校验是否可以反审核
+     */
+    private void validateAuditRevoke(SrmPurchaseInDO inDO) {
+        // 1. 校验是否存在退货项
+        purchaseInItemMapper.selectListByInId(inDO.getId()).forEach(purchaseInItem -> {
+            boolean hasReturnItem = srmPurchaseReturnItemMapper.existsByInItemId(purchaseInItem.getId());
+            ThrowUtil.ifThrow(hasReturnItem, PURCHASE_IN_PROCESS_FAIL_RETURN_ITEM_EXISTS, purchaseInItem.getId());
+        });
+
+        // 2. 校验付款状态
+        if (!Objects.equals(inDO.getPayStatus(), SrmPaymentStatus.NONE_PAYMENT.getCode())) {
+            throw exception(PURCHASE_IN_PROCESS_FAIL_PAYMENT_STATUS);
+        }
+    }
+
+    /**
+     * 处理关联的入库单
+     */
+    private void handleRelatedInboundOrders(SrmPurchaseInDO inDO) {
+        List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.SRM_PURCHASE_IN.getValue(), inDO.getId());
+        if (CollUtil.isEmpty(inbounds)) {
+            return;
+        }
+
+        for (WmsInboundDTO inbound : inbounds) {
+            if (isInboundCanAbandon(inbound)) {
+                wmsInboundApi.abandonInbound(inbound.getId(), "采购到货单反审核，作废入库单", BillType.SRM_PURCHASE_IN.getValue());
+            } else {
+                throw exception(PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS, inbound.getId());
             }
-            //回滚状态
-            rollbackSlaveStatus(purchaseInItemMapper.selectListByInId(inDO.getId()));
-            log.debug("采购订单撤回审核，ID: {}", inDO.getId());
-            auditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
+        }
+    }
 
+    /**
+     * 判断入库单是否可以作废
+     */
+    private boolean isInboundCanAbandon(WmsInboundDTO inbound) {
+        return Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())
+            && Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue());
             // 处理关联的入库单
             List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.SRM_PURCHASE_IN.getValue(), inDO.getId());
             if (CollUtil.isNotEmpty(inbounds)) {
@@ -731,7 +782,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 }
             }
         }
-    }
 
     /**
      * 按仓库分组生成入库单
@@ -809,8 +859,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             );
             log.info("采购到货单[{}]审核通过，创建入库单，ID: {}", inDO.getCode(), inbound);
         });
-
-
     }
 
     @Override

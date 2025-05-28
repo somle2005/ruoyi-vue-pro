@@ -33,7 +33,7 @@ public class ItemOrderActionImpl implements Action<SrmOrderStatus, SrmEventEnum,
     @Autowired
     @Lazy
     SrmPurchaseRequestMapper requestMapper;
-    @Resource(name = SrmStateMachines.PURCHASE_REQUEST_ORDER_STATE_MACHINE_NAME)
+    @Resource(name = SrmStateMachines.PURCHASE_REQUEST_ORDER_STATE_MACHINE)
     @Lazy
     StateMachine<SrmOrderStatus, SrmEventEnum, SrmPurchaseRequestDO> requestStateMachine;
     @Autowired

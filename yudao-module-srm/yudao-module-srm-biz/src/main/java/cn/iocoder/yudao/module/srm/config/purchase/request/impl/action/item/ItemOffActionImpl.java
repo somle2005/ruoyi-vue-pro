@@ -22,7 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
-import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_REQUEST_OFF_STATE_MACHINE_NAME;
+import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_REQUEST_OFF_STATE_MACHINE;
 
 @Slf4j
 @Component
@@ -34,7 +34,7 @@ public class ItemOffActionImpl implements Action<SrmOffStatus, SrmEventEnum, Srm
     @Autowired
     private SrmPurchaseRequestMapper requestMapper;
 
-    @Resource(name = PURCHASE_REQUEST_OFF_STATE_MACHINE_NAME)
+    @Resource(name = PURCHASE_REQUEST_OFF_STATE_MACHINE)
     private StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseRequestDO> machine;
 
     @Override

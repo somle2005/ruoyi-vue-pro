@@ -14,6 +14,7 @@ import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.validator.internal.util.stereotypes.Lazy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,8 +35,10 @@ public class InPayItemActionImpl implements Action<SrmPaymentStatus, SrmEventEnu
     @Autowired
     private SrmPurchaseInItemMapper mapper;
     @Resource(name = PURCHASE_IN_PAYMENT_STATE_MACHINE)
+    @Lazy
     private StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInDO> stateMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME)
+    @Lazy
     private StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> purchaseOrderItemPaymentStateMachine;
     @Autowired
     private SrmPurchaseInMapper srmPurchaseInMapper;
