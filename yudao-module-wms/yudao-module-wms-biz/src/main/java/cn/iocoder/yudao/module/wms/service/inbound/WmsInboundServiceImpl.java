@@ -11,14 +11,13 @@ import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.WmsInboundDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.inItem.SrmPurchaseInItemCountDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
-import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
 import cn.iocoder.yudao.module.wms.config.InboundStateMachineConfigure;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalHistoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
@@ -59,7 +58,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -407,7 +405,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         if (inboundRespVO.getUpstreamBillType() != null && inboundRespVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
             //触发到货单明细行 状态机
             //如果成功创建入库单-触发SRM入库数量联动
-            srmPurchaseInApi.updatePurchaseInItemQty(BeanUtils.toBean(inboundDO, WmsInboundDTO.class));
+            srmPurchaseInApi.updatePurchaseInItemQty();
         }
 
     }

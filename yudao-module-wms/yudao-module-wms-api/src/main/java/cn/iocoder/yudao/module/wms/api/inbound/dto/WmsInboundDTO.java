@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.wms.api.inbound.dto;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Data
@@ -106,4 +107,9 @@ public class WmsInboundDTO {
      * 特别说明，创建方专用
      */
     private String remark;
+
+    /**
+     * 详情列表
+     */
+    private List<WmsInboundItemRespDTO> itemList;
 }

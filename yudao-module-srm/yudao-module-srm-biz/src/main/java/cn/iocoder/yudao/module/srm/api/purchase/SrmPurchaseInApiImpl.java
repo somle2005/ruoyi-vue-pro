@@ -3,7 +3,6 @@ package cn.iocoder.yudao.module.srm.api.purchase;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInItemDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.WmsInboundDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
@@ -51,7 +50,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
     }
 
     @Override
-    public void updatePurchaseInItemQty(WmsInboundDTO inboundDO) {
+    public void updatePurchaseInItemQty() {
         //todo 岽宇完成
     }
 

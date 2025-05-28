@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.srm.api.purchase;
 
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.WmsInboundDTO;
 
 import java.util.List;
 
@@ -21,8 +20,7 @@ public interface SrmPurchaseInApi {
     /**
      * 状态机-变动入库项-入库数量
      *
-     * @param inboundDO 入库单
      */
-    void updatePurchaseInItemQty(WmsInboundDTO inboundDO);
+    void updatePurchaseInItemQty();
 
 } 
