@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmPayCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.order.SrmOrderItemOffDTO;
 import cn.iocoder.yudao.module.srm.config.BaseFailCallbackImpl;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
@@ -30,20 +31,15 @@ import static cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus.*;
 @SuppressWarnings({"rawtypes", "unchecked"})
 public class SrmPurchaseOrderItemStatusMachine {
 
-
     @Autowired
     private BaseFailCallbackImpl baseFailCallbackImpl;
-
-
     @Autowired
     Action<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecuteAction;
-    //TODO 待优化，区分DTO 申请+订单
-    @Resource
+    @Autowired
     Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> ItemStorageActionImpl;
     @Autowired
     Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> orderItemPayAction;
-    @Autowired
-    private Action<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemDOAction;
+
 
     @Bean(PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
     public StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> getPurchaseOrderItemExecutionStateMachine() {
@@ -95,20 +91,22 @@ public class SrmPurchaseOrderItemStatusMachine {
         return builder.build(PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME);
     }
 
+    @Resource
+    Action<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> OrderItemOffActionImpl;
     //采购订单子项状态机
     @Bean(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
-    public StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> getPurchaseOrderStateMachine() {
-        StateMachineBuilder<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> builder = StateMachineBuilderFactory.create();
+    public StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> getPurchaseOrderStateMachine() {
+        StateMachineBuilder<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> builder = StateMachineBuilderFactory.create();
         // 初始化状态
-        builder.internalTransition().within(OPEN).on(SrmEventEnum.OFF_INIT).perform(orderItemDOAction);
+        builder.internalTransition().within(OPEN).on(SrmEventEnum.OFF_INIT).perform(OrderItemOffActionImpl);
         // 开启
-        builder.externalTransitions().fromAmong(MANUAL_CLOSED).to(OPEN).on(SrmEventEnum.ACTIVATE).perform(orderItemDOAction);
+        builder.externalTransitions().fromAmong(MANUAL_CLOSED).to(OPEN).on(SrmEventEnum.ACTIVATE).perform(OrderItemOffActionImpl);
         // 手动关闭
-        builder.externalTransition().from(OPEN).to(MANUAL_CLOSED).on(SrmEventEnum.MANUAL_CLOSE).perform(orderItemDOAction);
+        builder.externalTransition().from(OPEN).to(MANUAL_CLOSED).on(SrmEventEnum.MANUAL_CLOSE).perform(OrderItemOffActionImpl);
         //自动关闭
-        builder.externalTransition().from(OPEN).to(CLOSED).on(SrmEventEnum.AUTO_CLOSE).perform(orderItemDOAction);
+        builder.externalTransition().from(OPEN).to(CLOSED).on(SrmEventEnum.AUTO_CLOSE).perform(OrderItemOffActionImpl);
         //撤销关闭
-        builder.externalTransitions().fromAmong(MANUAL_CLOSED, CLOSED, OPEN).to(OPEN).on(SrmEventEnum.CANCEL_DELETE).perform(orderItemDOAction);
+        builder.externalTransitions().fromAmong(MANUAL_CLOSED, CLOSED, OPEN).to(OPEN).on(SrmEventEnum.CANCEL_DELETE).perform(OrderItemOffActionImpl);
         //错误回调函数
         builder.setFailCallback(baseFailCallbackImpl);
         return builder.build(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME);
@@ -117,22 +115,16 @@ public class SrmPurchaseOrderItemStatusMachine {
     @Bean(PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME)
     public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> getPurchaseOrderItemPaymentStateMachine() {
         StateMachineBuilder<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> builder = StateMachineBuilderFactory.create();
-
         // 初始化付款状态
         builder.internalTransition().within(NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(orderItemPayAction);
-
         // 取消付款
         builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT).to(NONE_PAYMENT).on(SrmEventEnum.CANCEL_PAYMENT).perform(orderItemPayAction);
-
         // 付款异常
         builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT, ALL_PAYMENT).to(NONE_PAYMENT).on(SrmEventEnum.PAYMENT_EXCEPTION).perform(orderItemPayAction);
-
         // 付款调整
         builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT, ALL_PAYMENT).to(NONE_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(orderItemPayAction);
-
         // 设置错误回调
         builder.setFailCallback(baseFailCallbackImpl);
-
         return builder.build(PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME);
     }
 

@@ -11,7 +11,6 @@ import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
 import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
-import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -30,7 +29,7 @@ public class SrmPurchaseInItemStatusMachine {
     private BaseFailCallbackImpl baseFailCallbackImpl;
 
     //TODO 待优化 区分DTO 请求、订单
-    @Resource
+    @Autowired
     Action<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> InPayItemActionImpl;
 
     @Bean(SrmStateMachines.PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE)

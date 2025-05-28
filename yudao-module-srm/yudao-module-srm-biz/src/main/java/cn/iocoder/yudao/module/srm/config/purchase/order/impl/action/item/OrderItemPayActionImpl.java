@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.srm.config.purchase.order.impl.action.item;
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmPayCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.order.SrmOrderItemOffDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderItemMapper;
@@ -32,7 +33,7 @@ public class OrderItemPayActionImpl implements Action<SrmPaymentStatus, SrmEvent
     @Resource(name = PURCHASE_ORDER_PAYMENT_STATE_MACHINE_NAME)
     private StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseOrderDO> paymentStateMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
-    private StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> purchaseOrderItemOffStateMachine;
+    private StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> purchaseOrderItemOffStateMachine;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -87,7 +88,7 @@ public class OrderItemPayActionImpl implements Action<SrmPaymentStatus, SrmEvent
         SrmPurchaseOrderItemDO orderItemDO = itemMapper.selectById(orderItemId);
         if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()) && Objects.equals(orderItemDO.getPayStatus(), SrmPaymentStatus.ALL_PAYMENT.getCode())) {
             // 当前订单项，完全入库 + 完全付款 -> 关闭订单项
-            purchaseOrderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, orderItemDO);
+            purchaseOrderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, new SrmOrderItemOffDTO().setItemId(orderItemDO.getId()));
         }
     }
 }

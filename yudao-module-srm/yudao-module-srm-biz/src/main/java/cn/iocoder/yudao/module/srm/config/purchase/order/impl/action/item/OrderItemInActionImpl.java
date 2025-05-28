@@ -18,6 +18,7 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,6 +47,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     private StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInDTO> requestItemInStateMachine;
 
     @Resource(name = PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
+    @Lazy
     private StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecutionStateMachine;
 
     @Resource(name = PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)

@@ -22,6 +22,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
 
 @Slf4j
 @Configuration
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class SrmPurchaseRequestItemStatusMachine {
 
 
@@ -51,10 +52,11 @@ public class SrmPurchaseRequestItemStatusMachine {
     }
 
 
+    //TODO Autowired无法获取对象，bug待排查
     @Resource
     private Action<SrmOrderStatus, SrmEventEnum, SrmQuantityOrderedCountDTO> itemOrderActionImpl;
 
-    //    子项采购状态
+    //子项采购状态
     @Bean(PURCHASE_REQUEST_ITEM_ORDER_STATE_MACHINE_NAME)
     public StateMachine<SrmOrderStatus, SrmEventEnum, SrmQuantityOrderedCountDTO> getPurchaseOrderStateMachine() {
         StateMachineBuilder<SrmOrderStatus, SrmEventEnum, SrmQuantityOrderedCountDTO> builder = StateMachineBuilderFactory.create();

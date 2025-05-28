@@ -6,7 +6,8 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInItemDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
-import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -21,7 +22,8 @@ import java.util.stream.Collectors;
 @Validated
 public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
 
-    @Resource
+    @Autowired
+    @Lazy
     private SrmPurchaseInService purchaseInService;
 
     @Override

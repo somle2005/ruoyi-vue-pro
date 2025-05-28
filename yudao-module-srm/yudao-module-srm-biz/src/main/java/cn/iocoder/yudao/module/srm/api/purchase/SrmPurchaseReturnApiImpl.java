@@ -10,6 +10,8 @@ import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmOutboundStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
@@ -27,7 +29,8 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN
 @Validated
 public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
 
-    @Resource
+    @Autowired
+    @Lazy
     private SrmPurchaseReturnService purchaseReturnService;
     @Resource(name = PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME)
     StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> stateMachine;
