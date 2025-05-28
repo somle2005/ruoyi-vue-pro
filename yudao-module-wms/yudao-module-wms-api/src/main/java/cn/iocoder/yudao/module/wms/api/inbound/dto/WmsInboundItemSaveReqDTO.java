@@ -22,6 +22,11 @@ public class WmsInboundItemSaveReqDTO {
     private Integer planQty;
 
     /**
+     * 实际入库量
+     */
+    private Integer actualQty;
+
+    /**
      * 库存归属部门
      **/
     private Long deptId;

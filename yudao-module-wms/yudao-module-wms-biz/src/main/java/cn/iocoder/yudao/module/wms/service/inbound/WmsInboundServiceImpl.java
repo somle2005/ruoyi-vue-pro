@@ -10,12 +10,15 @@ import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.WmsInboundDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.inItem.SrmPurchaseInItemCountDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
+import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.config.InboundStateMachineConfigure;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalHistoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
@@ -63,6 +66,7 @@ import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus.*;
 import static com.fhs.common.constant.Constant.ONE;
 import static java.lang.Boolean.FALSE;
 
@@ -73,6 +77,8 @@ import static java.lang.Boolean.FALSE;
  */
 @Service
 public class WmsInboundServiceImpl implements WmsInboundService {
+
+    private SrmPurchaseInApi srmPurchaseInApi;
 
     @Resource
     @Lazy
@@ -130,7 +136,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         // 设置单据号
         String no = noRedisDAO.generate(WmsNoRedisDAO.INBOUND_NO_PREFIX, 3);
         createReqVO.setCode(no);
-        createReqVO.setAuditStatus(WmsInboundAuditStatus.DRAFT.getValue());
+        createReqVO.setAuditStatus(DRAFT.getValue());
         createReqVO.setInboundStatus(WmsInboundStatus.NONE.getValue());
         createReqVO.setShelvingStatus(WmsInboundShelvingStatus.NONE.getValue());
         if (inboundMapper.getByCode(createReqVO.getCode()) != null) {
@@ -157,7 +163,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                 // 设置归属
                 item.setInboundId(inbound.getId());
                 item.setInboundStatus(WmsInboundStatus.NONE.getValue());
-                item.setActualQty(0);
+                item.setActualQty(item.getActualQty() == null ? 0 : item.getActualQty());
                 toInsetList.add(BeanUtils.toBean(item, WmsInboundItemDO.class));
             });
             // 校验 toInsetList 中是否有重复的 productId
@@ -181,7 +187,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         WmsInboundDO exists = validateInboundExists(updateReqVO.getId());
         // 判断是否允许编辑
         WmsInboundAuditStatus auditStatus = WmsInboundAuditStatus.parse(exists.getAuditStatus());
-        if (!auditStatus.matchAny(WmsInboundAuditStatus.DRAFT, WmsInboundAuditStatus.REJECT)) {
+        if (!auditStatus.matchAny(DRAFT, WmsInboundAuditStatus.REJECT)) {
             throw exception(INBOUND_CAN_NOT_EDIT);
         }
         // 单据号不允许被修改
@@ -257,7 +263,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         WmsInboundDO inbound = validateInboundExists(id);
         // 判断是否允许删除
         WmsInboundAuditStatus auditStatus = WmsInboundAuditStatus.parse(inbound.getAuditStatus());
-        if (!auditStatus.matchAny(WmsInboundAuditStatus.DRAFT, WmsInboundAuditStatus.REJECT)) {
+        if (!auditStatus.matchAny(DRAFT, WmsInboundAuditStatus.REJECT)) {
             throw exception(INBOUND_CAN_NOT_EDIT);
         }
         // 唯一索引去重
@@ -401,9 +407,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         if (inboundRespVO.getUpstreamBillType() != null && inboundRespVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
             //触发到货单明细行 状态机
             //如果成功创建入库单-触发SRM入库数量联动
-            inboundRespVO.getItemList().forEach(inItem -> purchaseInCountDTOStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE
-                    , SrmEventEnum.STOCK_ADJUSTMENT
-                    , SrmPurchaseInItemCountDTO.builder().inItemId(inItem.getUpstreamItemId()).inCount(BigDecimal.valueOf(inItem.getPlanQty())).build()));
+//            srmPurchaseInApi.updatePurchaseInItemQty(BeanUtils.toBean(inboundDO, WmsInboundDTO.class));
         }
 
     }
@@ -640,5 +644,22 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         inboundItemService.updateActualQuantity(BeanUtils.toBean(inboundItemDOS, WmsInboundItemSaveReqVO.class));
         //
         return this.getInbound(inbound.getId());
+    }
+
+    /**
+    * 强制作废入库单
+     */
+    @Override
+    public void forceAbandon(WmsApprovalReqVO approvalReqVO) {
+        // 获得业务对象
+        WmsInboundDO inbound = validateInboundExists(approvalReqVO.getBillId());
+        if(inbound.getAuditStatus().equals(AUDITING.getValue())){
+            approve(WmsInboundAuditStatus.Event.REJECT, approvalReqVO);
+        }
+        if(inbound.getAuditStatus().equals(DRAFT.getValue())||inbound.getAuditStatus().equals(REJECT.getValue())){
+            approve(WmsInboundAuditStatus.Event.ABANDON, approvalReqVO);
+        }else{
+            throw exception(INBOUND_ABANDON_NOT_ALLOWED);
+        }
     }
 }

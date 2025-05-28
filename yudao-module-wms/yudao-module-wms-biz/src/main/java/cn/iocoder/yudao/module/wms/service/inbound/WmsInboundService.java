@@ -27,7 +27,7 @@ public interface WmsInboundService {
      * @param createReqVO 创建信息
      * @return 编号
      */
-    WmsInboundDO createInbound(@Valid WmsInboundSaveReqVO createReqVO);
+    WmsInboundDO createInbound(WmsInboundSaveReqVO createReqVO);
 
     /**
      * 更新入库单
@@ -171,4 +171,6 @@ public interface WmsInboundService {
      * 创建调拨入库单
      */
     WmsInboundDO createForTransfer(WmsInboundSaveReqVO inboundSaveReqVO);
+
+    void forceAbandon(WmsApprovalReqVO approvalReqVO);
 }

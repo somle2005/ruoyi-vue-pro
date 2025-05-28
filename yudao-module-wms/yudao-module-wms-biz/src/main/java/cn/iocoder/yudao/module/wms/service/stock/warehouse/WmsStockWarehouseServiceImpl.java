@@ -96,7 +96,8 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
 //            throw exception(STOCK_WAREHOUSE_WAREHOUSE_ID_PRODUCT_ID_DUPLICATE);
 //        }
         // 更新
-        exists.setMakePendingQty(exists.getMakePendingQty()+updateReqVO.getMakePendingQty());
+        int makePendingQty = Math.max(exists.getMakePendingQty() + updateReqVO.getMakePendingQty(), 0);
+        exists.setMakePendingQty(makePendingQty);
         stockWarehouseMapper.updateById(exists);
         // 返回
         return exists;

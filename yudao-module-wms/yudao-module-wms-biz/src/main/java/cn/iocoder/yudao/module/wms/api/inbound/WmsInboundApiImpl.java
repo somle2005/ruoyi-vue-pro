@@ -1,16 +1,19 @@
 package cn.iocoder.yudao.module.wms.api.inbound;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemRespDTO;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
-import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
@@ -44,8 +47,19 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     @Override
     public Long createInbound(WmsInboundSaveReqDTO createReqDTO) {
         WmsInboundSaveReqVO createReqVO = BeanUtils.toBean(createReqDTO, WmsInboundSaveReqVO.class);
+        //预填实际数量
+        List<WmsInboundItemSaveReqDTO> itemList = createReqDTO.getItemList();
+
+        itemList.forEach(item -> {
+            item.setActualQty(item.getPlanQty());
+        });
+        createReqVO.setItemList(BeanUtils.toBean(itemList, WmsInboundItemSaveReqVO.class));
         WmsInboundDO inbound = inboundService.createInbound(createReqVO);
-        //处理xx单逻辑
+        //外部模块生成的入库单，直接发起审批
+        WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
+        approvalReqVO.setBillType(BillType.WMS_INBOUND.getValue());
+        approvalReqVO.setBillId(inbound.getId());
+        inboundService.approve(WmsInboundAuditStatus.Event.SUBMIT, approvalReqVO);
         return inbound.getId();
     }
 
@@ -72,7 +86,7 @@ public class WmsInboundApiImpl implements WmsInboundApi {
         WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
         approvalReqVO.setBillId(id);
         approvalReqVO.setComment(comment);
-        inboundService.approve(WmsInboundAuditStatus.Event.ABANDON, approvalReqVO);
+        inboundService.forceAbandon(approvalReqVO);
     }
 
     @Override

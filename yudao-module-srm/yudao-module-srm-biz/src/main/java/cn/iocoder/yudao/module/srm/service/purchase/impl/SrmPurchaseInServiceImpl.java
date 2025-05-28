@@ -718,8 +718,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.SRM_PURCHASE_IN.getValue(), inDO.getId());
             if (CollUtil.isNotEmpty(inbounds)) {
                 for (WmsInboundDTO inbound : inbounds) {
-                    //未审核+未入库 -> 作废入库单
-                    if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue()) && Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue())) {
+                    //未审核通过+未入库 -> 作废入库单
+                    if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())
+                            || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue())
+                            || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.AUDITING.getValue())
+                            || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.REJECT.getValue())) {
                         wmsInboundApi.abandonInbound(inbound.getId(), "采购到货单反审核，作废入库单", BillType.SRM_PURCHASE_IN.getValue());
                     } else {
                         //抛出异常
@@ -783,6 +786,14 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                     })
                     .collect(Collectors.toList());
 
+            //获取公司ID集合
+            Set<Long> companyIds = inboundItems.stream()
+                    .map(WmsInboundItemSaveReqDTO::getCompanyId)
+                    .filter(Objects::nonNull)
+                    .collect(Collectors.toSet());
+            if(companyIds.size()>1){
+                throw exception(PURCHASE_IN_ITEM_COMPANY_NOT_MATCH, inDO.getCode());
+            }
             // 5.2 创建入库单
             Long inbound = wmsInboundApi.createInbound(
                     WmsInboundSaveReqDTO.builder()
@@ -793,6 +804,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                             .warehouseId(warehouseId)
                             .itemList(inboundItems)
                             .auditStatus(WmsInboundAuditStatus.DRAFT.getValue())
+                            .companyId(companyIds.iterator().next())
                             .build()
             );
             log.info("采购到货单[{}]审核通过，创建入库单，ID: {}", inDO.getCode(), inbound);
