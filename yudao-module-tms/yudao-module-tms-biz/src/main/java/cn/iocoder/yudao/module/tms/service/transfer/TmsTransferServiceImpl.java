@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.transfer;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
@@ -20,11 +21,14 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.TmsTransferDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.transfer.TmsTransferMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.transfer.item.TmsTransferItemMapper;
+import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
+import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferBO;
 import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferItemBO;
 import cn.iocoder.yudao.module.tms.service.transfer.item.TmsTransferItemService;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import jakarta.annotation.Resource;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -38,6 +42,7 @@ import java.util.stream.Stream;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.TRANSFER_NOT_EXISTS;
+import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.TRANSFER_AUDIT_STATE_MACHINE;
 
 /**
  * 调拨单 Service 实现类
@@ -46,22 +51,18 @@ import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.TRANSFER_N
  */
 @Service
 @Validated
+@RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TmsTransferServiceImpl implements TmsTransferService {
 
-    @Resource
-    private TmsTransferMapper transferMapper;
+    private final TmsTransferMapper transferMapper;
+    private final TmsTransferItemMapper tmsTransferItemMapper;
+    private final TmsTransferItemService transferItemService;
+    private final ErpProductApi erpProductApi;
+    private final FmsCompanyApi fmsCompanyApi;
+    private final WmsWarehouseApi wmsWarehouseApi;
 
-    @Resource
-    private TmsTransferItemService transferItemService;
-
-    @Resource
-    private ErpProductApi erpProductApi;
-    @Autowired
-    private TmsTransferItemMapper tmsTransferItemMapper;
-    @Autowired
-    private FmsCompanyApi fmsCompanyApi;
-    @Autowired
-    private WmsWarehouseApi wmsWarehouseApi;
+    @Resource(name = TRANSFER_AUDIT_STATE_MACHINE)
+    private StateMachine<TmsAuditStatus, TmsEventEnum, TmsTransferAuditReqVO> transferAuditStateMachine;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -328,14 +329,21 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     @Transactional(rollbackFor = Exception.class)
     public void review(TmsTransferAuditReqVO reqVO) {
         // 1. 校验调拨单是否存在
-        TmsTransferDO transfer = validateTransferExists(reqVO.getId());
+        TmsTransferDO tmsTransferDO = validateTransferExists(reqVO.getId());
 
         if (reqVO.getReviewed()) {
-            //审核同意
-            //1.0 状态
-            //2.0 创建出库单(待审核)
+            //审核
+            if (reqVO.getPass()) {
+                //通过
+                //1.0 状态
+                //2.0 创建出库单(待审核)
+                transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.AGREE, reqVO);
+            } else {
+                //不通过
+            }
+
         } else {
-            //审核拒绝
+            //审核撤销
             //1.0 更新状态
             //2.0 存在对应得出库单 -> e
         }
@@ -344,7 +352,10 @@ public class TmsTransferServiceImpl implements TmsTransferService {
 
     @Override
     public void submitAudit(List<Long> transferIds) {
-
+        transferIds.forEach(transferId -> {
+            TmsTransferDO tmsTransferDO = validateTransferExists(transferId);
+            transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.SUBMIT_FOR_REVIEW, new TmsTransferAuditReqVO().setId(transferId));
+        });
     }
 
 }

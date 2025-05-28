@@ -645,8 +645,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         List<SrmPurchaseInItemDO> inItemDOS = purchaseInItemMapper.selectByIds(inIds);
         //检验是否和ids数量一致，报错未对应入库项
         if (inItemDOS.size() != inIds.size()) {
-            throw exception(PURCHASE_IN_ITEM_NOT_EXISTS,
-                    CollUtil.subtract(inIds, CollUtil.newArrayList(inItemDOS.stream().map(SrmPurchaseInItemDO::getId).collect(Collectors.toSet()))));
+            throw exception(PURCHASE_IN_ITEM_NOT_EXISTS, CollUtil.subtract(inIds, CollUtil.newArrayList(inItemDOS.stream().map(SrmPurchaseInItemDO::getId).collect(Collectors.toSet()))));
         }
         return inItemDOS;
     }
