@@ -76,10 +76,6 @@ public class TmsFirstMileDO extends TenantBaseDO {
      */
     private Long toWarehouseId;
     /**
-     * 提单号
-     */
-    private String ladingNo;
-    /**
      * 柜型（字典）
      */
     private Integer cabinetType;
@@ -91,14 +87,6 @@ public class TmsFirstMileDO extends TenantBaseDO {
      * 预计到货日期
      */
     private LocalDateTime arrivePlanTime;
-    /**
-     * 预计送仓时间
-     */
-    private LocalDateTime deliveryEstimateTime;
-    /**
-     * 实际送仓时间
-     */
-    private LocalDateTime deliveryActualTime;
     /**
      * 货柜体积（m³）
      */

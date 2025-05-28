@@ -64,7 +64,7 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             vo.setMainQueryVO(new TmsFirstMilePageReqVO.mainQueryVO());
         }
         if (vo.getTrackingQueryVO() == null) {
-            vo.setTrackingQueryVO(new TmsFirstMilePageReqVO.TmsVesselTrackingQueryVO());
+            vo.setTrackingQueryVO(new TmsFirstMilePageReqVO.TmsVesselTrackingFirstMileQueryVO());
         }
         MPJLambdaWrapper<TmsFirstMileItemDO> lambdaWrapper = buildWrapper(vo.getItemPageReqVO())
             .leftJoin(TmsFirstMileDO.class, TmsFirstMileDO::getId, TmsFirstMileItemDO::getFirstMileId)
@@ -80,12 +80,9 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             .betweenIfPresent(TmsFirstMileDO::getAuditTime, vo.getMainQueryVO().getAuditTime()) // 审核时间范围
             .eqIfPresent(TmsFirstMileDO::getAuditStatus, vo.getMainQueryVO().getAuditStatus()) // 审核状态
             .eqIfPresent(TmsFirstMileDO::getToWarehouseId, vo.getMainQueryVO().getToWarehouseId()) // 目的仓库ID
-            .likeIfPresent(TmsFirstMileDO::getLadingNo, vo.getMainQueryVO().getLadingNo()) // 提单号
             .eqIfPresent(TmsFirstMileDO::getCabinetType, vo.getMainQueryVO().getCabinetType()) // 柜型
             .betweenIfPresent(TmsFirstMileDO::getPackTime, vo.getMainQueryVO().getPackTime()) // 装箱时间范围
             .betweenIfPresent(TmsFirstMileDO::getArrivePlanTime, vo.getMainQueryVO().getArrivePlanTime()) // 预计到港时间范围
-            .betweenIfPresent(TmsFirstMileDO::getDeliveryEstimateTime, vo.getMainQueryVO().getDeliveryEstimateTime()) // 预计提货时间范围
-            .betweenIfPresent(TmsFirstMileDO::getDeliveryActualTime, vo.getMainQueryVO().getDeliveryActualTime()) // 实际提货时间范围
             .betweenIfPresent(TmsFirstMileDO::getTotalVolume, vo.getMainQueryVO().getTotalVolume()) // 总体积范围
             .betweenIfPresent(TmsFirstMileDO::getTotalWeight, vo.getMainQueryVO().getTotalWeight()) // 总重量范围
             .betweenIfPresent(TmsFirstMileDO::getNetWeight, vo.getMainQueryVO().getNetWeight()) // 净重范围
@@ -123,6 +120,8 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
             // 货代
             .eqIfExists(TmsVesselTrackingDO::getForwarderCompanyId, vo.getTrackingQueryVO().getForwarderCompanyId()) // 货代公司ID
             .eqIfExists(TmsVesselTrackingDO::getContainerNo, vo.getTrackingQueryVO().getContainerNo()) // 集装箱号
+            //deliveryEstimateTime
+            .eqIfExists(TmsVesselTrackingDO::getDeliveryEstimateTime, vo.getTrackingQueryVO().getDeliveryEstimateTime())
             // 排序
             .orderByDesc(TmsVesselTrackingDO::getCreateTime);
 

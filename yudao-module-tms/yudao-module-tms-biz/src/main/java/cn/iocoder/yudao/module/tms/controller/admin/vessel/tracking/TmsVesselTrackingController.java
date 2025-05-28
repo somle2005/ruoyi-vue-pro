@@ -1,3 +1,4 @@
+/*
 package cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking;
 
 import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
@@ -146,4 +147,4 @@ public class TmsVesselTrackingController {
         return success(vesselTrackingService.getVesselTrackingLog(id));
     }
 
-}
+}*/

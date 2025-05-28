@@ -71,4 +71,12 @@ public class TmsVesselTrackingSaveReqVO {
     @Schema(description = "乐观锁")
     private Integer revision;
 
+    @Schema(description = "预计送仓时间")
+    private LocalDateTime deliveryEstimateTime;
+
+    @Schema(description = "实际送仓时间")
+    private LocalDateTime deliveryActualTime;
+
+    @Schema(description = "提单号")
+    private String ladingNo;
 }

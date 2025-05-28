@@ -111,4 +111,16 @@ public class TmsVesselTrackingDO extends TenantBaseDO {
      * 跟踪状态(字典)
      */
     private Integer trackingStatus;
+    /**
+     * 预计送仓时间
+     */
+    private LocalDateTime deliveryEstimateTime;
+    /**
+     * 实际送仓时间
+     */
+    private LocalDateTime deliveryActualTime;
+    /**
+     * 提单号
+     */
+    private String ladingNo;
 }

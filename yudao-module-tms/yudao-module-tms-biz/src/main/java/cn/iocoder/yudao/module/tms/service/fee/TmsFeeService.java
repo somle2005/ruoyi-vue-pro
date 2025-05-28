@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 
@@ -28,7 +29,7 @@ public interface TmsFeeService {
      * 创建出运订单费用明细
      *
      * @param createReqVO 创建信息
-     * @param sourceType 源类型
+     * @param sourceType  源类型
      * @return 编号
      */
     Long createFee(@Valid TmsFeeSaveReqVO createReqVO, Integer sourceType);
@@ -37,14 +38,14 @@ public interface TmsFeeService {
      * 更新出运订单费用明细
      *
      * @param updateReqVO 更新信息
-     * @param sourceType 源类型
+     * @param sourceType  源类型
      */
     void updateFee(@Valid TmsFeeSaveReqVO updateReqVO, Integer sourceType);
 
     /**
      * 删除出运订单费用明细
      *
-     * @param id 编号
+     * @param id         编号
      * @param sourceType 源类型
      */
     void deleteFee(Long id, Integer sourceType);
@@ -52,7 +53,7 @@ public interface TmsFeeService {
     /**
      * 获得出运订单费用明细
      *
-     * @param sourceId 原单ID
+     * @param sourceId   原单ID
      * @param sourceType 源类型
      * @return 出运订单费用明细
      */
@@ -78,10 +79,11 @@ public interface TmsFeeService {
     /**
      * 批量更新出运订单费用明细
      *
-     * @param feeList    更新信息列表
-     * @param sourceType 源类型
+     * @param sourceId   源单ID
+     * @param sourceType 原单类型
+     * @param list       更新信息列表
      */
-    void updateFeeList(List<TmsFeeDO> feeList, Integer sourceType);
+    void updateFeeList(@NotNull(message = "更新时源单ID不能为空") Long sourceId, @NotNull(message = "更新时源单类型不能为空") Integer sourceType, List<? extends TmsFeeSaveReqVO> list);
 
     /**
      * 批量删除出运订单费用明细
@@ -90,6 +92,7 @@ public interface TmsFeeService {
      * @param sourceType 源类型
      */
     void deleteFeeList(List<Long> ids, Integer sourceType);
+
     /**
      * 批量删除出运订单费用明细,通过原单ID，原单类型
      *

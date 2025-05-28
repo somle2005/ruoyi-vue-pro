@@ -52,10 +52,6 @@ public class TmsFirstMileSaveReqVO {
     @DiffLogField(name = "目的仓ID")
     private Long toWarehouseId;
 
-    @Schema(description = "提单号")
-    @DiffLogField(name = "提单号")
-    private String ladingNo;
-
     @Schema(description = "柜型（字典）")
     @DiffLogField(name = "柜型")
     private Integer cabinetType;
@@ -73,14 +69,6 @@ public class TmsFirstMileSaveReqVO {
     @NotNull(message = "预计到货日期不能为空")
     @DiffLogField(name = "预计到货日期")
     private LocalDateTime arrivePlanTime;
-
-    @Schema(description = "预计送仓时间")
-    @DiffLogField(name = "预计送仓时间")
-    private LocalDateTime deliveryEstimateTime;
-
-    @Schema(description = "实际送仓时间")
-    @DiffLogField(name = "实际送仓时间")
-    private LocalDateTime deliveryActualTime;
 
     @Schema(description = "货柜体积（m³）")
     @DiffLogField(name = "货柜体积")

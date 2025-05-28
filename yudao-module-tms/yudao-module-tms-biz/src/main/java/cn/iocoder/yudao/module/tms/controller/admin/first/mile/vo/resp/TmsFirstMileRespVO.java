@@ -71,10 +71,6 @@ public class TmsFirstMileRespVO extends BaseVO {
     @ExcelProperty("目的仓名称")
     private String toWarehouseName;
 
-    @Schema(description = "提单号")
-    @ExcelProperty("提单号")
-    private String ladingNo;
-
     @Schema(description = "柜型（字典）")
     @ExcelProperty(value = "柜型", converter = DictConvert.class)
     @DictFormat(DictTypeConstants.TMS_CABINET_TYPE)
@@ -87,14 +83,6 @@ public class TmsFirstMileRespVO extends BaseVO {
     @Schema(description = "预计到货日期")
     @ExcelProperty("预计到货日期")
     private LocalDateTime arrivePlanTime;
-
-    @Schema(description = "预计送仓时间")
-    @ExcelProperty("预计送仓时间")
-    private LocalDateTime deliveryEstimateTime;
-
-    @Schema(description = "实际送仓时间")
-    @ExcelProperty("实际送仓时间")
-    private LocalDateTime deliveryActualTime;
 
     @Schema(description = "货柜体积（m³）")
     @ExcelProperty("货柜体积（m³）")
