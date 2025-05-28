@@ -85,8 +85,7 @@ public class OrderItemPayActionImpl implements Action<SrmPaymentStatus, SrmEvent
 
     private void checkStatusAndClose(Long orderItemId) {
         SrmPurchaseOrderItemDO orderItemDO = itemMapper.selectById(orderItemId);
-        if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()) && Objects.equals(orderItemDO.getPayStatus(),
-            SrmPaymentStatus.ALL_PAYMENT.getCode())) {
+        if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()) && Objects.equals(orderItemDO.getPayStatus(), SrmPaymentStatus.ALL_PAYMENT.getCode())) {
             // 当前订单项，完全入库 + 完全付款 -> 关闭订单项
             purchaseOrderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, orderItemDO);
         }

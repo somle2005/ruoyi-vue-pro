@@ -4,10 +4,9 @@ import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmQuantityOrderedCountDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.machine.request.SrmRequestInDTO;
 import cn.iocoder.yudao.module.srm.config.BaseFailCallbackImpl;
-import cn.iocoder.yudao.module.srm.config.purchase.request.impl.action.item.ItemStorageActionImpl;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmOffStatus;
@@ -23,7 +22,6 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
 
 @Slf4j
 @Configuration
-@SuppressWarnings({"rawtypes", "unchecked"})
 public class SrmPurchaseRequestItemStatusMachine {
 
 
@@ -79,12 +77,12 @@ public class SrmPurchaseRequestItemStatusMachine {
     }
 
 
-    @Resource
-    private ItemStorageActionImpl itemStorageActionImpl;
+    @Autowired
+    private Action<SrmStorageStatus, SrmEventEnum, SrmRequestInDTO> itemStorageActionImpl;
 
     @Bean(PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME)
-    public StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> buildPurchaseOrderItemStorageStateMachine() {
-        StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> builder = StateMachineBuilderFactory.create();
+    public StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInDTO> buildPurchaseOrderItemStorageStateMachine() {
+        StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmRequestInDTO> builder = StateMachineBuilderFactory.create();
         // 初始化入库
         builder.externalTransition().from(SrmStorageStatus.NONE_IN_STORAGE).to(SrmStorageStatus.NONE_IN_STORAGE).on(SrmEventEnum.STORAGE_INIT).perform(itemStorageActionImpl);
         // 取消入库

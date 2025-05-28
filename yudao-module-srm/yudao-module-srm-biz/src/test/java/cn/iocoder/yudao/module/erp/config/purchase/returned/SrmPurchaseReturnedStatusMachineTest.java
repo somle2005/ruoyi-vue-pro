@@ -23,8 +23,8 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 
-import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_REQUEST_OFF_STATE_MACHINE_NAME;
-import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_REQUEST_ORDER_STATE_MACHINE_NAME;
+import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_REQUEST_OFF_STATE_MACHINE;
+import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_REQUEST_ORDER_STATE_MACHINE;
 
 @Slf4j
 @Disabled
@@ -37,10 +37,10 @@ class SrmPurchaseReturnedStatusMachineTest extends BaseDbUnitTest {
     SrmPurchaseRequestMapper mapper;
     //    @Resource(name = ErpStateMachines.PURCHASE_REQUEST_AUDIT_STATE_MACHINE_NAME)
     StateMachine<ErpAuditStatus, SrmEventEnum, SrmPurchaseRequestDO> auditMachine;
-    @Resource(name = PURCHASE_REQUEST_OFF_STATE_MACHINE_NAME)
+    @Resource(name = PURCHASE_REQUEST_OFF_STATE_MACHINE)
     StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseRequestDO> offMachine;
 
-    @Resource(name = PURCHASE_REQUEST_ORDER_STATE_MACHINE_NAME)
+    @Resource(name = PURCHASE_REQUEST_ORDER_STATE_MACHINE)
     StateMachine<SrmOrderStatus, SrmEventEnum, SrmPurchaseRequestDO> orderMachine;
 
     @BeforeAll

@@ -29,7 +29,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_ORDER_
  * 更改item实际入库数量+入库状态
  */
 @Slf4j
-@Component
+@Component("SrmPurchaseInItemStorageActionImpl")
 public class StorageInItemActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> {
     @Autowired
     private SrmPurchaseInItemMapper srmPurchaseInItemMapper;

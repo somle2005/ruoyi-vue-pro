@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmStateMachines;
 import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
+import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -28,23 +29,24 @@ public class SrmPurchaseInItemStatusMachine {
     @Autowired
     private BaseFailCallbackImpl baseFailCallbackImpl;
 
-    @Autowired
-    Action<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> inPayItemActionImpl;
+    //TODO 待优化 区分DTO 请求、订单
+    @Resource
+    Action<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> InPayItemActionImpl;
 
     @Bean(SrmStateMachines.PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE)
     public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> getPurchaseRequestPaymentStateMachine() {
         StateMachineBuilder<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> builder = StateMachineBuilderFactory.create();
         //初始化
-        builder.internalTransition().within(NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(inPayItemActionImpl);
+        builder.internalTransition().within(NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(InPayItemActionImpl);
         //付款金额调整
-        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT, ALL_PAYMENT, PAYMENT_EXCEPTION).to(PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(inPayItemActionImpl);
+        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT, ALL_PAYMENT, PAYMENT_EXCEPTION).to(PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(InPayItemActionImpl);
         //付款失败事件
-        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT).to(PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION).perform(inPayItemActionImpl);
+        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT).to(PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION).perform(InPayItemActionImpl);
         //完成付款
-        builder.externalTransition().from(NONE_PAYMENT).to(ALL_PAYMENT).on(SrmEventEnum.COMPLETE_PAYMENT).perform(inPayItemActionImpl);
+        builder.externalTransition().from(NONE_PAYMENT).to(ALL_PAYMENT).on(SrmEventEnum.COMPLETE_PAYMENT).perform(InPayItemActionImpl);
 
         //取消付款
-        builder.externalTransition().from(ALL_PAYMENT).to(NONE_PAYMENT).on(SrmEventEnum.CANCEL_PAYMENT).perform(inPayItemActionImpl);
+        builder.externalTransition().from(ALL_PAYMENT).to(NONE_PAYMENT).on(SrmEventEnum.CANCEL_PAYMENT).perform(InPayItemActionImpl);
         builder.setFailCallback(baseFailCallbackImpl);
         return builder.build(SrmStateMachines.PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE);
     }

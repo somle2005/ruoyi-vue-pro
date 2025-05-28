@@ -42,7 +42,7 @@ public class SrmPurchaseOrderStatusMachine {
 
     //订单主项开关状态机
     @Bean(PURCHASE_ORDER_OFF_STATE_MACHINE_NAME)
-    public StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> getPurchaseOrderStateMachine() {
+    public StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> getPurchaseOrderItemStateMachine() {
         StateMachineBuilder<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> builder = StateMachineBuilderFactory.create();
         // 初始化状态
         builder.internalTransition().within(OPEN).on(SrmEventEnum.OFF_INIT).perform(orderOffActionImpl);

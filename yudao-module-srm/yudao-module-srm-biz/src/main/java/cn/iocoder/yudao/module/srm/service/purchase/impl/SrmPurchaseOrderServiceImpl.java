@@ -109,24 +109,24 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Resource(name = PURCHASE_ORDER_AUDIT_STATE_MACHINE_NAME)
     StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseOrderAuditReqVO> orderAuditMachine;
     @Resource(name = PURCHASE_ORDER_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> purchaseOrderStorageMachine;
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> orderStorageMachine;
     @Resource(name = PURCHASE_ORDER_PAYMENT_STATE_MACHINE_NAME)
-    StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseOrderDO> purchaseOrderPaymentMachine;
+    StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseOrderDO> orderPaymentMachine;
     @Resource(name = PURCHASE_ORDER_EXECUTION_STATE_MACHINE_NAME)
-    StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderDO> purchaseOrderExecutionMachine;
-    //
+    StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderDO> orderExecutionMachine;
+    //子项
     @Resource(name = PURCHASE_REQUEST_ITEM_ORDER_STATE_MACHINE_NAME)
-    StateMachine<SrmOrderStatus, SrmEventEnum, SrmQuantityOrderedCountDTO> requestOrderItemMachine;
+    StateMachine<SrmOrderStatus, SrmEventEnum, SrmQuantityOrderedCountDTO> requestItemMachine;
     @Resource(name = PURCHASE_REQUEST_ITEM_OFF_STATE_MACHINE_NAME)
     StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseRequestItemsDO> requestItemOffMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
     StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemOffMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> requestItemStorageMachine;
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemStorageMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME)
-    StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> requestItemPaymentMachine;
+    StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> orderItemPaymentMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
-    StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> requestItemExecutionMachine;
+    StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecutionMachine;
     @Autowired
     @Lazy
     private SrmPurchaseRequestService srmPurchaseRequestService;
@@ -195,11 +195,11 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             //开关
             orderItemOffMachine.fireEvent(SrmOffStatus.OPEN, SrmEventEnum.OFF_INIT, orderItemDO);
             //付款
-            requestItemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, SrmPayCountDTO.builder().orderItemId(orderItemDO.getId()).build());
+            orderItemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, SrmPayCountDTO.builder().orderItemId(orderItemDO.getId()).build());
             //入库
-            requestItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmOrderInCountDTO.builder().orderItemId(orderItemDO.getId()).build());
+            orderItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmOrderInCountDTO.builder().orderItemId(orderItemDO.getId()).build());
             //执行
-            requestItemExecutionMachine.fireEvent(SrmExecutionStatus.PENDING, SrmEventEnum.EXECUTION_INIT, orderItemDO);
+            orderItemExecutionMachine.fireEvent(SrmExecutionStatus.PENDING, SrmEventEnum.EXECUTION_INIT, orderItemDO);
         }
         //联动采购申请项的库存
         for (SrmPurchaseOrderItemDO orderItemDO : purchaseOrderItems) {
@@ -207,7 +207,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 SrmPurchaseRequestItemsDO itemsDO = srmPurchaseRequestService.validItemIdExist(itemId);
                 //下单数量 <-> 申请单已订购数量
                 SrmQuantityOrderedCountDTO dto = SrmQuantityOrderedCountDTO.builder().purchaseRequestItemId(itemsDO.getId()).quantity(orderItemDO.getQty().intValue()).build();
-                requestOrderItemMachine.fireEvent(SrmOrderStatus.fromCode(itemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
+                requestItemMachine.fireEvent(SrmOrderStatus.fromCode(itemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
             });
         }
     }
@@ -220,11 +220,11 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         orderAuditMachine.fireEvent(SrmAuditStatus.DRAFT, SrmEventEnum.AUDIT_INIT,
             SrmPurchaseOrderAuditReqVO.builder().orderIds(Collections.singletonList(orderDO.getId())).build());
         //入库
-        purchaseOrderStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, orderDO);
+        orderStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, orderDO);
         //执行
-        purchaseOrderExecutionMachine.fireEvent(SrmExecutionStatus.PENDING, SrmEventEnum.EXECUTION_INIT, orderDO);
+        orderExecutionMachine.fireEvent(SrmExecutionStatus.PENDING, SrmEventEnum.EXECUTION_INIT, orderDO);
         //付款
-        purchaseOrderPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, orderDO);
+        orderPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, orderDO);
     }
 
     @Override
@@ -469,12 +469,12 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 SrmQuantityOrderedCountDTO dto = SrmQuantityOrderedCountDTO.builder().purchaseRequestItemId(requestItemsDO.getId()).quantity(changCount).build();
                 if (changCount < 0) {
                     //采购数量减少了
-                    requestOrderItemMachine.fireEvent(SrmOrderStatus.fromCode(requestItemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
+                    requestItemMachine.fireEvent(SrmOrderStatus.fromCode(requestItemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
                 } else if (changCount > 0) {
                     //采购数量增多了
                     int i = requestItemsDO.getApprovedQty() - requestItemsDO.getOrderClosedQty();
                     ThrowUtil.ifThrow(changCount > i, PURCHASE_ORDER_ITEM_PURCHASE_FAIL_EXCEED, requestItemsDO.getId(), i);
-                    requestOrderItemMachine.fireEvent(SrmOrderStatus.fromCode(requestItemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
+                    requestItemMachine.fireEvent(SrmOrderStatus.fromCode(requestItemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
                 }
             });
         }
@@ -578,7 +578,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             //触发关闭撤销
             requestItemOffMachine.fireEvent(SrmOffStatus.fromCode(requestItemsDO.getOffStatus()), SrmEventEnum.CANCEL_DELETE, requestItemsDO);
             //订购状态调整
-            requestOrderItemMachine.fireEvent(SrmOrderStatus.fromCode(requestItemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
+            requestItemMachine.fireEvent(SrmOrderStatus.fromCode(requestItemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
         });
     }
 
