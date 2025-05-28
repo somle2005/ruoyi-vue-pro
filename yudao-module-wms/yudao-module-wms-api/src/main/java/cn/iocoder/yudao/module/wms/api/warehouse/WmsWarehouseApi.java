@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.wms.api.warehouse;
 
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWareHouseUpdateReqDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.vo.WmsWarehouseListReqDTO;
 
@@ -25,4 +26,13 @@ public interface WmsWarehouseApi {
      * @return 仓库列表
      */
     List<WmsWarehouseDTO> selectList(WmsWarehouseListReqDTO reqDTO);
+
+    /**
+     * 更新仓库库存
+     *
+     * @param updateReqVO 更新信息
+     * @return 仓库库存
+     */
+    Boolean updateStockWarehouse(WmsWareHouseUpdateReqDTO updateReqVO);
+
 }

@@ -29,7 +29,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.STOCK_WAREHOUSE_NOT_EXISTS;
@@ -92,15 +91,15 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
     @Override
     public WmsStockWarehouseDO updateStockWarehouse(WmsStockWarehouseSaveReqVO updateReqVO) {
         // 校验存在
-        WmsStockWarehouseDO exists = validateStockWarehouseExists(updateReqVO.getId());
-        if (!Objects.equals(updateReqVO.getId(), exists.getId()) && Objects.equals(updateReqVO.getWarehouseId(), exists.getWarehouseId()) && Objects.equals(updateReqVO.getProductId(), exists.getProductId())) {
-            throw exception(STOCK_WAREHOUSE_WAREHOUSE_ID_PRODUCT_ID_DUPLICATE);
-        }
+        WmsStockWarehouseDO exists = validateStockWarehouseExists(updateReqVO.getProductId(), updateReqVO.getWarehouseId());
+//        if (!Objects.equals(updateReqVO.getId(), exists.getId()) && Objects.equals(updateReqVO.getWarehouseId(), exists.getWarehouseId()) && Objects.equals(updateReqVO.getProductId(), exists.getProductId())) {
+//            throw exception(STOCK_WAREHOUSE_WAREHOUSE_ID_PRODUCT_ID_DUPLICATE);
+//        }
         // 更新
-        WmsStockWarehouseDO stockWarehouse = BeanUtils.toBean(updateReqVO, WmsStockWarehouseDO.class);
-        stockWarehouseMapper.updateById(stockWarehouse);
+        exists.setMakePendingQty(exists.getMakePendingQty()+updateReqVO.getMakePendingQty());
+        stockWarehouseMapper.updateById(exists);
         // 返回
-        return stockWarehouse;
+        return exists;
     }
 
     /**
@@ -109,21 +108,21 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deleteStockWarehouse(Long id) {
-        // 校验存在
-        WmsStockWarehouseDO stockWarehouse = validateStockWarehouseExists(id);
-        // 唯一索引去重
-        stockWarehouse.setWarehouseId(stockWarehouseMapper.flagUKeyAsLogicDelete(stockWarehouse.getWarehouseId()));
-        stockWarehouse.setProductId(stockWarehouseMapper.flagUKeyAsLogicDelete(stockWarehouse.getProductId()));
-        stockWarehouseMapper.updateById(stockWarehouse);
-        // 删除
-        stockWarehouseMapper.deleteById(id);
+//        // 校验存在
+//        WmsStockWarehouseDO stockWarehouse = validateStockWarehouseExists(id);
+//        // 唯一索引去重
+//        stockWarehouse.setWarehouseId(stockWarehouseMapper.flagUKeyAsLogicDelete(stockWarehouse.getWarehouseId()));
+//        stockWarehouse.setProductId(stockWarehouseMapper.flagUKeyAsLogicDelete(stockWarehouse.getProductId()));
+//        stockWarehouseMapper.updateById(stockWarehouse);
+//        // 删除
+//        stockWarehouseMapper.deleteById(id);
     }
 
     /**
      * @sign : 0AC227DD0DAC3D98
      */
-    private WmsStockWarehouseDO validateStockWarehouseExists(Long id) {
-        WmsStockWarehouseDO stockWarehouse = stockWarehouseMapper.selectById(id);
+    private WmsStockWarehouseDO validateStockWarehouseExists(Long productId, Long warehouseId) {
+        WmsStockWarehouseDO stockWarehouse = stockWarehouseMapper.getByWarehouseIdAndProductId(warehouseId, productId);
         if (stockWarehouse == null) {
             throw exception(STOCK_WAREHOUSE_NOT_EXISTS);
         }

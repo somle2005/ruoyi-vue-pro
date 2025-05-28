@@ -8,10 +8,7 @@ import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseExcelVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehousePageReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseProductRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.*;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -50,16 +47,16 @@ public class WmsStockWarehouseController {
     // public CommonResult<Long> createStockWarehouse(@Valid @RequestBody WmsStockWarehouseSaveReqVO createReqVO) {
     // return success(stockWarehouseService.createStockWarehouse(createReqVO).getId());
     // }
-    // /**
-    // * @sign : A68FAA9D68AA9447
-    // */
-    // @PutMapping("/update")
-    // @Operation(summary = "更新仓库库存")
-    // @PreAuthorize("@ss.hasPermission('wms:stock-warehouse:update')")
-    // public CommonResult<Boolean> updateStockWarehouse(@Valid @RequestBody WmsStockWarehouseSaveReqVO updateReqVO) {
-    // stockWarehouseService.updateStockWarehouse(updateReqVO);
-    // return success(true);
-    // }
+     /**
+     * @sign : A68FAA9D68AA9447
+     */
+     @PutMapping("/update")
+     @Operation(summary = "更新仓库库存")
+     @PreAuthorize("@ss.hasPermission('wms:stock-warehouse:update')")
+     public CommonResult<Boolean> updateStockWarehouse(@Valid @RequestBody WmsStockWarehouseSaveReqVO updateReqVO) {
+     stockWarehouseService.updateStockWarehouse(updateReqVO);
+     return success(true);
+     }
     // @DeleteMapping("/delete")
     // @Operation(summary = "删除仓库库存")
     // @Parameter(name = "id", description = "编号", required = true)

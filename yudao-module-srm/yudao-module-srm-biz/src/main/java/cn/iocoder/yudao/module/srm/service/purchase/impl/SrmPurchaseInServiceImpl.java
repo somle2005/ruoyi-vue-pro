@@ -567,6 +567,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         });
     }
 
+    @Override
     public SrmPurchaseInDO validatePurchaseInExists(Long id) {
         SrmPurchaseInDO purchaseIn = purchaseInMapper.selectById(id);
         if (purchaseIn == null) {
@@ -791,6 +792,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                             .upstreamBillCode(inDO.getCode())
                             .warehouseId(warehouseId)
                             .itemList(inboundItems)
+                            .auditStatus(WmsInboundAuditStatus.DRAFT.getValue())
                             .build()
             );
             log.info("采购到货单[{}]审核通过，创建入库单，ID: {}", inDO.getCode(), inbound);

@@ -38,8 +38,8 @@ import java.util.Map;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.INBOUND_ITEM_NOT_EXISTS;
-import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.INBOUND_ITEM_PRODUCT_NOT_EXISTS;
+import static cn.iocoder.yudao.module.system.enums.somle.BillType.WMS_INBOUND;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 @Tag(name = "入库单详情")
 @RestController
@@ -77,6 +77,21 @@ public class WmsInboundItemController {
     @Operation(summary = "设置实际入库量")
     @PreAuthorize("@ss.hasPermission('wms:inbound-item:update')")
     public CommonResult<Boolean> updateActualQuantity(@Validated(ValidationGroup.update.class) @RequestBody List<WmsInboundItemSaveReqVO> updateReqVOList) {
+//        if (CollectionUtils.isEmpty(updateReqVOList)) {
+//            throw exception(INBOUND_NOT_EXISTS);
+//        }
+//        Set<Long> inboundIds = StreamX.from(updateReqVOList).toSet(WmsInboundItemSaveReqVO::getInboundId);
+//        if (inboundIds.size() > 1) {
+//            throw exception(INBOUND_ITEM_INBOUND_ID_DUPLICATE);
+//        }
+//        Long inboundId = inboundIds.stream().findFirst().get();
+//        WmsInboundDO inboundDO = inboundService.validateInboundExists(inboundId);
+//        WmsApprovalReqVO wmsApprovalReqVO = new WmsApprovalReqVO();
+//        wmsApprovalReqVO.setBillType(WMS_INBOUND.getValue());
+//        wmsApprovalReqVO.setBillId(inboundId);
+//        wmsApprovalReqVO.setStatusType(inboundDO.getInboundStatus()+"");
+//        wmsApprovalReqVO.setComment(inboundDO.getRemark());
+//        inboundService.approve(WmsInboundAuditStatus.Event.AGREE, wmsApprovalReqVO);
         inboundItemService.updateActualQuantity(updateReqVOList);
         return success(true);
     }
