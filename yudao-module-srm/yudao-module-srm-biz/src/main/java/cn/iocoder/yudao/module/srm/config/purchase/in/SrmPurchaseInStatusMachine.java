@@ -21,6 +21,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus.*;
+import static cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus.*;
+
 //采购入库单主表状态机
 @Slf4j
 @Configuration
@@ -39,20 +42,20 @@ public class SrmPurchaseInStatusMachine {
         StateMachineBuilder<SrmAuditStatus, SrmEventEnum, SrmPurchaseInAuditReqVO> builder = StateMachineBuilderFactory.create();
 
         // 初始化状态
-        builder.internalTransition().within(SrmAuditStatus.DRAFT).on(SrmEventEnum.AUDIT_INIT).perform(inAuditActionImpl);
+        builder.internalTransition().within(DRAFT).on(SrmEventEnum.AUDIT_INIT).perform(inAuditActionImpl);
 
         // 提交审核
-        builder.externalTransitions().fromAmong(SrmAuditStatus.DRAFT, SrmAuditStatus.REVOKED, SrmAuditStatus.REJECTED).to(SrmAuditStatus.PENDING_REVIEW)
+        builder.externalTransitions().fromAmong(DRAFT, REVOKED, REJECTED).to(PENDING_REVIEW)
             .on(SrmEventEnum.SUBMIT_FOR_REVIEW).perform(inAuditActionImpl);
 
         // 审核通过
-        builder.externalTransition().from(SrmAuditStatus.PENDING_REVIEW).to(SrmAuditStatus.APPROVED).on(SrmEventEnum.AGREE).perform(inAuditActionImpl);
+        builder.externalTransition().from(PENDING_REVIEW).to(APPROVED).on(SrmEventEnum.AGREE).perform(inAuditActionImpl);
 
         // 审核不通过
-        builder.externalTransition().from(SrmAuditStatus.PENDING_REVIEW).to(SrmAuditStatus.REJECTED).on(SrmEventEnum.REJECT).perform(inAuditActionImpl);
+        builder.externalTransition().from(PENDING_REVIEW).to(REJECTED).on(SrmEventEnum.REJECT).perform(inAuditActionImpl);
 
         // 反审核
-        builder.externalTransition().from(SrmAuditStatus.APPROVED).to(SrmAuditStatus.REVOKED).on(SrmEventEnum.WITHDRAW_REVIEW).perform(inAuditActionImpl);
+        builder.externalTransition().from(APPROVED).to(REVOKED).on(SrmEventEnum.WITHDRAW_REVIEW).perform(inAuditActionImpl);
 
         builder.setFailCallback(baseFailCallbackImpl);
 
@@ -63,21 +66,16 @@ public class SrmPurchaseInStatusMachine {
     public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInDO> getPurchaseRequestPaymentStateMachine() {
         StateMachineBuilder<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInDO> builder = StateMachineBuilderFactory.create();
         //初始化
-        builder.internalTransition().within(SrmPaymentStatus.NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(inPayActionImpl);
+        builder.internalTransition().within(NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(inPayActionImpl);
         //付款金额调整
-        builder.externalTransition().from(SrmPaymentStatus.NONE_PAYMENT).to(SrmPaymentStatus.PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT)
+        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT, ALL_PAYMENT, PAYMENT_EXCEPTION).to(PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT)
             .perform(inPayActionImpl);
-        builder.externalTransition().from(SrmPaymentStatus.ALL_PAYMENT).to(SrmPaymentStatus.ALL_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT)
-            .perform(inPayActionImpl);
-        builder.externalTransition().from(SrmPaymentStatus.PARTIALLY_PAYMENT).to(SrmPaymentStatus.ALL_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT)
-            .perform(inPayActionImpl);
+
         //付款失败事件
-        builder.externalTransition().from(SrmPaymentStatus.NONE_PAYMENT).to(SrmPaymentStatus.PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION)
-            .perform(inPayActionImpl);
-        builder.externalTransition().from(SrmPaymentStatus.PARTIALLY_PAYMENT).to(SrmPaymentStatus.PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION)
+        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT).to(PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION)
             .perform(inPayActionImpl);
         //取消付款
-        builder.externalTransition().from(SrmPaymentStatus.ALL_PAYMENT).to(SrmPaymentStatus.NONE_PAYMENT).on(SrmEventEnum.CANCEL_PAYMENT)
+        builder.externalTransition().from(ALL_PAYMENT).to(NONE_PAYMENT).on(SrmEventEnum.CANCEL_PAYMENT)
             .perform(inPayActionImpl);
 
         builder.setFailCallback(baseFailCallbackImpl);

@@ -16,6 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import static cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus.*;
+import static cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus.*;
+
 //采购入库单主表状态机
 @Slf4j
 @Configuration
@@ -27,36 +30,35 @@ public class SrmPurchaseInItemStatusMachine {
 
     @Autowired
     Action<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> inPayItemActionImpl;
+
     @Bean(SrmStateMachines.PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE)
     public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> getPurchaseRequestPaymentStateMachine() {
         StateMachineBuilder<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> builder = StateMachineBuilderFactory.create();
         //初始化
-        builder.internalTransition().within(SrmPaymentStatus.NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(inPayItemActionImpl);
+        builder.internalTransition().within(NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(inPayItemActionImpl);
         //付款金额调整
-        builder.externalTransition().from(SrmPaymentStatus.NONE_PAYMENT).to(SrmPaymentStatus.PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(inPayItemActionImpl);
-        builder.externalTransition().from(SrmPaymentStatus.ALL_PAYMENT).to(SrmPaymentStatus.ALL_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(inPayItemActionImpl);
-        builder.externalTransition().from(SrmPaymentStatus.PARTIALLY_PAYMENT).to(SrmPaymentStatus.ALL_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(inPayItemActionImpl);
+        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT, ALL_PAYMENT, PAYMENT_EXCEPTION).to(PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(inPayItemActionImpl);
         //付款失败事件
-        builder.externalTransition().from(SrmPaymentStatus.NONE_PAYMENT).to(SrmPaymentStatus.PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION).perform(inPayItemActionImpl);
-        builder.externalTransition().from(SrmPaymentStatus.PARTIALLY_PAYMENT).to(SrmPaymentStatus.PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION).perform(inPayItemActionImpl);
+        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT).to(PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION).perform(inPayItemActionImpl);
         //完成付款
-        builder.externalTransition().from(SrmPaymentStatus.NONE_PAYMENT).to(SrmPaymentStatus.ALL_PAYMENT).on(SrmEventEnum.COMPLETE_PAYMENT).perform(inPayItemActionImpl);
+        builder.externalTransition().from(NONE_PAYMENT).to(ALL_PAYMENT).on(SrmEventEnum.COMPLETE_PAYMENT).perform(inPayItemActionImpl);
 
         //取消付款
-        builder.externalTransition().from(SrmPaymentStatus.ALL_PAYMENT).to(SrmPaymentStatus.NONE_PAYMENT).on(SrmEventEnum.CANCEL_PAYMENT).perform(inPayItemActionImpl);
+        builder.externalTransition().from(ALL_PAYMENT).to(NONE_PAYMENT).on(SrmEventEnum.CANCEL_PAYMENT).perform(inPayItemActionImpl);
         builder.setFailCallback(baseFailCallbackImpl);
         return builder.build(SrmStateMachines.PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE);
     }
 
     @Autowired
     Action<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> itemStorageActionImpl;
+
     @Bean(SrmStateMachines.PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
     public StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> getPurchaseRequestStorageStateMachine() {
         StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> builder = StateMachineBuilderFactory.create();
         //初始化
-        builder.internalTransition().within(SrmStorageStatus.NONE_IN_STORAGE).on(SrmEventEnum.STORAGE_INIT).perform(itemStorageActionImpl);
+        builder.internalTransition().within(NONE_IN_STORAGE).on(SrmEventEnum.STORAGE_INIT).perform(itemStorageActionImpl);
         //库存调整,不管终点，在 Action 里面调整终点
-        builder.externalTransitions().fromAmong(SrmStorageStatus.NONE_IN_STORAGE, SrmStorageStatus.PARTIALLY_IN_STORAGE, SrmStorageStatus.ALL_IN_STORAGE).to(SrmStorageStatus.PARTIALLY_IN_STORAGE)
+        builder.externalTransitions().fromAmong(NONE_IN_STORAGE, PARTIALLY_IN_STORAGE, ALL_IN_STORAGE).to(PARTIALLY_IN_STORAGE)
             .on(SrmEventEnum.STOCK_ADJUSTMENT).perform(itemStorageActionImpl);
         //
         builder.setFailCallback(baseFailCallbackImpl);

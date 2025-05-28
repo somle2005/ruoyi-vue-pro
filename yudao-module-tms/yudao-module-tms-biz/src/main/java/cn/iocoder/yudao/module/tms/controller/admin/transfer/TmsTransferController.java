@@ -69,7 +69,7 @@ public class TmsTransferController {
     @PostMapping("/page")
     @Operation(summary = "获得调拨单分页")
     @PreAuthorize("@ss.hasPermission('tms:transfer:query')")
-    public CommonResult<PageResult<TmsTransferRespVO>> getTransferPage(@RequestBody TmsTransferPageReqVO pageReqVO) {
+    public CommonResult<PageResult<TmsTransferRespVO>> getTransferPage(@RequestBody(required = false) TmsTransferPageReqVO pageReqVO) {
         return success(transferService.getTmsTransferRespVOPage(pageReqVO));
     }
 

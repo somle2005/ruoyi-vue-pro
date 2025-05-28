@@ -94,6 +94,9 @@ public interface TmsTransferItemMapper extends BaseMapperX<TmsTransferItemDO> {
     }
 
     default PageResult<TmsTransferItemBO> selectBOPage(TmsTransferPageReqVO vo) {
+        if (vo == null) {
+            vo = new TmsTransferPageReqVO();
+        }
         MPJLambdaWrapper<TmsTransferItemDO> wrapper = buildBOWrapper(vo);
         wrapper.selectAssociation(TmsTransferDO.class, TmsTransferItemBO::getTmsTransferDO);
         return selectJoinPage(vo, TmsTransferItemBO.class, wrapper);

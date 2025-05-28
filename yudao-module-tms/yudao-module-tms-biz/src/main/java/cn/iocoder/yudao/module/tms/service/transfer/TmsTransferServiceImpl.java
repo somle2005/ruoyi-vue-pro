@@ -325,7 +325,20 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void review(TmsTransferAuditReqVO reqVO) {
+        // 1. 校验调拨单是否存在
+        TmsTransferDO transfer = validateTransferExists(reqVO.getId());
+
+        if (reqVO.getReviewed()) {
+            //审核同意
+            //1.0 状态
+            //2.0 创建出库单(待审核)
+        } else {
+            //审核拒绝
+            //1.0 更新状态
+            //2.0 存在对应得出库单 -> e
+        }
 
     }
 

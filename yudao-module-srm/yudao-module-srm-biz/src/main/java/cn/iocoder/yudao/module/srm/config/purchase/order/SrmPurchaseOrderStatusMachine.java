@@ -142,7 +142,7 @@ public class SrmPurchaseOrderStatusMachine {
         // 付款异常
         builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT).to(PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION).perform(orderPayActionImpl);
         // 付款调整
-        builder.externalTransitions().fromAmong(PARTIALLY_PAYMENT, ALL_PAYMENT, PAYMENT_EXCEPTION).to(PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(orderPayActionImpl);
+        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT, ALL_PAYMENT, PAYMENT_EXCEPTION).to(PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(orderPayActionImpl);
         // 设置错误回调
         builder.setFailCallback(baseFailCallbackImpl);
 
