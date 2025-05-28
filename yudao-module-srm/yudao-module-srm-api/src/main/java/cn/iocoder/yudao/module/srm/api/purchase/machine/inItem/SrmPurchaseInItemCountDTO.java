@@ -15,6 +15,6 @@ public class SrmPurchaseInItemCountDTO {
     //到货项差额
     private BigDecimal inCount;
 
-    //退货想差额
+    //退货项差额
     private BigDecimal outCount;
 }
