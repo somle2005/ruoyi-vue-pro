@@ -764,23 +764,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
      */
     private boolean isInboundCanAbandon(WmsInboundDTO inbound) {
         return Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())
-            && Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue());
-            // 处理关联的入库单
-            List<WmsInboundDTO> inbounds = wmsInboundApi.getInboundList(BillType.SRM_PURCHASE_IN.getValue(), inDO.getId());
-            if (CollUtil.isNotEmpty(inbounds)) {
-                for (WmsInboundDTO inbound : inbounds) {
-                    //未审核通过+未入库 -> 作废入库单
-                    if (Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())
-                            || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue())
-                            || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.AUDITING.getValue())
-                            || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.REJECT.getValue())) {
-                        wmsInboundApi.abandonInbound(inbound.getId(), "采购到货单反审核，作废入库单", BillType.SRM_PURCHASE_IN.getValue());
-                    } else {
-                        //抛出异常
-                        throw exception(PURCHASE_IN_PROCESS_FAIL_IN_BOUND_EXISTS, inbound.getId());
-                    }
-                }
-            }
+            && (Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue())
+                || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.AUDITING.getValue())
+                || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.REJECT.getValue()));
         }
 
     /**
