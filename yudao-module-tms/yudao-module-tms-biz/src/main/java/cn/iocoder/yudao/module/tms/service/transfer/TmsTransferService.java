@@ -51,6 +51,14 @@ public interface TmsTransferService {
     TmsTransferDO getTransfer(Long id);
 
     /**
+     * 校验调拨单是否存在
+     *
+     * @param id 编号
+     * @return 调拨单
+     */
+    TmsTransferDO validateTransferExists(Long id);
+
+    /**
      * 获得调拨单分页
      *
      * @param pageReqVO 分页查询

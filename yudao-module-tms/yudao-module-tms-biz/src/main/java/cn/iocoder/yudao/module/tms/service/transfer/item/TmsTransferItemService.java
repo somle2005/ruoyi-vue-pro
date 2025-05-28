@@ -6,6 +6,8 @@ import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransfer
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemDO;
 import jakarta.validation.Valid;
 
+import java.util.List;
+
 /**
  * 调拨单明细 Service 接口
  *
@@ -51,4 +53,39 @@ public interface TmsTransferItemService {
      */
     PageResult<TmsTransferItemDO> getTransferItemPage(TmsTransferItemPageReqVO pageReqVO);
 
+    /**
+     * 根据调拨单ID获取明细列表
+     *
+     * @param transferId 调拨单编号
+     * @return 明细列表
+     */
+    List<TmsTransferItemDO> getTransferItemListByTransferId(Long transferId);
+
+    /**
+     * 批量创建调拨单明细
+     *
+     * @param list 创建信息列表
+     */
+    void createTransferItemList(List<TmsTransferItemDO> list);
+
+    /**
+     * 批量更新调拨单明细
+     *
+     * @param list 更新信息列表
+     */
+    void updateTransferItemList(List<TmsTransferItemDO> list);
+
+    /**
+     * 批量删除调拨单明细
+     *
+     * @param ids 编号列表
+     */
+    void deleteTransferItemList(List<Long> ids);
+
+    /**
+     * 根据调拨单ID删除明细
+     *
+     * @param transferId 调拨单编号
+     */
+    void deleteTransferItemByTransferId(Long transferId);
 }

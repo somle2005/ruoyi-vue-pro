@@ -7,6 +7,8 @@ import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransfer
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * 调拨单明细 Mapper
  *
@@ -31,6 +33,17 @@ public interface TmsTransferItemMapper extends BaseMapperX<TmsTransferItemDO> {
             .eqIfPresent(TmsTransferItemDO::getOutboundClosedQty, reqVO.getOutboundClosedQty())
             .eqIfPresent(TmsTransferItemDO::getInboundClosedQty, reqVO.getInboundClosedQty())
             .orderByDesc(TmsTransferItemDO::getId));
+    }
+
+    default List<TmsTransferItemDO> selectListByTransferId(Long transferId) {
+        return selectList(new LambdaQueryWrapperX<TmsTransferItemDO>()
+            .eq(TmsTransferItemDO::getTransferId, transferId)
+            .orderByDesc(TmsTransferItemDO::getId));
+    }
+
+    default void deleteByTransferId(Long transferId) {
+        delete(new LambdaQueryWrapperX<TmsTransferItemDO>()
+            .eq(TmsTransferItemDO::getTransferId, transferId));
     }
 
 }

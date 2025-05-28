@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.tms.controller.admin.transfer.vo;
 
+import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -122,5 +123,5 @@ public class TmsTransferRespVO {
     private String inboundCode;
 
     @Schema(description = "调拨单明细")
-    private TmsTransferRespVO item;
+    private TmsTransferItemRespVO item;
 }

@@ -69,10 +69,10 @@ public class TmsTransferController {
         return success(BeanUtils.toBean(transfer, TmsTransferRespVO.class));
     }
 
-    @GetMapping("/page")
+    @PostMapping("/page")
     @Operation(summary = "获得调拨单分页")
     @PreAuthorize("@ss.hasPermission('tms:transfer:query')")
-    public CommonResult<PageResult<TmsTransferRespVO>> getTransferPage(TmsTransferPageReqVO pageReqVO) {
+    public CommonResult<PageResult<TmsTransferRespVO>> getTransferPage(@RequestBody TmsTransferPageReqVO pageReqVO) {
         PageResult<TmsTransferDO> pageResult = transferService.getTransferPage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, TmsTransferRespVO.class));
     }
@@ -95,7 +95,7 @@ public class TmsTransferController {
     public CommonResult<Boolean> importTransferExcel(@RequestParam("file") MultipartFile file) throws Exception {
         List<TmsTransferSaveReqVO> list = ExcelUtils.read(file, TmsTransferSaveReqVO.class);
         // 可根据业务需要批量保存或校验
-        return success(true);
+        return success(false);
     }
 
     @PutMapping("/submit-audit")
