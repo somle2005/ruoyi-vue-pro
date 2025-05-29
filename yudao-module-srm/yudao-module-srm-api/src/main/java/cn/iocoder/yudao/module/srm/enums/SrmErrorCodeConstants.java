@@ -24,7 +24,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_ORDER_DELETE_FAIL_APPROVE = new ErrorCode(1_030_101_001, "采购订单({})已审核，无法删除");
     ErrorCode PURCHASE_ORDER_PROCESS_FAIL = new ErrorCode(1_030_101_002, "反审核失败，只有已审核的采购订单才能反审核");
     ErrorCode PURCHASE_ORDER_APPROVE_FAIL = new ErrorCode(1_030_101_003, "审核失败，只有未审核的采购订单才能审核");
-    ErrorCode PURCHASE_ORDER_NO_EXISTS = new ErrorCode(1_030_101_004, "生成采购单号失败，请重新提交");
+    ErrorCode PURCHASE_ORDER_NO_EXISTS = new ErrorCode(1_030_101_004, "生成采购单编号{}失败，请重新提交");
     ErrorCode PURCHASE_ORDER_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_101_005, "采购订单({})当前状态({})，无法修改");
     ErrorCode PURCHASE_ORDER_NOT_APPROVE = new ErrorCode(1_030_101_006, "采购订单({})未审核，无法操作");
     ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_PRODUCT_EXCEED = new ErrorCode(1_030_101_007, "采购订单项({})超过最大允许到货数量({})");
@@ -47,7 +47,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_ORDER_GENERATE_CONTRACT_FAIL_ERROR = new ErrorCode(1_030_101_022, "生成({})合同发生错误，请联系管理员,({})");
     ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_EXISTS_IN = new ErrorCode(1_030_101_021, "采购订单项编号({})存在对应的到货项，无法反审核");
     ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_EXISTS_DEL = new ErrorCode(1_030_101_021, "采购订单项({})存在对应的采购到货项，无法删除");
-    ErrorCode PURCHASE_ORDER_NO_HAS_EXISTS = new ErrorCode(1_030_101_004, "采购订单NO:({})已经存在");
+    ErrorCode PURCHASE_ORDER_NO_HAS_EXISTS = new ErrorCode(1_030_101_004, "采购订单编号:({})已经存在");
     ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_APPROVE = new ErrorCode(1_030_101_023, "采购订单项({})不处于已审核，无法修改验货+完工单");
     ErrorCode PURCHASE_ORDER_NOT_AUDIT = new ErrorCode(1_030_101_024, "订单处于已审核,才可以生成采购合同");
     ErrorCode PURCHASE_ORDER_UPDATE_FAIL_OFF = new ErrorCode(1_030_101_025, "采购订单({})非开启状态，无法修改");
@@ -56,7 +56,7 @@ public interface SrmErrorCodeConstants {
 
     // ========== ERP 采购到货（1-030-102-000） ==========
     ErrorCode PURCHASE_IN_NOT_EXISTS = new ErrorCode(1_030_102_000, "采购到货单不存在");
-    ErrorCode PURCHASE_IN_DELETE_FAIL_APPROVE = new ErrorCode(1_030_102_001, "采购到货单({})已审核，无法删除");
+    ErrorCode PURCHASE_IN_DELETE_FAIL_APPROVE = new ErrorCode(1_030_102_001, "采购到货单({})处于草稿、未通过、审核撤销，才可以删除");
     ErrorCode PURCHASE_IN_PROCESS_FAIL = new ErrorCode(1_030_102_002, "反审核失败，只有已审核的到货单才能反审核");
     ErrorCode PURCHASE_IN_APPROVE_FAIL = new ErrorCode(1_030_102_003, "审核失败，只有未审核的到货单才能审核");
     ErrorCode PURCHASE_IN_NO_EXISTS = new ErrorCode(1_030_102_004, "生成到货单失败，请重新提交");

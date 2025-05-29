@@ -535,14 +535,18 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseIn(List<Long> ids) {
         // 获取业务名称用于日志记录
+        //1.0 校验存在
         List<SrmPurchaseInDO> ins = purchaseInMapper.selectByIds(ids);
         String businessName = CollUtil.join(ins.stream().map(SrmPurchaseInDO::getCode).collect(Collectors.toList()), ",");
         LogRecordContext.putVariable("businessName", businessName);
 
-        // 1. 已审批->无法删除
-        if (CollUtil.isEmpty(ins)) {
-            return;
-        }
+        // 1. 未（草稿+未通过+审核撤销）->无法删除
+        List<Integer> statusList = List.of(SrmAuditStatus.DRAFT.getCode(), SrmAuditStatus.REJECTED.getCode(), SrmAuditStatus.REVOKED.getCode());
+        ins.forEach(purchaseIn -> {
+            if (!statusList.contains(purchaseIn.getAuditStatus())) {
+                throw exception(PURCHASE_IN_DELETE_FAIL_APPROVE, purchaseIn.getCode());
+            }
+        });
         for (SrmPurchaseInDO inDO : ins) {
             //校验,入库项存在对应的退货项 -> 异常
             purchaseInItemMapper.selectListByInId(inDO.getId()).forEach(purchaseInItem -> {
@@ -551,13 +555,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             });
         }
 
-        //2. 联动回滚状态数量
-        ins.forEach(purchaseIn -> {
-            if (SrmAuditStatus.APPROVED.getCode().equals(purchaseIn.getAuditStatus())) {
-                throw exception(PURCHASE_IN_DELETE_FAIL_APPROVE, purchaseIn.getCode());
-            }
-            rollbackSlaveStatus(purchaseInItemMapper.selectListByInId(purchaseIn.getId()));
-        });
+
         // 2. 遍历删除，并记录操作日志
         ins.forEach(purchaseIn -> {
             // 2.1 删除订单

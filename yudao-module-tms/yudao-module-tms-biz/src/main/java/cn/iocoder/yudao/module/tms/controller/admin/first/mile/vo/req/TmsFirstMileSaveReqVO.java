@@ -26,6 +26,9 @@ public class TmsFirstMileSaveReqVO {
     @DiffLogField(name = "头程单ID")
     private Long id;
 
+    /**
+     * code限制开发给用户
+     */
     @Schema(description = "编码", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "编码不能为空")
     @DiffLogField(name = "编码")

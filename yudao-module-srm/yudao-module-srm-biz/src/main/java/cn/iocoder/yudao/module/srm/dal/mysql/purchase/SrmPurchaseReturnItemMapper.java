@@ -52,6 +52,7 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .likeIfPresent(SrmPurchaseReturnItemDO::getBarCode, vo.getItemQuery().getBarCode()) // 产品sku
             .likeIfPresent(SrmPurchaseReturnItemDO::getProductName, vo.getItemQuery().getProductName()) // 产品名称
             .eqIfPresent(SrmPurchaseReturnItemDO::getOutboundStatus, vo.getItemQuery().getOutboundStatus())
+            .orderByDesc(SrmPurchaseReturnItemDO::getCreateTime)
             ;
     }
 
@@ -83,6 +84,7 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .eqIfPresent(SrmPurchaseReturnItemDO::getId, vo.getMainQuery().getId()) //ID
             .eqIfPresent(SrmPurchaseReturnItemDO::getCreator, vo.getMainQuery().getCreator()) // 创建人
             .eqIfPresent(SrmPurchaseReturnItemDO::getOutboundStatus, vo.getMainQuery().getOutboundStatus())
+            .orderByDesc(SrmPurchaseReturnItemDO::getCreateTime)
             ;
     }
 

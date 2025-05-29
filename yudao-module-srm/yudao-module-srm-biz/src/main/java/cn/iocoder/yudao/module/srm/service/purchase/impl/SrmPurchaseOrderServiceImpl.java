@@ -337,6 +337,11 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         //生成单据编号
         if (vo.getCode() != null) {
             ThrowUtil.ifThrow(purchaseOrderMapper.selectByNo(vo.getCode()) != null, PURCHASE_ORDER_NO_HAS_EXISTS, vo.getCode());
+            //如果符合"^" + PURCHASE_ORDER_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$" 正则再执行
+            String pattern = "^" + PURCHASE_ORDER_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$";
+            if (vo.getCode().matches(pattern)) {
+                noRedisDAO.setManualSerial(PURCHASE_ORDER_NO_PREFIX, vo.getCode());
+            }
             noRedisDAO.setManualSerial(PURCHASE_ORDER_NO_PREFIX, vo.getCode());
         } else {
             vo.setCode(noRedisDAO.generate(PURCHASE_ORDER_NO_PREFIX, PURCHASE_ORDER_NO_OUT_OF_BOUNDS));
