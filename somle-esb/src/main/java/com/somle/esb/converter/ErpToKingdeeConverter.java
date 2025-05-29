@@ -2,7 +2,6 @@ package com.somle.esb.converter;
 
 import cn.hutool.core.text.CharSequenceUtil;
 import cn.hutool.core.util.ObjectUtil;
-import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
@@ -10,6 +9,7 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import cn.iocoder.yudao.module.system.api.dict.dto.DictDataRespDTO;
 import cn.iocoder.yudao.module.tms.api.logistic.customrule.dto.TmsCustomRuleDTO;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import com.somle.kingdee.model.KingdeeAuxInfoDetail;
 import com.somle.kingdee.model.KingdeeProductSaveReqVO;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
@@ -87,7 +87,7 @@ public class ErpToKingdeeConverter {
         String barCode = productDTO.getBarCode();
         // 如果国家编码不为空，且产品条码不为空，设置SKU
         if (ObjectUtil.isNotEmpty(countryCode)) {
-            DictDataRespDTO dictData = dictDataApi.getDictData(DictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
+            DictDataRespDTO dictData = dictDataApi.getDictData(TmsDictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
             if (CharSequenceUtil.isNotBlank(barCode)) {
                 String countrySuffix = getCountrySuffix(dictData.getLabel());
                 reqVO.setNumber(barCode + "-" + countrySuffix);

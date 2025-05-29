@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.srm.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
-import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -17,7 +16,7 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @Getter
-public enum SrmAuditStatus implements ArrayValuable<Integer>, StatusValue {
+public enum SrmAuditStatus implements ArrayValuable<Integer> {
 
     // 1. 草稿阶段
     DRAFT(1, "草稿"),

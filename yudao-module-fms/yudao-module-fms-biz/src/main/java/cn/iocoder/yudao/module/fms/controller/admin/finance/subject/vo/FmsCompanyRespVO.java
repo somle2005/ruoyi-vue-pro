@@ -1,8 +1,8 @@
 package cn.iocoder.yudao.module.fms.controller.admin.finance.subject.vo;
 
-import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.module.fms.api.enums.FmsDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -85,7 +85,7 @@ public class FmsCompanyRespVO {
 
     @Schema(description = "开启状态", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty(value = "开启状态", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.COMMON_BOOLEAN_STATUS)
+    @DictFormat(FmsDictTypeConstants.FMS_BOOLEAN_STATUS)
     private Boolean status;
 
     @Schema(description = "纳税人识别号", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -1,7 +1,6 @@
-package cn.iocoder.yudao.framework.common.core;
+package cn.iocoder.yudao.module.tms.enums.status;
 
-public interface StatusValue {
-
+public interface TmsStatusValue {
     /**
      * 获得状态描述
      *

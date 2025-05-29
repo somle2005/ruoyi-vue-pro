@@ -1,12 +1,12 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp;
 
-import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -61,7 +61,7 @@ public class TmsFirstMileRespVO extends BaseVO {
 
     @Schema(description = "审核状态")
     @ExcelProperty(value = "审核状态", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.AUDIT_STATUS)
+    @DictFormat(TmsDictTypeConstants.AUDIT_STATUS)
     private Integer auditStatus;
 
     @Schema(description = "目的仓ID", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -73,7 +73,7 @@ public class TmsFirstMileRespVO extends BaseVO {
 
     @Schema(description = "柜型（字典）")
     @ExcelProperty(value = "柜型", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.TMS_CABINET_TYPE)
+    @DictFormat(TmsDictTypeConstants.TMS_CABINET_TYPE)
     private Integer cabinetType;
 
     @Schema(description = "装柜日期")

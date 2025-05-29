@@ -1,11 +1,11 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo;
 
-import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -51,17 +51,17 @@ public class TmsFirstMileRequestRespVO extends BaseVO {
 
     @Schema(description = "审核状态")
     @ExcelProperty(value = "审核状态", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.AUDIT_STATUS)
+    @DictFormat(TmsDictTypeConstants.AUDIT_STATUS)
     private Integer auditStatus;
 
     @Schema(description = "订购状态")
     @ExcelProperty(value = "订购状态", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.ORDER_STATUS)
+    @DictFormat(TmsDictTypeConstants.ORDER_STATUS)
     private Integer orderStatus;
 
     @Schema(description = "关闭状态")
     @ExcelProperty(value = "关闭状态", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.OFF_STATUS)
+    @DictFormat(TmsDictTypeConstants.OFF_STATUS)
     private Integer offStatus;
 
     @Schema(description = "总重量（kg）")

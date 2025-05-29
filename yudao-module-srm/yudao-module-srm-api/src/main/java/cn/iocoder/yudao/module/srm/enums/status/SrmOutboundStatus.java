@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.srm.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
-import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -12,7 +11,7 @@ import java.util.Map;
 //srm_outbound_status 字典
 @RequiredArgsConstructor
 @Getter
-public enum SrmOutboundStatus implements ArrayValuable<Integer>, StatusValue {
+public enum SrmOutboundStatus implements ArrayValuable<Integer> {
     NONE_OUTBOUND(0, "未出库"),
     PARTIALLY_OUTBOUND(1, "部分出库"),
     ALL_OUTBOUND(2, "已出库");

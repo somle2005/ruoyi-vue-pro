@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.srm.config;
 
 import cn.iocoder.yudao.framework.cola.statemachine.builder.FailCallback;
-import cn.iocoder.yudao.framework.common.core.StatusValue;
+import cn.iocoder.yudao.framework.common.core.ArrayValuable;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.SrmPurchaseRequestAuditReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.*;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
@@ -11,6 +11,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -106,8 +107,9 @@ public class BaseFailCallbackImpl<S, E, C> implements FailCallback<S, E, C> {
     private String convertEventToDescription(Object event) {
         try {
             // 判断event是否为ArrayValuable的实例
-            if (event instanceof StatusValue) {
-                return ((StatusValue) event).getDesc();
+            if (event instanceof ArrayValuable) {
+                Method method = event.getClass().getMethod("getDesc");
+                return (String) method.invoke(event);
             } else {
                 log.warn("Unknown event type: {}", event.getClass());
             }

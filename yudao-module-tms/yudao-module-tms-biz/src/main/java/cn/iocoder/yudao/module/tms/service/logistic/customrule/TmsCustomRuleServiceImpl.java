@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.tms.service.logistic.customrule;
 
 import cn.hutool.core.collection.CollUtil;
-import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
@@ -15,6 +14,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.logistic.customrule.vo.TmsCu
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.product.TmsCustomProductDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.customrule.TmsCustomRuleDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.logistic.customrule.TmsCustomRuleMapper;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import cn.iocoder.yudao.module.tms.service.logistic.category.product.TmsCustomProductService;
 import cn.iocoder.yudao.module.tms.service.logistic.customrule.bo.TmsCustomRuleBO;
 import jakarta.annotation.Resource;
@@ -182,7 +182,7 @@ public class TmsCustomRuleServiceImpl implements TmsCustomRuleService {
         }
         // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
         String barCode = erpProductApi.getProductDto(productId).getBarCode();
-        String countryDesc = dictDataApi.getDictDataLabel(DictTypeConstants.COUNTRY_CODE, countryCode);
+        String countryDesc = dictDataApi.getDictDataLabel(TmsDictTypeConstants.COUNTRY_CODE, countryCode);
         ThrowUtil.ifThrow(id == null, NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE, barCode + countryDesc);
         ThrowUtil.ifThrow(!tmsCustomRuleDO.getId().equals(id), NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE, barCode + countryDesc);
     }
@@ -190,12 +190,12 @@ public class TmsCustomRuleServiceImpl implements TmsCustomRuleService {
     private void baseValidator(TmsCustomRuleSaveReqVO vo) {
         //国家
         Optional.ofNullable(vo.getCountryCode())
-            .ifPresent(countryCodes -> dictDataApi.validateDictDataList(DictTypeConstants.COUNTRY_CODE,
+            .ifPresent(countryCodes -> dictDataApi.validateDictDataList(TmsDictTypeConstants.COUNTRY_CODE,
                 countryCodes.stream()
                     .map(String::valueOf)
                     .collect(Collectors.toSet())));
         //货币
-        Optional.ofNullable(vo.getDeclaredValueCurrencyCode()).ifPresent(i -> dictDataApi.validateDictDataList(DictTypeConstants.CURRENCY_CODE, Collections.singleton(String.valueOf(i))));
+        Optional.ofNullable(vo.getDeclaredValueCurrencyCode()).ifPresent(i -> dictDataApi.validateDictDataList(TmsDictTypeConstants.CURRENCY_CODE, Collections.singleton(String.valueOf(i))));
         //物流属性
         Optional.ofNullable(vo.getLogisticAttribute()).ifPresent(i -> dictDataApi.validateDictDataList(ErpDictTypeConstants.ERP_LOGISTIC_ATTRIBUTE, Collections.singleton(String.valueOf(i))));
 

@@ -1,9 +1,9 @@
 package cn.iocoder.yudao.module.tms.controller.admin.fee.vo;
 
-import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -30,7 +30,7 @@ public class TmsFeeRespVO extends BaseVO {
 
     @Schema(description = "费用类型", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty(value = "费用类型", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.TMS_FEE_TYPE)
+    @DictFormat(TmsDictTypeConstants.TMS_FEE_TYPE)
     private Integer costType;
 
     @Schema(description = "金额", requiredMode = Schema.RequiredMode.REQUIRED)

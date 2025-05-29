@@ -1,6 +1,5 @@
 package cn.iocoder.yudao.module.srm.service.purchase.impl;
 
-import cn.iocoder.yudao.framework.common.enums.ChannelEnum;
 import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
@@ -8,6 +7,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupp
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupplierSaveReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmSupplierMapper;
+import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import jakarta.annotation.Resource;
 import org.springframework.integration.support.MessageBuilder;
@@ -37,7 +37,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     @Resource
     private SrmSupplierMapper supplierMapper;
 
-    @Resource(name = ChannelEnum.SUPPLIER)
+    @Resource(name = SrmChannelEnum.SUPPLIER)
     private MessageChannel supplierChannel;
 
     @Override

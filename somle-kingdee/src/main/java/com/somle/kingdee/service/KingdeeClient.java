@@ -2,9 +2,9 @@ package com.somle.kingdee.service;
 
 import cn.hutool.core.util.ObjUtil;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
+import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
-import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -377,7 +377,7 @@ public class KingdeeClient {
         log.debug("采购订单总页数：{}", totalPages);
 
         // 2. 从Spring容器获取通用线程池
-        ThreadPoolExecutor executorService = SpringUtils.getBean(ThreadPoolExecutor.class);
+        ThreadPoolExecutor executorService = AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor();
         log.debug("使用通用线程池，核心线程数：{}，最大线程数：{}",
                 executorService.getCorePoolSize(), executorService.getMaximumPoolSize());
 

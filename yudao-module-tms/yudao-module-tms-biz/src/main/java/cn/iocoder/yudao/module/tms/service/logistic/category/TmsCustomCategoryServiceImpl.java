@@ -14,6 +14,7 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.item.TmsCust
 import cn.iocoder.yudao.module.tms.dal.mysql.logistic.category.TmsCustomCategoryMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.logistic.category.item.TmsCustomCategoryItemMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.logistic.customrule.TmsCustomRuleMapper;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants;
 import cn.iocoder.yudao.module.tms.service.logistic.category.bo.TmsCustomCategoryBO;
 import cn.iocoder.yudao.module.tms.service.logistic.category.item.TmsCustomCategoryItemService;
@@ -29,7 +30,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import static cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants.PRODUCT_MATERIAL;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 
@@ -56,7 +56,7 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
     @Transactional(rollbackFor = Exception.class)
     public Long createCustomRuleCategory(TmsCustomCategorySaveReqVO createReqVO) {
         //材质-字典校验
-        dictDataApi.validateDictDataList(PRODUCT_MATERIAL, List.of(String.valueOf(createReqVO.getMaterial())));
+        dictDataApi.validateDictDataList(TmsDictTypeConstants.PRODUCT_MATERIAL, List.of(String.valueOf(createReqVO.getMaterial())));
         validateCustomRuleCategoryNotExists(createReqVO);
         // 插入
         TmsCustomCategoryDO customRuleCategory = TmsCustomCategoryConvert.INSTANCE.convert(createReqVO);
@@ -89,7 +89,7 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
         Long categoryId = updateReqVO.getId();
         validateCustomRuleCategoryExists(categoryId);
         //材质-字典校验
-        dictDataApi.validateDictDataList(PRODUCT_MATERIAL, List.of(String.valueOf(updateReqVO.getMaterial())));
+        dictDataApi.validateDictDataList(TmsDictTypeConstants.PRODUCT_MATERIAL, List.of(String.valueOf(updateReqVO.getMaterial())));
         // 更新
         TmsCustomCategoryDO updateObj = BeanUtils.toBean(updateReqVO, TmsCustomCategoryDO.class);
         customRuleCategoryMapper.updateById(updateObj);

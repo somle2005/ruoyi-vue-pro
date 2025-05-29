@@ -1,9 +1,9 @@
-package cn.iocoder.yudao.framework.common.enums;
+package cn.iocoder.yudao.module.srm.enums;
 
 /**
  * 消息通道枚举
  */
-public interface ChannelEnum {
+public interface SrmChannelEnum {
 
     /**
      * 供应商同步通道
@@ -24,5 +24,4 @@ public interface ChannelEnum {
      * 采购退货单同步通道
      */
     String PURCHASE_RETURN = "srm_channel_purchase_return";
-
 }

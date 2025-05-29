@@ -1,8 +1,8 @@
 package cn.iocoder.yudao.module.tms.controller.admin.port.info.vo;
 
-import cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -57,7 +57,7 @@ public class TmsPortInfoRespVO {
 
     @Schema(description = "国家代码(字典)")
     @ExcelProperty(value = "国家代码", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.COUNTRY_CODE)
+    @DictFormat(TmsDictTypeConstants.COUNTRY_CODE)
     private Integer countryCode;
 
     @Schema(description = "国家描述")
@@ -78,7 +78,7 @@ public class TmsPortInfoRespVO {
 
     @Schema(description = "启用/禁用状态")
     @ExcelProperty(value = "启用/禁用状态", converter = DictConvert.class)
-    @DictFormat(DictTypeConstants.COMMON_BOOLEAN_STATUS)
+    @DictFormat(TmsDictTypeConstants.BOOLEAN_STATUS)
     private Boolean status;
 
 }

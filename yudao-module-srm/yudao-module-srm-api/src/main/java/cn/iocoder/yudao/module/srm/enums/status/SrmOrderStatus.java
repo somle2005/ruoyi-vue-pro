@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.srm.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
-import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,7 +10,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter
-public enum SrmOrderStatus implements ArrayValuable<Integer>, StatusValue {
+public enum SrmOrderStatus implements ArrayValuable<Integer> {
 
     OT_ORDERED(1, "未订购"),
     ORDERED(2, "全部订购"),
