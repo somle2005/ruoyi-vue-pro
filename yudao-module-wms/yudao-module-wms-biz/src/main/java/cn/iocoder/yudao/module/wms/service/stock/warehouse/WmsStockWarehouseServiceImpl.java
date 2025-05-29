@@ -7,6 +7,8 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseQueryDTO;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseSimpleDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.*;
@@ -21,6 +23,7 @@ import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.stock.ownership.WmsStockOwnershipService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
+import com.google.common.collect.Maps;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
@@ -305,11 +308,21 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
     }
 
     @Override
-    public List<WmsStockWarehouseDO> selectSellableQty(Long warehouseId, Long productId) {
-        LambdaQueryWrapperX<WmsStockWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
-        wrapper.eq(WmsStockWarehouseDO::getWarehouseId, warehouseId)
-                .eq(WmsStockWarehouseDO::getProductId, productId)
-                .ge(WmsStockWarehouseDO::getSellableQty, 0);
-        return stockWarehouseMapper.selectList(wrapper);
+    public Map<Long, List<WmsStockWarehouseDO>>  selectSellableQty(WmsWarehouseQueryDTO wmsWarehouseQueryDTO) {
+        Map<Long, List<WmsStockWarehouseDO>> map = Maps.newHashMap();
+        List<WmsWarehouseSimpleDTO> warehouses = wmsWarehouseQueryDTO.getWarehouses();
+        if (CollectionUtils.isEmpty(warehouses)) {
+            return Map.of();
+        }
+        warehouses.forEach(wmsWarehouse -> {
+            LambdaQueryWrapperX<WmsStockWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
+            wrapper.eqIfPresent(WmsStockWarehouseDO::getWarehouseId, wmsWarehouse.getWarehouseId())
+                    .inIfPresent(WmsStockWarehouseDO::getProductId, wmsWarehouse.getProductIds())
+                    .ge(WmsStockWarehouseDO::getSellableQty, 0);
+            List<WmsStockWarehouseDO> rtnList = stockWarehouseMapper.selectList(wrapper);
+            map.put(wmsWarehouse.getWarehouseId(), rtnList);
+        });
+
+        return map;
     }
 }

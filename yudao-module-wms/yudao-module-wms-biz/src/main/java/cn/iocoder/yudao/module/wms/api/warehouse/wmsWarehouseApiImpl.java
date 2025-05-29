@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsStockWarehouseSimpleDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWareHouseUpdateReqDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseQueryDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.vo.WmsWarehouseListReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
@@ -70,8 +71,22 @@ public class wmsWarehouseApiImpl implements WmsWarehouseApi {
     }
 
     @Override
-    public List<WmsStockWarehouseSimpleDTO> selectSellableQty(Long warehouseId, Long productId) {
-        List<WmsStockWarehouseDO> rtnList = stockWarehouseService.selectSellableQty(warehouseId, productId);
-        return BeanUtils.toBean(rtnList, WmsStockWarehouseSimpleDTO.class);
+    public Map<Long, List<WmsStockWarehouseSimpleDTO>> selectSellableQty(WmsWarehouseQueryDTO wmsWarehouseQueryDTO) {
+        Map<Long, List<WmsStockWarehouseDO>> sellableQty = stockWarehouseService.selectSellableQty(wmsWarehouseQueryDTO);
+        //转化数据为期望的返回类型
+        if (CollectionUtils.isEmpty(sellableQty)) {
+            return Collections.emptyMap();
+        }
+        // 将 WmsStockWarehouseDO 转换为 WmsStockWarehouseSimpleDTO
+        Map<Long, List<WmsStockWarehouseSimpleDTO>> result = new HashMap<>();
+        for (Map.Entry<Long, List<WmsStockWarehouseDO>> entry : sellableQty.entrySet()) {
+            Long warehouseId = entry.getKey();
+            List<WmsStockWarehouseSimpleDTO> simpleDTOList = entry.getValue().stream()
+                    .map(stock -> BeanUtils.toBean(stock, WmsStockWarehouseSimpleDTO.class))
+                    .collect(Collectors.toList());
+            result.put(warehouseId, simpleDTOList);
+        }
+        return result;
+
     }
 }

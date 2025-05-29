@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.wms.api.warehouse;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsStockWarehouseSimpleDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWareHouseUpdateReqDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseQueryDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.vo.WmsWarehouseListReqDTO;
 
 import java.util.Collection;
@@ -39,10 +40,9 @@ public interface WmsWarehouseApi {
     /**
      * 查询可售库存
      *
-     * @param warehouseId 仓库编号
-     * @param productId   产品编号
+     * @param wmsWarehouseQueryDTO 仓库编号
      * @return 可售库存列表
      */
-    List<WmsStockWarehouseSimpleDTO> selectSellableQty(Long warehouseId, Long productId);
+    Map<Long, List<WmsStockWarehouseSimpleDTO>>  selectSellableQty(WmsWarehouseQueryDTO wmsWarehouseQueryDTO);
 
 }
