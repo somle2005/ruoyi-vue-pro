@@ -25,6 +25,10 @@ public enum SrmStorageStatus implements ArrayValuable<Integer>, StatusValue {
         }
     }
 
+    // 获取所有状态（返回 List<SrmStorageStatus>）
+    public static java.util.List<SrmStorageStatus> getAllStatuses() {
+        return java.util.Arrays.asList(values());
+    }
     // 存储状态码和描述的字段
     private final Integer code;
     private final String desc;

@@ -84,10 +84,7 @@ public class SrmPurchaseOrderStatusMachine {
         // 初始化状态
         builder.internalTransition().within(NONE_IN_STORAGE).on(SrmEventEnum.STORAGE_INIT).perform(orderInActionImpl);
         //
-        builder.externalTransitions().fromAmong(PARTIALLY_IN_STORAGE, ALL_IN_STORAGE).to(NONE_IN_STORAGE).on(SrmEventEnum.STOCK_ADJUSTMENT).perform(orderInActionImpl);
-        builder.externalTransitions().fromAmong(NONE_IN_STORAGE, ALL_IN_STORAGE).to(PARTIALLY_IN_STORAGE).on(SrmEventEnum.STOCK_ADJUSTMENT).perform(orderInActionImpl);
-        //内部流转,未入库<->部分入库,完全入库
-        builder.externalTransitions().fromAmong(NONE_IN_STORAGE, PARTIALLY_IN_STORAGE).to(ALL_IN_STORAGE).on(SrmEventEnum.STOCK_ADJUSTMENT).perform(orderInActionImpl);
+        builder.externalTransitions().fromAmong(NONE_IN_STORAGE, PARTIALLY_IN_STORAGE, ALL_IN_STORAGE).to(NONE_IN_STORAGE).on(SrmEventEnum.STOCK_ADJUSTMENT).perform(orderInActionImpl);
         //结束事件
 
         builder.setFailCallback(baseFailCallbackImpl);
