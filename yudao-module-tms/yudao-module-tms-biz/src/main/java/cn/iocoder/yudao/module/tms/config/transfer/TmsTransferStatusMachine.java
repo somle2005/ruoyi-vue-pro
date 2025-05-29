@@ -25,27 +25,27 @@ public class TmsTransferStatusMachine {
     TmsFailCallbackImpl tmsFailCallbackImpl;
 
     @Autowired
-    Action<TmsAuditStatus, TmsEventEnum, TmsTransferAuditReqVO> transferAuditAction;
+    Action<TmsAuditStatus, TmsEventEnum, TmsTransferAuditReqVO> TmsTransferImpl;
 
     @Bean(TRANSFER_AUDIT_STATE_MACHINE)
     public StateMachine<TmsAuditStatus, TmsEventEnum, TmsTransferAuditReqVO> getFirstMileRequestStateMachine() {
         StateMachineBuilder<TmsAuditStatus, TmsEventEnum, TmsTransferAuditReqVO> builder = StateMachineBuilderFactory.create();
 
         // 初始化状态
-        builder.internalTransition().within(TmsAuditStatus.DRAFT).on(TmsEventEnum.AUDIT_INIT).perform(transferAuditAction);
+        builder.internalTransition().within(TmsAuditStatus.DRAFT).on(TmsEventEnum.AUDIT_INIT).perform(TmsTransferImpl);
 
         // 提交审核
         builder.externalTransitions().fromAmong(TmsAuditStatus.DRAFT, TmsAuditStatus.REVOKED, TmsAuditStatus.REJECTED).to(TmsAuditStatus.PENDING_REVIEW)
-            .on(TmsEventEnum.SUBMIT_FOR_REVIEW).perform(transferAuditAction);
+            .on(TmsEventEnum.SUBMIT_FOR_REVIEW).perform(TmsTransferImpl);
 
         // 审核通过
-        builder.externalTransition().from(TmsAuditStatus.PENDING_REVIEW).to(TmsAuditStatus.APPROVED).on(TmsEventEnum.AGREE).perform(transferAuditAction);
+        builder.externalTransition().from(TmsAuditStatus.PENDING_REVIEW).to(TmsAuditStatus.APPROVED).on(TmsEventEnum.AGREE).perform(TmsTransferImpl);
 
         // 审核不通过
-        builder.externalTransition().from(TmsAuditStatus.PENDING_REVIEW).to(TmsAuditStatus.REJECTED).on(TmsEventEnum.REJECT).perform(transferAuditAction);
+        builder.externalTransition().from(TmsAuditStatus.PENDING_REVIEW).to(TmsAuditStatus.REJECTED).on(TmsEventEnum.REJECT).perform(TmsTransferImpl);
 
         // 反审核
-        builder.externalTransition().from(TmsAuditStatus.APPROVED).to(TmsAuditStatus.REVOKED).on(TmsEventEnum.WITHDRAW_REVIEW).perform(transferAuditAction);
+        builder.externalTransition().from(TmsAuditStatus.APPROVED).to(TmsAuditStatus.REVOKED).on(TmsEventEnum.WITHDRAW_REVIEW).perform(TmsTransferImpl);
 
         builder.setFailCallback(tmsFailCallbackImpl);
 

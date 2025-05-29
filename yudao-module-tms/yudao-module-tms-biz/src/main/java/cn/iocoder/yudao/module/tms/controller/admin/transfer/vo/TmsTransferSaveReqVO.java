@@ -22,6 +22,7 @@ public class TmsTransferSaveReqVO {
 
     @Schema(description = "调拨单编码", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotBlank(message = "调拨单编码不能为空")
+    @NotNull(message = "调拨单编码不能为空")
     private String code;
 
     @Schema(description = "发出仓库ID", requiredMode = Schema.RequiredMode.REQUIRED)

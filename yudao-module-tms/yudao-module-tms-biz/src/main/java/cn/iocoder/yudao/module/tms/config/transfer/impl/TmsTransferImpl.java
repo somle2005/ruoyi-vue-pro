@@ -35,6 +35,7 @@ public class TmsTransferImpl implements Action<TmsAuditStatus, TmsEventEnum, Tms
         }
 
         //更新状态
-        tmsTransferMapper.updateById(transfer);
+        tmsTransferMapper.updateById(transfer.setAuditStatus(to.getCode()));
+        log.debug("调拨审核状态机，ID: {},起始状态{} -> 目标状态{}", transfer.getId(), from.getDesc(), to.getDesc());
     }
 }
