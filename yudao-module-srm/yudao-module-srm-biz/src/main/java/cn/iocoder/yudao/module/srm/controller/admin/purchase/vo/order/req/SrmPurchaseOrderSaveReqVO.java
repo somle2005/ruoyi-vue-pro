@@ -11,8 +11,6 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import static cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO.PURCHASE_ORDER_NO_PREFIX;
-
 @Schema(description = "管理后台 - ERP 采购订单新增/修改 Request VO")
 @Data
 @SuppressWarnings("all")
@@ -24,10 +22,13 @@ public class SrmPurchaseOrderSaveReqVO {
     @DiffLogField(name = "订单编号")
     private Long id;
 
-    @Pattern(regexp = "^" + PURCHASE_ORDER_NO_PREFIX + "-\\d{8}-\\d{6}$",
-             message = "单据编号格式不正确，正确格式如：" + PURCHASE_ORDER_NO_PREFIX + "-20250108-000001")
-    @Pattern(regexp = "^" + PURCHASE_ORDER_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$",
-             message = "单据编号格式不正确，注意后6位序号中不能以9开头,正确格式:" + PURCHASE_ORDER_NO_PREFIX + "-20250108-000001")
+    /**
+     * code限制条件放给用户
+     */
+//    @Pattern(regexp = "^" + PURCHASE_ORDER_NO_PREFIX + "-\\d{8}-\\d{6}$",
+//             message = "单据编号格式不正确，正确格式如：" + PURCHASE_ORDER_NO_PREFIX + "-20250108-000001")
+//    @Pattern(regexp = "^" + PURCHASE_ORDER_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$",
+//             message = "单据编号格式不正确，注意后6位序号中不能以9开头,正确格式:" + PURCHASE_ORDER_NO_PREFIX + "-20250108-000001")
     @Schema(description = "单据编号", example = "CGDD-20250108-000027")
     @DiffLogField(name = "单据编号")
     private String code;

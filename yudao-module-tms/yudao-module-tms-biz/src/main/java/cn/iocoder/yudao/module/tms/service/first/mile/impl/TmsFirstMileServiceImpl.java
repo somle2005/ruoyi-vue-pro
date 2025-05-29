@@ -123,11 +123,15 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         warehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
 
         if (vo.getCode() != null) {
-            validCodeDateIsToday(vo);
             if (validCodeDuplicate(vo.getCode())) {
                 throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
             }
-            noRedisDAO.setManualSerial(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, vo.getCode());
+//            validCodeDateIsToday(vo);
+            String pattern = "^" + FIRST_MILE_CODE_DUPLICATE + "-\\d{8}-[0-8]\\d{5}$";
+            if (vo.getCode().matches(pattern)) {
+                //如果符合再设置max序号
+                noRedisDAO.setManualSerial(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, vo.getCode());
+            }
         } else {
             vo.setCode(noRedisDAO.generate(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, FIRST_MILE_CODE_DUPLICATE));
         }
