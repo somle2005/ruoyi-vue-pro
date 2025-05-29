@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.TRANSFER_CREATE_IN_STOCK_ERROR;
+import static jodd.util.StringUtil.truncate;
+
 /**
  * 调拨单 API 实现类
  */
@@ -72,7 +76,12 @@ public class TmsTransferApiImpl implements TmsTransferApi {
         }
 
         //4.0 创建对应入库单
-        createInbound(reqDTO);
+        try {
+            createInbound(reqDTO);
+        } catch (Exception e) {
+            throw exception(TRANSFER_CREATE_IN_STOCK_ERROR, truncate(e.getMessage(), 200));
+        }
+
     }
 
     /**

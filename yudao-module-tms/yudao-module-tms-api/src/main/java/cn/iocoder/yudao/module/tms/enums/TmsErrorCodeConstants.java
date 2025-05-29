@@ -79,6 +79,8 @@ public interface TmsErrorCodeConstants {
     // ========== 调拨单 1-030-906-000 ==========
     ErrorCode TRANSFER_NOT_EXISTS = new ErrorCode(1_030_906_001, "调拨单{}不存在");
     ErrorCode TRANSFER_CODE_DUPLICATE = new ErrorCode(1_030_906_002, "调拨单编码{}已存在");
+    ErrorCode TRANSFER_CREATE_OUT_STOCK_ERROR = new ErrorCode(1_030_906_003, "创建出库单失败，原因：{}");
+    ErrorCode TRANSFER_CREATE_IN_STOCK_ERROR = new ErrorCode(1_030_906_004, "创建入库单失败，原因：{}");
 
     // ========== 调拨单明细 1-030-907-000 ==========
     ErrorCode TRANSFER_ITEM_NOT_EXISTS = new ErrorCode(1_030_907_001, "调拨单明细{}不存在");

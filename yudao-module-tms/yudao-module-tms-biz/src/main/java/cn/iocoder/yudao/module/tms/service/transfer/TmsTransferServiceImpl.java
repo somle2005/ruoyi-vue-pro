@@ -51,9 +51,9 @@ import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
-import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.TRANSFER_CODE_DUPLICATE;
-import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.TRANSFER_NOT_EXISTS;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.TRANSFER_AUDIT_STATE_MACHINE;
+import static jodd.util.StringUtil.truncate;
 
 /**
  * 调拨单 Service 实现类
@@ -354,7 +354,12 @@ public class TmsTransferServiceImpl implements TmsTransferService {
                 transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.AGREE, reqVO);
                 //2.0 创建出库单(待审核)
                 TmsTransferBO tmsTransferBO = getTransferBO(reqVO.getId());
-                createWmsOutbound(tmsTransferBO);
+                try {
+                    createWmsOutbound(tmsTransferBO);
+                } catch (Exception e) {
+                    throw exception(TRANSFER_CREATE_OUT_STOCK_ERROR, truncate(e.getMessage(), 200));
+                }
+
             } else {
                 //不通过
                 transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.REJECT, reqVO);
