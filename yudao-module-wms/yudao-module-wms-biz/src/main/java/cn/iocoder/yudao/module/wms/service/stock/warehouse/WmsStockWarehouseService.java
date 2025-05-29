@@ -80,4 +80,13 @@ public interface WmsStockWarehouseService {
      * 按 ID 集合查询 WmsStockWarehouseDO
      */
     List<WmsStockWarehouseDO> selectByIds(List<Long> idList);
+
+    /**
+     * 查询可售库存
+     *
+     * @param warehouseId 仓库编号
+     * @param productId   产品编号
+     * @return 可售库存列表
+     */
+    List<WmsStockWarehouseDO> selectSellableQty(Long warehouseId, Long productId);
 }

@@ -179,7 +179,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             throw exception(OUTBOUND_WAREHOUSE_ERROR);
         }
 //        outboundDO.setUpstreamBillType(outboundDO.getType());
-        if(!outboundDO.getUpstreamBillType().equals(SRM_PURCHASE_RETURN.getValue())) {
+        if(outboundDO.getUpstreamBillType() != null && outboundDO.getUpstreamBillType().equals(SRM_PURCHASE_RETURN.getValue())) {
             Long warehouseId = StreamX.from(warehouseIdSetOfBin).first();
             if (!Objects.equals(warehouseId, outboundDO.getWarehouseId())) {
                 throw exception(OUTBOUND_WAREHOUSE_ERROR);

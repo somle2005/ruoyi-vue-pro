@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.api.warehouse;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsStockWarehouseSimpleDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWareHouseUpdateReqDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.vo.WmsWarehouseListReqDTO;
@@ -66,5 +67,11 @@ public class wmsWarehouseApiImpl implements WmsWarehouseApi {
     public Boolean updateStockWarehouse(WmsWareHouseUpdateReqDTO updateReqVO){
         stockWarehouseService.updateStockWarehouse(BeanUtils.toBean(updateReqVO, WmsStockWarehouseSaveReqVO.class));
         return true;
+    }
+
+    @Override
+    public List<WmsStockWarehouseSimpleDTO> selectSellableQty(Long warehouseId, Long productId) {
+        List<WmsStockWarehouseDO> rtnList = stockWarehouseService.selectSellableQty(warehouseId, productId);
+        return BeanUtils.toBean(rtnList, WmsStockWarehouseSimpleDTO.class);
     }
 }

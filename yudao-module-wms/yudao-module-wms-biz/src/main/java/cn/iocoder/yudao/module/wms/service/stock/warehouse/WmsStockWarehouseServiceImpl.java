@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
@@ -301,5 +302,14 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
             return List.of();
         }
         return stockWarehouseMapper.selectByIds(idList);
+    }
+
+    @Override
+    public List<WmsStockWarehouseDO> selectSellableQty(Long warehouseId, Long productId) {
+        LambdaQueryWrapperX<WmsStockWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
+        wrapper.eq(WmsStockWarehouseDO::getWarehouseId, warehouseId)
+                .eq(WmsStockWarehouseDO::getProductId, productId)
+                .ge(WmsStockWarehouseDO::getSellableQty, 0);
+        return stockWarehouseMapper.selectList(wrapper);
     }
 }
