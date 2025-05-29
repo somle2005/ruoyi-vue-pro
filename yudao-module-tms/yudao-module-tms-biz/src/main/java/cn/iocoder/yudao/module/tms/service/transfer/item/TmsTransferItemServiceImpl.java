@@ -119,4 +119,16 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     public void deleteTransferItemByTransferId(Long transferId) {
         transferItemMapper.deleteByTransferId(transferId);
     }
+
+    @Override
+    public void updateTransferItemOutbound(Long id, Integer outboundQty) {
+        // 1. 校验存在
+        validateTransferItemExists(id);
+
+        // 2. 更新出库信息
+        TmsTransferItemDO updateObj = new TmsTransferItemDO();
+        updateObj.setId(id);
+        updateObj.setOutboundClosedQty(outboundQty);
+        transferItemMapper.updateById(updateObj);
+    }
 }

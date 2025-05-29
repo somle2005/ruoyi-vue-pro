@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
+import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsTransferStatusUpdateDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsCompanyRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsWarehourseRespVO;
@@ -352,10 +353,10 @@ public class TmsTransferServiceImpl implements TmsTransferService {
             }
         } else {
             //反审核
-            //1.0 更新状态
-            transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.WITHDRAW_REVIEW, reqVO);
-            //2.0 作废WMS出库单
+            //1.0 作废WMS出库单
             abandonWmsOutbound(tmsTransferDO.getId());
+            //2.0 更新状态
+            transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.WITHDRAW_REVIEW, reqVO);
         }
     }
 
@@ -431,5 +432,43 @@ public class TmsTransferServiceImpl implements TmsTransferService {
             transferAuditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsTransferDO.getAuditStatus()), TmsEventEnum.SUBMIT_FOR_REVIEW, new TmsTransferAuditReqVO().setId(transferId));
         });
     }
+
+    @Override
+    public void updateTransferStatus(TmsTransferStatusUpdateDTO updateDTO) {
+        // 1. 校验调拨单是否存在
+        TmsTransferDO transfer = validateTransferExists(updateDTO.getId());
+
+        // 2. 更新出库状态相关信息
+        if (updateDTO.getOutboundTime() != null) {
+            transfer.setOutboundTime(updateDTO.getOutboundTime());
+        }
+        if (updateDTO.getOutboundStatus() != null) {
+            transfer.setOutboundStatus(updateDTO.getOutboundStatus());
+        }
+        if (updateDTO.getOutboundId() != null) {
+            transfer.setOutboundId(updateDTO.getOutboundId());
+        }
+        if (updateDTO.getOutboundCode() != null) {
+            transfer.setOutboundCode(updateDTO.getOutboundCode());
+        }
+
+        // 3. 更新入库状态相关信息
+        if (updateDTO.getInboundTime() != null) {
+            transfer.setInboundTime(updateDTO.getInboundTime());
+        }
+        if (updateDTO.getInboundStatus() != null) {
+            transfer.setInboundStatus(updateDTO.getInboundStatus());
+        }
+        if (updateDTO.getInboundId() != null) {
+            transfer.setInboundId(updateDTO.getInboundId());
+        }
+        if (updateDTO.getInboundCode() != null) {
+            transfer.setInboundCode(updateDTO.getInboundCode());
+        }
+
+        // 5. 保存更新
+        transferMapper.updateById(transfer);
+    }
+
 
 }

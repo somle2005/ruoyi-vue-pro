@@ -10,11 +10,17 @@ import org.springframework.validation.annotation.Validated;
 public interface TmsTransferApi {
 
     /**
-     * 出库单审核后回调
+     * 1.0 出库单审核后回调
      * <p>
-     * 1:1:1 调拨单:出库单:入库单 , 忽略子项数量差异
+     * 1:1:1 调拨单:出库单:入库单
      *
      * @param reqDTO 出库单信息
      */
     void afterOutboundAudit(TmsOutboundReqDTO reqDTO);
+
+    /**
+     * 2.0 入库单审核后回调
+     *
+     */
+//    void afterInboundAudit(TmsInboundReqDTO reqDTO);
 }

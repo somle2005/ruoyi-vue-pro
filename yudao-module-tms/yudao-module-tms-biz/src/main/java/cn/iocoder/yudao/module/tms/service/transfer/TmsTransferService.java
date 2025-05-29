@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.tms.service.transfer;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
+import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsTransferStatusUpdateDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.transfer.vo.*;
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.TmsTransferDO;
 import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferBO;
@@ -108,4 +109,11 @@ public interface TmsTransferService {
      * @param transferIds 调拨单编号列表
      */
     void submitAudit(@Size(min = 1, message = "提交审核的单据数量不小于1") List<Long> transferIds);
+
+    /**
+     * 更新调拨单状态,入库，出库
+     *
+     * @param updateDTO 更新信息
+     */
+    void updateTransferStatus(TmsTransferStatusUpdateDTO updateDTO);
 }

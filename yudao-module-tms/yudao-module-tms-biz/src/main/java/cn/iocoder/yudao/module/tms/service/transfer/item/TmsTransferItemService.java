@@ -94,4 +94,12 @@ public interface TmsTransferItemService {
      * @param transferId 调拨单编号
      */
     void deleteTransferItemByTransferId(Long transferId);
+
+    /**
+     * 更新调拨单明细的出库信息
+     *
+     * @param id          调拨单明细编号
+     * @param outboundQty 出库数量
+     */
+    void updateTransferItemOutbound(Long id, Integer outboundQty);
 }

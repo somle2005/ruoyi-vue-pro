@@ -4,7 +4,7 @@ import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsOutboundItemReqDTO;
 import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsOutboundReqDTO;
-import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.TmsTransferDO;
+import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsTransferStatusUpdateDTO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.transfer.TmsTransferMapper;
 import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferBO;
@@ -58,16 +58,33 @@ public class TmsTransferApiImpl implements TmsTransferApi {
         List<TmsTransferItemDO> items = transferItemService.validateTransferItemExists(itemIds);
 
         // 3.0 获取主单并更新出库时间、出库状态、出库单ID、出库单编码
-        TmsTransferDO transfer = transferService.getTransfer(items.get(0).getTransferId());
-        transfer.setOutboundTime(reqDTO.getOutboundTime());
-        transfer.setOutboundStatus(reqDTO.getOutboundStatus());
-        transfer.setOutboundId(reqDTO.getId());
-        transfer.setOutboundCode(reqDTO.getCode());
-        transferMapper.updateById(transfer);
+        transferService.updateTransferStatus(new TmsTransferStatusUpdateDTO()
+            .setId(items.get(0).getTransferId())
+            .setOutboundTime(reqDTO.getOutboundTime())
+            .setOutboundStatus(reqDTO.getOutboundStatus())
+            .setOutboundId(reqDTO.getId())
+            .setOutboundCode(reqDTO.getCode())
+        );
+        //3.1 填充子项的出库明细数值
+        for (TmsOutboundItemReqDTO outboundItem : reqDTO.getItems()) {
+            transferItemService.updateTransferItemOutbound(
+                outboundItem.getUpstreamItemId(),
+                outboundItem.getActualQty().intValue()
+            );
+        }
 
         //4.0 创建对应入库单
+        createInbound(reqDTO);
+    }
+
+    /**
+     * 创建入库单
+     *
+     * @param reqDTO 出库单请求DTO
+     */
+    private void createInbound(TmsOutboundReqDTO reqDTO) {
         TmsTransferBO transferBO = transferService.getTransferBO(reqDTO.getId());
-        //仓库to ,
+        //仓库to ,提交过去->入库单待审核,等待回调
         Long inbound = wmsInboundApi.createInbound(
             WmsInboundSaveReqDTO.builder()
                 .type(WmsInboundType.TRANSFER.getValue())
