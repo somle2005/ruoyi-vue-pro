@@ -3,8 +3,8 @@ package cn.iocoder.yudao.module.system.api.user;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.number.NumberUtils;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
-import cn.iocoder.yudao.module.system.api.user.dto.AdminUserReqDTO;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserSaveReqDTO;
 
 import java.util.*;
 import java.util.function.BiConsumer;
@@ -106,7 +106,7 @@ public interface AdminUserApi {
      * @Date 14:52 2024/11/4
      * @Param [erpUser]
      **/
-    void updateUser(AdminUserReqDTO erpUser);
+    void updateUser(AdminUserSaveReqDTO erpUser);
 
     /**
      * @return java.lang.Long
@@ -115,7 +115,7 @@ public interface AdminUserApi {
      * @Date 14:52 2024/11/4
      * @Param [erpUser]
      **/
-    Long createUser(AdminUserReqDTO erpUser);
+    Long createUser(AdminUserSaveReqDTO erpUser);
 
     /**
      * @return java.lang.Integer
