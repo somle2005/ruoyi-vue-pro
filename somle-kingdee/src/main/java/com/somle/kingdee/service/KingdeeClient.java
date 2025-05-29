@@ -8,7 +8,7 @@ import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.somle.kingdee.constant.ErpRedisKeyConstants;
+import com.somle.kingdee.constant.KingdeeRedisKeyConstants;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplier;
 import com.somle.kingdee.model.vo.KingdeeSupplierQueryReqVO;
@@ -422,7 +422,7 @@ public class KingdeeClient {
      * @param vo 查询参数
      * @return 分页数据流
      */
-    public Stream<KingdeePage> getAllPurInbound(KingdeePurInboundReqVO vo) {
+    public Stream<KingdeePage> streamPurInbound(KingdeePurInboundReqVO vo) {
         log.debug("获取采购入库单列表");
         String endpoint = "/jdy/v2/scm/pur_inbound";
         return StreamX.iterate(
@@ -509,7 +509,7 @@ public class KingdeeClient {
      * @param vo 查询参数
      * @return 分页数据流
      */
-    public Stream<KingdeePage> getAllPurReturn(KingdeePurReturnReqVO vo) {
+    public Stream<KingdeePage> streamPurReturn(KingdeePurReturnReqVO vo) {
         log.debug("获取采购退货单列表");
         String endpoint = "/jdy/v2/scm/pur_ret";
         return StreamX.iterate(
@@ -615,7 +615,7 @@ public class KingdeeClient {
         //TODO 双端锁校验，防止并发，等待批量查询。
 
         // 生成缓存key，使用查询参数的hash值作为key的一部分
-        String cacheKey = ErpRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + Objects.hash(JsonUtilsX.toJsonString(queryReqVO));
+        String cacheKey = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + Objects.hash(JsonUtilsX.toJsonString(queryReqVO));
 
         // 尝试从缓存获取
         String cachedData = redisTemplate.opsForValue().get(cacheKey);

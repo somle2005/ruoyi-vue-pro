@@ -25,7 +25,11 @@
         <profile>
             <id>local</id>
             <dependencies>
-
+                <!--使得启动类注解不报错-->
+                <dependency>
+                    <groupId>org.springframework.data</groupId>
+                    <artifactId>spring-data-jpa</artifactId>
+                </dependency>
             </dependencies>
         </profile>
         <profile>
@@ -193,6 +197,7 @@
             <groupId>cn.iocoder.boot</groupId>
             <artifactId>yudao-spring-boot-starter-protection</artifactId>
         </dependency>
+
 
     </dependencies>
 

@@ -13,7 +13,7 @@ public class KingdeePurInboundDataJob extends KingdeeDataJob {
         setDate(param);
         var vo = KingdeePurInboundReqVO.builder().build();
         for (KingdeeClient client : kingdeeService.getClients()) {
-            client.getAllPurInbound(vo).forEach(
+            client.streamPurInbound(vo).forEach(
                 page -> {
                     service.send(
                         OssData.builder()
