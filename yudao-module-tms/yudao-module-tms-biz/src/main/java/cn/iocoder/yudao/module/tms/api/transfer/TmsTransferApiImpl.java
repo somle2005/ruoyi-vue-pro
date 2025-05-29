@@ -90,7 +90,7 @@ public class TmsTransferApiImpl implements TmsTransferApi {
      * @param reqDTO 出库单请求DTO
      */
     private void createInbound(TmsOutboundReqDTO reqDTO) {
-        TmsTransferBO transferBO = transferService.getTransferBO(reqDTO.getId());
+        TmsTransferBO transferBO = transferService.getTransferBO(reqDTO.getUpstreamBillId());
         //仓库to ,提交过去->入库单待审核,等待回调
         Long inbound = wmsInboundApi.createInbound(
             WmsInboundSaveReqDTO.builder()
