@@ -11,7 +11,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundIt
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
@@ -21,6 +20,7 @@ import cn.iocoder.yudao.module.wms.service.quantity.InboundExecutor;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -45,11 +45,11 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     private WmsInboundItemService inboundItemService;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createInbound(WmsInboundSaveReqDTO createReqDTO) {
         WmsInboundSaveReqVO createReqVO = BeanUtils.toBean(createReqDTO, WmsInboundSaveReqVO.class);
         //预填实际数量
         List<WmsInboundItemSaveReqDTO> itemList = createReqDTO.getItemList();
-
         itemList.forEach(item -> {
             item.setActualQty(item.getPlanQty());
         });
