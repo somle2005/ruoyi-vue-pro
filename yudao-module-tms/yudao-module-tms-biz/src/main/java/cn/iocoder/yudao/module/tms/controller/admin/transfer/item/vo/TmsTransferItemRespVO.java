@@ -46,6 +46,10 @@ public class TmsTransferItemRespVO {
     @ExcelProperty("数量")
     private Integer qty;
 
+    @Schema(description = "可售库存")
+    @ExcelProperty("可售库存")
+    private Integer sellableQty;
+
     @Schema(description = "箱数")
     @ExcelProperty("箱数")
     private Integer boxQty;

@@ -116,4 +116,12 @@ public interface TmsTransferService {
      * @param updateDTO 更新信息
      */
     void updateTransferStatus(TmsTransferStatusUpdateDTO updateDTO);
+
+    /**
+     * 获取可售库存数量
+     *
+     * @param reqVO 查询参数
+     * @return 可售库存数量信息
+     */
+    TmsTransferSellableQtyRespVO getSellableQty(TmsTransferSellableQtyReqVO reqVO);
 }

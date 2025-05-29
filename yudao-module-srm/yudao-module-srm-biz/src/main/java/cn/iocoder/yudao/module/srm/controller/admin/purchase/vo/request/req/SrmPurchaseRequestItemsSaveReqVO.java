@@ -56,7 +56,6 @@ public class SrmPurchaseRequestItemsSaveReqVO {
 
     @Schema(description = "含税单价")
     @Positive(message = "含税单价必须为正数")
-    @NotNull(message = "含税单价不能为空")
     private BigDecimal actTaxPrice;
 
     @Schema(description = "价税合计")
@@ -75,7 +74,6 @@ public class SrmPurchaseRequestItemsSaveReqVO {
     @Schema(description = "增值税税率，百分比")
     //    @DecimalMin(value = "0.0", message = "税率不能为负")
     //    @DecimalMax(value = "1.0", message = "税率不能超过100%")
-    @NotNull(message = "增值税税率不能为空")
     private BigDecimal taxPercent;
     //期望到货日期
     @Schema(description = "期望到货日期")

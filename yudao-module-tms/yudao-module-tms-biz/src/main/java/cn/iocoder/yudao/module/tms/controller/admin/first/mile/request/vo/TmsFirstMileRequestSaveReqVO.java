@@ -26,7 +26,7 @@ public class TmsFirstMileRequestSaveReqVO {
     private Long id;
 
     @Schema(description = "单据编号")
-    @Pattern(regexp = "^" + FIRST_MILE_REQUEST_NO_PREFIX + "\\d{8}\\d{4}$", message = "单据编号格式不正确")
+    @Pattern(regexp = "^" + FIRST_MILE_REQUEST_NO_PREFIX + "-\\d{8}-\\d{6}$", message = "单据编号格式不正确")
     @DiffLogField(name = "单据编号")
     private String code;
 

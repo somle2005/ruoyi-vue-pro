@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req;
 
+import com.mzt.logapi.starter.annotation.DiffLogField;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
@@ -31,6 +32,11 @@ public class SrmPurchaseRequestMergeReqVO {
     @NotNull(message = "项目列表不能为空")
     @Schema(description = "项目列表", requiredMode = Schema.RequiredMode.REQUIRED)
     private List<requestItems> items;
+
+    @Schema(description = "币别id(财务管理-币别维护)")
+    @DiffLogField(name = "币别编号")
+    @NotNull(message = "币别编号不能为空")
+    private Long currencyId;
 
     @Schema(description = "订单币别名称")
     @NotBlank(message = "订单币别名称不能为空")

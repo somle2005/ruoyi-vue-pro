@@ -118,4 +118,11 @@ public class TmsTransferController {
         transferService.switchOpen(reqVO);
         return success(true);
     }
+
+    @PostMapping("/get-sellable-qty")
+    @Operation(summary = "获取可售库存数量")
+    @PreAuthorize("@ss.hasPermission('tms:transfer:query')")
+    public CommonResult<TmsTransferSellableQtyRespVO> getSellableQty(@RequestBody TmsTransferSellableQtyReqVO reqVO) {
+        return success(transferService.getSellableQty(reqVO));
+    }
 }

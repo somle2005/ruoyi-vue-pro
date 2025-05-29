@@ -28,11 +28,14 @@ import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferBO;
 import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferItemBO;
 import cn.iocoder.yudao.module.tms.service.transfer.item.TmsTransferItemService;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsStockWarehouseSimpleDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.WmsOutboundApi;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseQueryDTO;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseSimpleDTO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -68,11 +71,9 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     private final ErpProductApi erpProductApi;
     private final FmsCompanyApi fmsCompanyApi;
     private final WmsWarehouseApi wmsWarehouseApi;
-
+    private final WmsOutboundApi wmsOutboundApi;
     @Resource(name = TRANSFER_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsTransferAuditReqVO> transferAuditStateMachine;
-    @Autowired
-    private WmsOutboundApi wmsOutboundApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -497,6 +498,41 @@ public class TmsTransferServiceImpl implements TmsTransferService {
         if (!transfer.getId().equals(id)) {
             throw exception(TRANSFER_CODE_DUPLICATE, code);
         }
+    }
+
+    @Override
+    public TmsTransferSellableQtyRespVO getSellableQty(TmsTransferSellableQtyReqVO reqVO) {
+        // 1. 构建查询参数
+        WmsWarehouseQueryDTO queryDTO = new WmsWarehouseQueryDTO();
+        queryDTO.setWarehouses(reqVO.getWarehouses().stream()
+            .map(item -> {
+                WmsWarehouseSimpleDTO dto = new WmsWarehouseSimpleDTO();
+                dto.setWarehouseId(item.getWarehouseId());
+                dto.setProductIds(item.getProductIds());
+                return dto;
+            })
+            .collect(Collectors.toList()));
+
+        // 2. 调用 WMS 接口获取可售库存
+        Map<Long, List<WmsStockWarehouseSimpleDTO>> result = wmsWarehouseApi.selectSellableQty(queryDTO);
+
+        // 3. 转换返回结果
+        TmsTransferSellableQtyRespVO respVO = new TmsTransferSellableQtyRespVO();
+        Map<Long, List<TmsTransferSellableQtyRespVO.ProductSellableQty>> warehouseProductMap = result.entrySet().stream()
+            .collect(Collectors.toMap(
+                Map.Entry::getKey,
+                entry -> entry.getValue().stream()
+                    .map(item -> {
+                        TmsTransferSellableQtyRespVO.ProductSellableQty productQty = new TmsTransferSellableQtyRespVO.ProductSellableQty();
+                        productQty.setProductId(item.getProductId());
+                        productQty.setSellableQty(item.getSellableQty());
+                        return productQty;
+                    })
+                    .collect(Collectors.toList())
+            ));
+        respVO.setWarehouseProductMap(warehouseProductMap);
+
+        return respVO;
     }
 
 }

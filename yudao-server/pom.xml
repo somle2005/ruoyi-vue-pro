@@ -23,7 +23,7 @@
     <profiles>
         <!-- 本地开发环境 -->
         <profile>
-            <id>local-esb</id>
+            <id>local</id>
             <dependencies>
                 <dependency>
                     <groupId>com.somle</groupId>
