@@ -48,6 +48,7 @@ import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.TRANSFER_CODE_DUPLICATE;
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.TRANSFER_NOT_EXISTS;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.TRANSFER_AUDIT_STATE_MACHINE;
 
@@ -76,7 +77,10 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createTransfer(TmsTransferSaveReqVO createReqVO) {
-        // 1. 插入主表
+        // 1. 校验调拨单编码是否重复
+        validateTransferCodeUnique(createReqVO.getCode(), null);
+
+        // 2. 插入主表
         TmsTransferDO transfer = BeanUtils.toBean(createReqVO, TmsTransferDO.class);
         // 计算总数量、总重量等信息
         calculateTotalInfo(transfer, createReqVO.getItems());
@@ -160,6 +164,9 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     public void updateTransfer(TmsTransferSaveReqVO updateReqVO) {
         // 校验存在
         TmsTransferDO transfer = validateTransferExists(updateReqVO.getId());
+
+        // 校验调拨单编码是否重复
+        validateTransferCodeUnique(updateReqVO.getCode(), updateReqVO.getId());
 
         // 1. 更新主表
         TmsTransferDO updateObj = BeanUtils.toBean(updateReqVO, TmsTransferDO.class);
@@ -472,5 +479,24 @@ public class TmsTransferServiceImpl implements TmsTransferService {
         transferMapper.updateById(transfer);
     }
 
+    /**
+     * 校验调拨单编码是否唯一
+     *
+     * @param code 调拨单编码
+     * @param id   调拨单编号
+     */
+    private void validateTransferCodeUnique(String code, Long id) {
+        TmsTransferDO transfer = transferMapper.selectOne(TmsTransferDO::getCode, code);
+        if (transfer == null) {
+            return;
+        }
+        // 如果 id 为空，说明不用比较是否为相同 id
+        if (id == null) {
+            throw exception(TRANSFER_CODE_DUPLICATE, code);
+        }
+        if (!transfer.getId().equals(id)) {
+            throw exception(TRANSFER_CODE_DUPLICATE, code);
+        }
+    }
 
 }

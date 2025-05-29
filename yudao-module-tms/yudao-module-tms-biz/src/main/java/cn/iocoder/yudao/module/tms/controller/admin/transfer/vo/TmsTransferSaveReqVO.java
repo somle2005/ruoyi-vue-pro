@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.tms.controller.admin.transfer.vo;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemSaveReqVO;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
@@ -21,7 +21,7 @@ public class TmsTransferSaveReqVO {
     private Long id;
 
     @Schema(description = "调拨单编码", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "调拨单编码不能为空")
+    @NotBlank(message = "调拨单编码不能为空")
     private String code;
 
     @Schema(description = "发出仓库ID", requiredMode = Schema.RequiredMode.REQUIRED)

@@ -23,16 +23,6 @@
     <profiles>
         <!-- 本地开发环境 -->
         <profile>
-            <id>local</id>
-            <dependencies>
-                <!--使得启动类注解不报错-->
-                <dependency>
-                    <groupId>org.springframework.data</groupId>
-                    <artifactId>spring-data-jpa</artifactId>
-                </dependency>
-            </dependencies>
-        </profile>
-        <profile>
             <id>local-esb</id>
             <dependencies>
                 <dependency>
