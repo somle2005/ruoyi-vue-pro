@@ -12,18 +12,11 @@ public class EccangRmaRefaDataJob extends EccangDataJob {
     public String execute(String param) throws Exception {
         setDate(param);
 
-//        var vo = EccangRmaRefaReqVO.builder()
-//            .page(1)
-//            .pageSize(100)
-//            .datePaidPlatformStart(beforeYesterdayFirstSecond)
-//            .datePaidPlatformEnd(beforeYesterdayLastSecond)
-//            .build();
-
         var vo = EccangRmaRefaReqVO.builder()
             .page(1)
             .pageSize(100)
-            .datePaidPlatformStart(beforeYesterdayFirstSecond.minusDays(7))
-            .datePaidPlatformEnd(beforeYesterdayLastSecond)
+            .createDateStart(beforeYesterdayFirstSecond)
+            .createDateEnd(beforeYesterdayLastSecond)
             .build();
 
         eccangService.getRmaRefaList(vo).forEach(page -> {
