@@ -50,7 +50,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         // stockWarehouseDO.setAvailableQty(stockWarehouseDO.getAvailableQty() - quantity);
         // 可售量
         stockWarehouseDO.setSellableQty(stockWarehouseDO.getSellableQty() - quantity);
-        if(stockWarehouseDO.getSellableQty()<0) {
+        if ((stockWarehouseDO.getAvailableQty() - quantity) < 0) {
             throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
         }
         // 待出库量
@@ -128,14 +128,14 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         if (stockBinDO == null) {
             throw exception(INBOUND_ITEM_NOT_EXISTS);
         }
-        if(stockBinDO.getSellableQty()<quantity) {
+        if (stockBinDO.getAvailableQty() + stockBinDO.getOutboundPendingQty() < quantity) {
             throw exception(STOCK_BIN_NOT_ENOUGH);
         }
 
         // 从指定仓位出库：未指定出库的批次库存，但指定了仓位
         List<WmsInboundItemDO> itemsList=inboundItemService.selectItemListHasAvailableQty(warehouseId,productId);
         if(CollectionUtils.isEmpty(itemsList)) {
-            throw exception(INBOUND_ITEM_NOT_EXISTS);
+            throw exception(INBOUND_ITEM_PRODUCT_NOT_EXISTS, productId);
         }
 
         // 检查入库批次库存是否充足
@@ -154,7 +154,8 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         for (WmsInboundItemDO itemDO : itemsList) {
             Integer available = itemDO.getOutboundAvailableQty();
             Integer flowQty = 0;
-            if (available > quantity) { // 需要多次扣除
+            // 需要多次扣除
+            if (available > quantity) {
                 flowQty = quantity;
                 available = available - flowQty;
                 itemDO.setOutboundAvailableQty(available);
@@ -178,7 +179,8 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
 
                 inboundItemFlowList.add(flowDO);
 
-            } else if (available.equals(quantity)) { // 刚好单次扣除
+            } else if (available.equals(quantity)) {
+                // 刚好单次扣除
                 flowQty = available;
                 available = 0;
                 quantity = 0;
@@ -263,7 +265,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         // stockBinDO.setAvailableQty(stockBinDO.getAvailableQty() - quantity);
         // 可售库存
         stockBinDO.setSellableQty(stockBinDO.getSellableQty() - quantity);
-        if(stockBinDO.getSellableQty()<0) {
+        if (stockBinDO.getAvailableQty() + stockBinDO.getOutboundPendingQty() < 0) {
             throw exception(STOCK_BIN_NOT_ENOUGH);
         }
         // 待出库量

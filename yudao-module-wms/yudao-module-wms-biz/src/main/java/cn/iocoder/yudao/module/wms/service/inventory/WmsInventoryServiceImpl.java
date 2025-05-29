@@ -124,53 +124,53 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     }
 
 
-    /**
-     * @sign : 2710B20EC7D9E031
-     */
-    @Override
-    @Transactional(rollbackFor = Exception.class)
-    public WmsInventoryDO updateInventory(WmsInventorySaveReqVO updateReqVO) {
-        // 校验存在
-        WmsInventoryDO exists = validateInventoryExists(updateReqVO.getId());
-        // 校验可否编辑
-        WmsInventoryAuditStatus inventoryAuditStatus = WmsInventoryAuditStatus.parse(exists.getAuditStatus());
-        if (inventoryAuditStatus.matchAny(WmsInventoryAuditStatus.AUDITING, WmsInventoryAuditStatus.PASS)) {
-            throw exception(INVENTORY_CAN_NOT_EDIT);
-        }
-        // 单据号不允许被修改
-        updateReqVO.setCode(exists.getCode());
-
-        // 全部删除
-        List<WmsInventoryBinDO> inventoryBinDOList = inventoryBinMapper.selectByInventoryId(updateReqVO.getId());
-        for (WmsInventoryBinDO inventoryBinDO : inventoryBinDOList) {
-            inventoryBinMapper.deleteAbsoluteById(inventoryBinDO.getId());
-        }
-
-        // 保存库存盘点产品详情
-        List<WmsInventoryBinDO> toInsetList = new ArrayList<>();
-        Set<String> keys = new HashSet<>();
-        if (updateReqVO.getBinItemList() != null) {
-            StreamX.from(updateReqVO.getBinItemList()).filter(Objects::nonNull).forEach(item -> {
-                keys.add(item.getProductId()+"-"+item.getBinId());
-                WmsInventoryBinDO inventoryBinDO = BeanUtils.toBean(item, WmsInventoryBinDO.class);
-                inventoryBinDO.setId(null);
-                // 设置归属
-                inventoryBinDO.setInventoryId(exists.getId());
-                inventoryBinDO.setActualQty(0);
-                toInsetList.add(inventoryBinDO);
-            });
-            // 校验
-            if (keys.size()!= toInsetList.size()) {
-                throw exception(INVENTORY_BIN_DUPLICATE);
-            }
-            inventoryBinMapper.insertBatch(toInsetList);
-        }
-        // 更新
-        WmsInventoryDO inventory = BeanUtils.toBean(updateReqVO, WmsInventoryDO.class);
-        inventoryMapper.updateById(inventory);
-        // 返回
-        return inventory;
-    }
+//    /**
+//     * @sign : 2710B20EC7D9E031
+//     */
+//    @Override
+//    @Transactional(rollbackFor = Exception.class)
+//    public WmsInventoryDO updateInventory(WmsInventorySaveReqVO updateReqVO) {
+//        // 校验存在
+//        WmsInventoryDO exists = validateInventoryExists(updateReqVO.getId());
+//        // 校验可否编辑
+//        WmsInventoryAuditStatus inventoryAuditStatus = WmsInventoryAuditStatus.parse(exists.getAuditStatus());
+//        if (inventoryAuditStatus.matchAny(WmsInventoryAuditStatus.AUDITING, WmsInventoryAuditStatus.PASS)) {
+//            throw exception(INVENTORY_CAN_NOT_EDIT);
+//        }
+//        // 单据号不允许被修改
+//        updateReqVO.setCode(exists.getCode());
+//
+//        // 全部删除
+//        List<WmsInventoryBinDO> inventoryBinDOList = inventoryBinMapper.selectByInventoryId(updateReqVO.getId());
+//        for (WmsInventoryBinDO inventoryBinDO : inventoryBinDOList) {
+//            inventoryBinMapper.deleteAbsoluteById(inventoryBinDO.getId());
+//        }
+//
+//        // 保存库存盘点产品详情
+//        List<WmsInventoryBinDO> toInsetList = new ArrayList<>();
+//        Set<String> keys = new HashSet<>();
+//        if (updateReqVO.getBinItemList() != null) {
+//            StreamX.from(updateReqVO.getBinItemList()).filter(Objects::nonNull).forEach(item -> {
+//                keys.add(item.getProductId()+"-"+item.getBinId());
+//                WmsInventoryBinDO inventoryBinDO = BeanUtils.toBean(item, WmsInventoryBinDO.class);
+//                inventoryBinDO.setId(null);
+//                // 设置归属
+//                inventoryBinDO.setInventoryId(exists.getId());
+//                inventoryBinDO.setActualQty(0);
+//                toInsetList.add(inventoryBinDO);
+//            });
+//            // 校验
+//            if (keys.size()!= toInsetList.size()) {
+//                throw exception(INVENTORY_BIN_DUPLICATE);
+//            }
+//            inventoryBinMapper.insertBatch(toInsetList);
+//        }
+//        // 更新
+//        WmsInventoryDO inventory = BeanUtils.toBean(updateReqVO, WmsInventoryDO.class);
+//        inventoryMapper.updateById(inventory);
+//        // 返回
+//        return inventory;
+//    }
 
     /**
      * @sign : 159065E285D50040

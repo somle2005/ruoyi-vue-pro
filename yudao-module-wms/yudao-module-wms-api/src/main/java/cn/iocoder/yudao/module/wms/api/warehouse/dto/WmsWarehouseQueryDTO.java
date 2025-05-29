@@ -6,6 +6,8 @@ import java.util.List;
 
 @Data
 public class WmsWarehouseQueryDTO {
-
+    /**
+     * 仓库详情
+     */
     List<WmsWarehouseSimpleDTO> warehouses;
 }

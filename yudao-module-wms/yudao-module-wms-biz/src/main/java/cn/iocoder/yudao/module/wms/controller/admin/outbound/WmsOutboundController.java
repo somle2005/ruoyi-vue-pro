@@ -23,16 +23,11 @@ import jakarta.validation.Valid;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.io.IOException;
 import java.util.List;
+
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
@@ -168,11 +163,15 @@ public class WmsOutboundController {
         return success(true);
     }
 
+    /**
+     * 同意出库单审批 并完成出库
+     */
     @PutMapping("/agree")
-    @Operation(summary = "同意审批")
+    @Operation(summary = "同意出库")
     @PreAuthorize("@ss.hasPermission('wms:outbound:agree')")
     public CommonResult<Boolean> agree(@RequestBody WmsApprovalReqVO approvalReqVO) {
         outboundService.approve(WmsOutboundAuditStatus.Event.AGREE, approvalReqVO);
+        outboundService.approve(WmsOutboundAuditStatus.Event.FINISH, approvalReqVO);
         return success(true);
     }
 

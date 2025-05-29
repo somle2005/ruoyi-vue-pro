@@ -24,7 +24,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Arrays;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -55,16 +54,16 @@ public class WmsInventoryController {
         return success(inventoryService.createInventory(createReqVO).getId());
     }
 
-    /**
-     * @sign : 30CB28F31026826D
-     */
-    @PutMapping("/update")
-    @Operation(summary = "更新盘点单")
-    @PreAuthorize("@ss.hasPermission('wms:inventory:update')")
-    public CommonResult<Boolean> updateInventory(@Valid @RequestBody WmsInventorySaveReqVO updateReqVO) {
-        inventoryService.updateInventory(updateReqVO);
-        return success(true);
-    }
+//    /**
+//     * @sign : 30CB28F31026826D
+//     */
+//    @PutMapping("/update")
+//    @Operation(summary = "更新盘点单")
+//    @PreAuthorize("@ss.hasPermission('wms:inventory:update')")
+//    public CommonResult<Boolean> updateInventory(@Valid @RequestBody WmsInventorySaveReqVO updateReqVO) {
+//        inventoryService.updateInventory(updateReqVO);
+//        return success(true);
+//    }
 
     @DeleteMapping("/delete")
     @Operation(summary = "删除盘点单")

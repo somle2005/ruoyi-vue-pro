@@ -29,12 +29,12 @@ public interface WmsInventoryService {
      */
     WmsInventoryDO createInventory(@Valid WmsInventorySaveReqVO createReqVO);
 
-    /**
-     * 更新盘点
-     *
-     * @param updateReqVO 更新信息
-     */
-    WmsInventoryDO updateInventory(@Valid WmsInventorySaveReqVO updateReqVO);
+//    /**
+//     * 更新盘点
+//     *
+//     * @param updateReqVO 更新信息
+//     */
+//    WmsInventoryDO updateInventory(@Valid WmsInventorySaveReqVO updateReqVO);
 
     /**
      * 删除盘点
