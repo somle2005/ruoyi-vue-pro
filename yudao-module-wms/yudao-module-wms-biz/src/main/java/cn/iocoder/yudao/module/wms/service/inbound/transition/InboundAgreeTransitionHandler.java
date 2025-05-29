@@ -13,8 +13,6 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmInboundReqDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.quantity.InboundExecutor;
@@ -46,7 +44,6 @@ public class InboundAgreeTransitionHandler extends BaseInboundTransitionHandler 
         List<WmsInboundItemRespVO> itemList = inboundVO.getItemList();
         //处理到货单逻辑
         if (inboundVO.getUpstreamBillType() != null && inboundVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
-            //触发到货单明细行 状态机
             //如果成功创建入库单-触发SRM入库数量联动
             SrmInboundReqDTO reqDTO = BeanUtils.toBean(inboundVO, SrmInboundReqDTO.class);
             srmPurchaseInApi.updatePurchaseInItemQty(reqDTO);

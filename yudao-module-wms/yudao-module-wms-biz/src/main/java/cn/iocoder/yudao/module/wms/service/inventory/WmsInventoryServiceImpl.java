@@ -90,7 +90,7 @@ public class WmsInventoryServiceImpl implements WmsInventoryService {
     @Transactional(rollbackFor = Exception.class)
     public WmsInventoryDO createInventory(WmsInventorySaveReqVO createReqVO) {
         // 设置单据号等初始值
-        String no = noRedisDAO.generate(WmsNoRedisDAO.INVENTORY_NO_PREFIX, 3);
+        String no = noRedisDAO.generate(WmsNoRedisDAO.INVENTORY_NO_PREFIX, 6);
         createReqVO.setCode(no);
         createReqVO.setAuditStatus(WmsInventoryAuditStatus.DRAFT.getValue());
         // 

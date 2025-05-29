@@ -70,7 +70,7 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
     @Transactional(rollbackFor = Exception.class)
     public WmsExchangeDO createExchange(WmsExchangeSaveReqVO createReqVO) {
         // 设置单据号
-        String code = noRedisDAO.generate(WmsNoRedisDAO.EXCHANGE_NO_PREFIX, 3);
+        String code = noRedisDAO.generate(WmsNoRedisDAO.EXCHANGE_NO_PREFIX, 6);
         createReqVO.setCode(code);
         createReqVO.setAuditStatus(WmsExchangeAuditStatus.DRAFT.getValue());
         if (exchangeMapper.getByCode(createReqVO.getCode()) != null) {
@@ -136,7 +136,7 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
             // 保存详情
             exchangeDefectiveMapper.insertBatch(toInsetList);
             exchangeDefectiveMapper.updateBatch(toUpdateList);
-            exchangeDefectiveMapper.deleteBatchIds(toDeleteList);
+            exchangeDefectiveMapper.deleteByIds(toDeleteList);
         }
         // 更新
         WmsExchangeDO exchange = BeanUtils.toBean(updateReqVO, WmsExchangeDO.class);
@@ -189,6 +189,7 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
     /**
      * 按 ID 集合查询 WmsExchangeDO
      */
+    @Override
     public List<WmsExchangeDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();
