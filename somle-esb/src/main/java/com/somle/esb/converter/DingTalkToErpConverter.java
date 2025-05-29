@@ -5,12 +5,10 @@ import cn.iocoder.yudao.framework.common.util.string.StrUtils;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptSaveReqDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
-import cn.iocoder.yudao.module.system.api.user.dto.AdminUserReqDTO;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserSaveReqDTO;
 import com.dingtalk.api.response.OapiV2UserGetResponse;
 import com.somle.dingtalk.model.DingTalkDepartment;
 import com.somle.dingtalk.service.DingTalkService;
-import com.somle.esb.model.EsbMapping;
-import com.somle.esb.service.EsbMappingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,8 +26,7 @@ public class DingTalkToErpConverter {
     @Autowired
     private AdminUserApi adminUserApi;
 
-    @Autowired
-    EsbMappingService mappingService;
+
     private static final String CHINESE_CHAR_PATTERN = "[\\u4E00-\\u9FA5]+";
     private static final String ENGLISH_CHAR_PATTERN = "^[a-zA-Z\\s]+$";
 
@@ -72,30 +69,26 @@ public class DingTalkToErpConverter {
 //        ));
 //    }
 
-    public DeptSaveReqDTO toErp(DingTalkDepartment dept) {
+    public DeptSaveReqDTO toSaveReq(DingTalkDepartment dept) {
         DeptSaveReqDTO erpDept = new DeptSaveReqDTO();
+        erpDept.setExternalId(dept.getDeptId().toString());
         // translate parent id
         if (dept.getDeptId() == 1L) {
             erpDept.setParentId(0L);
         } else {
             try {
-                var mapping = mappingService.toMapping(dept);
-                mapping.setExternalId(dept.getParentId().toString());
-                mapping = mappingService.findMapping(mapping);
-                erpDept
-                    .setParentId(mapping.getInternalId());
+                var result = deptApi.getDeptByExternalId(dept.getParentId().toString());
+                erpDept.setParentId(result.getId());
             } catch (Exception e) {
-                throw new RuntimeException("parent mapping not found");
+                throw new RuntimeException("external id not found: " + dept.getParentId());
             }
         }
         // translate id
         try {
-            var mapping = mappingService.toMapping(dept);
-            mapping = mappingService.findMapping(mapping);
-            erpDept
-                .setId(mapping.getInternalId());
+            var result = deptApi.getDeptByExternalId(dept.getDeptId().toString());
+            erpDept.setId(result.getId());
         } catch (Exception e) {
-            log.debug("mapping not found");
+            log.debug("external id not found: " + dept.getDeptId());
         }
         //translate the rest
         erpDept
@@ -105,37 +98,30 @@ public class DingTalkToErpConverter {
         return erpDept;
     }
 
-    public AdminUserReqDTO toErp(OapiV2UserGetResponse.UserGetResponse user) {
-        AdminUserReqDTO erpUser = new AdminUserReqDTO();
+    public AdminUserSaveReqDTO toSaveReq(OapiV2UserGetResponse.UserGetResponse user) {
+        AdminUserSaveReqDTO erpUser = new AdminUserSaveReqDTO();
+        erpUser.setExternalId(user.getUserid().toString());
         //try to translate id
         try {
-            var mapping = mappingService.toMapping(user);
-            mapping = mappingService.findMapping(mapping);
-            erpUser
-                .setId(mapping.getInternalId());
+            var result = adminUserApi.getUserByExternalId(user.getUserid());
+            erpUser.setId(result.getId());
         } catch (Exception e) {
-            log.debug("user mapping not found");
+            log.debug("user external id not found: " + user.getUserid());
         }
         //try to translate dept id
         try {
-            var mapping = new EsbMapping();
-            mapping
-                .setType("department")
-                .setDomain("dingtalk")
-                .setExternalId(user.getDeptIdList().get(0).toString());
-            mapping = mappingService.findMapping(mapping);
-            erpUser
-                .setDeptId(mapping.getInternalId());
+            var erpDept = deptApi.getDeptByExternalId(user.getDeptIdList().get(0).toString());
+            erpUser.setDeptId(erpDept.getId());
         } catch (Exception e) {
-            log.debug("dept mapping not found");
+            log.debug("dept external id not found: " + user.getDeptIdList().get(0));
         }
         //translate the rest
         erpUser
-            .setUsername(null)
+            .setUsername(generateUserName(user.getName()))
+            .setAppendOnDuplicateUsername(true)
             .setMobile(user.getMobile())
             .setEmail(user.getEmail())
             .setNickname(user.getName())
-            .setPassword("123456")
             .setAvatar(user.getAvatar());
         return erpUser;
     }
@@ -162,9 +148,6 @@ public class DingTalkToErpConverter {
             //存在特殊字符则抛出异常
             throw new RuntimeException("昵称\""+nickname+"\"不规范，请联系管理员");
         }
-        //获取以相同用户名开头的用户数量
-        Integer usernameIndex = adminUserApi.getUsernameIndex(nickname);
-        //自动生成用户账户
-        return usernameIndex == 0 ? initUsername : initUsername + "." + usernameIndex;
+        return initUsername;
     }
 }

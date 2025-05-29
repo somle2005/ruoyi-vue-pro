@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.system.api.dept;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptLevelRespDTO;
+import cn.iocoder.yudao.module.system.api.dept.dto.DeptReqDTO;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptSaveReqDTO;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.convert.dept.DeptConvert;
@@ -29,9 +30,24 @@ public class DeptApiImpl implements DeptApi {
 
     @Override
     public DeptRespDTO getDept(Long id) {
-        DeptDO dept = deptService.getDept(id);
-        return deptConvert.toRespDTO(dept);
+        DeptReqDTO reqDTO = new DeptReqDTO();
+        reqDTO.setId(id);
+        List<DeptRespDTO> depts = deptService.listDepts(reqDTO);
+        return depts.get(0);
     }
+
+    @Override
+    public DeptRespDTO getDeptByExternalId(String externalId) {
+        DeptReqDTO reqDTO = new DeptReqDTO();
+        reqDTO.setExternalId(externalId);
+        List<DeptRespDTO> depts = deptService.listDepts(reqDTO);
+        return depts.get(0);
+    };
+
+    public List<DeptRespDTO> listDepts(DeptReqDTO reqDTO) {
+        List<DeptRespDTO> depts = deptService.listDepts(reqDTO);
+        return depts;
+    };
 
     @Override
     public List<DeptRespDTO> getDeptList(Collection<Long> ids) {
@@ -64,10 +80,6 @@ public class DeptApiImpl implements DeptApi {
         return deptService.getDeptLevel(id);
     }
 
-    @Override
-    public String getParentNameById(Long id) {
-        return deptService.getParentNameById(id);
-    }
 
     @Override
     public TreeSet<DeptLevelRespDTO> getDeptTreeLevel(Long deptId) {

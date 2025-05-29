@@ -30,6 +30,14 @@ public interface AdminUserApi {
     AdminUserRespDTO getUser(Long id);
 
     /**
+     * 通过用户 ID 查询用户
+     *
+     * @param externalId 外部ID
+     * @return 用户对象信息
+     */
+    AdminUserRespDTO getUserByExternalId(String externalId);
+
+    /**
      * 通过用户 ID 查询用户下属
      *
      * @param id 用户编号
@@ -200,5 +208,4 @@ public interface AdminUserApi {
             }
         }
     }
-
 }
