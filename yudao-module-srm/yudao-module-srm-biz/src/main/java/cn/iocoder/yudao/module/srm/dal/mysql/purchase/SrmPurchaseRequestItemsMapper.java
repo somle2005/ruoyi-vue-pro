@@ -33,7 +33,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
             .likeIfPresent(SrmPurchaseRequestItemsDO::getBarCode, req.getBarCode())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductName, req.getProductName())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductUnitName, req.getProductUnitName())
-            .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
+            .orderByDesc(SrmPurchaseRequestItemsDO::getCreateTime) // 按时间降序排序
             ;
     }
 
