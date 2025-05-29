@@ -17,6 +17,7 @@ import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.quantity.context.OutboundContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -70,6 +71,7 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
     protected abstract void updateOutbound(WmsOutboundRespVO outboundRespVO);
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void execute(OutboundContext context) {
 
         WmsOutboundRespVO outboundRespVO=outboundService.getOutboundWithItemList(context.getOutboundId());

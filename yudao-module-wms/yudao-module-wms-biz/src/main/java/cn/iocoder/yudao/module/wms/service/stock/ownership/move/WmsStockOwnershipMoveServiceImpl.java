@@ -75,7 +75,7 @@ public class WmsStockOwnershipMoveServiceImpl implements WmsStockOwnershipMoveSe
     @Transactional(rollbackFor = Exception.class)
     public WmsStockOwnershipMoveDO createStockOwnershipMoveInLock(WmsStockOwnershipMoveSaveReqVO createReqVO) {
         // 设置单据号
-        String no = noRedisDAO.generate(WmsNoRedisDAO.STOCK_OWNERSHIP_MOVE_NO_PREFIX, 3);
+        String no = noRedisDAO.generate(WmsNoRedisDAO.STOCK_OWNERSHIP_MOVE_NO_PREFIX, 6);
         createReqVO.setNo(no);
         // 指定初始状态
         createReqVO.setExecuteStatus(WmsMoveExecuteStatus.DRAFT.getValue());
@@ -149,7 +149,7 @@ public class WmsStockOwnershipMoveServiceImpl implements WmsStockOwnershipMoveSe
             // 保存详情
             stockOwnershipMoveItemMapper.insertBatch(toInsetList);
             stockOwnershipMoveItemMapper.updateBatch(toUpdateList);
-            stockOwnershipMoveItemMapper.deleteBatchIds(toDeleteList);
+            stockOwnershipMoveItemMapper.deleteByIds(toDeleteList);
         }
         // 更新
         WmsStockOwnershipMoveDO stockOwnershipMove = BeanUtils.toBean(updateReqVO, WmsStockOwnershipMoveDO.class);
@@ -197,6 +197,7 @@ public class WmsStockOwnershipMoveServiceImpl implements WmsStockOwnershipMoveSe
     /**
      * 按 ID 集合查询 WmsStockOwnershipMoveDO
      */
+    @Override
     public List<WmsStockOwnershipMoveDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();

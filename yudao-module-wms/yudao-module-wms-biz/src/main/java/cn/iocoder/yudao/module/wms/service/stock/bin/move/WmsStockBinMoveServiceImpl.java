@@ -74,7 +74,7 @@ public class WmsStockBinMoveServiceImpl implements WmsStockBinMoveService {
 
     private WmsStockBinMoveDO createStockBinMoveInLock(WmsStockBinMoveSaveReqVO createReqVO) {
         // 设置单据号
-        String no = noRedisDAO.generate(WmsNoRedisDAO.STOCK_BIN_MOVE_NO_PREFIX, 3);
+        String no = noRedisDAO.generate(WmsNoRedisDAO.STOCK_BIN_MOVE_NO_PREFIX, 6);
         createReqVO.setNo(no);
         // 指定初始状态
         createReqVO.setExecuteStatus(WmsMoveExecuteStatus.DRAFT.getValue());
@@ -200,6 +200,7 @@ public class WmsStockBinMoveServiceImpl implements WmsStockBinMoveService {
     /**
      * 按 ID 集合查询 WmsStockBinMoveDO
      */
+    @Override
     public List<WmsStockBinMoveDO> selectByIds(Set<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();
@@ -210,6 +211,7 @@ public class WmsStockBinMoveServiceImpl implements WmsStockBinMoveService {
     /**
      * 按 ID 集合查询 WmsStockBinMoveDO
      */
+    @Override
     public List<WmsStockBinMoveDO> selectSimpleList(WmsStockBinMovePageReqVO reqVO) {
         return stockBinMoveMapper.selectSimpleList(reqVO);
     }
@@ -233,6 +235,7 @@ public class WmsStockBinMoveServiceImpl implements WmsStockBinMoveService {
     /**
      * 按 ID 集合查询 WmsStockBinMoveDO
      */
+    @Override
     public List<WmsStockBinMoveDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();

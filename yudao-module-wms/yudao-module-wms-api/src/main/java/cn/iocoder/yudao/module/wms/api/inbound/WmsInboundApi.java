@@ -15,7 +15,7 @@ public interface WmsInboundApi {
 
     /**
      * 创建入库单
-     *
+     * 直接进行审批操作，使wms入库单进入【待入库状态】
      * @param createReqDTO 入库单创建请求
      * @return 入库单ID
      */

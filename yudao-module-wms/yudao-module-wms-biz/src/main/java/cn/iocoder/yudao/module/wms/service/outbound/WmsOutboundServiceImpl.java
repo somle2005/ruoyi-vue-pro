@@ -90,9 +90,6 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     protected WmsLockRedisDAO lockRedisDAO;
 
     @Resource
-    private WmsInboundMapper inboundMapper;
-
-    @Resource
     private WmsOutboundMapper outboundMapper;
 
     @Resource
@@ -142,7 +139,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Transactional(rollbackFor = Exception.class)
     public WmsOutboundDO createOutbound(WmsOutboundSaveReqVO createReqVO) {
         // 设置单据号
-        String no = noRedisDAO.generate(WmsNoRedisDAO.OUTBOUND_NO_PREFIX, 3);
+        String no = noRedisDAO.generate(WmsNoRedisDAO.OUTBOUND_NO_PREFIX, 6);
         createReqVO.setAuditStatus(WmsOutboundAuditStatus.DRAFT.getValue());
         createReqVO.setOutboundStatus(WmsOutboundStatus.NONE.getValue());
         createReqVO.setCode(no);
@@ -181,7 +178,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         if (warehouseIdSetOfBin.size() != 1) {
             throw exception(OUTBOUND_WAREHOUSE_ERROR);
         }
-        outboundDO.setUpstreamBillType(outboundDO.getType());
+//        outboundDO.setUpstreamBillType(outboundDO.getType());
         if(!outboundDO.getUpstreamBillType().equals(SRM_PURCHASE_RETURN.getValue())) {
             Long warehouseId = StreamX.from(warehouseIdSetOfBin).first();
             if (!Objects.equals(warehouseId, outboundDO.getWarehouseId())) {
@@ -200,10 +197,11 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
                 ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
                 throw exception(STOCK_BIN_PRODUCT_NOT_EXISTS, productDto.getBarCode());
             }
-            if (stockBinDO.getSellableQty() < itemDO.getPlanQty()) {
-                ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
-                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, productDto.getBarCode());
-            }
+            //建单时不做此项校验
+//            if (stockBinDO.getSellableQty() < itemDO.getPlanQty()) {
+//                ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
+//                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, productDto.getBarCode());
+//            }
         }
     }
 
