@@ -2,17 +2,11 @@ package cn.iocoder.yudao.framework.mybatis.config;
 
 import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.mybatis.core.handler.DefaultDBFieldHandler;
-import cn.iocoder.yudao.framework.mybatis.core.physical.AbsoluteDeleteMpSqlInjector;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.autoconfigure.MybatisPlusAutoConfiguration;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.core.incrementer.IKeyGenerator;
-import com.baomidou.mybatisplus.core.injector.ISqlInjector;
-import com.baomidou.mybatisplus.extension.incrementer.DmKeyGenerator;
-import com.baomidou.mybatisplus.extension.incrementer.H2KeyGenerator;
-import com.baomidou.mybatisplus.extension.incrementer.KingbaseKeyGenerator;
-import com.baomidou.mybatisplus.extension.incrementer.OracleKeyGenerator;
-import com.baomidou.mybatisplus.extension.incrementer.PostgreKeyGenerator;
+import com.baomidou.mybatisplus.extension.incrementer.*;
 import com.baomidou.mybatisplus.extension.parser.JsqlParserGlobal;
 import com.baomidou.mybatisplus.extension.parser.cache.JdkSerialCaffeineJsqlParseCache;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
@@ -83,12 +77,12 @@ public class YudaoMybatisAutoConfiguration {
     }
 
 
-    /**
-     * 实现数据物理删除
-     **/
-    @Bean
-    public ISqlInjector absoluteDeleteMpSqlInjector() {
-        return new AbsoluteDeleteMpSqlInjector();
-    }
+//    /**
+//     * 实现数据物理删除
+//     **/
+//    @Bean
+//    public ISqlInjector absoluteDeleteMpSqlInjector() {
+//        return new AbsoluteDeleteMpSqlInjector();
+//    }
 
 }
