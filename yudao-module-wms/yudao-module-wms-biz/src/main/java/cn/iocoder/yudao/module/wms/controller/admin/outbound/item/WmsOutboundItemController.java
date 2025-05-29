@@ -220,8 +220,8 @@ public class WmsOutboundItemController {
     @PutMapping("/update-actual-quantity")
     @Operation(summary = "设置实际出库量")
     @PreAuthorize("@ss.hasPermission('wms:outbound-item:update')")
-    public CommonResult<Boolean> updateActualQuantity(@Validated(ValidationGroup.update.class) @RequestBody List<WmsOutboundItemSaveReqVO> updateReqVOList) {
-        outboundItemService.updateActualQuantity(updateReqVOList);
+    public CommonResult<Boolean> updateActualQuantity(@Validated(ValidationGroup.update.class) @RequestBody WmsOutboundSaveReqVO updateReqVOList) {
+        outboundItemService.updateActualQuantity(updateReqVOList.getItemList());
         return success(true);
     }
 }

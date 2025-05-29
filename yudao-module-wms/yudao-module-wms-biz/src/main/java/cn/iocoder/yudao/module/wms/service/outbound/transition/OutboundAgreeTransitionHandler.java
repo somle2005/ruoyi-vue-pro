@@ -8,6 +8,9 @@ import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmOutboundItemReqDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmOutboundReqDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
+import cn.iocoder.yudao.module.tms.api.transfer.TmsTransferApi;
+import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsOutboundItemReqDTO;
+import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsOutboundReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
@@ -31,6 +34,9 @@ public class OutboundAgreeTransitionHandler extends BaseOutboundTransitionHandle
     @Resource
     private SrmPurchaseReturnApi srmPurchaseReturnApi;
 
+    @Resource
+    private TmsTransferApi tmsTransferApi;
+
     @Override
     public void perform(Integer from, Integer to, WmsOutboundAuditStatus.Event event, TransitionContext<WmsOutboundDO> context) {
         super.perform(from, to, event, context);
@@ -44,6 +50,12 @@ public class OutboundAgreeTransitionHandler extends BaseOutboundTransitionHandle
             SrmOutboundReqDTO srmOutboundReqDTO = BeanUtils.toBean(outboundVO, SrmOutboundReqDTO.class);
             srmOutboundReqDTO.setItems(BeanUtils.toBean(outboundVO.getItemList(), SrmOutboundItemReqDTO.class));
                 srmPurchaseReturnApi.updatePurchaseReturnItemQty(srmOutboundReqDTO);
+        }
+        //更新TMS调拨单状态机
+        if(outboundVO.getUpstreamBillType()!=null && outboundVO.getUpstreamBillType().equals(BillType.TMS_TRANSFER.getValue())) {
+            TmsOutboundReqDTO tmsOutboundReqDTO = BeanUtils.toBean(outboundVO, TmsOutboundReqDTO.class);
+            tmsOutboundReqDTO.setItems(BeanUtils.toBean(outboundVO.getItemList(), TmsOutboundItemReqDTO.class));
+            tmsTransferApi.afterOutboundAudit(tmsOutboundReqDTO);
         }
     }
 }
