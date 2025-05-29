@@ -7,8 +7,10 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemD
 import cn.iocoder.yudao.module.tms.dal.mysql.transfer.item.TmsTransferItemMapper;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,6 +31,7 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     private TmsTransferItemMapper transferItemMapper;
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public Long createTransferItem(TmsTransferItemSaveReqVO createReqVO) {
         // 插入
         TmsTransferItemDO transferItem = BeanUtils.toBean(createReqVO, TmsTransferItemDO.class);
@@ -38,6 +41,7 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateTransferItem(TmsTransferItemSaveReqVO updateReqVO) {
         // 校验存在
         validateTransferItemExists(updateReqVO.getId());
@@ -47,6 +51,7 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTransferItem(Long id) {
         // 校验存在
         validateTransferItemExists(id);
@@ -65,7 +70,7 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
         if (CollUtil.isEmpty(ids)) {
             return List.of();
         }
-        List<TmsTransferItemDO> items = transferItemMapper.selectByIds(ids);
+        List<TmsTransferItemDO> items = transferItemMapper.selectByIds(new HashSet<>(ids));
         if (items.size() != ids.size()) {
             throw exception(TRANSFER_ITEM_NOT_EXISTS,
                 CollUtil.subtract(ids, CollUtil.newArrayList(items.stream().map(TmsTransferItemDO::getId).collect(Collectors.toSet()))));
@@ -84,6 +89,7 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public List<TmsTransferItemDO> getTransferItemListByIds(List<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return List.of();
@@ -100,6 +106,7 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateTransferItemList(List<TmsTransferItemDO> list) {
         if (CollUtil.isEmpty(list)) {
             return;
@@ -108,6 +115,7 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTransferItemList(List<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return;
@@ -116,19 +124,32 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void deleteTransferItemByTransferId(Long transferId) {
         transferItemMapper.deleteByTransferId(transferId);
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateTransferItemOutbound(Long id, Integer outboundQty) {
         // 1. 校验存在
         validateTransferItemExists(id);
 
         // 2. 更新出库信息
         TmsTransferItemDO updateObj = new TmsTransferItemDO();
-        updateObj.setId(id);
         updateObj.setOutboundClosedQty(outboundQty);
+        transferItemMapper.updateById(updateObj);
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateTransferItemInbound(Long itemId, int i) {
+        // 1. 校验存在
+        validateTransferItemExists(itemId);
+
+        //2.0 更新入库信息
+        TmsTransferItemDO updateObj = new TmsTransferItemDO();
+        updateObj.setInboundClosedQty(i);
         transferItemMapper.updateById(updateObj);
     }
 }

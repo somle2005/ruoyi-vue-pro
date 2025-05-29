@@ -426,6 +426,7 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void submitAudit(List<Long> transferIds) {
         transferIds.forEach(transferId -> {
             TmsTransferDO tmsTransferDO = validateTransferExists(transferId);
@@ -434,6 +435,7 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateTransferStatus(TmsTransferStatusUpdateDTO updateDTO) {
         // 1. 校验调拨单是否存在
         TmsTransferDO transfer = validateTransferExists(updateDTO.getId());

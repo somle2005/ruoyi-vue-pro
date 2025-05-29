@@ -2,9 +2,7 @@ package cn.iocoder.yudao.module.tms.api.transfer;
 
 import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
-import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsOutboundItemReqDTO;
-import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsOutboundReqDTO;
-import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsTransferStatusUpdateDTO;
+import cn.iocoder.yudao.module.tms.api.transfer.dto.*;
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.transfer.TmsTransferMapper;
 import cn.iocoder.yudao.module.tms.service.bo.transfer.TmsTransferBO;
@@ -110,4 +108,44 @@ public class TmsTransferApiImpl implements TmsTransferApi {
         );
         log.info("调拨单[{}]出库审核通过，创建入库单，ID: {}", transferBO.getCode(), inbound);
     }
-} 
+
+    /**
+     * 2.0 入库单审核后回调
+     * <p>
+     * 回填入库时间，入库数量,入库ID，入库编码
+     *
+     * @param reqDTO 入库单信息
+     */
+    @Override
+    public void afterInboundAudit(TmsInboundReqDTO reqDTO) {
+        // 1.0 校验上游类型是否是调拨入库
+        if (!Objects.equals(reqDTO.getUpstreamBillType(), BillType.TMS_TRANSFER.getValue())) {
+            throw new IllegalArgumentException(StrUtil.format("入库单审核回调TmsInboundReqDTO，上游类型({})不是调拨单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamBillType())).getLabel()));
+        }
+
+        // 2.0 校验reqDTO的items的upstreamItemId是否存在
+        List<Long> itemIds = reqDTO.getItemList().stream()
+            .map(TmsInboundItemReqDTO::getUpstreamItemId)
+            .toList();
+        List<TmsTransferItemDO> items = transferItemService.validateTransferItemExists(itemIds);
+
+        // 3.0 获取主单并更新入库时间、入库状态、入库单ID、入库单编码
+        transferService.updateTransferStatus(new TmsTransferStatusUpdateDTO()
+            .setId(items.get(0).getTransferId())
+            .setInboundTime(reqDTO.getInboundTime())
+            .setInboundStatus(reqDTO.getInboundStatus())
+            .setInboundId(reqDTO.getId())
+            .setInboundCode(reqDTO.getCode())
+        );
+
+        // 3.1 填充子项的入库明细数值
+        for (var inboundItem : reqDTO.getItemList()) {
+            transferItemService.updateTransferItemInbound(
+                inboundItem.getUpstreamItemId(),
+                inboundItem.getActualQty()
+            );
+        }
+
+        log.info("调拨单[{}]入库审核通过，入库单ID: {}", reqDTO.getUpstreamBillCode(), reqDTO.getId());
+    }
+}
