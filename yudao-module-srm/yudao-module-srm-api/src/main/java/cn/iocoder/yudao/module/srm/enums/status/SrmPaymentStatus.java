@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.srm.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
-import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,7 +10,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter
-public enum SrmPaymentStatus implements ArrayValuable<Integer>, StatusValue {
+public enum SrmPaymentStatus implements ArrayValuable<Integer> {
     NONE_PAYMENT(1, "未付款"), PARTIALLY_PAYMENT(2, "部分付款"), ALL_PAYMENT(3, "完全付款"), PAYMENT_EXCEPTION(4, "付款异常"),
     ;
 

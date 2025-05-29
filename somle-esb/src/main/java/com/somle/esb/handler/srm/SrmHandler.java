@@ -1,6 +1,5 @@
 package com.somle.esb.handler.srm;
 
-import cn.iocoder.yudao.framework.common.enums.ChannelEnum;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
@@ -9,6 +8,7 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
+import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import com.somle.esb.convert.KingdeePurInboundConvert;
 import com.somle.esb.convert.KingdeePurOrderConvert;
 import com.somle.esb.convert.KingdeePurReturnConvert;
@@ -43,7 +43,7 @@ public class SrmHandler {
     private final SrmPurchaseReturnApi srmPurchaseReturnApi;
 
     //消费供应商
-    @ServiceActivator(inputChannel = ChannelEnum.SUPPLIER)
+    @ServiceActivator(inputChannel = SrmChannelEnum.SUPPLIER)
     public void syncSuppliersToKingdee(@Payload List<Long> supplierIds) {
         log.info("[syncSuppliersToKingdee] 开始同步供应商到金蝶，数量：{}", supplierIds.size());
         try {
@@ -71,7 +71,7 @@ public class SrmHandler {
     }
 
     //消费采购订单
-    @ServiceActivator(inputChannel = ChannelEnum.PURCHASE_ORDER)
+    @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_ORDER)
     public void syncPurchaseOrdersToKingdee(@Payload List<Long> orderIds) {
         log.info("[syncPurchaseOrdersToKingdee] 开始同步采购订单到金蝶，数量：{}", orderIds.size());
         try {
@@ -99,7 +99,7 @@ public class SrmHandler {
     }
 
     //消费采购入库(到货)单
-    @ServiceActivator(inputChannel = ChannelEnum.PURCHASE_IN)
+    @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_IN)
     public void syncPurchaseInToKingdee(@Payload List<Long> inIds) {
         log.info("[syncPurchaseInToKingdee] 开始同步采购入库单到金蝶，数量：{}", inIds.size());
         try {
@@ -127,7 +127,7 @@ public class SrmHandler {
     }
 
     //消费采购退货单
-    @ServiceActivator(inputChannel = ChannelEnum.PURCHASE_RETURN)
+    @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_RETURN)
     public void syncPurchaseReturnToKingdee(@Payload List<Long> returnIds) {
         log.info("[syncPurchaseReturnToKingdee] 开始同步采购退货单到金蝶，数量：{}", returnIds.size());
         try {

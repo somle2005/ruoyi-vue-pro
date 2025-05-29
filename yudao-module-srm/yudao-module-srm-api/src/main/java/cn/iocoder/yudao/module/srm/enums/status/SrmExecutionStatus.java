@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.srm.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
-import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -16,7 +15,7 @@ import java.util.Map;
  */
 @RequiredArgsConstructor
 @Getter
-public enum SrmExecutionStatus implements ArrayValuable<Integer>, StatusValue {
+public enum SrmExecutionStatus implements ArrayValuable<Integer> {
 
     PENDING(1, "待执行"),
     IN_PROGRESS(2, "执行中"),

@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.srm.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
-import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,7 +10,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter
-public enum SrmOffStatus implements ArrayValuable<Integer>, StatusValue {
+public enum SrmOffStatus implements ArrayValuable<Integer> {
 
     OPEN(1, "开启"),
     CLOSED(2, "已关闭"),

@@ -22,7 +22,6 @@ import com.github.yulichang.interfaces.MPJBaseJoin;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Param;
 
-import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
@@ -192,13 +191,13 @@ public interface BaseMapperX<T> extends MPJBaseMapper<T> {
         return delete(new LambdaQueryWrapper<T>().eq(field, value));
     }
 
-    /**
-     * 物理删除
-     *
-     * @param id
-     * @return
-     */
-    int deleteAbsoluteById(Serializable id);
+//    /**
+//     * 物理删除
+//     *
+//     * @param id
+//     * @return
+//     */
+//    int deleteAbsoluteById(Serializable id);
 
     /**
      * 在逻辑删除时，处理唯一键的值，以避免唯一键值冲突  flagUKeyAsLogicDelete

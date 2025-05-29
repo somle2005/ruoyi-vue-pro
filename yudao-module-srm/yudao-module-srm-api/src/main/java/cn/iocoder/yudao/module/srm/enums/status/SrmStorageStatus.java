@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.srm.enums.status;
 
 import cn.iocoder.yudao.framework.common.core.ArrayValuable;
-import cn.iocoder.yudao.framework.common.core.StatusValue;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
@@ -11,7 +10,7 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 @Getter
-public enum SrmStorageStatus implements ArrayValuable<Integer>, StatusValue {
+public enum SrmStorageStatus implements ArrayValuable<Integer> {
     NONE_IN_STORAGE(1, "未入库"), PARTIALLY_IN_STORAGE(2, "部分入库"), ALL_IN_STORAGE(3, "全部入库"),
     ;
 

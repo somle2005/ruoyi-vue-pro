@@ -19,6 +19,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.TmsCust
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.TmsCustomCategorySaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.TmsCustomCategoryDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.item.TmsCustomCategoryItemDO;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import cn.iocoder.yudao.module.tms.service.logistic.category.TmsCustomCategoryService;
 import cn.iocoder.yudao.module.tms.service.logistic.category.bo.TmsCustomCategoryBO;
 import cn.iocoder.yudao.module.tms.service.logistic.category.item.TmsCustomCategoryItemService;
@@ -40,7 +41,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
-import static cn.iocoder.yudao.framework.common.enums.enums.DictTypeConstants.PRODUCT_MATERIAL;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
 @Tag(name = "管理后台 - 海关分类")
@@ -159,7 +159,7 @@ public class TmsCustomCategoryController {
         List<Long> ids = listDOs.stream().map(TmsCustomCategoryDO::getId).toList();
         Map<Long, List<TmsCustomCategoryItemDO>> itemMap = customRuleCategoryItemService.getCustomRuleCategoryItemMap(ids);
         //1 材料ids
-        List<DictDataRespDTO> dtoList = dictDataApi.getDictDataList(PRODUCT_MATERIAL);
+        List<DictDataRespDTO> dtoList = dictDataApi.getDictDataList(TmsDictTypeConstants.PRODUCT_MATERIAL);
         //1.1 构造map  字典的value:字典的label
         Map<String, String> materialMap = dtoList.stream().collect(Collectors.toMap(DictDataRespDTO::getValue, DictDataRespDTO::getLabel));
         // 1.2 构造人员map
