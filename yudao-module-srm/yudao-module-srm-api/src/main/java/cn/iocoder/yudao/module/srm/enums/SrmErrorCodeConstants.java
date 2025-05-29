@@ -56,7 +56,7 @@ public interface SrmErrorCodeConstants {
 
     // ========== ERP 采购到货（1-030-102-000） ==========
     ErrorCode PURCHASE_IN_NOT_EXISTS = new ErrorCode(1_030_102_000, "采购到货单不存在");
-    ErrorCode PURCHASE_IN_DELETE_FAIL_APPROVE = new ErrorCode(1_030_102_001, "采购到货单({})已审核，无法删除");
+    ErrorCode PURCHASE_IN_DELETE_FAIL_APPROVE = new ErrorCode(1_030_102_001, "采购到货单({})处于草稿、未通过、审核撤销，才可以删除");
     ErrorCode PURCHASE_IN_PROCESS_FAIL = new ErrorCode(1_030_102_002, "反审核失败，只有已审核的到货单才能反审核");
     ErrorCode PURCHASE_IN_APPROVE_FAIL = new ErrorCode(1_030_102_003, "审核失败，只有未审核的到货单才能审核");
     ErrorCode PURCHASE_IN_NO_EXISTS = new ErrorCode(1_030_102_004, "生成到货单失败，请重新提交");

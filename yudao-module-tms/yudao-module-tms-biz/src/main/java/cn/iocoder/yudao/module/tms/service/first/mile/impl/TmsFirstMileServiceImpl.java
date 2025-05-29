@@ -286,8 +286,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         }
         List<TmsFirstMileBO> firstMileBOList = TmsFirstMileConvert.convertBOList(itemPageResult.getList());
         // 获取费用(费用不分页展示，详情取)
-
-
         return new PageResult<>(firstMileBOList, itemPageResult.getTotal());
     }
 
