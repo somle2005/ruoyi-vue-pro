@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.api.purchase.dto.wms;
+package cn.iocoder.yudao.module.srm.api.purchase.dto.req;
 
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,12 +9,12 @@ import java.util.List;
 
 @Data
 @Validated
-public class SrmInboundReqDTO {
+public class SrmPurchaseInSaveReqDTO {
 
     /**
      * 主键
      */
-    @NotNull(message = "SRM至WMS的入库单主键ID不能为空")
+    @NotNull(message = "主键ID不能为空")
     private Long id;
 
     /**
@@ -37,11 +37,7 @@ public class SrmInboundReqDTO {
      */
     private Integer upstreamBillType;
 
-    /**
-     * 上架状态
-     */
-    private Integer shelvingStatus;
 
-    @Size(min = 1, message = "SRM至WMS的入库单明细列表至少有一个")
-    private List<SrmInboundItemReqDTO> itemList;
+    @Size(min = 1, message = "明细列表至少有一个")
+    private List<SrmPurchaseInSaveItemReqDTO> itemList;
 }

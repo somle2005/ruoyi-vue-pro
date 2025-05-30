@@ -5,8 +5,8 @@ import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInItemDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmInboundItemReqDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmInboundReqDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmPurchaseInSaveItemReqDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmPurchaseInSaveReqDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.inItem.SrmPurchaseInItemCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
@@ -72,13 +72,13 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
      * @param reqDTO 入库单DTO
      */
     @Override
-    public void updatePurchaseInItemQty(SrmInboundReqDTO reqDTO) {
+    public void updatePurchaseInItemQty(SrmPurchaseInSaveReqDTO reqDTO) {
         //校验
         if (!Objects.equals(reqDTO.getUpstreamBillType(), BillType.SRM_PURCHASE_IN.getValue())) {
             throw new IllegalArgumentException(StrUtil.format("入库单审核回调SrmInboundReqDTO，上游类型{}不是到货单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamBillType())).getLabel()));
         }
         //校验item存在
-        purchaseInService.validatePurchaseInItemExists(reqDTO.getItemList().stream().map(SrmInboundItemReqDTO::getUpstreamItemId).collect(Collectors.toList()));
+        purchaseInService.validatePurchaseInItemExists(reqDTO.getItemList().stream().map(SrmPurchaseInSaveItemReqDTO::getUpstreamItemId).collect(Collectors.toList()));
         reqDTO.getItemList().forEach(item -> {
             //消费
             SrmPurchaseInItemCountDTO build = SrmPurchaseInItemCountDTO.builder()

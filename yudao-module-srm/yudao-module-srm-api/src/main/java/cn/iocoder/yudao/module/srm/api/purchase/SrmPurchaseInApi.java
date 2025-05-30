@@ -1,13 +1,13 @@
 package cn.iocoder.yudao.module.srm.api.purchase;
 
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmInboundReqDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmPurchaseInSaveReqDTO;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
 /**
- * 采购入库单 API 接口
+ * 采购到货单 API 接口
  */
 @Validated
 public interface SrmPurchaseInApi {
@@ -25,6 +25,6 @@ public interface SrmPurchaseInApi {
      * <p>
      * 入库单审核后，回调
      */
-    void updatePurchaseInItemQty(SrmInboundReqDTO reqDTO);
+    void updatePurchaseInItemQty(SrmPurchaseInSaveReqDTO reqDTO);
 
 } 
