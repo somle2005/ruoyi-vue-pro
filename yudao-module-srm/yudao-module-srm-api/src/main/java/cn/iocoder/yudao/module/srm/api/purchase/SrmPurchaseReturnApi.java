@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.srm.api.purchase;
 
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmOutboundReqDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveReqDTO;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
@@ -26,5 +26,5 @@ public interface SrmPurchaseReturnApi {
      *<p>
      * 出库单审核后回调
      */
-    void updatePurchaseReturnItemQty(SrmOutboundReqDTO reqDTO);
+    void updatePurchaseReturnItemQty(SrmReturnSaveReqDTO reqDTO);
 } 

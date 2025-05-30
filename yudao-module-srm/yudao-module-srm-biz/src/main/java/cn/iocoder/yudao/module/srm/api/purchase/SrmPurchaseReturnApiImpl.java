@@ -4,8 +4,8 @@ import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnItemDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmOutboundItemReqDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.wms.SrmOutboundReqDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveItemReqDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveReqDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutItemCountDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
@@ -118,13 +118,13 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
      * @param reqDTO reqDTO
      */
     @Override
-    public void updatePurchaseReturnItemQty(@Validated SrmOutboundReqDTO reqDTO) {
+    public void updatePurchaseReturnItemQty(@Validated SrmReturnSaveReqDTO reqDTO) {
         //校验
         if (!Objects.equals(reqDTO.getUpstreamBillType(), BillType.SRM_PURCHASE_RETURN.getValue())) {
             throw new IllegalArgumentException(StrUtil.format("出库单审核回调SrmOutboundReqDTO，上游类型({})不是退货单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamBillType())).getLabel()));
         }
         //校验item存在
-        List<Long> itemIds = reqDTO.getItems().stream().map(SrmOutboundItemReqDTO::getUpstreamItemId).collect(Collectors.toList());
+        List<Long> itemIds = reqDTO.getItems().stream().map(SrmReturnSaveItemReqDTO::getUpstreamItemId).collect(Collectors.toList());
         List<SrmPurchaseReturnItemDO> items = purchaseReturnService.validatePurchaseReturnItemExists(itemIds);
 
         //消费
