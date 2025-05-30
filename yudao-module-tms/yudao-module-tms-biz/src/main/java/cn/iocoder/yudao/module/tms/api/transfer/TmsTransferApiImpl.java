@@ -107,7 +107,7 @@ public class TmsTransferApiImpl implements TmsTransferApi {
                     .map(item -> WmsInboundItemSaveReqDTO.builder()
                         .productId(item.getProductId())
                         .planQty(item.getQty())
-//                        .deptId(item.getDeptId())
+                        .deptId(item.getDeptId()) //行库存部门ID
                         .companyId(item.getStockCompanyId())
                         .remark(item.getRemark())
                         .upstreamItemId(item.getId())

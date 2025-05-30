@@ -3,15 +3,12 @@ package cn.iocoder.yudao.module.tms.service.transfer;
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
-import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
-import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsTransferStatusUpdateDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsCompanyRespVO;
@@ -50,12 +47,12 @@ import org.springframework.validation.annotation.Validated;
 import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.TRANSFER_AUDIT_STATE_MACHINE;
+import static cn.iocoder.yudao.module.tms.tool.TmsStreamXTool.assemble;
 import static jodd.util.StringUtil.truncate;
 
 /**
@@ -243,42 +240,55 @@ public class TmsTransferServiceImpl implements TmsTransferService {
         return respVO;
     }
 
-    /**
-     * 装配产品信息
-     */
+
     private void assembleProducts(List<TmsTransferItemRespVO> itemList) {
-        Map<Long, ErpProductDTO> productDTOMap = erpProductApi.getProductMap(StreamX.from(itemList).map(TmsTransferItemRespVO::getProductId).toList());
-        Map<Long, TmsProductRespVO> productVOMap = StreamX.from(productDTOMap.values()).toMap(ErpProductDTO::getId, product -> BeanUtils.toBean(product, TmsProductRespVO.class));
-        StreamX.from(itemList).assemble(productVOMap, TmsTransferItemRespVO::getProductId, TmsTransferItemRespVO::setProduct);
+        assemble(
+            itemList,
+            TmsTransferItemRespVO::getProductId,
+            erpProductApi::getProductMap,
+            TmsTransferItemRespVO::setProduct,
+            product -> BeanUtils.toBean(product, TmsProductRespVO.class)
+        );
     }
 
-    /**
-     * 装配公司信息
-     */
     private void assembleCompany(List<TmsTransferItemRespVO> itemList) {
-        Map<Long, FmsCompanyDTO> companyMap = fmsCompanyApi.getCompanyMap(StreamX.from(itemList).map(TmsTransferItemRespVO::getStockCompanyId).toSet());
-        Map<Long, TmsCompanyRespVO> companyVOMap = StreamX.from(companyMap.values()).toMap(FmsCompanyDTO::getId, company -> BeanUtils.toBean(company, TmsCompanyRespVO.class));
-        StreamX.from(itemList).assemble(companyVOMap, TmsTransferItemRespVO::getStockCompanyId, TmsTransferItemRespVO::setStockCompany);
+        assemble(
+            itemList,
+            TmsTransferItemRespVO::getStockCompanyId,
+            ids -> fmsCompanyApi.getCompanyMap(new HashSet<>(ids)),
+            TmsTransferItemRespVO::setStockCompany,
+            company -> BeanUtils.toBean(company, TmsCompanyRespVO.class)
+        );
     }
 
-    /**
-     * 装配仓库信息
-     */
+
     private void assembleWarehouse(List<TmsTransferRespVO> transferList) {
-        Set<Long> warehouseIds = transferList.stream()
-            .flatMap(transfer -> Stream.of(transfer.getFromWarehouseId(), transfer.getToWarehouseId()))
-            .collect(Collectors.toSet());
+        // fromWarehouse
+        assemble(
+            transferList,
+            TmsTransferRespVO::getFromWarehouseId,
+            ids -> wmsWarehouseApi.getWarehouseMap(new ArrayList<>(ids)),
+            TmsTransferRespVO::setFromWarehouse,
+            warehouse -> BeanUtils.toBean(warehouse, TmsWarehourseRespVO.class)
+        );
+        // toWarehouse
+        assemble(
+            transferList,
+            TmsTransferRespVO::getToWarehouseId,
+            ids -> wmsWarehouseApi.getWarehouseMap(new ArrayList<>(ids)),
+            TmsTransferRespVO::setToWarehouse,
+            warehouse -> BeanUtils.toBean(warehouse, TmsWarehourseRespVO.class)
+        );
 
-        Map<Long, TmsWarehourseRespVO> warehouseMap = wmsWarehouseApi.getWarehouseMap(new ArrayList<>(warehouseIds)).entrySet().stream()
-            .collect(Collectors.toMap(Map.Entry::getKey, entry -> BeanUtils.toBean(entry.getValue(), TmsWarehourseRespVO.class)));
-
-        StreamX.from(transferList).assemble(warehouseMap, TmsTransferRespVO::getFromWarehouseId, TmsTransferRespVO::setFromWarehouse);
-        StreamX.from(transferList).assemble(warehouseMap, TmsTransferRespVO::getToWarehouseId, TmsTransferRespVO::setToWarehouse);
     }
 
     private void assembleDept(List<TmsTransferItemRespVO> allItems) {
-        Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(StreamX.from(allItems).map(TmsTransferItemRespVO::getDeptId).toList());
-        StreamX.from(allItems).assemble(deptDTOMap, TmsTransferItemRespVO::getDeptId, (tmsTransferItemRespVO, deptRespDTO) -> tmsTransferItemRespVO.setDept(BeanUtils.toBean(deptRespDTO, TmsDeptRespVO.class)));
+        assemble(allItems,
+            TmsTransferItemRespVO::getDeptId,
+            ids -> deptApi.getDeptMap(ids),
+            TmsTransferItemRespVO::setDept,
+            dept -> BeanUtils.toBean(dept, TmsDeptRespVO.class)
+        );
     }
 
     /**
@@ -432,7 +442,7 @@ public class TmsTransferServiceImpl implements TmsTransferService {
             itemDTO.setRemark(item.getRemark()); // 备注
             itemDTO.setUpstreamItemId(item.getId()); // 来源详情ID
             itemDTO.setCompanyId(item.getStockCompanyId()); // 设置库存公司ID
-//            itemDTO.setDeptId(item.getDeptId()); //库存归属部门ID(哪个部门出库SKU)
+            itemDTO.setDeptId(item.getDeptId()); //库存归属部门ID(哪个部门出库SKU)
             return itemDTO;
         }).collect(Collectors.toList());
     }
