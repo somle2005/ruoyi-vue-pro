@@ -54,6 +54,10 @@ public class WmsInboundApiImpl implements WmsInboundApi {
             item.setActualQty(item.getPlanQty());
         });
         createReqVO.setItemList(BeanUtils.toBean(itemList, WmsInboundItemSaveReqVO.class));
+        //调拨单触发时，填写公司缺省值
+        if (createReqVO.getUpstreamBillType().equals(BillType.TMS_TRANSFER.getValue())) {
+            createReqVO.setCompanyId(999L);
+        }
         WmsInboundDO inbound = inboundService.createInbound(createReqVO);
         //外部模块生成的入库单，直接发起审批
         WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
