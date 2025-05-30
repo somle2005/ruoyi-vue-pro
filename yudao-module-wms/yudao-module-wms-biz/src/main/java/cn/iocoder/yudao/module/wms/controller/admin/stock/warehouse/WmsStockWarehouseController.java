@@ -160,8 +160,15 @@ public class WmsStockWarehouseController {
     @PostMapping("/select-sellable-qty")
     @Operation(summary = "查询可售库存")
 //    @PreAuthorize("@ss.hasPermission('wms:inbound:query')")
-    public CommonResult<Map<Long, List<WmsStockWarehouseDO>>> selectSellableQty(@RequestBody WmsWarehouseQueryDTO wmsWarehouseQueryDTO) {
+    public CommonResult<List<WmsStockWarehouseDO>> selectSellableQty(@RequestBody WmsWarehouseQueryDTO wmsWarehouseQueryDTO) {
         Map<Long, List<WmsStockWarehouseDO>> rtnMap = stockWarehouseService.selectSellableQty(wmsWarehouseQueryDTO);
-        return success(rtnMap);
+        // 转换数据为期望的返回类型
+        if (rtnMap.isEmpty()) {
+            return success(List.of());
+        }
+        List<WmsStockWarehouseDO> rtnList = StreamX.from(rtnMap.values()).flatMap(List::stream).toList();
+        // 返回
+        return success(rtnList);
+
     }
 }
