@@ -2,7 +2,7 @@ package cn.iocoder.yudao.module.tms.config.first.mile.impl.action;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
+import cn.iocoder.yudao.module.tms.api.first.TmsFistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
@@ -24,7 +24,7 @@ public class FirstMileAuditActionImpl implements Action<TmsAuditStatus, TmsEvent
     public void execute(TmsAuditStatus from, TmsAuditStatus to, TmsEventEnum event, TmsFirstMileAuditReqVO context) {
 
         TmsFirstMileDO firstMileDO = tmsFirstMileService.getFirstMile(context.getId());
-        FistMileDTO dto = BeanUtils.toBean(firstMileDO, FistMileDTO.class, fistMileDTO -> fistMileDTO.setAuditStatus(to.getCode()));
+        TmsFistMileDTO dto = BeanUtils.toBean(firstMileDO, TmsFistMileDTO.class, fistMileDTO -> fistMileDTO.setAuditStatus(to.getCode()));
         if (event == TmsEventEnum.AGREE || event == TmsEventEnum.REJECT) {
             //审核通过?不通过，需要有审核意见
             dto.setReviewComment(context.getReviewComment());

@@ -2,7 +2,7 @@ package cn.iocoder.yudao.module.tms.service.first.mile;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
-import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
+import cn.iocoder.yudao.module.tms.api.first.TmsFistMileDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
@@ -124,9 +124,9 @@ public interface TmsFirstMileService {
     /**
      * 更新头程单状态
      *
-     * @param fistMileDTO dto
+     * @param tmsFistMileDTO dto
      */
-    void updateFirstMileStatus(FistMileDTO fistMileDTO);
+    void updateFirstMileStatus(TmsFistMileDTO tmsFistMileDTO);
 
     /**
      * 批量查询申请单MAP

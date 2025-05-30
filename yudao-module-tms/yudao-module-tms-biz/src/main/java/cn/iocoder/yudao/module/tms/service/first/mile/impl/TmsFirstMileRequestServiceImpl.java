@@ -11,7 +11,6 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
-import cn.iocoder.yudao.module.tms.api.log.LogRecordConstants;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestSaveReqVO;
@@ -24,6 +23,7 @@ import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.TmsFirstMileRequ
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
 import cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
+import cn.iocoder.yudao.module.tms.enums.TmsLogRecordConstants;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
@@ -100,8 +100,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_CREATE_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_CREATE_SUB_TYPE,
             bizNo = "{{#id}}",
             extra = "{{#vo.code}}",
             success = "创建了头程申请单【{{#vo.code}}】")
@@ -173,8 +173,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_DELETE_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_DELETE_SUB_TYPE,
             bizNo = "{{#id}}",
             success = "删除了头程申请单【{{#businessName}}】")
     public void deleteFirstMileRequest(Long id) {
@@ -232,8 +232,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_UPDATE_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_UPDATE_SUB_TYPE,
             bizNo = "{{#id}}",
             extra = "{{#code}}",
             success = "更新了头程申请单【{{#code}}】: {_DIFF{#requestDO}}")
@@ -305,8 +305,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_SUBMIT_AUDIT_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_SUBMIT_AUDIT_SUB_TYPE,
             bizNo = "{{#ids[0]}}",
             success = "提交了头程申请单【{{#codes}}】审核")
     public void submitAudit(List<Long> ids) {
@@ -352,8 +352,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_AUDIT_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_AUDIT_SUB_TYPE,
             bizNo = "{{#reqVO.id}}",
             success = "{{#reqVO.reviewed ? (#reqVO.pass ? '审核通过' : '审核不通过') : '反审核'}}了头程申请单【{{#vo.code}}】")
     public void review(TmsFirstMileRequestAuditReqVO reqVO) {
@@ -464,8 +464,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_REQUEST_UPDATE_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_REQUEST_UPDATE_SUB_TYPE,
             bizNo = "{{#vo.id}}",
             success = "更新了头程申请单【{{#vo.code}}】: {_DIFF{#vo}}")
     public void updateFirstMileRequest(@Validated TmsFirstMileRequestSaveReqVO vo) {

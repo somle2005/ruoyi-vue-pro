@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.tms.api.log;
+package cn.iocoder.yudao.module.tms.enums;
 
 /**
  * TMS 模块 - 操作日志常量
@@ -14,7 +14,7 @@ package cn.iocoder.yudao.module.tms.api.log;
  * - {{#reqVO.reviewed}}: 是否已审核
  * - {{#reqVO.pass}}: 是否审核通过
  */
-public interface LogRecordConstants {
+public interface TmsLogRecordConstants {
 
     // ========== 业务类型 ==========
     /**

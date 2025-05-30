@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * 头程单DTO
  */
 @Data
-public class FistMileDTO {
+public class TmsFistMileDTO {
 
     /**
      * 头程单ID

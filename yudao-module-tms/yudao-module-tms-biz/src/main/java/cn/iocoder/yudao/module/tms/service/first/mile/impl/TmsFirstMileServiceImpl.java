@@ -10,9 +10,8 @@ import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
-import cn.iocoder.yudao.module.tms.api.first.FistMileDTO;
-import cn.iocoder.yudao.module.tms.api.first.mile.request.FistMileRequestItemDTO;
-import cn.iocoder.yudao.module.tms.api.log.LogRecordConstants;
+import cn.iocoder.yudao.module.tms.api.first.TmsFistMileDTO;
+import cn.iocoder.yudao.module.tms.api.first.mile.request.TmsFistMileRequestItemDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
@@ -32,6 +31,7 @@ import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.TmsFirstMileRequ
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
 import cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
+import cn.iocoder.yudao.module.tms.enums.TmsLogRecordConstants;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
@@ -94,7 +94,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Resource(name = FIRST_MILE_AUDIT_STATE_MACHINE)
     StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileAuditReqVO> auditStateMachine;
     @Resource(name = FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE)
-    StateMachine<TmsOrderStatus, TmsEventEnum, FistMileRequestItemDTO> requestItemOrderStateMachine;
+    StateMachine<TmsOrderStatus, TmsEventEnum, TmsFistMileRequestItemDTO> requestItemOrderStateMachine;
 
 
     //校验code中间日期是否是当天
@@ -113,8 +113,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Override
     @Idempotent
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_CREATE_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_CREATE_SUB_TYPE,
             bizNo = "{{#id}}",
             success = "创建了头程单【{{#vo.code}}】")
     public Long createFirstMile(TmsFirstMileSaveReqVO vo) {
@@ -181,8 +181,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_UPDATE_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_UPDATE_SUB_TYPE,
             bizNo = "{{#vo.id}}",
             success = "更新了头程单【{{#vo.code}}】: {_DIFF{#vo}}")
     public void updateFirstMile(TmsFirstMileSaveReqVO vo) {
@@ -224,8 +224,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     }
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_DELETE_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_DELETE_SUB_TYPE,
             bizNo = "{{#id}}",
             success = "删除了头程单【{{#code}}】")
     public void deleteFirstMile(Long id) {
@@ -296,8 +296,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_SUBMIT_AUDIT_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_SUBMIT_AUDIT_SUB_TYPE,
             bizNo = "{{#ids[0]}}",
             success = "提交了头程单【{{#codes}}】审核")
     public void submitAudit(List<Long> ids) {
@@ -337,8 +337,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    @LogRecord(type = LogRecordConstants.TMS_FIRST_MILE_TYPE,
-            subType = LogRecordConstants.TMS_FIRST_MILE_AUDIT_SUB_TYPE,
+    @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
+        subType = TmsLogRecordConstants.TMS_FIRST_MILE_AUDIT_SUB_TYPE,
             bizNo = "{{#reqVO.id}}",
             success = "{{#reqVO.reviewed ? (#reqVO.pass ? '审核通过' : '审核不通过') : '反审核'}}了头程单【{{#code}}】")
     public void review(TmsFirstMileAuditReqVO reqVO) {
@@ -488,7 +488,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         itemList.stream().filter(item -> item.getRequestItemId() != null).forEach(item -> {
             //拿到申请itemDO
             TmsFirstMileRequestItemDO firstMileRequestItemDO = tmsFirstMileRequestService.getFirstMileRequestItem(item.getRequestItemId());
-            FistMileRequestItemDTO dto = FistMileRequestItemDTO.builder().itemId(item.getRequestItemId()).qty(item.getQty()).build();
+            TmsFistMileRequestItemDTO dto = TmsFistMileRequestItemDTO.builder().itemId(item.getRequestItemId()).qty(item.getQty()).build();
             if (!isAdd) {
                 dto.setQty(-dto.getQty());//取反
             }
@@ -526,7 +526,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
                 Integer changeQty = item.getQty() - oldItemDO.getQty();
                 requestItemOrderStateMachine.fireEvent(TmsOrderStatus.fromCode(oldItemDO.getOrderStatus())
                     , TmsEventEnum.ORDER_ADJUSTMENT
-                    , FistMileRequestItemDTO.builder().itemId(item.getRequestItemId()).qty(changeQty).build());
+                    , TmsFistMileRequestItemDTO.builder().itemId(item.getRequestItemId()).qty(changeQty).build());
             });
             firstMileItemMapper.updateBatch(diffedList.get(1));
         }
@@ -572,12 +572,12 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     /**
      * 更新头程单状态
      *
-     * @param fistMileDTO dto
+     * @param tmsFistMileDTO dto
      */
     @Override
-    public void updateFirstMileStatus(FistMileDTO fistMileDTO) {
-        validateFirstMileExists(fistMileDTO.getId());
-        TmsFirstMileDO firstMileDO = BeanUtils.toBean(fistMileDTO, TmsFirstMileDO.class);
+    public void updateFirstMileStatus(TmsFistMileDTO tmsFistMileDTO) {
+        validateFirstMileExists(tmsFistMileDTO.getId());
+        TmsFirstMileDO firstMileDO = BeanUtils.toBean(tmsFistMileDTO, TmsFirstMileDO.class);
         firstMileMapper.updateById(firstMileDO);
     }
 

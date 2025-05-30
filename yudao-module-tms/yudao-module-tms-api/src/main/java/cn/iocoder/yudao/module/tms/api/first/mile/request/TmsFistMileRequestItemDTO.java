@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class FistMileRequestItemDTO {
+public class TmsFistMileRequestItemDTO {
     //id
     private Long itemId;
     //订购数量变动值

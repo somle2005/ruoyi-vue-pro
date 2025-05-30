@@ -8,7 +8,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class FistMileRequestDTO {
+public class TmsFistMileRequestDTO {
     //id
     private Long id;
     //订购数量
