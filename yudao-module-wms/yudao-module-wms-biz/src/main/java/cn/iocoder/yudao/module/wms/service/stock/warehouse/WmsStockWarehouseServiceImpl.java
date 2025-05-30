@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -324,5 +325,24 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
         });
 
         return map;
+    }
+
+    @Override
+    public List<WmsStockWarehouseDO> selectSellableQtyList(WmsWarehouseQueryDTO wmsWarehouseQueryDTO) {
+        if (CollectionUtils.isEmpty(wmsWarehouseQueryDTO.getWarehouses())) {
+            return List.of();
+        }
+        List<WmsStockWarehouseDO> rtnList = new ArrayList<>();
+        for (WmsWarehouseSimpleDTO warehouse : wmsWarehouseQueryDTO.getWarehouses()) {
+            LambdaQueryWrapperX<WmsStockWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
+            wrapper.eqIfPresent(WmsStockWarehouseDO::getWarehouseId, warehouse.getWarehouseId())
+                .inIfPresent(WmsStockWarehouseDO::getProductId, warehouse.getProductIds())
+                .ge(WmsStockWarehouseDO::getSellableQty, 0);
+            List<WmsStockWarehouseDO> results = stockWarehouseMapper.selectList(wrapper);
+            if (!results.isEmpty()) {
+                rtnList.add(results.get(0));
+            }
+        }
+        return rtnList;
     }
 }

@@ -24,7 +24,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Map;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -161,14 +160,7 @@ public class WmsStockWarehouseController {
     @Operation(summary = "查询可售库存")
 //    @PreAuthorize("@ss.hasPermission('wms:inbound:query')")
     public CommonResult<List<WmsStockWarehouseDO>> selectSellableQty(@RequestBody WmsWarehouseQueryDTO wmsWarehouseQueryDTO) {
-        Map<Long, List<WmsStockWarehouseDO>> rtnMap = stockWarehouseService.selectSellableQty(wmsWarehouseQueryDTO);
-        // 转换数据为期望的返回类型
-        if (rtnMap.isEmpty()) {
-            return success(List.of());
-        }
-        List<WmsStockWarehouseDO> rtnList = StreamX.from(rtnMap.values()).flatMap(List::stream).toList();
-        // 返回
-        return success(rtnList);
+        return success(stockWarehouseService.selectSellableQtyList(wmsWarehouseQueryDTO));
 
     }
 }
