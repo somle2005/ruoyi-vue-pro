@@ -4,10 +4,10 @@ import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmPayCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.order.SrmOrderItemOffDTO;
 import cn.iocoder.yudao.module.srm.config.BaseFailCallbackImpl;
+import cn.iocoder.yudao.module.srm.config.machine.SrmOrderInCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.SrmPayCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.order.SrmOrderItemOffContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmExecutionStatus;
@@ -36,9 +36,9 @@ public class SrmPurchaseOrderItemStatusMachine {
     @Autowired
     Action<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecuteAction;
     @Autowired
-    Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> ItemStorageActionImpl;
+    Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountContext> ItemStorageActionImpl;
     @Autowired
-    Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> orderItemPayAction;
+    Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountContext> orderItemPayAction;
 
 
     @Bean(PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
@@ -71,10 +71,12 @@ public class SrmPurchaseOrderItemStatusMachine {
 
         return builder.build(PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME);
     }
+    @Resource
+    Action<SrmOffStatus, SrmEventEnum, SrmOrderItemOffContext> OrderItemOffActionImpl;
 
     @Bean(PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
-    public StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> buildPurchaseOrderItemStorageStateMachine() {
-        StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> builder = StateMachineBuilderFactory.create();
+    public StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountContext> buildPurchaseOrderItemStorageStateMachine() {
+        StateMachineBuilder<SrmStorageStatus, SrmEventEnum, SrmOrderInCountContext> builder = StateMachineBuilderFactory.create();
 
         // 初始化入库
         builder.externalTransition().from(NONE_IN_STORAGE).to(NONE_IN_STORAGE).on(SrmEventEnum.STORAGE_INIT).perform(ItemStorageActionImpl);
@@ -91,12 +93,10 @@ public class SrmPurchaseOrderItemStatusMachine {
         return builder.build(PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME);
     }
 
-    @Resource
-    Action<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> OrderItemOffActionImpl;
     //采购订单子项状态机
     @Bean(PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
-    public StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> getPurchaseOrderStateMachine() {
-        StateMachineBuilder<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> builder = StateMachineBuilderFactory.create();
+    public StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffContext> getPurchaseOrderStateMachine() {
+        StateMachineBuilder<SrmOffStatus, SrmEventEnum, SrmOrderItemOffContext> builder = StateMachineBuilderFactory.create();
         // 初始化状态
         builder.internalTransition().within(OPEN).on(SrmEventEnum.OFF_INIT).perform(OrderItemOffActionImpl);
         // 开启
@@ -113,8 +113,8 @@ public class SrmPurchaseOrderItemStatusMachine {
     }
 
     @Bean(PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME)
-    public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> getPurchaseOrderItemPaymentStateMachine() {
-        StateMachineBuilder<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> builder = StateMachineBuilderFactory.create();
+    public StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountContext> getPurchaseOrderItemPaymentStateMachine() {
+        StateMachineBuilder<SrmPaymentStatus, SrmEventEnum, SrmPayCountContext> builder = StateMachineBuilderFactory.create();
         // 初始化付款状态
         builder.internalTransition().within(NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(orderItemPayAction);
         // 取消付款

@@ -14,10 +14,10 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmPayCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmQuantityOrderedCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.order.SrmOrderItemOffDTO;
+import cn.iocoder.yudao.module.srm.config.machine.SrmOrderInCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.SrmPayCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.SrmQuantityOrderedCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.order.SrmOrderItemOffContext;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInSaveReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.*;
 import cn.iocoder.yudao.module.srm.convert.purchase.SrmOrderConvert;
@@ -117,15 +117,15 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderDO> orderExecutionMachine;
     //子项
     @Resource(name = PURCHASE_REQUEST_ITEM_ORDER_STATE_MACHINE_NAME)
-    StateMachine<SrmOrderStatus, SrmEventEnum, SrmQuantityOrderedCountDTO> requestItemMachine;
+    StateMachine<SrmOrderStatus, SrmEventEnum, SrmQuantityOrderedCountContext> requestItemMachine;
     @Resource(name = PURCHASE_REQUEST_ITEM_OFF_STATE_MACHINE_NAME)
     StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseRequestItemsDO> requestItemOffMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
-    StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> orderItemOffMachine;
+    StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffContext> orderItemOffMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemStorageMachine;
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountContext> orderItemStorageMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME)
-    StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> orderItemPaymentMachine;
+    StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountContext> orderItemPaymentMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
     StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecutionMachine;
     @Autowired
@@ -194,11 +194,11 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         //查询订单下面的产品项
         for (SrmPurchaseOrderItemDO orderItemDO : purchaseOrderItems) {
             //开关
-            orderItemOffMachine.fireEvent(SrmOffStatus.OPEN, SrmEventEnum.OFF_INIT, new SrmOrderItemOffDTO().setItemId(orderItemDO.getId()));
+            orderItemOffMachine.fireEvent(SrmOffStatus.OPEN, SrmEventEnum.OFF_INIT, new SrmOrderItemOffContext().setItemId(orderItemDO.getId()));
             //付款
-            orderItemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, SrmPayCountDTO.builder().orderItemId(orderItemDO.getId()).build());
+            orderItemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, SrmPayCountContext.builder().orderItemId(orderItemDO.getId()).build());
             //入库
-            orderItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmOrderInCountDTO.builder().orderItemId(orderItemDO.getId()).build());
+            orderItemStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmOrderInCountContext.builder().orderItemId(orderItemDO.getId()).build());
             //执行
             orderItemExecutionMachine.fireEvent(SrmExecutionStatus.PENDING, SrmEventEnum.EXECUTION_INIT, orderItemDO);
         }
@@ -207,7 +207,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             Optional.ofNullable(orderItemDO.getPurchaseApplyItemId()).ifPresent(itemId -> {
                 SrmPurchaseRequestItemsDO itemsDO = srmPurchaseRequestService.validItemIdExist(itemId);
                 //下单数量 <-> 申请单已订购数量
-                SrmQuantityOrderedCountDTO dto = SrmQuantityOrderedCountDTO.builder().purchaseRequestItemId(itemsDO.getId()).quantity(orderItemDO.getQty().intValue()).build();
+                SrmQuantityOrderedCountContext dto = SrmQuantityOrderedCountContext.builder().purchaseRequestItemId(itemsDO.getId()).quantity(orderItemDO.getQty().intValue()).build();
                 requestItemMachine.fireEvent(SrmOrderStatus.fromCode(itemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
             });
         }
@@ -472,7 +472,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 int newCount = orderItemDO.getQty().intValue();
                 int oldCount = oldOrderItem.getQty().intValue();
                 int changCount = newCount - oldCount;
-                SrmQuantityOrderedCountDTO dto = SrmQuantityOrderedCountDTO.builder().purchaseRequestItemId(requestItemsDO.getId()).quantity(changCount).build();
+                SrmQuantityOrderedCountContext dto = SrmQuantityOrderedCountContext.builder().purchaseRequestItemId(requestItemsDO.getId()).quantity(changCount).build();
                 if (changCount < 0) {
                     //采购数量减少了
                     requestItemMachine.fireEvent(SrmOrderStatus.fromCode(requestItemsDO.getOrderStatus()), SrmEventEnum.ORDER_ADJUSTMENT, dto);
@@ -579,7 +579,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     private void deleteSyncLogic(SrmPurchaseOrderItemDO item) {
         Optional.ofNullable(item.getPurchaseApplyItemId()).ifPresent(id -> {
             SrmPurchaseRequestItemsDO requestItemsDO = requestItemsMapper.selectById(id);
-            SrmQuantityOrderedCountDTO dto = SrmQuantityOrderedCountDTO.builder().purchaseRequestItemId(item.getPurchaseApplyItemId()).quantity(item.getQty().negate().intValue())
+            SrmQuantityOrderedCountContext dto = SrmQuantityOrderedCountContext.builder().purchaseRequestItemId(item.getPurchaseApplyItemId()).quantity(item.getQty().negate().intValue())
                 .build();//减少申请个数的订购数量
             //触发关闭撤销
             requestItemOffMachine.fireEvent(SrmOffStatus.fromCode(requestItemsDO.getOffStatus()), SrmEventEnum.CANCEL_DELETE, requestItemsDO);
@@ -766,7 +766,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 List<SrmPurchaseOrderDO> orders = purchaseOrderMapper.selectByIds(orderItemDOS.stream().map(SrmPurchaseOrderItemDO::getOrderId).collect(Collectors.toSet()));
                 String codes = CollUtil.join(orders.stream().map(SrmPurchaseOrderDO::getCode).collect(Collectors.toList()), ",");
                 LogRecordContext.putVariable("codes", codes);
-                orderItemDOS.forEach(orderItemDO -> orderItemOffMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), event, new SrmOrderItemOffDTO().setItemId(orderItemDO.getId())));
+                orderItemDOS.forEach(orderItemDO -> orderItemOffMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), event, new SrmOrderItemOffContext().setItemId(orderItemDO.getId())));
             }
         }
     }

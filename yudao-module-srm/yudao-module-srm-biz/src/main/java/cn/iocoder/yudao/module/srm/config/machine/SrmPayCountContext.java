@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.api.purchase.machine;
+package cn.iocoder.yudao.module.srm.config.machine;
 
 import lombok.Builder;
 import lombok.Data;
@@ -10,7 +10,7 @@ import java.math.BigDecimal;
  */
 @Data
 @Builder
-public class SrmPayCountDTO {
+public class SrmPayCountContext {
     private Long orderItemId;
     //支付金额差异
     private BigDecimal payCountDiff;

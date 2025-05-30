@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.srm.config.purchase.order.impl.action.item;
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.order.SrmOrderItemOffDTO;
+import cn.iocoder.yudao.module.srm.config.machine.order.SrmOrderItemOffContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderItemMapper;
@@ -24,7 +24,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class OrderItemOffActionImpl implements Action<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> {
+public class OrderItemOffActionImpl implements Action<SrmOffStatus, SrmEventEnum, SrmOrderItemOffContext> {
 
     @Resource(name = SrmStateMachines.PURCHASE_ORDER_OFF_STATE_MACHINE_NAME)
     @Lazy
@@ -39,7 +39,7 @@ public class OrderItemOffActionImpl implements Action<SrmOffStatus, SrmEventEnum
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void execute(SrmOffStatus from, SrmOffStatus to, SrmEventEnum event, SrmOrderItemOffDTO context) {
+    public void execute(SrmOffStatus from, SrmOffStatus to, SrmEventEnum event, SrmOrderItemOffContext context) {
         // 查询采购订单子项
         SrmPurchaseOrderItemDO itemDO = purchaseOrderService.validatePurchaseOrderItemExists(context.getItemId());
         if(itemDO == null) {

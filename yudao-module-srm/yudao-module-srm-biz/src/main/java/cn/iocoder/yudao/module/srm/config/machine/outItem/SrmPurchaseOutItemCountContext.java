@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.api.purchase.machine.outItem;
+package cn.iocoder.yudao.module.srm.config.machine.outItem;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class SrmPurchaseOutItemCountDTO {
+public class SrmPurchaseOutItemCountContext {
     //到货项ID
     private Long outItemId;
 

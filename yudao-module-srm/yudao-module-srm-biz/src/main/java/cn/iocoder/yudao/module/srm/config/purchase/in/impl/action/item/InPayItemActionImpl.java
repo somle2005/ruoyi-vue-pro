@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.srm.config.purchase.in.impl.action.item;
 import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmPayCountDTO;
+import cn.iocoder.yudao.module.srm.config.machine.SrmPayCountContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
@@ -39,7 +39,7 @@ public class InPayItemActionImpl implements Action<SrmPaymentStatus, SrmEventEnu
     private StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInDO> stateMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME)
     @Lazy
-    private StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> purchaseOrderItemPaymentStateMachine;
+    private StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountContext> purchaseOrderItemPaymentStateMachine;
     @Autowired
     private SrmPurchaseInMapper srmPurchaseInMapper;
     @Autowired
@@ -87,7 +87,7 @@ public class InPayItemActionImpl implements Action<SrmPaymentStatus, SrmEventEnu
 //            totalPrice = totalPrice.negate();//取反
 //        }
         purchaseOrderItemPaymentStateMachine.fireEvent(SrmPaymentStatus.fromCode(orderItemDO.getPayStatus()), SrmEventEnum.PAYMENT_ADJUSTMENT,
-            SrmPayCountDTO.builder().orderItemId(orderItemId).payCountDiff(totalPrice).build());
+            SrmPayCountContext.builder().orderItemId(orderItemId).payCountDiff(totalPrice).build());
     }
 
     private void toIn(SrmPurchaseInItemDO inItemDO) {

@@ -7,7 +7,7 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInItemDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmPurchaseInSaveItemReqDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmPurchaseInSaveReqDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.inItem.SrmPurchaseInItemCountDTO;
+import cn.iocoder.yudao.module.srm.config.machine.inItem.SrmPurchaseInItemCountContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
@@ -39,7 +39,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
     @Lazy
     private SrmPurchaseInService purchaseInService;
     @Resource(name = PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountDTO> purchaseInItemStorageStateMachine;
+    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountContext> purchaseInItemStorageStateMachine;
 
     @Override
     public List<SrmPurchaseInDTO> getPurchaseInList(List<Long> ids) {
@@ -81,7 +81,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
         purchaseInService.validatePurchaseInItemExists(reqDTO.getItemList().stream().map(SrmPurchaseInSaveItemReqDTO::getUpstreamItemId).collect(Collectors.toList()));
         reqDTO.getItemList().forEach(item -> {
             //消费
-            SrmPurchaseInItemCountDTO build = SrmPurchaseInItemCountDTO.builder()
+            SrmPurchaseInItemCountContext build = SrmPurchaseInItemCountContext.builder()
                 .inItemId(item.getUpstreamItemId())
                 .inCount(BigDecimal.valueOf(item.getActualQty()))
                 .build();

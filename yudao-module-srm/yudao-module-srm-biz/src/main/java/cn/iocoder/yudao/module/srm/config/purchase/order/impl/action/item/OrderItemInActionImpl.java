@@ -3,9 +3,9 @@ package cn.iocoder.yudao.module.srm.config.purchase.order.impl.action.item;
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.order.SrmOrderItemOffDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.request.SrmRequestInMachineDTO;
+import cn.iocoder.yudao.module.srm.config.machine.SrmOrderInCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.order.SrmOrderItemOffContext;
+import cn.iocoder.yudao.module.srm.config.machine.request.SrmRequestInMachineContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
@@ -33,7 +33,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
 //订单项入库状态机
 @Component
 @Slf4j
-public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> {
+public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmOrderInCountContext> {
 
     @Autowired
     private SrmPurchaseRequestItemsMapper erpPurchaseRequestItemsMapper;
@@ -45,19 +45,19 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseOrderDO> orderStorageStateMachine;
 
     @Resource(name = PURCHASE_REQUEST_ITEM_STORAGE_STATE_MACHINE_NAME)
-    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInMachineDTO> requestItemInStateMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmRequestInMachineContext> requestItemInStateMachine;
 
     @Resource(name = PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
     @Lazy
     private StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecutionStateMachine;
 
     @Resource(name = PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
-    private StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> orderItemOffStateMachine;
+    private StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffContext> orderItemOffStateMachine;
 
     //入库项(->入库主单)->订单项(->订单主单)->申请项(->订单主单)
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmOrderInCountDTO dto) {
+    public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmOrderInCountContext dto) {
         // 1. 先查询数据库中的采购项信息
         SrmPurchaseOrderItemDO oldData = itemMapper.selectById(dto.getOrderItemId());
         if (oldData == null) {
@@ -132,7 +132,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             ThrowUtil.ifThrow(applyItemDO == null, PURCHASE_REQUEST_ITEM_NOT_FOUND, oldData.getId(), applyItemId);
             //
             requestItemInStateMachine.fireEvent(SrmStorageStatus.fromCode(applyItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT,
-                SrmRequestInMachineDTO.builder().applyItemId(applyItemId).inCount(dtoCount).build());
+                SrmRequestInMachineContext.builder().applyItemId(applyItemId).inCount(dtoCount).build());
         });
     }
 
@@ -157,7 +157,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
         //&& Objects.equals(orderItemDO.getPayStatus(),SrmPaymentStatus.ALL_PAYMENT.getCode())
         if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode())) {
             // 当前订单项，完全入库  -> 关闭订单项
-            orderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, new SrmOrderItemOffDTO().setItemId(orderItemDO.getId()));
+            orderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, new SrmOrderItemOffContext().setItemId(orderItemDO.getId()));
         }
     }
 }

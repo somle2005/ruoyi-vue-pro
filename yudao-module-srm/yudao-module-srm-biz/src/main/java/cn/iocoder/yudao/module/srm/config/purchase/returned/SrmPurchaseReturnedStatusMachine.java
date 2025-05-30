@@ -4,8 +4,8 @@ import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutMachineDTO;
 import cn.iocoder.yudao.module.srm.config.BaseFailCallbackImpl;
+import cn.iocoder.yudao.module.srm.config.machine.outItem.SrmPurchaseOutMachineContext;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
@@ -71,11 +71,11 @@ public class SrmPurchaseReturnedStatusMachine {
 
     //出库
     @Autowired
-    private Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineDTO> outboundActionImpl;
+    private Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineContext> outboundActionImpl;
 
     @Bean(PURCHASE_RETURN_OUT_STORAGE_STATE_MACHINE_NAME)
     public StateMachine getOutboundMachine() {
-        StateMachineBuilder<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineDTO> builder = StateMachineBuilderFactory.create();
+        StateMachineBuilder<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineContext> builder = StateMachineBuilderFactory.create();
         //初始化
         builder.internalTransition().within(SrmOutboundStatus.NONE_OUTBOUND).on(SrmEventEnum.OUT_STORAGE_INIT).perform(outboundActionImpl);
         //出库数量调整

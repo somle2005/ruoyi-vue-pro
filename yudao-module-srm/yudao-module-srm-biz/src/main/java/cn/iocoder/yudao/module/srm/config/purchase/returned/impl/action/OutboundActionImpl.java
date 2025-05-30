@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.srm.config.purchase.returned.impl.action;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutMachineDTO;
+import cn.iocoder.yudao.module.srm.config.machine.outItem.SrmPurchaseOutMachineContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseReturnItemMapper;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class OutboundActionImpl implements Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineDTO> {
+public class OutboundActionImpl implements Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineContext> {
     @Autowired
     private SrmPurchaseReturnMapper srmPurchaseReturnMapper;
 
@@ -26,7 +26,7 @@ public class OutboundActionImpl implements Action<SrmOutboundStatus, SrmEventEnu
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void execute(SrmOutboundStatus from, SrmOutboundStatus to, SrmEventEnum event, SrmPurchaseOutMachineDTO context) {
+    public void execute(SrmOutboundStatus from, SrmOutboundStatus to, SrmEventEnum event, SrmPurchaseOutMachineContext context) {
         SrmPurchaseReturnDO returnDO = srmPurchaseReturnMapper.selectById(context.getReturnId());
 
         if (event == SrmEventEnum.OUT_STORAGE_ADJUSTMENT) {

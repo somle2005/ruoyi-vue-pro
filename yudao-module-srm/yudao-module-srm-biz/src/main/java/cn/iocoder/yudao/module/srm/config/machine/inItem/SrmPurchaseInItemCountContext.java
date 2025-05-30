@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.api.purchase.machine.inItem;
+package cn.iocoder.yudao.module.srm.config.machine.inItem;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class SrmPurchaseInItemCountDTO {
+public class SrmPurchaseInItemCountContext {
 
     //到货项ID
     private Long inItemId;

@@ -4,8 +4,8 @@ import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilder;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderFactory;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutItemCountDTO;
 import cn.iocoder.yudao.module.srm.config.BaseFailCallbackImpl;
+import cn.iocoder.yudao.module.srm.config.machine.outItem.SrmPurchaseOutItemCountContext;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmOutboundStatus;
 import lombok.extern.slf4j.Slf4j;
@@ -25,11 +25,11 @@ public class SrmPurchaseReturnedItemStatusMachine {
     private BaseFailCallbackImpl baseFailCallbackImpl;
 
     @Autowired
-    private Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> outItemActionImpl;
+    private Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountContext> outItemActionImpl;
 
     @Bean(PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME)
     public StateMachine getOutStorageMachine() {
-        StateMachineBuilder<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> builder = StateMachineBuilderFactory.create();
+        StateMachineBuilder<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountContext> builder = StateMachineBuilderFactory.create();
         //初始化
         builder.internalTransition().within(SrmOutboundStatus.NONE_OUTBOUND).on(SrmEventEnum.OUT_STORAGE_INIT).perform(outItemActionImpl);
         //出库数量调整

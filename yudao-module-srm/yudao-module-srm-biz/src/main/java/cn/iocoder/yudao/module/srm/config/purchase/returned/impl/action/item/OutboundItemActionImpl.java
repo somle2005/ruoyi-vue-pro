@@ -3,8 +3,8 @@ package cn.iocoder.yudao.module.srm.config.purchase.returned.impl.action.item;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutItemCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutMachineDTO;
+import cn.iocoder.yudao.module.srm.config.machine.outItem.SrmPurchaseOutItemCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.outItem.SrmPurchaseOutMachineContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
@@ -28,10 +28,10 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN
 
 @Slf4j
 @Component
-public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> {
+public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountContext> {
 
     @Resource(name = PURCHASE_RETURN_OUT_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineDTO> stateMachine;
+    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineContext> stateMachine;
     @Autowired
     private SrmPurchaseReturnItemMapper srmPurchaseReturnItemMapper;
     @Autowired
@@ -44,7 +44,7 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void execute(SrmOutboundStatus from, SrmOutboundStatus to, SrmEventEnum event, SrmPurchaseOutItemCountDTO context) {
+    public void execute(SrmOutboundStatus from, SrmOutboundStatus to, SrmEventEnum event, SrmPurchaseOutItemCountContext context) {
         SrmPurchaseReturnItemDO returnItemDO = srmPurchaseReturnItemMapper.selectById(context.getOutItemId());
 
         if (event == SrmEventEnum.RETURN_ADJUSTMENT) {
@@ -73,7 +73,7 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
             }
             returnItemDO.setOutboundQty(changedOutboundQty);
             // 1.0 传递给主单
-            stateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.ORDER_ADJUSTMENT, SrmPurchaseOutMachineDTO.builder().returnId(returnItemDO.getReturnId()).build());
+            stateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.ORDER_ADJUSTMENT, SrmPurchaseOutMachineContext.builder().returnId(returnItemDO.getReturnId()).build());
             // 2.0 传给订单项，同步当前的退货数量给订单项(暂不使用状态机)
             toOrderReturnCount(returnItemDO);
         }

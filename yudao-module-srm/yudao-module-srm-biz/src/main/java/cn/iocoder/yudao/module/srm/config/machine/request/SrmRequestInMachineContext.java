@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.api.purchase.machine.request;
+package cn.iocoder.yudao.module.srm.config.machine.request;
 
 
 import lombok.Builder;
@@ -8,7 +8,7 @@ import java.math.BigDecimal;
 
 @Data
 @Builder
-public class SrmRequestInMachineDTO {
+public class SrmRequestInMachineContext {
 
     //入库差额
     private BigDecimal inCount;

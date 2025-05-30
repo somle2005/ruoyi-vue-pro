@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.api.purchase.machine;
+package cn.iocoder.yudao.module.srm.config.machine;
 
 import lombok.Builder;
 import lombok.Data;
@@ -9,7 +9,7 @@ import lombok.Data;
  */
 @Data
 @Builder
-public class SrmQuantityOrderedCountDTO {
+public class SrmQuantityOrderedCountContext {
     //申请单订单项ID
     private Long purchaseRequestItemId;
     //订购数量

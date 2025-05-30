@@ -2,8 +2,8 @@ package cn.iocoder.yudao.module.srm.config.purchase.order.impl.action.item;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmPayCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.order.SrmOrderItemOffDTO;
+import cn.iocoder.yudao.module.srm.config.machine.SrmPayCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.order.SrmOrderItemOffContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseOrderItemMapper;
@@ -25,7 +25,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_ORDER_
 
 @Component
 @Slf4j
-public class OrderItemPayActionImpl implements Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountDTO> {
+public class OrderItemPayActionImpl implements Action<SrmPaymentStatus, SrmEventEnum, SrmPayCountContext> {
     @Resource
     private SrmPurchaseOrderItemMapper itemMapper;
     @Resource
@@ -33,11 +33,11 @@ public class OrderItemPayActionImpl implements Action<SrmPaymentStatus, SrmEvent
     @Resource(name = PURCHASE_ORDER_PAYMENT_STATE_MACHINE_NAME)
     private StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseOrderDO> paymentStateMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_OFF_STATE_MACHINE_NAME)
-    private StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffDTO> purchaseOrderItemOffStateMachine;
+    private StateMachine<SrmOffStatus, SrmEventEnum, SrmOrderItemOffContext> purchaseOrderItemOffStateMachine;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void execute(SrmPaymentStatus f, SrmPaymentStatus t, SrmEventEnum event, SrmPayCountDTO context) {
+    public void execute(SrmPaymentStatus f, SrmPaymentStatus t, SrmEventEnum event, SrmPayCountContext context) {
         // 支付状态机执行
         SrmPurchaseOrderItemDO orderItemDO = itemMapper.selectById(context.getOrderItemId());
         // 1. 校验参数
@@ -88,7 +88,7 @@ public class OrderItemPayActionImpl implements Action<SrmPaymentStatus, SrmEvent
         SrmPurchaseOrderItemDO orderItemDO = itemMapper.selectById(orderItemId);
         if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()) && Objects.equals(orderItemDO.getPayStatus(), SrmPaymentStatus.ALL_PAYMENT.getCode())) {
             // 当前订单项，完全入库 + 完全付款 -> 关闭订单项
-            purchaseOrderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, new SrmOrderItemOffDTO().setItemId(orderItemDO.getId()));
+            purchaseOrderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, new SrmOrderItemOffContext().setItemId(orderItemDO.getId()));
         }
     }
 }

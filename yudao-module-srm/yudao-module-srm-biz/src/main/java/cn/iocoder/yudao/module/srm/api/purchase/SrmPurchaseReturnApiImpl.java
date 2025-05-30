@@ -6,7 +6,7 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnItemDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveItemReqDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveReqDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.outItem.SrmPurchaseOutItemCountDTO;
+import cn.iocoder.yudao.module.srm.config.machine.outItem.SrmPurchaseOutItemCountContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
@@ -38,7 +38,7 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
     @Lazy
     private SrmPurchaseReturnService purchaseReturnService;
     @Resource(name = PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountDTO> srmOutboundStateMachine;
+    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountContext> srmOutboundStateMachine;
 
     @Override
     public List<SrmPurchaseReturnDTO> getPurchaseReturnList(List<Long> ids) {
@@ -129,7 +129,7 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
 
         //消费
         reqDTO.getItems().forEach(item -> {
-            SrmPurchaseOutItemCountDTO build = SrmPurchaseOutItemCountDTO.builder()
+            SrmPurchaseOutItemCountContext build = SrmPurchaseOutItemCountContext.builder()
                 .outItemId(item.getUpstreamItemId())
                 .outCount(BigDecimal.valueOf(item.getActualQty()))
                 .build();

@@ -16,8 +16,8 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.SrmOrderInCountDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPurchaseInCountDTO;
+import cn.iocoder.yudao.module.srm.config.machine.SrmOrderInCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.in.SrmPurchaseInCountContext;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurchaseInPayReqVO;
@@ -101,11 +101,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Resource(name = PURCHASE_IN_ITEM_PAYMENT_STATE_MACHINE)
     private StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> itemPaymentMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
-    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountDTO> orderItemStorageMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountContext> orderItemStorageMachine;
     @Resource(name = PURCHASE_IN_AUDIT_STATE_MACHINE)
     private StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseInAuditReqVO> purchaseInAuditStateMachine;
     @Resource(name = PURCHASE_IN_STORAGE_STATE_MACHINE)
-    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> purchaseInStorageMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountContext> purchaseInStorageMachine;
     @Autowired
     private FmsCompanyApi fmsCompanyApi;
 
@@ -235,7 +235,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         auditMachine.fireEvent(SrmAuditStatus.DRAFT, SrmEventEnum.AUDIT_INIT, SrmPurchaseInAuditReqVO.builder().inId(purchaseIn.getId()).build());
         paymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, purchaseIn);
         //主表初始化入库状态
-        purchaseInStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmPurchaseInCountDTO.builder().inId(purchaseIn.getId()).build());
+        purchaseInStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmPurchaseInCountContext.builder().inId(purchaseIn.getId()).build());
     }
 
     private void rollbackSlaveStatus(List<SrmPurchaseInItemDO> diffList) {
@@ -245,7 +245,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInStatus()),
                         SrmEventEnum.STOCK_ADJUSTMENT,
                         //取反数量
-                        SrmOrderInCountDTO.builder().orderItemId(orderItemId).inCount(inItemDO.getQty().negate()).build());
+                    SrmOrderInCountContext.builder().orderItemId(orderItemId).inCount(inItemDO.getQty().negate()).build());
             });
         }
     }
@@ -521,7 +521,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 //更新订单项入库数量+状态 入库状态机,创建入库单->增加入库数量
                 orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInStatus())
                         , SrmEventEnum.STOCK_ADJUSTMENT
-                        , SrmOrderInCountDTO.builder().orderItemId(orderItemId).inCount(purchaseInItem.getQty()).build()); //正数
+                    , SrmOrderInCountContext.builder().orderItemId(orderItemId).inCount(purchaseInItem.getQty()).build()); //正数
             });
         }
     }

@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.srm.config.purchase.in.impl.action;
 
 import cn.iocoder.yudao.framework.cola.statemachine.Action;
-import cn.iocoder.yudao.module.srm.api.purchase.machine.in.SrmPurchaseInCountDTO;
+import cn.iocoder.yudao.module.srm.config.machine.in.SrmPurchaseInCountContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInItemMapper;
@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountDTO> {
+public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountContext> {
 
     @Autowired
     private SrmPurchaseInMapper srmPurchaseInMapper;
@@ -26,7 +26,7 @@ public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnu
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmPurchaseInCountDTO context) {
+    public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmPurchaseInCountContext context) {
         // 1. 获取入库单信息
         SrmPurchaseInDO purchaseIn = srmPurchaseInMapper.selectById(context.getInId());
         if (purchaseIn == null) {
@@ -36,7 +36,6 @@ public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnu
         if (event == SrmEventEnum.STORAGE_INIT) {
             //初始化 to就够了
         }
-        ;
         if (event == SrmEventEnum.STOCK_ADJUSTMENT) {
             // 2. 获取所有入库项
             List<SrmPurchaseInItemDO> items = srmPurchaseInItemMapper.selectListByInId(context.getInId());
