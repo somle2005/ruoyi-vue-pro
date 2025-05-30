@@ -8,6 +8,7 @@ import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseQueryDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.*;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
@@ -23,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -153,5 +155,13 @@ public class WmsStockWarehouseController {
         });
         // 导出 Excel
         ExcelUtils.write(response, "仓库库存.xls", "数据", WmsStockWarehouseExcelVO.class, excelVOList);
+    }
+
+    @PostMapping("/select-sellable-qty")
+    @Operation(summary = "查询可售库存")
+//    @PreAuthorize("@ss.hasPermission('wms:inbound:query')")
+    public CommonResult<Map<Long, List<WmsStockWarehouseDO>>> selectSellableQty(@RequestBody WmsWarehouseQueryDTO wmsWarehouseQueryDTO) {
+        Map<Long, List<WmsStockWarehouseDO>> rtnMap = stockWarehouseService.selectSellableQty(wmsWarehouseQueryDTO);
+        return success(rtnMap);
     }
 }
