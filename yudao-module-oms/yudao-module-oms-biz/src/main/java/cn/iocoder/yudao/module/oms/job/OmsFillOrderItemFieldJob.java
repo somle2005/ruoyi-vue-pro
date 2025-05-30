@@ -4,8 +4,7 @@ import cn.hutool.core.map.MapUtil;
 import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.quartz.core.handler.JobHandler;
-import cn.iocoder.yudao.framework.tenant.core.context.TenantContextHolder;
-import cn.iocoder.yudao.module.oms.api.enums.OmsTenantId;
+import cn.iocoder.yudao.framework.tenant.core.job.TenantJob;
 import cn.iocoder.yudao.module.oms.api.enums.order.OrderStatusEnum;
 import cn.iocoder.yudao.module.oms.dal.dataobject.OmsOrderDO;
 import cn.iocoder.yudao.module.oms.dal.dataobject.OmsOrderItemDO;
@@ -40,11 +39,9 @@ public class OmsFillOrderItemFieldJob implements JobHandler {
     @Resource
     private OmsOrderItemService omsOrderItemService;
 
+    @TenantJob
     @Override
     public String execute(String param) {
-        // 设置租户为默认租户
-        TenantContextHolder.setTenantId(OmsTenantId.DEFAULT.getId());
-
         //找出该平台下所有的店铺
         Map<String, OmsShopDO> omsShopMap = omsShopService.getByPlatformCode(param)
             .stream().collect(Collectors.toMap(OmsShopDO::getExternalId, Function.identity()));
