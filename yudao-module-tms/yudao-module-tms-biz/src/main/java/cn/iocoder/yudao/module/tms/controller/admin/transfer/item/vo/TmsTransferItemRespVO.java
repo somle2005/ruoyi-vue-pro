@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo;
 
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsCompanyRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsDeptRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -81,4 +82,9 @@ public class TmsTransferItemRespVO {
     @ExcelProperty("已入库数")
     private Integer inboundClosedQty;
 
+    @Schema(description = "库存归属部门ID")
+    private Long deptId;
+
+    @Schema(description = "库存归属部门")
+    private TmsDeptRespVO dept;
 }

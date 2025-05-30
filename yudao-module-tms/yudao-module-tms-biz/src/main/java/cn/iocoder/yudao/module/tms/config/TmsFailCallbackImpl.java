@@ -18,14 +18,15 @@ public class TmsFailCallbackImpl<C> implements FailCallback<TmsStatusValue, TmsE
 
     @Override
     public void onFail(TmsStatusValue sourceState, TmsStatusValue targetState, TmsEventEnum event, C context) {
-        String sourceDesc = sourceState.toString();
+//        String sourceDesc = sourceState.toString();//失效
+        String sourceDesc = sourceState.getDesc();
         String eventDesc = event.getDesc();
 
         String contextName = (context == null) ? "null" : context.getClass().getSimpleName();
 
         log.warn("【TMS状态机】{} 在状态 [{}] 下无法触发事件 [{}]，上下文类型 [{}]", null, sourceDesc, eventDesc, contextName);
 
-        throw ServiceExceptionUtil.exception(FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR, null, sourceDesc, eventDesc);
+        throw ServiceExceptionUtil.exception(FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR, sourceDesc, eventDesc);
     }
 
 }

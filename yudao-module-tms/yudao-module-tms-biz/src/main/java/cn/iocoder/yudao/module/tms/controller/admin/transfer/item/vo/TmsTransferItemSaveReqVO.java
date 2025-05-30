@@ -32,4 +32,6 @@ public class TmsTransferItemSaveReqVO {
     @Schema(description = "备注")
     private String remark;
 
+    @Schema(description = "库存归属部门ID")
+    private Long deptId;
 }

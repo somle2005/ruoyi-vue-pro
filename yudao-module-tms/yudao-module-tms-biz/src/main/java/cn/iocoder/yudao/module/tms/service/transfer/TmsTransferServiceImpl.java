@@ -10,9 +10,12 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.system.api.dept.DeptApi;
+import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsTransferStatusUpdateDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsCompanyRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsDeptRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsWarehourseRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransferItemRespVO;
@@ -74,6 +77,8 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     private final WmsOutboundApi wmsOutboundApi;
     @Resource(name = TRANSFER_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsTransferAuditReqVO> transferAuditStateMachine;
+    @Autowired
+    private DeptApi deptApi;
 
     @Override
     @Transactional(rollbackFor = Exception.class)
@@ -271,6 +276,11 @@ public class TmsTransferServiceImpl implements TmsTransferService {
         StreamX.from(transferList).assemble(warehouseMap, TmsTransferRespVO::getToWarehouseId, TmsTransferRespVO::setToWarehouse);
     }
 
+    private void assembleDept(List<TmsTransferItemRespVO> allItems) {
+        Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(StreamX.from(allItems).map(TmsTransferItemRespVO::getDeptId).toList());
+        StreamX.from(allItems).assemble(deptDTOMap, TmsTransferItemRespVO::getDeptId, (tmsTransferItemRespVO, deptRespDTO) -> tmsTransferItemRespVO.setDept(BeanUtils.toBean(deptRespDTO, TmsDeptRespVO.class)));
+    }
+
     /**
      * 装配调拨单VO的关联数据
      *
@@ -295,9 +305,11 @@ public class TmsTransferServiceImpl implements TmsTransferService {
         assembleProducts(allItems);
         assembleCompany(allItems);
         assembleWarehouse(respVOList);
+        assembleDept(allItems);
 
         return respVOList;
     }
+
 
     @Override
     public PageResult<TmsTransferBO> getTransferBOPage(TmsTransferPageReqVO pageReqVO) {

@@ -59,4 +59,6 @@ public class TmsTransferItemPageReqVO extends PageParam {
     @Schema(description = "已入库数")
     private Integer inboundClosedQty;
 
+    @Schema(description = "库存归属部门ID")
+    private Long deptId;
 }
