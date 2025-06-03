@@ -9,10 +9,7 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
-import com.somle.esb.convert.KingdeePurInboundConvert;
-import com.somle.esb.convert.KingdeePurOrderConvert;
-import com.somle.esb.convert.KingdeePurReturnConvert;
-import com.somle.esb.convert.KingdeeSupplierConvert;
+import com.somle.esb.converter.ErpToKingdeeConverter;
 import com.somle.kingdee.model.KingdeePurInboundSaveReqVO;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
 import com.somle.kingdee.model.KingdeePurReturnSaveReqVO;
@@ -41,6 +38,7 @@ public class SrmHandler {
     private final SrmPurchaseOrderApi srmPurchaseOrderApi;
     private final SrmPurchaseInApi srmPurchaseInApi;
     private final SrmPurchaseReturnApi srmPurchaseReturnApi;
+    private final ErpToKingdeeConverter erpToKingdeeConverter;
 
     //消费供应商
     @ServiceActivator(inputChannel = SrmChannelEnum.SUPPLIER)
@@ -55,7 +53,7 @@ public class SrmHandler {
             }
 
             // 转换为金蝶供应商
-            List<KingdeeSupplier> kingdeeSuppliers = KingdeeSupplierConvert.INSTANCE.convertList(suppliers);
+            List<KingdeeSupplier> kingdeeSuppliers = erpToKingdeeConverter.convertSupplierDTOList(suppliers);
             // 同步到金蝶
             int total = kingdeeSuppliers.size();
             for (int i = 0; i < total; i++) {
@@ -83,7 +81,7 @@ public class SrmHandler {
             }
 
             // 转换为金蝶采购订单
-            List<KingdeePurOrderSaveReqVO> kingdeeOrders = KingdeePurOrderConvert.INSTANCE.convertList(orders);
+            List<KingdeePurOrderSaveReqVO> kingdeeOrders = erpToKingdeeConverter.convertOrderDTOList(orders);
             // 同步到金蝶
             int total = kingdeeOrders.size();
             for (int i = 0; i < total; i++) {
@@ -111,7 +109,7 @@ public class SrmHandler {
             }
 
             // 转换为金蝶采购入库单
-            List<KingdeePurInboundSaveReqVO> kingdeeInOrders = KingdeePurInboundConvert.INSTANCE.convertList(inOrders);
+            List<KingdeePurInboundSaveReqVO> kingdeeInOrders = erpToKingdeeConverter.convertInDTOList(inOrders);
             // 同步到金蝶
             int total = kingdeeInOrders.size();
             for (int i = 0; i < total; i++) {
@@ -139,7 +137,7 @@ public class SrmHandler {
             }
 
             // 转换为金蝶采购退货单
-            List<KingdeePurReturnSaveReqVO> kingdeeReturnOrders = KingdeePurReturnConvert.INSTANCE.convertList(returnOrders);
+            List<KingdeePurReturnSaveReqVO> kingdeeReturnOrders = erpToKingdeeConverter.convertReturnDTOList(returnOrders);
             // 同步到金蝶
             int total = kingdeeReturnOrders.size();
             for (int i = 0; i < total; i++) {
