@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.wms.dal.mysql.inbound.item;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemListForTmsReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsPickupPendingPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
@@ -61,12 +62,12 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.betweenIfPresent(WmsInboundItemDO::getCreateTime, reqVO.getCreateTime());
 
         // 范围查询
-        wrapper.eqIfPresent(WmsInboundItemDO::getInboundCompanyId, reqVO.getInboundCompanyId());
-        wrapper.eqIfPresent(WmsInboundItemDO::getInboundDeptId, reqVO.getInboundDeptId());
+        wrapper.eqIfPresent(WmsInboundItemDO::getCompanyId, reqVO.getInboundCompanyId());
+        wrapper.eqIfPresent(WmsInboundItemDO::getDeptId, reqVO.getInboundDeptId());
         wrapper.betweenIfPresent(WmsInboundItemDO::getActualQty,reqVO.getActualQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getOutboundAvailableQty,reqVO.getOutboundAvailableQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getPlanQty,reqVO.getPlanQty());
-        wrapper.betweenIfPresent(WmsInboundItemDO::getShelvedQty,reqVO.getShelvedQty());
+        wrapper.betweenIfPresent(WmsInboundItemDO::getShelveClosedQty, reqVO.getShelvedQty());
 
         wrapper.betweenIfPresent(AGE_COL, reqVO.getAge());
 
@@ -92,7 +93,7 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         query.eqIfPresent(WmsInboundItemDO::getProductId, reqVO.getProductId());
         // 已入库或部分入库
         query.in(WmsInboundItemDO::getInboundStatus, WmsInboundStatus.ALL.getValue(), WmsInboundStatus.PART.getValue());
-        query.gt(WmsInboundItemDO::getActualQty, WmsInboundItemDO::getShelvedQty)
+        query.gt(WmsInboundItemDO::getActualQty, WmsInboundItemDO::getShelveClosedQty)
             .innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId).likeIfExists(WmsInboundDO::getCode, reqVO.getInboundCode())
             .orderByDesc(WmsInboundItemDO::getId);
         // 按仓库ID查询
@@ -104,4 +105,14 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         return selectPage(reqVO, query);
     }
 
+    default List<WmsInboundItemQueryDO> getInboundItemListForTms(WmsInboundItemListForTmsReqVO listForTmsReqVO) {
+//        List<>
+        MPJLambdaWrapperX<WmsInboundItemQueryDO> wrapper = new MPJLambdaWrapperX<>();
+        wrapper.eq(WmsInboundItemDO::getCompanyId, listForTmsReqVO.getCompanyId());
+        wrapper.selectAll(WmsInboundItemDO.class);
+        wrapper.select(WmsInboundDO::getWarehouseId);
+        wrapper.leftJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId)
+            .eq(WmsInboundDO::getWarehouseId, listForTmsReqVO.getWarehouseId());
+        return selectList(wrapper);
+    }
 }

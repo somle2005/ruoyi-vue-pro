@@ -156,9 +156,18 @@ public interface WmsInboundService {
     Map<Long, WmsInboundItemOwnershipDO> getInboundItemOwnershipMap(Long warehouseId, List<Long> productIds, boolean olderFirst);
 
     /**
+     * 按入库顺序获得入库批次列表
+     *
+     * @param warehouseId 仓库编号
+     * @param productId   产品编号
+     * @param olderFirst  是否按入库时间升序
+     */
+    List<WmsInboundItemOwnershipDO> getInboundItemOwnershipList(Long warehouseId, Long productId, boolean olderFirst);
+
+    /**
      * 创建盘点入库单
      */
-    WmsInboundDO createForInventory(WmsInboundSaveReqVO inboundSaveReqVO);
+    WmsInboundDO createForStockCheck(WmsInboundSaveReqVO inboundSaveReqVO);
 
     /**
      * 更新上架状态
@@ -166,7 +175,7 @@ public interface WmsInboundService {
     void updateShelvingStatus(Set<Long> set);
 
 
-    List<WmsInboundDO> getInboundList(Integer upstreamBillType, Long upstreamBillId);
+    List<WmsInboundDO> getInboundList(Integer upstreamType, Long upstreamId);
     /**
      * 创建调拨入库单
      */

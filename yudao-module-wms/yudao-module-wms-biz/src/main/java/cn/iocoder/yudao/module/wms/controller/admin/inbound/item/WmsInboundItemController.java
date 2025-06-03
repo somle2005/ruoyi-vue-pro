@@ -38,8 +38,8 @@ import java.util.Map;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
-import static cn.iocoder.yudao.module.system.enums.somle.BillType.WMS_INBOUND;
-import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.INBOUND_ITEM_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.INBOUND_ITEM_PRODUCT_NOT_EXISTS;
 
 @Tag(name = "入库单详情")
 @RestController
@@ -187,6 +187,31 @@ public class WmsInboundItemController {
         return success(voListResult);
     }
 
+    @PostMapping("tms/list")
+    @Operation(summary = "常规批次库存列表查询")
+//    @PreAuthorize("@ss.hasPermission('wms:inbound-item:query')")
+    public CommonResult<List<WmsInboundItemRespVO>> getInboundItemListForTms(@Valid @RequestBody WmsInboundItemListForTmsReqVO listForTmsReqVO) {
+        // 查询数据
+        List<WmsInboundItemQueryDO> doListResult = inboundItemService.getInboundItemListForTms(listForTmsReqVO);
+        // 转换
+        List<WmsInboundItemRespVO> voListResult = BeanUtils.toBean(doListResult, WmsInboundItemRespVO.class);
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(voListResult)
+            .mapping(WmsInboundItemRespVO::getCreator, WmsInboundItemRespVO::setCreatorName)
+            .mapping(WmsInboundItemRespVO::getUpdater, WmsInboundItemRespVO::setUpdaterName)
+            .fill();
+        // 装配
+//        inboundItemService.assembleDept(voListResult);
+//        inboundItemService.assembleInbound(voListResult);
+//        inboundItemService.assembleProducts(voListResult);
+//        inboundItemService.assembleWarehouse(voListResult);
+//        inboundItemService.assembleStockType(voListResult);
+//        inboundItemService.assembleCompany(voListResult);
+        inboundItemService.assembleStockWarehouse(voListResult);
+        InboundExecutor.setShelveAvailableQty(voListResult);
+        // 返回
+        return success(voListResult);
+    }
 
     /**
      * @sign : 83456B9A2BFF8F84
@@ -246,7 +271,7 @@ public class WmsInboundItemController {
             inboundItemBinVO.setStockTypeLabel(stockType.getLabel());
 
             if(itemRespVO.getInboundCompany()!=null) {
-                inboundItemBinVO.setCompanyName(itemRespVO.getInboundCompany().getName());
+                inboundItemBinVO.setAddressLine3(itemRespVO.getInboundCompany().getName());
             }
 
             if(itemRespVO.getInboundDept()!=null) {
