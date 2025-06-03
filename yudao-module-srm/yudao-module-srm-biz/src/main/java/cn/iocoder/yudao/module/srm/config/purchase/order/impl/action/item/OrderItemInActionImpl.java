@@ -148,7 +148,11 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             log.warn("未找到对应的采购订单,订单ID={}", oldData.getOrderId());
             return;
         }
-        orderStorageStateMachine.fireEvent(SrmStorageStatus.fromCode(orderDO.getInStatus()), event, orderDO);
+        if (event == SrmEventEnum.STORAGE_INIT) {
+            log.debug("采购项订单入库状态初始化");
+            return;
+        }
+        orderStorageStateMachine.fireEvent(SrmStorageStatus.fromCode(orderDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT, orderDO);
     }
 
     private void checkStatusAndClose(Long orderItemId) {
