@@ -9,13 +9,15 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
  * @table-fields : tenant_id,creator,company_id,outbound_pending_qty,create_time,available_qty,updater,update_time,product_id,shelving_pending_qty,id,dept_id,warehouse_id
  */
-@Schema(description = "管理后台 - 所有者库存 Response VO")
+@Schema(description = "管理后台 - 逻辑库存 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class WmsStockOwnershipRespVO {

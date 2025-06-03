@@ -29,9 +29,9 @@ public interface WmsOutboundMapper extends BaseMapperX<WmsOutboundDO> {
 				.eqIfPresent(WmsOutboundDO::getType, reqVO.getType())
 				.eqIfPresent(WmsOutboundDO::getOutboundStatus, reqVO.getOutboundStatus())
 				.eqIfPresent(WmsOutboundDO::getAuditStatus, reqVO.getAuditStatus())
-				.eqIfPresent(WmsOutboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
-				.eqIfPresent(WmsOutboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
-				.eqIfPresent(WmsOutboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
+            .eqIfPresent(WmsOutboundDO::getUpstreamId, reqVO.getUpstreamId())
+            .eqIfPresent(WmsOutboundDO::getUpstreamCode, reqVO.getUpstreamCode())
+            .eqIfPresent(WmsOutboundDO::getUpstreamType, reqVO.getUpstreamType())
 				.eqIfPresent(WmsOutboundDO::getRemark, reqVO.getRemark())
                 .eqIfPresent(WmsOutboundDO::getCompanyId, reqVO.getCompanyId())
 				.betweenIfPresent(WmsOutboundDO::getCreateTime, reqVO.getCreateTime())
@@ -79,10 +79,10 @@ public interface WmsOutboundMapper extends BaseMapperX<WmsOutboundDO> {
         return selectOne(wrapper);
     }
 
-    default List<WmsOutboundDO> getOutboundList(Integer billType, Long upstreamBillId){
+    default List<WmsOutboundDO> getOutboundList(Integer billType, Long upstreamId) {
         LambdaQueryWrapperX<WmsOutboundDO> wrapper = new LambdaQueryWrapperX<>();
-        wrapper.eq(WmsOutboundDO::getUpstreamBillId, upstreamBillId);
-        wrapper.eq(WmsOutboundDO::getUpstreamBillType, billType);
+        wrapper.eq(WmsOutboundDO::getUpstreamId, upstreamId);
+        wrapper.eq(WmsOutboundDO::getUpstreamType, billType);
         return selectList(wrapper);
     }
 }

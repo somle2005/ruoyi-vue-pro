@@ -19,7 +19,7 @@ public class BaseExchangeTransitionHandler extends ApprovalHistoryTransitionHand
 
     @Resource
     @Lazy
-    protected WmsExchangeService inventoryService;
+    protected WmsExchangeService stockCheckService;
 
     /**
      * 变更状态
@@ -29,7 +29,7 @@ public class BaseExchangeTransitionHandler extends ApprovalHistoryTransitionHand
         super.perform(from, to, event, context);
         WmsExchangeDO inboundDO = context.data();
         inboundDO.setAuditStatus(to);
-        inventoryService.updateExchangeAuditStatus(inboundDO.getId(),to);
+        stockCheckService.updateExchangeAuditStatus(inboundDO.getId(), to);
     }
 
 }

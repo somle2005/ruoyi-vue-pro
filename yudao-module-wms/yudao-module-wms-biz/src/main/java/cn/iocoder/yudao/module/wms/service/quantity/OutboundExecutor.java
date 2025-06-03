@@ -1,7 +1,6 @@
 package cn.iocoder.yudao.module.wms.service.quantity;
 
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
-import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemOwnershipDO;
@@ -9,17 +8,20 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundIt
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
+import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemOwnershipQueryMapper;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
+import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.quantity.context.OutboundContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -35,6 +37,13 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
 
     @Resource
     protected WmsOutboundService outboundService;
+
+    @Resource
+    protected WmsInboundItemOwnershipQueryMapper inboundItemOwnershipQueryMapper;
+
+    @Resource
+    @Lazy
+    private WmsInboundService inboundService;
 
     @Resource
     protected WmsInboundItemService inboundItemService;
@@ -89,20 +98,36 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
                 deptId=outboundRespVO.getDeptId();
             }
 
+
             // 如果未指定归属，则按入库批次的先进先出进行处理
             if (deptId == null || companyId == null) {
-                WmsInboundItemOwnershipDO inboundItemOwnership = inboundService.getInboundItemOwnership(warehouseId, productId, true);
-                if(inboundItemOwnership==null) {
+                List<Long> deptIds = new ArrayList<>();
+                List<Long> companyIds = new ArrayList<>();
+                //todo 获取批次列表，然后根据可售数量判断取多个批次的库存
+                List<WmsInboundItemOwnershipDO> inboundItemOwnershipList = inboundService.getInboundItemOwnershipList(warehouseId, productId, true);
+                if (inboundItemOwnershipList == null) {
                     throw exception(STOCK_OWNERSHIP_NOT_EXISTS);
                 }
-                deptId = inboundItemOwnership.getInboundDeptId();
-                companyId = inboundItemOwnership.getInboundCompanyId();
-            }
-            // 抛出异常
-            if (deptId == null || companyId == null) {
-                throw exception(STOCK_OWNERSHIP_NOT_EXISTS);
-            }
+                int totalQty = 0;
 
+                for (WmsInboundItemOwnershipDO inboundItemOwnership : inboundItemOwnershipList) {
+                    deptIds.add(inboundItemOwnership.getInboundDeptId());
+                    companyIds.add(inboundItemOwnership.getInboundCompanyId());
+                    if (inboundItemOwnership.getSellableQty() >= item.getActualQty()) {
+                        break;
+                    } else {
+                        totalQty = totalQty - inboundItemOwnership.getSellableQty();
+                    }
+                }
+
+            }
+            /**
+             for(Long deptIdItem : item.getDeptIds()) {
+             if(!item.getDeptId().equals(deptIdItem)) {
+             throw exception(DEPT_ID_NOT_MATCH);
+             }
+             }
+             */
 
             // 执行出库的原子操作
             Integer quantity= getExecuteQty(item);

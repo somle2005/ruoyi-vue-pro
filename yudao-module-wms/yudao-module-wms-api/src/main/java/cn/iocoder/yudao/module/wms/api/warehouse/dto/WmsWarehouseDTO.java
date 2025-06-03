@@ -32,9 +32,9 @@ public class WmsWarehouseDTO {
     private Long externalStorageId;
 
     /**
-     * 公司名称
+     * 详细地址3
      */
-    private String companyName;
+    private String addressLine3;
 
     /**
      * 国家

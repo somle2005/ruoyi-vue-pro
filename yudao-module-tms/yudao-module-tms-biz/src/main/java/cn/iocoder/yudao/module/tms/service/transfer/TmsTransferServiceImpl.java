@@ -418,9 +418,9 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     private WmsOutboundImportReqDTO buildOutboundBaseInfo(TmsTransferBO transferBO) {
         WmsOutboundImportReqDTO importReqDTO = new WmsOutboundImportReqDTO();
         importReqDTO.setType(WmsOutboundType.TRANSFER.getValue()); // 调拨出库
-        importReqDTO.setUpstreamBillId(transferBO.getId()); // 来源单据ID
-        importReqDTO.setUpstreamBillCode(transferBO.getCode()); // 来源单据号
-        importReqDTO.setUpstreamBillType(BillType.TMS_TRANSFER.getValue()); // 来源单据类型
+        importReqDTO.setUpstreamId(transferBO.getId()); // 来源单据ID
+        importReqDTO.setUpstreamCode(transferBO.getCode()); // 来源单据编码
+        importReqDTO.setUpstreamType(BillType.TMS_TRANSFER.getValue()); // 来源单据类型
         importReqDTO.setRemark(transferBO.getRemark()); // 备注
         importReqDTO.setOutboundTime(transferBO.getOutboundTime()); // 出库时间
         importReqDTO.setWarehouseId(transferBO.getFromWarehouseId()); //起始仓
@@ -440,7 +440,7 @@ public class TmsTransferServiceImpl implements TmsTransferService {
             itemDTO.setPlanQty(item.getQty()); // 计划出库量
             itemDTO.setActualQty(item.getQty()); // 实际出库量
             itemDTO.setRemark(item.getRemark()); // 备注
-            itemDTO.setUpstreamItemId(item.getId()); // 来源详情ID
+            itemDTO.setUpstreamId(item.getId()); // 来源明细行ID
             itemDTO.setCompanyId(item.getStockCompanyId()); // 设置库存公司ID
             itemDTO.setDeptId(item.getDeptId()); //库存归属部门ID(哪个部门出库SKU)
             return itemDTO;

@@ -32,11 +32,11 @@ public interface WmsInboundApi {
     /**
      * 按 上游单据类型 和 上游单据ID 查询入库单
      *
-     * @param upstreamBillType 入库单类型
-     * @param upstreamBillId 上游单号
+     * @param upstreamType 入库单类型
+     * @param upstreamId 上游单号
      * @return WmsInboundDTO
      */
-    List<WmsInboundDTO> getInboundList(Integer upstreamBillType, Long upstreamBillId);
+    List<WmsInboundDTO> getInboundList(Integer upstreamType, Long upstreamId);
 
 
     /**

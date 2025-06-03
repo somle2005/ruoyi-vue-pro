@@ -120,17 +120,17 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
     @Override
     public void updatePurchaseReturnItemQty(@Validated SrmReturnSaveReqDTO reqDTO) {
         //校验
-        if (!Objects.equals(reqDTO.getUpstreamBillType(), BillType.SRM_PURCHASE_RETURN.getValue())) {
-            throw new IllegalArgumentException(StrUtil.format("出库单审核回调SrmOutboundReqDTO，上游类型({})不是退货单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamBillType())).getLabel()));
+        if (!Objects.equals(reqDTO.getUpstreamType(), BillType.SRM_PURCHASE_RETURN.getValue())) {
+            throw new IllegalArgumentException(StrUtil.format("出库单审核回调SrmOutboundReqDTO，上游类型({})不是退货单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamType())).getLabel()));
         }
         //校验item存在
-        List<Long> itemIds = reqDTO.getItems().stream().map(SrmReturnSaveItemReqDTO::getUpstreamItemId).collect(Collectors.toList());
+        List<Long> itemIds = reqDTO.getItems().stream().map(SrmReturnSaveItemReqDTO::getUpstreamId).collect(Collectors.toList());
         List<SrmPurchaseReturnItemDO> items = purchaseReturnService.validatePurchaseReturnItemExists(itemIds);
 
         //消费
         reqDTO.getItems().forEach(item -> {
             SrmPurchaseOutItemCountContext build = SrmPurchaseOutItemCountContext.builder()
-                .outItemId(item.getUpstreamItemId())
+                .outItemId(item.getUpstreamId())
                 .outCount(BigDecimal.valueOf(item.getActualQty()))
                 .build();
             srmOutboundStateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.STOCK_ADJUSTMENT, build);

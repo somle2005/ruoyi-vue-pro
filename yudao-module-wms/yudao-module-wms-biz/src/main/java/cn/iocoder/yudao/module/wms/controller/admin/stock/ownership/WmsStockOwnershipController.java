@@ -22,19 +22,16 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "所有者库存")
+@Tag(name = "逻辑库存")
 @RestController
 @RequestMapping("/wms/stock-ownership")
 @Validated
@@ -154,6 +151,6 @@ public class WmsStockOwnershipController {
             }
         }
         // 导出 Excel
-        ExcelUtils.write(response, "所有者库存.xls", "数据", WmsStockOwnershipExcelVO.class, xlsList);
+        ExcelUtils.write(response, "逻辑库存.xls", "数据", WmsStockOwnershipExcelVO.class, xlsList);
     }
-}
+}

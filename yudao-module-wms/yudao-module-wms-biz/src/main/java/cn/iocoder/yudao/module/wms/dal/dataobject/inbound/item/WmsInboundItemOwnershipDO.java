@@ -3,11 +3,7 @@ package cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 import java.time.LocalDateTime;
 
@@ -24,6 +20,11 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WmsInboundItemOwnershipDO extends BaseDO {
+
+    /**
+     * 主键ID
+     */
+    private Long id;
 
     /**
      * 仓库ID
@@ -54,6 +55,16 @@ public class WmsInboundItemOwnershipDO extends BaseDO {
      * 主单部门ID
      */
     private Long inboundDeptId;
+
+    /**
+     * 库位ID
+     */
+    private Long binId;
+
+    /**
+     * 可售量，未被单据占用的良品数量
+     */
+    private Integer sellableQty;
 
 
 

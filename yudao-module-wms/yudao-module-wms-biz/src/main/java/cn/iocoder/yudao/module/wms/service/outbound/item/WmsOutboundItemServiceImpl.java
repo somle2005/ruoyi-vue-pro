@@ -21,6 +21,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehous
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.item.WmsOutboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
+import cn.iocoder.yudao.module.wms.dal.mysql.outbound.WmsOutboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.item.WmsOutboundItemMapper;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
@@ -48,6 +49,9 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
 
     @Resource
     private WmsOutboundItemMapper outboundItemMapper;
+
+    @Resource
+    private WmsOutboundMapper outboundMapper;
 
     @Resource
     @Lazy
@@ -150,7 +154,9 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
         StreamX.from(itemList).assemble(productVOMap, WmsOutboundItemRespVO::getProductId, WmsOutboundItemRespVO::setProduct);
     }
 
+    //同意出库操作
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updateActualQuantity(List<WmsOutboundItemSaveReqVO> updateReqVOList) {
         if (CollectionUtils.isEmpty(updateReqVOList)) {
             return;
@@ -163,8 +169,8 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
         WmsOutboundDO outboundDO = outboundService.validateOutboundExists(outboundId);
         WmsOutboundAuditStatus auditStatus = WmsOutboundAuditStatus.parse(outboundDO.getAuditStatus());
         WmsOutboundStatus wmsOutboundStatus = WmsOutboundStatus.parse(outboundDO.getOutboundStatus());
-        // 审批通过后，设置实际出库量
-        if (!auditStatus.matchAny(WmsOutboundAuditStatus.PASS)) {
+//         审批通过后，设置实际出库量
+        if (!auditStatus.matchAny(WmsOutboundAuditStatus.FINISHED)) {
             throw exception(OUTBOUND_CAN_NOT_EDIT);
         }
         // 除了未入库的情况，其它情况不允许修改实际入库量
@@ -173,7 +179,8 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
         }
         // 校验数量
         Map<Long, WmsOutboundItemSaveReqVO> updateReqVOMap = StreamX.from(updateReqVOList).toMap(WmsOutboundItemSaveReqVO::getId);
-        List<WmsOutboundItemDO> outboundItemDOSInDB = outboundItemMapper.selectByIds(StreamX.from(updateReqVOList).toList(WmsOutboundItemSaveReqVO::getId));
+//        List<WmsOutboundItemDO> outboundItemDOSInDB2 = outboundItemMapper.selectByIds(StreamX.from(updateReqVOList).toList(WmsOutboundItemSaveReqVO::getId));
+        List<WmsOutboundItemDO> outboundItemDOSInDB = BeanUtils.toBean(updateReqVOList, WmsOutboundItemDO.class);
         for (WmsOutboundItemDO itemDO : outboundItemDOSInDB) {
             WmsOutboundItemSaveReqVO updateReqVO = updateReqVOMap.get(itemDO.getId());
             if (updateReqVO.getActualQty() == null || updateReqVO.getActualQty() <= 0) {
@@ -181,13 +188,17 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
             }
             itemDO.setActualQty(updateReqVO.getActualQty());
         }
-        // 保存
+        //改为【已出库】
+        outboundDO.setOutboundStatus(WmsOutboundStatus.ALL.getValue());
+        outboundMapper.updateById(outboundDO);
+        outboundItemDOSInDB.forEach(outboundItemDO -> outboundItemDO.setOutboundStatus(WmsOutboundStatus.ALL.getValue()));
         outboundItemMapper.updateBatch(outboundItemDOSInDB);
     }
 
     /**
      * 按 ID 集合查询 WmsOutboundItemDO
      */
+    @Override
     public List<WmsOutboundItemDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();

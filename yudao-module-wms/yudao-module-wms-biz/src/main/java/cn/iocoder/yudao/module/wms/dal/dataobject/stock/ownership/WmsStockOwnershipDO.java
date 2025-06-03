@@ -1,14 +1,13 @@
 package cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership;
 
-import lombok.*;
-import java.util.*;
-import java.time.LocalDateTime;
-import java.time.LocalDateTime;
-import com.baomidou.mybatisplus.annotation.*;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.*;
 
 /**
- * 所有者库存 DO
+ * 逻辑库存 DO
  * @author 李方捷
  * @table-fields : company_id,outbound_pending_qty,product_id,shelving_pending_qty,available_qty,id,dept_id,warehouse_id
  */
@@ -62,5 +61,5 @@ public class WmsStockOwnershipDO extends BaseDO {
     /**
      * 待上架数量，上架是指从拣货区上架到货架
      */
-    private Integer shelvingPendingQty;
+    private Integer shelvePendingQty;
 }

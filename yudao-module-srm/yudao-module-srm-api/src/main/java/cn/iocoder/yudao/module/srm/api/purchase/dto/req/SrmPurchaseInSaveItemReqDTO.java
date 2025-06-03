@@ -21,5 +21,5 @@ public class SrmPurchaseInSaveItemReqDTO {
 
 
     @NotNull(message = "明细上游ID不能为空")
-    private Long upstreamItemId;
+    private Long upstreamId;
 }

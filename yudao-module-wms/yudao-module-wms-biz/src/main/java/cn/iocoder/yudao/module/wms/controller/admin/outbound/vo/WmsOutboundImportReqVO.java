@@ -18,7 +18,7 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : code,company_id,remark,audit_status,outbound_time,type,upstream_bill_type,latest_outbound_action_id,outbound_status,upstream_bill_id,id,upstream_bill_code,dept_id,warehouse_id
+ * @table-fields : code,company_id,remark,audit_status,outbound_time,type,upstream_type,latest_outbound_action_id,outbound_status,upstream_id,id,upstream_code,dept_id,warehouse_id
  */
 @Schema(description = "管理后台 - 出库单新增/修改 Request VO")
 @Data
@@ -65,14 +65,14 @@ public class WmsOutboundImportReqVO {
 
     @Schema(description = "来源单据ID", example = "")
     @NotNull(message = "来源单据ID不能为空")
-    private Long upstreamBillId;
+    private Long upstreamId;
 
-    @Schema(description = "来源单据号", example = "")
-    private String upstreamBillCode;
+    @Schema(description = "来源单据编码", example = "")
+    private String upstreamCode;
 
     @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
     @InEnum(BillType.class)
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 
     @Schema(description = "仓库ID", example = "")
     private Long warehouseId;

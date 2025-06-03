@@ -41,7 +41,7 @@ public class WmsInboundItemFlowServiceImpl implements WmsInboundItemFlowService 
      */
     @Override
     public WmsInboundItemFlowDO createInboundItemFlow(WmsInboundItemFlowSaveReqVO createReqVO) {
-        // 按 wms_inbound_item_flow.inbound_id -> wms_inbound.id 的引用关系，校验存在性
+        // 按 wms_inbound_flow.inbound_id -> wms_inbound.id 的引用关系，校验存在性
         if (createReqVO.getInboundId() != null) {
             WmsInboundDO inbound = inboundService.getInbound(createReqVO.getInboundId());
             if (inbound == null) {
@@ -62,7 +62,7 @@ public class WmsInboundItemFlowServiceImpl implements WmsInboundItemFlowService 
     public WmsInboundItemFlowDO updateInboundItemFlow(WmsInboundItemFlowSaveReqVO updateReqVO) {
         // 校验存在
         WmsInboundItemFlowDO exists = validateInboundItemFlowExists(updateReqVO.getId());
-        // 按 wms_inbound_item_flow.inbound_id -> wms_inbound.id 的引用关系，校验存在性
+        // 按 wms_inbound_flow.inbound_id -> wms_inbound.id 的引用关系，校验存在性
         if (updateReqVO.getInboundId() != null) {
             WmsInboundDO inbound = inboundService.getInbound(updateReqVO.getInboundId());
             if (inbound == null) {
@@ -112,6 +112,7 @@ public class WmsInboundItemFlowServiceImpl implements WmsInboundItemFlowService 
     /**
      * 按 inboundId 查询 WmsInboundItemFlowDO
      */
+    @Override
     public List<WmsInboundItemFlowDO> selectByInboundId(Long inboundId, int limit) {
         return inboundItemFlowMapper.selectByInboundId(inboundId, limit);
     }
@@ -129,6 +130,7 @@ public class WmsInboundItemFlowServiceImpl implements WmsInboundItemFlowService 
     /**
      * 按 ID 集合查询 WmsInboundItemFlowDO
      */
+    @Override
     public List<WmsInboundItemFlowDO> selectByIds(Set<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();
@@ -139,6 +141,7 @@ public class WmsInboundItemFlowServiceImpl implements WmsInboundItemFlowService 
     /**
      * 按 ID 集合查询 WmsInboundItemFlowDO
      */
+    @Override
     public List<WmsInboundItemFlowDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();

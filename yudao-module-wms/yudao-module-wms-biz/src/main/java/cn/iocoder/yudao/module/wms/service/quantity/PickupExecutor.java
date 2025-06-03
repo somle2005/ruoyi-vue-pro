@@ -163,7 +163,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         flowDO.setOutboundAvailableDeltaQty(quantity);
         flowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty());
         flowDO.setActualQty(inboundItemDO.getActualQty());
-        flowDO.setShelvedQty(inboundItemDO.getShelvedQty());
+        flowDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty());
 
         inboundItemFlowService.insert(flowDO);
 
@@ -254,8 +254,8 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
             // 可用量
             stockOwnershipDO.setAvailableQty(stockOwnershipDO.getAvailableQty() + quantity);
             // 待上架量
-            stockOwnershipDO.setShelvingPendingQty(stockOwnershipDO.getShelvingPendingQty() - quantity);
-            if(stockOwnershipDO.getShelvingPendingQty()<0) {
+            stockOwnershipDO.setShelvePendingQty(stockOwnershipDO.getShelvePendingQty() - quantity);
+            if (stockOwnershipDO.getShelvePendingQty() < 0) {
                 throw exception(STOCK_OWNERSHIP_NOT_ENOUGH);
             }
         }

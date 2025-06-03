@@ -17,7 +17,7 @@ public enum UpstreamBillType implements ArrayValuable<Integer>, DictEnum {
     //手工生成
     WMS_MANUAL(0, "手工入库"),
     WMS_PURCHASE(1, "采购入库"),
-    WMS_INVENTORY(2,"盘点入库"),
+    WMS_STOCKCHECK(2, "盘点入库"),
     //外部生成
     TMS_FIRST_MILE(100, "头程单入库"),
     TMS_TRANSFER(101, "调拨单入库"),

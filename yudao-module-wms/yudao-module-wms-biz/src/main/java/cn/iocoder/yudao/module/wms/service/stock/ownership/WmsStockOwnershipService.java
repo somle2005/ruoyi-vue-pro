@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 /**
- * 所有者库存 Service 接口
+ * 逻辑库存 Service 接口
  *
  * @author 李方捷
  */
@@ -47,7 +47,7 @@ public interface WmsStockOwnershipService {
      * 获得所有者库存
      *
      * @param id 编号
-     * @return 所有者库存
+     * @return 逻辑库存
      */
     WmsStockOwnershipDO getStockOwnership(Long id);
 

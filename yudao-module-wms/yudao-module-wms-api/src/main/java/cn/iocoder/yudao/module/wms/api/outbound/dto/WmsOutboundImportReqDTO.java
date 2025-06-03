@@ -14,7 +14,7 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : code,company_id,remark,audit_status,outbound_time,type,upstream_bill_type,latest_outbound_action_id,outbound_status,upstream_bill_id,id,upstream_bill_code,dept_id,warehouse_id
+ * @table-fields : code,company_id,remark,audit_status,outbound_time,type,upstream_type,latest_outbound_action_id,outbound_status,upstream_id,id,upstream_code,dept_id,warehouse_id
  */
 @Data
 public class WmsOutboundImportReqDTO {
@@ -75,15 +75,15 @@ public class WmsOutboundImportReqDTO {
      * 来源单据ID
      */
     @NotNull(message = "来源单据ID不能为空")
-    private Long upstreamBillId;
+    private Long upstreamId;
 
     /**
-     * 来源单据号
+     * 来源单据编码
      */
-    private String upstreamBillCode;
+    private String upstreamCode;
 
     /**
      * WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单
      */
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 }

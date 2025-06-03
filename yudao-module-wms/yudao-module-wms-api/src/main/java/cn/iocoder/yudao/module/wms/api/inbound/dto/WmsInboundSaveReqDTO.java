@@ -59,7 +59,7 @@ public class WmsInboundSaveReqDTO {
     private LocalDateTime arrivalActualTime;
 
     /**
-     * 预计到货时间
+     * 计划到货时间
      **/
     private LocalDateTime arrivalPlanTime;
 
@@ -76,22 +76,22 @@ public class WmsInboundSaveReqDTO {
     /**
      * 来源单据ID
      **/
-    private Long upstreamBillId;
+    private Long upstreamId;
 
     /**
-     * 来源单据号
+     * 来源单据编码
      **/
-    private String upstreamBillCode;
+    private String upstreamCode;
 
     /**
      * WMS来源单据类型
      **/
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 
     /**
      * WMS入库单上架状态
      **/
-    private Integer shelvingStatus;
+    private Integer shelveStatus;
 
     /**
      * 备注

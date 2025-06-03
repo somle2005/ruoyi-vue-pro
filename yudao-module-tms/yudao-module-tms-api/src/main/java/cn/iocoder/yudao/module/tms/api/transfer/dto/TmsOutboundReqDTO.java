@@ -29,18 +29,18 @@ public class TmsOutboundReqDTO {
     /**
      * 上游单据类型
      */
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 
     /**
      * 上游单据编号
      */
     @NotNull(message = "上游单据编号不能为空")
-    private Long upstreamBillId;
+    private Long upstreamId;
 
     /**
      * 上游单据编码
      */
-    private String upstreamBillCode;
+    private String upstreamCode;
     /**
      * 出库时间
      */

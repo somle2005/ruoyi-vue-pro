@@ -355,21 +355,21 @@ public class EccangService {
         return post("getSkuRelation", vo, EccangSkuRelationRespVO.class);
     }
 
-    public Stream<EccangPage> getInventory() {
+    public Stream<EccangPage> getStockCheck() {
         var payload = JsonUtilsX.newObject();
-        return getAllPage(payload, "getProductInventory");
+        return getAllPage(payload, "getProductStockCheck");
     }
 
 
-    public Stream<EccangPage> getInventoryBatchLog(EccangInventoryBatchLogVO eccangInventoryBatchLogVO) {
+    public Stream<EccangPage> getStockCheckBatchLog(EccangStockCheckBatchLogVO eccangStockCheckBatchLogVO) {
         List<EccangWarehouse> warehouseList = getWarehouseList();
         var codeList = warehouseList.stream().map(EccangWarehouse::getWarehouseCode).toList();
-        eccangInventoryBatchLogVO.setWarehouseCode(codeList);
-        return getAllPage(JsonUtilsX.toJSONObject(eccangInventoryBatchLogVO), "getInventoryBatchLog");
+        eccangStockCheckBatchLogVO.setWarehouseCode(codeList);
+        return getAllPage(JsonUtilsX.toJSONObject(eccangStockCheckBatchLogVO), "getStockCheckBatchLog");
     }
 
-    public Stream<EccangPage> getInventoryBatch(EccangInventoryBatchReqVO eccangInventoryBatchVO) {
-        return getAllPage(JsonUtilsX.toJSONObject(eccangInventoryBatchVO), "getInventoryBatch");
+    public Stream<EccangPage> getStockCheckBatch(EccangStockCheckBatchReqVO eccangStockCheckBatchVO) {
+        return getAllPage(JsonUtilsX.toJSONObject(eccangStockCheckBatchVO), "getStockCheckBatch");
     }
 
     public EccangPage addDepartment(EccangCategory department) {

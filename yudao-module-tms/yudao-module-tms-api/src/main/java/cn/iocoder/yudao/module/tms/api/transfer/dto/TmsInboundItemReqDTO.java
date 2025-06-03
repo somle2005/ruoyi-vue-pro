@@ -74,8 +74,8 @@ public class TmsInboundItemReqDTO {
     private String remark;
 
     /**
-     * 来源详情ID
+     * 来源明细行ID
      */
     @NotNull(message = "调拨入库单明细上游ID不能为空")
-    private Long upstreamItemId;
+    private Long upstreamId;
 } 

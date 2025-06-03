@@ -55,7 +55,7 @@ public class WmsInboundApiImpl implements WmsInboundApi {
         });
         createReqVO.setItemList(BeanUtils.toBean(itemList, WmsInboundItemSaveReqVO.class));
         //调拨单触发时，填写公司缺省值
-        if (createReqVO.getUpstreamBillType().equals(BillType.TMS_TRANSFER.getValue())) {
+        if (createReqVO.getUpstreamType().equals(BillType.TMS_TRANSFER.getValue())) {
             createReqVO.setCompanyId(999L);
         }
         WmsInboundDO inbound = inboundService.createInbound(createReqVO);
@@ -74,8 +74,8 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     }
 
     @Override
-    public List<WmsInboundDTO> getInboundList(Integer upstreamBillType, Long upstreamBillId) {
-        List<WmsInboundDO> inboundList = inboundService.getInboundList(upstreamBillType, upstreamBillId);
+    public List<WmsInboundDTO> getInboundList(Integer upstreamType, Long upstreamId) {
+        List<WmsInboundDO> inboundList = inboundService.getInboundList(upstreamType, upstreamId);
         return BeanUtils.toBean(inboundList, WmsInboundDTO.class);
     }
 

@@ -38,8 +38,8 @@ public class WmsOutboundSimpleRespVO {
     @ExcelProperty("来源单据ID")
     private Long sourceBillId;
 
-    @Schema(description = "来源单据号")
-    @ExcelProperty("来源单据号")
+    @Schema(description = "来源单据编码")
+    @ExcelProperty("来源单据编码")
     private String sourceBillNo;
 
     @Schema(description = "来源单据类型 ; BillType : 0-入库单 , 1-出库单", example = "2")

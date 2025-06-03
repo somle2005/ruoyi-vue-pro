@@ -26,7 +26,7 @@ public interface WmsWarehouseMapper extends BaseMapperX<WmsWarehouseDO> {
                 .eqIfPresent(WmsWarehouseDO::getStatus, reqVO.getStatus())
 				.likeIfPresent(WmsWarehouseDO::getName, reqVO.getName())
 				.eqIfPresent(WmsWarehouseDO::getExternalStorageId, reqVO.getExternalStorageId())
-				.likeIfPresent(WmsWarehouseDO::getCompanyName, reqVO.getCompanyName())
+            .likeIfPresent(WmsWarehouseDO::getAddressLine3, reqVO.getAddressLine3())
 				.eqIfPresent(WmsWarehouseDO::getCountry, reqVO.getCountry())
 				.eqIfPresent(WmsWarehouseDO::getProvince, reqVO.getProvince())
 				.eqIfPresent(WmsWarehouseDO::getCity, reqVO.getCity())
@@ -117,7 +117,7 @@ public interface WmsWarehouseMapper extends BaseMapperX<WmsWarehouseDO> {
                     .eqIfPresent(WmsWarehouseDO::getProvince, reqDTO.getProvince())
                     .eqIfPresent(WmsWarehouseDO::getCity, reqDTO.getCity())
                     .eqIfPresent(WmsWarehouseDO::getPostcode, reqDTO.getPostcode())
-                    .eqIfPresent(WmsWarehouseDO::getCompanyName, reqDTO.getCompanyName());
+                .eqIfPresent(WmsWarehouseDO::getAddressLine3, reqDTO.getAddressLine3());
         }
         return selectList(queryWrapper);
     }

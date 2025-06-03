@@ -32,11 +32,11 @@ public interface WmsOutboundApi {
     /**
      * 按 上游单据类型 和 上游单据ID 查询出库单
      *
-     * @param upstreamBillType 出库单类型
-     * @param upstreamBillId 上游单号
+     * @param upstreamType 出库单类型
+     * @param upstreamId 上游单号
      * @return WmsInboundDTO
      */
-    List<WmsOutboundDTO> getOutboundList(Integer upstreamBillType, Long upstreamBillId);
+    List<WmsOutboundDTO> getOutboundList(Integer upstreamType, Long upstreamId);
 
     /**
      * 出库单作废

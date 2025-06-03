@@ -405,9 +405,9 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private WmsOutboundImportReqDTO buildOutboundBaseInfo(TmsFirstMileBO firstMileBO) {
         WmsOutboundImportReqDTO importReqDTO = new WmsOutboundImportReqDTO();
         importReqDTO.setType(OUTBOUND_BILL.getValue()); // 订单出库
-        importReqDTO.setUpstreamBillId(firstMileBO.getId()); // 来源单据ID
-        importReqDTO.setUpstreamBillCode(firstMileBO.getCode()); // 来源单据号
-        importReqDTO.setUpstreamBillType(First_MILE_SOURCE_TYPE); // 来源单据类型
+        importReqDTO.setUpstreamId(firstMileBO.getId()); // 来源单据ID
+        importReqDTO.setUpstreamCode(firstMileBO.getCode()); // 来源单据编码
+        importReqDTO.setUpstreamType(First_MILE_SOURCE_TYPE); // 来源单据类型
         importReqDTO.setRemark(firstMileBO.getRemark()); // 备注
         importReqDTO.setOutboundTime(firstMileBO.getOutboundTime()); // 出库时间
         return importReqDTO;
@@ -426,7 +426,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             itemDTO.setPlanQty(item.getQty()); // 计划出库量
             itemDTO.setActualQty(item.getQty()); // 实际出库量
             itemDTO.setRemark(item.getRemark()); // 备注
-            itemDTO.setUpstreamItemId(item.getId()); // 来源详情ID
+            itemDTO.setUpstreamId(item.getId()); // 来源明细行ID
             itemDTO.setCompanyId(item.getCompanyId()); // 设置库存公司ID
             itemDTO.setDeptId(item.getDeptId()); //库存归属部门ID(哪个部门出库SKU)
             return itemDTO;

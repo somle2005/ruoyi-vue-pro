@@ -11,7 +11,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : bill_id,tenant_id,outbound_available_qty,creator,create_time,shelved_qty,updater,inbound_id,outbound_available_delta_qty,outbound_action_id,update_time,actual_qty,bill_item_id,product_id,bill_type,id,inbound_item_id,direction
+ * @table-fields : bill_id,tenant_id,outbound_available_qty,creator,create_time,shelve_closed_qty,updater,inbound_id,outbound_available_delta_qty,outbound_action_id,update_time,actual_qty,bill_item_id,product_id,bill_type,id,inbound_item_id,direction
  */
 @Schema(description = "管理后台 - 入库单库存详情扣减 Response VO")
 @Data

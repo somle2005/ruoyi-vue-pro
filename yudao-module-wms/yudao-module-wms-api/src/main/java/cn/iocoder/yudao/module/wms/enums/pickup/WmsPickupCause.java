@@ -15,7 +15,7 @@ import java.util.Arrays;
 public enum WmsPickupCause implements ArrayValuable<Integer>, DictEnum {
 
     PICKUP(1, "拣货"),
-    INVENTORY(2, "盘点"),
+    STOCKCHECK(2, "盘点"),
     BIN_MOVE(3, "移库位");
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(WmsPickupCause::getValue).toArray(Integer[]::new);

@@ -72,17 +72,17 @@ public class WmsOutboundDTO {
     /**
      * 来源单据ID
      */
-    private Long upstreamBillId;
+    private Long upstreamId;
 
     /**
-     * 来源单据号
+     * 来源单据编码
      */
-    private String upstreamBillCode;
+    private String upstreamCode;
 
     /**
      * WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单
      */
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 
     private List<WmsOutboundItemRespDTO> itemList;
 }

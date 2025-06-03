@@ -12,7 +12,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : code,inbound_status,company_id,create_time,inbound_time,arrival_actual_time,remark,audit_status,trace_no,type,upstream_bill_type,init_age,upstream_bill_id,shipping_method,upstream_bill_code,dept_id,arrival_plan_time,shelving_status,warehouse_id
+ * @table-fields : code,inbound_status,company_id,create_time,inbound_time,arrival_actual_time,remark,audit_status,trace_no,type,upstream_type,init_age,upstream_id,shipping_method,upstream_code,dept_id,arrival_plan_time,shelving_status,warehouse_id
  */
 @Schema(description = "管理后台 - 入库单分页 Request VO")
 @Data
@@ -55,7 +55,7 @@ public class WmsInboundPageReqVO extends PageParam {
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] arrivalActualTime;
 
-    @Schema(description = "预计到货时间", example = "")
+    @Schema(description = "计划到货时间", example = "")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] arrivalPlanTime;
 
@@ -70,16 +70,16 @@ public class WmsInboundPageReqVO extends PageParam {
     private String code;
 
     @Schema(description = "来源单据ID", example = "")
-    private Long upstreamBillId;
+    private Long upstreamId;
 
-    @Schema(description = "来源单据号", example = "")
-    private String upstreamBillCode;
+    @Schema(description = "来源单据编码", example = "")
+    private String upstreamCode;
 
     @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 
     @Schema(description = "WMS入库单上架状态 ; WmsInboundShelvingStatus : 1-未上架 , 2-部分上架 , 3-已上架", example = "")
-    private Integer shelvingStatus;
+    private Integer shelveStatus;
 
     @Schema(description = "特别说明，创建方专用", example = "")
     private String remark;

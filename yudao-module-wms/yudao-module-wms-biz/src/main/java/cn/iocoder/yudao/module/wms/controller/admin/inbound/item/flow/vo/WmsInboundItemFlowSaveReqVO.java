@@ -1,15 +1,14 @@
 package cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import java.util.*;
-import jakarta.validation.constraints.*;
 import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
- * @table-fields : bill_id,outbound_available_qty,shelved_qty,inbound_id,outbound_available_delta_qty,outbound_action_id,actual_qty,bill_item_id,product_id,bill_type,id,inbound_item_id,direction
+ * @table-fields : bill_id,outbound_available_qty,shelve_closed_qty,inbound_id,outbound_available_delta_qty,outbound_action_id,actual_qty,bill_item_id,product_id,bill_type,id,inbound_item_id,direction
  */
 @Schema(description = "管理后台 - 入库单库存详情扣减新增/修改 Request VO")
 @Data

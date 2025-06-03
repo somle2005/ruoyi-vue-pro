@@ -19,7 +19,7 @@ public class TmsOutboundItemReqDTO {
      * 上游单据明细编号
      */
     @NotNull(message = "上游单据明细编号不能为空")
-    private Long upstreamItemId;
+    private Long upstreamId;
 
     /**
      * 实际出库数量
