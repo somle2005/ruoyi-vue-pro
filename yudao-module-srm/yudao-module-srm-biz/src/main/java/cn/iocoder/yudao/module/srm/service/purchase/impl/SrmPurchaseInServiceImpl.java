@@ -229,6 +229,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         for (SrmPurchaseInItemDO purchaseInItem : purchaseInItems) {
             itemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, purchaseInItem);
         }
+        //变更订单项的执行状态
     }
 
     private void initMasterStatus(SrmPurchaseInDO purchaseIn) {

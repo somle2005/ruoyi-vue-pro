@@ -191,6 +191,8 @@ public class SrmPurchaseReturnBaseRespVO {
         @Schema(description = "仓库产品可售库存")
         private BigDecimal sellableQty;
 
+        @Schema(description = "实际入库数量,到货项实际入库数量")
+        private BigDecimal actualQty;
 
         @Schema(description = "产品单价，单位：元")
         private BigDecimal productPrice;

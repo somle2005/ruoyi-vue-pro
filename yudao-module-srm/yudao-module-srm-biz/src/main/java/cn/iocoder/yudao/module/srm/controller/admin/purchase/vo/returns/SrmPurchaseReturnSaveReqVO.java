@@ -75,5 +75,11 @@ public class SrmPurchaseReturnSaveReqVO {
 
         @Schema(description = "退货申请人部门id")
         private Long applicationDeptId;
+
+        /**
+         * 实际入库数量,取到货单item的实际入库数量
+         */
+        @Schema(description = "实际入库数量,到货项实际入库数量")
+        private BigDecimal actualQty;
     }
 }

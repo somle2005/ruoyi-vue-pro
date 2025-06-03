@@ -23,7 +23,6 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SrmPurchaseReturnItemDO extends TenantBaseDO {
-
     /**
      * 编号
      */
@@ -40,7 +39,6 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
      * 关联 {@link SrmPurchaseReturnDO#getId()}
      */
     private Long returnId;
-
     /**
      * 到货项id
      */
@@ -49,7 +47,6 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
      * 入库单code
      */
     private String inCode;
-
     /**
      * 仓库编号
      * <p>
@@ -142,4 +139,8 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
      * 出库数量
      */
     private BigDecimal outboundQty;
+    /**
+     * 实际入库数量,取到货单item的实际入库数量
+     */
+    private BigDecimal actualQty;
 }

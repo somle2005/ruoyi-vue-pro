@@ -6,11 +6,9 @@ import cn.iocoder.yudao.module.srm.config.machine.SrmOrderInCountContext;
 import cn.iocoder.yudao.module.srm.config.machine.in.SrmPurchaseInCountContext;
 import cn.iocoder.yudao.module.srm.config.machine.inItem.SrmPurchaseInItemCountContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
-import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmPurchaseInItemMapper;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
-import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,7 +16,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.util.Collections;
 
 import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_IN_STORAGE_STATE_MACHINE;
 import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME;
@@ -40,20 +37,17 @@ public class StorageInItemActionImpl implements Action<SrmStorageStatus, SrmEven
     @Resource(name = PURCHASE_IN_STORAGE_STATE_MACHINE)
     @Lazy
     StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountContext> pushInStorageStateMachine;
-    @Autowired
-    @Lazy
-    private SrmPurchaseOrderService srmPurchaseOrderService;
 
     @Override
     public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmPurchaseInItemCountContext context) {
-        SrmPurchaseInItemDO srmPurchaseInItemDO = srmPurchaseInItemMapper.selectById(context.getInItemId());
+        SrmPurchaseInItemDO inItemDO = srmPurchaseInItemMapper.selectById(context.getInItemId());
 
         //调整库存
         if (event == SrmEventEnum.ORDER_ADJUSTMENT) {
-            BigDecimal oldActualQty = srmPurchaseInItemDO.getActualQty(); // 原实际入库数量
+            BigDecimal oldActualQty = inItemDO.getActualQty(); // 原实际入库数量
             BigDecimal changeActualQty = context.getInCount() == null ? BigDecimal.ZERO : context.getInCount(); // 变更数量
             BigDecimal finalActualQty = oldActualQty.add(changeActualQty); // 最终实际入库数量
-            BigDecimal qty = srmPurchaseInItemDO.getQty(); // 计划入库数量
+            BigDecimal qty = inItemDO.getQty(); // 计划入库数量
             //qty == actualQty to为ALL_IN_STORAGE 完全入库
             //qty > actualQty to为PARTIALLY_IN_STORAGE 部分入库
             if (finalActualQty.compareTo(qty) >= 0) {
@@ -68,22 +62,22 @@ public class StorageInItemActionImpl implements Action<SrmStorageStatus, SrmEven
             }
 
             //  更新数据库中的实际入库数量
-            srmPurchaseInItemDO.setActualQty(finalActualQty);
+            inItemDO.setActualQty(finalActualQty);
         }
 
-
+        inItemDO.setInStatus(to.getCode());
         //
-        srmPurchaseInItemMapper.updateById(srmPurchaseInItemDO.setInStatus(to.getCode()));
+        srmPurchaseInItemMapper.updateById(inItemDO);
 
         //1. 转递给主单?
         pushInStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STOCK_ADJUSTMENT
-            , SrmPurchaseInCountContext.builder().inId(srmPurchaseInItemDO.getInId()).build());
+            , SrmPurchaseInCountContext.builder().inId(inItemDO.getInId()).build());
         //2. 传递事件给订单项, 入库状态
         if (event != SrmEventEnum.ORDER_INIT) {
-            SrmPurchaseOrderItemDO srmPurchaseOrderItemDO = srmPurchaseOrderService.getPurchaseOrderItemList(Collections.singleton(srmPurchaseInItemDO.getOrderItemId())).get(0);
-            orderItemStorageStateMachine.fireEvent(SrmStorageStatus.fromCode(srmPurchaseOrderItemDO.getInStatus())
-                    , SrmEventEnum.STOCK_ADJUSTMENT
-                , SrmOrderInCountContext.builder().orderItemId(srmPurchaseInItemDO.getOrderItemId()).returnCount(context.getInCount()).build());
+            orderItemStorageStateMachine.fireEvent(
+                SrmStorageStatus.NONE_IN_STORAGE
+                , SrmEventEnum.STOCK_ADJUSTMENT
+                , SrmOrderInCountContext.builder().orderItemId(inItemDO.getOrderItemId()).inCount(context.getInCount()).build());
         }
 
     }
