@@ -25,11 +25,7 @@
         <profile>
             <id>local</id>
             <dependencies>
-                <dependency>
-                    <groupId>com.somle</groupId>
-                    <artifactId>somle-esb</artifactId>
-                    <version>${revision}</version>
-                </dependency>
+
             </dependencies>
         </profile>
 

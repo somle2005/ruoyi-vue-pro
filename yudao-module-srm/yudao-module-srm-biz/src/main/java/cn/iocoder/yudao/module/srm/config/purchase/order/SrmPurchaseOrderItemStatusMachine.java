@@ -54,7 +54,7 @@ public class SrmPurchaseOrderItemStatusMachine {
         // 执行完成
         builder.externalTransitions().fromAmong(PENDING, IN_PROGRESS, COMPLETED).to(COMPLETED).on(SrmEventEnum.COMPLETE_EXECUTION).perform(orderItemExecuteAction);
 
-        //到货数量调整->执行状态(根据到货数量动态变化)
+        // 到货数量调整->执行状态(根据到货数量动态变化)
         builder.externalTransitions().fromAmong(PENDING, IN_PROGRESS, COMPLETED, CANCELLED).to(COMPLETED).on(SrmEventEnum.EXECUTION_ADJUSTMENT).perform(orderItemExecuteAction);
 
         // 暂停执行

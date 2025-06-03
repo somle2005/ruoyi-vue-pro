@@ -32,6 +32,7 @@ import cn.iocoder.yudao.module.srm.enums.LogRecordConstants;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmPurchaseOrderSourceEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
+import cn.iocoder.yudao.module.srm.enums.status.SrmExecutionStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmPaymentStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
@@ -102,6 +103,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     private StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPurchaseInItemDO> itemPaymentMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
     private StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountContext> orderItemStorageMachine;
+    @Resource(name = PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
+    private StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecutionMachine;
     @Resource(name = PURCHASE_IN_AUDIT_STATE_MACHINE)
     private StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseInAuditReqVO> purchaseInAuditStateMachine;
     @Resource(name = PURCHASE_IN_STORAGE_STATE_MACHINE)
@@ -229,7 +232,16 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         for (SrmPurchaseInItemDO purchaseInItem : purchaseInItems) {
             itemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, purchaseInItem);
         }
-        //变更订单项的执行状态
+        syncOrderItemExecutionStatus(purchaseInItems);
+    }
+
+    private void syncOrderItemExecutionStatus(List<SrmPurchaseInItemDO> purchaseInItems) {
+        purchaseInItems.forEach(purchaseInItem -> {
+            //变更订单项的执行状态
+            SrmPurchaseOrderItemDO orderItemDO = purchaseOrderService.validatePurchaseOrderItemExists(purchaseInItem.getOrderItemId());
+            orderItemExecutionMachine.fireEvent(SrmExecutionStatus.fromCode(orderItemDO.getExecuteStatus()), SrmEventEnum.EXECUTION_ADJUSTMENT, orderItemDO);
+        });
+
     }
 
     private void initMasterStatus(SrmPurchaseInDO purchaseIn) {
@@ -237,6 +249,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         paymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, purchaseIn);
         //主表初始化入库状态
         purchaseInStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmPurchaseInCountContext.builder().inId(purchaseIn.getId()).build());
+
     }
 
     private void rollbackSlaveStatus(List<SrmPurchaseInItemDO> diffList) {
@@ -501,14 +514,17 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 o.setSource(SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc());
             });
             purchaseInItemMapper.insertBatch(diffList.get(0));
+            syncOrderItemExecutionStatus(diffList.get(0));
         }
         if (CollUtil.isNotEmpty(diffList.get(1))) {
             purchaseInItemMapper.updateBatch(diffList.get(1));
+            syncOrderItemExecutionStatus(diffList.get(1));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {
             if (diffList.get(2) != null) {
                 purchaseInItemMapper.deleteByIds(convertList(diffList.get(2), SrmPurchaseInItemDO::getId));
             }
+            syncOrderItemExecutionStatus(diffList.get(2));
         }
     }
 
@@ -541,7 +557,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         String businessName = CollUtil.join(ins.stream().map(SrmPurchaseInDO::getCode).collect(Collectors.toList()), ",");
         LogRecordContext.putVariable("businessName", businessName);
 
-        // 1. 未（草稿+未通过+审核撤销）->无法删除
+        // 1.1 （草稿+未通过+审核撤销）->无法删除
         List<Integer> statusList = List.of(SrmAuditStatus.DRAFT.getCode(), SrmAuditStatus.REJECTED.getCode(), SrmAuditStatus.REVOKED.getCode());
         ins.forEach(purchaseIn -> {
             if (!statusList.contains(purchaseIn.getAuditStatus())) {
@@ -556,6 +572,13 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             });
         }
 
+        //1.2 同步执行状态给订单项
+        for (SrmPurchaseInDO inDO : ins) {
+            List<SrmPurchaseInItemDO> purchaseInItemDOS = purchaseInItemMapper.selectListByInId(inDO.getId());
+            purchaseInItemDOS.forEach(peek -> peek.setQty(BigDecimal.ZERO));
+            syncOrderItemExecutionStatus(purchaseInItemDOS);
+        }
+
 
         // 2. 遍历删除，并记录操作日志
         ins.forEach(purchaseIn -> {
@@ -564,6 +587,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             // 2.2 删除订单项
             purchaseInItemMapper.deleteByInId(purchaseIn.getId());
         });
+
     }
 
     @Override
