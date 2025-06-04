@@ -27,7 +27,7 @@ public class WmsStockFlowPageReqVO extends PageParam {
     @Schema(description = "库存ID，分别指向三张库存表的ID", example = "17743")
     private Long stockId;
 
-    @Schema(description = "WMS流水发生的原因 ; WmsStockReason : 1-入库 , 2-拣货 , 3-出库 , 4-提交出库单 , 5-拒绝出库单 , 6-库位库存移动 , 7-所有者库存移动 , 8-盘赢 , 9-盘亏", example = "1", hidden = true)
+    @Schema(description = "WMS流水发生的原因 ; WmsStockReason : 1-入库 , 2-拣货 , 3-出库 , 4-提交出库单 , 5-拒绝出库单 , 6-库位库存移动 , 7-逻辑库存移动 , 8-盘赢 , 9-盘亏", example = "1", hidden = true)
     private Integer[] reason;
 
     @Schema(description = "流水触发的单据ID", example = "21958")

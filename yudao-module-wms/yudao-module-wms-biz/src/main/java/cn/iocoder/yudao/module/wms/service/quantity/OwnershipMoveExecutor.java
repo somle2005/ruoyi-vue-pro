@@ -95,7 +95,7 @@ public class OwnershipMoveExecutor extends QuantityExecutor<OwnershipMoveContext
 
 
     /**
-     * 处理所有者库存
+     * 处理逻辑库存
      **/
     private void processStockOwnership(Long warehouseId, WmsStockOwnershipMoveItemDO ownershipMoveItemDO, WmsStockOwnershipDO fromStockOwnershipDO) {
 

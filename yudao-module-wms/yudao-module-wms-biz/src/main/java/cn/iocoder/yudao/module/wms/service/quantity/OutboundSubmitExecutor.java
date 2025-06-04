@@ -243,7 +243,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
 
 
     /**
-     * 更新所有者库存
+     * 更新逻辑库存
      **/
     @Override
     protected  WmsStockFlowDirection updateStockOwnershipQty(WmsStockOwnershipDO stockOwnershipDO, WmsOutboundItemRespVO item, Integer quantity) {

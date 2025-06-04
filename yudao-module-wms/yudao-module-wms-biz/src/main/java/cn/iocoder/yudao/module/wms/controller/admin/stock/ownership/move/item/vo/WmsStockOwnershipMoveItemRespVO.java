@@ -8,13 +8,15 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
  * @table-fields : tenant_id,creator,create_time,from_company_id,remark,updater,ownership_move_id,update_time,from_dept_id,product_id,qty,id,to_company_id,to_dept_id
  */
-@Schema(description = "管理后台 - 所有者库存移动详情 Response VO")
+@Schema(description = "管理后台 - 逻辑库存移动详情 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class WmsStockOwnershipMoveItemRespVO {
@@ -23,8 +25,8 @@ public class WmsStockOwnershipMoveItemRespVO {
     @ExcelProperty("主键")
     private Long id;
 
-    @Schema(description = "所有者移动表ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3465")
-    @ExcelProperty("所有者移动表ID")
+    @Schema(description = "逻辑移动表ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "3465")
+    @ExcelProperty("逻辑移动表ID")
     private Long ownershipMoveId;
 
     @Schema(description = "产品ID", example = "2464")

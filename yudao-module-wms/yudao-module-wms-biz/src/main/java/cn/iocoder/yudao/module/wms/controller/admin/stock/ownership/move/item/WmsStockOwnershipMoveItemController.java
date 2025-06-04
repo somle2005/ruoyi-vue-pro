@@ -16,9 +16,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
-@Tag(name = "所有者库存移动详情")
+@Tag(name = "逻辑库存移动详情")
 @RestController
 @RequestMapping("/wms/stock-ownership-move-item")
 @Validated
@@ -31,7 +32,7 @@ public class WmsStockOwnershipMoveItemController {
     // * @sign : 56C81C5C06921A3C
     // */
     // @PostMapping("/create")
-    // @Operation(summary = "创建所有者库存移动详情")
+    // @Operation(summary = "创建逻辑库存移动详情")
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move-item:create')")
     // public CommonResult<Long> createStockOwnershipMoveItem(@Valid @RequestBody WmsStockOwnershipMoveItemSaveReqVO createReqVO) {
     // return success(stockOwnershipMoveItemService.createStockOwnershipMoveItem(createReqVO).getId());
@@ -41,7 +42,7 @@ public class WmsStockOwnershipMoveItemController {
     // * @sign : EEEF0EC4B914FBE9
     // */
     // @PutMapping("/update")
-    // @Operation(summary = "更新所有者库存移动详情")
+    // @Operation(summary = "更新逻辑库存移动详情")
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move-item:update')")
     // public CommonResult<Boolean> updateStockOwnershipMoveItem(@Valid @RequestBody WmsStockOwnershipMoveItemSaveReqVO updateReqVO) {
     // stockOwnershipMoveItemService.updateStockOwnershipMoveItem(updateReqVO);
@@ -49,7 +50,7 @@ public class WmsStockOwnershipMoveItemController {
     // }
     // 
     // @DeleteMapping("/delete")
-    // @Operation(summary = "删除所有者库存移动详情")
+    // @Operation(summary = "删除逻辑库存移动详情")
     // @Parameter(name = "id", description = "编号", required = true)
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move-item:delete')")
     // public CommonResult<Boolean> deleteStockOwnershipMoveItem(@RequestParam("id") Long id) {
@@ -61,7 +62,7 @@ public class WmsStockOwnershipMoveItemController {
     // * @sign : 0893F459C772A04E
     // */
     // @GetMapping("/get")
-    // @Operation(summary = "获得所有者库存移动详情")
+    // @Operation(summary = "获得逻辑库存移动详情")
     // @Parameter(name = "id", description = "编号", required = true, example = "1024")
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move-item:query')")
     // public CommonResult<WmsStockOwnershipMoveItemRespVO> getStockOwnershipMoveItem(@RequestParam("id") Long id) {
@@ -79,7 +80,7 @@ public class WmsStockOwnershipMoveItemController {
      * @sign : CF2179E1049D4C17
      */
     @GetMapping("/page")
-    @Operation(summary = "获得所有者库存移动详情分页")
+    @Operation(summary = "获得逻辑库存移动详情分页")
     @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move-item:query')")
     public CommonResult<PageResult<WmsStockOwnershipMoveItemRespVO>> getStockOwnershipMoveItemPage(@Valid WmsStockOwnershipMoveItemPageReqVO pageReqVO) {
         // 查询数据
@@ -93,13 +94,13 @@ public class WmsStockOwnershipMoveItemController {
         return success(voPageResult);
     }
     // @GetMapping("/export-excel")
-    // @Operation(summary = "导出所有者库存移动详情 Excel")
+    // @Operation(summary = "导出逻辑库存移动详情 Excel")
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move-item:export')")
     // @ApiAccessLog(operateType = EXPORT)
     // public void exportStockOwnershipMoveItemExcel(@Valid WmsStockOwnershipMoveItemPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
     // pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
     // List<WmsStockOwnershipMoveItemDO> list = stockOwnershipMoveItemService.getStockOwnershipMoveItemPage(pageReqVO).getList();
     // // 导出 Excel
-    // ExcelUtils.write(response, "所有者库存移动详情.xls", "数据", WmsStockOwnershipMoveItemRespVO.class, BeanUtils.toBean(list, WmsStockOwnershipMoveItemRespVO.class));
+    // ExcelUtils.write(response, "逻辑库存移动详情.xls", "数据", WmsStockOwnershipMoveItemRespVO.class, BeanUtils.toBean(list, WmsStockOwnershipMoveItemRespVO.class));
     // }
-}
+}

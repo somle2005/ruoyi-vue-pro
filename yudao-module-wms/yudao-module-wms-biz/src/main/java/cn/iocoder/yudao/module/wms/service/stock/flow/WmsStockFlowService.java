@@ -70,7 +70,7 @@ public interface WmsStockFlowService {
     void createForStockWarehouse(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockWarehouseDO stockWarehouseDO, Integer quantity, Long reasonId, Long reasonItemId);
 
     /**
-     * 创建所有者库存变化流水
+     * 创建逻辑库存变化流水
      */
     void createForStockOwnership(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockOwnershipDO stockOwnershipDO, Integer quantity, Long reasonId, Long reasonItemId);
 

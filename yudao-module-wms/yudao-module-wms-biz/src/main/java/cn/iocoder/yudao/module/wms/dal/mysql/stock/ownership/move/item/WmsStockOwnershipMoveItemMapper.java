@@ -1,15 +1,16 @@
 package cn.iocoder.yudao.module.wms.dal.mysql.stock.ownership.move.item;
 
-import java.util.*;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
+import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.item.vo.WmsStockOwnershipMoveItemPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.move.item.WmsStockOwnershipMoveItemDO;
 import org.apache.ibatis.annotations.Mapper;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.item.vo.*;
+
+import java.util.List;
 
 /**
- * 所有者库存移动详情 Mapper
+ * 逻辑库存移动详情 Mapper
  *
  * @author 李方捷
  */
@@ -49,4 +50,4 @@ public interface WmsStockOwnershipMoveItemMapper extends BaseMapperX<WmsStockOwn
     default List<WmsStockOwnershipMoveItemDO> selectByOwnershipMoveId(Long ownershipMoveId) {
         return selectList(new LambdaQueryWrapperX<WmsStockOwnershipMoveItemDO>().eq(WmsStockOwnershipMoveItemDO::getOwnershipMoveId, ownershipMoveId));
     }
-}
+}

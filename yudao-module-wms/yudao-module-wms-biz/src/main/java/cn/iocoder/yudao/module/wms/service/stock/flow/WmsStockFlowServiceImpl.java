@@ -228,7 +228,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     }
 
     /**
-     * 创建所有者库存变化流水
+     * 创建逻辑库存变化流水
      */
     @Override
     public void createForStockOwnership(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockOwnershipDO stockOwnershipDO, Integer quantity, Long reasonId, Long reasonItemId) {
@@ -441,10 +441,10 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Override
     public void assembleCompanyAndDept(List<WmsStockFlowRespVO> list) {
-        // 过滤所有者库存的动账流水
+        // 过滤逻辑库存的动账流水
         List<WmsStockFlowRespVO> ownershipFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockType.OWNERSHIP.getValue(), v.getStockType())).toList();
         List<Long> stockOwnershipIds = StreamX.from(ownershipFlowList).toList(WmsStockFlowRespVO::getStockId).stream().distinct().toList();
-        // 查询到对应的所有者库存记录
+        // 查询到对应的逻辑库存记录
         List<WmsStockOwnershipDO> stockOwnershipDOList = stockOwnershipService.selectByIds(stockOwnershipIds);
         Map<Long, WmsStockOwnershipDO> ownershipDOMap = StreamX.from(stockOwnershipDOList).toMap(WmsStockOwnershipDO::getId);
         Set<Long> companyIds = StreamX.from(stockOwnershipDOList).toSet(WmsStockOwnershipDO::getCompanyId);
@@ -455,13 +455,13 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         Map<Long, DeptSimpleRespVO> deptSimpleVOMap = BeanUtils.toBean(deptDTOMap, DeptSimpleRespVO.class);
         // 循环库位的动账流水
         for (WmsStockFlowRespVO ownershipRespVO : ownershipFlowList) {
-            // 找到流水对应的所有者库存记录
+            // 找到流水对应的逻辑库存记录
             WmsStockOwnershipDO stockOwnershipDO = ownershipDOMap.get(ownershipRespVO.getStockId());
-            // 通过所有者库存记录找到对应的部门
+            // 通过逻辑库存记录找到对应的部门
             DeptSimpleRespVO deptVO = deptSimpleVOMap.get(stockOwnershipDO.getDeptId());
             // 设置部门
             ownershipRespVO.setDept(deptVO);
-            // 通过所有者库存记录找到对应的财务公司
+            // 通过逻辑库存记录找到对应的财务公司
             FmsCompanyDTO companyDTO=companyDTOMap.get(stockOwnershipDO.getCompanyId());
             // 设置公司
             ownershipRespVO.setCompany(BeanUtils.toBean(companyDTO, FmsCompanySimpleRespVO.class));
