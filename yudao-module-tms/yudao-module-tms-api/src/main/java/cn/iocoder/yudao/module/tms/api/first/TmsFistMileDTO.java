@@ -21,7 +21,7 @@ public class TmsFistMileDTO {
     /**
      * 审核意见
      */
-    private String reviewComment;
+    private String auditAdvice;
 
     /**
      * 实际送仓时间

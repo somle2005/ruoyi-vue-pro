@@ -71,7 +71,7 @@ public class StorageInItemActionImpl implements Action<SrmStorageStatus, SrmEven
 
         //1. 转递给主单?
         pushInStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STOCK_ADJUSTMENT
-            , SrmPurchaseInCountContext.builder().inId(inItemDO.getInId()).build());
+            , SrmPurchaseInCountContext.builder().arriveId(inItemDO.getArriveId()).build());
         //2. 传递事件给订单项, 入库状态
         if (event != SrmEventEnum.ORDER_INIT) {
             orderItemStorageStateMachine.fireEvent(

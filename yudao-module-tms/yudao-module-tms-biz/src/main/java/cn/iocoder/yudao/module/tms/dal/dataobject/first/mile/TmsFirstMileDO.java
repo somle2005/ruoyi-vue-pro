@@ -70,7 +70,7 @@ public class TmsFirstMileDO extends TenantBaseDO {
     /**
      * 审核意见
      */
-    private String reviewComment;
+    private String auditAdvice;
     /**
      * 目的仓ID
      */

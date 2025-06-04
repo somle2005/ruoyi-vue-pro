@@ -31,7 +31,7 @@ public interface SrmPurchaseRequestMapper extends BaseMapperX<SrmPurchaseRequest
             .eqIfPresent(SrmPurchaseRequestDO::getTag, reqVO.getTag())
             //
             .likeIfPresent(SrmPurchaseRequestDO::getDelivery, reqVO.getDelivery())
-            .likeIfPresent(SrmPurchaseRequestDO::getReviewComment, reqVO.getReviewComment()).orderByDesc(SrmPurchaseRequestDO::getId);
+            .likeIfPresent(SrmPurchaseRequestDO::getReviewAdvice, reqVO.getReviewAdvice()).orderByDesc(SrmPurchaseRequestDO::getId);
     }
 
     //    //getBoWrapper

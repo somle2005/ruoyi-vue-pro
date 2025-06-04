@@ -104,7 +104,7 @@ public class SrmPurchaseRequestRespVO extends BaseVO {
      */
     @Schema(description = "审核意见")
     @ExcelProperty("审核意见")
-    private String reviewComment;
+    private String reviewAdvice;
 
 
     @Schema(description = "结算账户编号")

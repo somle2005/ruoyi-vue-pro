@@ -13,8 +13,8 @@ import java.time.LocalDateTime;
 /**
  * SRM采购到货表 DO
  */
-@TableName(value = "srm_purchase_in")
-@KeySequence("srm_purchase_in_seq") // Oracle、PostgreSQL、Kingbase、DB2、H2 用。MySQL 可省略
+@TableName(value = "srm_purchase_arrive")
+@KeySequence("srm_purchase_arrive_seq") // Oracle、PostgreSQL、Kingbase、DB2、H2 用。MySQL 可省略
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -77,7 +77,7 @@ public class SrmPurchaseInDO extends TenantBaseDO {
     /**
      * 入库时间
      */
-    private LocalDateTime inTime;
+    private LocalDateTime arriveTime;
 
     /**
      * 结算日期
@@ -151,7 +151,7 @@ public class SrmPurchaseInDO extends TenantBaseDO {
     /**
      * 审核意见
      */
-    private String reviewComment;
+    private String reviewAdvice;
 
     /**
      * 对账状态（false-未对账，true-已对账）

@@ -52,7 +52,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
         // 2. 获取入库明细列表
         Map<Long, List<SrmPurchaseInItemDO>> inItemMap = purchaseInService.getPurchaseInItemListByInIds(
                 inOrders.stream().map(SrmPurchaseInDO::getId).collect(Collectors.toList()))
-            .stream().collect(Collectors.groupingBy(SrmPurchaseInItemDO::getInId));
+            .stream().collect(Collectors.groupingBy(SrmPurchaseInItemDO::getArriveId));
 
         // 3. 转换为 DTO 对象
         return inOrders.stream().map(inOrder -> {

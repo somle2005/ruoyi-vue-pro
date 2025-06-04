@@ -12,7 +12,7 @@ public class SrmPurchaseInAuditReqVO {
     @NotNull(groups = {Validation.OnSubmitAudit.class, Validation.OnAudit.class}, message = "到货单ID不能为空")
     //    @Size(min = 1, groups = Validation.OnAudit.class, message = "到货单ID审核时候只能传一个")
     @Schema(description = "到货单ID集合")
-    private Long inId;
+    private Long arriveId;
 
     // 审核/反审核
     @NotNull(groups = Validation.OnAudit.class, message = "审核状态不能为空")
@@ -25,6 +25,6 @@ public class SrmPurchaseInAuditReqVO {
 
     //审核意见
     @Schema(description = "审核意见")
-    private String reviewComment;
+    private String reviewAdvice;
 
 }

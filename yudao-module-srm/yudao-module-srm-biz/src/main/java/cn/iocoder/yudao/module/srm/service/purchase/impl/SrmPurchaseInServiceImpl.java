@@ -73,7 +73,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmEventEnum.PAYMENT_INIT;
 import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
 
 /**
- * ERP 采购入库 Service 实现类
+ * ERP 采购到货 Service 实现类
  *
  * @author wdy
  */
@@ -122,7 +122,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
-        vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
+        vo.setArriveTime(vo.getArriveTime() == null ? LocalDateTime.now() : vo.getArriveTime());
         // 1.1 校验到货项对应的采购项可入库数量是否充足。
         validatePurchaseOrderItemQty(vo.getItems());
         // 1.2 校验入库项的有效性
@@ -152,7 +152,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         calculateTotalPrice(purchaseIn, purchaseInItems);
         ThrowUtil.ifSqlThrow(purchaseInMapper.insert(purchaseIn), GlobalErrorCodeConstants.DB_INSERT_ERROR);
         // 2.2 插入入库项
-        purchaseInItems.forEach(o -> o.setInId(purchaseIn.getId()));
+        purchaseInItems.forEach(o -> o.setArriveId(purchaseIn.getId()));
         ThrowUtil.ifThrow(!purchaseInItemMapper.insertBatch(purchaseInItems), GlobalErrorCodeConstants.DB_BATCH_INSERT_ERROR);
         //3.0 设置初始化状态
         initMasterStatus(purchaseIn);
@@ -163,7 +163,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     /**
      * 校验到货项对应的采购项可入库数量是否充足。
      *
-     * @param voItems 采购入库项
+     * @param voItems 采购到货项
      */
     private void validatePurchaseOrderItemQty(List<SrmPurchaseInSaveReqVO.Item> voItems) {
         if (CollUtil.isEmpty(voItems)) {
@@ -179,7 +179,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 1.1 批量获取入库项和入库单信息,减少数据库查询
         List<SrmPurchaseInItemDO> srmPurchaseInItemDOS = purchaseInItemMapper.selectListByOrderItemIds(orderItemIds);
         if (CollUtil.isNotEmpty(srmPurchaseInItemDOS)) {
-            List<Long> inIds = srmPurchaseInItemDOS.stream().map(SrmPurchaseInItemDO::getInId).distinct().toList();
+            List<Long> inIds = srmPurchaseInItemDOS.stream().map(SrmPurchaseInItemDO::getArriveId).distinct().toList();
             // 批量查询入库单状态
             Map<Long, SrmPurchaseInDO> inMap = convertMap(purchaseInMapper.selectByIds(inIds), SrmPurchaseInDO::getId);
 
@@ -192,14 +192,14 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             // 校验入库单状态,并关联订单项信息
             srmPurchaseInItemDOS.stream()
                     .filter(item -> {
-                        SrmPurchaseInDO in = inMap.get(item.getInId());
+                        SrmPurchaseInDO in = inMap.get(item.getArriveId());
                         return in != null && !Objects.equals(in.getAuditStatus(), SrmAuditStatus.APPROVED.getCode());
                     })
                     .findFirst()
                     .ifPresent(item -> {
                         SrmPurchaseOrderItemDO orderItem = orderItemMap.get(item.getOrderItemId());
                         String orderItemInfo = orderItem != null ? String.format("订单项[%s-编号:%s]", orderItem.getProductName(), orderItem.getId()) : String.format("订单项ID[%s]", item.getOrderItemId());
-                        SrmPurchaseInDO in = inMap.get(item.getInId());
+                        SrmPurchaseInDO in = inMap.get(item.getArriveId());
                         throw exception(PURCHASE_IN_ITEM_ORDER_ITEM_NOT_AUDIT_PASS,
                                 orderItemInfo, // 订单项信息
                                 in.getCode()); // 到货单编号
@@ -245,10 +245,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     private void initMasterStatus(SrmPurchaseInDO purchaseIn) {
-        auditMachine.fireEvent(SrmAuditStatus.DRAFT, SrmEventEnum.AUDIT_INIT, SrmPurchaseInAuditReqVO.builder().inId(purchaseIn.getId()).build());
+        auditMachine.fireEvent(SrmAuditStatus.DRAFT, SrmEventEnum.AUDIT_INIT, SrmPurchaseInAuditReqVO.builder().arriveId(purchaseIn.getId()).build());
         paymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, SrmEventEnum.PAYMENT_INIT, purchaseIn);
         //主表初始化入库状态
-        purchaseInStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmPurchaseInCountContext.builder().inId(purchaseIn.getId()).build());
+        purchaseInStorageMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STORAGE_INIT, SrmPurchaseInCountContext.builder().arriveId(purchaseIn.getId()).build());
 
     }
 
@@ -283,7 +283,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
-        vo.setInTime(vo.getInTime() == null ? LocalDateTime.now() : vo.getInTime());
+        vo.setArriveTime(vo.getArriveTime() == null ? LocalDateTime.now() : vo.getArriveTime());
         // 1.1 校验存在
         SrmPurchaseInDO purchaseIn = validatePurchaseInExists(vo.getId());
         // 1.2 校验采购到货审核状态可以修改
@@ -510,7 +510,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         //2 批量添加、修改、删除
         if (CollUtil.isNotEmpty(diffList.get(0))) {
             diffList.get(0).forEach(o -> {
-                o.setInId(id);
+                o.setArriveId(id);
                 o.setSource(SrmPurchaseOrderSourceEnum.WEB_ENTRY.getDesc());
             });
             purchaseInItemMapper.insertBatch(diffList.get(0));
@@ -645,7 +645,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         bean.setSrmPurchaseInItemDOS(itemDOS);
         return bean;
     }
-// ==================== 采购入库项 ====================
+// ==================== 采购到货项 ====================
 
     @Override
     public List<SrmPurchaseInItemDO> getPurchaseInItemListByInId(Long inId) {
@@ -688,20 +688,20 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         for (Long inId : inIds) {
             SrmPurchaseInDO srmPurchaseInDO = validatePurchaseInExists(inId);
             purchaseInAuditStateMachine.fireEvent(SrmAuditStatus.fromCode(srmPurchaseInDO.getAuditStatus()), SrmEventEnum.SUBMIT_FOR_REVIEW,
-                    SrmPurchaseInAuditReqVO.builder().inId(inId).build());//提交审核
+                SrmPurchaseInAuditReqVO.builder().arriveId(inId).build());//提交审核
         }
     }
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
             subType = LogRecordConstants.SRM_PURCHASE_IN_SUBMIT_AUDIT_SUB_TYPE,
-            bizNo = "{{#req.inId}}",
+        bizNo = "{{#req.arriveId}}",
             extra = "{{#codes}}",
             success = "{{#req.reviewed ? (#req.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购到货单【{{#codes}}】")
     @Transactional(rollbackFor = Exception.class)
     public void review(SrmPurchaseInAuditReqVO req) {
         // 1. 获取并校验入库单信息
-        SrmPurchaseInDO inDO = validatePurchaseInExists(req.getInId());
+        SrmPurchaseInDO inDO = validatePurchaseInExists(req.getArriveId());
         SrmAuditStatus currentStatus = SrmAuditStatus.fromCode(inDO.getAuditStatus());
         LogRecordContext.putVariable("codes", inDO.getCode());
 
@@ -863,7 +863,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                             .itemList(inboundItems)
                             .auditStatus(WmsInboundAuditStatus.DRAFT.getValue())
                             .companyId(companyIds.iterator().next())
-                            .arrivalPlanTime(inDO.getInTime())
+                        .arrivalPlanTime(inDO.getArriveTime())
                             .build()
             );
             log.info("采购到货单[{}]审核通过，创建入库单，ID: {}", inDO.getCode(), inbound);
@@ -878,7 +878,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         Map<Long, SrmPurchaseInPayReqVO.Item> itemMap =
                 vo.getItems().stream().collect(Collectors.toMap(SrmPurchaseInPayReqVO.Item::getId, Function.identity()));
         itemIds.stream().distinct().forEach(item -> {
-            Long inId = purchaseInItemMapper.selectById(item).getInId();
+            Long inId = purchaseInItemMapper.selectById(item).getArriveId();
             SrmPurchaseInDO purchaseInDO = purchaseInMapper.selectById(inId);
             ThrowUtil.ifThrow(!purchaseInDO.getAuditStatus().equals(SrmAuditStatus.APPROVED.getCode()), PURCHASE_IN_NOT_APPROVE, purchaseInDO.getCode());
         });
@@ -887,15 +887,15 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             //校验
             SrmPurchaseInItemDO inItemDO = validatePurchaseInItemExists(inItemId);
             if (vo.getPass()) {
-                updatePurchaseInItemPaymentPrice(inItemDO.getInId(), itemMap.get(inItemId).getPayPrice());
+                updatePurchaseInItemPaymentPrice(inItemDO.getArriveId(), itemMap.get(inItemId).getPayPrice());
             } else {
-                updatePurchaseInItemPaymentPrice(inItemDO.getInId(), BigDecimal.ZERO);
+                updatePurchaseInItemPaymentPrice(inItemDO.getArriveId(), BigDecimal.ZERO);
             }
             if (inItemDO.getPayStatus() == null) {
                 itemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, PAYMENT_INIT, inItemDO);
             } else {
                 //付款金额调整
-                updatePurchaseInItemPaymentPrice(inItemDO.getInId(), itemMap.get(inItemId).getPayPrice());
+                updatePurchaseInItemPaymentPrice(inItemDO.getArriveId(), itemMap.get(inItemId).getPayPrice());
                 itemPaymentMachine.fireEvent(SrmPaymentStatus.fromCode(inItemDO.getPayStatus()), PAYMENT_ADJUSTMENT, inItemDO);
             }
         });

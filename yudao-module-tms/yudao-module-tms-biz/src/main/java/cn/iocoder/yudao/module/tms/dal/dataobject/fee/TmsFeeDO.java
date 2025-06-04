@@ -32,11 +32,11 @@ public class TmsFeeDO extends TenantBaseDO {
     /**
      * 原单类型;出运订单、调拨单
      */
-    private Integer sourceType;
+    private Integer upstreamType;
     /**
      * 原单ID;出运订单ID、调拨单ID
      */
-    private Long sourceId;
+    private Long upstreamId;
     /**
      * 费用类型（如运输费、关税）;字典
      */

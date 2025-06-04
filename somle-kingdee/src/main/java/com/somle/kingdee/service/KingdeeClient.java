@@ -680,9 +680,11 @@ public class KingdeeClient {
             }
 
             // 6. 汇总
-            Map<String, KingdeeSupplierSaveVO> result = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenApply(v -> futures.stream().map(CompletableFuture::join).flatMap(page -> page.getRowsList(KingdeeSupplierSaveVO.class).stream()).collect(Collectors.toMap(KingdeeSupplierSaveVO::getName, supplier -> supplier, (oldVal, newVal) -> {
-                log.warn("发现重复的供应商名称：{}，将使用最新的供应商", oldVal.getName());
-                return newVal;
+            Map<String, KingdeeSupplierSaveVO> result = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenApply(v -> futures.stream().map(CompletableFuture::join)
+                .flatMap(page -> page.getRowsList(KingdeeSupplierSaveVO.class).stream())
+                .collect(Collectors.toMap(KingdeeSupplierSaveVO::getName, supplier -> supplier, (oldVal, newVal) -> {
+                    log.warn("发现重复的供应商名称：{}", oldVal.getName());
+                    return oldVal;
             }))).join();
 
             // 7. 缓存

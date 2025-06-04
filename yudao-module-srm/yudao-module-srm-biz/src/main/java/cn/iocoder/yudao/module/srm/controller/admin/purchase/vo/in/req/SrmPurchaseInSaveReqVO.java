@@ -28,7 +28,7 @@ public class SrmPurchaseInSaveReqVO {
 
     @Schema(description = "到货时间(不填默认当前时间)")
     @DiffLogField(name = "到货时间")
-    private LocalDateTime inTime;
+    private LocalDateTime arriveTime;
 
     @Schema(description = "单据日期")
     @DiffLogField(name = "单据日期")
@@ -98,7 +98,7 @@ public class SrmPurchaseInSaveReqVO {
         private Long id;
 
         @Schema(description = "采购到货编号")
-        private Long inId;
+        private Long arriveId;
 
         @Schema(description = "仓库Id", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "仓库不能为空")

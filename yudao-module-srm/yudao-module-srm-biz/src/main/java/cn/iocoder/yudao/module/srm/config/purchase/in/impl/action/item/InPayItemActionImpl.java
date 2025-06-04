@@ -91,7 +91,7 @@ public class InPayItemActionImpl implements Action<SrmPaymentStatus, SrmEventEnu
     }
 
     private void toIn(SrmPurchaseInItemDO inItemDO) {
-        SrmPurchaseInDO srmPurchaseInDO = srmPurchaseInMapper.selectById(inItemDO.getInId());
+        SrmPurchaseInDO srmPurchaseInDO = srmPurchaseInMapper.selectById(inItemDO.getArriveId());
         //付款调整->主表动态判断
         stateMachine.fireEvent(SrmPaymentStatus.fromCode(srmPurchaseInDO.getPayStatus()), SrmEventEnum.PAYMENT_ADJUSTMENT, srmPurchaseInDO);
     }

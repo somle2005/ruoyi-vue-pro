@@ -9,18 +9,18 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.List;
 
-@Schema(description = "管理后台 - 采购入库单基础 Response VO")
+@Schema(description = "管理后台 - 采购到货单基础 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class SrmPurchaseInBaseRespVO {
 
     // ========== 基本信息 ==========
-    @Schema(description = "入库单编号", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("入库单编号")
+    @Schema(description = "到货单编号", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("到货单编号")
     private Long id;
 
-    @Schema(description = "入库单号", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("入库单号")
+    @Schema(description = "到货单号", requiredMode = Schema.RequiredMode.REQUIRED)
+    @ExcelProperty("到货单号")
     private String code;
 
     @Schema(description = "单据日期", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -29,7 +29,7 @@ public class SrmPurchaseInBaseRespVO {
 
     @Schema(description = "到货时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("到货时间")
-    private LocalDateTime inTime;
+    private LocalDateTime arriveTime;
 
     @Schema(description = "备注")
     private String remark;
@@ -88,7 +88,7 @@ public class SrmPurchaseInBaseRespVO {
     private LocalDateTime auditTime;
 
     @Schema(description = "审核意见")
-    private String reviewComment;
+    private String reviewAdvice;
 
     // ========== 数量金额信息 ==========
     @Schema(description = "商品总体积，单位：m³")
@@ -154,8 +154,8 @@ public class SrmPurchaseInBaseRespVO {
         @Schema(description = "入库项编号", requiredMode = Schema.RequiredMode.REQUIRED)
         private Long id;
 
-        @Schema(description = "入库单编号", requiredMode = Schema.RequiredMode.REQUIRED)
-        private Long inId;
+        @Schema(description = "到货单编号", requiredMode = Schema.RequiredMode.REQUIRED)
+        private Long arriveId;
 
         @Schema(description = "备注")
         private String remark;

@@ -61,7 +61,7 @@ public class SrmSupplierDO extends BaseDO {
      * <p>
      * 枚举 {@link cn.iocoder.yudao.framework.common.enums.CommonStatusEnum}
      */
-    private Integer status;
+    private Integer openStatus;
     /**
      * 排序
      */

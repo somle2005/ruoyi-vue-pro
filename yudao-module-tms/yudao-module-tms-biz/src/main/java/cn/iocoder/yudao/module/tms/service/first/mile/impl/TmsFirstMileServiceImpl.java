@@ -563,8 +563,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             return;
         }
         List<TmsFeeDO> feeList = BeanUtils.toBean(list, TmsFeeDO.class, peek -> {
-            peek.setSourceType(First_MILE_SOURCE_TYPE);
-            peek.setSourceId(sourceId);
+            peek.setUpstreamType(First_MILE_SOURCE_TYPE);
+            peek.setUpstreamId(sourceId);
         });
         feeService.createFeeList(feeList, First_MILE_SOURCE_TYPE);
     }

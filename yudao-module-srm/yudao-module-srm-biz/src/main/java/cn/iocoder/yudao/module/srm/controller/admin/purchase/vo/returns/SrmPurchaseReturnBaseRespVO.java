@@ -60,7 +60,7 @@ public class SrmPurchaseReturnBaseRespVO {
     private LocalDateTime auditTime;
 
     @Schema(description = "审核意见")
-    private String reviewComment;
+    private String reviewAdvice;
 
     // ========== 供应商信息 ==========
     @Schema(description = "供应商编号", requiredMode = Schema.RequiredMode.REQUIRED)

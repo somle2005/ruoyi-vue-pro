@@ -18,7 +18,7 @@ import org.apache.ibatis.annotations.Mapper;
 public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> {
 
     default MPJLambdaWrapper<SrmPurchaseOrderDO> wrapper(SrmPurchaseOrderPageReqVO vo) {
-        return new MPJLambdaWrapperX<SrmPurchaseOrderDO>().selectAll(SrmPurchaseOrderDO.class).eqIfPresent(SrmPurchaseOrderDO::getStatus, vo.getStatus())
+        return new MPJLambdaWrapperX<SrmPurchaseOrderDO>().selectAll(SrmPurchaseOrderDO.class)
             .eqIfPresent(SrmPurchaseOrderDO::getSupplierId, vo.getSupplierId()).eqIfPresent(SrmPurchaseOrderDO::getAccountId, vo.getAccountId())
             .eqIfPresent(SrmPurchaseOrderDO::getTotalCount, vo.getTotalCount()).eqIfPresent(SrmPurchaseOrderDO::getTotalPrice, vo.getTotalPrice())
             .eqIfPresent(SrmPurchaseOrderDO::getTotalProductPrice, vo.getTotalProductPrice())

@@ -8,6 +8,6 @@ import lombok.Data;
 public class SrmPurchaseInCountContext {
 
     //到货单ID
-    private Long inId;
+    private Long arriveId;
 
 }
