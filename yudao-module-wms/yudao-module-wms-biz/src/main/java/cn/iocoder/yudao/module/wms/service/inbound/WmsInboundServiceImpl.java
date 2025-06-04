@@ -25,14 +25,14 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockW
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemOwnershipDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.WmsInboundMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemLogicQueryMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemMapper;
-import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemOwnershipQueryMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsInboundItemFlowMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.flow.WmsStockFlowMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
@@ -83,7 +83,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
 
     @Resource
     @Lazy
-    private WmsInboundItemOwnershipQueryMapper inboundItemOwnershipQueryMapper;
+    private WmsInboundItemLogicQueryMapper inboundItemLogicQueryMapper;
 
     @Resource
     private WmsNoRedisDAO noRedisDAO;
@@ -499,8 +499,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      * @param olderFirst 是否按入库时间升序
      */
     @Override
-    public WmsInboundItemOwnershipDO getInboundItemOwnership(Long warehouseId, Long productId, boolean olderFirst) {
-        return inboundItemOwnershipQueryMapper.getInboundItemOwnership(warehouseId, productId, olderFirst);
+    public WmsInboundItemLogicDO getInboundItemLogic(Long warehouseId, Long productId, boolean olderFirst) {
+        return inboundItemLogicQueryMapper.getInboundItemLogic(warehouseId, productId, olderFirst);
     }
 
     /**
@@ -510,8 +510,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      * @param olderFirst 是否按入库时间升序
      */
     @Override
-    public Map<Long, WmsInboundItemOwnershipDO> getInboundItemOwnershipMap(Long warehouseId, List<Long> productIds, boolean olderFirst) {
-        return inboundItemOwnershipQueryMapper.selectInboundItemOwnershipMap(warehouseId, productIds, olderFirst);
+    public Map<Long, WmsInboundItemLogicDO> getInboundItemLogicMap(Long warehouseId, List<Long> productIds, boolean olderFirst) {
+        return inboundItemLogicQueryMapper.selectInboundItemLogicMap(warehouseId, productIds, olderFirst);
     }
 
     /**
@@ -523,8 +523,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<WmsInboundItemOwnershipDO> getInboundItemOwnershipList(Long warehouseId, Long productId, boolean olderFirst) {
-        return inboundItemOwnershipQueryMapper.getInboundItemOwnershipList(warehouseId, productId, olderFirst);
+    public List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, boolean olderFirst) {
+        return inboundItemLogicQueryMapper.getInboundItemLogicList(warehouseId, productId, olderFirst);
     }
 
     /**
@@ -534,8 +534,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      * @param olderFirst 是否按入库时间升序
      */
     @Override
-    public List<WmsInboundItemOwnershipDO> selectInboundItemOwnershipList(Long warehouseId, Long productId, boolean olderFirst) {
-        Map<Long, List<WmsInboundItemOwnershipDO>> longListMap = inboundItemOwnershipQueryMapper.selectInboundItemOwnershipGroupedMap(warehouseId, Collections.singletonList(productId), olderFirst);
+    public List<WmsInboundItemLogicDO> selectInboundItemLogicList(Long warehouseId, Long productId, boolean olderFirst) {
+        Map<Long, List<WmsInboundItemLogicDO>> longListMap = inboundItemLogicQueryMapper.selectInboundItemLogicGroupedMap(warehouseId, Collections.singletonList(productId), olderFirst);
         return longListMap.get(productId);
     }
 

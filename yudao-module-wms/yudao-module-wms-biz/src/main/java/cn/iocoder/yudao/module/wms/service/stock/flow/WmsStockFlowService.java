@@ -6,7 +6,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRe
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
@@ -72,7 +72,7 @@ public interface WmsStockFlowService {
     /**
      * 创建逻辑库存变化流水
      */
-    void createForStockOwnership(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockOwnershipDO stockOwnershipDO, Integer quantity, Long reasonId, Long reasonItemId);
+    void createForStockLogic(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockLogicDO stockLogicDO, Integer quantity, Long reasonId, Long reasonItemId);
 
     /**
      * 创建仓位库存变化流水
@@ -108,7 +108,7 @@ public interface WmsStockFlowService {
 
     void assembleBinMove(List<WmsStockFlowRespVO> list);
 
-    void assembleOwnershipMove(List<WmsStockFlowRespVO> list);
+    void assembleLogicMove(List<WmsStockFlowRespVO> list);
 
     void assembleBatchAvailableQty(List<WmsStockFlowRespVO> list);
 }

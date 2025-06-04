@@ -51,10 +51,10 @@ public interface WmsInboundItemMapper extends BaseMapperX<WmsInboundItemDO> {
         return selectList(query);
     }
 
-    // default PageResult<WmsInboundItemOwnershipDO> selectInboundItemOwnershipList(Long productId) {
+    // default PageResult<WmsInboundItemLogicDO> selectInboundItemLogicList(Long productId) {
     // 
     // 
-    // MPJLambdaWrapperX<WmsInboundItemOwnershipDO> wrapper = new MPJLambdaWrapperX();
+    // MPJLambdaWrapperX<WmsInboundItemLogicDO> wrapper = new MPJLambdaWrapperX();
     // //
     // wrapper.selectAll(WmsInboundItemDO.class);
     // wrapper.select(WmsInboundDO::getWarehouseId);
@@ -66,9 +66,9 @@ public interface WmsInboundItemMapper extends BaseMapperX<WmsInboundItemDO> {
     // 
     // 
     // 
-    // PageResult<WmsInboundItemOwnershipDO> pageResult =selectPage(new PageParam(),wrapper);
+    // PageResult<WmsInboundItemLogicDO> pageResult =selectPage(new PageParam(),wrapper);
     // 
-    // List<WmsInboundItemOwnershipDO> list= selectList(wrapper);
+    // List<WmsInboundItemLogicDO> list= selectList(wrapper);
     // 
     // return selectPage(new PageParam(), wrapper);
     // 

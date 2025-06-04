@@ -8,7 +8,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespV
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
@@ -246,11 +246,11 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
      * 更新逻辑库存
      **/
     @Override
-    protected  WmsStockFlowDirection updateStockOwnershipQty(WmsStockOwnershipDO stockOwnershipDO, WmsOutboundItemRespVO item, Integer quantity) {
+    protected WmsStockFlowDirection updateStockLogicQty(WmsStockLogicDO stockLogicDO, WmsOutboundItemRespVO item, Integer quantity) {
         // 可用量
-        // stockOwnershipDO.setAvailableQty(stockOwnershipDO.getAvailableQty()-quantity);
+        // stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty()-quantity);
         // 待出库量
-        stockOwnershipDO.setOutboundPendingQty(stockOwnershipDO.getOutboundPendingQty()+quantity);
+        stockLogicDO.setOutboundPendingQty(stockLogicDO.getOutboundPendingQty() + quantity);
 
         return WmsStockFlowDirection.IN;
     }

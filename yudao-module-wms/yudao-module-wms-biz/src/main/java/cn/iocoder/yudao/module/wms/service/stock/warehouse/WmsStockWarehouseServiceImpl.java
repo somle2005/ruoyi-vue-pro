@@ -21,7 +21,7 @@ import cn.iocoder.yudao.module.wms.dal.mysql.stock.warehouse.WmsStockWarehousePr
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
-import cn.iocoder.yudao.module.wms.service.stock.ownership.WmsStockOwnershipService;
+import cn.iocoder.yudao.module.wms.service.stock.logic.WmsStockLogicService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import com.google.common.collect.Maps;
 import jakarta.annotation.Resource;
@@ -56,7 +56,7 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
 
     @Resource
     @Lazy
-    private WmsStockOwnershipService stockOwnershipService;
+    private WmsStockLogicService stockLogicService;
 
     @Resource
     @Lazy
