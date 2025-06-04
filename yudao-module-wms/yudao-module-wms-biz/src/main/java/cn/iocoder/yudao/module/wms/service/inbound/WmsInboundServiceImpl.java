@@ -362,8 +362,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             if (respVO.getOutboundAvailableQty() == null) {
                 respVO.setOutboundAvailableQty(0);
             }
-            if (respVO.getShelvedQty() == null) {
-                respVO.setShelvedQty(0);
+            if (respVO.getShelveClosedQty() == null) {
+                respVO.setShelveClosedQty(0);
             }
         }
         if (countOfNone > 0) {
@@ -417,7 +417,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                     .direction(ONE)
                     .outboundAvailableQty(respVO.getActualQty())
                     .outboundAvailableDeltaQty(respVO.getActualQty())
-                .shelveClosedQty(respVO.getShelvedQty())
+                .shelveClosedQty(respVO.getShelveClosedQty())
                     .build();
             inboundItemFlowMapper.insert(inboundItemFlow);
             List<WmsStockFlowDO> wmsStockFlowDOList = stockFlowMapper.selectByReasonItemIdAndReasonBillId(respVO.getId(), respVO.getInboundId());
@@ -583,15 +583,15 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             Integer full = 0;
             for (WmsInboundItemDO itemDO : inboundItemDOList) {
                 Integer actualQty = itemDO.getActualQty();
-                Integer shelvedQty = itemDO.getShelveClosedQty();
+                Integer ShelveClosedQty = itemDO.getShelveClosedQty();
                 // 如果存在已上架数量不为0，部分上架
-                if (shelvedQty == 0) {
+                if (ShelveClosedQty == 0) {
                     none++;
                 }
-                if (shelvedQty >= actualQty) {
+                if (ShelveClosedQty >= actualQty) {
                     full++;
                 }
-                if (shelvedQty > 0 && shelvedQty < actualQty) {
+                if (ShelveClosedQty > 0 && ShelveClosedQty < actualQty) {
                     part++;
                 }
             }

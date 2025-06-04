@@ -44,10 +44,12 @@ public interface WmsInboundItemMapper extends BaseMapperX<WmsInboundItemDO> {
 
     default List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId) {
         MPJLambdaWrapperX<WmsInboundItemDO> query = new MPJLambdaWrapperX<>();
-        query.select(WmsInboundItemDO::getId, WmsInboundItemDO::getInboundId, WmsInboundItemDO::getProductId);
+//        query.select(WmsInboundItemDO::getId, WmsInboundItemDO::getInboundId, WmsInboundItemDO::getProductId);
+        query.selectAll(WmsInboundItemDO.class);
         query.innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId);
         query.in(WmsInboundDO::getInboundStatus, Arrays.asList(WmsInboundStatus.ALL.getValue(), WmsInboundStatus.PART.getValue()));
         query.eq(WmsInboundDO::getWarehouseId, warehouseId).eq(WmsInboundItemDO::getProductId, productId).last("ORDER BY DATEDIFF(t1.inbound_time, now())+t1.init_age desc");
+        query.selectAll(WmsInboundItemDO.class);
         return selectList(query);
     }
 

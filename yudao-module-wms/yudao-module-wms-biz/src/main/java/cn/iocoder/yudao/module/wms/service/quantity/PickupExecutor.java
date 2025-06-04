@@ -78,7 +78,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
                 throw exception(INBOUND_ITEM_ACTUAL_QTY_ERROR);
             }
             // 拣货量不能大于可拣货的量
-            Integer pickupAvaAty = inboundItemVO.getActualQty() - inboundItemVO.getShelvedQty();
+            Integer pickupAvaAty = inboundItemVO.getActualQty() - inboundItemVO.getShelveClosedQty();
             if(pickupItemDO.getQty() > pickupAvaAty) {
                 throw exception(INBOUND_ITEM_ACTUAL_QTY_ERROR);
             }
@@ -135,16 +135,16 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
 
         Integer quantity = pickupItemDO.getQty();
 
-        Integer shelvedQtyAfterPickup=inboundItemVO.getShelvedQty()+quantity;
+        Integer ShelveClosedQtyAfterPickup = inboundItemVO.getShelveClosedQty() + quantity;
 
         // 判断拣货量是否大于实际入库量
-        if(shelvedQtyAfterPickup>inboundItemVO.getActualQty()) {
+        if (ShelveClosedQtyAfterPickup > inboundItemVO.getActualQty()) {
             throw  exception(INBOUND_ITEM_PICKUP_LEFT_QUANTITY_NOT_ENOUGH);
         }
 
         // 更新入库记录
         inboundItemVO.setOutboundAvailableQty(inboundItemVO.getOutboundAvailableQty()+quantity);
-        inboundItemVO.setShelvedQty(shelvedQtyAfterPickup);
+        inboundItemVO.setShelveClosedQty(ShelveClosedQtyAfterPickup);
 
         WmsInboundItemDO inboundItemDO = BeanUtils.toBean(inboundItemVO, WmsInboundItemDO.class);
         inboundItemService.updateById(inboundItemDO);

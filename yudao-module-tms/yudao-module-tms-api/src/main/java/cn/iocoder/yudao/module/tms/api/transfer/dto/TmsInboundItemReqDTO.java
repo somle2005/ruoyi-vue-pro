@@ -51,7 +51,7 @@ public class TmsInboundItemReqDTO {
     /**
      * 已上架量，已经拣货到仓位的库存量
      */
-    private Integer shelvedQty;
+    private Integer shelveClosedQty;
 
     /**
      * 上架可用量，已上架量 - 出库可用量

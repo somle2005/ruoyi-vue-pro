@@ -54,5 +54,5 @@ public class WmsInboundItemFlowSimpleVO {
 
     @Schema(description = "已上架量，已经拣货到仓位的库存量", example = "")
     @ExcelProperty("已上架量，已经拣货到仓位的库存量")
-    private Integer shelvedQty;
+    private Integer shelveClosedQty;
 }

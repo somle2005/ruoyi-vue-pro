@@ -58,5 +58,5 @@ public class WmsInboundItemFlowPageReqVO extends PageParam {
     private Integer actualQty;
 
     @Schema(description = "已上架量，已经拣货到仓位的库存量", example = "")
-    private Integer shelvedQty;
+    private Integer shelveClosedQty;
 }

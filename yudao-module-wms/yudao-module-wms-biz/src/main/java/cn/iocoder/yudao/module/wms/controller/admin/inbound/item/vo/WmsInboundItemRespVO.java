@@ -103,7 +103,7 @@ public class WmsInboundItemRespVO {
 
     @Schema(description = "已上架量，已经拣货到仓位的库存量", example = "")
     @ExcelProperty("已上架量")
-    private Integer shelvedQty;
+    private Integer shelveClosedQty;
 
     @Schema(description = "可上架量", example = "")
     private Integer shelveAvailableQty;

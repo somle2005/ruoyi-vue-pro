@@ -52,7 +52,7 @@ public class WmsInboundItemBinDTO {
     /**
      * 已上架量，已经拣货到仓位的库存量
      */
-    private Integer shelvedQty;
+    private Integer shelveClosedQty;
 
     /**
      * 最新的流水ID

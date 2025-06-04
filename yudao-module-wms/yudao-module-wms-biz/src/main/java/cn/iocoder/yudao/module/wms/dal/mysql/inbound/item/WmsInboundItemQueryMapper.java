@@ -67,7 +67,7 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.betweenIfPresent(WmsInboundItemDO::getActualQty,reqVO.getActualQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getOutboundAvailableQty,reqVO.getOutboundAvailableQty());
         wrapper.betweenIfPresent(WmsInboundItemDO::getPlanQty,reqVO.getPlanQty());
-        wrapper.betweenIfPresent(WmsInboundItemDO::getShelveClosedQty, reqVO.getShelvedQty());
+        wrapper.betweenIfPresent(WmsInboundItemDO::getShelveClosedQty, reqVO.getShelveClosedQty());
 
         wrapper.betweenIfPresent(AGE_COL, reqVO.getAge());
 

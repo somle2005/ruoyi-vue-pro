@@ -141,7 +141,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         // 检查入库批次库存是否充足
         int totalOutboundAvailableQty=0;
         for (WmsInboundItemDO inboundItemDO : itemsList) {
-            totalOutboundAvailableQty += inboundItemDO.getOutboundAvailableQty();
+            totalOutboundAvailableQty += inboundItemDO.getOutboundAvailableQty() == null ? 0 : inboundItemDO.getOutboundAvailableQty();
         }
         if(quantity>totalOutboundAvailableQty) {
             throw exception(INBOUND_ITEM_OUTBOUND_AVAILABLE_QTY_NOT_ENOUGH);

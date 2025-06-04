@@ -47,7 +47,7 @@ public class TmsFirstMileStockRespVO {
     private Integer planQty;
 
     @Schema(description = "已上架量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
-    private Integer shelvedQty;
+    private Integer shelveClosedQty;
 
     @Schema(description = "批次号", requiredMode = Schema.RequiredMode.REQUIRED, example = "BATCH001")
     private String batchNo;

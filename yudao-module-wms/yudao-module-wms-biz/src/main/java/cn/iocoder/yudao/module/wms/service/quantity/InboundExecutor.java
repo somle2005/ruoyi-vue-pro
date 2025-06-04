@@ -166,13 +166,13 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
 
     public static void setShelveAvailableQty(List<? extends WmsInboundItemRespVO> items) {
         items.forEach(item -> {
-            item.setShelveAvailableQty(item.getActualQty() - item.getShelvedQty());
+            item.setShelveAvailableQty(item.getActualQty() - item.getShelveClosedQty());
         });
     }
 
     public static void setShelveAvailableQty(Collection<? extends WmsInboundItemFlowSimpleVO> items) {
         items.forEach(item -> {
-            item.setShelveAvailableQty(item.getActualQty() - item.getShelvedQty());
+            item.setShelveAvailableQty(item.getActualQty() - item.getShelveClosedQty());
         });
     }
 

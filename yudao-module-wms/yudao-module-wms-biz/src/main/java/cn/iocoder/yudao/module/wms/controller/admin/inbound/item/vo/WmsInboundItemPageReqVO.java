@@ -55,7 +55,7 @@ public class WmsInboundItemPageReqVO extends PageParam {
     private Integer[] planQty;
 
     @Schema(description = "已上架量，已经拣货到仓位的库存量", example = "")
-    private Integer[] shelvedQty;
+    private Integer[] shelveClosedQty;
 
     @Schema(description = "最新的流水ID", example = "", hidden = true)
     private Long latestFlowId;

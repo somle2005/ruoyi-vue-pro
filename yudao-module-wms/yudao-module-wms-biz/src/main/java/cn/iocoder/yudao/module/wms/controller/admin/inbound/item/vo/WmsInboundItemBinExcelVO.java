@@ -62,7 +62,7 @@ public class WmsInboundItemBinExcelVO {
     private Integer actualQty;
 
     @ExcelProperty("已上架量")
-    private Integer shelvedQty;
+    private Integer shelveClosedQty;
 
     @Schema(description = "可上架量", example = "")
     private Integer shelveAvailableQty;
