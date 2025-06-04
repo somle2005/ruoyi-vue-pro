@@ -1,12 +1,11 @@
 package cn.iocoder.yudao.module.wms.api.inbound;
 
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
-import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
-import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemRespDTO;
-import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundItemSaveReqDTO;
-import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundSaveReqDTO;
+import cn.iocoder.yudao.module.wms.api.inbound.dto.*;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemListForTmsReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
@@ -16,7 +15,6 @@ import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
-import cn.iocoder.yudao.module.wms.service.quantity.InboundExecutor;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -94,13 +92,25 @@ public class WmsInboundApiImpl implements WmsInboundApi {
     }
 
     @Override
-    public List<WmsInboundItemRespDTO> getInboundItemList(Long companyId, List<Long> productIds) {
+    public List<WmsInboundItemRespDTO> getInboundItemList(WmsInboundItemListForTmsReqDTO reqDTO) {
         // 查询数据
-        List<WmsInboundItemQueryDO> doListResult = inboundItemService.getInboundItemList(companyId, productIds);
+        List<WmsInboundItemQueryDO> doListResult = inboundItemService.getInboundItemListForTms(BeanUtils.toBean(reqDTO, WmsInboundItemListForTmsReqVO.class));
         // 转换
         List<WmsInboundItemRespVO> voListResult = BeanUtils.toBean(doListResult, WmsInboundItemRespVO.class);
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(voListResult)
+            .mapping(WmsInboundItemRespVO::getCreator, WmsInboundItemRespVO::setCreatorName)
+            .mapping(WmsInboundItemRespVO::getUpdater, WmsInboundItemRespVO::setUpdaterName)
+            .fill();
+        // 装配
+//        inboundItemService.assembleDept(voListResult);
+//        inboundItemService.assembleInbound(voListResult);
+//        inboundItemService.assembleProducts(voListResult);
+//        inboundItemService.assembleWarehouse(voListResult);
+//        inboundItemService.assembleStockType(voListResult);
+        inboundItemService.assembleCompany(voListResult);
         inboundItemService.assembleStockWarehouse(voListResult);
-        InboundExecutor.setShelveAvailableQty(voListResult);
+//        InboundExecutor.setShelveAvailableQty(voListResult);
         // 返回
         return BeanUtils.toBean(voListResult, WmsInboundItemRespDTO.class);
     }

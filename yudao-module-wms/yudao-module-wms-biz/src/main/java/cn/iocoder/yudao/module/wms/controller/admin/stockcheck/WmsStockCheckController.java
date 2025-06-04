@@ -169,7 +169,7 @@ public class WmsStockCheckController {
     }
 
     @PutMapping("/abandon")
-    @Operation(summary = "作废")
+    @Operation(summary = "作废盘点单")
     @PreAuthorize("@ss.hasPermission('wms:stockCheck:abandon')")
     public CommonResult<Boolean> abandon(@RequestBody WmsApprovalReqVO approvalReqVO) {
         stockCheckService.approve(WmsStockCheckAuditStatus.Event.ABANDON, approvalReqVO);
