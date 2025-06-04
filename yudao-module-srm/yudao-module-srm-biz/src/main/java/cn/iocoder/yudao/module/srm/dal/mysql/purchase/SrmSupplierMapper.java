@@ -23,12 +23,12 @@ public interface SrmSupplierMapper extends BaseMapperX<SrmSupplierDO> {
                 .likeIfPresent(SrmSupplierDO::getMobile, reqVO.getMobile())
                 .likeIfPresent(SrmSupplierDO::getTelephone, reqVO.getTelephone())
                 //开关
-                .eqIfPresent(SrmSupplierDO::getStatus, reqVO.getStatus())
+            .eqIfPresent(SrmSupplierDO::getOpenStatus, reqVO.getOpenStatus())
                 .orderByDesc(SrmSupplierDO::getId));
     }
 
     default List<SrmSupplierDO> selectListByStatus(Integer status) {
-        return selectList(SrmSupplierDO::getStatus, status);
+        return selectList(SrmSupplierDO::getOpenStatus, status);
     }
 
     default SrmSupplierDO selectByName(String name) {

@@ -819,7 +819,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             saveReqVO.setCode(null)
                 .setItems(inItems)
                 .setId(null)
-                .setInTime(reqVO.getBillTime() == null ? LocalDateTime.now() : reqVO.getBillTime())
+                .setArriveTime(reqVO.getBillTime() == null ? LocalDateTime.now() : reqVO.getBillTime())
                 .setCurrencyId(currencyId.get()) // 币别
         );
         // service持久化

@@ -28,9 +28,9 @@ public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnu
     @Transactional(rollbackFor = Exception.class)
     public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmPurchaseInCountContext context) {
         // 1. 获取入库单信息
-        SrmPurchaseInDO purchaseIn = srmPurchaseInMapper.selectById(context.getInId());
+        SrmPurchaseInDO purchaseIn = srmPurchaseInMapper.selectById(context.getArriveId());
         if (purchaseIn == null) {
-            log.error("[execute][入库单({}) 不存在]", context.getInId());
+            log.error("[execute][入库单({}) 不存在]", context.getArriveId());
             return;
         }
         if (event == SrmEventEnum.STORAGE_INIT) {
@@ -38,9 +38,9 @@ public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnu
         }
         if (event == SrmEventEnum.STOCK_ADJUSTMENT) {
             // 2. 获取所有入库项
-            List<SrmPurchaseInItemDO> items = srmPurchaseInItemMapper.selectListByInId(context.getInId());
+            List<SrmPurchaseInItemDO> items = srmPurchaseInItemMapper.selectListByInId(context.getArriveId());
             if (items.isEmpty()) {
-                log.error("[execute][入库单({}) 没有入库项]", context.getInId());
+                log.error("[execute][入库单({}) 没有入库项]", context.getArriveId());
                 return;
             }
 
@@ -91,7 +91,7 @@ public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnu
             srmPurchaseInMapper.updateById(purchaseIn.setInStatus(to.getCode()));
         }
         log.info("[execute][入库单({}) 状态从({}) 更新为({})]",
-                context.getInId(),
+            context.getArriveId(),
                 SrmStorageStatus.getDescriptionByCode(purchaseIn.getInStatus()),
                 to.getDesc());
     }

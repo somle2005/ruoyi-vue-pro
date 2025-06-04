@@ -67,7 +67,7 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
     private LocalDateTime auditTime;
 
     @Schema(description = "审核意见")
-    private String reviewComment;
+    private String reviewAdvice;
 
     @Schema(description = "审核状态")
     private Integer auditStatus;

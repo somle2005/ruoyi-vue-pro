@@ -88,7 +88,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
         if(supplier == null) {
             throw exception(SUPPLIER_NOT_EXISTS);
         }
-        if(CommonStatusEnum.isDisable(supplier.getStatus())) {
+        if (CommonStatusEnum.isDisable(supplier.getOpenStatus())) {
             throw exception(SUPPLIER_NOT_ENABLE, supplier.getName());
         }
         return supplier;

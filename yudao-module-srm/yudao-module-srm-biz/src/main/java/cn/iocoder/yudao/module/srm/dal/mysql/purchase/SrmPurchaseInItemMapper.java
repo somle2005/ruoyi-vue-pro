@@ -66,7 +66,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
         }
         MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapper = buildWrapper(reqVO)
             // ========== 关联主表 ==========
-            .leftJoin(SrmPurchaseInDO.class, SrmPurchaseInDO::getId, SrmPurchaseInItemDO::getInId)
+            .leftJoin(SrmPurchaseInDO.class, SrmPurchaseInDO::getId, SrmPurchaseInItemDO::getArriveId)
             .selectAll(SrmPurchaseInDO.class);
 
         // 处理主表查询条件
@@ -84,7 +84,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 .eqIfPresent(SrmPurchaseInDO::getCurrencyId, mainQuery.getCurrencyId())
                 // ========== 时间信息 ==========
                 .betweenIfPresent(SrmPurchaseInDO::getBillTime, mainQuery.getBillTime())
-                .betweenIfPresent(SrmPurchaseInDO::getInTime, mainQuery.getInTime())
+                .betweenIfPresent(SrmPurchaseInDO::getArriveTime, mainQuery.getArriveTime())
                 // ========== 审核信息 ==========
                 .eqIfPresent(SrmPurchaseInDO::getAuditorId, mainQuery.getAuditorId())
                 .betweenIfPresent(SrmPurchaseInDO::getAuditTime, mainQuery.getAuditTime())
@@ -115,7 +115,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
             return List.of();
         }
         MPJLambdaWrapper<SrmPurchaseInItemDO> wrapper = buildBOWrapper(new SrmPurchaseInPageReqVO()).selectAssociation(SrmPurchaseInDO.class, SrmPurchaseInItemBO::getSrmPurchaseInDO);
-        wrapper.in(SrmPurchaseInItemDO::getInId, inIds);
+        wrapper.in(SrmPurchaseInItemDO::getArriveId, inIds);
         return selectJoinList(SrmPurchaseInItemBO.class, wrapper);
     }
 
@@ -129,15 +129,15 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
         return selectJoinOne(SrmPurchaseInItemBO.class, wrapper);
     }
     default List<SrmPurchaseInItemDO> selectListByInId(Long inId) {
-        return selectList(SrmPurchaseInItemDO::getInId, inId);
+        return selectList(SrmPurchaseInItemDO::getArriveId, inId);
     }
 
     default List<SrmPurchaseInItemDO> selectListByInIds(Collection<Long> inIds) {
-        return selectList(SrmPurchaseInItemDO::getInId, inIds);
+        return selectList(SrmPurchaseInItemDO::getArriveId, inIds);
     }
 
     default int deleteByInId(Long inId) {
-        return delete(SrmPurchaseInItemDO::getInId, inId);
+        return delete(SrmPurchaseInItemDO::getArriveId, inId);
     }
 
     //根据订单项id获得入库项item数量

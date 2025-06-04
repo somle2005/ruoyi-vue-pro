@@ -86,7 +86,7 @@ public class SrmPurchaseRequestDO extends TenantBaseDO {
     /**
      * 审核意见
      */
-    private String reviewComment;
+    private String reviewAdvice;
     /**
      * 入库状态
      */

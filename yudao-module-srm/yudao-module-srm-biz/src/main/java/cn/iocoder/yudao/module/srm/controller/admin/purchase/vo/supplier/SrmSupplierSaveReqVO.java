@@ -47,7 +47,7 @@ public class SrmSupplierSaveReqVO {
     @Schema(description = "开启状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @NotNull(message = "开启状态不能为空")
     @InEnum(value = CommonStatusEnum.class)
-    private Integer status;
+    private Integer openStatus;
 
     @Schema(description = "排序", requiredMode = Schema.RequiredMode.REQUIRED, example = "10")
     private Integer sort;

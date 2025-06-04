@@ -31,7 +31,7 @@ public class InAuditActionImpl implements Action<SrmAuditStatus, SrmEventEnum, S
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void execute(SrmAuditStatus from, SrmAuditStatus to, SrmEventEnum event, SrmPurchaseInAuditReqVO req) {
-        SrmPurchaseInDO data = mapper.selectById(req.getInId());
+        SrmPurchaseInDO data = mapper.selectById(req.getArriveId());
         //        List<SrmPurchaseInItemDO> itemDOS = itemsMapper.selectListByInId(req.getInId());
         validate(from, to, event, data);
         //审核通过(批准数量)
@@ -44,13 +44,13 @@ public class InAuditActionImpl implements Action<SrmAuditStatus, SrmEventEnum, S
             //                itemDO.setApproveCount(item.getApproveCount() == null ? itemDO.getCount() : item.getApproveCount());//默认(批准数量 = 申请数量)
             //            });
             //设置审核意见
-            data.setReviewComment(req.getReviewComment());
+            data.setReviewAdvice(req.getReviewAdvice());
             data.setAuditTime(LocalDateTime.now());
             data.setAuditorId(getLoginUserId());
         }
         //审核不通过(设置未通过意见)
         if (event == SrmEventEnum.REJECT) {
-            data.setReviewComment(req.getReviewComment());
+            data.setReviewAdvice(req.getReviewAdvice());
             data.setAuditTime(LocalDateTime.now());
             data.setAuditorId(getLoginUserId());
         }

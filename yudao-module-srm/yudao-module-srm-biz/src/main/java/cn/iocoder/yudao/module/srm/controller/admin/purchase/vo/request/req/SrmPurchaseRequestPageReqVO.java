@@ -70,7 +70,7 @@ public class SrmPurchaseRequestPageReqVO extends PageParam {
     private String delivery;
 
     @Schema(description = "审核意见")
-    private String reviewComment;
+    private String reviewAdvice;
 
     @Schema(description = "入库状态")
     private Integer inStatus;

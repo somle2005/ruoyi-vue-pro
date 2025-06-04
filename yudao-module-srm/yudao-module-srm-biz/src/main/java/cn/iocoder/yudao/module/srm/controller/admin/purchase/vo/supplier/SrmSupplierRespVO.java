@@ -55,7 +55,7 @@ public class SrmSupplierRespVO {
     @Schema(description = "开启状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
     @ExcelProperty(value = "开启状态", index = 8, converter = DictConvert.class)
     @DictFormat(DictTypeConstants.COMMON_STATUS)
-    private Integer status;
+    private Integer openStatus;
 
     @Schema(description = "排序", requiredMode = Schema.RequiredMode.REQUIRED, example = "10")
     @ExcelProperty(value = "排序", index = 9)

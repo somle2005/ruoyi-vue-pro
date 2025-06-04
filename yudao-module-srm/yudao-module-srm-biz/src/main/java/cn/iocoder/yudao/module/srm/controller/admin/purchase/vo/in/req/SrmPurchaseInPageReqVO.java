@@ -56,7 +56,7 @@ public class SrmPurchaseInPageReqVO extends PageParam {
 
         @Schema(description = "到货时间")
         @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
-        private LocalDateTime[] inTime;
+        private LocalDateTime[] arriveTime;
 
         // ========== 审核信息 ==========
         @Schema(description = "审核人编号")

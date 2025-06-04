@@ -28,7 +28,7 @@ public class SrmPurchaseReturnAuditReqVO {
 
     //审核意见
     @Schema(description = "审核意见")
-    private String reviewComment;
+    private String reviewAdvice;
 
     //退款完成|退款撤销 布尔值
     @NotNull(message = "退款完成|退款撤销 布尔值不能为空")

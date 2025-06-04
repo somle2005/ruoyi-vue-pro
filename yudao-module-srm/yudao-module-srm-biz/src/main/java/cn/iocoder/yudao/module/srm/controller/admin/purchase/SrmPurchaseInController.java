@@ -156,7 +156,7 @@ public class SrmPurchaseInController {
         List<SrmPurchaseInItemDO> purchaseInItemList = list.stream()
             .flatMap(bo -> bo.getSrmPurchaseInItemDOS().stream())
             .collect(Collectors.toList());
-        Map<Long, List<SrmPurchaseInItemDO>> purchaseInItemMap = convertMultiMap(purchaseInItemList, SrmPurchaseInItemDO::getInId);
+        Map<Long, List<SrmPurchaseInItemDO>> purchaseInItemMap = convertMultiMap(purchaseInItemList, SrmPurchaseInItemDO::getArriveId);
 
         // 1.2 产品信息
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(convertSet(purchaseInItemList, SrmPurchaseInItemDO::getProductId));
