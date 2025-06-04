@@ -100,7 +100,7 @@
 //                        if (variant.getPrice() != null) {
 //                            shopProductDTO.setPrice(new BigDecimal(variant.getPrice()));
 //                        }
-//                        shopProductDTO.setSellableQty(variant.getInventoryQuantity());
+//                        shopProductDTO.setSellableQty(variant.getStockCheckQuantity());
 //                        return shopProductDTO;
 //                    })
 //            ).toList();

@@ -21,8 +21,8 @@ public class SrmReturnSaveItemReqDTO {
     private Integer actualQty;
 
     /**
-     * 来源详情ID
+     * 来源明细行ID
      */
     @NotNull(message = "明细来源详情ID不能为空")
-    private Long upstreamItemId;
+    private Long upstreamId;
 }

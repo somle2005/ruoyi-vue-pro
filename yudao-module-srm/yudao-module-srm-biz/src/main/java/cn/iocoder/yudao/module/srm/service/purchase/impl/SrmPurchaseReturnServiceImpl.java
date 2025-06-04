@@ -686,9 +686,9 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     private WmsOutboundImportReqDTO buildOutboundBaseInfo(SrmPurchaseReturnDO purchaseReturn) {
         WmsOutboundImportReqDTO importReqDTO = new WmsOutboundImportReqDTO();
         importReqDTO.setType(cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType.ORDER.getValue()); // 订单出库
-        importReqDTO.setUpstreamBillId(purchaseReturn.getId()); // 来源单据ID
-        importReqDTO.setUpstreamBillCode(purchaseReturn.getCode()); // 来源单据号
-        importReqDTO.setUpstreamBillType(BillType.SRM_PURCHASE_RETURN.getValue()); // 来源单据类型
+        importReqDTO.setUpstreamId(purchaseReturn.getId()); // 来源单据ID
+        importReqDTO.setUpstreamCode(purchaseReturn.getCode()); // 来源单据编码
+        importReqDTO.setUpstreamType(BillType.SRM_PURCHASE_RETURN.getValue()); // 来源单据类型
         //甲方(财务公司ID)，取第一个退货项 -> 到货项 -> 订单项 -> 订单(purchaseCompanyId)
         // 获取甲方(财务公司ID)，从退货项追溯到订单的财务公司ID
         List<SrmPurchaseReturnItemDO> returnItems = purchaseReturnItemMapper.selectListByReturnId(purchaseReturn.getId());
@@ -729,7 +729,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
             itemDTO.setPlanQty(item.getQty().intValue()); // 计划出库量
             itemDTO.setActualQty(item.getQty().intValue()); // 实际出库量
             itemDTO.setRemark(item.getRemark()); // 备注
-            itemDTO.setUpstreamItemId(item.getId()); // 来源详情ID
+            itemDTO.setUpstreamId(item.getId()); // 来源明细行ID
             return itemDTO;
         }).collect(Collectors.toList());
     }

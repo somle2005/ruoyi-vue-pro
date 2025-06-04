@@ -18,17 +18,17 @@ public class SrmReturnSaveReqDTO {
      * 来源单据ID
      */
     @NotNull(message = "来源单据ID不能为空")
-    private Long upstreamBillId;
+    private Long upstreamId;
 
     /**
-     * 来源单据号
+     * 来源单据编码
      */
-    private String upstreamBillCode;
+    private String upstreamCode;
 
     /**
      * 上游单据类型 ;
      */
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 
     /**
      * 出库单明细

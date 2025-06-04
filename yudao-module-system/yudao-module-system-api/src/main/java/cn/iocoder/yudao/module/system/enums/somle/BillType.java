@@ -17,7 +17,7 @@ public enum BillType implements ArrayValuable<Integer>, DictEnum {
     // ========== WMS  编码段 0~99 ==========
     WMS_INBOUND(0, "入库单"),
     WMS_OUTBOUND(1, "出库单"),
-    WMS_INVENTORY(2,"盘点单"),
+    WMS_STOCKCHECK(2, "盘点单"),
     WMS_EXCHANGE(3,"换货单"),
     WMS_PICKUP(4,"上架单"),
     WMS_BIN_MOVE(5,"库位移动单"),

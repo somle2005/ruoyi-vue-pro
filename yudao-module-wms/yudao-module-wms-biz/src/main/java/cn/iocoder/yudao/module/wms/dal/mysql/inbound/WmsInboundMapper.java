@@ -28,9 +28,9 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
                 .eqIfPresent(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())
                 .eqIfPresent(WmsInboundDO::getAuditStatus, reqVO.getAuditStatus())
                 .eqIfPresent(WmsInboundDO::getInboundStatus, reqVO.getInboundStatus())
-                .eqIfPresent(WmsInboundDO::getUpstreamBillId, reqVO.getUpstreamBillId())
-                .likeIfPresent(WmsInboundDO::getUpstreamBillCode, reqVO.getUpstreamBillCode())
-                .eqIfPresent(WmsInboundDO::getUpstreamBillType, reqVO.getUpstreamBillType())
+            .eqIfPresent(WmsInboundDO::getUpstreamId, reqVO.getUpstreamId())
+            .likeIfPresent(WmsInboundDO::getUpstreamCode, reqVO.getUpstreamCode())
+            .eqIfPresent(WmsInboundDO::getUpstreamType, reqVO.getUpstreamType())
                 .eqIfPresent(WmsInboundDO::getTraceNo, reqVO.getTraceNo())
                 .eqIfPresent(WmsInboundDO::getShippingMethod, reqVO.getShippingMethod())
                 .likeIfPresent(WmsInboundDO::getRemark, reqVO.getRemark())
@@ -76,7 +76,7 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
         LambdaQueryWrapperX<WmsInboundDO> wrapper = new LambdaQueryWrapperX<>();
         wrapper.likeIfPresent(WmsInboundDO::getCode, pageReqVO.getCode());
         wrapper.likeIfPresent(WmsInboundDO::getTraceNo, pageReqVO.getTraceNo());
-        wrapper.likeIfPresent(WmsInboundDO::getUpstreamBillCode, pageReqVO.getUpstreamBillCode());
+        wrapper.likeIfPresent(WmsInboundDO::getUpstreamCode, pageReqVO.getUpstreamCode());
         wrapper.eqIfPresent(WmsInboundDO::getType, pageReqVO.getType());
         wrapper.eqIfPresent(WmsInboundDO::getWarehouseId, pageReqVO.getWarehouseId());
         wrapper.eqIfPresent(WmsInboundDO::getTraceNo, pageReqVO.getTraceNo());
@@ -92,10 +92,10 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
         return selectOne(wrapper);
     }
 
-    default List<WmsInboundDO> getInboundList(Integer upstreamBillType, Long upstreamBillId) {
+    default List<WmsInboundDO> getInboundList(Integer upstreamType, Long upstreamId) {
         LambdaQueryWrapperX<WmsInboundDO> wrapper = new LambdaQueryWrapperX<>();
-        wrapper.eq(WmsInboundDO::getUpstreamBillId, upstreamBillId);
-        wrapper.eq(WmsInboundDO::getUpstreamBillType, upstreamBillType);
+        wrapper.eq(WmsInboundDO::getUpstreamId, upstreamId);
+        wrapper.eq(WmsInboundDO::getUpstreamType, upstreamType);
         //非作废审核状态
         wrapper.ne(WmsInboundDO::getAuditStatus, WmsInboundAuditStatus.ABANDONED.getValue());
         return selectList(wrapper);

@@ -16,7 +16,7 @@ public enum WmsInboundType implements ArrayValuable<Integer>, DictEnum {
 
     MANUAL(1, "手工入库"),
     PURCHASE(2, "采购入库"),
-    INVENTORY(3, "盘点入库"),
+    STOCKCHECK(3, "盘点入库"),
     TRANSFER(4, "调拨入库"),
    ;
 

@@ -180,7 +180,7 @@ public class WmsPickupServiceImpl implements WmsPickupService {
         }
         // 校验数量
         for (WmsPickupItemDO itemDO : toInsetList) {
-            if(cause==WmsPickupCause.PICKUP || cause==WmsPickupCause.INVENTORY) {
+            if (cause == WmsPickupCause.PICKUP || cause == WmsPickupCause.STOCKCHECK) {
                 if (itemDO.getQty() == null || itemDO.getQty() <= 0) {
                     throw exception(PICKUP_ITEM_QTY_ERROR);
                 }
@@ -279,8 +279,8 @@ public class WmsPickupServiceImpl implements WmsPickupService {
     }
 
     @Override
-    public void createForInventory(WmsPickupSaveReqVO pickupSaveReqVO) {
-        pickupSaveReqVO.setCause(WmsPickupCause.INVENTORY.getValue());
+    public void createForStockCheck(WmsPickupSaveReqVO pickupSaveReqVO) {
+        pickupSaveReqVO.setCause(WmsPickupCause.STOCKCHECK.getValue());
         this.createPickup(pickupSaveReqVO);
     }
 

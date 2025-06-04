@@ -10,12 +10,14 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
 import java.util.List;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,creator,code,company_id,create_time,remark,audit_status,outbound_time,type,updater,upstream_bill_type,update_time,latest_outbound_action_id,outbound_status,upstream_bill_id,id,upstream_bill_code,dept_id,warehouse_id
+ * @table-fields : tenant_id,creator,code,company_id,create_time,remark,audit_status,outbound_time,type,updater,upstream_type,update_time,latest_outbound_action_id,outbound_status,upstream_id,id,upstream_code,dept_id,warehouse_id
  */
 @Schema(description = "管理后台 - 出库单 Response VO")
 @Data
@@ -121,13 +123,13 @@ public class WmsOutboundRespVO {
 
     @Schema(description = "来源单据ID", example = "")
     @ExcelProperty("来源单据ID")
-    private Long upstreamBillId;
+    private Long upstreamId;
 
-    @Schema(description = "来源单据号", example = "")
-    @ExcelProperty("来源单据号")
-    private String upstreamBillCode;
+    @Schema(description = "来源单据编码", example = "")
+    @ExcelProperty("来源单据编码")
+    private String upstreamCode;
 
     @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
     @ExcelProperty("WMS来源单据类型")
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 }

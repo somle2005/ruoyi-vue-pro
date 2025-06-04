@@ -119,14 +119,13 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      * @sign : 5D2F5734A2A97234
      */
     @Override
-    @Transactional(rollbackFor = Exception.class)
     public WmsInboundDO createInbound(WmsInboundSaveReqVO createReqVO) {
         // 设置单据号
         String no = noRedisDAO.generate(WmsNoRedisDAO.INBOUND_NO_PREFIX, 6);
         createReqVO.setCode(no);
         createReqVO.setAuditStatus(DRAFT.getValue());
         createReqVO.setInboundStatus(WmsInboundStatus.NONE.getValue());
-        createReqVO.setShelvingStatus(WmsInboundShelvingStatus.NONE.getValue());
+        createReqVO.setShelveStatus(WmsInboundShelvingStatus.NONE.getValue());
         if (inboundMapper.getByCode(createReqVO.getCode()) != null) {
             throw exception(INBOUND_NO_DUPLICATE);
         }
@@ -418,7 +417,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                     .direction(ONE)
                     .outboundAvailableQty(respVO.getActualQty())
                     .outboundAvailableDeltaQty(respVO.getActualQty())
-                    .shelvedQty(respVO.getShelvedQty())
+                .shelveClosedQty(respVO.getShelvedQty())
                     .build();
             inboundItemFlowMapper.insert(inboundItemFlow);
             List<WmsStockFlowDO> wmsStockFlowDOList = stockFlowMapper.selectByReasonItemIdAndReasonBillId(respVO.getId(), respVO.getInboundId());
@@ -516,9 +515,22 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     }
 
     /**
+     * 按入库顺序获得入库批次列表
+     *
+     * @param warehouseId 仓库id
+     * @param productId   产品id
+     * @param olderFirst  是否按入库时间升序
+     */
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public List<WmsInboundItemOwnershipDO> getInboundItemOwnershipList(Long warehouseId, Long productId, boolean olderFirst) {
+        return inboundItemOwnershipQueryMapper.getInboundItemOwnershipList(warehouseId, productId, olderFirst);
+    }
+
+    /**
      * 按入库顺序获得第一个入库批次
-     * @param warehouseId
-     * @param productId
+     * @param warehouseId 仓库id
+     * @param productId 产品id
      * @param olderFirst 是否按入库时间升序
      */
     @Override
@@ -531,14 +543,14 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      * 创建盘点入库单
      */
     @Override
-    public WmsInboundDO createForInventory(WmsInboundSaveReqVO inboundSaveReqVO) {
+    public WmsInboundDO createForStockCheck(WmsInboundSaveReqVO inboundSaveReqVO) {
         JdbcUtils.requireTransaction();
         Map<Long, Integer> actualQtyMap = StreamX.from(inboundSaveReqVO.getItemList()).toMap(WmsInboundItemSaveReqVO::getProductId, WmsInboundItemSaveReqVO::getActualQty);
         // 创建
         WmsInboundDO inbound = this.createInbound(inboundSaveReqVO);
         // 保存
-        inbound.setUpstreamBillType(BillType.WMS_INVENTORY.getValue());
-        inbound.setType(WmsInboundType.INVENTORY.getValue());
+        inbound.setUpstreamType(BillType.WMS_STOCKCHECK.getValue());
+        inbound.setType(WmsInboundType.STOCKCHECK.getValue());
         inboundMapper.updateById(inbound);
         // 
         WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
@@ -571,7 +583,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             Integer full = 0;
             for (WmsInboundItemDO itemDO : inboundItemDOList) {
                 Integer actualQty = itemDO.getActualQty();
-                Integer shelvedQty = itemDO.getShelvedQty();
+                Integer shelvedQty = itemDO.getShelveClosedQty();
                 // 如果存在已上架数量不为0，部分上架
                 if (shelvedQty == 0) {
                     none++;
@@ -585,19 +597,19 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             }
             WmsInboundDO inbound = this.getInbound(id);
             if (none == inboundItemDOList.size()) {
-                inbound.setShelvingStatus(WmsInboundShelvingStatus.NONE.getValue());
+                inbound.setShelveStatus(WmsInboundShelvingStatus.NONE.getValue());
             } else if (full == inboundItemDOList.size()) {
-                inbound.setShelvingStatus(WmsInboundShelvingStatus.ALL.getValue());
+                inbound.setShelveStatus(WmsInboundShelvingStatus.ALL.getValue());
             } else {
-                inbound.setShelvingStatus(WmsInboundShelvingStatus.PARTLY.getValue());
+                inbound.setShelveStatus(WmsInboundShelvingStatus.PARTLY.getValue());
             }
             inboundMapper.updateById(inbound);
         }
     }
 
     @Override
-    public List<WmsInboundDO> getInboundList(Integer upstreamBillType, Long upstreamBillId) {
-        return inboundMapper.getInboundList(upstreamBillType,upstreamBillId);
+    public List<WmsInboundDO> getInboundList(Integer upstreamType, Long upstreamId) {
+        return inboundMapper.getInboundList(upstreamType, upstreamId);
     }
 
     @Override
@@ -608,7 +620,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         // 创建
         WmsInboundDO inbound = this.createInbound(inboundSaveReqVO);
         // 保存
-        inbound.setUpstreamBillType(BillType.TMS_TRANSFER.getValue());
+        inbound.setUpstreamType(BillType.TMS_TRANSFER.getValue());
         inbound.setType(WmsInboundType.TRANSFER.getValue());
         inboundMapper.updateById(inbound);
         //

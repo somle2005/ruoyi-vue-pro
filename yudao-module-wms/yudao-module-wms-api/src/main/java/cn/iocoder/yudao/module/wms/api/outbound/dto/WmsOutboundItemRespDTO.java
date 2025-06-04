@@ -5,7 +5,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * @table-fields : tenant_id,creator,company_id,create_time,bin_id,plan_qty,upstream_item_id,remark,outbound_id,updater,update_time,outbound_status,actual_qty,product_id,id,dept_id
+ * @table-fields : tenant_id,creator,company_id,create_time,bin_id,plan_qty,upstream_id,remark,outbound_id,updater,update_time,outbound_status,actual_qty,product_id,id,dept_id
  */
 @Data
 public class WmsOutboundItemRespDTO {
@@ -110,9 +110,9 @@ public class WmsOutboundItemRespDTO {
     private String remark;
 
     /**
-     * 来源详情ID
+     * 来源明细行ID
      */
-    private Long upstreamItemId;
+    private Long upstreamId;
 
 //    /**
 //     * 部门

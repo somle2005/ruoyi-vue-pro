@@ -1,17 +1,13 @@
 package cn.iocoder.yudao.module.wms.service.inbound.item;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemBinRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemImportExcelVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemPageReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsPickupPendingPageReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.*;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemBinQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -163,4 +159,12 @@ public interface WmsInboundItemService {
     void assembleStockType(List<WmsInboundItemRespVO> list);
 
     WmsInboundItemDO getByInboundIdAndProductId(Long inboundId, Long productId);
+
+    /**
+     * 获取入库单详情列表 tms查询用
+     *
+     * @param listForTmsReqVO 入库单详情列表查询条件
+     * @return 入库单详情列表
+     */
+    List<WmsInboundItemQueryDO> getInboundItemListForTms(WmsInboundItemListForTmsReqVO listForTmsReqVO);
 }

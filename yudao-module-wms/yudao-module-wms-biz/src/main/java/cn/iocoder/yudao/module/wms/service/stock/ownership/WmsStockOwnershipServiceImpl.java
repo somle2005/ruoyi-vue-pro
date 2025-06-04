@@ -40,7 +40,7 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 /**
- * 所有者库存 Service 实现类
+ * 逻辑库存 Service 实现类
  *
  * @author 李方捷
  */
@@ -167,7 +167,7 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
             // 可用库存
             stockOwnershipDO.setAvailableQty(0);
             // 待上架数量
-            stockOwnershipDO.setShelvingPendingQty(0);
+            stockOwnershipDO.setShelvePendingQty(0);
             // 待出库量
             stockOwnershipDO.setOutboundPendingQty(0);
             // 不良品数量
@@ -186,8 +186,8 @@ public class WmsStockOwnershipServiceImpl implements WmsStockOwnershipService {
             stockOwnershipDO.setAvailableQty(0);
         }
         // 待上架量
-        if (stockOwnershipDO.getShelvingPendingQty() == null) {
-            stockOwnershipDO.setShelvingPendingQty(0);
+        if (stockOwnershipDO.getShelvePendingQty() == null) {
+            stockOwnershipDO.setShelvePendingQty(0);
         }
         // 待出库量
         if (stockOwnershipDO.getOutboundPendingQty() == null) {

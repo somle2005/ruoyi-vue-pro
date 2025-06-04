@@ -79,9 +79,9 @@ public interface WmsOutboundService {
 
     void assembleApprovalHistory(List<WmsOutboundRespVO> list);
 
-    WmsOutboundDO createForInventory(WmsOutboundSaveReqVO outboundSaveReqVO);
+    WmsOutboundDO createForStockCheck(WmsOutboundSaveReqVO outboundSaveReqVO);
 
-    List<WmsOutboundDO> getOutboundList(Integer upstreamBillType, Long upstreamBillId);
+    List<WmsOutboundDO> getOutboundList(Integer upstreamType, Long upstreamId);
 
     WmsOutboundRespVO generateOutbound(WmsOutboundImportReqVO importReqVO);
 

@@ -55,7 +55,7 @@ public class WmsNoRedisDAO {
     /**
      * 盘点单据号前缀
      **/
-    public static final String INVENTORY_NO_PREFIX = "PDD";
+    public static final String STOCKCHECK_NO_PREFIX = "PDD";
 
     /**
      * 盘点单据号前缀

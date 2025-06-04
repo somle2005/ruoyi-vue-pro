@@ -29,13 +29,11 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundPageR
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.item.WmsOutboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
-import cn.iocoder.yudao.module.wms.dal.mysql.inbound.WmsInboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.WmsOutboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.item.WmsOutboundItemMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.pickup.item.WmsPickupItemMapper;
@@ -43,7 +41,6 @@ import cn.iocoder.yudao.module.wms.dal.mysql.stock.bin.WmsStockBinMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
-import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
@@ -58,7 +55,6 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -178,8 +174,8 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         if (warehouseIdSetOfBin.size() != 1) {
             throw exception(OUTBOUND_WAREHOUSE_ERROR);
         }
-//        outboundDO.setUpstreamBillType(outboundDO.getType());
-        if(outboundDO.getUpstreamBillType() != null && outboundDO.getUpstreamBillType().equals(SRM_PURCHASE_RETURN.getValue())) {
+//        outboundDO.setUpstreamType(outboundDO.getType());
+        if (outboundDO.getUpstreamType() != null && outboundDO.getUpstreamType().equals(SRM_PURCHASE_RETURN.getValue())) {
             Long warehouseId = StreamX.from(warehouseIdSetOfBin).first();
             if (!Objects.equals(warehouseId, outboundDO.getWarehouseId())) {
                 throw exception(OUTBOUND_WAREHOUSE_ERROR);
@@ -224,7 +220,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         }
         WmsOutboundSaveReqVO createReqVO = BeanUtils.toBean(importReqVO, WmsOutboundSaveReqVO.class);
         createReqVO.setItemList(itemList);
-//        createReqVO.setUpstreamBillCode(importReqVO.getUpstreamBillCode());
+//        createReqVO.setUpstreamCode(importReqVO.getUpstreamCode());
 //        createReqVO.setWarehouseId(importReqVO.getWarehouseId());
         WmsOutboundDO outboundDO = createOutbound(createReqVO);
         return BeanUtils.toBean(outboundDO, WmsOutboundRespVO.class);
@@ -391,8 +387,8 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     }
 
     @Override
-    public WmsOutboundDO createForInventory(WmsOutboundSaveReqVO outboundSaveReqVO) {
-        outboundSaveReqVO.setType(WmsOutboundType.INVENTORY.getValue());
+    public WmsOutboundDO createForStockCheck(WmsOutboundSaveReqVO outboundSaveReqVO) {
+        outboundSaveReqVO.setType(WmsOutboundType.STOCKCHECK.getValue());
         // 
         WmsOutboundDO outbound = this.createOutbound(outboundSaveReqVO);
         WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
@@ -416,8 +412,8 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     }
 
     @Override
-    public List<WmsOutboundDO> getOutboundList(Integer upstreamBillType, Long upstreamBillId) {
-        return outboundMapper.getOutboundList(upstreamBillType,upstreamBillId);
+    public List<WmsOutboundDO> getOutboundList(Integer upstreamType, Long upstreamId) {
+        return outboundMapper.getOutboundList(upstreamType, upstreamId);
     }
 
     @Override

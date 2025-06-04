@@ -53,8 +53,8 @@ public class WmsWarehouseListReqDTO {
     private String postcode;
 
     /**
-     * 公司名称
+     * 详细地址3
      */
-    private String companyName;
+    private String addressLine3;
 
 } 

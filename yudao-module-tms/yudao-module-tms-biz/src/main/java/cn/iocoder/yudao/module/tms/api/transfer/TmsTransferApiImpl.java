@@ -49,13 +49,13 @@ public class TmsTransferApiImpl implements TmsTransferApi {
     @Transactional(rollbackFor = Exception.class)
     public void afterOutboundAudit(TmsOutboundReqDTO reqDTO) {
         // 1.0 校验上游类型是否是调拨出库
-        if (!Objects.equals(reqDTO.getUpstreamBillType(), BillType.TMS_TRANSFER.getValue())) {
-            throw new IllegalArgumentException(StrUtil.format("出库单审核回调TmsOutboundReqDTO，上游类型({})不是调拨单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamBillType())).getLabel()));
+        if (!Objects.equals(reqDTO.getUpstreamType(), BillType.TMS_TRANSFER.getValue())) {
+            throw new IllegalArgumentException(StrUtil.format("出库单审核回调TmsOutboundReqDTO，上游类型({})不是调拨单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamType())).getLabel()));
         }
 
         // 2.0 校验reqDTO的items的upstreamItemId是否存在
         List<Long> itemIds = reqDTO.getItems().stream()
-            .map(TmsOutboundItemReqDTO::getUpstreamItemId)
+            .map(TmsOutboundItemReqDTO::getUpstreamId)
             .toList();
         List<TmsTransferItemDO> items = transferItemService.validateTransferItemExists(itemIds);
 
@@ -70,7 +70,7 @@ public class TmsTransferApiImpl implements TmsTransferApi {
         //3.1 填充子项的出库明细数值
         for (TmsOutboundItemReqDTO outboundItem : reqDTO.getItems()) {
             transferItemService.updateTransferItemOutbound(
-                outboundItem.getUpstreamItemId(),
+                outboundItem.getUpstreamId(),
                 outboundItem.getActualQty().intValue()
             );
         }
@@ -90,14 +90,14 @@ public class TmsTransferApiImpl implements TmsTransferApi {
      * @param reqDTO 出库单请求DTO
      */
     private void createInbound(TmsOutboundReqDTO reqDTO) {
-        TmsTransferBO transferBO = transferService.getTransferBO(reqDTO.getUpstreamBillId());
+        TmsTransferBO transferBO = transferService.getTransferBO(reqDTO.getUpstreamId());
         //仓库to ,提交过去->入库单待审核,等待回调
         Long inbound = wmsInboundApi.createInbound(
             WmsInboundSaveReqDTO.builder()
                 .type(WmsInboundType.TRANSFER.getValue())
-                .upstreamBillType(BillType.TMS_TRANSFER.getValue())
-                .upstreamBillId(transferBO.getId())
-                .upstreamBillCode(transferBO.getCode())
+                .upstreamType(BillType.TMS_TRANSFER.getValue())
+                .upstreamId(transferBO.getId())
+                .upstreamCode(transferBO.getCode())
                 .warehouseId(transferBO.getToWarehouseId())
                 //TODO 主单是否有库存公司
 //                .companyId(transferBO.getCompanyId())
@@ -110,7 +110,7 @@ public class TmsTransferApiImpl implements TmsTransferApi {
                         .deptId(item.getDeptId()) //行库存部门ID
                         .companyId(item.getStockCompanyId())
                         .remark(item.getRemark())
-                        .upstreamItemId(item.getId())
+                        .upstreamId(item.getId())
                         .build())
                     .collect(Collectors.toList()))
                 .build()
@@ -128,13 +128,13 @@ public class TmsTransferApiImpl implements TmsTransferApi {
     @Override
     public void afterInboundAudit(TmsInboundReqDTO reqDTO) {
         // 1.0 校验上游类型是否是调拨入库
-        if (!Objects.equals(reqDTO.getUpstreamBillType(), BillType.TMS_TRANSFER.getValue())) {
-            throw new IllegalArgumentException(StrUtil.format("入库单审核回调TmsInboundReqDTO，上游类型({})不是调拨单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamBillType())).getLabel()));
+        if (!Objects.equals(reqDTO.getUpstreamType(), BillType.TMS_TRANSFER.getValue())) {
+            throw new IllegalArgumentException(StrUtil.format("入库单审核回调TmsInboundReqDTO，上游类型({})不是调拨单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamType())).getLabel()));
         }
 
         // 2.0 校验reqDTO的items的upstreamItemId是否存在
         List<Long> itemIds = reqDTO.getItemList().stream()
-            .map(TmsInboundItemReqDTO::getUpstreamItemId)
+            .map(TmsInboundItemReqDTO::getUpstreamId)
             .toList();
         List<TmsTransferItemDO> items = transferItemService.validateTransferItemExists(itemIds);
 
@@ -150,11 +150,11 @@ public class TmsTransferApiImpl implements TmsTransferApi {
         // 3.1 填充子项的入库明细数值
         for (var inboundItem : reqDTO.getItemList()) {
             transferItemService.updateTransferItemInbound(
-                inboundItem.getUpstreamItemId(),
+                inboundItem.getUpstreamId(),
                 inboundItem.getActualQty()
             );
         }
 
-        log.info("调拨单[{}]入库审核通过，入库单ID: {}", reqDTO.getUpstreamBillCode(), reqDTO.getId());
+        log.info("调拨单[{}]入库审核通过，入库单ID: {}", reqDTO.getUpstreamCode(), reqDTO.getId());
     }
 }

@@ -75,9 +75,9 @@ public class WmsInboundItemBinDTO {
     private String remark;
 
     /**
-     * 来源详情ID
+     * 来源明细行ID
      */
-    private Long upstreamItemId;
+    private Long upstreamId;
 
     /**
      * 入库的财务公司ID

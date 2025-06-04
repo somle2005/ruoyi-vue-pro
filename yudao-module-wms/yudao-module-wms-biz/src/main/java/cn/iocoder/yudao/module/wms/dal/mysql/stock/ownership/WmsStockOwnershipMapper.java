@@ -14,7 +14,7 @@ import org.apache.ibatis.annotations.Mapper;
 import java.util.List;
 
 /**
- * 所有者库存 Mapper
+ * 逻辑库存 Mapper
  *
  * @author 李方捷
  */
@@ -34,7 +34,7 @@ public interface WmsStockOwnershipMapper extends BaseMapperX<WmsStockOwnershipDO
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getCreateTime, reqVO.getCreateTime());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getAvailableQty, reqVO.getAvailableQty());
         wrapper.betweenIfPresent(WmsStockOwnershipDO::getOutboundPendingQty, reqVO.getOutboundPendingQty());
-        wrapper.betweenIfPresent(WmsStockOwnershipDO::getShelvingPendingQty, reqVO.getShelvingPendingQty());
+        wrapper.betweenIfPresent(WmsStockOwnershipDO::getShelvePendingQty, reqVO.getShelvingPendingQty());
         wrapper.ne(WmsStockOwnershipDO::getAvailableQty, 0);
         return selectPage(reqVO, wrapper);
     }

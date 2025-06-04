@@ -49,15 +49,15 @@ public class WmsOutboundSaveReqDTO {
     /**
      * 来源单据ID
      **/
-    private Long upstreamBillId;
+    private Long upstreamId;
 
     /**
-     * 来源单据号
+     * 来源单据编码
      **/
-    private String upstreamBillCode;
+    private String upstreamCode;
 
     /**
      * 来源单据类型
      **/
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 }

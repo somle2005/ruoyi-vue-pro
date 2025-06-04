@@ -6,11 +6,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : outbound_available_qty,inbound_status,company_id,create_time,plan_qty,shelved_qty,upstream_item_id,remark,inbound_dept_id,latest_flow_id,inbound_id,inbound_company_id,actual_qty,product_id,dept_id
+ * @table-fields : outbound_available_qty,inbound_status,company_id,create_time,plan_qty,shelve_closed_qty,upstream_id,remark,inbound_dept_id,latest_flow_id,inbound_id,inbound_company_id,actual_qty,product_id,dept_id
  */
 @Schema(description = "管理后台 - 入库单详情分页 Request VO")
 @Data
@@ -70,8 +72,8 @@ public class WmsInboundItemPageReqVO extends PageParam {
     @Schema(description = "备注", example = "")
     private String remark;
 
-    @Schema(description = "来源详情ID", example = "")
-    private Long upstreamItemId;
+    @Schema(description = "来源明细行ID", example = "")
+    private Long upstreamId;
 
     @Schema(description = "入库的财务公司ID", example = "")
     private Long inboundCompanyId;

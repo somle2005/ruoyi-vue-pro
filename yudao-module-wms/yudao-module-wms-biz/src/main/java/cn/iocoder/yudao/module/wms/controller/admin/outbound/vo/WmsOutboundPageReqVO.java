@@ -6,11 +6,13 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDateTime;
+
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : code,company_id,create_time,remark,audit_status,outbound_time,type,upstream_bill_type,latest_outbound_action_id,outbound_status,upstream_bill_id,upstream_bill_code,dept_id,warehouse_id
+ * @table-fields : code,company_id,create_time,remark,audit_status,outbound_time,type,upstream_type,latest_outbound_action_id,outbound_status,upstream_id,upstream_code,dept_id,warehouse_id
  */
 @Schema(description = "管理后台 - 出库单分页 Request VO")
 @Data
@@ -57,11 +59,11 @@ public class WmsOutboundPageReqVO extends PageParam {
     private String code;
 
     @Schema(description = "来源单据ID", example = "")
-    private Long upstreamBillId;
+    private Long upstreamId;
 
-    @Schema(description = "来源单据号", example = "")
-    private String upstreamBillCode;
+    @Schema(description = "来源单据编码", example = "")
+    private String upstreamCode;
 
     @Schema(description = "WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单 , 3-换货单", example = "")
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 }

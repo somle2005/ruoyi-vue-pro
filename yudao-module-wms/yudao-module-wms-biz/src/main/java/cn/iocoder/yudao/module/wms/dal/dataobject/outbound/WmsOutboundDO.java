@@ -1,18 +1,17 @@
 package cn.iocoder.yudao.module.wms.dal.dataobject.outbound;
 
-import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.item.WmsOutboundItemDO;
+import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.*;
 
 import java.time.LocalDateTime;
-import java.util.List;
-
-import com.baomidou.mybatisplus.annotation.*;
-import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 
 /**
  * 出库单 DO
  * @author 李方捷
- * @table-fields : code,company_id,remark,audit_status,outbound_time,type,upstream_bill_type,latest_outbound_action_id,outbound_status,upstream_bill_id,id,upstream_bill_code,dept_id,warehouse_id
+ * @table-fields : code,company_id,remark,audit_status,outbound_time,type,upstream_type,latest_outbound_action_id,outbound_status,upstream_id,id,upstream_code,dept_id,warehouse_id
  */
 @TableName("wms_outbound")
 // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
@@ -89,17 +88,17 @@ public class WmsOutboundDO extends BaseDO {
     /**
      * 来源单据ID
      */
-    private Long upstreamBillId;
+    private Long upstreamId;
 
     /**
-     * 来源单据号
+     * 来源单据编码
      */
-    private String upstreamBillCode;
+    private String upstreamCode;
 
     /**
      * WMS来源单据类型 ; WmsBillType : 0-入库单 , 1-出库单 , 2-盘点单
      */
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 
 
 

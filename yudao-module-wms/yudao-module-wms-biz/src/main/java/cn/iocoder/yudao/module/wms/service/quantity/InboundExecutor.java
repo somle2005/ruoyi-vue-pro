@@ -155,7 +155,7 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
         WmsStockOwnershipDO stockOwnershipDO = stockOwnershipService.getByUkProductOwner(warehouseId, companyId, deptId, productId, true);
 
         // 待上架量
-        stockOwnershipDO.setShelvingPendingQty(stockOwnershipDO.getShelvingPendingQty() + actualQuantity);
+        stockOwnershipDO.setShelvePendingQty(stockOwnershipDO.getShelvePendingQty() + actualQuantity);
 
         // 保存
         stockOwnershipService.insertOrUpdate(stockOwnershipDO);

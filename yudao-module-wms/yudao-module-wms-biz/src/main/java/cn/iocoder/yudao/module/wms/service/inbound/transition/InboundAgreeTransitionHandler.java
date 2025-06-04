@@ -49,13 +49,13 @@ public class InboundAgreeTransitionHandler extends BaseInboundTransitionHandler 
         WmsInboundRespVO inboundVO = inboundService.getInboundWithItemList(context.data().getId());
         List<WmsInboundItemRespVO> itemList = inboundVO.getItemList();
         //处理到货单逻辑
-        if (inboundVO.getUpstreamBillType() != null && inboundVO.getUpstreamBillType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
+        if (inboundVO.getUpstreamType() != null && inboundVO.getUpstreamType().equals(BillType.SRM_PURCHASE_IN.getValue())) {
             //如果成功创建入库单-触发SRM入库数量联动
             SrmPurchaseInSaveReqDTO reqDTO = BeanUtils.toBean(inboundVO, SrmPurchaseInSaveReqDTO.class);
             srmPurchaseInApi.updatePurchaseInItemQty(reqDTO);
         }
         //如果成功创建入库单-触发TMS入库数量联动
-        if (inboundVO.getUpstreamBillType() != null && inboundVO.getUpstreamBillType().equals(BillType.TMS_TRANSFER.getValue())) {
+        if (inboundVO.getUpstreamType() != null && inboundVO.getUpstreamType().equals(BillType.TMS_TRANSFER.getValue())) {
             TmsInboundReqDTO tmsInboundReqDTO = BeanUtils.toBean(inboundVO, TmsInboundReqDTO.class);
             tmsInboundReqDTO.setItemList(BeanUtils.toBean(inboundVO.getItemList(), TmsInboundItemReqDTO.class));
             tmsTransferApi.afterInboundAudit(tmsInboundReqDTO);

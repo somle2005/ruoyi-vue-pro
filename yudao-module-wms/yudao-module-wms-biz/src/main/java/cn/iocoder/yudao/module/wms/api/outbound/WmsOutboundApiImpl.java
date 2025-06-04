@@ -48,7 +48,7 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     @Override
     public Long createOutbound(WmsOutboundSaveReqDTO createReqDTO) {
 
-        BillType billType = BillType.parse(createReqDTO.getUpstreamBillType());
+        BillType billType = BillType.parse(createReqDTO.getUpstreamType());
         WmsOutboundSaveReqVO createReqVO = BeanUtils.toBean(createReqDTO, WmsOutboundSaveReqVO.class);
         // 如果是头程单，处理
         if(billType==BillType.TMS_FIRST_MILE) {
@@ -94,16 +94,16 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
                     saveReqVO.setPlanQty(qty);
                     saveReqVO.setActualQty(qty);
                     saveReqVO.setBinId(wmsInboundItemBinQueryDO.getBinId());
-                    saveReqVO.setDeptId(wmsInboundItemBinQueryDO.getInboundDeptId());
-                    saveReqVO.setCompanyId(wmsInboundItemBinQueryDO.getInboundCompanyId());
+                    saveReqVO.setDeptId(wmsInboundItemBinQueryDO.getDeptId());
+                    saveReqVO.setCompanyId(wmsInboundItemBinQueryDO.getCompanyId());
                     processedList.add(saveReqVO);
                 } else {
                     qty=leftQty;
                     saveReqVO.setPlanQty(qty);
                     saveReqVO.setActualQty(qty);
                     saveReqVO.setBinId(wmsInboundItemBinQueryDO.getBinId());
-                    saveReqVO.setDeptId(wmsInboundItemBinQueryDO.getInboundDeptId());
-                    saveReqVO.setCompanyId(wmsInboundItemBinQueryDO.getInboundCompanyId());
+                    saveReqVO.setDeptId(wmsInboundItemBinQueryDO.getDeptId());
+                    saveReqVO.setCompanyId(wmsInboundItemBinQueryDO.getCompanyId());
                     processedList.add(saveReqVO);
                     break;
                 }
@@ -127,8 +127,8 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     }
 
     @Override
-    public List<WmsOutboundDTO> getOutboundList(Integer upstreamBillType, Long upstreamBillId) {
-        List<WmsOutboundDO> outboundList = outboundService.getOutboundList(upstreamBillType, upstreamBillId);
+    public List<WmsOutboundDTO> getOutboundList(Integer upstreamType, Long upstreamId) {
+        List<WmsOutboundDO> outboundList = outboundService.getOutboundList(upstreamType, upstreamId);
         return BeanUtils.toBean(outboundList, WmsOutboundDTO.class);
     }
 

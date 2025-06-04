@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 
-@Schema(description = "管理后台 - 所有者库存 Response VO")
+@Schema(description = "管理后台 - 逻辑库存 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class WmsStockOwnershipExcelVO {

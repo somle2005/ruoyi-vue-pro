@@ -9,11 +9,7 @@ import cn.iocoder.yudao.framework.common.util.date.DateUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowBinExcelVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowOwnershipExcelVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowWarehouseExcelVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.*;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
@@ -27,12 +23,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
@@ -141,7 +132,7 @@ public class WmsStockFlowController {
         stockFlowService.assembleStockWarehouse(voPageResult.getList());
         stockFlowService.assembleInboundItemFlow(voPageResult.getList());
         stockFlowService.assembleCompanyAndDept(voPageResult.getList());
-        stockFlowService.assembleInventory(voPageResult.getList());
+        stockFlowService.assembleStockCheck(voPageResult.getList());
         stockFlowService.assembleBinMove(voPageResult.getList());
         stockFlowService.assembleOwnershipMove(voPageResult.getList());
         //批次可用库存数量显示为库存变更前数量
@@ -185,8 +176,8 @@ public class WmsStockFlowController {
             excelVO.setReasonBillCode(flowRespVO.getOutbound().getCode());
         } else if(flowRespVO.getPickup()!=null) {
             excelVO.setReasonBillCode(flowRespVO.getPickup().getCode());
-        } else if(flowRespVO.getInventory()!=null) {
-            excelVO.setReasonBillCode(flowRespVO.getInventory().getCode());
+        } else if (flowRespVO.getStockCheck() != null) {
+            excelVO.setReasonBillCode(flowRespVO.getStockCheck().getCode());
         } else if(flowRespVO.getStockBinMove()!=null) {
             excelVO.setReasonBillCode(flowRespVO.getStockBinMove().getNo());
         } else if(flowRespVO.getStockOwnershipMove()!=null) {
@@ -227,8 +218,8 @@ public class WmsStockFlowController {
             excelVO.setReasonBillCode(flowRespVO.getOutbound().getCode());
         } else if(flowRespVO.getPickup()!=null) {
             excelVO.setReasonBillCode(flowRespVO.getPickup().getCode());
-        } else if(flowRespVO.getInventory()!=null) {
-            excelVO.setReasonBillCode(flowRespVO.getInventory().getCode());
+        } else if (flowRespVO.getStockCheck() != null) {
+            excelVO.setReasonBillCode(flowRespVO.getStockCheck().getCode());
         } else if(flowRespVO.getStockBinMove()!=null) {
             excelVO.setReasonBillCode(flowRespVO.getStockBinMove().getNo());
         } else if(flowRespVO.getStockOwnershipMove()!=null) {
@@ -269,8 +260,8 @@ public class WmsStockFlowController {
             excelVO.setReasonBillCode(flowRespVO.getOutbound().getCode());
         } else if(flowRespVO.getPickup()!=null) {
             excelVO.setReasonBillCode(flowRespVO.getPickup().getCode());
-        } else if(flowRespVO.getInventory()!=null) {
-            excelVO.setReasonBillCode(flowRespVO.getInventory().getCode());
+        } else if (flowRespVO.getStockCheck() != null) {
+            excelVO.setReasonBillCode(flowRespVO.getStockCheck().getCode());
         } else if(flowRespVO.getStockBinMove()!=null) {
             excelVO.setReasonBillCode(flowRespVO.getStockBinMove().getNo());
         } else if(flowRespVO.getStockOwnershipMove()!=null) {

@@ -839,7 +839,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                                 .deptId(item.getApplicationDeptId())
                                 .companyId(order != null ? order.getPurchaseCompanyId() : null) // 设置库存财务公司ID
                                 .remark(item.getRemark())
-                                .upstreamItemId(item.getId()) // 到货明细ID
+                            .upstreamId(item.getId()) // 到货明细ID
                                 .build();
                     })
                     .collect(Collectors.toList());
@@ -856,9 +856,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             Long inbound = wmsInboundApi.createInbound(
                     WmsInboundSaveReqDTO.builder()
                             .type(WmsInboundType.PURCHASE.getValue())
-                            .upstreamBillType(BillType.SRM_PURCHASE_IN.getValue())
-                            .upstreamBillId(inDO.getId())
-                            .upstreamBillCode(inDO.getCode())
+                        .upstreamType(BillType.SRM_PURCHASE_IN.getValue())
+                        .upstreamId(inDO.getId())
+                        .upstreamCode(inDO.getCode())
                             .warehouseId(warehouseId)
                             .itemList(inboundItems)
                             .auditStatus(WmsInboundAuditStatus.DRAFT.getValue())

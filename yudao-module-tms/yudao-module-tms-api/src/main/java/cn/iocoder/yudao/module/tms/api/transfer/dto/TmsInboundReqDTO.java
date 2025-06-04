@@ -55,22 +55,22 @@ public class TmsInboundReqDTO {
      * 来源单据ID
      */
     @NotNull(message = "调拨入库单来源单据ID不能为空")
-    private Long upstreamBillId;
+    private Long upstreamId;
 
     /**
-     * 来源单据号
+     * 来源单据编码
      */
-    private String upstreamBillCode;
+    private String upstreamCode;
 
     /**
      * 来源单据类型
      */
-    private Integer upstreamBillType;
+    private Integer upstreamType;
 
     /**
      * 上架状态
      */
-    private Integer shelvingStatus;
+    private Integer shelveStatus;
 
     /**
      * 入库单明细列表

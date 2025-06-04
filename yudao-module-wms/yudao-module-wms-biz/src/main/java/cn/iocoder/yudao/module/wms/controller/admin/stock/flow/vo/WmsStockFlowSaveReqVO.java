@@ -1,13 +1,14 @@
 package cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import jakarta.validation.constraints.*;
-import java.sql.Timestamp;
 import cn.iocoder.yudao.framework.common.validation.InEnum;
-import cn.iocoder.yudao.module.wms.enums.stock.WmsStockType;
-import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
+import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
+import cn.iocoder.yudao.module.wms.enums.stock.WmsStockType;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
+
+import java.sql.Timestamp;
 
 /**
  * @table-fields : reason,outbound_pending_qty,delta_qty,flow_time,transit_qty,available_qty,next_flow_id,make_pending_qty,stock_id,stock_type,inbound_item_flow_id,product_id,shelving_pending_qty,id,reason_bill_id,defective_qty,return_transit_qty,sellable_qty,direction,prev_flow_id,reason_item_id,warehouse_id
@@ -19,7 +20,7 @@ public class WmsStockFlowSaveReqVO {
     @Schema(description = "主键", requiredMode = Schema.RequiredMode.REQUIRED, example = "9446")
     private Long id;
 
-    @Schema(description = "WMS库存类型 ; WmsStockType : 1-仓库库存 , 2-仓位库存 , 3-所有者库存", requiredMode = Schema.RequiredMode.REQUIRED, example = "2")
+    @Schema(description = "WMS库存类型 ; WmsStockType : 1-仓库库存 , 2-仓位库存 , 3-逻辑库存", requiredMode = Schema.RequiredMode.REQUIRED, example = "2")
     @NotNull(message = "WMS库存类型不能为空")
     @InEnum(WmsStockType.class)
     private Integer stockType;

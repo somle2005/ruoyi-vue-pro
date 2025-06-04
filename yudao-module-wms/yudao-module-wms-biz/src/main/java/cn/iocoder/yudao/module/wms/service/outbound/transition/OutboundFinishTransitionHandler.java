@@ -50,7 +50,7 @@ public class OutboundFinishTransitionHandler extends BaseOutboundTransitionHandl
         WmsOutboundDO outboundDO = context.data();
         List<WmsOutboundItemDO> outboundItemDOS = outboundItemService.selectByOutboundId(outboundDO.getId());
 
-        BillType billType = BillType.parse(context.data().getUpstreamBillType());
+        BillType billType = BillType.parse(context.data().getUpstreamType());
         // 如果源单是调拨单，生成目标仓库的入库单
          if(billType==BillType.TMS_TRANSFER) {
 
@@ -62,7 +62,7 @@ public class OutboundFinishTransitionHandler extends BaseOutboundTransitionHandl
                 inboundItemSaveReqVO.setProductId(outboundItemDO.getProductId());
                 inboundItemSaveReqVO.setPlanQty(outboundItemDO.getActualQty());
                 inboundItemSaveReqVO.setActualQty(outboundItemDO.getActualQty());
-                inboundItemSaveReqVO.setUpstreamItemId(outboundItemDO.getId());
+                inboundItemSaveReqVO.setUpstreamId(outboundItemDO.getId());
                 inboundItemSaveReqVOList.add(inboundItemSaveReqVO);
 
             }
@@ -71,9 +71,9 @@ public class OutboundFinishTransitionHandler extends BaseOutboundTransitionHandl
             inboundSaveReqVO.setWarehouseId(43L);
 
             inboundSaveReqVO.setItemList(inboundItemSaveReqVOList);
-            inboundSaveReqVO.setUpstreamBillId(outboundDO.getId());
-            inboundSaveReqVO.setUpstreamBillCode(outboundDO.getCode());
-            inboundSaveReqVO.setUpstreamBillType(BillType.WMS_OUTBOUND.getValue());
+             inboundSaveReqVO.setUpstreamId(outboundDO.getId());
+             inboundSaveReqVO.setUpstreamCode(outboundDO.getCode());
+             inboundSaveReqVO.setUpstreamType(BillType.WMS_OUTBOUND.getValue());
 
             inboundSaveReqVO.setType(WmsInboundType.TRANSFER.getValue());
 

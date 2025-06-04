@@ -11,6 +11,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWareho
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import jakarta.validation.Valid;
+
 import java.util.List;
 
 /**
@@ -103,7 +104,7 @@ public interface WmsStockFlowService {
 
     void assembleInboundItemFlow(List<WmsStockFlowRespVO> list);
 
-    void assembleInventory(List<WmsStockFlowRespVO> list);
+    void assembleStockCheck(List<WmsStockFlowRespVO> list);
 
     void assembleBinMove(List<WmsStockFlowRespVO> list);
 

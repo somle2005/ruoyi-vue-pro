@@ -111,7 +111,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
             newFlowDO.setOutboundAvailableDeltaQty(Math.abs(quantity));
             newFlowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty());
             newFlowDO.setActualQty(inboundItemDO.getActualQty());
-            newFlowDO.setShelvedQty(inboundItemDO.getShelvedQty());
+            newFlowDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty());
 
             inboundItemFlowList.add(newFlowDO);
 

@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemOwnershipDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -88,10 +89,11 @@ public interface WmsInboundItemOwnershipQueryMapper extends BaseMapperX<WmsInbou
         ;
         // 查询主表字段
         wrapper.select(WmsInboundItemDO::getProductId);
-        wrapper.select(WmsInboundItemDO::getInboundCompanyId);
-        wrapper.select(WmsInboundItemDO::getInboundDeptId);
+        wrapper.select(WmsInboundItemDO::getCompanyId);
+        wrapper.select(WmsInboundItemDO::getDeptId);
         // 查询子表字段
         wrapper.innerJoin(WmsInboundDO.class,WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId).
+            select(WmsInboundDO::getId).
                 select(WmsInboundDO::getWarehouseId).
                 select(WmsInboundDO::getInboundTime).
                 select(AGE_COL_EXPR).
@@ -109,4 +111,45 @@ public interface WmsInboundItemOwnershipQueryMapper extends BaseMapperX<WmsInbou
         return StreamX.from(list).groupBy(WmsInboundItemOwnershipDO::getProductId);
     }
 
+    /**
+     * 获得入库批次列表
+     *
+     * @param warehouseId 仓库编号
+     * @param productId   产品编号
+     * @param olderFirst  是否按入库时间升序
+     * @return 入库批次列表
+     */
+    default List<WmsInboundItemOwnershipDO> getInboundItemOwnershipList(Long warehouseId, Long productId, boolean olderFirst) {
+        // 主表
+        MPJLambdaWrapperX<WmsInboundItemOwnershipDO> wrapper = new MPJLambdaWrapperX();
+        // 主表条件
+        wrapper.eq(WmsInboundItemQueryDO::getProductId, productId)
+            .in(WmsInboundItemQueryDO::getInboundStatus, WmsInboundStatus.ALL.getValue(), WmsInboundStatus.PART.getValue())
+        ;
+        // 查询主表字段
+        wrapper.select(WmsInboundItemDO::getProductId);
+        wrapper.select(WmsInboundItemDO::getCompanyId);
+        wrapper.select(WmsInboundItemDO::getDeptId);
+        // 查询子表字段
+        wrapper.innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId).
+            select(WmsInboundDO::getId).
+            select(WmsInboundDO::getWarehouseId).
+            select(WmsInboundDO::getInboundTime).
+            select(AGE_COL_EXPR).
+            eq(WmsInboundDO::getWarehouseId, warehouseId);
+
+        wrapper.innerJoin(WmsStockBinDO.class, WmsStockBinDO::getWarehouseId, WmsInboundDO::getWarehouseId).
+            eq(WmsStockBinDO::getProductId, productId).
+            select(WmsStockBinDO::getBinId).
+            select(WmsStockBinDO::getSellableQty);
+
+        // 控制顺序
+        if (olderFirst) {
+            wrapper.orderByAsc(WmsInboundDO::getInboundTime);
+        } else {
+            wrapper.orderByDesc(WmsInboundDO::getInboundTime);
+        }
+
+        return selectList(wrapper);
+    }
 }

@@ -7,7 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
- * @table-fields : tenant_id,outbound_available_qty,creator,inbound_status,company_id,create_time,plan_qty,shelved_qty,upstream_item_id,remark,inbound_dept_id,latest_flow_id,updater,inbound_id,inbound_company_id,update_time,actual_qty,product_id,id,dept_id
+ * @table-fields : tenant_id,outbound_available_qty,creator,inbound_status,company_id,create_time,plan_qty,shelve_closed_qty,upstream_id,remark,inbound_dept_id,latest_flow_id,updater,inbound_id,inbound_company_id,update_time,actual_qty,product_id,id,dept_id
  */
 @Schema(description = "管理后台 - 入库单详情 Response VO")
 @Data
@@ -29,7 +29,7 @@ public class WmsInboundItemBinExcelVO {
     private Long binId;
 
     @ExcelProperty("公司")
-    private String companyName;
+    private String addressLine3;
 
     @ExcelProperty("部门")
     private String deptName;

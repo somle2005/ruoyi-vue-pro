@@ -83,14 +83,14 @@ public class BinMoveExecutor extends QuantityExecutor<BinMoveContext> {
         }
 
         fromPickup.setWarehouseId(binMoveDO.getWarehouseId());
-        fromPickup.setUpstreamBillType(BillType.WMS_BIN_MOVE.getValue());
-        fromPickup.setUpstreamBillId(binMoveDO.getId());
-        fromPickup.setUpstreamBillCode(binMoveDO.getNo());
+        fromPickup.setUpstreamType(BillType.WMS_BIN_MOVE.getValue());
+        fromPickup.setUpstreamId(binMoveDO.getId());
+        fromPickup.setUpstreamCode(binMoveDO.getNo());
 
         toPickup.setWarehouseId(binMoveDO.getWarehouseId());
-        toPickup.setUpstreamBillType(BillType.WMS_BIN_MOVE.getValue());
-        toPickup.setUpstreamBillId(binMoveDO.getId());
-        toPickup.setUpstreamBillCode(binMoveDO.getNo());
+        toPickup.setUpstreamType(BillType.WMS_BIN_MOVE.getValue());
+        toPickup.setUpstreamId(binMoveDO.getId());
+        toPickup.setUpstreamCode(binMoveDO.getNo());
 
         List<WmsWarehouseProductVO> warehouseProductList = StreamX.from(binMoveItemDOList).toList(item->{
             return WmsWarehouseProductVO.builder().warehouseId(binMoveDO.getWarehouseId()).productId(item.getProductId()).build();

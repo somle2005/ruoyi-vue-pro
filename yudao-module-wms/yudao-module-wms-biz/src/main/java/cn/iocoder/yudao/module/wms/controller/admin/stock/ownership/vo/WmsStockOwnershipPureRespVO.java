@@ -10,7 +10,7 @@ import lombok.Data;
 /**
  * @table-fields : tenant_id,creator,company_id,create_time,outbound_pending_qty,available_qty,updater,update_time,product_id,shelving_pending_qty,id,dept_id,warehouse_id
  */
-@Schema(description = "管理后台 - 所有者库存 Response VO")
+@Schema(description = "管理后台 - 逻辑库存 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class WmsStockOwnershipPureRespVO {

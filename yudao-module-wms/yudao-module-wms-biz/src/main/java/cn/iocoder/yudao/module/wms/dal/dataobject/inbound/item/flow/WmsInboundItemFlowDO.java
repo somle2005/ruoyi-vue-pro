@@ -1,20 +1,19 @@
 package cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow;
 
-import lombok.*;
-import java.util.*;
-import java.time.LocalDateTime;
-import java.time.LocalDateTime;
-import com.baomidou.mybatisplus.annotation.*;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.*;
 
 /**
  * 入库单库存详情扣减 DO
  * @author 李方捷
- * @table-fields : bill_id,outbound_available_qty,shelved_qty,inbound_id,outbound_available_delta_qty,outbound_action_id,actual_qty,bill_item_id,product_id,bill_type,id,inbound_item_id,direction
+ * @table-fields : bill_id,outbound_available_qty,shelve_closed_qty,inbound_id,outbound_available_delta_qty,outbound_action_id,actual_qty,bill_item_id,product_id,bill_type,id,inbound_item_id,direction
  */
-@TableName("wms_inbound_item_flow")
+@TableName("setShelveStatus")
 // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
-@KeySequence("wms_inbound_item_flow_seq")
+@KeySequence("wms_inbound_flow_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)
@@ -87,5 +86,5 @@ public class WmsInboundItemFlowDO extends BaseDO {
     /**
      * 已上架量，已经拣货到仓位的库存量
      */
-    private Integer shelvedQty;
+    private Integer shelveClosedQty;
 }

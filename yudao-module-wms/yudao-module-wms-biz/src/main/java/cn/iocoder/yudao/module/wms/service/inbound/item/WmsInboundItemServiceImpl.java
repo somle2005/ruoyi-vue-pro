@@ -465,4 +465,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     public WmsInboundItemDO getByInboundIdAndProductId(Long inboundId, Long productId) {
         return inboundItemMapper.getByInboundIdAndProductId(inboundId, productId);
     }
+
+    @Override
+    public List<WmsInboundItemQueryDO> getInboundItemListForTms(WmsInboundItemListForTmsReqVO listForTmsReqVO) {
+        return inboundItemQueryMapper.getInboundItemListForTms(listForTmsReqVO);
+    }
 }

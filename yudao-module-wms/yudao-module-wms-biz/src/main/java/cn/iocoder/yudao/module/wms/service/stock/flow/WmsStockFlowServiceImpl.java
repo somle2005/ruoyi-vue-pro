@@ -15,7 +15,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleResp
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inventory.vo.WmsInventoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
@@ -26,11 +25,11 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowSa
 import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMoveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stockcheck.vo.WmsStockCheckRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inventory.WmsInventoryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.WmsPickupDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
@@ -39,6 +38,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.move.WmsStockOwnershipMoveDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stockcheck.WmsStockCheckDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.flow.WmsStockFlowMapper;
@@ -47,7 +47,6 @@ import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockType;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsInboundItemFlowService;
-import cn.iocoder.yudao.module.wms.service.inventory.WmsInventoryService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
 import cn.iocoder.yudao.module.wms.service.quantity.InboundExecutor;
@@ -56,6 +55,7 @@ import cn.iocoder.yudao.module.wms.service.stock.bin.move.WmsStockBinMoveService
 import cn.iocoder.yudao.module.wms.service.stock.ownership.WmsStockOwnershipService;
 import cn.iocoder.yudao.module.wms.service.stock.ownership.move.WmsStockOwnershipMoveService;
 import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
+import cn.iocoder.yudao.module.wms.service.stockcheck.WmsStockCheckService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
 import jakarta.annotation.Resource;
@@ -110,7 +110,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Resource
     @Lazy
-    private WmsInventoryService inventoryService;
+    private WmsStockCheckService stockCheckService;
 
     @Resource
     @Lazy
@@ -244,7 +244,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
             // 可用量，在库的良品数量
             stockFlowDO.setAvailableQty(stockOwnershipDO.getAvailableQty());
             // 待上架数量
-            stockFlowDO.setShelvingPendingQty(stockOwnershipDO.getShelvingPendingQty() + quantity);
+            stockFlowDO.setShelvingPendingQty(stockOwnershipDO.getShelvePendingQty() + quantity);
             // 不良品数量
             // stockFlowDO.setDefectiveQty(stockOwnershipDO.getDefectiveQty());
             // 待出库量
@@ -387,13 +387,13 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     }
 
     @Override
-    public void assembleInventory(List<WmsStockFlowRespVO> list) {
-        List<WmsStockFlowRespVO> inventoryFlowList = StreamX.from(list).filter(
-            v -> Objects.equals(WmsStockReason.INVENTORY_NEGATIVE.getValue(), v.getReason()) || Objects.equals(WmsStockReason.INVENTORY_POSITIVE.getValue(), v.getReason())
+    public void assembleStockCheck(List<WmsStockFlowRespVO> list) {
+        List<WmsStockFlowRespVO> stockCheckFlowList = StreamX.from(list).filter(
+            v -> Objects.equals(WmsStockReason.STOCKCHECK_NEGATIVE.getValue(), v.getReason()) || Objects.equals(WmsStockReason.STOCKCHECK_POSITIVE.getValue(), v.getReason())
         ).toList();
-        List<WmsInventoryDO> inventoryDOList = inventoryService.selectByIds(StreamX.from(inventoryFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
-        Map<Long, WmsInventoryRespVO> inventoryMap = StreamX.from(inventoryDOList).toMap(WmsInventoryDO::getId, elem -> BeanUtils.toBean(elem, WmsInventoryRespVO.class));
-        StreamX.from(inventoryFlowList).assemble(inventoryMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setInventory);
+        List<WmsStockCheckDO> stockCheckDOList = stockCheckService.selectByIds(StreamX.from(stockCheckFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
+        Map<Long, WmsStockCheckRespVO> stockCheckMap = StreamX.from(stockCheckDOList).toMap(WmsStockCheckDO::getId, elem -> BeanUtils.toBean(elem, WmsStockCheckRespVO.class));
+        StreamX.from(stockCheckFlowList).assemble(stockCheckMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setStockCheck);
     }
 
     @Override

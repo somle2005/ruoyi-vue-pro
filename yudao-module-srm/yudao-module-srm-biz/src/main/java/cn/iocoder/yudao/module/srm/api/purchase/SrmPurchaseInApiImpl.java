@@ -74,15 +74,15 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
     @Override
     public void updatePurchaseInItemQty(SrmPurchaseInSaveReqDTO reqDTO) {
         //校验
-        if (!Objects.equals(reqDTO.getUpstreamBillType(), BillType.SRM_PURCHASE_IN.getValue())) {
-            throw new IllegalArgumentException(StrUtil.format("入库单审核回调SrmInboundReqDTO，上游类型{}不是到货单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamBillType())).getLabel()));
+        if (!Objects.equals(reqDTO.getUpstreamType(), BillType.SRM_PURCHASE_IN.getValue())) {
+            throw new IllegalArgumentException(StrUtil.format("入库单审核回调SrmInboundReqDTO，上游类型{}不是到货单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamType())).getLabel()));
         }
         //校验item存在
-        purchaseInService.validatePurchaseInItemExists(reqDTO.getItemList().stream().map(SrmPurchaseInSaveItemReqDTO::getUpstreamItemId).collect(Collectors.toList()));
+        purchaseInService.validatePurchaseInItemExists(reqDTO.getItemList().stream().map(SrmPurchaseInSaveItemReqDTO::getUpstreamId).collect(Collectors.toList()));
         reqDTO.getItemList().forEach(item -> {
             //消费
             SrmPurchaseInItemCountContext build = SrmPurchaseInItemCountContext.builder()
-                .inItemId(item.getUpstreamItemId())
+                .inItemId(item.getUpstreamId())
                 .inCount(BigDecimal.valueOf(item.getActualQty()))
                 .build();
             purchaseInItemStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STOCK_ADJUSTMENT, build);

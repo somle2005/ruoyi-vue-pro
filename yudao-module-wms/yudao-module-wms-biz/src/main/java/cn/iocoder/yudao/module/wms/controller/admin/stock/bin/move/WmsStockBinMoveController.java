@@ -28,7 +28,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -165,7 +164,7 @@ public class WmsStockBinMoveController {
     @Operation(summary = "下载模板 批量库位")
     @PreAuthorize("@ss.hasPermission('wms:stock-bin-move:download-template')")
     public ResponseEntity<byte[]> downloadExcelTemplate() throws IOException {
-        ClassPathResource resource = new ClassPathResource("templates/inventory-bin-import.xlsx");
+        ClassPathResource resource = new ClassPathResource("templates/stockCheck-bin-import.xlsx");
         byte[] fileContent;
         try (InputStream inputStream = resource.getInputStream()) {
             fileContent = inputStream.readAllBytes();

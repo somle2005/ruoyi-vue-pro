@@ -19,7 +19,7 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
- * @table-fields : tenant_id,outbound_available_qty,creator,inbound_status,company_id,create_time,plan_qty,shelved_qty,upstream_item_id,remark,inbound_dept_id,latest_flow_id,updater,inbound_id,inbound_company_id,update_time,actual_qty,product_id,id,dept_id
+ * @table-fields : tenant_id,outbound_available_qty,creator,inbound_status,company_id,create_time,plan_qty,shelve_closed_qty,upstream_id,remark,inbound_dept_id,latest_flow_id,updater,inbound_id,inbound_company_id,update_time,actual_qty,product_id,id,dept_id
  */
 @Schema(description = "管理后台 - 入库单详情 Response VO")
 @Data
@@ -134,9 +134,9 @@ public class WmsInboundItemRespVO {
     @Schema(description = "财务公司", example = "")
     private FmsCompanySimpleRespVO company;
 
-    @Schema(description = "来源详情ID", example = "")
-    @ExcelProperty("来源详情ID")
-    private Long upstreamItemId;
+    @Schema(description = "来源明细行ID", example = "")
+    @ExcelProperty("来源明细行ID")
+    private Long upstreamId;
 
     @Schema(description = "入库的财务公司ID", example = "")
     @ExcelProperty("入库的财务公司ID")

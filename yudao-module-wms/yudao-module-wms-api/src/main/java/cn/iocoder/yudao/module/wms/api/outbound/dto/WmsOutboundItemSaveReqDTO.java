@@ -37,7 +37,7 @@ public class WmsOutboundItemSaveReqDTO {
     private String remark;
 
     /**
-     * 来源详情ID
+     * 来源明细行ID
      **/
-    private Long upstreamItemId;
+    private Long upstreamId;
 }
