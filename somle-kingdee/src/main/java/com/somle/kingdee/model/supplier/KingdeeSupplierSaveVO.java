@@ -9,9 +9,12 @@ import java.util.List;
 import java.util.Map;
 
 
+/**
+ * 金蝶供应商saveVO
+ */
 @Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
-public class KingdeeSupplier {
+public class KingdeeSupplierSaveVO {
     // id
     private String id;
 

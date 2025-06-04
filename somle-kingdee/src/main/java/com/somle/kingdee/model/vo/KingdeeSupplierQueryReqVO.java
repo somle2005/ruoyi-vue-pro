@@ -57,7 +57,7 @@ public class KingdeeSupplierQueryReqVO {
     /**
      * 每页显示条数默认10
      */
-    private Integer pageSize = 10;
+    private Integer pageSize = 100;
 
     /**
      * 模糊搜索-名称

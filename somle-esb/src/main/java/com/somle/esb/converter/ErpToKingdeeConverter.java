@@ -17,7 +17,7 @@ import cn.iocoder.yudao.module.system.api.dict.dto.DictDataRespDTO;
 import cn.iocoder.yudao.module.tms.api.logistic.customrule.dto.TmsCustomRuleDTO;
 import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import com.somle.kingdee.model.*;
-import com.somle.kingdee.model.supplier.KingdeeSupplier;
+import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.model.supplier.SupplierBomentity;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.extern.slf4j.Slf4j;
@@ -168,22 +168,22 @@ public class ErpToKingdeeConverter {
     }
 
 
-    public KingdeeSupplier toKingdee(SrmSupplierDTO erpSupplierDTO) {
-        KingdeeSupplier kingdeeSupplier = new KingdeeSupplier();
-        kingdeeSupplier.setName(erpSupplierDTO.getName());
-        kingdeeSupplier.setAccountOpenAddr(erpSupplierDTO.getBankAddress());
-        kingdeeSupplier.setBank(erpSupplierDTO.getBankName());
-        kingdeeSupplier.setBankAccount(erpSupplierDTO.getBankAccount());
-        kingdeeSupplier.setRemark(erpSupplierDTO.getRemark());
-        kingdeeSupplier.setRate(String.valueOf(erpSupplierDTO.getTaxPercent()));
-        kingdeeSupplier.setTaxpayerNo(erpSupplierDTO.getTaxNo());
+    public KingdeeSupplierSaveVO toKingdee(SrmSupplierDTO erpSupplierDTO) {
+        KingdeeSupplierSaveVO kingdeeSupplierSaveVO = new KingdeeSupplierSaveVO();
+        kingdeeSupplierSaveVO.setName(erpSupplierDTO.getName());
+        kingdeeSupplierSaveVO.setAccountOpenAddr(erpSupplierDTO.getBankAddress());
+        kingdeeSupplierSaveVO.setBank(erpSupplierDTO.getBankName());
+        kingdeeSupplierSaveVO.setBankAccount(erpSupplierDTO.getBankAccount());
+        kingdeeSupplierSaveVO.setRemark(erpSupplierDTO.getRemark());
+        kingdeeSupplierSaveVO.setRate(String.valueOf(erpSupplierDTO.getTaxPercent()));
+        kingdeeSupplierSaveVO.setTaxpayerNo(erpSupplierDTO.getTaxNo());
         List<SupplierBomentity> bomEntityList = new ArrayList<>();
         SupplierBomentity bomEntity = new SupplierBomentity();
         bomEntity.setContactPerson(erpSupplierDTO.getContact());
         bomEntity.setMobile(erpSupplierDTO.getMobile());
         bomEntity.setEmail(erpSupplierDTO.getEmail());
-        kingdeeSupplier.setBomEntity(bomEntityList);
-        return kingdeeSupplier;
+        kingdeeSupplierSaveVO.setBomEntity(bomEntityList);
+        return kingdeeSupplierSaveVO;
     }
 
     public KingdeeAuxInfoDetail toKingdee(String deptId) {
@@ -472,22 +472,22 @@ public class ErpToKingdeeConverter {
      * @param supplier SRM供应商
      * @return 金蝶供应商
      */
-    public KingdeeSupplier convertSupplierDTO(SrmSupplierDTO supplier) {
+    public KingdeeSupplierSaveVO convertSupplierDTO(SrmSupplierDTO supplier) {
         if (supplier == null) {
             return null;
         }
-        KingdeeSupplier kingdeeSupplier = new KingdeeSupplier();
+        KingdeeSupplierSaveVO kingdeeSupplierSaveVO = new KingdeeSupplierSaveVO();
         // 基本信息
-        convertBasicInfo(kingdeeSupplier, supplier);
+        convertBasicInfo(kingdeeSupplierSaveVO, supplier);
         // 银行信息
-        convertBankInfo(kingdeeSupplier, supplier);
+        convertBankInfo(kingdeeSupplierSaveVO, supplier);
         // 税务信息
-        convertTaxInfo(kingdeeSupplier, supplier);
+        convertTaxInfo(kingdeeSupplierSaveVO, supplier);
         // 地址信息
-        convertAddressInfo(kingdeeSupplier, supplier);
+        convertAddressInfo(kingdeeSupplierSaveVO, supplier);
         // 联系人信息
-        kingdeeSupplier.setBomEntity(convertToBomEntity(supplier));
-        return kingdeeSupplier;
+        kingdeeSupplierSaveVO.setBomEntity(convertToBomEntity(supplier));
+        return kingdeeSupplierSaveVO;
     }
 
     /**
@@ -496,7 +496,7 @@ public class ErpToKingdeeConverter {
      * @param suppliers SRM供应商列表
      * @return 金蝶供应商列表
      */
-    public List<KingdeeSupplier> convertSupplierDTOList(List<SrmSupplierDTO> suppliers) {
+    public List<KingdeeSupplierSaveVO> convertSupplierDTOList(List<SrmSupplierDTO> suppliers) {
         if (suppliers == null) {
             return Collections.emptyList();
         }
@@ -510,7 +510,7 @@ public class ErpToKingdeeConverter {
     /**
      * 转换基本信息
      */
-    void convertBasicInfo(KingdeeSupplier target, SrmSupplierDTO source) {
+    void convertBasicInfo(KingdeeSupplierSaveVO target, SrmSupplierDTO source) {
         if (source.getId() != null) {
             //把供应商ID作为金蝶的供应商编码
             target.setNumber(String.valueOf(source.getId()));
@@ -524,7 +524,7 @@ public class ErpToKingdeeConverter {
     /**
      * 转换银行信息
      */
-    void convertBankInfo(KingdeeSupplier target, SrmSupplierDTO source) {
+    void convertBankInfo(KingdeeSupplierSaveVO target, SrmSupplierDTO source) {
         target.setAccountOpenAddr(StrUtil.trimToNull(source.getBankAddress()));
         target.setBank(StrUtil.trimToNull(source.getBankName()));
         target.setBankAccount(StrUtil.trimToNull(source.getBankAccount()));
@@ -533,7 +533,7 @@ public class ErpToKingdeeConverter {
     /**
      * 转换税务信息
      */
-    void convertTaxInfo(KingdeeSupplier target, SrmSupplierDTO source) {
+    void convertTaxInfo(KingdeeSupplierSaveVO target, SrmSupplierDTO source) {
         if (source.getTaxPercent() != null) {
             target.setRate(String.valueOf(source.getTaxPercent()));
         }
@@ -543,7 +543,7 @@ public class ErpToKingdeeConverter {
     /**
      * 转换地址信息
      */
-    void convertAddressInfo(KingdeeSupplier target, SrmSupplierDTO source) {
+    void convertAddressInfo(KingdeeSupplierSaveVO target, SrmSupplierDTO source) {
         // 设置详细地址
         target.setAddr(StrUtil.trimToNull(source.getCompanyAddress()));
         // 设置送达地址

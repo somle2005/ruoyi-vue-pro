@@ -2,7 +2,7 @@ oss:
   bucketName: somle-bigdata-dev
 kingdee:
   outerInstanceIds:
-    - 369949131390717952 #金蝶沙盒
+    - 409386088805830656 #金蝶沙盒
 
 debug: false
 
@@ -164,15 +164,12 @@ logging:
   level:
     com.mzt.logapi.service.impl: debug
     org:
-      springframework:
-        beans:
-          factory: info
+      springframework.beans.factory: info
     cn:
       iocoder:
         yudao:
           module:
-            system:
-              logger: debug #异步操作日志记录
+            system.logger: debug
             srm: debug
             oms: debug
             tms: debug
