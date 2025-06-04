@@ -214,7 +214,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             //查询仓位库存表 规则1.根据后进先出筛选出最近入库批次 2.同一批次下，多个库位，根据自带优先级进行选择 3.该库位必须有足够货量
             WmsStockBinDO stockBin = stockBinMapper.selectByProductId(item.getProductId(), item.getPlanQty(), importReqVO.getWarehouseId());
             if(stockBin == null) {
-                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, item.getProductId());
+                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, item.getProduct().getName());
             }
             item.setBinId(stockBin.getBinId());
         }

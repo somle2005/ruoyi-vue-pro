@@ -98,40 +98,40 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
                 deptId=outboundRespVO.getDeptId();
             }
 
+            List<Long> deptIds = new ArrayList<>();
+            List<Long> companyIds = new ArrayList<>();
 
             // 如果未指定归属，则按入库批次的先进先出进行处理
             if (deptId == null || companyId == null) {
-                List<Long> deptIds = new ArrayList<>();
-                List<Long> companyIds = new ArrayList<>();
                 //todo 获取批次列表，然后根据可售数量判断取多个批次的库存
                 List<WmsInboundItemLogicDO> inboundItemLogicList = inboundService.getInboundItemLogicList(warehouseId, productId, true);
                 if (inboundItemLogicList == null) {
                     throw exception(STOCK_LOGIC_NOT_EXISTS);
                 }
-                int totalQty = 0;
+                int totalQty = item.getActualQty();
 
                 for (WmsInboundItemLogicDO inboundItemLogic : inboundItemLogicList) {
-                    deptIds.add(inboundItemLogic.getInboundDeptId());
-                    companyIds.add(inboundItemLogic.getInboundCompanyId());
-                    if (inboundItemLogic.getSellableQty() >= item.getActualQty()) {
+                    deptIds.add(inboundItemLogic.getDeptId());
+                    companyIds.add(inboundItemLogic.getCompanyId());
+                    if (inboundItemLogic.getSellableQty() >= totalQty) {
                         break;
                     } else {
                         totalQty = totalQty - inboundItemLogic.getSellableQty();
                     }
                 }
-
+            } else {
+                deptIds.add(deptId);
+                companyIds.add(companyId);
             }
-            /**
-             for(Long deptIdItem : item.getDeptIds()) {
-             if(!item.getDeptId().equals(deptIdItem)) {
-             throw exception(DEPT_ID_NOT_MATCH);
-             }
-             }
-             */
 
             // 执行出库的原子操作
             Integer quantity= getExecuteQty(item);
-            outboundSingleItem(outboundRespVO,item,companyId, deptId, warehouseId, item.getBinId(),productId, quantity, outboundRespVO.getId(), item.getId());
+            for (int i = 0; i < deptIds.size(); i++) {
+                companyId = companyIds.get(i);
+                deptId = deptIds.get(i);
+                // 执行单个出库详情
+                this.outboundSingleItem(outboundRespVO, item, companyId, deptId, warehouseId, item.getBinId(), productId, quantity, outboundRespVO.getId(), item.getId());
+            }
         }
         updateOutbound(outboundRespVO);
         // 完成最终的出库

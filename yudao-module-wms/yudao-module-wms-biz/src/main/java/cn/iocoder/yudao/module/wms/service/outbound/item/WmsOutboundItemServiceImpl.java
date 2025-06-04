@@ -174,9 +174,9 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
             throw exception(OUTBOUND_CAN_NOT_EDIT);
         }
         // 除了未入库的情况，其它情况不允许修改实际入库量
-        if (!wmsOutboundStatus.matchAny(WmsOutboundStatus.NONE)) {
-            throw exception(INBOUND_CAN_NOT_EDIT);
-        }
+//        if (!wmsOutboundStatus.matchAny(WmsOutboundStatus.NONE)) {
+//            throw exception(INBOUND_CAN_NOT_EDIT);
+//        }
         // 校验数量
         Map<Long, WmsOutboundItemSaveReqVO> updateReqVOMap = StreamX.from(updateReqVOList).toMap(WmsOutboundItemSaveReqVO::getId);
 //        List<WmsOutboundItemDO> outboundItemDOSInDB2 = outboundItemMapper.selectByIds(StreamX.from(updateReqVOList).toList(WmsOutboundItemSaveReqVO::getId));

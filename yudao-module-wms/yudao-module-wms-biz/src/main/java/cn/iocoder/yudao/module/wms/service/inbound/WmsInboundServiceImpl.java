@@ -151,6 +151,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                 item.setInboundId(inbound.getId());
                 item.setInboundStatus(WmsInboundStatus.NONE.getValue());
                 item.setActualQty(item.getActualQty() == null ? 0 : item.getActualQty());
+                item.setCompanyId(createReqVO.getCompanyId());
                 toInsetList.add(BeanUtils.toBean(item, WmsInboundItemDO.class));
             });
             // 校验 toInsetList 中是否有重复的 productId
