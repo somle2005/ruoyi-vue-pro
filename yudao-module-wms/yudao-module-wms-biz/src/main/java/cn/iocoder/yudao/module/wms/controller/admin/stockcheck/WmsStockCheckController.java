@@ -48,7 +48,7 @@ public class WmsStockCheckController {
      * @sign : EEF1FA4365B38CB4
      */
     @PostMapping("/create")
-    @Operation(summary = "创建盘点单")
+    @Operation(summary = "盘点单创建")
     @PreAuthorize("@ss.hasPermission('wms:stock-check:create')")
     public CommonResult<Long> createStockCheck(@Valid @RequestBody WmsStockCheckSaveReqVO createReqVO) {
         return success(stockCheckService.createStockCheck(createReqVO).getId());
@@ -58,7 +58,7 @@ public class WmsStockCheckController {
 //     * @sign : 30CB28F31026826D
 //     */
 //    @PutMapping("/update")
-//    @Operation(summary = "更新盘点单")
+//    @Operation(summary = "盘点单更新")
 //    @PreAuthorize("@ss.hasPermission('wms:stock-check:update')")
 //    public CommonResult<Boolean> updateStockCheck(@Valid @RequestBody WmsStockCheckSaveReqVO updateReqVO) {
 //        stockCheckService.updateStockCheck(updateReqVO);
@@ -66,7 +66,7 @@ public class WmsStockCheckController {
 //    }
 
     @DeleteMapping("/delete")
-    @Operation(summary = "删除盘点单")
+    @Operation(summary = "盘点单删除")
     @Parameter(name = "id", description = "编号", required = true)
     @PreAuthorize("@ss.hasPermission('wms:stock-check:delete')")
     public CommonResult<Boolean> deleteStockCheck(@RequestParam("id") Long id) {
@@ -78,7 +78,7 @@ public class WmsStockCheckController {
      * @sign : FD03427E08081E43
      */
     @GetMapping("/get")
-    @Operation(summary = "获得盘点单")
+    @Operation(summary = "盘点单获得详情")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('wms:stock-check:query')")
     public CommonResult<WmsStockCheckRespVO> getStockCheck(@RequestParam("id") Long id) {
@@ -121,7 +121,7 @@ public class WmsStockCheckController {
      * @sign : B1908BBFDE62B4FB
      */
     @PostMapping("/page")
-    @Operation(summary = "获得盘点分页")
+    @Operation(summary = "盘点单获得分页")
     @PreAuthorize("@ss.hasPermission('wms:stock-check:query')")
     public CommonResult<PageResult<WmsStockCheckRespVO>> getStockCheckPage(@Valid @RequestBody WmsStockCheckPageReqVO pageReqVO) {
         // 查询数据
@@ -153,7 +153,7 @@ public class WmsStockCheckController {
 //    }
 
     @PutMapping("/submit")
-    @Operation(summary = "提交审批")
+    @Operation(summary = "盘点单提交审批")
     @PreAuthorize("@ss.hasPermission('wms:stock-check:submit')")
     public CommonResult<Boolean> submit(@RequestBody WmsApprovalReqVO approvalReqVO) {
         stockCheckService.approve(WmsStockCheckAuditStatus.Event.SUBMIT, approvalReqVO);
@@ -161,7 +161,7 @@ public class WmsStockCheckController {
     }
 
     @PutMapping("/agree")
-    @Operation(summary = "同意审批")
+    @Operation(summary = "盘点单同意审批")
     @PreAuthorize("@ss.hasPermission('wms:stock-check:agree')")
     public CommonResult<Boolean> agree(@RequestBody WmsApprovalReqVO approvalReqVO) {
         stockCheckService.approve(WmsStockCheckAuditStatus.Event.AGREE, approvalReqVO);
@@ -169,7 +169,7 @@ public class WmsStockCheckController {
     }
 
     @PutMapping("/abandon")
-    @Operation(summary = "作废盘点单")
+    @Operation(summary = "盘点单作废")
     @PreAuthorize("@ss.hasPermission('wms:stock-check:abandon')")
     public CommonResult<Boolean> abandon(@RequestBody WmsApprovalReqVO approvalReqVO) {
         stockCheckService.approve(WmsStockCheckAuditStatus.Event.ABANDON, approvalReqVO);
@@ -177,7 +177,7 @@ public class WmsStockCheckController {
     }
 
     @PutMapping("/reject")
-    @Operation(summary = "驳回审批")
+    @Operation(summary = "盘点单驳回审批")
     @PreAuthorize("@ss.hasPermission('wms:stock-check:reject')")
     public CommonResult<Boolean> reject(@RequestBody WmsApprovalReqVO approvalReqVO) {
         stockCheckService.approve(WmsStockCheckAuditStatus.Event.REJECT, approvalReqVO);

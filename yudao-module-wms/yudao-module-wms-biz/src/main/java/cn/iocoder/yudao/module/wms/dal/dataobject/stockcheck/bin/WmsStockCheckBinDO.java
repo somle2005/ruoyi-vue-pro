@@ -11,7 +11,7 @@ import lombok.*;
  * @author 李方捷
  * @table-fields : actual_qty,bin_id,expected_qty,stockCheck_id,product_id,remark,id,status
  */
-@TableName("wms_stockCheck_bin")
+@TableName("wms_stock_check_bin")
 // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @KeySequence("wms_stockCheck_bin_seq")
 @Data
