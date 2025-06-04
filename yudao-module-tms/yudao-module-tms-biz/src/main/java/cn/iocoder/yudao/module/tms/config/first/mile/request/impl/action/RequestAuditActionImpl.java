@@ -26,6 +26,6 @@ public class RequestAuditActionImpl implements Action<TmsAuditStatus, TmsEventEn
 
         firstMileRequestService.validateFirstMileRequestExists(context.getRequestId());
 
-        firstMileRequestService.updateFirstMileRequestStatus(context.getRequestId(), null, null, to.getCode(), context.getReviewComment());
+        firstMileRequestService.updateFirstMileRequestStatus(context.getRequestId(), null, null, to.getCode(), context.getAuditAdvice());
     }
 }

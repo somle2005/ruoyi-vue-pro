@@ -37,7 +37,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
     public Long createFee(TmsFeeSaveReqVO createReqVO, Integer sourceType) {
         // 插入
         TmsFeeDO fee = BeanUtils.toBean(createReqVO, TmsFeeDO.class);
-        fee.setSourceType(sourceType);
+        fee.setUpstreamType(sourceType);
         feeMapper.insert(fee);
         // 返回
         return fee.getId();
@@ -48,7 +48,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
         // 校验存在
         validateFeeExists(updateReqVO.getId(), sourceType);
         // 更新
-        TmsFeeDO updateObj = BeanUtils.toBean(updateReqVO, TmsFeeDO.class, peek -> peek.setSourceType(sourceType));
+        TmsFeeDO updateObj = BeanUtils.toBean(updateReqVO, TmsFeeDO.class, peek -> peek.setUpstreamType(sourceType));
         feeMapper.updateById(updateObj);
     }
 
@@ -87,7 +87,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
             return Collections.emptyList();
         }
         // 设置源类型
-        feeList.forEach(fee -> fee.setSourceType(sourceType));
+        feeList.forEach(fee -> fee.setUpstreamType(sourceType));
         // 批量插入
         feeMapper.insertBatch(feeList);
         // 返回 ID 列表
@@ -101,7 +101,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
         // 校验存在
         feeList.forEach(fee -> validateFeeExists(fee.getId(), sourceType));
         // 设置源类型
-        feeList.forEach(fee -> fee.setSourceType(sourceType));
+        feeList.forEach(fee -> fee.setUpstreamType(sourceType));
         // 批量更新
         feeMapper.updateBatch(feeList);
     }
@@ -112,7 +112,7 @@ public class TmsFeeServiceImpl implements TmsFeeService {
             return;
         }
         List<TmsFeeDO> oldList = this.getFee(sourceId, sourceType);
-        List<TmsFeeDO> newList = BeanUtils.toBean(list, TmsFeeDO.class, peek -> peek.setSourceType(sourceType));
+        List<TmsFeeDO> newList = BeanUtils.toBean(list, TmsFeeDO.class, peek -> peek.setUpstreamType(sourceType));
 
         //截取ID来区分新增、更新、删除
         List<List<TmsFeeDO>> diffedList = CollectionUtils.diffList(oldList, newList, (oldVal, newVal) -> ObjectUtil.equal(oldVal.getId(), newVal.getId()));

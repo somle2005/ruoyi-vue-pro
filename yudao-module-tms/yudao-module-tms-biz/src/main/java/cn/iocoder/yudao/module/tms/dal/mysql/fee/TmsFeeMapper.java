@@ -20,8 +20,8 @@ public interface TmsFeeMapper extends BaseMapperX<TmsFeeDO> {
     //build wrapper MPJLambdaWrapperX
     default MPJLambdaWrapperX<TmsFeeDO> buildWrapper(TmsFeePageReqVO reqVO) {
         return new MPJLambdaWrapperX<TmsFeeDO>()
-            .eqIfPresent(TmsFeeDO::getSourceType, reqVO.getSourceType())
-            .eqIfPresent(TmsFeeDO::getSourceId, reqVO.getSourceId())
+            .eqIfPresent(TmsFeeDO::getUpstreamType, reqVO.getUpstreamType())
+            .eqIfPresent(TmsFeeDO::getUpstreamId, reqVO.getUpstreamId())
             .eqIfPresent(TmsFeeDO::getCostType, reqVO.getCostType())
             .betweenIfPresent(TmsFeeDO::getAmount, reqVO.getAmount())
             .betweenIfPresent(TmsFeeDO::getCurrencyType, reqVO.getCurrencyType())
@@ -36,60 +36,60 @@ public interface TmsFeeMapper extends BaseMapperX<TmsFeeDO> {
     }
 
     default List<TmsFeeDO> selectListBySourceId(Long sourceId) {
-        return selectList(TmsFeeDO::getSourceId, sourceId);
+        return selectList(TmsFeeDO::getUpstreamId, sourceId);
     }
 
     default int deleteBySourceId(Long sourceId) {
-        return delete(TmsFeeDO::getSourceId, sourceId);
+        return delete(TmsFeeDO::getUpstreamId, sourceId);
     }
 
     default List<TmsFeeDO> selectListBySourceIdAndType(Long sourceId, Integer sourceType) {
         return selectList(new MPJLambdaWrapperX<TmsFeeDO>()
-            .eq(TmsFeeDO::getSourceId, sourceId)
-            .eq(TmsFeeDO::getSourceType, sourceType));
+            .eq(TmsFeeDO::getUpstreamId, sourceId)
+            .eq(TmsFeeDO::getUpstreamType, sourceType));
     }
 
     default List<Long> selectFirstMileIdsByFeePageReqVO(TmsFeePageReqVO reqVO) {
         return selectList(new MPJLambdaWrapperX<TmsFeeDO>()
-            .eqIfPresent(TmsFeeDO::getSourceType, reqVO.getSourceType())
+            .eqIfPresent(TmsFeeDO::getUpstreamType, reqVO.getUpstreamType())
             .eqIfPresent(TmsFeeDO::getCostType, reqVO.getCostType())
             .betweenIfPresent(TmsFeeDO::getAmount, reqVO.getAmount())
             .betweenIfPresent(TmsFeeDO::getCurrencyType, reqVO.getCurrencyType())
             .likeIfPresent(TmsFeeDO::getRemark, reqVO.getRemark())
             .betweenIfPresent(TmsFeeDO::getCreateTime, reqVO.getCreateTime()))
             .stream()
-            .map(TmsFeeDO::getSourceId)
+            .map(TmsFeeDO::getUpstreamId)
             .distinct()
             .collect(Collectors.toList());
     }
 
     default List<TmsFeeDO> selectBySourceIdAndSourceType(Long id, Integer sourceType) {
         return selectList(new MPJLambdaWrapperX<TmsFeeDO>()
-            .eq(TmsFeeDO::getSourceId, id)
-            .eq(TmsFeeDO::getSourceType, sourceType));
+            .eq(TmsFeeDO::getUpstreamId, id)
+            .eq(TmsFeeDO::getUpstreamType, sourceType));
     }
 
     default int deleteByIdAndType(Long id, Integer sourceType) {
         return delete(new MPJLambdaWrapperX<TmsFeeDO>()
             .eq(TmsFeeDO::getId, id)
-            .eq(TmsFeeDO::getSourceType, sourceType));
+            .eq(TmsFeeDO::getUpstreamType, sourceType));
     }
 
     default void deleteBatchIdsBySourceType(List<Long> ids, Integer sourceType) {
         delete(new MPJLambdaWrapperX<TmsFeeDO>()
             .in(TmsFeeDO::getId, ids)
-            .eq(TmsFeeDO::getSourceType, sourceType));
+            .eq(TmsFeeDO::getUpstreamType, sourceType));
     }
     default int deleteBySourceIdAndType(Long sourceId, Integer sourceType) {
         return delete(new MPJLambdaWrapperX<TmsFeeDO>()
-            .eq(TmsFeeDO::getSourceId, sourceId)
-            .eq(TmsFeeDO::getSourceType, sourceType));
+            .eq(TmsFeeDO::getUpstreamId, sourceId)
+            .eq(TmsFeeDO::getUpstreamType, sourceType));
     }
 
     default int deleteBySourceIdAndSourceType(Long sourceId, Integer sourceType) {
         return delete(new MPJLambdaWrapperX<TmsFeeDO>()
-            .eq(TmsFeeDO::getSourceId, sourceId)
-            .eq(TmsFeeDO::getSourceType, sourceType));
+            .eq(TmsFeeDO::getUpstreamId, sourceId)
+            .eq(TmsFeeDO::getUpstreamType, sourceType));
     }
 
 }

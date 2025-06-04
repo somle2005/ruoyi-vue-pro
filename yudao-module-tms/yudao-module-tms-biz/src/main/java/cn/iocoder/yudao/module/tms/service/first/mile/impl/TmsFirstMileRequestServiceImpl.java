@@ -249,7 +249,7 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         }
         if (auditStatus != null) {
             requestDO.setAuditStatus(auditStatus);
-            requestDO.setReviewComment(auditMsg);
+            requestDO.setAuditAdvice(auditMsg);
         }
         // 执行更新
         firstMileRequestMapper.updateById(requestDO);

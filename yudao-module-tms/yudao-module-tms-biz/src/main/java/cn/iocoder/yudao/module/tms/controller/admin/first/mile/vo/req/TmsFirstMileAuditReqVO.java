@@ -29,5 +29,5 @@ public class TmsFirstMileAuditReqVO {
     //审核意见
     @Schema(description = "审核意见")
     @DiffLogField(name = "审核意见")
-    private String reviewComment;
+    private String auditAdvice;
 }

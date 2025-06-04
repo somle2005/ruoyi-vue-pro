@@ -11,8 +11,8 @@ import lombok.*;
  *
  * @author wdy
  */
-@TableName("tms_port_info")
-@KeySequence("tms_port_info_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
+@TableName("tms_port")
+@KeySequence("tms_port_seq") // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

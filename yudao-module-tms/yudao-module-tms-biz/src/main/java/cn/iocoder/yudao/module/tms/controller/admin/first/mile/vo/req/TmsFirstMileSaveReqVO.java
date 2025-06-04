@@ -128,7 +128,7 @@ public class TmsFirstMileSaveReqVO {
                 vesselTracking.setUpstreamId(id);
             }
             if (fees != null) {
-                fees.forEach(fee -> fee.setSourceId(id));
+                fees.forEach(fee -> fee.setUpstreamId(id));
             }
         }
     }
@@ -147,10 +147,10 @@ public class TmsFirstMileSaveReqVO {
     @Data
     public static class TmsFeeSaveReqVO2 extends TmsFeeSaveReqVO {
         @Schema(description = "上游单据类型; 前端不填入，后端写死的")
-        private final Integer sourceType = BillType.TMS_FIRST_MILE.getValue();
+        private final Integer upstreamType = BillType.TMS_FIRST_MILE.getValue();
 
         @Schema(description = "上游业务单ID，如调拨单ID(前端不填入)")
         @Null(groups = {Validation.OnCreate.class}, message = "上游业务单ID必须为空，前端创建头程时不传递")
-        private Long sourceId;
+        private Long upstreamId;
     }
 }

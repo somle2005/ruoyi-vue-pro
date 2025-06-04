@@ -22,11 +22,11 @@ public class TmsFeeRespVO extends BaseVO {
 
     @Schema(description = "原单类型;出运订单、调拨单")
     @ExcelProperty("原单类型;出运订单、调拨单")
-    private Integer sourceType;
+    private Integer upstreamType;
 
     @Schema(description = "原单ID;出运订单ID、调拨单ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("原单ID;出运订单ID、调拨单ID")
-    private Long sourceId;
+    private Long upstreamId;
 
     @Schema(description = "费用类型", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty(value = "费用类型", converter = DictConvert.class)
