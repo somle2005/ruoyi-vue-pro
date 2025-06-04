@@ -11,7 +11,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundIt
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.WmsPickupDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
@@ -106,7 +106,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         Long flowId = this.processInboundItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
         this.processStockBin(pickup, pickupItemDO, inboundDO, inboundItemVO,flowId);
         this.processStockWarehouseItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
-        this.processStockOwnershipItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
+        this.processStockLogicItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
     }
 
 
@@ -215,7 +215,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
     /**
      * 处理库存库位
      **/
-    private void processStockOwnershipItem(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO) {
+    private void processStockLogicItem(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO) {
 
         Long warehouseId = pickup.getWarehouseId();
         Integer quantity = pickupItemDO.getQty();
@@ -240,29 +240,29 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
 
 
         // 刷新逻辑库存
-        // wmsStockOwnershipService.refreshForPickup(pickup.getWarehouseId(), inboundDO.getCompanyId(), deptId,inboundItemVO.getProductId(), pickup.getId(), pickupItemDO.getId(),);
+        // wmsStockLogicService.refreshForPickup(pickup.getWarehouseId(), inboundDO.getCompanyId(), deptId,inboundItemVO.getProductId(), pickup.getId(), pickupItemDO.getId(),);
 
         // 校验本方法在事务中
         JdbcUtils.requireTransaction();
         // 查询库存记录
-        WmsStockOwnershipDO stockOwnershipDO = stockOwnershipService.getByUkProductOwner(warehouseId, companyId, deptId, productId, false);
+        WmsStockLogicDO stockLogicDO = stockLogicService.getByUkProductOwner(warehouseId, companyId, deptId, productId, false);
         // 如果不存在就创建
-        if (stockOwnershipDO == null) {
-            throw exception(STOCK_OWNERSHIP_NOT_EXISTS);
+        if (stockLogicDO == null) {
+            throw exception(STOCK_LOGIC_NOT_EXISTS);
         } else {
             // 如果存在就修改
             // 可用量
-            stockOwnershipDO.setAvailableQty(stockOwnershipDO.getAvailableQty() + quantity);
+            stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() + quantity);
             // 待上架量
-            stockOwnershipDO.setShelvePendingQty(stockOwnershipDO.getShelvePendingQty() - quantity);
-            if (stockOwnershipDO.getShelvePendingQty() < 0) {
-                throw exception(STOCK_OWNERSHIP_NOT_ENOUGH);
+            stockLogicDO.setShelvePendingQty(stockLogicDO.getShelvePendingQty() - quantity);
+            if (stockLogicDO.getShelvePendingQty() < 0) {
+                throw exception(STOCK_LOGIC_NOT_ENOUGH);
             }
         }
         // 保存
-        stockOwnershipService.insertOrUpdate(stockOwnershipDO);
+        stockLogicService.insertOrUpdate(stockLogicDO);
         // 记录流水
-        stockFlowService.createForStockOwnership(this.getReason(), WmsStockFlowDirection.IN, productId, stockOwnershipDO, quantity, pickup.getId(), pickupItemDO.getId());
+        stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.IN, productId, stockLogicDO, quantity, pickup.getId(), pickupItemDO.getId());
 
     }
 

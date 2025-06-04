@@ -78,8 +78,8 @@ public class WmsStockBinPageReqVO extends PageParam {
     private Integer[] warehouseShelvingPendingQty;
 
 
-    @Schema(description = "是否返回 suggestedOwnership ", example = "")
-    private Integer withSuggestedOwnership;
+    @Schema(description = "是否返回 suggestedLogic ", example = "")
+    private Integer withSuggestedLogic;
 
 
 }

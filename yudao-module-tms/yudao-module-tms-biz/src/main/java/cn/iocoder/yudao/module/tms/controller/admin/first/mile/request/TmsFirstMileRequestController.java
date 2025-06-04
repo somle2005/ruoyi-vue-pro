@@ -25,8 +25,8 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.request.TmsFir
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
-import cn.iocoder.yudao.module.wms.api.stock.ownership.WmsStockOwnershipApi;
-import cn.iocoder.yudao.module.wms.api.stock.ownership.dto.WmsStockOwnershipDTO;
+import cn.iocoder.yudao.module.wms.api.stock.logic.WmsStockLogicApi;
+import cn.iocoder.yudao.module.wms.api.stock.logic.dto.WmsStockLogicDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -63,7 +63,7 @@ public class TmsFirstMileRequestController {
     private final DeptApi deptApi;
     private final AdminUserApi adminUserApi;
     private final FmsCompanyApi fmsCompanyApi;
-    private final WmsStockOwnershipApi wmsStockOwnershipApi;
+    private final WmsStockLogicApi wmsStockLogicApi;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程申请单")
@@ -187,7 +187,7 @@ public class TmsFirstMileRequestController {
     @Operation(summary = "获取产品可用库存")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:query')")
     public CommonResult<TmsFirstMileRequestProductStockRespVO> getProductStock(@Valid @RequestBody TmsFirstMileRequestProductStockReqVO reqVO) {
-        Map<Long, WmsStockOwnershipDTO> stockMap = wmsStockOwnershipApi.selectByDeptIdAndProductIdAndCountryIdMap(reqVO.getDeptId(), reqVO.getProductIds(), reqVO.getCountry());
+        Map<Long, WmsStockLogicDTO> stockMap = wmsStockLogicApi.selectByDeptIdAndProductIdAndCountryIdMap(reqVO.getDeptId(), reqVO.getProductIds(), reqVO.getCountry());
         
         // 转换为 ProductStock 列表
         List<TmsFirstMileRequestProductStockRespVO.ProductStock> productStocks = stockMap.entrySet().stream()
@@ -232,7 +232,7 @@ public class TmsFirstMileRequestController {
                 .flatMap(bo -> bo.getItems().stream().map(TmsFirstMileRequestItemDO::getSalesCompanyId)).collect(Collectors.toSet()));
         //获取产品库存 wmsWarehouseApi
         //公司MAP
-        Map<Long, WmsStockOwnershipDTO> wmsStockOwnershipDTOMap = wmsStockOwnershipApi.selectByDeptIdAndProductIdAndCountryIdMap(firstMileRequestBOList.get(0).getRequestDeptId(), productIds, CountryEnum.CHINA.getCountryCode());
+        Map<Long, WmsStockLogicDTO> wmsStockLogicDTOMap = wmsStockLogicApi.selectByDeptIdAndProductIdAndCountryIdMap(firstMileRequestBOList.get(0).getRequestDeptId(), productIds, CountryEnum.CHINA.getCountryCode());
 
         return firstMileRequestBOList.stream().map(bo -> {
             TmsFirstMileRequestRespVO respVO = BeanUtils.toBean(bo, TmsFirstMileRequestRespVO.class, respVO1 -> {
@@ -255,7 +255,7 @@ public class TmsFirstMileRequestController {
                         MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> itemRespVO.setCreator(user.getNickname()));
                         MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> itemRespVO.setUpdater(user.getNickname()));
                         //带出该申请部门的 该产品sku的 中国的 仓库库存汇总
-                        MapUtils.findAndThen(wmsStockOwnershipDTOMap, item.getProductId(), wmsStockOwnershipDTO -> itemRespVO.setDomesticWarehouseStock(wmsStockOwnershipDTO.getAvailableQty()));
+                            MapUtils.findAndThen(wmsStockLogicDTOMap, item.getProductId(), wmsStockLogicDTO -> itemRespVO.setDomesticWarehouseStock(wmsStockLogicDTO.getAvailableQty()));
                         }
                             //自动计算该sku的采购在途数量
                     )).collect(Collectors.toList());

@@ -7,8 +7,9 @@ import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import org.apache.ibatis.annotations.Mapper;
+
 import java.util.List;
 
 /**
@@ -52,8 +53,8 @@ public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
         wrapper.betweenIfPresent(WmsStockFlowDO::getShelvingPendingQty, reqVO.getShelvingPendingQty());
         //过滤公司
          if(reqVO.getCompanyId()!=null) {
-         wrapper.innerJoin(WmsStockOwnershipDO.class, WmsStockOwnershipDO::getId, WmsStockFlowDO::getStockId)
-         .eqIfExists(WmsStockOwnershipDO::getCompanyId, reqVO.getCompanyId());
+             wrapper.innerJoin(WmsStockLogicDO.class, WmsStockLogicDO::getId, WmsStockFlowDO::getStockId)
+                 .eqIfExists(WmsStockLogicDO::getCompanyId, reqVO.getCompanyId());
          }
          wrapper.orderByDesc(WmsStockFlowDO::getCreateTime);
         return selectPage(reqVO, wrapper);

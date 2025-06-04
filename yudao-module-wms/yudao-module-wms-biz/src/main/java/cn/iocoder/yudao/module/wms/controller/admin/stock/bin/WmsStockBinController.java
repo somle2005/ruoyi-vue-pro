@@ -12,8 +12,8 @@ import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespBinVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinExcelVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo.WmsStockOwnershipPureRespVO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemOwnershipDO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.logic.vo.WmsStockLogicPureRespVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
@@ -110,18 +110,18 @@ public class WmsStockBinController {
         stockBinService.assembleBin(voPageResult.getList(),true);
 
         // 获取建议库存
-        if(Objects.equals(1,pageReqVO.getWithSuggestedOwnership())) {
-            //List<WmsStockOwnershipPureRespVO> suggestedOwnershipList = new ArrayList<>();
+        if (Objects.equals(1, pageReqVO.getWithSuggestedLogic())) {
+            //List<WmsStockLogicPureRespVO> suggestedLogicList = new ArrayList<>();
             Map<Long, List<Long>> productIdsMap = StreamX.from(voPageResult.getList()).groupBy(WmsStockBinRespVO::getWarehouseId,WmsStockBinRespVO::getProductId);
 
             for (Map.Entry<Long, List<Long>> entry : productIdsMap.entrySet()) {
-                Map<Long, WmsInboundItemOwnershipDO> ownershipMap = inboundService.getInboundItemOwnershipMap(entry.getKey(), entry.getValue(), true);
+                Map<Long, WmsInboundItemLogicDO> logicMap = inboundService.getInboundItemLogicMap(entry.getKey(), entry.getValue(), true);
 
                 StreamX.from(voPageResult.getList())
                     .filter(e-> Objects.equals(entry.getKey(),e.getWarehouseId()))
                     .forEach(e->{
-                        WmsInboundItemOwnershipDO ownership = ownershipMap.get(e.getProductId());
-                        e.setSuggestedOwnership(BeanUtils.toBean(ownership, WmsStockOwnershipPureRespVO.class));
+                        WmsInboundItemLogicDO logic = logicMap.get(e.getProductId());
+                        e.setSuggestedLogic(BeanUtils.toBean(logic, WmsStockLogicPureRespVO.class));
                     });
             }
 

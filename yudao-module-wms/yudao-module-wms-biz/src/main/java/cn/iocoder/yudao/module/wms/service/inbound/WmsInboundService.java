@@ -6,7 +6,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundPageReq
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemOwnershipDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import jakarta.validation.Valid;
 
@@ -137,7 +137,7 @@ public interface WmsInboundService {
      * @param productId
      * @param olderFirst 是否按入库时间升序
      */
-    WmsInboundItemOwnershipDO getInboundItemOwnership(Long warehouseId, Long productId, boolean olderFirst);
+    WmsInboundItemLogicDO getInboundItemLogic(Long warehouseId, Long productId, boolean olderFirst);
 
     /**
      * 按入库顺序获得第一个入库批次
@@ -145,7 +145,7 @@ public interface WmsInboundService {
      * @param productId
      * @param olderFirst 是否按入库时间升序
      */
-    List<WmsInboundItemOwnershipDO> selectInboundItemOwnershipList(Long warehouseId, Long productId, boolean olderFirst);
+    List<WmsInboundItemLogicDO> selectInboundItemLogicList(Long warehouseId, Long productId, boolean olderFirst);
 
     /**
      * 按入库顺序获得第一个入库批次
@@ -153,7 +153,7 @@ public interface WmsInboundService {
      * @param productIds
      * @param olderFirst 是否按入库时间升序
      */
-    Map<Long, WmsInboundItemOwnershipDO> getInboundItemOwnershipMap(Long warehouseId, List<Long> productIds, boolean olderFirst);
+    Map<Long, WmsInboundItemLogicDO> getInboundItemLogicMap(Long warehouseId, List<Long> productIds, boolean olderFirst);
 
     /**
      * 按入库顺序获得入库批次列表
@@ -162,7 +162,7 @@ public interface WmsInboundService {
      * @param productId   产品编号
      * @param olderFirst  是否按入库时间升序
      */
-    List<WmsInboundItemOwnershipDO> getInboundItemOwnershipList(Long warehouseId, Long productId, boolean olderFirst);
+    List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, boolean olderFirst);
 
     /**
      * 创建盘点入库单

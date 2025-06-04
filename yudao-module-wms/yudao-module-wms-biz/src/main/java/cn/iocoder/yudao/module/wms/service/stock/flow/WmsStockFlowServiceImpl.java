@@ -22,7 +22,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBi
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowSaveReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.move.vo.WmsStockOwnershipMoveRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.logic.move.vo.WmsStockLogicMoveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stockcheck.vo.WmsStockCheckRespVO;
@@ -35,8 +35,8 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.WmsPickupDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.move.WmsStockBinMoveDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.WmsStockOwnershipDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.move.WmsStockOwnershipMoveDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.move.WmsStockLogicMoveDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stockcheck.WmsStockCheckDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
@@ -52,8 +52,8 @@ import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
 import cn.iocoder.yudao.module.wms.service.quantity.InboundExecutor;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.move.WmsStockBinMoveService;
-import cn.iocoder.yudao.module.wms.service.stock.ownership.WmsStockOwnershipService;
-import cn.iocoder.yudao.module.wms.service.stock.ownership.move.WmsStockOwnershipMoveService;
+import cn.iocoder.yudao.module.wms.service.stock.logic.WmsStockLogicService;
+import cn.iocoder.yudao.module.wms.service.stock.logic.move.WmsStockLogicMoveService;
 import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
 import cn.iocoder.yudao.module.wms.service.stockcheck.WmsStockCheckService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
@@ -118,11 +118,11 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Resource
     @Lazy
-    private WmsStockOwnershipMoveService stockOwnershipMoveService;
+    private WmsStockLogicMoveService stockLogicMoveService;
 
     @Resource
     @Lazy
-    private WmsStockOwnershipService stockOwnershipService;
+    private WmsStockLogicService stockLogicService;
 
     @Resource
     @Lazy
@@ -231,24 +231,24 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
      * 创建逻辑库存变化流水
      */
     @Override
-    public void createForStockOwnership(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockOwnershipDO stockOwnershipDO, Integer quantity, Long reasonId, Long reasonItemId) {
-        createFor(reason, WmsStockType.OWNERSHIP, direction, stockOwnershipDO.getId(), stockOwnershipDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
+    public void createForStockLogic(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockLogicDO stockLogicDO, Integer quantity, Long reasonId, Long reasonItemId) {
+        createFor(reason, WmsStockType.LOGIC, direction, stockLogicDO.getId(), stockLogicDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
             // 采购计划量
-            // stockFlowDO.setPurchasePlanQty(stockOwnershipDO.getPurchasePlanQty());
+            // stockFlowDO.setPurchasePlanQty(stockLogicDO.getPurchasePlanQty());
             // 采购在途量
-            // stockFlowDO.setPurchaseTransitQty(stockOwnershipDO.getPurchaseTransitQty());
+            // stockFlowDO.setPurchaseTransitQty(stockLogicDO.getPurchaseTransitQty());
             // 退货在途量
-            // stockFlowDO.setReturnTransitQty(stockOwnershipDO.getReturnTransitQty());
+            // stockFlowDO.setReturnTransitQty(stockLogicDO.getReturnTransitQty());
             // 可售量，未被单据占用的良品数量
-            // stockFlowDO.setSellableQty(stockOwnershipDO.getSellableQty());
+            // stockFlowDO.setSellableQty(stockLogicDO.getSellableQty());
             // 可用量，在库的良品数量
-            stockFlowDO.setAvailableQty(stockOwnershipDO.getAvailableQty());
+            stockFlowDO.setAvailableQty(stockLogicDO.getAvailableQty());
             // 待上架数量
-            stockFlowDO.setShelvingPendingQty(stockOwnershipDO.getShelvePendingQty() + quantity);
+            stockFlowDO.setShelvingPendingQty(stockLogicDO.getShelvePendingQty() + quantity);
             // 不良品数量
-            // stockFlowDO.setDefectiveQty(stockOwnershipDO.getDefectiveQty());
+            // stockFlowDO.setDefectiveQty(stockLogicDO.getDefectiveQty());
             // 待出库量
-            stockFlowDO.setOutboundPendingQty(stockOwnershipDO.getOutboundPendingQty());
+            stockFlowDO.setOutboundPendingQty(stockLogicDO.getOutboundPendingQty());
         });
     }
 
@@ -259,11 +259,11 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     public void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId, Long inboundItemFlowId) {
         createFor(reason, WmsStockType.BIN, direction, stockBinDO.getId(), stockBinDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
             // 采购计划量
-            // stockFlowDO.setPurchasePlanQty(stockOwnershipDO.getPurchasePlanQty());
+            // stockFlowDO.setPurchasePlanQty(stockLogicDO.getPurchasePlanQty());
             // 采购在途量
-            // stockFlowDO.setPurchaseTransitQty(stockOwnershipDO.getPurchaseTransitQty());
+            // stockFlowDO.setPurchaseTransitQty(stockLogicDO.getPurchaseTransitQty());
             // 退货在途量
-            // stockFlowDO.setReturnTransitQty(stockOwnershipDO.getReturnTransitQty());
+            // stockFlowDO.setReturnTransitQty(stockLogicDO.getReturnTransitQty());
             // 可售量，未被单据占用的良品数量
             stockFlowDO.setSellableQty(stockBinDO.getSellableQty());
             // 可用量，在库的良品数量
@@ -271,7 +271,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
             // 待上架数量
             // stockFlowDO.setShelvingPendingQty(stockBinDO.getShelvingPendingQty() + quantity);
             // 不良品数量
-            // stockFlowDO.setDefectiveQty(stockOwnershipDO.getDefectiveQty());
+            // stockFlowDO.setDefectiveQty(stockLogicDO.getDefectiveQty());
             // 待出库量
             stockFlowDO.setOutboundPendingQty(stockBinDO.getOutboundPendingQty());
             // 库存批次的流水ID
@@ -407,13 +407,13 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     }
 
     @Override
-    public void assembleOwnershipMove(List<WmsStockFlowRespVO> list) {
+    public void assembleLogicMove(List<WmsStockFlowRespVO> list) {
         List<WmsStockFlowRespVO> flowList = StreamX.from(list).filter(
-            v -> Objects.equals(WmsStockReason.STOCK_OWNERSHIP_MOVE.getValue(), v.getReason())
+            v -> Objects.equals(WmsStockReason.STOCK_LOGIC_MOVE.getValue(), v.getReason())
         ).toList();
-        List<WmsStockOwnershipMoveDO> doList = stockOwnershipMoveService.selectByIds(StreamX.from(flowList).toList(WmsStockFlowRespVO::getReasonBillId));
-        Map<Long, WmsStockOwnershipMoveRespVO> voMap = StreamX.from(doList).toMap(WmsStockOwnershipMoveDO::getId, elem -> BeanUtils.toBean(elem, WmsStockOwnershipMoveRespVO.class));
-        StreamX.from(flowList).assemble(voMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setStockOwnershipMove);
+        List<WmsStockLogicMoveDO> doList = stockLogicMoveService.selectByIds(StreamX.from(flowList).toList(WmsStockFlowRespVO::getReasonBillId));
+        Map<Long, WmsStockLogicMoveRespVO> voMap = StreamX.from(doList).toMap(WmsStockLogicMoveDO::getId, elem -> BeanUtils.toBean(elem, WmsStockLogicMoveRespVO.class));
+        StreamX.from(flowList).assemble(voMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setStockLogicMove);
     }
 
     @Override
@@ -442,29 +442,29 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     @Override
     public void assembleCompanyAndDept(List<WmsStockFlowRespVO> list) {
         // 过滤逻辑库存的动账流水
-        List<WmsStockFlowRespVO> ownershipFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockType.OWNERSHIP.getValue(), v.getStockType())).toList();
-        List<Long> stockOwnershipIds = StreamX.from(ownershipFlowList).toList(WmsStockFlowRespVO::getStockId).stream().distinct().toList();
+        List<WmsStockFlowRespVO> logicFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockType.LOGIC.getValue(), v.getStockType())).toList();
+        List<Long> stockLogicIds = StreamX.from(logicFlowList).toList(WmsStockFlowRespVO::getStockId).stream().distinct().toList();
         // 查询到对应的逻辑库存记录
-        List<WmsStockOwnershipDO> stockOwnershipDOList = stockOwnershipService.selectByIds(stockOwnershipIds);
-        Map<Long, WmsStockOwnershipDO> ownershipDOMap = StreamX.from(stockOwnershipDOList).toMap(WmsStockOwnershipDO::getId);
-        Set<Long> companyIds = StreamX.from(stockOwnershipDOList).toSet(WmsStockOwnershipDO::getCompanyId);
-        List<Long> deptIds = StreamX.from(stockOwnershipDOList).toList(WmsStockOwnershipDO::getDeptId);
+        List<WmsStockLogicDO> stockLogicDOList = stockLogicService.selectByIds(stockLogicIds);
+        Map<Long, WmsStockLogicDO> logicDOMap = StreamX.from(stockLogicDOList).toMap(WmsStockLogicDO::getId);
+        Set<Long> companyIds = StreamX.from(stockLogicDOList).toSet(WmsStockLogicDO::getCompanyId);
+        List<Long> deptIds = StreamX.from(stockLogicDOList).toList(WmsStockLogicDO::getDeptId);
         // 查询到部门记录
         Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(deptIds);
         Map<Long, FmsCompanyDTO> companyDTOMap = companyApi.getCompanyMap(companyIds);
         Map<Long, DeptSimpleRespVO> deptSimpleVOMap = BeanUtils.toBean(deptDTOMap, DeptSimpleRespVO.class);
         // 循环库位的动账流水
-        for (WmsStockFlowRespVO ownershipRespVO : ownershipFlowList) {
+        for (WmsStockFlowRespVO logicRespVO : logicFlowList) {
             // 找到流水对应的逻辑库存记录
-            WmsStockOwnershipDO stockOwnershipDO = ownershipDOMap.get(ownershipRespVO.getStockId());
+            WmsStockLogicDO stockLogicDO = logicDOMap.get(logicRespVO.getStockId());
             // 通过逻辑库存记录找到对应的部门
-            DeptSimpleRespVO deptVO = deptSimpleVOMap.get(stockOwnershipDO.getDeptId());
+            DeptSimpleRespVO deptVO = deptSimpleVOMap.get(stockLogicDO.getDeptId());
             // 设置部门
-            ownershipRespVO.setDept(deptVO);
+            logicRespVO.setDept(deptVO);
             // 通过逻辑库存记录找到对应的财务公司
-            FmsCompanyDTO companyDTO=companyDTOMap.get(stockOwnershipDO.getCompanyId());
+            FmsCompanyDTO companyDTO = companyDTOMap.get(stockLogicDO.getCompanyId());
             // 设置公司
-            ownershipRespVO.setCompany(BeanUtils.toBean(companyDTO, FmsCompanySimpleRespVO.class));
+            logicRespVO.setCompany(BeanUtils.toBean(companyDTO, FmsCompanySimpleRespVO.class));
         }
 
 

@@ -29,7 +29,7 @@ import cn.iocoder.yudao.module.wms.dal.mysql.stock.bin.WmsStockBinMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.bin.WmsStockBinProductMapper;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import cn.iocoder.yudao.module.wms.service.stock.flow.WmsStockFlowService;
-import cn.iocoder.yudao.module.wms.service.stock.ownership.WmsStockOwnershipService;
+import cn.iocoder.yudao.module.wms.service.stock.logic.WmsStockLogicService;
 import cn.iocoder.yudao.module.wms.service.stock.warehouse.WmsStockWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
@@ -78,7 +78,7 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
     WmsStockWarehouseService stockWarehouseService;
 
     @Autowired
-    private WmsStockOwnershipService wmsStockOwnershipService;
+    private WmsStockLogicService wmsStockLogicService;
 
     @Autowired
     @Lazy

@@ -106,13 +106,23 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
     }
 
     default List<WmsInboundItemQueryDO> getInboundItemListForTms(WmsInboundItemListForTmsReqVO listForTmsReqVO) {
-//        List<>
-        MPJLambdaWrapperX<WmsInboundItemQueryDO> wrapper = new MPJLambdaWrapperX<>();
-        wrapper.eq(WmsInboundItemDO::getCompanyId, listForTmsReqVO.getCompanyId());
-        wrapper.selectAll(WmsInboundItemDO.class);
-        wrapper.select(WmsInboundDO::getWarehouseId);
-        wrapper.leftJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId)
+        MPJLambdaWrapperX<WmsInboundItemQueryDO> wrapper1 = new MPJLambdaWrapperX<>();
+        List<WmsInboundItemDO> itemList = listForTmsReqVO.getInboundDoList();
+        wrapper1.eq(WmsInboundItemDO::getCompanyId, listForTmsReqVO.getCompanyId())
+            .selectAll(WmsInboundItemDO.class)
+            .select(WmsInboundDO::getWarehouseId)
+            .and(wrapper -> {
+                if (itemList != null && !itemList.isEmpty()) {
+                    itemList.forEach(inboundItem -> {
+                        wrapper.or(subWrapper -> {
+                            subWrapper.eq(WmsInboundItemDO::getProductId, inboundItem.getProductId())
+                                .eqIfExists(WmsInboundItemDO::getDeptId, inboundItem.getDeptId());
+                        });
+                    });
+                }
+            });
+        wrapper1.leftJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId)
             .eq(WmsInboundDO::getWarehouseId, listForTmsReqVO.getWarehouseId());
-        return selectList(wrapper);
+        return selectList(wrapper1);
     }
 }

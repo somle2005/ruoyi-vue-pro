@@ -20,7 +20,7 @@ public enum WmsStockReason implements ArrayValuable<Integer>, DictEnum {
     OUTBOUND_SUBMIT(4, "提交出库单"),
     OUTBOUND_REJECT(5, "拒绝出库单"),
     STOCK_BIN_MOVE(6,"库位库存移动"),
-    STOCK_OWNERSHIP_MOVE(7, "逻辑库存移动"),
+    STOCK_LOGIC_MOVE(7, "逻辑库存移动"),
     STOCKCHECK_POSITIVE(8, "盘赢"),
     STOCKCHECK_NEGATIVE(9, "盘亏")
 
