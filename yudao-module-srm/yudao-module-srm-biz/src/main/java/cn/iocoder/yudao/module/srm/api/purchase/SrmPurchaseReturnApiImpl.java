@@ -133,7 +133,7 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
                 .outItemId(item.getUpstreamId())
                 .outCount(BigDecimal.valueOf(item.getActualQty()))
                 .build();
-            srmOutboundStateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.STOCK_ADJUSTMENT, build);
+            srmOutboundStateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.OUT_STORAGE_ADJUSTMENT, build);
         });
     }
 }

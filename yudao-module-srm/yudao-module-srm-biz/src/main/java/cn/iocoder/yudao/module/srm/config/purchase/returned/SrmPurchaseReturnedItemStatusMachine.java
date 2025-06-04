@@ -33,9 +33,16 @@ public class SrmPurchaseReturnedItemStatusMachine {
         //初始化
         builder.internalTransition().within(SrmOutboundStatus.NONE_OUTBOUND).on(SrmEventEnum.OUT_STORAGE_INIT).perform(outItemActionImpl);
         //出库数量调整
-        builder.externalTransitions().fromAmong(SrmOutboundStatus.NONE_OUTBOUND).to(SrmOutboundStatus.PARTIALLY_OUTBOUND).on(SrmEventEnum.OUT_STORAGE_ADJUSTMENT).perform(outItemActionImpl);
+        builder.externalTransitions().fromAmong(SrmOutboundStatus.NONE_OUTBOUND, SrmOutboundStatus.PARTIALLY_OUTBOUND, SrmOutboundStatus.ALL_OUTBOUND)
+            .to(SrmOutboundStatus.PARTIALLY_OUTBOUND)
+            .on(SrmEventEnum.OUT_STORAGE_ADJUSTMENT)
+            .perform(outItemActionImpl);
         //出库作废
-        builder.externalTransitions().fromAmong(SrmOutboundStatus.NONE_OUTBOUND, SrmOutboundStatus.PARTIALLY_OUTBOUND).to(SrmOutboundStatus.NONE_OUTBOUND).on(SrmEventEnum.OUT_STORAGE_CANCEL).perform(outItemActionImpl);
+        builder.externalTransitions()
+            .fromAmong(SrmOutboundStatus.NONE_OUTBOUND, SrmOutboundStatus.PARTIALLY_OUTBOUND)
+            .to(SrmOutboundStatus.NONE_OUTBOUND)
+            .on(SrmEventEnum.OUT_STORAGE_CANCEL)
+            .perform(outItemActionImpl);
         builder.setFailCallback(baseFailCallbackImpl);
         return builder.build(PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME);
     }

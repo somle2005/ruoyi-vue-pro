@@ -28,7 +28,7 @@ public enum SrmEventEnum {
     RETURN_INIT("退款初始化"), RETURN_ADJUSTMENT("退款调整"), RETURN_CANCEL("取消退款"), RETURN_EXCEPTION("退款异常"), RETURN_COMPLETE("退款完成"),
 
     // ========== 入库事件 ==========
-    STORAGE_INIT("入库初始化"), STOCK_ADJUSTMENT("库存调整"), CANCEL_STORAGE("取消入库"),
+    STORAGE_INIT("入库初始化"), STOCK_ADJUSTMENT("入库数量调整"), CANCEL_STORAGE("取消入库"),
     // PARTIAL_STORAGE("部分入库"),
     // COMPLETE_STORAGE("完成入库"),
     // STORAGE_EXCEPTION("入库异常"),
