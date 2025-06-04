@@ -44,7 +44,7 @@ public class StorageInItemActionImpl implements Action<SrmStorageStatus, SrmEven
 
         //调整库存
         if (event == SrmEventEnum.ORDER_ADJUSTMENT) {
-            BigDecimal oldActualQty = inItemDO.getActualQty(); // 原实际入库数量
+            BigDecimal oldActualQty = inItemDO.getActualQty() == null ? BigDecimal.ZERO : inItemDO.getActualQty(); // 原实际入库数量
             BigDecimal changeActualQty = context.getInCount() == null ? BigDecimal.ZERO : context.getInCount(); // 变更数量
             BigDecimal finalActualQty = oldActualQty.add(changeActualQty); // 最终实际入库数量
             BigDecimal qty = inItemDO.getQty(); // 计划入库数量

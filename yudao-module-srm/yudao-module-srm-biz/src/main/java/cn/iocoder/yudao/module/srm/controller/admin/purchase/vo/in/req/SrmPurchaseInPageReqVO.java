@@ -67,7 +67,7 @@ public class SrmPurchaseInPageReqVO extends PageParam {
         private LocalDateTime[] auditTime;
 
         // ========== 状态信息 ==========
-        @Schema(description = "到货状态")
+        @Schema(description = "入库状态")
         private Integer inStatus;
 
         @Schema(description = "审核状态")
@@ -123,7 +123,7 @@ public class SrmPurchaseInPageReqVO extends PageParam {
         private Long applicationDeptId;
 
         // ========== 状态信息 ==========
-        @Schema(description = "到货状态")
+        @Schema(description = "入库状态")
         private Integer inStatus;
 
         @Schema(description = "付款状态")

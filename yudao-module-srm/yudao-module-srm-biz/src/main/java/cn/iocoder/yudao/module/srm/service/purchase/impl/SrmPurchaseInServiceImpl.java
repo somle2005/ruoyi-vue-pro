@@ -576,6 +576,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         for (SrmPurchaseInDO inDO : ins) {
             List<SrmPurchaseInItemDO> purchaseInItemDOS = purchaseInItemMapper.selectListByInId(inDO.getId());
             purchaseInItemDOS.forEach(peek -> peek.setQty(BigDecimal.ZERO));
+            //更新
+            purchaseInItemMapper.updateBatch(purchaseInItemDOS);
             syncOrderItemExecutionStatus(purchaseInItemDOS);
         }
 

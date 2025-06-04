@@ -34,13 +34,13 @@ public class ReturnAuditActionImpl implements Action<SrmAuditStatus, SrmEventEnu
             //审核通过(批准数量)
             if (event == SrmEventEnum.AGREE) {
                 //设置审核意见
-                data.setReviewAdvice(req.getReviewAdvice());
+                data.setAuditAdvice(req.getAuditAdvice());
                 data.setAuditTime(LocalDateTime.now());
                 data.setAuditorId(getLoginUserId());
             }
             //审核不通过(设置未通过意见)
             if (event == SrmEventEnum.REJECT) {
-                data.setReviewAdvice(req.getReviewAdvice());
+                data.setAuditAdvice(req.getAuditAdvice());
                 data.setAuditTime(LocalDateTime.now());
                 data.setAuditorId(getLoginUserId());
             }

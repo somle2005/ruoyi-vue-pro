@@ -88,7 +88,7 @@ public class SrmPurchaseInBaseRespVO {
     private LocalDateTime auditTime;
 
     @Schema(description = "审核意见")
-    private String reviewAdvice;
+    private String auditAdvice;
 
     // ========== 数量金额信息 ==========
     @Schema(description = "商品总体积，单位：m³")

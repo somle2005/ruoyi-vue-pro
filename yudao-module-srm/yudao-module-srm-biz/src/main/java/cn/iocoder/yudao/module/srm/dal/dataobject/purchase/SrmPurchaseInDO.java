@@ -151,7 +151,7 @@ public class SrmPurchaseInDO extends TenantBaseDO {
     /**
      * 审核意见
      */
-    private String reviewAdvice;
+    private String auditAdvice;
 
     /**
      * 对账状态（false-未对账，true-已对账）

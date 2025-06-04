@@ -58,7 +58,7 @@ public class SrmPurchaseReturnDO extends TenantBaseDO {
     /**
      * 审核意见
      */
-    private String reviewAdvice;
+    private String auditAdvice;
     /**
      * 供应商编号
      * <p>

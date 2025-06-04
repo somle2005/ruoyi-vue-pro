@@ -44,13 +44,13 @@ public class InAuditActionImpl implements Action<SrmAuditStatus, SrmEventEnum, S
             //                itemDO.setApproveCount(item.getApproveCount() == null ? itemDO.getCount() : item.getApproveCount());//默认(批准数量 = 申请数量)
             //            });
             //设置审核意见
-            data.setReviewAdvice(req.getReviewAdvice());
+            data.setAuditAdvice(req.getAuditAdvice());
             data.setAuditTime(LocalDateTime.now());
             data.setAuditorId(getLoginUserId());
         }
         //审核不通过(设置未通过意见)
         if (event == SrmEventEnum.REJECT) {
-            data.setReviewAdvice(req.getReviewAdvice());
+            data.setAuditAdvice(req.getAuditAdvice());
             data.setAuditTime(LocalDateTime.now());
             data.setAuditorId(getLoginUserId());
         }

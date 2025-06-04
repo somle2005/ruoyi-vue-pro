@@ -166,5 +166,5 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
     /**
      * 审核意见
      */
-    private String reviewAdvice;
+    private String auditAdvice;
 }

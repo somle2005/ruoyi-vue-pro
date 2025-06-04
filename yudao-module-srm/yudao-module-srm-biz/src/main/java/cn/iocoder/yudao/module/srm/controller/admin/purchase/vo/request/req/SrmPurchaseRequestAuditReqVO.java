@@ -35,7 +35,7 @@ public class SrmPurchaseRequestAuditReqVO {
 
     //审核意见
     @Schema(description = "审核意见")
-    private String reviewAdvice;
+    private String auditAdvice;
 
     @Data
     public static class requestItems {

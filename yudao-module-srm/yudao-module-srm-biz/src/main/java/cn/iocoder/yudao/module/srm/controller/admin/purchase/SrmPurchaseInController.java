@@ -124,7 +124,7 @@ public class SrmPurchaseInController {
     @Operation(summary = "提交审核")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:submit-audit')")
     public CommonResult<Boolean> submitAudit(@Valid @RequestBody SrmPurchaseInSubmitReqVO vo) {
-        purchaseInService.submitAudit(vo.getInIds().stream().distinct().toList());
+        purchaseInService.submitAudit(vo.getArriveIds().stream().distinct().toList());
         return success(true);
     }
 
