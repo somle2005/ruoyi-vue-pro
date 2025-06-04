@@ -15,14 +15,14 @@ import java.util.Collection;
 import java.util.List;
 
 /**
- * ERP 采购入库 Service 接口
+ * ERP 采购到货 Service 接口
  *
  * @author 芋道源码
  */
 public interface SrmPurchaseInService {
 
     /**
-     * 创建采购入库
+     * 创建采购到货
      *
      * @param createReqVO 创建信息
      * @return 编号
@@ -30,14 +30,14 @@ public interface SrmPurchaseInService {
     Long createPurchaseIn(@Valid SrmPurchaseInSaveReqVO createReqVO);
 
     /**
-     * 更新采购入库
+     * 更新采购到货
      *
      * @param updateReqVO 更新信息
      */
     void updatePurchaseIn(@Valid SrmPurchaseInSaveReqVO updateReqVO);
 
     /**
-     * 更新采购入库的付款金额
+     * 更新采购到货的付款金额
      *
      * @param id           编号
      * @param paymentPrice 付款金额
@@ -45,25 +45,25 @@ public interface SrmPurchaseInService {
     void updatePurchaseInPaymentPrice(Long id, BigDecimal paymentPrice);
 
     /**
-     * 删除采购入库
+     * 删除采购到货
      *
      * @param ids 编号数组
      */
     void deletePurchaseIn(List<Long> ids);
 
     /**
-     * 获得采购入库
+     * 获得采购到货
      *
      * @param id 编号
-     * @return 采购入库
+     * @return 采购到货
      */
     SrmPurchaseInDO getPurchaseIn(Long id);
 
     /**
-     * 获取采购入库列表
+     * 获取采购到货列表
      *
      * @param ids 入库单ids
-     * @return 采购入库列表
+     * @return 采购到货列表
      */
     List<SrmPurchaseInDO> getPurchaseInList(List<Long> ids);
 
@@ -74,10 +74,10 @@ public interface SrmPurchaseInService {
      */
     SrmPurchaseInDO validatePurchaseInExists(Long id);
     /**
-     * 获得采购入库分页
+     * 获得采购到货分页
      *
      * @param pageReqVO 分页查询
-     * @return 采购入库分页
+     * @return 采购到货分页
      */
     PageResult<SrmPurchaseInBO> getPurchaseInBOPage(SrmPurchaseInPageReqVO pageReqVO);
 
@@ -86,21 +86,21 @@ public interface SrmPurchaseInService {
 
     //id
     SrmPurchaseInBO getPurchaseInBOById(Long id);
-    // ==================== 采购入库项 ====================
+    // ==================== 采购到货项 ====================
 
     /**
-     * 获得采购入库项列表
+     * 获得采购到货项列表
      *
-     * @param inId 采购入库编号
-     * @return 采购入库项列表
+     * @param inId 采购到货编号
+     * @return 采购到货项列表
      */
     List<SrmPurchaseInItemDO> getPurchaseInItemListByInId(Long inId);
 
     /**
-     * 获得采购入库项 List
+     * 获得采购到货项 List
      *
-     * @param inIds 采购入库编号数组
-     * @return 采购入库项 List
+     * @param inIds 采购到货编号数组
+     * @return 采购到货项 List
      */
     List<SrmPurchaseInItemDO> getPurchaseInItemListByInIds(Collection<Long> inIds);
 

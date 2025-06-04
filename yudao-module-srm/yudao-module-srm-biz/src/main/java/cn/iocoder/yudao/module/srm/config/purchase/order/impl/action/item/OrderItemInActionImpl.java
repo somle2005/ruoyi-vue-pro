@@ -38,7 +38,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     @Autowired
     private SrmPurchaseRequestItemsMapper erpPurchaseRequestItemsMapper;
     @Autowired
-    private SrmPurchaseOrderItemMapper itemMapper;
+    private SrmPurchaseOrderItemMapper orderItemMapper;
     @Autowired
     private SrmPurchaseOrderMapper mapper;
     @Resource(name = PURCHASE_ORDER_STORAGE_STATE_MACHINE_NAME)
@@ -59,7 +59,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     @Transactional(rollbackFor = Exception.class)
     public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmOrderInCountContext dto) {
         // 1. 先查询数据库中的采购项信息
-        SrmPurchaseOrderItemDO oldData = itemMapper.selectById(dto.getOrderItemId());
+        SrmPurchaseOrderItemDO oldData = orderItemMapper.selectById(dto.getOrderItemId());
         if (oldData == null) {
             return; // 防止空指针异常
         }
@@ -98,9 +98,9 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
 
         }
         // 更新数据库中的采购项状态
-        itemMapper.updateById(oldData.setInStatus(to.getCode())//状态
-            .setInboundClosedQty(newInCount)//入库数量
-        );
+        oldData.setInStatus(to.getCode());//状态
+        oldData.setInboundClosedQty(newInCount);//入库数量
+        orderItemMapper.updateById(oldData);
 
         // 3. 记录日志
         log.debug("订单项入库状态机触发({})事件：订单项ID={}，状态 {} -> {}, 入库数量={}, 退货数量={}", event.getDesc(), oldData.getId(), from.getDesc(),
@@ -115,7 +115,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     }
 
     private void toOrderExecute(Long orderItemId) {
-        SrmPurchaseOrderItemDO orderItemDO = itemMapper.selectById(orderItemId);
+        SrmPurchaseOrderItemDO orderItemDO = orderItemMapper.selectById(orderItemId);
         //部分入库->部分执行 , 完全入库 -> 完全执行
         if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode())) {
             orderItemExecutionStateMachine.fireEvent(SrmExecutionStatus.fromCode(orderItemDO.getExecuteStatus()), SrmEventEnum.START_EXECUTION, orderItemDO);
@@ -156,7 +156,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     }
 
     private void checkStatusAndClose(Long orderItemId) {
-        SrmPurchaseOrderItemDO orderItemDO = itemMapper.selectById(orderItemId);
+        SrmPurchaseOrderItemDO orderItemDO = orderItemMapper.selectById(orderItemId);
         // 当前订单项，完全入库 + 完全付款 -> 关闭订单项
         //&& Objects.equals(orderItemDO.getPayStatus(),SrmPaymentStatus.ALL_PAYMENT.getCode())
         if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode())) {

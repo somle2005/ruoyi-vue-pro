@@ -31,4 +31,8 @@ public interface SrmSupplierMapper extends BaseMapperX<SrmSupplierDO> {
         return selectList(SrmSupplierDO::getStatus, status);
     }
 
+    default SrmSupplierDO selectByName(String name) {
+        return selectOne(SrmSupplierDO::getName, name);
+    }
+
 }

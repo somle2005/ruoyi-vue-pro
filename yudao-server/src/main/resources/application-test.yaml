@@ -2,7 +2,7 @@ oss:
   bucketName: somle-bigdata-dev
 kingdee:
   outerInstanceIds:
-    - 369949131390717952 #金蝶沙盒
+    - 409386088805830656 #金蝶沙盒
 
 spring:
   autoconfigure:

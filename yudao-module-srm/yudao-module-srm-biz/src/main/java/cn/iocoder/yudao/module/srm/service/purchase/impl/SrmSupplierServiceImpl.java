@@ -21,8 +21,7 @@ import java.util.Collections;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_NOT_ENABLE;
-import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_NOT_EXISTS;
+import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.*;
 import static java.util.Collections.emptyList;
 
 /**
@@ -43,6 +42,8 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     @Override
     public Long createSupplier(SrmSupplierSaveReqVO createReqVO) {
         SrmSupplierDO supplier = BeanUtils.toBean(createReqVO, SrmSupplierDO.class);
+        // 校验供应商名称是否重复
+        validateSupplierNameDuplicate(supplier.getName(), null);
         supplierMapper.insert(supplier);
         // 发送消息到通道
         supplierChannel.send(MessageBuilder.withPayload(Collections.singletonList(supplier.getId())).build());
@@ -53,6 +54,8 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     public void updateSupplier(SrmSupplierSaveReqVO updateReqVO) {
         // 校验存在
         validateSupplierExists(updateReqVO.getId());
+        // 校验供应商名称是否重复
+        validateSupplierNameDuplicate(updateReqVO.getName(), updateReqVO.getId());
         // 更新
         SrmSupplierDO updateObj = BeanUtils.toBean(updateReqVO, SrmSupplierDO.class);
         supplierMapper.updateById(updateObj);
@@ -108,5 +111,18 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     @Override
     public List<SrmSupplierDO> getSupplierListByStatus(Integer status) {
         return supplierMapper.selectListByStatus(status);
+    }
+
+    /**
+     * 校验供应商名称是否重复
+     *
+     * @param name 供应商名称
+     * @param id   供应商编号
+     */
+    private void validateSupplierNameDuplicate(String name, Long id) {
+        SrmSupplierDO supplier = supplierMapper.selectByName(name);
+        if (supplier != null && !supplier.getId().equals(id)) {
+            throw exception(SUPPLIER_NAME_DUPLICATE, name);
+        }
     }
 }

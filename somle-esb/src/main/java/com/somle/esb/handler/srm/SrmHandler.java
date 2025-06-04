@@ -13,7 +13,7 @@ import com.somle.esb.converter.ErpToKingdeeConverter;
 import com.somle.kingdee.model.KingdeePurInboundSaveReqVO;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
 import com.somle.kingdee.model.KingdeePurReturnSaveReqVO;
-import com.somle.kingdee.model.supplier.KingdeeSupplier;
+import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -53,11 +53,11 @@ public class SrmHandler {
             }
 
             // 转换为金蝶供应商
-            List<KingdeeSupplier> kingdeeSuppliers = erpToKingdeeConverter.convertSupplierDTOList(suppliers);
+            List<KingdeeSupplierSaveVO> kingdeeSupplierSaveVOS = erpToKingdeeConverter.convertSupplierDTOList(suppliers);
             // 同步到金蝶
-            int total = kingdeeSuppliers.size();
+            int total = kingdeeSupplierSaveVOS.size();
             for (int i = 0; i < total; i++) {
-                KingdeeSupplier supplier = kingdeeSuppliers.get(i);
+                KingdeeSupplierSaveVO supplier = kingdeeSupplierSaveVOS.get(i);
                 kingdeeService.addSupplier(supplier);
                 log.info("[syncSuppliersToKingdee] 同步进度：{}/{}，供应商：{}", i + 1, total, supplier.getNumber());
             }
