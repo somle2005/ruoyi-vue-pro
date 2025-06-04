@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 /**
+ * @author jisencai
  * @table-fields : outbound_available_qty,inbound_status,company_id,plan_qty,shelve_closed_qty,upstream_id,remark,inbound_dept_id,latest_flow_id,inbound_id,inbound_company_id,actual_qty,product_id,id,dept_id
  */
 @Schema(description = "管理后台 - 入库单详情新增/修改 Request VO")
@@ -56,9 +57,4 @@ public class WmsInboundItemSaveReqVO {
     @Schema(description = "来源明细行ID", example = "")
     private Long upstreamId;
 
-    @Schema(description = "入库的财务公司ID", example = "")
-    private Long inboundCompanyId;
-
-    @Schema(description = "入库的归属部门ID,由用户指定", example = "")
-    private Long inboundDeptId;
 }

@@ -193,21 +193,21 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
                 inboundItemLogicDOMap.put(inboundItemSaveReqVO.getProductId(), inboundItemLogicDO);
             }
             // 求顶级部门
-            Long deptId = deptIdMap.get(inboundItemLogicDO.getInboundDeptId());
+            Long deptId = deptIdMap.get(inboundItemLogicDO.getDeptId());
             if(deptId==null) {
 
-                DeptRespDTO dept = deptApi.getDept(inboundItemLogicDO.getInboundDeptId());
+                DeptRespDTO dept = deptApi.getDept(inboundItemLogicDO.getDeptId());
                 int deptLevel = deptApi.getDeptLevel(dept.getId());
                 while (deptLevel > 2) {
                     dept = deptApi.getDept(dept.getParentId());
                     deptLevel = deptApi.getDeptLevel(dept.getId());
                 }
                 deptId = dept.getId();
-                deptIdMap.put(inboundItemLogicDO.getInboundDeptId(), deptId);
+                deptIdMap.put(inboundItemLogicDO.getDeptId(), deptId);
             }
 
             // 确定公司ID和部门ID
-            inboundItemSaveReqVO.setCompanyId(inboundItemLogicDO.getInboundCompanyId());
+            inboundItemSaveReqVO.setCompanyId(inboundItemLogicDO.getCompanyId());
             inboundItemSaveReqVO.setDeptId(deptId);
 
         }
@@ -289,8 +289,8 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
                 inboundItemLogicDOMap.put(outboundItemSaveReqVO.getProductId(), inboundItemLogicDO);
             }
 
-            outboundItemSaveReqVO.setCompanyId(inboundItemLogicDO.getInboundCompanyId());
-            outboundItemSaveReqVO.setDeptId(inboundItemLogicDO.getInboundDeptId());
+            outboundItemSaveReqVO.setCompanyId(inboundItemLogicDO.getCompanyId());
+            outboundItemSaveReqVO.setDeptId(inboundItemLogicDO.getDeptId());
         }
 
         // 创建出库单

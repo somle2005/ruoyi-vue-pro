@@ -49,12 +49,12 @@ public class WmsInboundItemLogicDO extends BaseDO {
     /**
      * 主单公司ID
      */
-    private Long inboundCompanyId;
+    private Long companyId;
 
     /**
      * 主单部门ID
      */
-    private Long inboundDeptId;
+    private Long deptId;
 
     /**
      * 库位ID
