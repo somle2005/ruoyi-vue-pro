@@ -35,7 +35,7 @@ import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.STOCK_OWNE
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.STOCK_OWNERSHIP_MOVE_ITEM_NOT_EXISTS;
 
 /**
- * 所有者库存移动详情 Service 实现类
+ * 逻辑库存移动详情 Service 实现类
  *
  * @author 李方捷
  */
@@ -135,6 +135,7 @@ public class WmsStockOwnershipMoveItemServiceImpl implements WmsStockOwnershipMo
     /**
      * 按 ID 集合查询 WmsStockOwnershipMoveItemDO
      */
+    @Override
     public List<WmsStockOwnershipMoveItemDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();

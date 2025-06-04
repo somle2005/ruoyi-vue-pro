@@ -32,7 +32,7 @@ import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.STOCKCHECK
 
 @Tag(name = "盘点单")
 @RestController
-@RequestMapping("/wms/stockCheck")
+@RequestMapping("/wms/stock-check")
 @Validated
 public class WmsStockCheckController {
 

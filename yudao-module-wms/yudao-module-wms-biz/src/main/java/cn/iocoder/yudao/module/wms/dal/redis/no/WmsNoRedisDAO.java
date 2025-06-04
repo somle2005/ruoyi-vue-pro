@@ -33,7 +33,7 @@ public class WmsNoRedisDAO {
     public static final String STOCK_BIN_MOVE_NO_PREFIX = "KWKC";
 
     /**
-     * 所有者库存移动单的流水号前缀
+     * 逻辑库存移动单的流水号前缀
      **/
     public static final String STOCK_OWNERSHIP_MOVE_NO_PREFIX = "SYZKC";
 

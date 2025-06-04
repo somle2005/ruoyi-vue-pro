@@ -1,14 +1,13 @@
 package cn.iocoder.yudao.module.wms.controller.admin.stock.ownership.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import java.util.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
  * @table-fields : company_id,outbound_pending_qty,product_id,shelving_pending_qty,available_qty,id,dept_id,warehouse_id
  */
-@Schema(description = "管理后台 - 所有者库存新增/修改 Request VO")
+@Schema(description = "管理后台 - 逻辑库存新增/修改 Request VO")
 @Data
 public class WmsStockOwnershipSaveReqVO {
 

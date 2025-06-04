@@ -29,7 +29,7 @@ public class WmsStockFlowSaveReqVO {
     @NotNull(message = "库存ID不能为空")
     private Long stockId;
 
-    @Schema(description = "WMS流水发生的原因 ; WmsStockReason : 1-入库 , 2-拣货 , 3-出库 , 4-提交出库单 , 5-拒绝出库单 , 6-库位库存移动 , 7-所有者库存移动 , 8-盘赢 , 9-盘亏", requiredMode = Schema.RequiredMode.REQUIRED, example = "不香")
+    @Schema(description = "WMS流水发生的原因 ; WmsStockReason : 1-入库 , 2-拣货 , 3-出库 , 4-提交出库单 , 5-拒绝出库单 , 6-库位库存移动 , 7-逻辑库存移动 , 8-盘赢 , 9-盘亏", requiredMode = Schema.RequiredMode.REQUIRED, example = "不香")
     @NotNull(message = "WMS流水发生的原因不能为空")
     @InEnum(WmsStockReason.class)
     private Integer reason;

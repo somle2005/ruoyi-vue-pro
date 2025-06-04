@@ -104,16 +104,16 @@ public interface WmsErrorCodeConstants {
     ErrorCode STOCK_BIN_PRODUCT_NOT_EXISTS = new ErrorCode(2_001_009_010, "{} 的仓位库存不存在");
     ErrorCode STOCK_BIN_PRODUCT_NOT_ENOUGH = new ErrorCode(2_001_009_011, "{} 的仓位库存不足");
 
-    // ========== WMS_STOCK_OWNERSHIP 所有者库存表 2_001_010_000 ==========
-    ErrorCode STOCK_OWNERSHIP_NOT_EXISTS = new ErrorCode(2_001_010_001, "所有者库存不存在");
+    // ========== WMS_STOCK_OWNERSHIP 逻辑库存表 2_001_010_000 ==========
+    ErrorCode STOCK_OWNERSHIP_NOT_EXISTS = new ErrorCode(2_001_010_001, "逻辑库存不存在");
     ErrorCode STOCK_OWNERSHIP_WAREHOUSE_ID_DEPT_ID_PRODUCT_ID_DUPLICATE = new ErrorCode(2_001_010_002, "仓库ID,库存归属部门ID,产品ID已存在");
-    ErrorCode STOCK_OWNERSHIP_BE_REFERRED = new ErrorCode(2_001_010_003, "所有者库存被引用");
-    ErrorCode STOCK_OWNERSHIP_CAN_NOT_EDIT = new ErrorCode(2_001_010_004, "所有者库存不允许编辑");
-    ErrorCode STOCK_OWNERSHIP_CAN_NOT_DELETE = new ErrorCode(2_001_010_005, "所有者库存不允许删除");
-    ErrorCode STOCK_OWNERSHIP_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_010_006, "所有者库存不符合审批条件");
+    ErrorCode STOCK_OWNERSHIP_BE_REFERRED = new ErrorCode(2_001_010_003, "逻辑库存被引用");
+    ErrorCode STOCK_OWNERSHIP_CAN_NOT_EDIT = new ErrorCode(2_001_010_004, "逻辑库存不允许编辑");
+    ErrorCode STOCK_OWNERSHIP_CAN_NOT_DELETE = new ErrorCode(2_001_010_005, "逻辑库存不允许删除");
+    ErrorCode STOCK_OWNERSHIP_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_010_006, "逻辑库存不符合审批条件");
     ErrorCode STOCK_OWNERSHIP_WAREHOUSE_ID_COMPANY_ID_DEPT_ID_PRODUCT_ID_DUPLICATE = new ErrorCode(2_001_010_007, "仓库ID,库存财务主体公司ID,库存归属部门ID,产品ID已存在");
-    ErrorCode STOCK_OWNERSHIP_NOT_ENOUGH = new ErrorCode(2_001_010_008, "所有者库存不足");
-    ErrorCode STOCK_OWNERSHIP_EXISTS = new ErrorCode(2_001_010_009, "所有者库存已存在");
+    ErrorCode STOCK_OWNERSHIP_NOT_ENOUGH = new ErrorCode(2_001_010_008, "逻辑库存不足");
+    ErrorCode STOCK_OWNERSHIP_EXISTS = new ErrorCode(2_001_010_009, "逻辑库存已存在");
 
     // ========== WMS_STOCK_FLOW 库存流水表 2_001_011_000 ==========
     ErrorCode STOCK_FLOW_NOT_EXISTS = new ErrorCode(2_001_011_001, "库存流水不存在");
@@ -205,31 +205,31 @@ public interface WmsErrorCodeConstants {
     ErrorCode STOCK_BIN_MOVE_ITEM_FROM_BIN_ERROR = new ErrorCode(2_001_017_011, "调出仓错误");
     ErrorCode STOCK_BIN_MOVE_ITEM_PRODUCT_ERROR = new ErrorCode(2_001_017_012, "{} 产品错误");
 
-    // ========== WMS_STOCK_OWNERSHIP_MOVE 所有者库存移动表 2_001_018_000 ==========
-    ErrorCode STOCK_OWNERSHIP_MOVE_NOT_EXISTS = new ErrorCode(2_001_018_001, "所有者库存移动不存在");
+    // ========== WMS_STOCK_OWNERSHIP_MOVE 逻辑库存移动表 2_001_018_000 ==========
+    ErrorCode STOCK_OWNERSHIP_MOVE_NOT_EXISTS = new ErrorCode(2_001_018_001, "逻辑库存移动不存在");
     ErrorCode STOCK_OWNERSHIP_MOVE_NO_DUPLICATE = new ErrorCode(2_001_018_002, "单据号已存在");
-    ErrorCode STOCK_OWNERSHIP_MOVE_BE_REFERRED = new ErrorCode(2_001_018_003, "所有者库存移动被引用");
-    ErrorCode STOCK_OWNERSHIP_MOVE_NO_OUT_OF_BOUNDS = new ErrorCode(2_001_018_004, "所有者库存移动单据号越界");
-    ErrorCode STOCK_OWNERSHIP_MOVE_CAN_NOT_EDIT = new ErrorCode(2_001_018_005, "所有者库存移动不允许编辑");
-    ErrorCode STOCK_OWNERSHIP_MOVE_CAN_NOT_DELETE = new ErrorCode(2_001_018_006, "所有者库存移动不允许删除");
-    ErrorCode STOCK_OWNERSHIP_MOVE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_018_007, "所有者库存移动不符合审批条件");
+    ErrorCode STOCK_OWNERSHIP_MOVE_BE_REFERRED = new ErrorCode(2_001_018_003, "逻辑库存移动被引用");
+    ErrorCode STOCK_OWNERSHIP_MOVE_NO_OUT_OF_BOUNDS = new ErrorCode(2_001_018_004, "逻辑库存移动单据号越界");
+    ErrorCode STOCK_OWNERSHIP_MOVE_CAN_NOT_EDIT = new ErrorCode(2_001_018_005, "逻辑库存移动不允许编辑");
+    ErrorCode STOCK_OWNERSHIP_MOVE_CAN_NOT_DELETE = new ErrorCode(2_001_018_006, "逻辑库存移动不允许删除");
+    ErrorCode STOCK_OWNERSHIP_MOVE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_018_007, "逻辑库存移动不符合审批条件");
 
-    // ========== WMS_STOCK_OWNERSHIP_MOVE_ITEM 所有者库存移动详情表 2_001_019_000 ==========
-    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_NOT_EXISTS = new ErrorCode(2_001_019_001, "所有者库存移动详情不存在");
-    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_REPEATED = new ErrorCode(2_001_019_002, "所有者移动详情重复");
-    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_BE_REFERRED = new ErrorCode(2_001_019_003, "所有者库存移动详情被引用");
-    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_CAN_NOT_EDIT = new ErrorCode(2_001_019_004, "所有者库存移动详情不允许编辑");
-    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_CAN_NOT_DELETE = new ErrorCode(2_001_019_005, "所有者库存移动详情不允许删除");
-    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_019_006, "所有者库存移动详情不符合审批条件");
-    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_EXISTS = new ErrorCode(2_001_019_007, "所有者库存移动详情已存在");
-    ErrorCode STOCK_OWNERSHIP_MOVE_QUANTITY_ERROR = new ErrorCode(2_001_019_008, "所有者库存移动数量错误");
+    // ========== WMS_STOCK_OWNERSHIP_MOVE_ITEM 逻辑库存移动详情表 2_001_019_000 ==========
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_NOT_EXISTS = new ErrorCode(2_001_019_001, "逻辑库存移动详情不存在");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_REPEATED = new ErrorCode(2_001_019_002, "逻辑库存移动详情重复");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_BE_REFERRED = new ErrorCode(2_001_019_003, "逻辑库存移动详情被引用");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_CAN_NOT_EDIT = new ErrorCode(2_001_019_004, "逻辑库存移动详情不允许编辑");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_CAN_NOT_DELETE = new ErrorCode(2_001_019_005, "逻辑库存移动详情不允许删除");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_019_006, "逻辑库存移动详情不符合审批条件");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_EXISTS = new ErrorCode(2_001_019_007, "逻辑库存移动详情已存在");
+    ErrorCode STOCK_OWNERSHIP_MOVE_QUANTITY_ERROR = new ErrorCode(2_001_019_008, "逻辑库存移动数量错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_SINGLE_WAREHOUSE_ALLOW = new ErrorCode(2_001_019_009, "仅允许单个仓库");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_TO_COMPANY_ERROR = new ErrorCode(2_001_019_010, "调入公司错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_TO_DEPT_ERROR = new ErrorCode(2_001_019_011, "调入部门错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_FROM_COMPANY_ERROR = new ErrorCode(2_001_019_012, "调出公司错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_FROM_DEPT_ERROR = new ErrorCode(2_001_019_013, "调出部门错误");
     ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_PRODUCT_ERROR = new ErrorCode(2_001_019_014, "产品错误");
-    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_OWNERSHIP_MOVE_ID_PRODUCT_ID_FROM_COMPANY_ID_FROM_DEPT_ID_TO_COMPANY_ID_TO_DEPT_ID_DUPLICATE = new ErrorCode(2_001_019_015, "所有者移动表ID,产品ID,调出财务公司ID,调出部门ID,调入财务公司ID,调入部门ID已存在");
+    ErrorCode STOCK_OWNERSHIP_MOVE_ITEM_OWNERSHIP_MOVE_ID_PRODUCT_ID_FROM_COMPANY_ID_FROM_DEPT_ID_TO_COMPANY_ID_TO_DEPT_ID_DUPLICATE = new ErrorCode(2_001_019_015, "逻辑库存移动表ID,产品ID,调出财务公司ID,调出部门ID,调入财务公司ID,调入部门ID已存在");
 
     // ========== WMS_STOCKCHECK 盘点表 2_001_020_000 ==========
     ErrorCode STOCKCHECK_NOT_EXISTS = new ErrorCode(2_001_020_001, "盘点单不存在");

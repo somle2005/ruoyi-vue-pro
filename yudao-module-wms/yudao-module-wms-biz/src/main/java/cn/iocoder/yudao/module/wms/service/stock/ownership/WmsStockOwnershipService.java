@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public interface WmsStockOwnershipService {
 
     /**
-     * 创建所有者库存
+     * 创建逻辑库存
      *
      * @param createReqVO 创建信息
      * @return 编号
@@ -30,21 +30,21 @@ public interface WmsStockOwnershipService {
     WmsStockOwnershipDO createStockOwnership(@Valid WmsStockOwnershipSaveReqVO createReqVO);
 
     /**
-     * 更新所有者库存
+     * 更新逻辑库存
      *
      * @param updateReqVO 更新信息
      */
     WmsStockOwnershipDO updateStockOwnership(@Valid WmsStockOwnershipSaveReqVO updateReqVO);
 
     /**
-     * 删除所有者库存
+     * 删除逻辑库存
      *
      * @param id 编号
      */
     void deleteStockOwnership(Long id);
 
     /**
-     * 获得所有者库存
+     * 获得逻辑库存
      *
      * @param id 编号
      * @return 逻辑库存
@@ -52,10 +52,10 @@ public interface WmsStockOwnershipService {
     WmsStockOwnershipDO getStockOwnership(Long id);
 
     /**
-     * 获得所有者库存分页
+     * 获得逻辑库存分页
      *
      * @param pageReqVO 分页查询
-     * @return 所有者库存分页
+     * @return 逻辑库存分页
      */
     PageResult<WmsStockOwnershipDO> getStockOwnershipPage(WmsStockOwnershipPageReqVO pageReqVO);
 

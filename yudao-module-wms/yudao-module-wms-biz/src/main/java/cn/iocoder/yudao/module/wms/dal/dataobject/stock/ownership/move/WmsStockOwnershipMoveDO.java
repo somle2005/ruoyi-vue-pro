@@ -1,14 +1,13 @@
 package cn.iocoder.yudao.module.wms.dal.dataobject.stock.ownership.move;
 
-import lombok.*;
-import java.util.*;
-import java.time.LocalDateTime;
-import java.time.LocalDateTime;
-import com.baomidou.mybatisplus.annotation.*;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.*;
 
 /**
- * 所有者库存移动 DO
+ * 逻辑库存移动 DO
  * @author 李方捷
  * @table-fields : no,execute_status,id,warehouse_id
  */

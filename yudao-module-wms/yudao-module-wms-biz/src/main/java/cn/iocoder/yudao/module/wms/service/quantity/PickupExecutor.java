@@ -239,7 +239,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         }
 
 
-        // 刷新所有者库存
+        // 刷新逻辑库存
         // wmsStockOwnershipService.refreshForPickup(pickup.getWarehouseId(), inboundDO.getCompanyId(), deptId,inboundItemVO.getProductId(), pickup.getId(), pickupItemDO.getId(),);
 
         // 校验本方法在事务中

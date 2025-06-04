@@ -98,7 +98,7 @@ public class WmsStockFlowController {
     }
 
     @PostMapping("/page-ownership")
-    @Operation(summary = "获得所有者库存流水分页")
+    @Operation(summary = "获得逻辑库存流水分页")
     @PreAuthorize("@ss.hasPermission('wms:stock-flow:query')")
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageOwnership(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.OWNERSHIP.getValue());
@@ -247,7 +247,7 @@ public class WmsStockFlowController {
             applyExcelVO(excelVO, flowRespVO);
         }
         // 导出 Excel
-        ExcelUtils.write(response, "所有者库存流水.xls", "数据", WmsStockFlowOwnershipExcelVO.class, excelVOS);
+        ExcelUtils.write(response, "逻辑库存流水.xls", "数据", WmsStockFlowOwnershipExcelVO.class, excelVOS);
     }
 
     private void applyExcelVO(WmsStockFlowOwnershipExcelVO excelVO, WmsStockFlowRespVO flowRespVO) {

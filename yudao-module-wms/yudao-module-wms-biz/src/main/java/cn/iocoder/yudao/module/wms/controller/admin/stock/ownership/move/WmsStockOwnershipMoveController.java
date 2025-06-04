@@ -36,7 +36,7 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
-@Tag(name = "所有者库存移动")
+@Tag(name = "逻辑库存移动")
 @RestController
 @RequestMapping("/wms/stock-ownership-move")
 @Validated
@@ -53,7 +53,7 @@ public class WmsStockOwnershipMoveController {
      * @sign : E50BC63A85635F27
      */
     @PostMapping("/create")
-    @Operation(summary = "创建所有者库存移动")
+    @Operation(summary = "创建逻辑库存移动")
     @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move:create')")
     public CommonResult<Long> createStockOwnershipMove(@Valid @RequestBody WmsStockOwnershipMoveSaveReqVO createReqVO) {
         return success(stockOwnershipMoveService.createStockOwnershipMove(createReqVO).getId());
@@ -63,14 +63,14 @@ public class WmsStockOwnershipMoveController {
     // * @sign : B17AAF1E8A33881D
     // */
     // @PutMapping("/update")
-    // @Operation(summary = "更新所有者库存移动")
+    // @Operation(summary = "更新逻辑库存移动")
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move:update')")
     // public CommonResult<Boolean> updateStockOwnershipMove(@Valid @RequestBody WmsStockOwnershipMoveSaveReqVO updateReqVO) {
     // stockOwnershipMoveService.updateStockOwnershipMove(updateReqVO);
     // return success(true);
     // }
     // @DeleteMapping("/delete")
-    // @Operation(summary = "删除所有者库存移动")
+    // @Operation(summary = "删除逻辑库存移动")
     // @Parameter(name = "id", description = "编号", required = true)
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move:delete')")
     // public CommonResult<Boolean> deleteStockOwnershipMove(@RequestParam("id") Long id) {
@@ -81,7 +81,7 @@ public class WmsStockOwnershipMoveController {
      * @sign : B7406A1F19B24A11
      */
     @GetMapping("/get")
-    @Operation(summary = "获得所有者库存移动")
+    @Operation(summary = "获得逻辑库存移动")
     @Parameter(name = "id", description = "编号", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move:query')")
     public CommonResult<WmsStockOwnershipMoveRespVO> getStockOwnershipMove(@RequestParam("id") Long id) {
@@ -92,7 +92,7 @@ public class WmsStockOwnershipMoveController {
         }
         // 转换
         WmsStockOwnershipMoveRespVO stockOwnershipMoveVO = BeanUtils.toBean(stockOwnershipMove, WmsStockOwnershipMoveRespVO.class);
-        // 组装所有者库存移动详情
+        // 组装逻辑库存移动详情
         List<WmsStockOwnershipMoveItemDO> stockOwnershipMoveItemList = stockOwnershipMoveItemService.selectByOwnershipMoveId(stockOwnershipMoveVO.getId());
         stockOwnershipMoveVO.setItemList(BeanUtils.toBean(stockOwnershipMoveItemList, WmsStockOwnershipMoveItemRespVO.class));
         // 组装
@@ -108,7 +108,7 @@ public class WmsStockOwnershipMoveController {
      * @sign : 586BDA157BC07B30
      */
     @GetMapping("/page")
-    @Operation(summary = "获得所有者库存移动分页")
+    @Operation(summary = "获得逻辑库存移动分页")
     @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move:query')")
     public CommonResult<PageResult<WmsStockOwnershipMoveRespVO>> getStockOwnershipMovePage(@Valid WmsStockOwnershipMovePageReqVO pageReqVO) {
         // 查询数据
@@ -121,14 +121,14 @@ public class WmsStockOwnershipMoveController {
         return success(voPageResult);
     }
     // @GetMapping("/export-excel")
-    // @Operation(summary = "导出所有者库存移动 Excel")
+    // @Operation(summary = "导出逻辑库存移动 Excel")
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership-move:export')")
     // @ApiAccessLog(operateType = EXPORT)
     // public void exportStockOwnershipMoveExcel(@Valid WmsStockOwnershipMovePageReqVO pageReqVO, HttpServletResponse response) throws IOException {
     // pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
     // List<WmsStockOwnershipMoveDO> list = stockOwnershipMoveService.getStockOwnershipMovePage(pageReqVO).getList();
     // // 导出 Excel
-    // ExcelUtils.write(response, "所有者库存移动.xls", "数据", WmsStockOwnershipMoveRespVO.class, BeanUtils.toBean(list, WmsStockOwnershipMoveRespVO.class));
+    // ExcelUtils.write(response, "逻辑库存移动.xls", "数据", WmsStockOwnershipMoveRespVO.class, BeanUtils.toBean(list, WmsStockOwnershipMoveRespVO.class));
     // }
 
 

@@ -44,7 +44,7 @@ public class WmsStockOwnershipController {
     // * @sign : 0E0BDA21A9064C48
     // */
     // @PostMapping("/create")
-    // @Operation(summary = "创建所有者库存")
+    // @Operation(summary = "创建逻辑库存")
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership:create')")
     // public CommonResult<Long> createStockOwnership(@Valid @RequestBody WmsStockOwnershipSaveReqVO createReqVO) {
     // return success(stockOwnershipService.createStockOwnership(createReqVO).getId());
@@ -53,14 +53,14 @@ public class WmsStockOwnershipController {
     // * @sign : A40903BCE776025E
     // */
     // @PutMapping("/update")
-    // @Operation(summary = "更新所有者库存")
+    // @Operation(summary = "更新逻辑库存")
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership:update')")
     // public CommonResult<Boolean> updateStockOwnership(@Valid @RequestBody WmsStockOwnershipSaveReqVO updateReqVO) {
     // stockOwnershipService.updateStockOwnership(updateReqVO);
     // return success(true);
     // }
     // @DeleteMapping("/delete")
-    // @Operation(summary = "删除所有者库存")
+    // @Operation(summary = "删除逻辑库存")
     // @Parameter(name = "id", description = "编号", required = true)
     // @PreAuthorize("@ss.hasPermission('wms:stock-ownership:delete')")
     // public CommonResult<Boolean> deleteStockOwnership(@RequestParam("id") Long id) {
@@ -71,7 +71,7 @@ public class WmsStockOwnershipController {
      * @sign : 7CDB60ED7A6D3E5E
      */
     @GetMapping("/stocks")
-    @Operation(summary = "获得产品的所有者库存清单")
+    @Operation(summary = "获得产品的逻辑库存清单")
     @Parameter(name = "warehouseId", description = "仓库ID", required = true, example = "1024")
     @Parameter(name = "productId", description = "产品ID", required = true, example = "1024")
     @PreAuthorize("@ss.hasPermission('wms:stock-ownership:query')")
@@ -88,7 +88,7 @@ public class WmsStockOwnershipController {
      * @sign : 7CDB60ED7A6D3E5E
      */
     @GetMapping("/stock")
-    @Operation(summary = "获得产品的所有者库存")
+    @Operation(summary = "获得产品的逻辑库存")
     @Parameter(name = "warehouseId", description = "仓库ID", required = true, example = "1024")
     @Parameter(name = "productId", description = "产品ID", required = true, example = "1024")
     @Parameter(name = "companyId", description = "公司ID", required = true, example = "1024")
@@ -111,7 +111,7 @@ public class WmsStockOwnershipController {
      * @sign : EC951F0579860D97
      */
     @PostMapping("/page")
-    @Operation(summary = "获得所有者库存分页")
+    @Operation(summary = "获得逻辑库存分页")
     @PreAuthorize("@ss.hasPermission('wms:stock-ownership:query')")
     public CommonResult<PageResult<WmsStockOwnershipRespVO>> getStockOwnershipPage(@Valid @RequestBody WmsStockOwnershipPageReqVO pageReqVO) {
         // 查询数据
@@ -133,7 +133,7 @@ public class WmsStockOwnershipController {
     }
 
     @PostMapping("/export-excel")
-    @Operation(summary = "导出所有者库存 Excel")
+    @Operation(summary = "导出逻辑库存 Excel")
     @PreAuthorize("@ss.hasPermission('wms:stock-ownership:export')")
     @ApiAccessLog(operateType = EXPORT)
     public void exportStockOwnershipExcel(@Valid @RequestBody WmsStockOwnershipPageReqVO pageReqVO, HttpServletResponse response) throws IOException {

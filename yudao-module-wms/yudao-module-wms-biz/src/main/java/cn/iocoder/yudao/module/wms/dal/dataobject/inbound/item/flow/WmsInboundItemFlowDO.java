@@ -11,9 +11,9 @@ import lombok.*;
  * @author 李方捷
  * @table-fields : bill_id,outbound_available_qty,shelve_closed_qty,inbound_id,outbound_available_delta_qty,outbound_action_id,actual_qty,bill_item_id,product_id,bill_type,id,inbound_item_id,direction
  */
-@TableName("setShelveStatus")
+@TableName("wms_item_flow")
 // 用于 Oracle、PostgreSQL、Kingbase、DB2、H2 数据库的主键自增。如果是 MySQL 等数据库，可不写。
-@KeySequence("wms_inbound_flow_seq")
+@KeySequence("wms_item_flow_seq")
 @Data
 @EqualsAndHashCode(callSuper = true)
 @ToString(callSuper = true)

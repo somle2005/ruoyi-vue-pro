@@ -196,7 +196,7 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
 
 
     /**
-     * 处理所有者库存
+     * 处理逻辑库存
      **/
     private void processStockOwnerShipItem(WmsOutboundItemRespVO item, Long companyId, Long deptId, Long warehouseId, Long binId, Long productId, Integer quantity, Long outboundId, Long outboundItemId) {
 

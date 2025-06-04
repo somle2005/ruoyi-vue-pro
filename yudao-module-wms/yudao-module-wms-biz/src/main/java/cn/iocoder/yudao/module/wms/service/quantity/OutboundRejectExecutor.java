@@ -71,6 +71,7 @@ public class OutboundRejectExecutor extends OutboundExecutor {
     /**
      * 更新入库单明细
      **/
+    @Override
     protected List<WmsInboundItemFlowDO> processInboundItem(WmsOutboundRespVO outboundRespVO, WmsOutboundItemRespVO item, Long companyId, Long deptId, Long warehouseId, Long binId, Long productId, Integer quantity, Long outboundId, Long outboundItemId) {
 
 
@@ -117,7 +118,7 @@ public class OutboundRejectExecutor extends OutboundExecutor {
     }
 
     /**
-     * 更新所有者库存
+     * 更新逻辑库存
      **/
     @Override
     protected  WmsStockFlowDirection updateStockOwnershipQty(WmsStockOwnershipDO stockOwnershipDO,WmsOutboundItemRespVO item,  Integer quantity) {

@@ -32,7 +32,7 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 /**
- * 所有者库存移动 Service 实现类
+ * 逻辑库存移动 Service 实现类
  *
  * @author 李方捷
  */
@@ -86,7 +86,7 @@ public class WmsStockOwnershipMoveServiceImpl implements WmsStockOwnershipMoveSe
         // 插入
         WmsStockOwnershipMoveDO stockOwnershipMove = BeanUtils.toBean(createReqVO, WmsStockOwnershipMoveDO.class);
         stockOwnershipMoveMapper.insert(stockOwnershipMove);
-        // 保存所有者库存移动详情详情
+        // 保存逻辑库存移动详情详情
         if (createReqVO.getItemList() != null) {
             List<WmsStockOwnershipMoveItemDO> toInsetList = new ArrayList<>();
             StreamX.from(createReqVO.getItemList()).filter(Objects::nonNull).forEach(item -> {
@@ -125,7 +125,7 @@ public class WmsStockOwnershipMoveServiceImpl implements WmsStockOwnershipMoveSe
         WmsStockOwnershipMoveDO exists = validateStockOwnershipMoveExists(updateReqVO.getId());
         // 单据号不允许被修改
         updateReqVO.setNo(exists.getNo());
-        // 保存所有者库存移动详情详情
+        // 保存逻辑库存移动详情详情
         if (updateReqVO.getItemList() != null) {
             List<WmsStockOwnershipMoveItemDO> existsInDB = stockOwnershipMoveItemMapper.selectByOwnershipMoveId(updateReqVO.getId());
             StreamX.CompareResult<WmsStockOwnershipMoveItemDO> compareResult = StreamX.compare(existsInDB, BeanUtils.toBean(updateReqVO.getItemList(), WmsStockOwnershipMoveItemDO.class), WmsStockOwnershipMoveItemDO::getId);

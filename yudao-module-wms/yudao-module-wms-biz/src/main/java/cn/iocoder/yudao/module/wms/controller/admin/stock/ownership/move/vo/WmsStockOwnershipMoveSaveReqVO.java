@@ -12,7 +12,7 @@ import java.util.List;
 /**
  * @table-fields : no,execute_status,id,warehouse_id
  */
-@Schema(description = "管理后台 - 所有者库存移动新增/修改 Request VO")
+@Schema(description = "管理后台 - 逻辑库存移动新增/修改 Request VO")
 @Data
 public class WmsStockOwnershipMoveSaveReqVO {
 

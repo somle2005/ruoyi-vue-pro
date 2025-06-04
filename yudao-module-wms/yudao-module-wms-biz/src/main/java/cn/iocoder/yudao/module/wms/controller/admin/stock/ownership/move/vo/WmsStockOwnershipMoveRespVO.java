@@ -16,7 +16,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 /**
  * @table-fields : tenant_id,no,creator,update_time,create_time,execute_status,id,warehouse_id,updater
  */
-@Schema(description = "管理后台 - 所有者库存移动 Response VO")
+@Schema(description = "管理后台 - 逻辑库存移动 Response VO")
 @Data
 @ExcelIgnoreUnannotated
 public class WmsStockOwnershipMoveRespVO {
