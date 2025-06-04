@@ -40,10 +40,6 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
      */
     private String code;
     /**
-     * 采购状态
-     */
-    private Integer status;
-    /**
      * 供应商编号(乙方)
      */
     private Long supplierId;

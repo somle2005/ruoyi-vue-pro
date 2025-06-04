@@ -21,9 +21,6 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     @Schema(description = "采购单编号")
     private String code;
 
-    @Schema(description = "采购状态")
-    private Integer status;
-
     @Schema(description = "供应商编号")
     private Long supplierId;
 
