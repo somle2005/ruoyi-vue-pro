@@ -110,8 +110,8 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
         toRequestItem(oldData, dtoCount);
         // 当前订单项，完全入库 + 完全付款 -> 关闭订单项
         checkStatusAndClose(dto.getOrderItemId());
-        // 执行状态机
-        toOrderExecute(dto.getOrderItemId());
+        // 执行状态机(目前跟到货数量相关、跟入库数量无关)
+//        toOrderExecute(dto.getOrderItemId());
     }
 
     private void toOrderExecute(Long orderItemId) {

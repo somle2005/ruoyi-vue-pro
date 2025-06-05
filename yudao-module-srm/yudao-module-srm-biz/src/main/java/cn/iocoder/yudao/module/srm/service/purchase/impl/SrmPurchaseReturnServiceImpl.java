@@ -595,6 +595,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                     try {
                         createWmsOutbound(purchaseReturnDO, returnItemDOS);
                     } catch (Exception e) {
+                        log.error("创建WMS出库单失败", e);
                         throw exception(PURCHASE_RETURN_PROCESS_FAIL_WMS_OUTBOUND_EXISTS, truncate(e.getMessage(), 200));
                     }
                 } else {
