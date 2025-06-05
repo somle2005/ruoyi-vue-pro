@@ -40,7 +40,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
     private WmsInboundItemFlowService inboundItemFlowService;
 
     public OutboundFinishExecutor() {
-        super(WmsStockReason.OUTBOUND_AGREE);
+        super(WmsStockReason.OUTBOUND_FINISH);
     }
 
     @Override
@@ -63,7 +63,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
             throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
         }
         // 可售量
-        stockWarehouseDO.setSellableQty(stockWarehouseDO.getSellableQty() - actualQty);
+        stockWarehouseDO.setSellableQty(stockWarehouseDO.getSellableQty() - quantity);
         if(stockWarehouseDO.getSellableQty()<0) {
             throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
         }

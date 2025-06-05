@@ -372,7 +372,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Override
     public void assembleOutbound(List<WmsStockFlowRespVO> list) {
-        List<WmsStockFlowRespVO> outboundFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.OUTBOUND_AGREE.getValue(), v.getReason())).toList();
+        List<WmsStockFlowRespVO> outboundFlowList = StreamX.from(list).filter(v -> Objects.equals(WmsStockReason.OUTBOUND_FINISH.getValue(), v.getReason())).toList();
         List<WmsOutboundDO> outboundDOList = outboundService.selectByIds(StreamX.from(outboundFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
         Map<Long, WmsOutboundSimpleRespVO> outboundMap = StreamX.from(outboundDOList).toMap(WmsOutboundDO::getId, outboundDO -> BeanUtils.toBean(outboundDO, WmsOutboundSimpleRespVO.class));
         StreamX.from(outboundFlowList).assemble(outboundMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setOutbound);

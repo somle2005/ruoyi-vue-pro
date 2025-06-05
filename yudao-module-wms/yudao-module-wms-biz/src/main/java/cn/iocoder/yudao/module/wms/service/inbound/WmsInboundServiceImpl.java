@@ -400,7 +400,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     private void updateTransitQty(WmsInboundDO inbound, List<WmsInboundItemDO> itemList) {
         for(WmsInboundItemDO item : itemList) {
             WmsStockWarehouseDO stockWarehouseDO = stockWarehouseService.getStockWarehouse(inbound.getWarehouseId(), item.getProductId(), FALSE);
-            stockWarehouseDO.setTransitQty(stockWarehouseDO.getTransitQty() - item.getActualQty());
+            stockWarehouseDO.setTransitQty(Math.max(stockWarehouseDO.getTransitQty() - item.getActualQty(), 0));
             stockWarehouseService.updateStockWarehouse(BeanUtils.toBean(stockWarehouseDO, WmsStockWarehouseSaveReqVO.class));
         }
     }

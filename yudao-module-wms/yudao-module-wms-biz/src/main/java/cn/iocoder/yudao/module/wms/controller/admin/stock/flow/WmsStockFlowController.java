@@ -93,7 +93,7 @@ public class WmsStockFlowController {
     @PreAuthorize("@ss.hasPermission('wms:stock-flow:query')")
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageWarehouse(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.WAREHOUSE.getValue());
-        pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
+        pageReqVO.setReason(new Integer[]{WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_FINISH.getValue()});
         return getStockFlowPage(pageReqVO);
     }
 
@@ -102,7 +102,7 @@ public class WmsStockFlowController {
     @PreAuthorize("@ss.hasPermission('wms:stock-flow:query')")
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageLogic(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.LOGIC.getValue());
-        pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
+        pageReqVO.setReason(new Integer[]{WmsStockReason.INBOUND.getValue(), WmsStockReason.OUTBOUND_FINISH.getValue()});
         return getStockFlowPage(pageReqVO);
     }
 
@@ -111,7 +111,7 @@ public class WmsStockFlowController {
     @PreAuthorize("@ss.hasPermission('wms:stock-flow:query')")
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageBin(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.BIN.getValue());
-        pageReqVO.setReason(new Integer[] { WmsStockReason.INBOUND.getValue(), WmsStockReason.PICKUP.getValue(), WmsStockReason.OUTBOUND_AGREE.getValue() });
+        pageReqVO.setReason(new Integer[]{WmsStockReason.INBOUND.getValue(), WmsStockReason.PICKUP.getValue(), WmsStockReason.OUTBOUND_FINISH.getValue()});
         return getStockFlowPage(pageReqVO);
     }
 
