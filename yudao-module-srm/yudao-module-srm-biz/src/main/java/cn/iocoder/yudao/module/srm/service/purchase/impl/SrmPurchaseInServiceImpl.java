@@ -300,8 +300,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         }
         // 1.7 校验订单项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
-        // 1.8 如果vo和旧item不同,则校验订单项到货数量是否超过采购订单的采购项入库数量
-        validQtyWhenUpdate(vo);
 
         // 2.1 更新入库
         SrmPurchaseInDO updateObj = BeanUtils.toBean(vo, SrmPurchaseInDO.class);
@@ -309,6 +307,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         purchaseInMapper.updateById(updateObj);
         // 2.2 更新入库项
         updatePurchaseInItemList(vo.getId(), purchaseInItems);
+        // 2.3 如果vo和旧item不同,则校验订单项到货数量是否超过采购订单的采购项入库数量
+        validQtyWhenUpdate(vo);
     }
 
     /**
