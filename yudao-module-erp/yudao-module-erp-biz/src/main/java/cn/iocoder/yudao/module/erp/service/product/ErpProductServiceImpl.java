@@ -306,7 +306,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        List<ErpProductDO> list = productMapper.selectBatchIds(ids);
+        List<ErpProductDO> list = productMapper.selectByIds(ids);
         return buildProductVOList(list);
     }
 

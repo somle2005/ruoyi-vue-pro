@@ -52,7 +52,6 @@ import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
 import jakarta.annotation.Resource;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -129,8 +128,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
 
     @Resource(name = OutboundStateMachineConfigure.STATE_MACHINE_NAME)
     private StateMachine<Integer, WmsOutboundAuditStatus.Event, TransitionContext<WmsOutboundDO>> outboundStateMachine;
-    @Autowired
-    private ErpProductApi erpProductApi;
+
 
     /**
      * @sign : A523E13094CD30CE
@@ -212,7 +210,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Transactional(rollbackFor = Exception.class)
     public WmsOutboundRespVO generateOutbound(WmsOutboundImportReqVO importReqVO) {
 
-        Map<Long, ErpProductRespDTO> productDTOMap = erpProductApi.getProductDTOMap(StreamX.from(importReqVO.getItemList()).toList(WmsOutboundItemSaveReqVO::getProductId));
+        Map<Long, ErpProductRespDTO> productDTOMap = productApi.getProductDTOMap(StreamX.from(importReqVO.getItemList()).toList(WmsOutboundItemSaveReqVO::getProductId));
         List<WmsOutboundItemSaveReqVO> itemList = BeanUtils.toBean(importReqVO.getItemList(), WmsOutboundItemSaveReqVO.class);
         //查库位
         for(WmsOutboundItemSaveReqVO item : itemList) {

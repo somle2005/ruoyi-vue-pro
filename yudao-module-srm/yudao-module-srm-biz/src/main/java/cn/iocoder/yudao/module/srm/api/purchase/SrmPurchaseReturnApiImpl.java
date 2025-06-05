@@ -14,6 +14,7 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmOutboundStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -32,6 +33,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN
  */
 @Service
 @Validated
+@Slf4j
 public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
 
     @Autowired
@@ -119,13 +121,14 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
      */
     @Override
     public void updatePurchaseReturnItemQty(@Validated SrmReturnSaveReqDTO reqDTO) {
+        log.debug("采购退货单回调，SrmReturnSaveReqDTO: {}", reqDTO);
         //校验
         if (!Objects.equals(reqDTO.getUpstreamType(), BillType.SRM_PURCHASE_RETURN.getValue())) {
-            throw new IllegalArgumentException(StrUtil.format("出库单审核回调SrmOutboundReqDTO，上游类型({})不是退货单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamType())).getLabel()));
+            throw new IllegalArgumentException(StrUtil.format("出库单审核回调SrmOutboundReqDTO类型错误，上游类型({})不是退货单", Objects.requireNonNull(BillType.parse(reqDTO.getUpstreamType())).getLabel()));
         }
         //校验item存在
         List<Long> itemIds = reqDTO.getItems().stream().map(SrmReturnSaveItemReqDTO::getUpstreamId).collect(Collectors.toList());
-        List<SrmPurchaseReturnItemDO> items = purchaseReturnService.validatePurchaseReturnItemExists(itemIds);
+        List<SrmPurchaseReturnItemDO> srmPurchaseReturnItemDOS = purchaseReturnService.validatePurchaseReturnItemExists(itemIds);
 
         //消费
         reqDTO.getItems().forEach(item -> {

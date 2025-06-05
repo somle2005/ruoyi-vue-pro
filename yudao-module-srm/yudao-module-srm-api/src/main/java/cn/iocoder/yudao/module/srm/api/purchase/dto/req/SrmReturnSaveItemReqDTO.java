@@ -10,9 +10,8 @@ public class SrmReturnSaveItemReqDTO {
 
     @NotNull(message = "明细ID不能为空")
     private Long id;
-    /**
-     * 标准产品ID
-     */
+
+    @NotNull(message = "产品ID不能为空")
     private Long productId;
     /**
      * 实际出库量
