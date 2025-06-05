@@ -256,7 +256,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         for (SrmPurchaseInItemDO inItemDO : diffList) {
             Optional.ofNullable(inItemDO.getOrderItemId()).ifPresent(orderItemId -> {
                 SrmPurchaseOrderItemDO orderItemDO = purchaseOrderService.validatePurchaseOrderItemExists(orderItemId);
-                orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInStatus()),
+                orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInboundStatus()),
                         SrmEventEnum.STOCK_ADJUSTMENT,
                         //取反数量
                     SrmOrderInCountContext.builder().orderItemId(orderItemId).inCount(inItemDO.getQty().negate()).build());
@@ -536,7 +536,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 //校验订单项是否存在
                 SrmPurchaseOrderItemDO orderItemDO = purchaseOrderService.validatePurchaseOrderItemExists(orderItemId);
                 //更新订单项入库数量+状态 入库状态机,创建入库单->增加入库数量
-                orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInStatus())
+                orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInboundStatus())
                         , SrmEventEnum.STOCK_ADJUSTMENT
                     , SrmOrderInCountContext.builder().orderItemId(orderItemId).inCount(purchaseInItem.getQty()).build()); //正数
             });

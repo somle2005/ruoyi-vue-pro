@@ -56,7 +56,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
             .likeIfPresent(SrmPurchaseRequestDO::getTag, req.getTag())
             .likeIfPresent(SrmPurchaseRequestDO::getDelivery, req.getDelivery())
             .likeIfPresent(SrmPurchaseRequestDO::getAuditAdvice, req.getAuditAdvice())
-            .eqIfPresent(SrmPurchaseRequestDO::getInStatus, req.getInStatus())
+            .eqIfPresent(SrmPurchaseRequestDO::getInboundStatus, req.getInboundStatus())
             .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
             ;
     }

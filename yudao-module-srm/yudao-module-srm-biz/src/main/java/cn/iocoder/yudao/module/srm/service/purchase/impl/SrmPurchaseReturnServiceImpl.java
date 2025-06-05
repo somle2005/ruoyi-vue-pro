@@ -444,7 +444,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         Long orderItemId = inItemDO.getOrderItemId();
         SrmPurchaseOrderItemDO orderItemDO = orderItemMapper.selectById(orderItemId);
 
-        orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT, SrmOrderInCountContext.builder().orderItemId(orderItemId).returnCount(number).build());
+        orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInboundStatus()), SrmEventEnum.STOCK_ADJUSTMENT, SrmOrderInCountContext.builder().orderItemId(orderItemId).returnCount(number).build());
     }
 
     @Override

@@ -120,5 +120,5 @@ public class SrmPurchaseRequestItemsDO extends TenantBaseDO {
     /**
      * 入库状态
      */
-    private Integer inStatus;
+    private Integer inboundStatus;
 }

@@ -134,7 +134,7 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
     /**
      * 入库状态
      */
-    private Integer inStatus;
+    private Integer inboundStatus;
     /**
      * 付款状态
      */

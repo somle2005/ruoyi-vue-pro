@@ -98,7 +98,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
 
         }
         // 更新数据库中的采购项状态
-        oldData.setInStatus(to.getCode());//状态
+        oldData.setInboundStatus(to.getCode());//状态
         oldData.setInboundClosedQty(newInCount);//入库数量
         orderItemMapper.updateById(oldData);
 
@@ -117,9 +117,9 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
     private void toOrderExecute(Long orderItemId) {
         SrmPurchaseOrderItemDO orderItemDO = orderItemMapper.selectById(orderItemId);
         //部分入库->部分执行 , 完全入库 -> 完全执行
-        if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode())) {
+        if (Objects.equals(orderItemDO.getInboundStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode())) {
             orderItemExecutionStateMachine.fireEvent(SrmExecutionStatus.fromCode(orderItemDO.getExecuteStatus()), SrmEventEnum.START_EXECUTION, orderItemDO);
-        } else if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.PARTIALLY_IN_STORAGE.getCode())) {
+        } else if (Objects.equals(orderItemDO.getInboundStatus(), SrmStorageStatus.PARTIALLY_IN_STORAGE.getCode())) {
             orderItemExecutionStateMachine.fireEvent(SrmExecutionStatus.fromCode(orderItemDO.getExecuteStatus()), SrmEventEnum.COMPLETE_EXECUTION, orderItemDO);
         }
     }
@@ -131,7 +131,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             SrmPurchaseRequestItemsDO applyItemDO = erpPurchaseRequestItemsMapper.selectById(applyItemId);
             ThrowUtil.ifThrow(applyItemDO == null, PURCHASE_REQUEST_ITEM_NOT_FOUND, oldData.getId(), applyItemId);
             //
-            requestItemInStateMachine.fireEvent(SrmStorageStatus.fromCode(applyItemDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT,
+            requestItemInStateMachine.fireEvent(SrmStorageStatus.fromCode(applyItemDO.getInboundStatus()), SrmEventEnum.STOCK_ADJUSTMENT,
                 SrmRequestInMachineContext.builder().applyItemId(applyItemId).inCount(dtoCount).build());
         });
     }
@@ -144,7 +144,7 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             log.error("未找到对应的采购订单,订单ID={}", oldData.getOrderId());
             return;
         }
-        if (orderDO.getInStatus() == null) {
+        if (orderDO.getInboundStatus() == null) {
             log.warn("未找到对应的采购订单,订单ID={}", oldData.getOrderId());
             return;
         }
@@ -152,14 +152,14 @@ public class OrderItemInActionImpl implements Action<SrmStorageStatus, SrmEventE
             log.debug("采购项订单入库状态初始化");
             return;
         }
-        orderStorageStateMachine.fireEvent(SrmStorageStatus.fromCode(orderDO.getInStatus()), SrmEventEnum.STOCK_ADJUSTMENT, orderDO);
+        orderStorageStateMachine.fireEvent(SrmStorageStatus.fromCode(orderDO.getInboundStatus()), SrmEventEnum.STOCK_ADJUSTMENT, orderDO);
     }
 
     private void checkStatusAndClose(Long orderItemId) {
         SrmPurchaseOrderItemDO orderItemDO = orderItemMapper.selectById(orderItemId);
         // 当前订单项，完全入库 + 完全付款 -> 关闭订单项
         //&& Objects.equals(orderItemDO.getPayStatus(),SrmPaymentStatus.ALL_PAYMENT.getCode())
-        if (Objects.equals(orderItemDO.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode())) {
+        if (Objects.equals(orderItemDO.getInboundStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode())) {
             // 当前订单项，完全入库  -> 关闭订单项
             orderItemOffStateMachine.fireEvent(SrmOffStatus.fromCode(orderItemDO.getOffStatus()), SrmEventEnum.AUTO_CLOSE, new SrmOrderItemOffContext().setItemId(orderItemDO.getId()));
         }
