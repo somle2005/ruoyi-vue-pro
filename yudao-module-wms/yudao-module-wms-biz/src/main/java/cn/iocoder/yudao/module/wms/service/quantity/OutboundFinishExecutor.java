@@ -93,8 +93,6 @@ public class OutboundFinishExecutor extends OutboundExecutor {
         Map<Long,WmsInboundItemDO> map=StreamX.from(inboundItemsList).toMap(WmsInboundItemDO::getId);
         for (WmsInboundItemFlowDO flowDO : flowDOList) {
             WmsInboundItemDO inboundItemDO = map.get(flowDO.getInboundItemId());
-            inboundItemDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty() + item.getActualQty());
-
             // 记录流水
             WmsInboundItemFlowDO newFlowDO=new WmsInboundItemFlowDO();
             newFlowDO.setOutboundActionId(actionId);
