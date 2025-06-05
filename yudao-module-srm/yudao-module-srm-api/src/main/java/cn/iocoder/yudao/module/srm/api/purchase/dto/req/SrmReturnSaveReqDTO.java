@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.srm.api.purchase.dto.req;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -28,11 +29,12 @@ public class SrmReturnSaveReqDTO {
     /**
      * 上游单据类型 ;
      */
+    @NotNull(message = "来源单据类型不能为空")
     private Integer upstreamType;
 
     /**
      * 出库单明细
      */
     @Size(min = 1, message = "明细不能为空")
-    private List<SrmReturnSaveItemReqDTO> items;
+    private List<@Valid SrmReturnSaveItemReqDTO> items;
 }

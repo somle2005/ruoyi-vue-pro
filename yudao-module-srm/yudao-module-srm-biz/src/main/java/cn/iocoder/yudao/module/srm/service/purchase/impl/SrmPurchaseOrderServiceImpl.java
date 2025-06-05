@@ -141,7 +141,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
      */
     private static void validHasInPurchaseItem(SrmPurchaseOrderItemDO item) {
         //判断订单项是否存在入库项
-        if (!Objects.equals(item.getInStatus(), SrmStorageStatus.NONE_IN_STORAGE.getCode())) {
+        if (!Objects.equals(item.getInboundStatus(), SrmStorageStatus.NONE_IN_STORAGE.getCode())) {
             //存在入库项，则发抛出异常
             throw exception(PURCHASE_ORDER_DELETE_FAIL);
         }
@@ -784,7 +784,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             // 非已审核+非开启+完全入库,异常
             ThrowUtil.ifThrow(!Objects.equals(order.getAuditStatus(), SrmAuditStatus.APPROVED.getCode()), PURCHASE_ORDER_ITEM_NOT_AUDIT, itemId);
 //            ThrowUtil.ifThrow(!Objects.equals(aDo.getOffStatus(), SrmOffStatus.OPEN.getCode()), PURCHASE_ORDER_ITEM_NOT_OPEN, itemId);
-            ThrowUtil.ifThrow(Objects.equals(aDo.getInStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()), PURCHASE_ORDER_IN_ITEM_NOT_OPEN, itemId);
+            ThrowUtil.ifThrow(Objects.equals(aDo.getInboundStatus(), SrmStorageStatus.ALL_IN_STORAGE.getCode()), PURCHASE_ORDER_IN_ITEM_NOT_OPEN, itemId);
         }
         List<Long> itemIds = reqVO.getItems().stream().map(SrmPurchaseOrderMergeReqVO.Item::getItemId).collect(Collectors.toList());
         List<SrmPurchaseOrderItemDO> orderItemDOS = purchaseOrderItemMapper.selectListByItemIds(itemIds);

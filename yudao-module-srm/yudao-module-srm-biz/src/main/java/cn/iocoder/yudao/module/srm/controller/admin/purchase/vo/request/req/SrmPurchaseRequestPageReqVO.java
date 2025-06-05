@@ -73,7 +73,7 @@ public class SrmPurchaseRequestPageReqVO extends PageParam {
     private String auditAdvice;
 
     @Schema(description = "入库状态")
-    private Integer inStatus;
+    private Integer inboundStatus;
     //子表分割线
 
     @Schema(description = "产品id")

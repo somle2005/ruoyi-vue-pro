@@ -10,6 +10,7 @@ import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
@@ -128,6 +129,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Resource(name = OutboundStateMachineConfigure.STATE_MACHINE_NAME)
     private StateMachine<Integer, WmsOutboundAuditStatus.Event, TransitionContext<WmsOutboundDO>> outboundStateMachine;
 
+
     /**
      * @sign : A523E13094CD30CE
      */
@@ -208,13 +210,14 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Transactional(rollbackFor = Exception.class)
     public WmsOutboundRespVO generateOutbound(WmsOutboundImportReqVO importReqVO) {
 
+        Map<Long, ErpProductRespDTO> productDTOMap = productApi.getProductDTOMap(StreamX.from(importReqVO.getItemList()).toList(WmsOutboundItemSaveReqVO::getProductId));
         List<WmsOutboundItemSaveReqVO> itemList = BeanUtils.toBean(importReqVO.getItemList(), WmsOutboundItemSaveReqVO.class);
         //查库位
         for(WmsOutboundItemSaveReqVO item : itemList) {
             //查询仓位库存表 规则1.根据后进先出筛选出最近入库批次 2.同一批次下，多个库位，根据自带优先级进行选择 3.该库位必须有足够货量
             WmsStockBinDO stockBin = stockBinMapper.selectByProductId(item.getProductId(), item.getPlanQty(), importReqVO.getWarehouseId());
             if(stockBin == null) {
-                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, item.getProduct().getName());
+                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, productDTOMap.get(item.getProductId()).getName());
             }
             item.setBinId(stockBin.getBinId());
         }

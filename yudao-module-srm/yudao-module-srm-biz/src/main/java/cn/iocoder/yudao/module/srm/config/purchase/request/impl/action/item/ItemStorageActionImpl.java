@@ -54,12 +54,12 @@ public class ItemStorageActionImpl implements Action<SrmStorageStatus, SrmEventE
                 t = SrmStorageStatus.NONE_IN_STORAGE;
             }
         } else {
-            itemsDO.setInStatus(t.getCode());//状态
+            itemsDO.setInboundStatus(t.getCode());//状态
         }
         ThrowUtil.ifSqlThrow(mapper.updateById(itemsDO), GlobalErrorCodeConstants.DB_BATCH_UPDATE_ERROR);
         //传递事件给主申请单
         SrmPurchaseRequestDO requestDO = srmPurchaseRequestMapper.selectById(itemsDO.getRequestId());
-        stateMachine.fireEvent(SrmStorageStatus.fromCode(requestDO.getInStatus()), event, requestDO);
+        stateMachine.fireEvent(SrmStorageStatus.fromCode(requestDO.getInboundStatus()), event, requestDO);
         log.debug("item入库状态机触发({})事件：将对象{},由状态 {}->{}", event.getDesc(), JSONUtil.toJsonStr(context), f.getDesc(), t.getDesc());
     }
 }

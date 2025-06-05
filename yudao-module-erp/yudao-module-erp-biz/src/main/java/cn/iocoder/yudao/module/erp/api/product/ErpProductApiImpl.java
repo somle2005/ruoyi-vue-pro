@@ -14,10 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
@@ -114,12 +111,11 @@ public class ErpProductApiImpl implements ErpProductApi {
 
     @Override
     public Map<Long, ErpProductRespDTO> getProductDTOMap(Collection<Long> ids) {
-        Map<Long, ErpProductRespVO> productVOMap = erpProductService.getProductVOMap(ids);
-        Map<Long, ErpProductRespDTO> productDTOMap = productVOMap.entrySet().stream()
+        Map<Long, ErpProductRespVO> productVOMap = erpProductService.getProductVOMap(new HashSet<>(ids));
+        return productVOMap.entrySet().stream()
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
                 ErpProductRespVO productVO = entry.getValue();
                 return BeanUtils.toBean(productVO, ErpProductRespDTO.class);
             }));
-        return productDTOMap;
     }
 }

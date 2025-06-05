@@ -47,7 +47,7 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
     public void execute(SrmOutboundStatus from, SrmOutboundStatus to, SrmEventEnum event, SrmPurchaseOutItemCountContext context) {
         SrmPurchaseReturnItemDO returnItemDO = srmPurchaseReturnItemMapper.selectById(context.getOutItemId());
 
-        if (event == SrmEventEnum.RETURN_ADJUSTMENT) {
+        if (event == SrmEventEnum.OUT_STORAGE_ADJUSTMENT) {
             if (context.getOutCount() == null) {
                 throw new IllegalArgumentException("退货数量调整事件下，dto退货数量不能为空");
             }

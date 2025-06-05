@@ -42,7 +42,7 @@ public class StorageActionImpl implements Action<SrmStorageStatus, SrmEventEnum,
         boolean hasAll = true;
 
         for (SrmPurchaseRequestItemsDO item : items) {
-            Integer inStatus = item.getInStatus();
+            Integer inStatus = item.getInboundStatus();
             if (inStatus == null || inStatus.equals(SrmStorageStatus.NONE_IN_STORAGE.getCode())) {
                 hasUn = true;
                 hasAll = false;
@@ -62,7 +62,7 @@ public class StorageActionImpl implements Action<SrmStorageStatus, SrmEventEnum,
         }
 //        }
 
-        requestDO.setInStatus(to.getCode());//设置状态
+        requestDO.setInboundStatus(to.getCode());//设置状态
         requestMapper.updateById(requestDO);
 
         log.debug("采购申请项入库状态机触发({})事件：将对象{},由状态 {}->{}", event.getDesc(), JSONUtil.toJsonStr(context), from.getDesc(), to.getDesc());

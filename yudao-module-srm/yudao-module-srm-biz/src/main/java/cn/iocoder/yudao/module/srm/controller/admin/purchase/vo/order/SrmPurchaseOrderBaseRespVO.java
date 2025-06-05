@@ -80,7 +80,7 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
     private Integer executeStatus;
 
     @Schema(description = "入库状态")
-    private Integer inStatus;
+    private Integer inboundStatus;
 
     @Schema(description = "付款状态")
     private Integer payStatus;
@@ -235,7 +235,7 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
         private Integer executeStatus;
 
         @Schema(description = "入库状态")
-        private Integer inStatus;
+        private Integer inboundStatus;
 
         @Schema(description = "付款状态")
         private Integer payStatus;

@@ -2,8 +2,6 @@ package cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo;
 
 import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
-import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.stockcheck.bin.WmsStockCheckBinDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -53,10 +51,10 @@ public class WmsOutboundItemSaveReqVO {
 
     @Schema(description = "来源明细行ID", example = "")
     private Long upstreamId;
-
-    @Schema(description = "产品信息")
-    private WmsProductDO product;
-
-    @Schema(description = "库位信息")
-    private WmsStockCheckBinDO bin;
+//
+//    @Schema(description = "产品信息")
+//    private WmsProductDO product;
+//
+//    @Schema(description = "库位信息")
+//    private WmsStockCheckBinDO bin;
 }
