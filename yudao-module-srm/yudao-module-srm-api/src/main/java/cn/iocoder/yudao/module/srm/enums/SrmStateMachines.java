@@ -27,6 +27,7 @@ public interface SrmStateMachines {
     String PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME = "purchase-order-item-storage";
     String PURCHASE_ORDER_ITEM_PAYMENT_STATE_MACHINE_NAME = "purchase-order-item-payment";
     String PURCHASE_ORDER_ITEM_PURCHASE_STATE_MACHINE_NAME = "purchase-order-item-purchase";
+    String PURCHASE_ORDER_ITEM_RETURN_STATE_MACHINE_NAME = "purchase-order-item-return";
 
     // ========== SRM 到货单主项 ==========
     String PURCHASE_IN_AUDIT_STATE_MACHINE = "purchase-in-main-audit";

@@ -31,7 +31,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN
 public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountContext> {
 
     @Resource(name = PURCHASE_RETURN_OUT_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineContext> stateMachine;
+    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineContext> outnoundStateMachine;
     @Autowired
     private SrmPurchaseReturnItemMapper srmPurchaseReturnItemMapper;
     @Autowired
@@ -74,7 +74,7 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
             //出库数量
             returnItemDO.setOutboundQty(changedOutboundQty);
             // 1.0 传递给主单
-            stateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.ORDER_ADJUSTMENT, SrmPurchaseOutMachineContext.builder().returnId(returnItemDO.getReturnId()).build());
+            outnoundStateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.OUT_STORAGE_ADJUSTMENT, SrmPurchaseOutMachineContext.builder().returnId(returnItemDO.getReturnId()).build());
             // 2.0 传给订单项，同步当前的退货数量给订单项(暂不使用状态机)
             toOrderReturnCount(returnItemDO);
         }
@@ -84,6 +84,9 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
         log.debug("子项退货状态机触发({})事件：对象outItemId={}，状态 {} -> {}", event.getDesc(), returnItemDO.getId(), from.getDesc(), to.getDesc());
     }
 
+    /**
+     * 1.改变订单项退货数量
+     */
     private void toOrderReturnCount(SrmPurchaseReturnItemDO returnItemDO) {
         //到货项 -> 订单项
         SrmPurchaseInItemDO inItemDO = srmPurchaseInItemMapper.selectById(returnItemDO.getInItemId());
@@ -99,7 +102,6 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
         BigDecimal newReturnCount = existingReturnCount.add(returnItemDO.getOutboundQty());
 
         // 更新订单退货数量
-        srmPurchaseOrderService.updatePurchaseOrderReturnCount(srmPurchaseOrderItemDO.getOrderId(),
-            Map.of(returnItemDO.getInItemId(), newReturnCount));
+        srmPurchaseOrderService.updatePurchaseOrderReturnCount(srmPurchaseOrderItemDO.getOrderId(), Map.of(returnItemDO.getInItemId(), newReturnCount));
     }
 }

@@ -96,7 +96,7 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
      */
     private BigDecimal totalInCount;
     /**
-     * 采购退货数量
+     * 采购退货总数
      */
     private BigDecimal totalReturnCount;
     /**
