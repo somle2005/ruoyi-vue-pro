@@ -45,9 +45,12 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
+/**
+ * @author jisencai
+ */
 @Tag(name = "库位盘点")
 @RestController
-@RequestMapping("/wms/stockCheck-bin")
+@RequestMapping("/wms/stock-check-bin")
 @Validated
 public class WmsStockCheckBinController {
 

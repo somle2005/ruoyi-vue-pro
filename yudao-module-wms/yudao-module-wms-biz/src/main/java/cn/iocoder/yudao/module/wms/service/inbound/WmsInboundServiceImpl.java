@@ -210,6 +210,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
                 item.setInboundId(updateReqVO.getId());
                 item.setInboundStatus(WmsInboundStatus.NONE.getValue());
                 item.setActualQty(0);
+                item.setCompanyId(updateReqVO.getCompanyId());
             });
             // 保存详情
             if(!toInsetList.isEmpty()) {

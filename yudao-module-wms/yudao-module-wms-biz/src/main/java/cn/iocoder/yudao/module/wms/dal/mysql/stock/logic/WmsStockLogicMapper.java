@@ -46,7 +46,7 @@ public interface WmsStockLogicMapper extends BaseMapperX<WmsStockLogicDO> {
         LambdaQueryWrapperX<WmsStockLogicDO> wrapper = new LambdaQueryWrapperX<>();
         wrapper.eq(WmsStockLogicDO::getWarehouseId, warehouseId);
         wrapper.eq(WmsStockLogicDO::getCompanyId, companyId);
-        wrapper.eq(WmsStockLogicDO::getDeptId, deptId);
+        wrapper.eqIfPresent(WmsStockLogicDO::getDeptId, deptId);
         wrapper.eq(WmsStockLogicDO::getProductId, productId);
         return selectOne(wrapper);
     }
