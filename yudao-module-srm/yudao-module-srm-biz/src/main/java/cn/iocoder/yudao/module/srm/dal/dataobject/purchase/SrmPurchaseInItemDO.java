@@ -71,7 +71,7 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
     /**
      * 实际入库状态
      */
-    private Integer inStatus;
+    private Integer inboundStatus;
     /**
      * 总价，单位：元 totalPrice = productPrice * qty
      */
@@ -113,7 +113,7 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
     /**
      * 含税单价
      */
-    private BigDecimal actTaxPrice;
+    private BigDecimal grossPrice;
     /**
      * 价税合计
      */
@@ -149,7 +149,7 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
     /**
      * x码
      */
-    private String xcode;
+    private String fbaCode;
     /**
      * 箱率 关联 {@link SrmPurchaseOrderItemDO#getContainerRate()}
      */

@@ -110,7 +110,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
         dto.setAmount(item.getTotalPrice());
         dto.setTaxPercent(item.getTaxPercent());
         dto.setTaxAmount(item.getTaxPrice());
-        dto.setActTaxPrice(item.getActTaxPrice());
+        dto.setGrossPrice(item.getGrossPrice());
         dto.setAllAmount(item.getTotalProductPrice());
         return dto;
     }

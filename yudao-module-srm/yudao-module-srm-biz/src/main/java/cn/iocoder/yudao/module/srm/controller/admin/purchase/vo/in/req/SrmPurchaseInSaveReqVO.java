@@ -148,7 +148,7 @@ public class SrmPurchaseInSaveReqVO {
 
         @Schema(description = "含税单价")
         @DiffLogField(name = "含税单价")
-        private BigDecimal actTaxPrice;
+        private BigDecimal grossPrice;
 
         @Schema(description = "价税合计")
         @DiffLogField(name = "价税合计")
@@ -217,7 +217,7 @@ public class SrmPurchaseInSaveReqVO {
         // ========== 其他字段 ==========
 
         @Schema(description = "x编码")
-        private String xcode;
+        private String fbaCode;
 
         @Schema(description = "箱率")
         private String containerRate;

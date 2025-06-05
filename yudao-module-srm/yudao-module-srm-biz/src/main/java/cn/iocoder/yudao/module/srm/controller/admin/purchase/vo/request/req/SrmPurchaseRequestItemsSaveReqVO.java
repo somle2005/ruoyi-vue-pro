@@ -56,7 +56,7 @@ public class SrmPurchaseRequestItemsSaveReqVO {
 
     @Schema(description = "含税单价")
     @Positive(message = "含税单价必须为正数")
-    private BigDecimal actTaxPrice;
+    private BigDecimal grossPrice;
 
     @Schema(description = "价税合计")
     @DecimalMin(value = "0.0", message = "价税合计必须大于0")

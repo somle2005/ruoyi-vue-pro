@@ -198,7 +198,7 @@ public class SrmPurchaseReturnBaseRespVO {
         private BigDecimal productPrice;
 
         @Schema(description = "含税单价，单位：元")
-        private BigDecimal actTaxPrice;
+        private BigDecimal grossPrice;
 
         @Schema(description = "税率，百分比")
         private BigDecimal taxPercent;

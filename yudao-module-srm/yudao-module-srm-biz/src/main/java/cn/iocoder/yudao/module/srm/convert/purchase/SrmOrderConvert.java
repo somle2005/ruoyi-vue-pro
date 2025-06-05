@@ -55,7 +55,7 @@ public interface SrmOrderConvert {
         // 设置下单数量(采购) == 申请项批准数量
         item.setQty(reqVO.getOrderQuantity()); //合并时vo -> 数量
         //vo 必填项 ，特殊
-        item.setProductPrice(itemDO.getActTaxPrice());//产品含税单价->产品价格
+        item.setProductPrice(itemDO.getGrossPrice());//产品含税单价->产品价格
         //价税合计
         item.setDeliveryTime(itemDO.getExpectArrivalDate());//交货日期 -> 期望到货日期
         return item;
@@ -91,7 +91,7 @@ public interface SrmOrderConvert {
                 item.setTotalPriceUntaxed(item.getProductPrice().multiply(item.getQty()).setScale(2, RoundingMode.HALF_UP));
                 item.setTotalTaxPrice(item.getTaxPrice().setScale(2, RoundingMode.HALF_UP));
                 //总金额
-                item.setTotalProductPrice(item.getQty().multiply(item.getActTaxPrice()).setScale(2, RoundingMode.HALF_UP));//数量*含税单价
+                item.setTotalProductPrice(item.getQty().multiply(item.getGrossPrice()).setScale(2, RoundingMode.HALF_UP));//数量*含税单价
                 item.setDeliveryTimeFormat(DateUtil.format(item.getDeliveryTime(), NORM_DATE_PATTERN));
                 item.setQty(item.getQty().setScale(0, RoundingMode.HALF_UP));
             })).setTotalCount(peek.getTotalCount().setScale(0, RoundingMode.HALF_UP));

@@ -30,7 +30,7 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .likeIfPresent(SrmPurchaseOrderItemDO::getProductUnitName, reqVO.getProductUnitName()) // 产品单位名称
             .eqIfPresent(SrmPurchaseOrderItemDO::getApplicantId, reqVO.getApplicantId()) // 申请人ID
             .eqIfPresent(SrmPurchaseOrderItemDO::getApplicationDeptId, reqVO.getApplicationDeptId()) // 申请部门ID
-            .eqIfPresent(SrmPurchaseOrderItemDO::getXcode, reqVO.getXCode()) // X码
+            .eqIfPresent(SrmPurchaseOrderItemDO::getFbaCode, reqVO.getFbaCode()) // X码
             .likeIfPresent(SrmPurchaseOrderItemDO::getContainerRate, reqVO.getContainerRate()) // 箱率
             .likeIfPresent(SrmPurchaseOrderItemDO::getPurchaseApplyCode, reqVO.getPurchaseApplyCode()) // 原单单号
             .orderByDesc(SrmPurchaseOrderItemDO::getCreateTime) // 按时间降序排序

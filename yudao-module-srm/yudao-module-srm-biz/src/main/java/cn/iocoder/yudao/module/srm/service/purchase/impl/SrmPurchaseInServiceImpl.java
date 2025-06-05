@@ -484,12 +484,12 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         inItemDO.setProductName(orderItemDO.getProductName());
         inItemDO.setDeclaredType(orderItemDO.getDeclaredType());
         inItemDO.setDeclaredTypeEn(orderItemDO.getDeclaredTypeEn());
-        inItemDO.setXcode(orderItemDO.getXcode());
+        inItemDO.setFbaCode(orderItemDO.getFbaCode());
         inItemDO.setContainerRate(orderItemDO.getContainerRate());
         inItemDO.setBarCode(orderItemDO.getBarCode());
 
         //产品价格
-        inItemDO.setActTaxPrice(orderItemDO.getActTaxPrice());
+        inItemDO.setGrossPrice(orderItemDO.getGrossPrice());
         // 复制税率相关
         inItemDO.setTaxPercent(orderItemDO.getTaxPercent());
         //申请人

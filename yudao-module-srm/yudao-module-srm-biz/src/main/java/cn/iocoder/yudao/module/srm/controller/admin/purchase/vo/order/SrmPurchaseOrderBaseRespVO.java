@@ -170,7 +170,7 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
         private String model;
 
         @Schema(description = "x码")
-        private String xcode;
+        private String fbaCode;
 
         @Schema(description = "箱率")
         private String containerRate;
@@ -193,7 +193,7 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
         private BigDecimal productPrice;
 
         @Schema(description = "含税单价", example = "120.00")
-        private BigDecimal actTaxPrice;
+        private BigDecimal grossPrice;
 
         @Schema(description = "税率，百分比")
         private BigDecimal taxPercent;

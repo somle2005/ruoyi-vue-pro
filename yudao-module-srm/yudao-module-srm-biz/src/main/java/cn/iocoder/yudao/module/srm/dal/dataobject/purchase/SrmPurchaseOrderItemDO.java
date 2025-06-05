@@ -88,7 +88,7 @@ public class SrmPurchaseOrderItemDO extends TenantBaseDO {
     /**
      * 含税单价
      */
-    private BigDecimal actTaxPrice;
+    private BigDecimal grossPrice;
     /**
      * 价税合计
      */
@@ -163,7 +163,7 @@ public class SrmPurchaseOrderItemDO extends TenantBaseDO {
     private String purchaseApplyCode;
 
 
-    private String xcode;//x码
+    private String fbaCode;//x码
     private String containerRate;//箱率
     /**
      * 汇率

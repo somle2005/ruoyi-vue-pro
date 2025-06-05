@@ -51,11 +51,11 @@ public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnu
             int notInCount = 0; // 未入库数量
 
             for (SrmPurchaseInItemDO item : items) {
-                if (item.getInStatus() == null) {
+                if (item.getInboundStatus() == null) {
                     notInCount++;
                     continue;
                 }
-                SrmStorageStatus itemStatus = SrmStorageStatus.fromCode(item.getInStatus());
+                SrmStorageStatus itemStatus = SrmStorageStatus.fromCode(item.getInboundStatus());
                 switch (itemStatus) {
                     case ALL_IN_STORAGE: // 全部入库
                         allInCount++;
@@ -87,12 +87,12 @@ public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnu
 
 
         // 5. 更新入库单状态
-        if (!to.getCode().equals(purchaseIn.getInStatus())) {
-            srmPurchaseInMapper.updateById(purchaseIn.setInStatus(to.getCode()));
+        if (!to.getCode().equals(purchaseIn.getInboundStatus())) {
+            srmPurchaseInMapper.updateById(purchaseIn.setInboundStatus(to.getCode()));
         }
         log.info("[execute][入库单({}) 状态从({}) 更新为({})]",
             context.getArriveId(),
-                SrmStorageStatus.getDescriptionByCode(purchaseIn.getInStatus()),
+            SrmStorageStatus.getDescriptionByCode(purchaseIn.getInboundStatus()),
                 to.getDesc());
     }
 }

@@ -65,7 +65,7 @@ public class StorageInItemActionImpl implements Action<SrmStorageStatus, SrmEven
             inItemDO.setActualQty(finalActualQty);
         }
 
-        inItemDO.setInStatus(to.getCode());
+        inItemDO.setInboundStatus(to.getCode());
         //
         srmPurchaseInItemMapper.updateById(inItemDO);
 

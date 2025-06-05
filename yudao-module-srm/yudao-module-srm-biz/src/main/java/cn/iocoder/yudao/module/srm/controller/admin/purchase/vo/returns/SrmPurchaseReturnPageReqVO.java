@@ -128,7 +128,7 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
         private String remark;
 
         @Schema(description = "含税单价")
-        private BigDecimal actTaxPrice;
+        private BigDecimal grossPrice;
 
         @Schema(description = "箱率")
         private String containerRate;

@@ -51,7 +51,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 .eqIfPresent(SrmPurchaseInItemDO::getApplicantId, itemQuery.getApplicantId())
                 .eqIfPresent(SrmPurchaseInItemDO::getApplicationDeptId, itemQuery.getApplicationDeptId())
                 // ========== 状态信息 ==========
-                .eqIfPresent(SrmPurchaseInItemDO::getInStatus, itemQuery.getInStatus())
+                .eqIfPresent(SrmPurchaseInItemDO::getInboundStatus, itemQuery.getInboundStatus())
                 .eqIfPresent(SrmPurchaseInItemDO::getPayStatus, itemQuery.getPayStatus())
                 .orderByDesc(SrmPurchaseInItemDO::getCreateTime) // 按时间降序排序
             ;
@@ -90,7 +90,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 .betweenIfPresent(SrmPurchaseInDO::getAuditTime, mainQuery.getAuditTime())
                 .eqIfPresent(SrmPurchaseInDO::getAuditStatus, mainQuery.getAuditStatus())
                 // ========== 状态信息 ==========
-                .eqIfPresent(SrmPurchaseInDO::getInStatus, mainQuery.getInStatus())
+                .eqIfPresent(SrmPurchaseInDO::getInboundStatus, mainQuery.getInboundStatus())
                 // ========== 时间范围 ==========
                 .betweenIfPresent(SrmPurchaseInDO::getCreateTime, mainQuery.getCreateTime())
                 .orderByDesc(SrmPurchaseInDO::getCreateTime)

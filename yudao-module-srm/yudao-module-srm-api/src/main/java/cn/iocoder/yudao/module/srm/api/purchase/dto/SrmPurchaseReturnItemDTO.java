@@ -68,7 +68,7 @@ public class SrmPurchaseReturnItemDTO {
     /**
      * 含税单价
      */
-    private BigDecimal actTaxPrice;
+    private BigDecimal grossPrice;
 
     /**
      * 价税合计

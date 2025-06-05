@@ -42,7 +42,7 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .eqIfPresent(SrmPurchaseReturnItemDO::getTotalPrice, vo.getItemQuery().getTotalPrice()) // 总价
             .eqIfPresent(SrmPurchaseReturnItemDO::getTaxPercent, vo.getItemQuery().getTaxPercent()) // 税率
             .eqIfPresent(SrmPurchaseReturnItemDO::getTaxPrice, vo.getItemQuery().getTaxPrice()) // 税额
-            .eqIfPresent(SrmPurchaseReturnItemDO::getActTaxPrice, vo.getItemQuery().getActTaxPrice()) // 含税单价
+            .eqIfPresent(SrmPurchaseReturnItemDO::getGrossPrice, vo.getItemQuery().getGrossPrice()) // 含税单价
             .likeIfPresent(SrmPurchaseReturnItemDO::getRemark, vo.getItemQuery().getRemark()) // 备注
             .likeIfPresent(SrmPurchaseReturnItemDO::getContainerRate, vo.getItemQuery().getContainerRate()) // 箱率
             .eqIfPresent(SrmPurchaseReturnItemDO::getApplicantId, vo.getItemQuery().getApplicantId()) // 申请人id

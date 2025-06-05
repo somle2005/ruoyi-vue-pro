@@ -432,8 +432,8 @@ public class ErpToKingdeeConverter {
         if (item.getTaxAmount() != null) {
             entity.setTaxAmount(String.valueOf(item.getTaxAmount()));
         }
-        if (item.getActTaxPrice() != null) {
-            entity.setActTaxPrice(String.valueOf(item.getActTaxPrice()));
+        if (item.getGrossPrice() != null) {
+            entity.setActTaxPrice(String.valueOf(item.getGrossPrice()));
         }
         if (item.getAllAmount() != null) {
             entity.setAllAmount(String.valueOf(item.getAllAmount()));

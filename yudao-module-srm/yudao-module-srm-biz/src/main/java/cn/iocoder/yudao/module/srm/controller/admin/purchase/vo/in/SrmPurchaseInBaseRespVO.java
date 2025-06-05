@@ -66,7 +66,7 @@ public class SrmPurchaseInBaseRespVO {
 
     // ========== 状态信息 ==========
     @Schema(description = "入库状态")
-    private Integer inStatus;
+    private Integer inboundStatus;
 
     @Schema(description = "付款状态")
     private Integer payStatus;
@@ -199,7 +199,7 @@ public class SrmPurchaseInBaseRespVO {
         private String barCode;
 
         @Schema(description = "x码")
-        private String xcode;
+        private String fbaCode;
 
         @Schema(description = "箱率")
         private String containerRate;
@@ -230,7 +230,7 @@ public class SrmPurchaseInBaseRespVO {
         private BigDecimal taxPrice;
 
         @Schema(description = "含税单价")
-        private BigDecimal actTaxPrice;
+        private BigDecimal grossPrice;
 
         @Schema(description = "价税合计")
         private BigDecimal allAmount;
@@ -246,7 +246,7 @@ public class SrmPurchaseInBaseRespVO {
 
         // ========== 状态信息 ==========
         @Schema(description = "入库状态")
-        private Integer inStatus;
+        private Integer inboundStatus;
 
         @Schema(description = "付款状态")
         private Integer payStatus;

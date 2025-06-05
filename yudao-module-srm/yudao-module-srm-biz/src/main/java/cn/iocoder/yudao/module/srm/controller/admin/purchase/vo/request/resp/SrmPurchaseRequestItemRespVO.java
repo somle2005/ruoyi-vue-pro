@@ -76,7 +76,7 @@ public class SrmPurchaseRequestItemRespVO extends BaseVO {
 
     @Schema(description = "含税单价", example = "100.00")
     @ExcelProperty("含税单价")
-    private BigDecimal actTaxPrice;
+    private BigDecimal grossPrice;
 
     @Schema(description = "价税合计")
     @ExcelProperty("价税合计")

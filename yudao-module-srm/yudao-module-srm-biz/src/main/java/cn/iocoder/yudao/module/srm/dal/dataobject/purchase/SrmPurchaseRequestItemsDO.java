@@ -81,7 +81,7 @@ public class SrmPurchaseRequestItemsDO extends TenantBaseDO {
     /**
      * 含税单价
      */
-    private BigDecimal actTaxPrice;
+    private BigDecimal grossPrice;
     /**
      * 关闭状态
      */

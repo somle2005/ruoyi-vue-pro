@@ -99,7 +99,7 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
     /**
      * 含税单价
      */
-    private BigDecimal actTaxPrice;
+    private BigDecimal grossPrice;
 
     /**
      * 箱率

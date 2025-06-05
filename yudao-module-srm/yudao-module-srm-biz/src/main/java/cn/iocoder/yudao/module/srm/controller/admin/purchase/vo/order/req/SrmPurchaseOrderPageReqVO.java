@@ -83,7 +83,7 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     private Long purchaseCompanyId;
 
     @Schema(description = "x码")
-    private String xCode;
+    private String fbaCode;
 
     @Schema(description = "箱率")
     private String containerRate;

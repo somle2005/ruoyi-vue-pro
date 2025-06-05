@@ -385,7 +385,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                 .setDeclaredType(inItem.getDeclaredType())
                 .setDeclaredTypeEn(inItem.getDeclaredTypeEn())
                 .setContainerRate(inItem.getContainerRate())
-                .setActTaxPrice(inItem.getActTaxPrice())
+                .setGrossPrice(inItem.getGrossPrice())
                 .setActualQty(inItem.getActualQty())
             ;
 

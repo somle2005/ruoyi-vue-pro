@@ -173,7 +173,7 @@ public class SrmPurchaseOrderSaveReqVO {
         @Schema(description = "含税单价")
         @DecimalMin(value = "0.00", message = "含税单价不能小于0")
         @DiffLogField(name = "含税单价")
-        private BigDecimal actTaxPrice;
+        private BigDecimal grossPrice;
 
         @Schema(description = "价税合计")
         @DecimalMin(value = "0.0", message = "价税合计必须大于0")
@@ -223,7 +223,7 @@ public class SrmPurchaseOrderSaveReqVO {
         // ========== 其他 ==========
         @Schema(description = "x码")
         @DiffLogField(name = "X码")
-        private String xcode;
+        private String fbaCode;
 
         @Schema(description = "箱率")
         @DiffLogField(name = "箱率")

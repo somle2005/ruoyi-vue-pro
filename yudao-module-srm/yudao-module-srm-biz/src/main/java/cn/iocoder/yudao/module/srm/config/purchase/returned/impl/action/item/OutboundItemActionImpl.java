@@ -71,14 +71,15 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
                 // 实际退货数量小于计划数量，设置为部分出库状态
                 to = SrmOutboundStatus.PARTIALLY_OUTBOUND;
             }
+            //出库数量
             returnItemDO.setOutboundQty(changedOutboundQty);
             // 1.0 传递给主单
             stateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.ORDER_ADJUSTMENT, SrmPurchaseOutMachineContext.builder().returnId(returnItemDO.getReturnId()).build());
             // 2.0 传给订单项，同步当前的退货数量给订单项(暂不使用状态机)
             toOrderReturnCount(returnItemDO);
         }
-
-        srmPurchaseReturnItemMapper.updateById(returnItemDO.setOutboundStatus(to.getCode()));//更新状态
+        returnItemDO.setOutboundStatus(to.getCode());
+        srmPurchaseReturnItemMapper.updateById(returnItemDO);//更新状态
         //log
         log.debug("子项退货状态机触发({})事件：对象outItemId={}，状态 {} -> {}", event.getDesc(), returnItemDO.getId(), from.getDesc(), to.getDesc());
     }
@@ -87,7 +88,18 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
         //到货项 -> 订单项
         SrmPurchaseInItemDO inItemDO = srmPurchaseInItemMapper.selectById(returnItemDO.getInItemId());
         SrmPurchaseOrderItemDO srmPurchaseOrderItemDO = srmPurchaseOrderItemMapper.selectById(inItemDO.getOrderItemId());
-        srmPurchaseOrderService.updatePurchaseOrderReturnCount(srmPurchaseOrderItemDO.getOrderId(), Map.of(returnItemDO.getInItemId(), returnItemDO.getOutboundQty()));
-//        srmPurchaseOrderService.updatePurchaseOrderReturnCount();
+
+        // 获取已有的退货数量
+        BigDecimal existingReturnCount = srmPurchaseOrderItemDO.getReturnCount();
+        if (existingReturnCount == null) {
+            existingReturnCount = BigDecimal.ZERO;
+        }
+
+        // 计算新的退货数量 = 已有退货数量 + 当前出库数量
+        BigDecimal newReturnCount = existingReturnCount.add(returnItemDO.getOutboundQty());
+
+        // 更新订单退货数量
+        srmPurchaseOrderService.updatePurchaseOrderReturnCount(srmPurchaseOrderItemDO.getOrderId(),
+            Map.of(returnItemDO.getInItemId(), newReturnCount));
     }
 }

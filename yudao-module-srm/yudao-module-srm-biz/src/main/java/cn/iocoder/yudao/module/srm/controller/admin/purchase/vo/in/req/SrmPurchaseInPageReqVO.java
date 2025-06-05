@@ -68,7 +68,7 @@ public class SrmPurchaseInPageReqVO extends PageParam {
 
         // ========== 状态信息 ==========
         @Schema(description = "入库状态")
-        private Integer inStatus;
+        private Integer inboundStatus;
 
         @Schema(description = "审核状态")
         private Integer auditStatus;
@@ -124,7 +124,7 @@ public class SrmPurchaseInPageReqVO extends PageParam {
 
         // ========== 状态信息 ==========
         @Schema(description = "入库状态")
-        private Integer inStatus;
+        private Integer inboundStatus;
 
         @Schema(description = "付款状态")
         private Integer payStatus;
