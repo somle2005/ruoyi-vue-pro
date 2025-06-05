@@ -127,6 +127,11 @@ public class WmsInboundItemFlowServiceImpl implements WmsInboundItemFlowService 
         return inboundItemFlowMapper.selectByOutboundActionId(latestOutboundActionId);
     }
 
+    @Override
+    public List<WmsInboundItemFlowDO> selectByOutboundId(Long outboundId, Long productId) {
+        return inboundItemFlowMapper.selectByOutboundId(outboundId, productId);
+    }
+
     /**
      * 按 ID 集合查询 WmsInboundItemFlowDO
      */

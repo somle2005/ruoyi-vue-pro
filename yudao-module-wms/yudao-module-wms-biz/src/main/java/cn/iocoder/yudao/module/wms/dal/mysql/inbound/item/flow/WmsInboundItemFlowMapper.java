@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import org.apache.ibatis.annotations.Mapper;
+
 import java.util.List;
 
 /**
@@ -46,4 +47,20 @@ public interface WmsInboundItemFlowMapper extends BaseMapperX<WmsInboundItemFlow
     default List<WmsInboundItemFlowDO> selectByOutboundActionId(Long outboundActionId) {
         return selectList(new LambdaQueryWrapperX<WmsInboundItemFlowDO>().eq(WmsInboundItemFlowDO::getOutboundActionId, outboundActionId));
     }
-}
+
+
+    /**
+     * 按 inboundId 查询 WmsInboundItemFlowDO
+     *
+     * @param outboundId 出库单编号
+     * @param productId  产品编号
+     */
+    default List<WmsInboundItemFlowDO> selectByOutboundId(Long outboundId, Long productId) {
+        LambdaQueryWrapperX<WmsInboundItemFlowDO> wrapper = new LambdaQueryWrapperX<>();
+        wrapper.eq(WmsInboundItemFlowDO::getBillId, outboundId)
+            .eq(WmsInboundItemFlowDO::getProductId, productId)
+            .orderByDesc(WmsInboundItemFlowDO::getUpdateTime)
+            .last("LIMIT 1");
+        return selectList(wrapper);
+    }
+}

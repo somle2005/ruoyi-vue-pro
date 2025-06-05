@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInbo
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import jakarta.validation.Valid;
+
 import java.util.List;
 import java.util.Set;
 
@@ -61,6 +62,15 @@ public interface WmsInboundItemFlowService {
     void insert(WmsInboundItemFlowDO flowDO);
 
     List<WmsInboundItemFlowDO> selectByActionId(Long latestOutboundActionId);
+
+    /**
+     * 按 outboundId 查询 WmsInboundItemFlowDO
+     *
+     * @param outboundId 出库单 ID
+     * @param productId  产品 ID
+     * @return 入库单库存详情扣减列表
+     */
+    List<WmsInboundItemFlowDO> selectByOutboundId(Long outboundId, Long productId);
 
     /**
      * 按 ID 集合查询 WmsInboundItemFlowDO

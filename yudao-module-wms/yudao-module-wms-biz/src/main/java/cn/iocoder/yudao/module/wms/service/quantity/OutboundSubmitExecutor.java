@@ -139,13 +139,13 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         }
 
         // 检查入库批次库存是否充足
-        int totalOutboundAvailableQty=0;
-        for (WmsInboundItemDO inboundItemDO : itemsList) {
-            totalOutboundAvailableQty += inboundItemDO.getOutboundAvailableQty() == null ? 0 : inboundItemDO.getOutboundAvailableQty();
-        }
-        if(quantity>totalOutboundAvailableQty) {
-            throw exception(INBOUND_ITEM_OUTBOUND_AVAILABLE_QTY_NOT_ENOUGH);
-        }
+//        int totalOutboundAvailableQty=0;
+//        for (WmsInboundItemDO inboundItemDO : itemsList) {
+//            totalOutboundAvailableQty += inboundItemDO.getOutboundAvailableQty() == null ? 0 : inboundItemDO.getOutboundAvailableQty();
+//        }
+//        if(quantity>totalOutboundAvailableQty) {
+//            throw exception(INBOUND_ITEM_OUTBOUND_AVAILABLE_QTY_NOT_ENOUGH);
+//        }
 
 
         // 从多个有可用库存的入库批次，以先进先出的原则扣除

@@ -63,7 +63,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
             throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
         }
         // 可售量
-        stockWarehouseDO.setSellableQty(stockWarehouseDO.getSellableQty() - quantity);
+        stockWarehouseDO.setSellableQty(stockWarehouseDO.getSellableQty() - actualQty);
         if(stockWarehouseDO.getSellableQty()<0) {
             throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
         }
@@ -93,7 +93,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
         Map<Long,WmsInboundItemDO> map=StreamX.from(inboundItemsList).toMap(WmsInboundItemDO::getId);
         for (WmsInboundItemFlowDO flowDO : flowDOList) {
             WmsInboundItemDO inboundItemDO = map.get(flowDO.getInboundItemId());
-            inboundItemDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty()+quantity);
+            inboundItemDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty() + item.getActualQty());
 
             // 记录流水
             WmsInboundItemFlowDO newFlowDO=new WmsInboundItemFlowDO();

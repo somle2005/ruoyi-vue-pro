@@ -75,7 +75,8 @@ public class OutboundRejectExecutor extends OutboundExecutor {
     protected List<WmsInboundItemFlowDO> processInboundItem(WmsOutboundRespVO outboundRespVO, WmsOutboundItemRespVO item, Long companyId, Long deptId, Long warehouseId, Long binId, Long productId, Integer quantity, Long outboundId, Long outboundItemId) {
 
 
-        List<WmsInboundItemFlowDO> flowDOList = inboundItemFlowService.selectByActionId(outboundRespVO.getLatestOutboundActionId());
+//        List<WmsInboundItemFlowDO> flowDOList = inboundItemFlowService.selectByActionId(outboundRespVO.getLatestOutboundActionId());
+        List<WmsInboundItemFlowDO> flowDOList = inboundItemFlowService.selectByOutboundId(outboundId, productId);
 
         Long actionId= IdUtil.getSnowflakeNextId();
         outboundRespVO.setLatestOutboundActionId(actionId);

@@ -32,7 +32,7 @@ public interface WmsOutboundService {
      *
      * @param updateReqVO 更新信息
      */
-    WmsOutboundDO updateOutbound(@Valid WmsOutboundSaveReqVO updateReqVO);
+    void updateOutbound(@Valid WmsOutboundSaveReqVO updateReqVO);
 
     /**
      * 删除出库单

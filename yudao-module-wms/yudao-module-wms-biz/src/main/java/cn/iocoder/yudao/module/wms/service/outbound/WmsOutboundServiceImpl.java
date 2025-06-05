@@ -249,7 +249,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public WmsOutboundDO updateOutbound(WmsOutboundSaveReqVO updateReqVO) {
+    public void updateOutbound(WmsOutboundSaveReqVO updateReqVO) {
         // 校验存在
         WmsOutboundDO exists = validateOutboundExists(updateReqVO.getId());
         // 判断是否允许编辑
@@ -299,7 +299,6 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             }
         }
         // 返回
-        return outbound;
     }
 
     @Override

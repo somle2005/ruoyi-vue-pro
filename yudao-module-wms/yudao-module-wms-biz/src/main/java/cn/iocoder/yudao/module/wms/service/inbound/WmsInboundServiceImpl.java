@@ -390,8 +390,10 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         inboundDO.setInboundTime(LocalDateTime.now());
         inboundMapper.updateById(inboundDO);
         updateStockFlow(inboundRespVO, inboundDO);
-        //更新在途数
-        updateTransitQty(inboundDO, itemList);
+        //针对外部生成单据，更新在途数
+        if (inboundDO.getUpstreamType() != null) {
+            updateTransitQty(inboundDO, itemList);
+        }
 
     }
 
