@@ -124,12 +124,12 @@ public class SrmPurchaseOrderItemDO extends TenantBaseDO {
     private BigDecimal payPrice;
     // ========== 采购入库 ==========
     /**
-     * 采购入库数量
+     * 入库数量
      */
     private BigDecimal inboundClosedQty;
     // ========== 采购退货（出库）） ==========
     /**
-     * 采购退货数量
+     * 退货数量
      */
     private BigDecimal returnCount;
     // ========== 其他 ==========

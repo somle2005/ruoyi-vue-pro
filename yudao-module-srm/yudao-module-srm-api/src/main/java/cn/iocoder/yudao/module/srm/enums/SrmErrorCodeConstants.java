@@ -30,7 +30,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_ORDER_NOT_APPROVE = new ErrorCode(1_030_101_006, "采购订单({})未审核，无法操作");
     ErrorCode PURCHASE_ORDER_ITEM_IN_FAIL_PRODUCT_EXCEED = new ErrorCode(1_030_101_007, "采购订单项({})超过最大允许到货数量({})");
     ErrorCode PURCHASE_ORDER_PROCESS_FAIL_EXISTS_IN = new ErrorCode(1_030_101_008, "反审核失败，已存在对应的采购到货单");
-    ErrorCode PURCHASE_ORDER_ITEM_RETURN_FAIL_IN_EXCEED = new ErrorCode(1_030_101_009, "采购订单项({})超过最大允许退货数量({})");
+    ErrorCode PURCHASE_ORDER_ITEM_RETURN_FAIL_IN_EXCEED = new ErrorCode(1_030_101_009, "采购订单项({}),产品({})超过最大允许退货数量({})");
     ErrorCode PURCHASE_ORDER_PROCESS_FAIL_EXISTS_RETURN = new ErrorCode(1_030_101_010, "反审核失败，已存在对应的采购退货单");
     ErrorCode PURCHASE_ORDER_NO_OUT_OF_BOUNDS = new ErrorCode(1_030_101_011, "采购订单号编码大于999999,生成失败");
     ErrorCode PURCHASE_ORDER_CODE_DUPLICATE = new ErrorCode(1_030_101_012, "采购订单编号({})已存在");
@@ -93,7 +93,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_RETURN_NO_OUT_OF_BOUNDS = new ErrorCode(1_030_103_009, "采购退货单号编码大于999999,生成失败");
     ErrorCode PURCHASE_RETURN_PROCESS_FAIL_PAYMENT_STATUS = new ErrorCode(1_030_103_010, "已审核的退货单才可以退款");
     ErrorCode PURCHASE_RETURN_IN_ITEM_IN_ID_NOT_SAME = new ErrorCode(1_030_103_011, "退货项中存在多个入库单的入库项");
-    ErrorCode PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON = new ErrorCode(1_030_103_012, "反审核失败，退货单已生成出库单({}),不处于草稿状态,无法撤销");
+    ErrorCode PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON = new ErrorCode(1_030_103_012, "反审核失败，退货单已生成出库单({}),非草稿状态,无法撤销");
     ErrorCode PURCHASE_RETURN_PROCESS_FAIL_WMS_OUTBOUND_EXISTS = new ErrorCode(1_030_103_013, "创建出库单失败，原因:{}");
     //PURCHASE_RETURN_WAREHOUSE_NOT_EXISTS
     ErrorCode PURCHASE_RETURN_PROCESS_FAIL_WAREHOUSE_ID_DONT_EXISTS = new ErrorCode(1_030_103_014, "创建出库单需要退货明细中仓库ID不为空");

@@ -9,7 +9,6 @@ import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import cn.iocoder.yudao.module.srm.config.machine.SrmOrderInCountContext;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnSaveReqVO;
@@ -20,7 +19,6 @@ import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmReturnStatus;
-import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnBO;
@@ -49,7 +47,8 @@ import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.
 import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.srm.enums.SrmEventEnum.RETURN_CANCEL;
 import static cn.iocoder.yudao.module.srm.enums.SrmEventEnum.RETURN_COMPLETE;
-import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
+import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN_AUDIT_STATE_MACHINE_NAME;
+import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME;
 import static jodd.util.StringUtil.truncate;
 
 /**
@@ -73,8 +72,6 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     private final ErpProductApi erpProductApi;
     private final SrmSupplierService supplierService;
 
-    @Resource(name = PURCHASE_ORDER_ITEM_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmOrderInCountContext> orderItemStorageMachine;
     @Resource(name = PURCHASE_RETURN_AUDIT_STATE_MACHINE_NAME)
     StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseReturnAuditReqVO> auditStatusMachine;
     @Resource(name = PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME)
@@ -217,14 +214,14 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         }
     }
 
-    private void linkSlaveStatus(List<SrmPurchaseReturnItemDO> items) {
-        //订单入库状态机
-        for (SrmPurchaseReturnItemDO item : items) {
-            Optional.ofNullable(inItemMapper.selectById(item.getInItemId())).ifPresent(o -> {
-                syncCountLogic(o, item.getQty());
-            });
-        }
-    }
+//    private void linkSlaveStatus(List<SrmPurchaseReturnItemDO> items) {
+//        //订单入库状态机
+//        for (SrmPurchaseReturnItemDO item : items) {
+//            Optional.ofNullable(inItemMapper.selectById(item.getInItemId())).ifPresent(o -> {
+//                syncCountLogic(o, item.getQty());
+//            });
+//        }
+//    }
 
     private void initMasterStatus(SrmPurchaseReturnDO purchaseReturn) {
         auditStatusMachine.fireEvent(SrmAuditStatus.DRAFT, SrmEventEnum.AUDIT_INIT, SrmPurchaseReturnAuditReqVO.builder().ids(Collections.singletonList(purchaseReturn.getId())).build());
@@ -434,19 +431,6 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         }
     }
 
-    /**
-     * 联动订单项
-     *
-     * @param inItemDO SrmPurchaseInItemDO
-     * @param number   BigDecimal
-     */
-    private void syncCountLogic(SrmPurchaseInItemDO inItemDO, BigDecimal number) {
-        Long orderItemId = inItemDO.getOrderItemId();
-        SrmPurchaseOrderItemDO orderItemDO = orderItemMapper.selectById(orderItemId);
-
-        orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInboundStatus()), SrmEventEnum.STOCK_ADJUSTMENT, SrmOrderInCountContext.builder().orderItemId(orderItemId).returnCount(number).build());
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseReturn(List<Long> ids) {
@@ -457,11 +441,6 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         //1. 校验已审核
         purchaseReturns.forEach(purchaseReturn -> ThrowUtil.ifThrow(validAudit(purchaseReturn.getId()), PURCHASE_RETURN_DELETE_FAIL_APPROVE));
 
-        //1.2 回滚数据状态
-        for (SrmPurchaseReturnDO purchaseReturn : purchaseReturns) {
-            List<SrmPurchaseReturnItemDO> itemDOS = purchaseReturnItemMapper.selectListByReturnId(purchaseReturn.getId());
-            rollBackStatus(itemDOS);
-        }
         // 2. 遍历删除，并记录操作日志
         purchaseReturns.forEach(purchaseReturn -> {
             // 2.1 删除订单
@@ -553,7 +532,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     /**
-     * 作废采购退货单关联的WMS出库单
+     * 状态判断+作废采购退货单关联的WMS出库单
      *
      * @param returnId 采购退货单ID
      */
@@ -588,10 +567,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                 if (req.getPass()) {
                     log.debug("退货单通过审核，ID: {}", purchaseReturnDO.getId());
                     auditStatusMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
-                    //联动
-                    linkSlaveStatus(returnItemDOS);
-
-                    //创建 WMS 出库单
+                    //创建 WMS 出库单(草稿)
                     try {
                         createWmsOutbound(purchaseReturnDO, returnItemDOS);
                     } catch (Exception e) {
@@ -602,23 +578,14 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                     //审核不通过
                     log.debug("退货单拒绝审核，ID: {}", purchaseReturnDO.getId());
                     auditStatusMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, req);
-                    //联动
-                    rollBackStatus(returnItemDOS);
                 }
             } else {
                 // 反审核
                 log.debug("退货单撤回审核，ID: {}", purchaseReturnDO.getId());
                 auditStatusMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, req);
-                // 作废WMS出库单
+                // 审核状态判断+作废WMS出库单
                 abandonWmsOutbound(purchaseReturnDO.getId());
             }
-        });
-    }
-
-
-    private void rollBackStatus(List<SrmPurchaseReturnItemDO> returnItemDOS) {
-        Optional.ofNullable(returnItemDOS).ifPresent(item -> {
-            item.forEach(itemDO -> syncCountLogic(inItemMapper.selectById(itemDO.getInItemId()), itemDO.getQty().negate()));
         });
     }
 

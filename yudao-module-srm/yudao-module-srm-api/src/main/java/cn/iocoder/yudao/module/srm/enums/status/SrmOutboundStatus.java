@@ -14,7 +14,7 @@ import java.util.Map;
 public enum SrmOutboundStatus implements ArrayValuable<Integer> {
     NONE_OUTBOUND(0, "未出库"),
     PARTIALLY_OUTBOUND(1, "部分出库"),
-    ALL_OUTBOUND(2, "已出库");
+    ALL_OUTBOUND(2, "全部出库");
 
     public static final int[] ARRAYS = Arrays.stream(values()).mapToInt(SrmOutboundStatus::getCode).toArray();
     private static final Map<Integer, SrmOutboundStatus> STATUS_MAP = new HashMap<>();

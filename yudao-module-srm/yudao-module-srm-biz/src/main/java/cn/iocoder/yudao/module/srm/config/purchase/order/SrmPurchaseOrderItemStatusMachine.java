@@ -107,7 +107,7 @@ public class SrmPurchaseOrderItemStatusMachine {
         // 手动关闭
         builder.externalTransition().from(OPEN).to(MANUAL_CLOSED).on(SrmEventEnum.MANUAL_CLOSE).perform(OrderItemOffActionImpl);
         //自动关闭
-        builder.externalTransition().from(OPEN).to(CLOSED).on(SrmEventEnum.AUTO_CLOSE).perform(OrderItemOffActionImpl);
+        builder.externalTransitions().fromAmong(OPEN, CLOSED).to(CLOSED).on(SrmEventEnum.AUTO_CLOSE).perform(OrderItemOffActionImpl);
         //撤销关闭
         builder.externalTransitions().fromAmong(MANUAL_CLOSED, CLOSED, OPEN).to(OPEN).on(SrmEventEnum.CANCEL_DELETE).perform(OrderItemOffActionImpl);
         //错误回调函数

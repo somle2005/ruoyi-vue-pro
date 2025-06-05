@@ -508,20 +508,24 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     public void updatePurchaseOrderReturnCount(Long orderId, Map<Long, BigDecimal> returnCountMap) {
         List<SrmPurchaseOrderItemDO> orderItems = purchaseOrderItemMapper.selectListByOrderId(orderId);
-        // 1. 更新每个采购订单项
-        orderItems.forEach(item -> {
-            BigDecimal returnCount = returnCountMap.getOrDefault(item.getId(), BigDecimal.ZERO);
-            if (item.getReturnCount().equals(returnCount)) {
-                return;
+        // 1. 更新对应的采购订单项
+        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = orderItems.stream().collect(Collectors.toMap(SrmPurchaseOrderItemDO::getId, Function.identity()));
+        returnCountMap.keySet().forEach(itemId -> {
+            SrmPurchaseOrderItemDO item = orderItemMap.get(itemId);
+            if (item != null) {
+                BigDecimal lastedReturnCount = returnCountMap.getOrDefault(itemId, BigDecimal.ZERO);
+                if (item.getReturnCount().equals(lastedReturnCount)) {
+                    return;
+                }
+                if (lastedReturnCount.compareTo(item.getInboundClosedQty()) > 0) {
+                    throw exception(PURCHASE_ORDER_ITEM_RETURN_FAIL_IN_EXCEED, item.getId(), erpProductApi.getProductDto(item.getProductId()).getName(), item.getInboundClosedQty());
+                }
+                purchaseOrderItemMapper.updateById(new SrmPurchaseOrderItemDO().setId(item.getId()).setReturnCount(lastedReturnCount));
             }
-            if (returnCount.compareTo(item.getInboundClosedQty()) > 0) {
-                throw exception(PURCHASE_ORDER_ITEM_RETURN_FAIL_IN_EXCEED, erpProductApi.getProductDto(item.getProductId()).getName(),
-                    item.getInboundClosedQty());
-            }
-            purchaseOrderItemMapper.updateById(new SrmPurchaseOrderItemDO().setId(item.getId()).setReturnCount(returnCount));
         });
+
         // 2. 更新采购订单
-        BigDecimal totalReturnCount = getSumValue(returnCountMap.values(), value -> value, BigDecimal::add, BigDecimal.ZERO);
+        BigDecimal totalReturnCount = getSumValue(orderItems.stream().map(SrmPurchaseOrderItemDO::getReturnCount).toList(), value -> value, BigDecimal::add, BigDecimal.ZERO);
         purchaseOrderMapper.updateById(new SrmPurchaseOrderDO().setId(orderId).setTotalReturnCount(totalReturnCount));
     }
 

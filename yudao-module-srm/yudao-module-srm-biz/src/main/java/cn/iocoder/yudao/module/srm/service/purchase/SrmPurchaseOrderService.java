@@ -53,7 +53,7 @@ public interface SrmPurchaseOrderService {
      * 更新采购订单的退货数量
      *
      * @param orderId        编号
-     * @param returnCountMap 退货数量 Map：key 采购订单项编号；value 退货数量
+     * @param returnCountMap 退货数量 Map：key 采购订单项编号；value 退货数量(最终结果)
      */
     void updatePurchaseOrderReturnCount(Long orderId, Map<Long, BigDecimal> returnCountMap);
 

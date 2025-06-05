@@ -53,7 +53,7 @@ public class ReturnAuditActionImpl implements Action<SrmAuditStatus, SrmEventEnu
             //
             data.setAuditStatus(to.getCode());
             srmPurchaseReturnMapper.updateById(data);
-            log.debug("审核状态机-退货-触发({})事件：将对象{},由状态 {}->{}", event.getDesc(), JSONUtil.toJsonStr(data), from.getDesc(), to.getDesc());
+            log.debug("采购退货状态机-审核-触发({})事件：将对象{},由状态 {}->{}", event.getDesc(), JSONUtil.toJsonStr(data), from.getDesc(), to.getDesc());
         });
 
     }
