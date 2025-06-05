@@ -300,8 +300,7 @@ public class WmsInboundItemController {
         PageResult<WmsInboundItemQueryDO> doPageResult = inboundItemService.getInboundItemPage(pageReqVO);
         List<WmsInboundItemQueryDO> distinct = StreamX.from(doPageResult.getList()).distinct(WmsInboundItemQueryDO::getId);
         Map<Long, WmsInboundItemQueryDO> distinctMap = StreamX.from(distinct).toMap(WmsInboundItemQueryDO::getId);
-        List<WmsInboundItemDO> inboundItemDOS = inboundItemService.selectByInboundId(pageReqVO.getInboundId());
-        List<WmsInboundItemRespVO> inboundItemVOS = BeanUtils.toBean(inboundItemDOS, WmsInboundItemRespVO.class);
+        List<WmsInboundItemRespVO> inboundItemVOS = BeanUtils.toBean(distinct, WmsInboundItemRespVO.class);
         // 装配
         inboundItemService.assembleDept(inboundItemVOS);
         inboundItemService.assembleInbound(inboundItemVOS);
@@ -314,7 +313,7 @@ public class WmsInboundItemController {
         inboundItemService.assembleWarehouse(inboundItemVOS);
         inboundItemService.assembleCompany(inboundItemVOS);
         // 转换
-        List<WmsInboundItemExportVO> exVOList = BeanUtils.toBean(inboundItemVOS, WmsInboundItemExportVO.class);
+        List<WmsInboundItemExportVO> exVOList = BeanUtils.toBean(distinct, WmsInboundItemExportVO.class);
         String inboundCode = null;
         // 扁平化
         Map<Long, WmsInboundItemExportVO> exportMap = StreamX.from(exVOList).toMap(WmsInboundItemExportVO::getId);

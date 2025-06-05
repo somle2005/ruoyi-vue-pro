@@ -66,10 +66,9 @@ public class WmsStockBinMoveServiceImpl implements WmsStockBinMoveService {
     @Override
     @Transactional(rollbackFor = Exception.class)
     public WmsStockBinMoveDO createStockBinMove(WmsStockBinMoveSaveReqVO createReqVO) {
-        WmsStockBinMoveDO stockBinMoveDO = lockRedisDAO.lockByWarehouse(createReqVO.getWarehouseId(), () -> {
+        return lockRedisDAO.lockByWarehouse(createReqVO.getWarehouseId(), () -> {
             return createStockBinMoveInLock(createReqVO);
         });
-        return stockBinMoveDO;
     }
 
     private WmsStockBinMoveDO createStockBinMoveInLock(WmsStockBinMoveSaveReqVO createReqVO) {

@@ -34,23 +34,23 @@ public class OutboundAgreeTransitionHandler extends BaseOutboundTransitionHandle
     @Override
     public void perform(Integer from, Integer to, WmsOutboundAuditStatus.Event event, TransitionContext<WmsOutboundDO> context) {
         super.perform(from, to, event, context);
-        // 调整库存
-//        OutboundContext outboundContext = new OutboundContext();
-//        outboundContext.setOutboundId(context.data().getId());
-//        outboundSubmitExecutor.execute(outboundContext);
-        //
         WmsOutboundRespVO outboundVO = outboundService.getOutboundWithItemList(context.data().getId());
+
+        if (outboundVO.getUpstreamType() == null) {
+            return;
+        }
         //更新SRM退货状态机
-        if (outboundVO.getUpstreamType() != null && outboundVO.getUpstreamType().equals(BillType.SRM_PURCHASE_RETURN.getValue())) {
+        if (outboundVO.getUpstreamType().equals(BillType.SRM_PURCHASE_RETURN.getValue())) {
             SrmReturnSaveReqDTO srmReturnSaveReqDTO = BeanUtils.toBean(outboundVO, SrmReturnSaveReqDTO.class);
             srmReturnSaveReqDTO.setItems(BeanUtils.toBean(outboundVO.getItemList(), SrmReturnSaveItemReqDTO.class));
             srmPurchaseReturnApi.updatePurchaseReturnItemQty(srmReturnSaveReqDTO);
         }
         //更新TMS调拨单状态机
-        if (outboundVO.getUpstreamType() != null && outboundVO.getUpstreamType().equals(BillType.TMS_TRANSFER.getValue())) {
+        if (outboundVO.getUpstreamType().equals(BillType.TMS_TRANSFER.getValue())) {
             TmsOutboundReqDTO tmsOutboundReqDTO = BeanUtils.toBean(outboundVO, TmsOutboundReqDTO.class);
             tmsOutboundReqDTO.setItems(BeanUtils.toBean(outboundVO.getItemList(), TmsOutboundItemReqDTO.class));
             tmsTransferApi.afterOutboundAudit(tmsOutboundReqDTO);
         }
+
     }
 }
