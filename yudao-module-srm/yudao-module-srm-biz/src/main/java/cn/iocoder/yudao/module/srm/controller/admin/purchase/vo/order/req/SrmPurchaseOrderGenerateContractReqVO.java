@@ -48,7 +48,8 @@ public class SrmPurchaseOrderGenerateContractReqVO {
     private Long partyBId;
 
     @Schema(description = "付款条款", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotBlank(message = "付款条款不能为空")
+    @NotBlank(message = "付款条款不能是空格字符串")
+    @NotNull(message = "付款条款不能为空")
     @DiffLogField(name = "付款条款")
     private String paymentTerms;
 }

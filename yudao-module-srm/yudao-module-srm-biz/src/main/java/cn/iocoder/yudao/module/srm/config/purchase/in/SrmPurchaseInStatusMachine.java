@@ -45,8 +45,7 @@ public class SrmPurchaseInStatusMachine {
         builder.internalTransition().within(DRAFT).on(SrmEventEnum.AUDIT_INIT).perform(inAuditActionImpl);
 
         // 提交审核
-        builder.externalTransitions().fromAmong(DRAFT, REVOKED, REJECTED).to(PENDING_REVIEW)
-            .on(SrmEventEnum.SUBMIT_FOR_REVIEW).perform(inAuditActionImpl);
+        builder.externalTransitions().fromAmong(DRAFT, REVOKED, REJECTED).to(PENDING_REVIEW).on(SrmEventEnum.SUBMIT_FOR_REVIEW).perform(inAuditActionImpl);
 
         // 审核通过
         builder.externalTransition().from(PENDING_REVIEW).to(APPROVED).on(SrmEventEnum.AGREE).perform(inAuditActionImpl);
@@ -68,8 +67,7 @@ public class SrmPurchaseInStatusMachine {
         //初始化
         builder.internalTransition().within(NONE_PAYMENT).on(SrmEventEnum.PAYMENT_INIT).perform(inPayActionImpl);
         //付款金额调整
-        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT, ALL_PAYMENT, PAYMENT_EXCEPTION).to(PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT)
-            .perform(inPayActionImpl);
+        builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT, ALL_PAYMENT, PAYMENT_EXCEPTION).to(PARTIALLY_PAYMENT).on(SrmEventEnum.PAYMENT_ADJUSTMENT).perform(inPayActionImpl);
 
         //付款失败事件
         builder.externalTransitions().fromAmong(NONE_PAYMENT, PARTIALLY_PAYMENT).to(PAYMENT_EXCEPTION).on(SrmEventEnum.PAYMENT_EXCEPTION)
@@ -93,6 +91,7 @@ public class SrmPurchaseInStatusMachine {
         //入库调整
         builder.externalTransitions().fromAmong(SrmStorageStatus.NONE_IN_STORAGE, SrmStorageStatus.PARTIALLY_IN_STORAGE, SrmStorageStatus.ALL_IN_STORAGE)
                 .to(SrmStorageStatus.PARTIALLY_IN_STORAGE).on(SrmEventEnum.STOCK_ADJUSTMENT).perform(inStorageActionImpl);
+
         builder.setFailCallback(baseFailCallbackImpl);
         return builder.build(SrmStateMachines.PURCHASE_IN_STORAGE_STATE_MACHINE);
     }

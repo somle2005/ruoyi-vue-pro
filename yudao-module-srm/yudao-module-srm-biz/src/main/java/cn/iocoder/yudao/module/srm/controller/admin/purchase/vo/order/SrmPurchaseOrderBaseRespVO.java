@@ -106,11 +106,11 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
     private BigDecimal totalProductPrice;
 
     @Schema(description = "合计税额，单位：元")
-    private BigDecimal totalTaxPrice;
+    private BigDecimal totalGrossPrice;
 
     // ========== 入库和退货信息 ==========
     @Schema(description = "订单采购入库数量")
-    private BigDecimal totalInCount;
+    private BigDecimal totalInboundCount;
 
     @Schema(description = "订单采购退货数量")
     private BigDecimal totalReturnCount;
@@ -123,7 +123,7 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
     private Long accountId;
 
     @Schema(description = "付款条款")
-    private String paymentTerms;
+    private String paymentTermsId;
 
     @Schema(description = "采购主体编号")
     private Long purchaseCompanyId;
@@ -139,10 +139,10 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
     private String fileUrl;
 
     @Schema(description = "装运港")
-    private String portOfLoading;
+    private String fromPortName;
 
     @Schema(description = "目的港")
-    private String portOfDischarge;
+    private String toPortName;
 
     // ========== 内部类：订单项 ==========
     @Data
@@ -196,13 +196,13 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
         private BigDecimal grossPrice;
 
         @Schema(description = "税率，百分比")
-        private BigDecimal taxPercent;
+        private BigDecimal taxRate;
 
         @Schema(description = "税额，单位：元")
-        private BigDecimal taxPrice;
+        private BigDecimal tax;
 
         @Schema(description = "价税合计")
-        private BigDecimal allAmount;
+        private BigDecimal grossTotalPrice;
 
         @Schema(description = "已付款金额")
         private BigDecimal payPrice;

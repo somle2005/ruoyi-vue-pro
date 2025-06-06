@@ -89,7 +89,7 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
      */
     private void toOrderReturnCount(SrmPurchaseReturnItemDO returnItemDO) {
         //到货项 -> 订单项
-        SrmPurchaseInItemDO inItemDO = srmPurchaseInItemMapper.selectById(returnItemDO.getInItemId());
+        SrmPurchaseInItemDO inItemDO = srmPurchaseInItemMapper.selectById(returnItemDO.getArriveItemId());
         SrmPurchaseOrderItemDO srmPurchaseOrderItemDO = srmPurchaseOrderItemMapper.selectById(inItemDO.getOrderItemId());
 
         // 获取已有的退货数量
@@ -102,6 +102,6 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
         BigDecimal newReturnCount = existingReturnCount.add(returnItemDO.getOutboundQty());
 
         // 更新订单退货数量
-        srmPurchaseOrderService.updatePurchaseOrderReturnCount(srmPurchaseOrderItemDO.getOrderId(), Map.of(returnItemDO.getInItemId(), newReturnCount));
+        srmPurchaseOrderService.updatePurchaseOrderReturnCount(srmPurchaseOrderItemDO.getOrderId(), Map.of(returnItemDO.getArriveItemId(), newReturnCount));
     }
 }

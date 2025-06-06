@@ -68,7 +68,7 @@ public class SrmSupplierRespVO {
     @Schema(description = "税率", example = "10")
     @ExcelProperty(value = "税率", index = 11)
     @NumberFormat(pattern = "#.##%")
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
 
     @Schema(description = "开户行", example = "张三")
     @ExcelProperty(value = "开户行", index = 12)
@@ -87,9 +87,9 @@ public class SrmSupplierRespVO {
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime createTime;
 
-    @Schema(description = "付款条款")
-    @ExcelProperty(value = "付款条款", index = 16)
-    private String paymentTerms;
+    @Schema(description = "付款条款ID")
+    @ExcelProperty(value = "付款条款ID", index = 16)
+    private String paymentTermsId;
 
     @Schema(description = "送达地址")
     @ExcelProperty(value = "送达地址", index = 17)

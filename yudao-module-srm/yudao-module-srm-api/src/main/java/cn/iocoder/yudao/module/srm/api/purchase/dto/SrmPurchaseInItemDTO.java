@@ -93,12 +93,12 @@ public class SrmPurchaseInItemDTO {
     /**
      * 合计税额
      */
-    private BigDecimal totalTaxPrice;
+    private BigDecimal totalGrossPrice;
 
     /**
      * 税率，百分比
      */
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
 
     /**
      * 税额，单位：元
@@ -113,7 +113,7 @@ public class SrmPurchaseInItemDTO {
     /**
      * 价税合计
      */
-    private BigDecimal allAmount;
+    private BigDecimal grossTotalPrice;
 
     /**
      * 备注

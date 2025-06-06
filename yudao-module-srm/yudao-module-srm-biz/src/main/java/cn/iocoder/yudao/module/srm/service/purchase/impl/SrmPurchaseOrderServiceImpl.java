@@ -355,8 +355,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     private void calculateTotalPrice(SrmPurchaseOrderDO purchaseOrder, List<SrmPurchaseOrderItemDO> purchaseOrderItems) {
         purchaseOrder.setTotalCount(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getQty, BigDecimal::add));
         purchaseOrder.setTotalProductPrice(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseOrder.setTotalTaxPrice(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getTaxPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseOrder.setTotalPrice(purchaseOrder.getTotalProductPrice().add(purchaseOrder.getTotalTaxPrice()));
+        purchaseOrder.setTotalGrossPrice(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getTax, BigDecimal::add, BigDecimal.ZERO));
+        purchaseOrder.setTotalPrice(purchaseOrder.getTotalProductPrice().add(purchaseOrder.getTotalGrossPrice()));
         // 计算优惠价格
         if (purchaseOrder.getDiscountPercent() == null) {
             purchaseOrder.setDiscountPercent(BigDecimal.ZERO);
@@ -396,8 +396,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             if (item.getTotalPrice() == null) {
                 return;
             }
-            if (item.getTaxPercent() != null) {
-                item.setTaxPrice(MoneyUtils.priceMultiplyPercent(item.getTotalPrice(), item.getTaxPercent()));
+            if (item.getTaxRate() != null) {
+                item.setTax(MoneyUtils.priceMultiplyPercent(item.getTotalPrice(), item.getTaxRate()));
             }
 
             // 设置产品相关信息
@@ -501,8 +501,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             purchaseOrderItemMapper.updateById(new SrmPurchaseOrderItemDO().setId(item.getId()).setInboundClosedQty(inCount));
         });
         // 2. 更新采购订单
-        BigDecimal totalInCount = getSumValue(inCountMap.values(), value -> value, BigDecimal::add, BigDecimal.ZERO);
-        purchaseOrderMapper.updateById(new SrmPurchaseOrderDO().setId(itemId).setTotalInCount(totalInCount));
+        BigDecimal totalInboundCount = getSumValue(inCountMap.values(), value -> value, BigDecimal::add, BigDecimal.ZERO);
+        purchaseOrderMapper.updateById(new SrmPurchaseOrderDO().setId(itemId).setTotalInboundCount(totalInboundCount));
     }
 
     @Override

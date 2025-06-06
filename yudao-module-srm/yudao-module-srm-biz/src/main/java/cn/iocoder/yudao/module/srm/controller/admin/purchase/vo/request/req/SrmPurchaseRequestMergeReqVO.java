@@ -43,13 +43,13 @@ public class SrmPurchaseRequestMergeReqVO {
     private String currencyName;
 
     @Schema(description = "付款条款")
-    private String paymentTerms;
+    private String paymentTermsId;
 
     @Schema(description = "装运港")
-    private String portOfLoading;
+    private String fromPortName;
 
     @Schema(description = "目的港")
-    private String portOfDischarge;
+    private String toPortName;
 
     @Schema(description = "结算账户编号")
     private Long accountId;
@@ -103,7 +103,7 @@ public class SrmPurchaseRequestMergeReqVO {
 
         @Schema(description = "价税合计")
         @DecimalMin(value = "0.0", message = "价税合计必须大于0")
-        private BigDecimal allAmount;
+        private BigDecimal grossTotalPrice;
 
         @Schema(description = "参考单价")
         @DecimalMin(value = "0.0", message = "参考单价必须大于0")
@@ -112,10 +112,10 @@ public class SrmPurchaseRequestMergeReqVO {
         //是否计算得到？待确认
         @Schema(description = "税额，单位：元")
         @DecimalMin(value = "0.0", message = "税额必须大于0")
-        private BigDecimal taxPrice;
+        private BigDecimal tax;
 
         @Schema(description = "增值税税率，百分比")
-        private BigDecimal taxPercent;
+        private BigDecimal taxRate;
 
         @Schema(description = "交货日期(交期)")
         @NotNull(message = "交货日期不能为空")

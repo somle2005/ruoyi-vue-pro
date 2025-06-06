@@ -62,7 +62,7 @@ public class SrmSupplierDTO {
     /**
      * 税率
      */
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
     /**
      * 开户行
      */
@@ -76,9 +76,9 @@ public class SrmSupplierDTO {
      */
     private String bankAddress;
     /**
-     * 付款条款
+     * 付款条款ID
      */
-    private String paymentTerms;
+    private String paymentTermsId;
 
     /**
      * 送达地址

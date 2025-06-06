@@ -139,12 +139,12 @@ public class SrmPurchaseInSaveReqVO {
 
         @Schema(description = "税率，百分比")
         @DiffLogField(name = "税率")
-        private BigDecimal taxPercent;
+        private BigDecimal taxRate;
 
-        @Schema(description = "税价合计，单位：元。 taxPrice = totalPrice * taxPercent", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "税价合计，单位：元。 tax = totalPrice * taxRate", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "税价合计不能为空")
         @DiffLogField(name = "税价合计")
-        private BigDecimal taxPrice;
+        private BigDecimal tax;
 
         @Schema(description = "含税单价")
         @DiffLogField(name = "含税单价")
@@ -152,17 +152,17 @@ public class SrmPurchaseInSaveReqVO {
 
         @Schema(description = "价税合计")
         @DiffLogField(name = "价税合计")
-        private BigDecimal allAmount;
+        private BigDecimal grossTotalPrice;
 
         @Schema(description = "合计产品价格，单位：元", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "合计产品价格不能为空")
         @DiffLogField(name = "合计产品价格")
         private BigDecimal totalProductPrice;
 
-        @Schema(description = "合计税价，单位：元。 totalTaxPrice = totalPrice * taxPercent", requiredMode = Schema.RequiredMode.REQUIRED)
+        @Schema(description = "合计税价，单位：元。 totalGrossPrice = totalPrice * taxRate", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "合计税价不能为空")
         @DiffLogField(name = "合计税价")
-        private BigDecimal totalTaxPrice;
+        private BigDecimal totalGrossPrice;
 
         @Schema(description = "已付款金额")
         @DiffLogField(name = "已付款金额")

@@ -58,7 +58,7 @@ public class SrmPurchaseOrderItemDTO {
     /**
      * 税率
      */
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
 
     /**
      * 税额
@@ -73,7 +73,7 @@ public class SrmPurchaseOrderItemDTO {
     /**
      * 价税合计
      */
-    private BigDecimal allAmount;
+    private BigDecimal grossTotalPrice;
 
     /**
      * 交货日期

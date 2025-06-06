@@ -31,8 +31,8 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             vo.setItemQuery(new SrmPurchaseReturnPageReqVO.ItemQuery());
         }
         return new MPJLambdaWrapperX<SrmPurchaseReturnItemDO>().selectAll(SrmPurchaseReturnItemDO.class)
-            .eqIfPresent(SrmPurchaseReturnItemDO::getInItemId, vo.getItemQuery().getInItemId()) // 入库项id
-            .likeIfPresent(SrmPurchaseReturnItemDO::getInCode, vo.getItemQuery().getInCode()) // 入库单code
+            .eqIfPresent(SrmPurchaseReturnItemDO::getArriveItemId, vo.getItemQuery().getArriveItemId()) // 入库项id
+            .likeIfPresent(SrmPurchaseReturnItemDO::getArriveCode, vo.getItemQuery().getArriveCode()) // 入库单code
             .eqIfPresent(SrmPurchaseReturnItemDO::getWarehouseId, vo.getItemQuery().getWarehouseId()) // 仓库编号
             .eqIfPresent(SrmPurchaseReturnItemDO::getProductId, vo.getItemQuery().getProductId()) // 产品编号
             .eqIfPresent(SrmPurchaseReturnItemDO::getProductUnitId, vo.getItemQuery().getProductUnitId()) // 产品单位单位
@@ -40,8 +40,8 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .likeIfPresent(SrmPurchaseReturnItemDO::getProductUnitName, vo.getItemQuery().getProductUnitName()) // 产品单位名称
             .eqIfPresent(SrmPurchaseReturnItemDO::getQty, vo.getItemQuery().getQty()) // 数量
             .eqIfPresent(SrmPurchaseReturnItemDO::getTotalPrice, vo.getItemQuery().getTotalPrice()) // 总价
-            .eqIfPresent(SrmPurchaseReturnItemDO::getTaxPercent, vo.getItemQuery().getTaxPercent()) // 税率
-            .eqIfPresent(SrmPurchaseReturnItemDO::getTaxPrice, vo.getItemQuery().getTaxPrice()) // 税额
+            .eqIfPresent(SrmPurchaseReturnItemDO::getTaxRate, vo.getItemQuery().getTaxRate()) // 税率
+            .eqIfPresent(SrmPurchaseReturnItemDO::getTax, vo.getItemQuery().getTax()) // 税额
             .eqIfPresent(SrmPurchaseReturnItemDO::getGrossPrice, vo.getItemQuery().getGrossPrice()) // 含税单价
             .likeIfPresent(SrmPurchaseReturnItemDO::getRemark, vo.getItemQuery().getRemark()) // 备注
             .likeIfPresent(SrmPurchaseReturnItemDO::getContainerRate, vo.getItemQuery().getContainerRate()) // 箱率
@@ -73,14 +73,14 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .eqIfPresent(SrmPurchaseReturnDO::getAccountId, vo.getMainQuery().getAccountId()) // 结算账户编号
             .betweenIfPresent(SrmPurchaseReturnDO::getReturnTime, vo.getMainQuery().getReturnTime()) // 退货时间
             .eqIfPresent(SrmPurchaseReturnDO::getCurrencyId, vo.getMainQuery().getCurrencyId()) // 币种编号
-            .eqIfPresent(SrmPurchaseReturnDO::getAllAmount, vo.getMainQuery().getAllAmount()) // 价税合计
+            .eqIfPresent(SrmPurchaseReturnDO::getGrossTotalPrice, vo.getMainQuery().getGrossTotalPrice()) // 价税合计
             .eqIfPresent(SrmPurchaseReturnDO::getTotalCount, vo.getMainQuery().getTotalCount()) // 合计数量
             .eqIfPresent(SrmPurchaseReturnDO::getTotalPrice, vo.getMainQuery().getTotalPrice()) // 最终合计价格
             .eqIfPresent(SrmPurchaseReturnDO::getTotalWeight, vo.getMainQuery().getTotalWeight()) // 总毛重
             .eqIfPresent(SrmPurchaseReturnDO::getTotalVolume, vo.getMainQuery().getTotalVolume()) // 总体积
             .eqIfPresent(SrmPurchaseReturnDO::getRefundPrice, vo.getMainQuery().getRefundPrice()) // 已退款金额
             .eqIfPresent(SrmPurchaseReturnDO::getTotalProductPrice, vo.getMainQuery().getTotalProductPrice()) // 合计产品价格
-            .eqIfPresent(SrmPurchaseReturnDO::getTotalTaxPrice, vo.getMainQuery().getTotalTaxPrice()) // 合计税额
+            .eqIfPresent(SrmPurchaseReturnDO::getTotalGrossPrice, vo.getMainQuery().getTotalGrossPrice()) // 合计税额
             .eqIfPresent(SrmPurchaseReturnItemDO::getId, vo.getMainQuery().getId()) //ID
             .eqIfPresent(SrmPurchaseReturnItemDO::getCreator, vo.getMainQuery().getCreator()) // 创建人
             .eqIfPresent(SrmPurchaseReturnItemDO::getOutboundStatus, vo.getMainQuery().getOutboundStatus())
@@ -117,12 +117,12 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
     }
 
     //通过入库项id查找对应的采购退货项
-    default List<SrmPurchaseReturnItemDO> selectListByInItemId(Long inItemId) {
-        return selectList(new LambdaQueryWrapper<SrmPurchaseReturnItemDO>().eq(SrmPurchaseReturnItemDO::getInItemId, inItemId));
+    default List<SrmPurchaseReturnItemDO> selectListByInItemId(Long arriveItemId) {
+        return selectList(new LambdaQueryWrapper<SrmPurchaseReturnItemDO>().eq(SrmPurchaseReturnItemDO::getArriveItemId, arriveItemId));
     }
 
     //入库项id存在对应的采购退货项
-    default boolean existsByInItemId(Long inItemId) {
-        return selectCount(new LambdaQueryWrapper<SrmPurchaseReturnItemDO>().eq(SrmPurchaseReturnItemDO::getInItemId, inItemId)) > 0;
+    default boolean existsByInItemId(Long arriveItemId) {
+        return selectCount(new LambdaQueryWrapper<SrmPurchaseReturnItemDO>().eq(SrmPurchaseReturnItemDO::getArriveItemId, arriveItemId)) > 0;
     }
 }

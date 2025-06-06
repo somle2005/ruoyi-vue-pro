@@ -70,7 +70,7 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
     /**
      * 合计税额，单位：元
      */
-    private BigDecimal totalTaxPrice;
+    private BigDecimal totalGrossPrice;
     /**
      * 优惠率，百分比
      */
@@ -94,7 +94,7 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
     /**
      * 采购入库数量
      */
-    private BigDecimal totalInCount;
+    private BigDecimal totalInboundCount;
     /**
      * 采购退货总数
      */
@@ -148,17 +148,17 @@ public class SrmPurchaseOrderDO extends TenantBaseDO {
      */
     private String address;
     /**
-     * 付款条款
+     * 付款条款(快照)
      */
     private String paymentTerms;
     /**
      * 装运港
      */
-    private String portOfLoading;
+    private String fromPortName;
     /**
      * 目的港
      */
-    private String portOfDischarge;
+    private String toPortName;
     /**
      * 采购状态
      */

@@ -82,7 +82,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
         reqDTO.getItemList().forEach(item -> {
             //消费
             SrmPurchaseInItemCountContext build = SrmPurchaseInItemCountContext.builder()
-                .inItemId(item.getUpstreamId())
+                .arriveItemId(item.getUpstreamId())
                 .inCount(BigDecimal.valueOf(item.getActualQty()))
                 .build();
             purchaseInItemStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STOCK_ADJUSTMENT, build);
@@ -108,10 +108,10 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
         dto.setQuantity(item.getQty());
         dto.setPrice(item.getProductPrice());
         dto.setAmount(item.getTotalPrice());
-        dto.setTaxPercent(item.getTaxPercent());
-        dto.setTaxAmount(item.getTaxPrice());
+        dto.setTaxRate(item.getTaxRate());
+        dto.setTaxAmount(item.getTax());
         dto.setGrossPrice(item.getGrossPrice());
-        dto.setAllAmount(item.getTotalProductPrice());
+        dto.setGrossTotalPrice(item.getTotalProductPrice());
         return dto;
     }
 } 

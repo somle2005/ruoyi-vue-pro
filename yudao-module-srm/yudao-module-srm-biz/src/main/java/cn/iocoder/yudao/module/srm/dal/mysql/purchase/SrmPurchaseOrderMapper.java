@@ -22,10 +22,10 @@ public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> 
             .eqIfPresent(SrmPurchaseOrderDO::getSupplierId, vo.getSupplierId()).eqIfPresent(SrmPurchaseOrderDO::getAccountId, vo.getAccountId())
             .eqIfPresent(SrmPurchaseOrderDO::getTotalCount, vo.getTotalCount()).eqIfPresent(SrmPurchaseOrderDO::getTotalPrice, vo.getTotalPrice())
             .eqIfPresent(SrmPurchaseOrderDO::getTotalProductPrice, vo.getTotalProductPrice())
-            .eqIfPresent(SrmPurchaseOrderDO::getTotalTaxPrice, vo.getTotalTaxPrice())
+            .eqIfPresent(SrmPurchaseOrderDO::getTotalGrossPrice, vo.getTotalGrossPrice())
             .eqIfPresent(SrmPurchaseOrderDO::getDiscountPercent, vo.getDiscountPercent())
             .eqIfPresent(SrmPurchaseOrderDO::getDiscountPrice, vo.getDiscountPrice())
-            .eqIfPresent(SrmPurchaseOrderDO::getRemark, vo.getRemark()).eqIfPresent(SrmPurchaseOrderDO::getTotalInCount, vo.getTotalInCount())
+            .eqIfPresent(SrmPurchaseOrderDO::getRemark, vo.getRemark()).eqIfPresent(SrmPurchaseOrderDO::getTotalInboundCount, vo.getTotalInboundCount())
             .eqIfPresent(SrmPurchaseOrderDO::getTotalReturnCount, vo.getTotalReturnCount())
             .betweenIfPresent(SrmPurchaseOrderDO::getBillTime, vo.getBillTime()).betweenIfPresent(SrmPurchaseOrderDO::getCreateTime, vo.getCreateTime())
             .betweenIfPresent(SrmPurchaseOrderDO::getSettlementDate, vo.getSettlementDate())
@@ -35,7 +35,7 @@ public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> 
             .eqIfPresent(SrmPurchaseOrderDO::getWarehouseId, vo.getWarehouseId()).eqIfPresent(SrmPurchaseOrderDO::getOffStatus, vo.getOffStatus())
             .eqIfPresent(SrmPurchaseOrderDO::getExecuteStatus, vo.getExecuteStatus()).eqIfPresent(SrmPurchaseOrderDO::getInboundStatus, vo.getInboundStatus())
             .eqIfPresent(SrmPurchaseOrderDO::getPayStatus, vo.getPayStatus()).eqIfPresent(SrmPurchaseOrderDO::getAuditStatus, vo.getAuditStatus())
-            .likeIfPresent(SrmPurchaseOrderDO::getAddress, vo.getAddress()).likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, vo.getPaymentTerms())
+            .likeIfPresent(SrmPurchaseOrderDO::getAddress, vo.getAddress()).likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, vo.getPaymentTermsId())
             .eqIfPresent(SrmPurchaseOrderDO::getOrderStatus, vo.getOrderStatus());
     }
 

@@ -93,7 +93,7 @@ public class SrmPurchaseRequestItemsDO extends TenantBaseDO {
     /**
      * 价税合计
      */
-    private BigDecimal allAmount;
+    private BigDecimal grossTotalPrice;
     /**
      * 参考单价
      */
@@ -101,13 +101,13 @@ public class SrmPurchaseRequestItemsDO extends TenantBaseDO {
     /**
      * 税额，单位：元
      * <p>
-     * taxPrice = totalPrice * taxPercent
+     * tax = totalPrice * taxRate
      */
-    private BigDecimal taxPrice;
+    private BigDecimal tax;
     /**
      * 税率，百分比
      */
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
 
     /**
      * 产品已订购数量

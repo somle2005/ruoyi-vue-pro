@@ -66,7 +66,7 @@ public class SrmPurchaseOrderSaveReqVO {
     //付款条款
     @Schema(description = "付款条款")
     @DiffLogField(name = "付款条款")
-    private String paymentTerms;
+    private String paymentTermsId;
 
     @Schema(description = "采购主体编号")
     @DiffLogField(name = "采购主体编号")
@@ -75,11 +75,11 @@ public class SrmPurchaseOrderSaveReqVO {
 
     @Schema(description = "装运港")
     @DiffLogField(name = "装运港")
-    private String portOfLoading;
+    private String fromPortName;
 
     @Schema(description = "目的港")
     @DiffLogField(name = "目的港")
-    private String portOfDischarge;
+    private String toPortName;
 
     @Schema(description = "优惠率，百分比")
     @DiffLogField(name = "优惠率")
@@ -157,11 +157,11 @@ public class SrmPurchaseOrderSaveReqVO {
 
         @Schema(description = "增值税税率，百分比")
         @DiffLogField(name = "增值税税率")
-        private BigDecimal taxPercent;
+        private BigDecimal taxRate;
 
         @Schema(description = "税额")
         @DiffLogField(name = "税额")
-        private BigDecimal taxPrice;
+        private BigDecimal tax;
 
         @Schema(description = "币别编号")
         private Long currencyId;
@@ -178,7 +178,7 @@ public class SrmPurchaseOrderSaveReqVO {
         @Schema(description = "价税合计")
         @DecimalMin(value = "0.0", message = "价税合计必须大于0")
         @DiffLogField(name = "价税合计")
-        private BigDecimal allAmount;
+        private BigDecimal grossTotalPrice;
 
         @Schema(description = "参考单价")
         @DecimalMin(value = "0.0", message = "参考单价必须大于0")

@@ -60,7 +60,7 @@ public class SrmPurchaseReturnSaveReqVO {
 
         @Schema(description = "到货项id", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "到货项id不能为空")
-        private Long inItemId;
+        private Long arriveItemId;
 
         @Schema(description = "退货数量", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "退货数量不能为空")

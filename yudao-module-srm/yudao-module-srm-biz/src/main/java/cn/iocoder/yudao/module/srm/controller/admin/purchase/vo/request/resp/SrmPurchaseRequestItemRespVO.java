@@ -80,15 +80,15 @@ public class SrmPurchaseRequestItemRespVO extends BaseVO {
 
     @Schema(description = "价税合计")
     @ExcelProperty("价税合计")
-    private BigDecimal allAmount;
+    private BigDecimal grossTotalPrice;
 
     @Schema(description = "税额，单位：元")
     @ExcelProperty("税额")
-    private BigDecimal taxPrice;
+    private BigDecimal tax;
 
     @Schema(description = "税率，百分比")
     @ExcelProperty("税率")
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
 
     @Schema(description = "批准数量")
     @ExcelProperty("批准数量")

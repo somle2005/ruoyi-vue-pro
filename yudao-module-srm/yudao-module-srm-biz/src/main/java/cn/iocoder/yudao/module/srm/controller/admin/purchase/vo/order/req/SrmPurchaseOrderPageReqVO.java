@@ -37,7 +37,7 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     private BigDecimal totalProductPrice;
 
     @Schema(description = "合计税额，单位：元")
-    private BigDecimal totalTaxPrice;
+    private BigDecimal totalGrossPrice;
 
     @Schema(description = "优惠率，百分比")
     private BigDecimal discountPercent;
@@ -52,7 +52,7 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     private String remark;
 
     @Schema(description = "采购入库数量")
-    private BigDecimal totalInCount;
+    private BigDecimal totalInboundCount;
 
     @Schema(description = "采购退货数量")
     private BigDecimal totalReturnCount;
@@ -110,7 +110,7 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     private String address;
 
     @Schema(description = "付款条款")
-    private String paymentTerms;
+    private String paymentTermsId;
 
     @Schema(description = "采购状态")
     private Integer orderStatus;

@@ -107,7 +107,7 @@ public class SrmPurchaseInBaseRespVO {
     private BigDecimal totalProductPrice;
 
     @Schema(description = "合计税额")
-    private BigDecimal totalTaxPrice;
+    private BigDecimal totalGrossPrice;
 
     @Schema(description = "优惠率，百分比")
     private BigDecimal discountPercent;
@@ -224,22 +224,22 @@ public class SrmPurchaseInBaseRespVO {
         private BigDecimal totalPrice;
 
         @Schema(description = "税率，百分比")
-        private BigDecimal taxPercent;
+        private BigDecimal taxRate;
 
         @Schema(description = "税额")
-        private BigDecimal taxPrice;
+        private BigDecimal tax;
 
         @Schema(description = "含税单价")
         private BigDecimal grossPrice;
 
         @Schema(description = "价税合计")
-        private BigDecimal allAmount;
+        private BigDecimal grossTotalPrice;
 
         @Schema(description = "合计产品价格")
         private BigDecimal totalProductPrice;
 
         @Schema(description = "合计税价")
-        private BigDecimal totalTaxPrice;
+        private BigDecimal totalGrossPrice;
 
         @Schema(description = "已付款金额")
         private BigDecimal payPrice;

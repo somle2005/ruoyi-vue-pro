@@ -175,7 +175,7 @@ public class ErpToKingdeeConverter {
         kingdeeSupplierSaveVO.setBank(erpSupplierDTO.getBankName());
         kingdeeSupplierSaveVO.setBankAccount(erpSupplierDTO.getBankAccount());
         kingdeeSupplierSaveVO.setRemark(erpSupplierDTO.getRemark());
-        kingdeeSupplierSaveVO.setRate(String.valueOf(erpSupplierDTO.getTaxPercent()));
+        kingdeeSupplierSaveVO.setRate(String.valueOf(erpSupplierDTO.getTaxRate()));
         kingdeeSupplierSaveVO.setTaxpayerNo(erpSupplierDTO.getTaxNo());
         List<SupplierBomentity> bomEntityList = new ArrayList<>();
         SupplierBomentity bomEntity = new SupplierBomentity();
@@ -426,8 +426,8 @@ public class ErpToKingdeeConverter {
         entity.setStockNumber(StrUtil.trimToNull(item.getWarehouseName()));
 
         // 5. 税率相关信息
-        if (item.getTaxPercent() != null) {
-            entity.setCess(String.valueOf(item.getTaxPercent()));
+        if (item.getTaxRate() != null) {
+            entity.setCess(String.valueOf(item.getTaxRate()));
         }
         if (item.getTaxAmount() != null) {
             entity.setTaxAmount(String.valueOf(item.getTaxAmount()));
@@ -435,8 +435,8 @@ public class ErpToKingdeeConverter {
         if (item.getGrossPrice() != null) {
             entity.setActTaxPrice(String.valueOf(item.getGrossPrice()));
         }
-        if (item.getAllAmount() != null) {
-            entity.setAllAmount(String.valueOf(item.getAllAmount()));
+        if (item.getGrossTotalPrice() != null) {
+            entity.setAllAmount(String.valueOf(item.getGrossTotalPrice()));
         }
 
         // 6. 条码信息
@@ -534,8 +534,8 @@ public class ErpToKingdeeConverter {
      * 转换税务信息
      */
     void convertTaxInfo(KingdeeSupplierSaveVO target, SrmSupplierDTO source) {
-        if (source.getTaxPercent() != null) {
-            target.setRate(String.valueOf(source.getTaxPercent()));
+        if (source.getTaxRate() != null) {
+            target.setRate(String.valueOf(source.getTaxRate()));
         }
         target.setTaxpayerNo(StrUtil.trimToNull(source.getTaxNo()));
     }

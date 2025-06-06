@@ -89,7 +89,7 @@ public interface SrmOrderConvert {
                 item.setIndex(index.getAndIncrement());
                 //不含税总额
                 item.setTotalPriceUntaxed(item.getProductPrice().multiply(item.getQty()).setScale(2, RoundingMode.HALF_UP));
-                item.setTotalTaxPrice(item.getTaxPrice().setScale(2, RoundingMode.HALF_UP));
+                item.setTotalGrossPrice(item.getTax().setScale(2, RoundingMode.HALF_UP));
                 //总金额
                 item.setTotalProductPrice(item.getQty().multiply(item.getGrossPrice()).setScale(2, RoundingMode.HALF_UP));//数量*含税单价
                 item.setDeliveryTimeFormat(DateUtil.format(item.getDeliveryTime(), NORM_DATE_PATTERN));
@@ -98,6 +98,9 @@ public interface SrmOrderConvert {
             //渲染甲方乙方
             peek.setA(dtoMap.get(vo.getPartyAId()));
             peek.setB(dtoMap.get(vo.getPartyBId()));
+            //渲染起始目的港口名称
+            peek.setPortOfLoading(orderDO.getFromPortName());
+            peek.setPortOfDischarge(orderDO.getToPortName());
             //付款条款
             peek.setPaymentTerms(vo.getPaymentTerms());
         });
