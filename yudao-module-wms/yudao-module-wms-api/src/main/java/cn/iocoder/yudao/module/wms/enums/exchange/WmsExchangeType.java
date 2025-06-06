@@ -14,7 +14,7 @@ import java.util.Arrays;
 @Getter
 public enum WmsExchangeType implements ArrayValuable<Integer>, DictEnum {
 
-    TO_DEFECTIVE(1, "良品转次品"),
+    TO_ITEM(1, "良品转次品"),
     TO_GOOD(2, "次品转良品"),
     // STOCKCHECK(3, "拆套"),
     // STOCKCHECK(3, "合套"),

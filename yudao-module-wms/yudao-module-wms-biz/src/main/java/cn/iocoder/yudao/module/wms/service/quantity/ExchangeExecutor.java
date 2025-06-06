@@ -7,7 +7,7 @@ import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.defective.WmsExchangeDefectiveDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.item.WmsExchangeItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
@@ -58,12 +58,12 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
 
         // 准备需要的数据
         WmsExchangeDO exchangeDO = context.getExchangeDO();
-        List<WmsExchangeDefectiveDO> exchangeDefectiveDOList = context.getExchangeDefectiveDOList();
-        if(CollectionUtils.isEmpty(exchangeDefectiveDOList)) {
-            throw exception(EXCHANGE_DEFECTIVE_ITEM_NOT_EXISTS);
+        List<WmsExchangeItemDO> exchangeItemDOList = context.getExchangeItemDOList();
+        if (CollectionUtils.isEmpty(exchangeItemDOList)) {
+            throw exception(EXCHANGE_ITEM_ITEM_NOT_EXISTS);
         }
 
-        List<WmsWarehouseProductVO> warehouseProductList = StreamX.from(exchangeDefectiveDOList).toList(item->{
+        List<WmsWarehouseProductVO> warehouseProductList = StreamX.from(exchangeItemDOList).toList(item -> {
             return WmsWarehouseProductVO.builder().warehouseId(exchangeDO.getWarehouseId()).productId(item.getProductId()).build();
         });
 
@@ -71,19 +71,19 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         List<WmsStockBinRespVO> stockBinList = stockBinService.selectStockBinList(warehouseProductList, false);
 
         Map<String,WmsStockBinRespVO> stockBinMap = StreamX.from(stockBinList).toMap(e-> makeStockKey(e.getBinId(),e.getProductId()));
-        for (WmsExchangeDefectiveDO defectiveDO : exchangeDefectiveDOList) {
+        for (WmsExchangeItemDO itemDO : exchangeItemDOList) {
 
-            if(defectiveDO.getQty()<=0) {
+            if (itemDO.getQty() <= 0) {
                 throw exception(EXCHANGE_QUANTITY_ERROR);
             }
 
-            WmsStockBinRespVO stockBinRespVO= stockBinMap.get(makeStockKey(defectiveDO.getFromBinId(),defectiveDO.getProductId()));
+            WmsStockBinRespVO stockBinRespVO = stockBinMap.get(makeStockKey(itemDO.getFromBinId(), itemDO.getProductId()));
             Integer availableQty = 0;
             if(stockBinRespVO!=null) {
                 availableQty = stockBinRespVO.getAvailableQty();
             }
             // 库存不足
-            if(availableQty<defectiveDO.getQty()) {
+            if (availableQty < itemDO.getQty()) {
                 throw exception(STOCK_BIN_NOT_ENOUGH);
             }
 
@@ -91,14 +91,14 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
 
 
         // 逐行处理
-        for (WmsExchangeDefectiveDO defectiveDO : exchangeDefectiveDOList) {
-            WmsStockBinRespVO fromStockBin = stockBinMap.get(makeStockKey(defectiveDO.getFromBinId(),defectiveDO.getProductId()));
-            WmsStockBinRespVO toStockBin = stockBinMap.get(makeStockKey(defectiveDO.getToBinId(),defectiveDO.getProductId()));
-            this.processStockBin(exchangeDO.getWarehouseId(),defectiveDO,fromStockBin,toStockBin);
+        for (WmsExchangeItemDO itemDO : exchangeItemDOList) {
+            WmsStockBinRespVO fromStockBin = stockBinMap.get(makeStockKey(itemDO.getFromBinId(), itemDO.getProductId()));
+            WmsStockBinRespVO toStockBin = stockBinMap.get(makeStockKey(itemDO.getToBinId(), itemDO.getProductId()));
+            this.processStockBin(exchangeDO.getWarehouseId(), itemDO, fromStockBin, toStockBin);
         }
 
         // 完成库位移动
-        exchangeService.finishExchange(exchangeDO,exchangeDefectiveDOList);
+        exchangeService.finishExchange(exchangeDO, exchangeItemDOList);
 
     }
 
@@ -107,7 +107,7 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
     /**
      * 处理仓位库存
      **/
-    private void processStockBin(Long warehouseId,WmsExchangeDefectiveDO defectiveDO,WmsStockBinRespVO fromStockBinVO,WmsStockBinRespVO toStockBinVO) {
+    private void processStockBin(Long warehouseId, WmsExchangeItemDO itemDO, WmsStockBinRespVO fromStockBinVO, WmsStockBinRespVO toStockBinVO) {
 
         JdbcUtils.requireTransaction();
 
@@ -116,31 +116,31 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         //
 
 
-        fromStockBinDO.setAvailableQty(fromStockBinDO.getAvailableQty()-defectiveDO.getQty());
+        fromStockBinDO.setAvailableQty(fromStockBinDO.getAvailableQty() - itemDO.getQty());
         if(fromStockBinDO.getAvailableQty()<0) {
             throw exception(STOCK_BIN_NOT_ENOUGH);
         }
         //
-        fromStockBinDO.setSellableQty(fromStockBinDO.getSellableQty()-defectiveDO.getQty());
+        fromStockBinDO.setSellableQty(fromStockBinDO.getSellableQty() - itemDO.getQty());
         if(fromStockBinDO.getSellableQty()<0) {
             throw exception(STOCK_BIN_NOT_ENOUGH);
         }
         // 保存
         stockBinService.insertOrUpdate(fromStockBinDO);
         // 记录流水
-        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.OUT, defectiveDO.getProductId(), fromStockBinDO , defectiveDO.getQty(), defectiveDO.getExchangeId(), defectiveDO.getId(),null);
+        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.OUT, itemDO.getProductId(), fromStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), null);
 
 
         // 入方
-        WmsStockBinDO toStockBinDO = stockBinService.getStockBin(defectiveDO.getToBinId(),defectiveDO.getProductId(), true);
+        WmsStockBinDO toStockBinDO = stockBinService.getStockBin(itemDO.getToBinId(), itemDO.getProductId(), true);
         // 可用库存
-        toStockBinDO.setAvailableQty(toStockBinDO.getAvailableQty() + defectiveDO.getQty());
+        toStockBinDO.setAvailableQty(toStockBinDO.getAvailableQty() + itemDO.getQty());
         // 可售库存
-        toStockBinDO.setSellableQty(toStockBinDO.getSellableQty() + defectiveDO.getQty());
+        toStockBinDO.setSellableQty(toStockBinDO.getSellableQty() + itemDO.getQty());
         // 保存
         stockBinService.insertOrUpdate(toStockBinDO);
         // 记录流水
-        stockFlowService.createForStockBin(this.getReason(),WmsStockFlowDirection.IN, defectiveDO.getProductId(),toStockBinDO , defectiveDO.getQty(), defectiveDO.getExchangeId(), defectiveDO.getId(),null);
+        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.IN, itemDO.getProductId(), toStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), null);
     }
 
 

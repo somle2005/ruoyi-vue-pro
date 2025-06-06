@@ -9,15 +9,15 @@ import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectiveRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.item.vo.WmsExchangeItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangePageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.defective.WmsExchangeDefectiveDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.item.WmsExchangeItemDO;
 import cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeAuditStatus;
 import cn.iocoder.yudao.module.wms.service.exchange.WmsExchangeService;
-import cn.iocoder.yudao.module.wms.service.exchange.defective.WmsExchangeDefectiveService;
+import cn.iocoder.yudao.module.wms.service.exchange.item.WmsExchangeItemService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,7 +45,7 @@ public class WmsExchangeController {
 
     @Resource()
     @Lazy()
-    private WmsExchangeDefectiveService exchangeDefectiveService;
+    private WmsExchangeItemService exchangeItemService;
 
     @Resource
     private WmsExchangeService exchangeService;
@@ -101,12 +101,12 @@ public class WmsExchangeController {
 			.mapping(WmsExchangeRespVO::getCreator, WmsExchangeRespVO::setUpdaterName)
 			.fill();
         // 组装良次换货详情
-        List<WmsExchangeDefectiveDO> exchangeDefectiveList = exchangeDefectiveService.selectByExchangeId(exchangeVO.getId());
-        exchangeVO.setDefectiveList(BeanUtils.toBean(exchangeDefectiveList, WmsExchangeDefectiveRespVO.class));
+        List<WmsExchangeItemDO> exchangeItemList = exchangeItemService.selectByExchangeId(exchangeVO.getId());
+        exchangeVO.setItemList(BeanUtils.toBean(exchangeItemList, WmsExchangeItemRespVO.class));
 
         // 装配
-        exchangeDefectiveService.assembleBins(exchangeVO.getDefectiveList());
-        exchangeDefectiveService.assembleProduct(exchangeVO.getDefectiveList());
+        exchangeItemService.assembleBins(exchangeVO.getItemList());
+        exchangeItemService.assembleProduct(exchangeVO.getItemList());
 
         // 返回
         return success(exchangeVO);
@@ -148,13 +148,13 @@ public class WmsExchangeController {
     }
 
 
-
-
     @PutMapping("/submit")
     @Operation(summary = "提交审批")
     @PreAuthorize("@ss.hasPermission('wms:exchange:submit')")
-    public CommonResult<Boolean> submit(@RequestBody WmsApprovalReqVO approvalReqVO) {
-        exchangeService.approve(WmsExchangeAuditStatus.Event.SUBMIT, approvalReqVO);
+    public CommonResult<Boolean> submit(@RequestBody List<WmsApprovalReqVO> approvalReqVOList) {
+        approvalReqVOList.forEach(approvalReqVO -> {
+            exchangeService.approve(WmsExchangeAuditStatus.Event.SUBMIT, approvalReqVO);
+        });
         return success(true);
     }
 

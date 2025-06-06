@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 
 /**
+ * @author jisencai
  * @table-fields : bill_id,status_after,status_type,bill_type,comment,id,status_before
  */
 @Schema(description = "管理后台 - 审批 Request VO")

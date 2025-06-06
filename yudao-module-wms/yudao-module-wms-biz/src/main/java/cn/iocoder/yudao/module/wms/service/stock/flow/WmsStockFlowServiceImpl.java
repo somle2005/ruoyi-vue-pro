@@ -246,7 +246,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
             // 待上架数量
             stockFlowDO.setShelvingPendingQty(stockLogicDO.getShelvePendingQty() + quantity);
             // 不良品数量
-            // stockFlowDO.setDefectiveQty(stockLogicDO.getDefectiveQty());
+            // stockFlowDO.setDefectiveQty(stockLogicDO.getItemQty());
             // 待出库量
             stockFlowDO.setOutboundPendingQty(stockLogicDO.getOutboundPendingQty());
         });
@@ -271,7 +271,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
             // 待上架数量
             // stockFlowDO.setShelvingPendingQty(stockBinDO.getShelvingPendingQty() + quantity);
             // 不良品数量
-            // stockFlowDO.setDefectiveQty(stockLogicDO.getDefectiveQty());
+            // stockFlowDO.setDefectiveQty(stockLogicDO.getItemQty());
             // 待出库量
             stockFlowDO.setOutboundPendingQty(stockBinDO.getOutboundPendingQty());
             // 库存批次的流水ID

@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo;
+package cn.iocoder.yudao.module.wms.controller.admin.exchange.item.vo;
 
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
@@ -18,7 +18,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 @Schema(description = "管理后台 - 良次换货详情 Response VO")
 @Data
 @ExcelIgnoreUnannotated
-public class WmsExchangeDefectiveRespVO {
+public class WmsExchangeItemRespVO {
 
     @Schema(description = "主键", requiredMode = Schema.RequiredMode.REQUIRED, example = "1234")
     @ExcelProperty("主键")

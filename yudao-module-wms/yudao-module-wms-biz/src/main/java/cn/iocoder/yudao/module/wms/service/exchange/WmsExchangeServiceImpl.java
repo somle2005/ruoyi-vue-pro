@@ -14,10 +14,10 @@ import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeRespV
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.defective.WmsExchangeDefectiveDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.item.WmsExchangeItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.exchange.WmsExchangeMapper;
-import cn.iocoder.yudao.module.wms.dal.mysql.exchange.defective.WmsExchangeDefectiveMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.exchange.item.WmsExchangeItemMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
 import cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeAuditStatus;
@@ -47,7 +47,7 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
 
     @Resource
     @Lazy
-    private WmsExchangeDefectiveMapper exchangeDefectiveMapper;
+    private WmsExchangeItemMapper exchangeItemMapper;
 
     @Resource
     private WmsNoRedisDAO noRedisDAO;
@@ -80,20 +80,20 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
         WmsExchangeDO exchange = BeanUtils.toBean(createReqVO, WmsExchangeDO.class);
         exchangeMapper.insert(exchange);
         // 保存良次换货详情详情
-        if (createReqVO.getDefectiveList() != null) {
-            List<WmsExchangeDefectiveDO> toInsetList = new ArrayList<>();
-            StreamX.from(createReqVO.getDefectiveList()).filter(Objects::nonNull).forEach(item -> {
+        if (createReqVO.getItemList() != null) {
+            List<WmsExchangeItemDO> toInsetList = new ArrayList<>();
+            StreamX.from(createReqVO.getItemList()).filter(Objects::nonNull).forEach(item -> {
                 item.setId(null);
                 // 设置归属
                 item.setExchangeId(exchange.getId());
-                toInsetList.add(BeanUtils.toBean(item, WmsExchangeDefectiveDO.class));
+                toInsetList.add(BeanUtils.toBean(item, WmsExchangeItemDO.class));
             });
             // 校验 toInsetList 中是否有重复的 productId
-            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsExchangeDefectiveDO::getProductId);
+            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsExchangeItemDO::getProductId);
             if (isProductIdRepeated) {
-                throw exception(EXCHANGE_DEFECTIVE_EXISTS);
+                throw exception(EXCHANGE_ITEM_EXISTS);
             }
-            exchangeDefectiveMapper.insertBatch(toInsetList);
+            exchangeItemMapper.insertBatch(toInsetList);
         }
         // 返回
         return exchange;
@@ -115,28 +115,28 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
         // 单据号不允许被修改
         updateReqVO.setCode(exists.getCode());
         // 保存良次换货详情详情
-        if (updateReqVO.getDefectiveList() != null) {
-            List<WmsExchangeDefectiveDO> existsInDB = exchangeDefectiveMapper.selectByExchangeId(updateReqVO.getId());
-            StreamX.CompareResult<WmsExchangeDefectiveDO> compareResult = StreamX.compare(existsInDB, BeanUtils.toBean(updateReqVO.getDefectiveList(), WmsExchangeDefectiveDO.class), WmsExchangeDefectiveDO::getId);
-            List<WmsExchangeDefectiveDO> toInsetList = compareResult.getTargetMoreThanBaseList();
-            List<WmsExchangeDefectiveDO> toUpdateList = compareResult.getIntersectionList();
-            List<WmsExchangeDefectiveDO> toDeleteList = compareResult.getBaseMoreThanTargetList();
-            List<WmsExchangeDefectiveDO> finalList = new ArrayList<>();
+        if (updateReqVO.getItemList() != null) {
+            List<WmsExchangeItemDO> existsInDB = exchangeItemMapper.selectByExchangeId(updateReqVO.getId());
+            StreamX.CompareResult<WmsExchangeItemDO> compareResult = StreamX.compare(existsInDB, BeanUtils.toBean(updateReqVO.getItemList(), WmsExchangeItemDO.class), WmsExchangeItemDO::getId);
+            List<WmsExchangeItemDO> toInsetList = compareResult.getTargetMoreThanBaseList();
+            List<WmsExchangeItemDO> toUpdateList = compareResult.getIntersectionList();
+            List<WmsExchangeItemDO> toDeleteList = compareResult.getBaseMoreThanTargetList();
+            List<WmsExchangeItemDO> finalList = new ArrayList<>();
             finalList.addAll(toInsetList);
             finalList.addAll(toUpdateList);
             // 校验 toInsetList 中是否有重复的 productId
-            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsExchangeDefectiveDO::getProductId);
+            boolean isProductIdRepeated = StreamX.isRepeated(toInsetList, WmsExchangeItemDO::getProductId);
             if (isProductIdRepeated) {
-                throw exception(EXCHANGE_DEFECTIVE_EXISTS);
+                throw exception(EXCHANGE_ITEM_EXISTS);
             }
             // 设置归属
             finalList.forEach(item -> {
                 item.setExchangeId(updateReqVO.getId());
             });
             // 保存详情
-            exchangeDefectiveMapper.insertBatch(toInsetList);
-            exchangeDefectiveMapper.updateBatch(toUpdateList);
-            exchangeDefectiveMapper.deleteByIds(toDeleteList);
+            exchangeItemMapper.insertBatch(toInsetList);
+            exchangeItemMapper.updateBatch(toUpdateList);
+            exchangeItemMapper.deleteByIds(toDeleteList);
         }
         // 更新
         WmsExchangeDO exchange = BeanUtils.toBean(updateReqVO, WmsExchangeDO.class);
@@ -229,7 +229,7 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
      * 完成换货
      **/
     @Override
-    public void finishExchange(WmsExchangeDO exchangeDO, List<WmsExchangeDefectiveDO> exchangeDefectiveDOList) {
+    public void finishExchange(WmsExchangeDO exchangeDO, List<WmsExchangeItemDO> exchangeItemDOList) {
          // 暂无实现逻辑
     }
 
