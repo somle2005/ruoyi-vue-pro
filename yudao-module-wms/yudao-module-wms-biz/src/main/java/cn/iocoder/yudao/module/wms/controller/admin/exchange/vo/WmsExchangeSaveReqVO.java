@@ -2,11 +2,12 @@ package cn.iocoder.yudao.module.wms.controller.admin.exchange.vo;
 
 import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
-import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectiveSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.item.vo.WmsExchangeItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeType;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+
 import java.util.List;
 
 /**
@@ -39,5 +40,5 @@ public class WmsExchangeSaveReqVO {
     private String remark;
 
     @Schema(description = "详情清单", example = "")
-    private List<WmsExchangeDefectiveSaveReqVO> defectiveList;
+    private List<WmsExchangeItemSaveReqVO> itemList;
 }

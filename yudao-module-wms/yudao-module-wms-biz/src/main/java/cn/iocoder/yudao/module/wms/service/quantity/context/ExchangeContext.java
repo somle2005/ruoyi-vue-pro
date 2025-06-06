@@ -1,7 +1,7 @@
 package cn.iocoder.yudao.module.wms.service.quantity.context;
 
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.defective.WmsExchangeDefectiveDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.item.WmsExchangeItemDO;
 import lombok.Data;
 
 import java.util.List;
@@ -15,6 +15,6 @@ import java.util.List;
 public class ExchangeContext {
 
     private WmsExchangeDO exchangeDO;
-    private List<WmsExchangeDefectiveDO> exchangeDefectiveDOList;
+    private List<WmsExchangeItemDO> exchangeItemDOList;
 
 }

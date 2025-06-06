@@ -278,16 +278,16 @@ public interface WmsErrorCodeConstants {
     ErrorCode EXCHANGE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_023_008, "换货单不符合审批条件");
     ErrorCode EXCHANGE_AUDIT_FAIL = new ErrorCode(2_001_023_009, "审核错误，当前换货单状态为{}，在{}状态时才允许{}");
     ErrorCode EXCHANGE_AUDIT_ERROR = new ErrorCode(2_001_023_010, "换货单审核错误");
-    ErrorCode EXCHANGE_DEFECTIVE_ITEM_NOT_EXISTS = new ErrorCode(2_001_023_011, "换货单审核错误");
+    ErrorCode EXCHANGE_ITEM_ITEM_NOT_EXISTS = new ErrorCode(2_001_023_011, "换货单审核错误");
     ErrorCode EXCHANGE_QUANTITY_ERROR = new ErrorCode(2_001_023_010, "换货单审核错误");
 
-    // ========== WMS_EXCHANGE_DEFECTIVE 良次换货详情表 2_001_024_000 ==========
-    ErrorCode EXCHANGE_DEFECTIVE_NOT_EXISTS = new ErrorCode(2_001_024_001, "良次换货详情不存在");
-    ErrorCode EXCHANGE_DEFECTIVE_EXISTS = new ErrorCode(2_001_024_002, "良次换货详情已存在");
-    ErrorCode EXCHANGE_DEFECTIVE_BE_REFERRED = new ErrorCode(2_001_024_003, "良次换货详情被引用");
-    ErrorCode EXCHANGE_DEFECTIVE_CAN_NOT_EDIT = new ErrorCode(2_001_024_004, "良次换货详情不允许编辑");
-    ErrorCode EXCHANGE_DEFECTIVE_CAN_NOT_DELETE = new ErrorCode(2_001_024_005, "良次换货详情不允许删除");
-    ErrorCode EXCHANGE_DEFECTIVE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_024_006, "良次换货详情不符合审批条件");
+    // ========== WMS_EXCHANGE_ITEM 良次换货详情表 2_001_024_000 ==========
+    ErrorCode EXCHANGE_ITEM_NOT_EXISTS = new ErrorCode(2_001_024_001, "良次换货详情不存在");
+    ErrorCode EXCHANGE_ITEM_EXISTS = new ErrorCode(2_001_024_002, "良次换货详情已存在");
+    ErrorCode EXCHANGE_ITEM_BE_REFERRED = new ErrorCode(2_001_024_003, "良次换货详情被引用");
+    ErrorCode EXCHANGE_ITEM_CAN_NOT_EDIT = new ErrorCode(2_001_024_004, "良次换货详情不允许编辑");
+    ErrorCode EXCHANGE_ITEM_CAN_NOT_DELETE = new ErrorCode(2_001_024_005, "良次换货详情不允许删除");
+    ErrorCode EXCHANGE_ITEM_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_024_006, "良次换货详情不符合审批条件");
 
     // ========== WMS_PRODUCT 良次换货详情表 2_001_025_000 ==========
     ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(2_001_025_001, "{} 产品不存在");

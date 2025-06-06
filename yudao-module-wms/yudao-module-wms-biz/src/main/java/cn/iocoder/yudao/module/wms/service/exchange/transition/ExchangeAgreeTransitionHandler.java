@@ -4,7 +4,7 @@ package cn.iocoder.yudao.module.wms.service.exchange.transition;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.TransitionContext;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
 import cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeAuditStatus;
-import cn.iocoder.yudao.module.wms.service.exchange.defective.WmsExchangeDefectiveService;
+import cn.iocoder.yudao.module.wms.service.exchange.item.WmsExchangeItemService;
 import cn.iocoder.yudao.module.wms.service.quantity.ExchangeExecutor;
 import cn.iocoder.yudao.module.wms.service.quantity.context.ExchangeContext;
 import jakarta.annotation.Resource;
@@ -23,7 +23,7 @@ public class ExchangeAgreeTransitionHandler extends BaseExchangeTransitionHandle
     private ExchangeExecutor exchangeExecutor;
 
     @Resource
-    private WmsExchangeDefectiveService exchangeDefectiveService;
+    private WmsExchangeItemService exchangeItemService;
 
 
 
@@ -33,7 +33,7 @@ public class ExchangeAgreeTransitionHandler extends BaseExchangeTransitionHandle
 
         ExchangeContext exchangeContext = new ExchangeContext();
         exchangeContext.setExchangeDO(context.data());
-        exchangeContext.setExchangeDefectiveDOList(exchangeDefectiveService.selectByExchangeId(context.data().getId()));
+        exchangeContext.setExchangeItemDOList(exchangeItemService.selectByExchangeId(context.data().getId()));
         exchangeExecutor.execute(exchangeContext);
     }
 

@@ -1,6 +1,6 @@
 package cn.iocoder.yudao.module.wms.controller.admin.exchange.vo;
 
-import cn.iocoder.yudao.module.wms.controller.admin.exchange.defective.vo.WmsExchangeDefectiveRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.item.vo.WmsExchangeItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -59,7 +59,7 @@ public class WmsExchangeRespVO {
 
     @Schema(description = "详情清单", example = "")
     @ExcelProperty("详情清单")
-    private List<WmsExchangeDefectiveRespVO> defectiveList;
+    private List<WmsExchangeItemRespVO> itemList;
 
     @Schema(description = "创建者", example = "")
     @ExcelProperty("创建者")
