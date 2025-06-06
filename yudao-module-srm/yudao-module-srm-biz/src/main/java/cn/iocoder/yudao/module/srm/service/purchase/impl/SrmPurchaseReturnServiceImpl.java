@@ -639,7 +639,10 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
             WmsOutboundImportReqDTO importReqDTO = buildOutboundBaseInfo(purchaseReturn);
             importReqDTO.setWarehouseId(warehouseId); // 设置仓库ID
             // 构建出库单明细信息，将相同仓库的退货项合并到一个出库单中
-            importReqDTO.setItemList(buildOutboundItems(items));
+            List<WmsOutboundItemSaveReqDTO> saveReqDTOS = buildOutboundItems(items);
+            //根据主单的公司ID复制给明细行
+            saveReqDTOS.forEach(item -> item.setCompanyId(importReqDTO.getCompanyId()));
+            importReqDTO.setItemList(saveReqDTOS);
             // 生成出库单
             wmsOutboundApi.generateOutbound(importReqDTO);
         });
@@ -698,6 +701,8 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
             itemDTO.setActualQty(item.getQty().intValue()); // 实际出库量
             itemDTO.setRemark(item.getRemark()); // 备注
             itemDTO.setUpstreamId(item.getId()); // 来源明细行ID
+            itemDTO.setDeptId(item.getApplicationDeptId()); //归属部门ID
+            // company 复制主单的
             return itemDTO;
         }).collect(Collectors.toList());
     }
