@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.api.outbound.dto;
 
 import lombok.Data;
+import lombok.NonNull;
 
 
 @Data
@@ -24,11 +25,13 @@ public class WmsOutboundItemSaveReqDTO {
     /**
      * 库存财务公司ID
      **/
+    @NonNull
     private Long companyId;
 
     /**
      * 库存归属部门ID
      **/
+    @NonNull
     private Long deptId;
 
     /**
@@ -40,4 +43,8 @@ public class WmsOutboundItemSaveReqDTO {
      * 来源明细行ID
      **/
     private Long upstreamId;
+
+    public WmsOutboundItemSaveReqDTO() {
+
+    }
 }

@@ -368,7 +368,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         // 4. 转化为 SrmPurchaseReturnItemDO 列表，并从入库项复制信息
         return convertList(list, o -> {
             // 4.1 从入库项复制基础信息
-            SrmPurchaseInItemDO inItem = inItemMap.get(o.getInItemId());
+            SrmPurchaseInItemDO inItem = inItemMap.get(o.getInItemId()); //入库项
             SrmPurchaseReturnItemDO item = new SrmPurchaseReturnItemDO(); // 创建新对象
             // 手动复制需要的字段，避免复制 id
             item.setProductId(inItem.getProductId())
@@ -384,16 +384,15 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                 .setContainerRate(inItem.getContainerRate())
                 .setGrossPrice(inItem.getGrossPrice())
                 .setActualQty(inItem.getActualQty())
+                .setApplicationDeptId(inItem.getApplicationDeptId()) //申请部门ID
+                .setApplicantId(inItem.getApplicantId()) //申请人ID
+                .setActualQty(inItem.getActualQty()) // 实际入库数量(业务上:到货明细入库数量不再变更)
             ;
 
             // 4.2 设置退货项特有信息
-            item
-                .setInItemId(o.getInItemId()) // 入库项ID
+            item.setInItemId(o.getInItemId()) // 入库项ID
                 .setQty(o.getQty()) // 退货数量
-                .setRemark(o.getRemark()) // 备注
-                .setApplicantId(o.getApplicantId()) // 申请人ID
-                .setApplicationDeptId(o.getApplicationDeptId()); // 申请部门ID
-
+                .setRemark(o.getRemark()); // 备注
             // 4.3 设置入库单编号
             SrmPurchaseInDO inDO = inMap.get(inItem.getArriveId());
             if (inDO != null) {
