@@ -128,7 +128,7 @@ public class SrmPurchaseOrderSaveReqVO {
         @Schema(description = "产品sku")
         @NotBlank(message = "产品sku不能为空")
         @DiffLogField(name = "产品SKU")
-        private String barCode;
+        private String productCode;
 
         @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED)
         @NotNull(message = "产品编号不能为空")

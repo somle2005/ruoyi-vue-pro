@@ -31,7 +31,7 @@ public class TmsFirstMileItemRespVO extends BaseVO {
      * FBA条码
      */
     @Schema(description = "FBA条码")
-    private String fbaBarCode;
+    private String fbaProductCode;
 
     //产品名称
     @Schema(description = "产品名称")

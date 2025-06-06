@@ -94,7 +94,7 @@ public class ErpProductServiceImpl implements ErpProductService {
     public Long createProduct(ErpProductSaveReqVO createReqVO) {
         //TODO 暂时编号不是系统自动生成，后续添加生成规则，流水号的递增由编号来判断，编号相同流水号便自增
         //校验是否存在相同的产品编码
-        validateProductCodeUnique(null, createReqVO.getBarCode());
+        validateProductCodeUnique(null, createReqVO.getProductCode());
         //检验是否存在相同的产品名称
         validateProductNameUnique(null, createReqVO.getName());
         //校验颜色，型号，系列是否已经有存在相同的产品
@@ -145,7 +145,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         // 校验存在
         validateProductExists(productId);
         //校验不同的id下是否存在相同的产品编码
-        validateProductCodeUnique(updateReqVO.getId(), updateReqVO.getBarCode());
+        validateProductCodeUnique(updateReqVO.getId(), updateReqVO.getProductCode());
         //检验是否存在相同的产品名称
         validateProductNameUnique(productId, updateReqVO.getName());
         //校验颜色，型号，系列是否已经有存在相同的产品
@@ -225,7 +225,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        List<ErpProductDO> list = productMapper.selectBatchIds(ids);
+        List<ErpProductDO> list = productMapper.selectByIds(ids);
         Map<Long, ErpProductDO> productMap = convertMap(list, ErpProductDO::getId);
         for (Long id : ids) {
             ErpProductDO product = productMap.get(id);
@@ -316,7 +316,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return productMapper.selectBatchIds(ids);
+        return productMapper.selectByIds(ids);
     }
 
     @Override
@@ -418,7 +418,7 @@ public class ErpProductServiceImpl implements ErpProductService {
      * @Author Wqh
      * @Description 根据编码查询出最大的流水号
      * @Date 10:06 2024/10/22
-     * @Param [barCode]
+     * @Param [productCode]
      **/
     private Integer increaseSerial(String color, String model, String series) {
         try {
@@ -484,11 +484,11 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
-    public List<Long> listProductIdByBarCode(String barCode) {
-        if (StrUtil.isBlank(barCode)) {
+    public List<Long> listProductIdByProductCode(String productCode) {
+        if (StrUtil.isBlank(productCode)) {
             return Collections.emptyList();
         }
-        productMapper.selectIdListByBarCode(barCode);
+        productMapper.selectIdListByProductCode(productCode);
         return List.of();
     }
 }

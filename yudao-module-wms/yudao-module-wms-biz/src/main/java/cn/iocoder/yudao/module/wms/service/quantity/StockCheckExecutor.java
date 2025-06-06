@@ -274,11 +274,11 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
 
             // 检查可用库存
             if(outboundItemSaveReqVO.getPlanQty() > stockBin.getAvailableQty()) {
-                throw exception(STOCK_BIN_AVAILABLE_QTY_NOT_ENOUGH,stockBin.getBin().getName(),product.getBarCode());
+                throw exception(STOCK_BIN_AVAILABLE_QTY_NOT_ENOUGH, stockBin.getBin().getName(), product.getProductCode());
             }
             // 检查可用库存
             if(outboundItemSaveReqVO.getPlanQty() > stockBin.getSellableQty()) {
-                throw exception(STOCK_BIN_SELLABLE_QTY_NOT_ENOUGH,stockBin.getBin().getName(),product.getBarCode());
+                throw exception(STOCK_BIN_SELLABLE_QTY_NOT_ENOUGH, stockBin.getBin().getName(), product.getProductCode());
             }
 
 

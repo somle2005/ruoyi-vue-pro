@@ -103,5 +103,5 @@ public class SrmPurchaseOrderItemDTO {
     /**
      * 产品条码
      */
-    private String barCode;
+    private String productCode;
 } 

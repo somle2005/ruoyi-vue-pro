@@ -260,7 +260,7 @@ public class KingdeePurReturnSaveReqVO {
         /**
          * 条形码
          */
-        private String barcode;
+        private String productcode;
 
         /**
          * 批次号

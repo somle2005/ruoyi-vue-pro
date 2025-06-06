@@ -143,7 +143,7 @@ public class ErpSaleOrderRespVO {
         @Schema(description = "产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "巧克力")
         private String productName;
         @Schema(description = "产品条码", requiredMode = Schema.RequiredMode.REQUIRED, example = "A9985")
-        private String productBarCode;
+        private String productProductCode;
         @Schema(description = "产品单位名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "盒")
         private String productUnitName;
 

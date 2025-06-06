@@ -69,5 +69,5 @@ public class TmsCustomRuleRespVO implements VO {
 
     @Schema(description = "条形码")
     @ExcelProperty("条形码")
-    private String fbaBarCode;
+    private String fbaProductCode;
 }

@@ -36,7 +36,7 @@ public interface WmsStockBinMapper extends BaseMapperX<WmsStockBinDO> {
         MPJLambdaWrapperX<WmsStockBinDO> wrapper = new MPJLambdaWrapperX();
         // 连接产品视图
         wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockBinDO::getProductId)
-            .likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode())
+            .likeIfExists(WmsProductDO::getProductCode, reqVO.getProductCode())
             .eqIfExists(WmsProductDO::getDeptId, reqVO.getProductDeptId());
 
         if(reqVO.getZoneId()!=null) {

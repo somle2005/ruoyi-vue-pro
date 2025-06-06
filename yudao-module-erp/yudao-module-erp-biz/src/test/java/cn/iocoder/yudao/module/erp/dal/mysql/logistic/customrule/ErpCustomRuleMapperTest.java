@@ -26,7 +26,7 @@
 //
 //    @Test
 //    void selectPage() {
-//        log.info("selectPage:{}", erpCustomRuleMapper.selectPage(new ErpCustomRulePageReqVO().setBarCode("W06S305QN")));
+//        log.info("selectPage:{}", erpCustomRuleMapper.selectPage(new ErpCustomRulePageReqVO().setProductCode("W06S305QN")));
 //    }
 //
 //    @Test

@@ -146,7 +146,7 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
         private String declaredTypeEn;
 
         @Schema(description = "产品sku")
-        private String barCode;
+        private String productCode;
 
         @Schema(description = "产品名称")
         private String productName;

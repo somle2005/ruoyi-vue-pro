@@ -51,7 +51,7 @@ public class ShopifyShopProductRepsVO {
         private ZonedDateTime createdAt;
         private ZonedDateTime updatedAt;
         private Boolean taxable;
-        private String barcode;
+        private String productcode;
         private String fulfillmentService;
         private Integer grams;
         private String stockCheckManagement;

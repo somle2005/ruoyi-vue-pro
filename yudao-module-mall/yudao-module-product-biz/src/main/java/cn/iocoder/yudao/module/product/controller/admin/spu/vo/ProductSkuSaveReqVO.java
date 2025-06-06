@@ -26,7 +26,7 @@ public class ProductSkuSaveReqVO {
     private Integer costPrice;
 
     @Schema(description = "条形码", example = "15156165456")
-    private String barCode;
+    private String productCode;
 
     @Schema(description = "图片地址", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.iocoder.cn/xx.png")
     @NotNull(message = "图片地址不能为空")

@@ -133,7 +133,7 @@ public class CrmContractController {
         contractVO.setProducts(BeanUtils.toBean(businessProducts, CrmContractRespVO.Product.class, businessProductVO ->
                 MapUtils.findAndThen(erpProductMap, businessProductVO.getProductId(),
                         product -> businessProductVO.setProductName(product.getName())
-                                .setBarCode(product.getBarCode()).setProductUnitName(unitMap.get(product.getUnitId()).getName()))));
+                            .setProductCode(product.getProductCode()).setProductUnitName(unitMap.get(product.getUnitId()).getName()))));
         return contractVO;
     }
 

@@ -33,20 +33,20 @@ public class SyncErpProductJobTestSomle extends SomleBaseSpringIntegrationTest {
 
     @Test
     void syncErpProducts() {
-        AtomicReference<List<String>> barCodes = new AtomicReference<>(new ArrayList<>());
+        AtomicReference<List<String>> productcodes = new AtomicReference<>(new ArrayList<>());
         AtomicReference<List<TmsCustomRuleDTO>> customRuleDTOS = new AtomicReference<>();
         try {
             TenantContextHolder.setTenantId(50001L);// 自动
             // 发送消息
             Optional.ofNullable(tmsCustomRuleApi.listCustomRules(null)).ifPresent(detailDTOS -> {
-                barCodes.set(detailDTOS.stream().map(dto -> dto.getProductDTO().getBarCode()).toList());
-                log.info("预计同步产品skus大小={{}},barCodes = {{}}", barCodes.get().size(), barCodes.get());
+                productcodes.set(detailDTOS.stream().map(dto -> dto.getProductDTO().getProductCode()).toList());
+                log.info("预计同步产品skus大小={{}},productcodes = {{}}", productcodes.get().size(), productcodes.get());
                 int total = detailDTOS.size();
                 int processed = 0;
-                //输出预计同步的barcode集合
+                //输出预计同步的productcode集合
                 for (TmsCustomRuleDTO detailDTO : detailDTOS) {
-                    String barCode = detailDTO.getProductDTO().getBarCode();
-                    log.debug("发送消息, BarCode = {}", barCode);
+                    String productCode = detailDTO.getProductDTO().getProductCode();
+                    log.debug("发送消息, ProductCode = {}", productCode);
                     // 单独处理每个条目
                     erpCustomRuleHandler.syncCustomRulesToEccang(List.of(detailDTO));
                     erpCustomRuleHandler.syncCustomRulesToKingdee(List.of(detailDTO));
@@ -66,11 +66,11 @@ public class SyncErpProductJobTestSomle extends SomleBaseSpringIntegrationTest {
         } finally {
             TenantContextHolder.clear(); // 清理租户上下文，避免线程复用导致问题
         }
-        // 返回数据总量和 barCodes
+        // 返回数据总量和 productcodes
         int total = Optional.ofNullable(customRuleDTOS.get())
             .map(List::size)
             .orElse(0);
-        String string = String.format("success, total=%d, barCodes=%s", total, barCodes.get());
+        String string = String.format("success, total=%d, productcodes=%s", total, productcodes.get());
         log.info(string);
     }
 }

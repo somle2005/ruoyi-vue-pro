@@ -25,7 +25,7 @@ public class TmsFirstMileRequestItemSaveReqVO {
 
     @Schema(description = "FBA条码")
     @DiffLogField(name = "FBA条码")
-    private String fbaBarCode;
+    private String fbaProductCode;
 
     @Schema(description = "申请数量", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "申请数量不能为空")

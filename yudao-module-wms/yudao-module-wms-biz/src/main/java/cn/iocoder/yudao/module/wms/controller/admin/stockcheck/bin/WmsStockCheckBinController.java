@@ -173,7 +173,7 @@ public class WmsStockCheckBinController {
                 continue;
             }
             if (itemRespVO.getProduct() != null) {
-                excelVO.setProductCode(itemRespVO.getProduct().getBarCode());
+                excelVO.setProductCode(itemRespVO.getProduct().getProductCode());
             }
             // 
             excelVO.setStockCheckCode(stockCheck.getCode());

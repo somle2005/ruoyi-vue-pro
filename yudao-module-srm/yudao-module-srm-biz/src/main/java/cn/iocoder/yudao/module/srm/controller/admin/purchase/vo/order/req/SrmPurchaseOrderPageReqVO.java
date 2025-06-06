@@ -123,7 +123,7 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     private Long productId;
 
     @Schema(description = "产品sku")
-    private String barCode;
+    private String productCode;
 
     @Schema(description = "产品名称")
     private String productName;

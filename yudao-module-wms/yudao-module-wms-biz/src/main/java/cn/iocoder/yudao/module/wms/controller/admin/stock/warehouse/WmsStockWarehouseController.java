@@ -150,7 +150,7 @@ public class WmsStockWarehouseController {
         List<WmsStockWarehouseExcelVO> excelVOList = BeanUtils.toBean(list, WmsStockWarehouseExcelVO.class);
         StreamX.from(excelVOList).assemble(list,WmsStockWarehouseRespVO::getId,WmsStockWarehouseExcelVO::getId,(ex,rs)->{
             ex.setWarehouseName(rs.getWarehouse().getName());
-            ex.setProductCode(rs.getProduct().getBarCode());
+            ex.setProductCode(rs.getProduct().getProductCode());
         });
         // 导出 Excel
         ExcelUtils.write(response, "仓库库存.xls", "数据", WmsStockWarehouseExcelVO.class, excelVOList);

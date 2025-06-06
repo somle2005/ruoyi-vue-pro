@@ -30,7 +30,7 @@ public class ErpProductDTO {
     /**
      * SKU（编码）
      */
-    private String barCode;
+    private String productCode;
     /**
      * 产品分类编号
      */

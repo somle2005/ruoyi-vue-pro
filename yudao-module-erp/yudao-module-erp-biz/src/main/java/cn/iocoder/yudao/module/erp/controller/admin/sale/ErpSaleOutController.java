@@ -110,7 +110,7 @@ public class ErpSaleOutController {
                     ErpStockDO stock = stockService.getStock(item.getProductId(), item.getWarehouseId());
                     item.setStockCount(stock != null ? stock.getCount() : BigDecimal.ZERO);
                     MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName())
-                            .setProductBarCode(product.getBarCode()).setProductUnitName(product.getUnitName()));
+                        .setProductProductCode(product.getProductCode()).setProductUnitName(product.getUnitName()));
                 }))));
     }
 
@@ -155,7 +155,7 @@ public class ErpSaleOutController {
         return BeanUtils.toBean(pageResult, ErpSaleOutRespVO.class, saleOut -> {
             saleOut.setItems(BeanUtils.toBean(saleOutItemMap.get(saleOut.getId()), ErpSaleOutRespVO.Item.class,
                     item -> MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName())
-                            .setProductBarCode(product.getBarCode()).setProductUnitName(product.getUnitName()))));
+                        .setProductProductCode(product.getProductCode()).setProductUnitName(product.getUnitName()))));
             saleOut.setProductNames(CollUtil.join(saleOut.getItems(), "，", ErpSaleOutRespVO.Item::getProductName));
             MapUtils.findAndThen(customerMap, saleOut.getCustomerId(), supplier -> saleOut.setCustomerName(supplier.getName()));
             MapUtils.findAndThen(userMap, Long.parseLong(saleOut.getCreator()), user -> saleOut.setCreatorName(user.getNickname()));

@@ -21,8 +21,8 @@ public class EccangReceivingDetailReqVO {
     private String receivingCode;          // 入库单号
     private List<Integer> warehouseIds;    // 仓库ID数组
     private List<String> warehouseCodes;   // 仓库代码数组(最大1000个元素)
-    private String productBarcode;         // 产品代码
-    private Integer productBarcodeType;    // 产品代码查询方式(1:模糊,0:精确)
+    private String productproductcode;         // 产品代码
+    private Integer productproductcodeType;    // 产品代码查询方式(1:模糊,0:精确)
     private String operationUserType;      // 产品负责人类型
     private String applicationCode;        // 操作类型
     private Integer personId;              // 产品负责人ID

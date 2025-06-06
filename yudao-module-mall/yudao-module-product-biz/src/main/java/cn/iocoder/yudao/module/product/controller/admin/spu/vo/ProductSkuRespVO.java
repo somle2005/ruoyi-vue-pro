@@ -25,7 +25,7 @@ public class ProductSkuRespVO {
     private Integer costPrice;
 
     @Schema(description = "条形码", example = "15156165456")
-    private String barCode;
+    private String productCode;
 
     @Schema(description = "图片地址", requiredMode = Schema.RequiredMode.REQUIRED, example = "https://www.iocoder.cn/xx.png")
     private String picUrl;

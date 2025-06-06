@@ -240,7 +240,7 @@ public class EccangProduct {
     private Integer expDate;
 
     /** 仓库条码列表 */
-    private List<WarehouseBarcode> warehouseBarcodeList;
+    private List<Warehouseproductcode> warehouseproductcodeList;
 
     /** 产品原产地（三字码，例如：CHN） */
     private String productOrigin;
@@ -340,9 +340,9 @@ class SelfProperty {
 }
 
 /** 仓库条码类 */
-class WarehouseBarcode {
+class Warehouseproductcode {
     private String warehouseCode;
-    private String barcode;
+    private String productcode;
 }
 
 /** 配件类 */

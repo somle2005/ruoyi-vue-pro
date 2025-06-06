@@ -25,7 +25,7 @@ public class TmsFirstMileRequestItemPageReqVO {
     private Long productId;
 
     @Schema(description = "FBA条码")
-    private String fbaBarCode;
+    private String fbaProductCode;
 
     @Schema(description = "申请数量")
     private Integer qty;

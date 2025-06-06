@@ -91,22 +91,22 @@ public class ErpToKingdeeConverter {
         // 获取产品名称
         String productName = productDTO.getName();
         // 获取产品条码
-        String barCode = productDTO.getBarCode();
+        String productCode = productDTO.getProductCode();
         // 如果国家编码不为空，且产品条码不为空，设置SKU
         if (ObjectUtil.isNotEmpty(countryCode)) {
             DictDataRespDTO dictData = dictDataApi.getDictData(TmsDictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
-            if (CharSequenceUtil.isNotBlank(barCode)) {
+            if (CharSequenceUtil.isNotBlank(productCode)) {
                 String countrySuffix = getCountrySuffix(dictData.getLabel());
-                reqVO.setNumber(barCode + "-" + countrySuffix);
+                reqVO.setNumber(productCode + "-" + countrySuffix);
                 reqVO.setName(productName + "-" + countrySuffix);
             }
         }
         // 如果国家编码为空，且产品名称不为空，设置SKU
-        else if (ObjectUtil.isNotEmpty(productName) && ObjectUtil.isNotEmpty(barCode)) {
-            reqVO.setNumber(barCode);
+        else if (ObjectUtil.isNotEmpty(productName) && ObjectUtil.isNotEmpty(productCode)) {
+            reqVO.setNumber(productCode);
             reqVO.setName(productName);
         }
-        reqVO.setBarcode(productDTO.getBarCode());
+        reqVO.setProductcode(productDTO.getProductCode());
         // 报关品名
         reqVO.setProducingPace(customRuleDTO.getDeclaredType());
         reqVO.setDeclaredTypeEn(customRuleDTO.getDeclaredTypeEn());
@@ -147,9 +147,9 @@ public class ErpToKingdeeConverter {
         KingdeeProductSaveReqVO reqVO = new KingdeeProductSaveReqVO();
         //普通
         reqVO.setCheckType("1");
-        reqVO.setNumber(productDTO.getBarCode());
+        reqVO.setNumber(productDTO.getProductCode());
         reqVO.setName(productDTO.getName());
-        reqVO.setBarcode(productDTO.getBarCode());
+        reqVO.setProductcode(productDTO.getProductCode());
         reqVO.setCostMethod("2");
 
         reqVO.setGrossWeight(String.valueOf(productDTO.getPackageWeight()));
@@ -440,7 +440,7 @@ public class ErpToKingdeeConverter {
         }
 
         // 6. 条码信息
-        entity.setBarcode(StrUtil.trimToNull(item.getBarCode()));
+        entity.setProductcode(StrUtil.trimToNull(item.getProductCode()));
 
         return entity;
     }

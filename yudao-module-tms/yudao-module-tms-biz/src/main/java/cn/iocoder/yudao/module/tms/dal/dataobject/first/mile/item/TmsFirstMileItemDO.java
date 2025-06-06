@@ -49,7 +49,7 @@ public class TmsFirstMileItemDO extends TenantBaseDO {
     /**
      * FBA条码
      */
-    private String fbaBarCode;
+    private String fbaProductCode;
     /**
      * 件数
      */

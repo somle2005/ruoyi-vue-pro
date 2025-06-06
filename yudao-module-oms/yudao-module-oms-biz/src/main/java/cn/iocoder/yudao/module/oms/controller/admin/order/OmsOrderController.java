@@ -125,7 +125,7 @@ public class OmsOrderController {
 
                     return Stream.of(item.setProductId(product.getId())
                         .setProductName(product.getName())
-                        .setProductBarCode(product.getBarCode())
+                        .setProductProductCode(product.getProductCode())
                         .setProductUnitName(product.getUnitName()));
                 }).toList();
                 order.setItems(items);
@@ -181,7 +181,7 @@ public class OmsOrderController {
 //                ErpProductRespDTO erpProductRespDTO = productDTOMap.get(productId);
 //                item.setProductId(productId)
 //                    .setProductName(erpProductRespDTO.getName())
-//                    .setProductBarCode(erpProductRespDTO.getBarCode())
+//                    .setProductProductCode(erpProductRespDTO.getProductCode())
 //                    .setProductUnitName(erpProductRespDTO.getUnitName())
 //                    .setQty(orderItem.getQty())
 //                    .setPrice(orderItem.getPrice());

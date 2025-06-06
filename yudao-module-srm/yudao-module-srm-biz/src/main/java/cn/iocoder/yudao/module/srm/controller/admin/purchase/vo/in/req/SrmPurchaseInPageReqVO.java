@@ -99,7 +99,7 @@ public class SrmPurchaseInPageReqVO extends PageParam {
         private String declaredTypeEn;
 
         @Schema(description = "条码")
-        private String barCode;
+        private String productCode;
 
         // ========== 仓库信息 ==========
         @Schema(description = "仓库编号")

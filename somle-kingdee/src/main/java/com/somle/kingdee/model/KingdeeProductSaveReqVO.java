@@ -30,8 +30,8 @@ public class KingdeeProductSaveReqVO {
     private String alarmDay; // 库存预警天数，指示库存接近最低水平时的提前告警时间
     private List<Auxentity> auxEntity; // 辅助属性列表，商品可能包含的各种附加信息
     private String auxUnitId; // 辅助单位ID，商品使用的辅助单位
-    private String barcode; // 商品的条形码
-    private List<BarcodeEntitySave> barcodeEntity; // 条形码实体对象，存储商品的条形码及相关信息
+    private String productcode; // 商品的条形码
+    private List<productcodeEntitySave> productcodeEntity; // 条形码实体对象，存储商品的条形码及相关信息
     private List<Bomentity> bomEntity; // 套装商品的BOM信息（物料清单），用于定义一个商品包含的其他商品
     private String brandId; // 品牌ID，标识商品所属的品牌
     private String brandNumber; // 品牌编码，标识品牌的唯一编号
@@ -139,11 +139,11 @@ class Auxentity {
 }
 
 @Data
-class BarcodeEntitySave {
+class productcodeEntitySave {
     private String id; // 条形码实体ID，唯一标识条形码
-    private String barcode; // 商品的条形码
-    private String barcodeRemark; // 条形码备注
-    private String barcodeUnitId; // 条形码对应的单位ID
+    private String productcode; // 商品的条形码
+    private String productcodeRemark; // 条形码备注
+    private String productcodeUnitId; // 条形码对应的单位ID
 
     // Constructors, getters, and setters can be added here
 }
@@ -172,7 +172,7 @@ class Bomentity {
 @Data
 class PriceEntitySave {
     private String id; // 价格实体ID，唯一标识价格记录
-    private String priceBarcode; // 价格条形码
+    private String priceproductcode; // 价格条形码
     private String priceCostPrice; // 参考成本价格
     private String priceDistributionPrice; // 配送价
     private String priceMaxPurchasePrice; // 最高采购价

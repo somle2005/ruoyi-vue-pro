@@ -49,7 +49,7 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .eqIfPresent(SrmPurchaseReturnItemDO::getApplicationDeptId, vo.getItemQuery().getApplicationDeptId()) // 申请部门id
             .likeIfPresent(SrmPurchaseReturnItemDO::getDeclaredType, vo.getItemQuery().getDeclaredType()) // 报关品名
             .likeIfPresent(SrmPurchaseReturnItemDO::getDeclaredTypeEn, vo.getItemQuery().getDeclaredTypeEn()) // 报关品名英文
-            .likeIfPresent(SrmPurchaseReturnItemDO::getBarCode, vo.getItemQuery().getBarCode()) // 产品sku
+            .likeIfPresent(SrmPurchaseReturnItemDO::getProductCode, vo.getItemQuery().getProductCode()) // 产品sku
             .likeIfPresent(SrmPurchaseReturnItemDO::getProductName, vo.getItemQuery().getProductName()) // 产品名称
             .eqIfPresent(SrmPurchaseReturnItemDO::getOutboundStatus, vo.getItemQuery().getOutboundStatus())
             .orderByDesc(SrmPurchaseReturnItemDO::getCreateTime)

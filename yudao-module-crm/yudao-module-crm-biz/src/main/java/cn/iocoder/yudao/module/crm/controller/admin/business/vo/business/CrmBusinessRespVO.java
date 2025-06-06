@@ -132,7 +132,7 @@ public class CrmBusinessRespVO {
         @Schema(description = "产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "李四")
         private String productName;
         @Schema(description = "产品条码", requiredMode = Schema.RequiredMode.REQUIRED, example = "20529")
-        private String barCode;
+        private String productCode;
         @Schema(description = "产品单位", requiredMode = Schema.RequiredMode.REQUIRED, example = "李四")
         private Integer productUnit;
         @Schema(description = "产品单位名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "个")

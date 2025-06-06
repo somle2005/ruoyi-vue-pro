@@ -30,7 +30,7 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
         return new MPJLambdaWrapperX<TmsFirstMileRequestItemDO>().eqIfPresent(TmsFirstMileRequestItemDO::getId,
                 vo.getId()).betweenIfPresent(TmsFirstMileRequestItemDO::getCreateTime, vo.getCreateTime())
             .eqIfPresent(TmsFirstMileRequestItemDO::getProductId, vo.getProductId())
-            .likeIfPresent(TmsFirstMileRequestItemDO::getFbaBarCode, vo.getFbaBarCode())
+            .likeIfPresent(TmsFirstMileRequestItemDO::getFbaProductCode, vo.getFbaProductCode())
             .eqIfPresent(TmsFirstMileRequestItemDO::getQty, vo.getQty())
             .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageLength, vo.getPackageLength())
             .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageWidth, vo.getPackageWidth())
@@ -41,7 +41,7 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
             .eqIfPresent(TmsFirstMileRequestItemDO::getOffStatus, vo.getOffStatus())
             .eqIfPresent(TmsFirstMileRequestItemDO::getOrderClosedQty, vo.getOrderClosedQty())
             //fba
-            .likeIfPresent(TmsFirstMileRequestItemDO::getFbaBarCode, vo.getFbaBarCode())
+            .likeIfPresent(TmsFirstMileRequestItemDO::getFbaProductCode, vo.getFbaProductCode())
             .orderByDesc(TmsFirstMileRequestItemDO::getId);
     }
 

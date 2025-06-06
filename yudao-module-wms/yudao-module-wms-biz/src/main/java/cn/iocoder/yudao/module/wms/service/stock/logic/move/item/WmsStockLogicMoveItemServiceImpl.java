@@ -233,7 +233,7 @@ public class WmsStockLogicMoveItemServiceImpl implements WmsStockLogicMoveItemSe
         Map<String, WmsProductRespSimpleVO> productVOMap = new HashMap<>();
         for (ErpProductDTO productDTO : productDTOMap.values()) {
             WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
-            productVOMap.put(productDTO.getBarCode(), productVO);
+            productVOMap.put(productDTO.getProductCode(), productVO);
         }
         StreamX.from(impVOList).assemble(productVOMap, WmsStockLogicMoveImportExcelVO::getProductCode, (e, v) -> {
             if (v != null) {

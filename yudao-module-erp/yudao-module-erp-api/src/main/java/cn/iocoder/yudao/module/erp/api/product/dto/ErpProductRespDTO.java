@@ -49,7 +49,7 @@ public class ErpProductRespDTO{
     /**
      * sku（编码）
      */
-    private String barCode;
+    private String productCode;
 
     /**
      * 单位编号
