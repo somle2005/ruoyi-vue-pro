@@ -88,7 +88,7 @@ public class SrmPurchaseReturnItemDTO {
     /**
      * 产品条码
      */
-    private String productCode;
+    private String barCode;
 
     /**
      * 报关品名

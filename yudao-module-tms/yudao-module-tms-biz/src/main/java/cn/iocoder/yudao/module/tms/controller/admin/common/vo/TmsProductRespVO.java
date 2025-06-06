@@ -13,5 +13,5 @@ public class TmsProductRespVO {
     private String name;
 
     @Schema(description = "产品sku")
-    private String productCode;
+    private String barCode;
 }

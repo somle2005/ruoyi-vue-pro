@@ -25,7 +25,7 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
         return new MPJLambdaWrapperX<SrmPurchaseOrderItemDO>()
             .selectAll(SrmPurchaseOrderItemDO.class)
             .eqIfPresent(SrmPurchaseOrderItemDO::getProductId, reqVO.getProductId()) // 产品ID
-            .likeIfPresent(SrmPurchaseOrderItemDO::getProductCode, reqVO.getProductCode()) // 产品SKU
+            .likeIfPresent(SrmPurchaseOrderItemDO::getBarCode, reqVO.getBarCode()) // 产品SKU
             .likeIfPresent(SrmPurchaseOrderItemDO::getProductName, reqVO.getProductName()) // 产品名称
             .likeIfPresent(SrmPurchaseOrderItemDO::getProductUnitName, reqVO.getProductUnitName()) // 产品单位名称
             .eqIfPresent(SrmPurchaseOrderItemDO::getApplicantId, reqVO.getApplicantId()) // 申请人ID

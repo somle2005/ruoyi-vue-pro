@@ -37,7 +37,7 @@ public class WmsProductRespBinVO extends BaseDO {
 
     @Schema(description = "SKU（编码）", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("SKU（编码）")
-    private String productCode;
+    private String barCode;
 
 
     @Schema(description = "单位名称")

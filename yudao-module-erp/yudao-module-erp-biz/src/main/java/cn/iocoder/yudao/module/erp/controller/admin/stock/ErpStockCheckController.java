@@ -99,7 +99,7 @@ public class ErpStockCheckController {
         return success(BeanUtils.toBean(stockCheck, ErpStockCheckRespVO.class, stockCheckVO ->
                 stockCheckVO.setItems(BeanUtils.toBean(stockCheckItemList, ErpStockCheckRespVO.Item.class, item ->
                         MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName())
-                            .setProductProductCode(product.getProductCode()).setProductUnitName(product.getUnitName()))))));
+                                .setProductBarCode(product.getBarCode()).setProductUnitName(product.getUnitName()))))));
     }
 
     @GetMapping("/page")
@@ -140,7 +140,7 @@ public class ErpStockCheckController {
         return BeanUtils.toBean(pageResult, ErpStockCheckRespVO.class, stockCheck -> {
             stockCheck.setItems(BeanUtils.toBean(stockCheckItemMap.get(stockCheck.getId()), ErpStockCheckRespVO.Item.class,
                     item -> MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName())
-                        .setProductProductCode(product.getProductCode()).setProductUnitName(product.getUnitName()))));
+                            .setProductBarCode(product.getBarCode()).setProductUnitName(product.getUnitName()))));
             stockCheck.setProductNames(CollUtil.join(stockCheck.getItems(), "，", ErpStockCheckRespVO.Item::getProductName));
             MapUtils.findAndThen(userMap, Long.parseLong(stockCheck.getCreator()), user -> stockCheck.setCreatorName(user.getNickname()));
         });

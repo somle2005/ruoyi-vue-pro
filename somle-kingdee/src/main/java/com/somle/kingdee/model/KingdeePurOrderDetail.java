@@ -208,7 +208,7 @@ public class KingdeePurOrderDetail {
         // 辅助单位编码
         private String auxUnitNumber;
         // 条形码
-        private String productcode;
+        private String barcode;
         // 基本数量
         private double baseQty;
         // 基本单位ID

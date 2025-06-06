@@ -124,7 +124,7 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
         // 连接产品视图
         if(reqVO.getProductCode()!=null) {
             wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockWarehouseDO::getProductId)
-                .likeIfExists(WmsProductDO::getProductCode, reqVO.getProductCode());
+                .likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode());
         }
 
         wrapper.eqIfPresent(WmsInboundItemDO::getInboundId, reqVO.getInboundId());

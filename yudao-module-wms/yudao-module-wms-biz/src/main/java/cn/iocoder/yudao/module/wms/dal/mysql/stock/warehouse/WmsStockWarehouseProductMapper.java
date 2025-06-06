@@ -23,7 +23,7 @@ public interface WmsStockWarehouseProductMapper extends BaseMapperX<WmsProductDO
 
         MPJLambdaWrapperX<WmsProductDO> wrapper = new MPJLambdaWrapperX();
         wrapper.distinct();
-        wrapper.likeIfExists(WmsProductDO::getProductCode, reqVO.getProductCode())
+        wrapper.likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode())
             .eqIfExists(WmsProductDO::getDeptId, reqVO.getProductDeptId());
 
         // 连接产品视图

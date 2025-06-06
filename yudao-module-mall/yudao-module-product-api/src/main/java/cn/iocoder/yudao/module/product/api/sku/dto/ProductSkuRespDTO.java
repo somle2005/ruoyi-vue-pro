@@ -42,7 +42,7 @@ public class ProductSkuRespDTO {
     /**
      * SKU 的条形码
      */
-    private String productCode;
+    private String barCode;
     /**
      * 图片地址
      */

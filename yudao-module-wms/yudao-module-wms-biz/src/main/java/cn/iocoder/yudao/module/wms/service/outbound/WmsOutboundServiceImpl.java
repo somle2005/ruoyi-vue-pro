@@ -193,12 +193,12 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             }
             if (stockBinDO == null) {
                 ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
-                throw exception(STOCK_BIN_PRODUCT_NOT_EXISTS, productDto.getProductCode());
+                throw exception(STOCK_BIN_PRODUCT_NOT_EXISTS, productDto.getBarCode());
             }
             //建单时不做此项校验
 //            if (stockBinDO.getSellableQty() < itemDO.getPlanQty()) {
 //                ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
-//                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, productDto.getProductCode());
+//                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, productDto.getBarCode());
 //            }
         }
     }

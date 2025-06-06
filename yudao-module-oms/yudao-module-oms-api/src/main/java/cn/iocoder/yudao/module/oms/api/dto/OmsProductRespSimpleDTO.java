@@ -3,9 +3,6 @@ package cn.iocoder.yudao.module.oms.api.dto;
 import lombok.Builder;
 import lombok.Data;
 
-/**
- * @author jisencai
- */
 @Data
 @Builder
 public class OmsProductRespSimpleDTO {
@@ -23,7 +20,7 @@ public class OmsProductRespSimpleDTO {
     /***
      * sku编码
      */
-    private String productCode;
+    private String barCode;
 
 
     /***

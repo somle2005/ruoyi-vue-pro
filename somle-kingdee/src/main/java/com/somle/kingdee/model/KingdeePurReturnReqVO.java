@@ -19,7 +19,7 @@ public class KingdeePurReturnReqVO {
     /**
      * 条形码
      */
-    private String productcode;
+    private String barcode;
 
     /**
      * 单据编码

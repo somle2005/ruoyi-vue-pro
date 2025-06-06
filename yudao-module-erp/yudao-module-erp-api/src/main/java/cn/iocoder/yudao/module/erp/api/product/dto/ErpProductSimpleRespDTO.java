@@ -3,9 +3,6 @@ package cn.iocoder.yudao.module.erp.api.product.dto;
 
 import lombok.Data;
 
-/**
- * @author jisencai
- */
 @Data
 public class ErpProductSimpleRespDTO {
     /**
@@ -21,7 +18,7 @@ public class ErpProductSimpleRespDTO {
     /**
      * SKU (编码)
      * */
-    private String productCode;
+    private String barCode;
 
     /**
      * 产品分类编号

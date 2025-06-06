@@ -49,5 +49,5 @@ public class TmsCustomRuleDO extends TenantBaseDO {
     /**
      * 条形码
      */
-    private String fbaProductCode;
+    private String fbaBarCode;
 }

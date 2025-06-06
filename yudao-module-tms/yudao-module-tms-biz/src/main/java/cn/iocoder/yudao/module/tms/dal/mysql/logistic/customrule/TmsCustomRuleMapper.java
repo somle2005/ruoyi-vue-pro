@@ -34,13 +34,13 @@ public interface TmsCustomRuleMapper extends BaseMapperX<TmsCustomRuleDO> {
             .eqIfPresent(TmsCustomRuleDO::getDeclaredValue, reqVO.getDeclaredValue())  // 申报金额
             .eqIfPresent(TmsCustomRuleDO::getDeclaredValueCurrencyCode, reqVO.getDeclaredValueCurrencyCode())  // 申报金额币种
             .eqIfPresent(TmsCustomRuleDO::getLogisticAttribute, reqVO.getLogisticAttribute())  // 物流属性
-            .likeIfPresent(TmsCustomRuleDO::getFbaProductCode, reqVO.getFbaProductCode())  // FBA条形码
+            .likeIfPresent(TmsCustomRuleDO::getFbaBarCode, reqVO.getFbaBarCode())  // FBA条形码
             .betweenIfPresent(TmsCustomRuleDO::getCreateTime, reqVO.getCreateTime())  // 创建时间范围
             .betweenIfPresent(TmsCustomRuleDO::getUpdateTime, reqVO.getUpdateTime())  // 更新时间范围
             .eqIfExists(TmsCustomRuleDO::getProductId, reqVO.getProductId()) // 产品id
             .orderByAsc(TmsCustomRuleDO::getId)  // 按id降序排序
             .leftJoin(TmsCustomProductDO.class, TmsCustomProductDO::getProductId, TmsCustomRuleDO::getProductId)  // 左连接产品表
-            //            .likeIfExists(TmsProductDO::getProductCode, reqVO.getProductCode()) // 产品SKU编码
+            //            .likeIfExists(TmsProductDO::getBarCode, reqVO.getBarCode()) // 产品SKU编码
             ;
     }
 

@@ -51,10 +51,10 @@ public class TmsCustomRulePageReqVO extends PageParam {
     private LocalDateTime[] updateTime;
 
     @Schema(description = "FBA条形码")
-    private String fbaProductCode;
+    private String fbaBarCode;
 //
 //    @Schema(description = "SKU（编码）")
-//    private String productCode;//ERP产品的SKU编码 //暂时根据productId查询
+//    private String barCode;//ERP产品的SKU编码 //暂时根据productId查询
 
     @Schema(description = "产品id")
     private Long productId;

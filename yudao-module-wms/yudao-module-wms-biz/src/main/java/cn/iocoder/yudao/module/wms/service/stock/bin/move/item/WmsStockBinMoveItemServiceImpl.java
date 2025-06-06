@@ -135,7 +135,6 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
     /**
      * 按 ID 集合查询 WmsStockBinMoveItemDO
      */
-    @Override
     public List<WmsStockBinMoveItemDO> selectByIds(List<Long> idList) {
         if (CollectionUtils.isEmpty(idList)) {
             return List.of();
@@ -212,7 +211,7 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
         Map<String, WmsProductRespSimpleVO> productVOMap = new HashMap<>();
         for (ErpProductDTO productDTO : productDTOMap.values()) {
             WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
-            productVOMap.put(productDTO.getProductCode(), productVO);
+            productVOMap.put(productDTO.getBarCode(), productVO);
         }
         StreamX.from(impVOList).assemble(productVOMap, WmsStockBinMoveImportExcelVO::getProductCode, (e, p) -> {
             if (p != null) {

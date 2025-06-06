@@ -42,7 +42,7 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
 
     @Schema(description = "FBA条码")
     @ExcelProperty("FBA条码")
-    private String fbaProductCode;
+    private String fbaBarCode;
 
     @Schema(description = "申请数量")
     @ExcelProperty("申请数量")
