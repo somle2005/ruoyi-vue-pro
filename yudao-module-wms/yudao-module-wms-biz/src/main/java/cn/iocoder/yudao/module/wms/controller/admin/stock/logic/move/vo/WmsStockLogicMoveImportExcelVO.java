@@ -19,10 +19,8 @@ public class WmsStockLogicMoveImportExcelVO {
 
     @ExcelProperty("仓库代码")
     public String warehouseCode;
-    /**
-     * 仓库ID
-     **/
-    @ExcelIgnore
+
+    @ExcelProperty("仓库ID")
     public Long warehouseId;
 
     @ExcelProperty("产品代码")
