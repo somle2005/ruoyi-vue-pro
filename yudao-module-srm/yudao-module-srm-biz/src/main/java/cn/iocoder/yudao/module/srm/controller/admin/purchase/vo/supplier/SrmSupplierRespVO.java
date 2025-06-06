@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier;
 
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.payment.term.vo.SrmPaymentTermRespVO;
 import cn.iocoder.yudao.module.system.enums.DictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -68,7 +69,7 @@ public class SrmSupplierRespVO {
     @Schema(description = "税率", example = "10")
     @ExcelProperty(value = "税率", index = 11)
     @NumberFormat(pattern = "#.##%")
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
 
     @Schema(description = "开户行", example = "张三")
     @ExcelProperty(value = "开户行", index = 12)
@@ -87,9 +88,15 @@ public class SrmSupplierRespVO {
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime createTime;
 
-    @Schema(description = "付款条款")
-    @ExcelProperty(value = "付款条款", index = 16)
+    @Schema(description = "付款条款ID")
+    @ExcelProperty(value = "付款条款ID", index = 16)
+    private Long paymentTermsId;
+
+    @Schema(description = "付款条款中文")
     private String paymentTerms;
+
+    @Schema(description = "付款条款")
+    private SrmPaymentTermRespVO srmPaymentTermsResp;
 
     @Schema(description = "送达地址")
     @ExcelProperty(value = "送达地址", index = 17)

@@ -104,7 +104,8 @@ public class SrmPurchaseInDO extends TenantBaseDO {
     /**
      * 合计税额
      */
-    private BigDecimal totalTaxPrice;
+    private BigDecimal totalGrossPrice;
+
 
     /**
      * 优惠率（百分比）

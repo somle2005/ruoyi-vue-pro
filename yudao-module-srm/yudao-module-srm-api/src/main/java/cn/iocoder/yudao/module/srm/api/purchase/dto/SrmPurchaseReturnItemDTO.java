@@ -58,7 +58,7 @@ public class SrmPurchaseReturnItemDTO {
     /**
      * 税率，百分比
      */
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
 
     /**
      * 税额，单位：元
@@ -73,7 +73,7 @@ public class SrmPurchaseReturnItemDTO {
     /**
      * 价税合计
      */
-    private BigDecimal allAmount;
+    private BigDecimal grossTotalPrice;
 
     /**
      * 仓库编号

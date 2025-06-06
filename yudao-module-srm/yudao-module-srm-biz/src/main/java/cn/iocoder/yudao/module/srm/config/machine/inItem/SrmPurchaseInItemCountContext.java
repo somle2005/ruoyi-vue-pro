@@ -10,7 +10,7 @@ import java.math.BigDecimal;
 public class SrmPurchaseInItemCountContext {
 
     //到货项ID
-    private Long inItemId;
+    private Long arriveItemId;
 
     //到货项差额
     private BigDecimal inCount;

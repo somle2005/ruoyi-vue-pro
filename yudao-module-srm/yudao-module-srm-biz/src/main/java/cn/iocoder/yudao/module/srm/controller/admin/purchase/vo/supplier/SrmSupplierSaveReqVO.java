@@ -56,7 +56,7 @@ public class SrmSupplierSaveReqVO {
     private String taxNo;
 
     @Schema(description = "税率")
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
 
     @Schema(description = "开户行")
     private String bankName;
@@ -67,9 +67,9 @@ public class SrmSupplierSaveReqVO {
     @Schema(description = "开户地址")
     private String bankAddress;
 
-    @Schema(description = "付款条款")
-    @NotBlank(message = "付款条款不能为空")
-    private String paymentTerms;
+    @Schema(description = "付款条款ID")
+    @NotBlank(message = "付款条款ID不能为空")
+    private Long paymentTermsId;
 
     @Schema(description = "送达地址")
     @NotBlank(message = "送达地址不能为空")

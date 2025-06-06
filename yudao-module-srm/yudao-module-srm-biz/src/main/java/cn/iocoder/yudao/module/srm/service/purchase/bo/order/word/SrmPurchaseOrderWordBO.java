@@ -38,4 +38,9 @@ public class SrmPurchaseOrderWordBO extends SrmPurchaseOrderDO {
     private LocalDateTime signingDate;
     //签订日期格式化str
     private String signingDateFormat;
+
+    //word起始港名称
+    private String portOfLoading;
+    //word目的港口名称
+    private String portOfDischarge;
 }

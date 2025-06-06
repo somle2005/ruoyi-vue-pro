@@ -83,7 +83,7 @@ public class SrmPurchaseReturnDO extends TenantBaseDO {
     /**
      * 价税合计
      */
-    private BigDecimal allAmount;
+    private BigDecimal grossTotalPrice;
 
     /**
      * 合计数量
@@ -92,7 +92,7 @@ public class SrmPurchaseReturnDO extends TenantBaseDO {
     /**
      * 最终合计价格，单位：元
      * <p>
-     * totalPrice = totalProductPrice + totalTaxPrice - discountPrice + otherPrice
+     * totalPrice = totalProductPrice + totalGrossPrice - discountPrice + otherPrice
      */
     private BigDecimal totalPrice;
     /**
@@ -117,7 +117,7 @@ public class SrmPurchaseReturnDO extends TenantBaseDO {
     /**
      * 合计税额，单位：元
      */
-    private BigDecimal totalTaxPrice;
+    private BigDecimal totalGrossPrice;
     /**
      * 优惠率，百分比
      */
@@ -125,7 +125,7 @@ public class SrmPurchaseReturnDO extends TenantBaseDO {
     /**
      * 优惠金额，单位：元
      * <p>
-     * discountPrice = (totalProductPrice + totalTaxPrice) * discountPercent
+     * discountPrice = (totalProductPrice + totalGrossPrice) * discountPercent
      */
     private BigDecimal discountPrice;
     /**

@@ -93,10 +93,10 @@ public class SrmPurchaseReturnBaseRespVO {
     private BigDecimal totalProductPrice;
 
     @Schema(description = "合计税额，单位：元")
-    private BigDecimal totalTaxPrice;
+    private BigDecimal totalGrossPrice;
 
     @Schema(description = "价税合计，单位：元")
-    private BigDecimal allAmount;
+    private BigDecimal grossTotalPrice;
 
     @Schema(description = "最终合计价格，单位：元")
     private BigDecimal totalPrice;
@@ -147,10 +147,10 @@ public class SrmPurchaseReturnBaseRespVO {
 
         // ========== 关联信息 ==========
         @Schema(description = "入库项编号", requiredMode = Schema.RequiredMode.REQUIRED)
-        private Long inItemId;
+        private Long arriveItemId;
 
         @Schema(description = "入库单编号")
-        private String inCode;
+        private String arriveCode;
 
         // ========== 产品信息 ==========
         @Schema(description = "产品编号")
@@ -201,16 +201,16 @@ public class SrmPurchaseReturnBaseRespVO {
         private BigDecimal grossPrice;
 
         @Schema(description = "税率，百分比")
-        private BigDecimal taxPercent;
+        private BigDecimal taxRate;
 
         @Schema(description = "税额，单位：元")
-        private BigDecimal taxPrice;
+        private BigDecimal tax;
 
         @Schema(description = "总价，单位：元")
         private BigDecimal totalPrice;
 
         @Schema(description = "价税合计，单位：元")
-        private BigDecimal allAmount;
+        private BigDecimal grossTotalPrice;
 
         // ========== 申请人信息 ==========
         @Schema(description = "申请人编号")

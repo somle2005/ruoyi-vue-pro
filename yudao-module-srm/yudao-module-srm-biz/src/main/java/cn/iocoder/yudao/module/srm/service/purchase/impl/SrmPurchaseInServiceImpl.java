@@ -354,8 +354,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 1. 计算总数量、总价等
         purchaseIn.setTotalCount(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getQty, BigDecimal::add));
         purchaseIn.setTotalProductPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseIn.setTotalTaxPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTaxPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseIn.setTotalPrice(purchaseIn.getTotalProductPrice().add(purchaseIn.getTotalTaxPrice()));
+        purchaseIn.setTotalGrossPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTax, BigDecimal::add, BigDecimal.ZERO));
+        purchaseIn.setTotalPrice(purchaseIn.getTotalProductPrice().add(purchaseIn.getTotalGrossPrice()));
 
         // 2. 计算优惠价格
         if (purchaseIn.getDiscountPercent() == null) {
@@ -451,8 +451,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             //总价
             inItemDO.setTotalPrice(MoneyUtils.priceMultiply(inItemDO.getProductPrice(), inItemDO.getQty()));
             //税率
-            if (inItemDO.getTaxPercent() != null && inItemDO.getTotalPrice() != null) {
-                inItemDO.setTaxPrice(MoneyUtils.priceMultiplyPercent(inItemDO.getTotalPrice(), inItemDO.getTaxPercent()));
+            if (inItemDO.getTaxRate() != null && inItemDO.getTotalPrice() != null) {
+                inItemDO.setTax(MoneyUtils.priceMultiplyPercent(inItemDO.getTotalPrice(), inItemDO.getTaxRate()));
             }
             // 存在关联 -> 填充订单项字段
             Optional.ofNullable(inItemDO.getOrderItemId())
@@ -491,7 +491,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         //产品价格
         inItemDO.setGrossPrice(orderItemDO.getGrossPrice());
         // 复制税率相关
-        inItemDO.setTaxPercent(orderItemDO.getTaxPercent());
+        inItemDO.setTaxRate(orderItemDO.getTaxRate());
         //申请人
         inItemDO.setApplicantId(orderItemDO.getApplicantId());
         //申请部门
@@ -885,11 +885,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             ThrowUtil.ifThrow(!purchaseInDO.getAuditStatus().equals(SrmAuditStatus.APPROVED.getCode()), PURCHASE_IN_NOT_APPROVE, purchaseInDO.getCode());
         });
 
-        itemIds.stream().distinct().forEach(inItemId -> {
+        itemIds.stream().distinct().forEach(arriveItemId -> {
             //校验
-            SrmPurchaseInItemDO inItemDO = validatePurchaseInItemExists(inItemId);
+            SrmPurchaseInItemDO inItemDO = validatePurchaseInItemExists(arriveItemId);
             if (vo.getPass()) {
-                updatePurchaseInItemPaymentPrice(inItemDO.getArriveId(), itemMap.get(inItemId).getPayPrice());
+                updatePurchaseInItemPaymentPrice(inItemDO.getArriveId(), itemMap.get(arriveItemId).getPayPrice());
             } else {
                 updatePurchaseInItemPaymentPrice(inItemDO.getArriveId(), BigDecimal.ZERO);
             }
@@ -897,7 +897,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 itemPaymentMachine.fireEvent(SrmPaymentStatus.NONE_PAYMENT, PAYMENT_INIT, inItemDO);
             } else {
                 //付款金额调整
-                updatePurchaseInItemPaymentPrice(inItemDO.getArriveId(), itemMap.get(inItemId).getPayPrice());
+                updatePurchaseInItemPaymentPrice(inItemDO.getArriveId(), itemMap.get(arriveItemId).getPayPrice());
                 itemPaymentMachine.fireEvent(SrmPaymentStatus.fromCode(inItemDO.getPayStatus()), PAYMENT_ADJUSTMENT, inItemDO);
             }
         });

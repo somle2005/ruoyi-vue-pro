@@ -40,7 +40,7 @@ public class StorageInItemActionImpl implements Action<SrmStorageStatus, SrmEven
 
     @Override
     public void execute(SrmStorageStatus from, SrmStorageStatus to, SrmEventEnum event, SrmPurchaseInItemCountContext context) {
-        SrmPurchaseInItemDO inItemDO = srmPurchaseInItemMapper.selectById(context.getInItemId());
+        SrmPurchaseInItemDO inItemDO = srmPurchaseInItemMapper.selectById(context.getArriveItemId());
 
         //调整库存
         if (event == SrmEventEnum.STOCK_ADJUSTMENT) {

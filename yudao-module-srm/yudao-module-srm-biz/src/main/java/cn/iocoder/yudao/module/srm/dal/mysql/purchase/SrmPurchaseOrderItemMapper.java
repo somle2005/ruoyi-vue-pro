@@ -52,12 +52,12 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .eqIfPresent(SrmPurchaseOrderDO::getTotalCount, reqVO.getTotalCount()) // 合计数量
             .eqIfPresent(SrmPurchaseOrderDO::getTotalPrice, reqVO.getTotalPrice()) // 合计总价
             .eqIfPresent(SrmPurchaseOrderDO::getTotalProductPrice, reqVO.getTotalProductPrice()) // 合计产品价格
-            .eqIfPresent(SrmPurchaseOrderDO::getTotalTaxPrice, reqVO.getTotalTaxPrice()) // 合计税额
+            .eqIfPresent(SrmPurchaseOrderDO::getTotalGrossPrice, reqVO.getTotalGrossPrice()) // 合计税额
             .eqIfPresent(SrmPurchaseOrderDO::getDiscountPercent, reqVO.getDiscountPercent()) // 优惠率
             .eqIfPresent(SrmPurchaseOrderDO::getDiscountPrice, reqVO.getDiscountPrice()) // 优惠金额
             .eqIfPresent(SrmPurchaseOrderDO::getDepositPrice, reqVO.getDepositPrice()) // 定金金额
             .likeIfPresent(SrmPurchaseOrderDO::getRemark, reqVO.getRemark()) // 备注
-            .eqIfPresent(SrmPurchaseOrderDO::getTotalInCount, reqVO.getTotalInCount()) // 总入库数量
+            .eqIfPresent(SrmPurchaseOrderDO::getTotalInboundCount, reqVO.getTotalInboundCount()) // 总入库数量
             .eqIfPresent(SrmPurchaseOrderDO::getTotalReturnCount, reqVO.getTotalReturnCount()) // 总退货数量
             .betweenIfPresent(SrmPurchaseOrderDO::getCreateTime, reqVO.getCreateTime()) // 创建时间
             .betweenIfPresent(SrmPurchaseOrderDO::getSettlementDate, reqVO.getSettlementDate()) // 结算日期

@@ -42,11 +42,11 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
     /**
      * 到货项id
      */
-    private Long inItemId;
+    private Long arriveItemId;
     /**
      * 入库单code
      */
-    private String inCode;
+    private String arriveCode;
     /**
      * 仓库编号
      * <p>
@@ -83,13 +83,13 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
     /**
      * 税率，百分比
      */
-    private BigDecimal taxPercent;
+    private BigDecimal taxRate;
     /**
      * 税额，单位：元
      * <p>
-     * taxPrice = totalPrice * taxPercent
+     * tax = totalPrice * taxRate
      */
-    private BigDecimal taxPrice;
+    private BigDecimal tax;
 
     /**
      * 备注

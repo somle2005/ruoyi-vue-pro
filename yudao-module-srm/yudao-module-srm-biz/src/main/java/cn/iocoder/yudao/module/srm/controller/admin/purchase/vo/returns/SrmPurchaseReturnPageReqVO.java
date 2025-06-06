@@ -59,7 +59,7 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
         private Long currencyId;
 
         @Schema(description = "价税合计")
-        private BigDecimal allAmount;
+        private BigDecimal grossTotalPrice;
 
         @Schema(description = "合计数量")
         private BigDecimal totalCount;
@@ -80,7 +80,7 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
         private BigDecimal totalProductPrice;
 
         @Schema(description = "合计税额")
-        private BigDecimal totalTaxPrice;
+        private BigDecimal totalGrossPrice;
 
         @Schema(description = "创建人")
         private Long creator;
@@ -92,10 +92,10 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
     @Data
     public static class ItemQuery {
         @Schema(description = "入库项id")
-        private Long inItemId;
+        private Long arriveItemId;
 
         @Schema(description = "入库单code")
-        private String inCode;
+        private String arriveCode;
 
         @Schema(description = "仓库编号")
         private Long warehouseId;
@@ -119,10 +119,10 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
         private BigDecimal totalPrice;
 
         @Schema(description = "税率")
-        private BigDecimal taxPercent;
+        private BigDecimal taxRate;
 
         @Schema(description = "税额")
-        private BigDecimal taxPrice;
+        private BigDecimal tax;
 
         @Schema(description = "备注")
         private String remark;
