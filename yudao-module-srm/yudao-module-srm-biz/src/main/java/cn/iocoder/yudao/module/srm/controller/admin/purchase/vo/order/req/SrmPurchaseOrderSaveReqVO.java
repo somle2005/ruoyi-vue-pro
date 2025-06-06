@@ -64,9 +64,9 @@ public class SrmPurchaseOrderSaveReqVO {
     @DiffLogField(name = "收货地址")
     private String address;
     //付款条款
-    @Schema(description = "付款条款")
-    @DiffLogField(name = "付款条款")
-    private String paymentTermsId;
+    @Schema(description = "付款条款ID")
+    @DiffLogField(name = "付款条款ID")
+    private Long paymentTermsId;
 
     @Schema(description = "采购主体编号")
     @DiffLogField(name = "采购主体编号")

@@ -72,7 +72,7 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .eqIfPresent(SrmPurchaseOrderDO::getPayStatus, reqVO.getPayStatus()) // 付款状态
             .eqIfPresent(SrmPurchaseOrderDO::getAuditStatus, reqVO.getAuditStatus()) // 审核状态
             .likeIfPresent(SrmPurchaseOrderDO::getAddress, reqVO.getAddress()) // 收货地址
-            .likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, reqVO.getPaymentTermsId()) // 付款条款
+            .likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, reqVO.getPaymentTerms()) // 付款条款
             .eqIfPresent(SrmPurchaseOrderDO::getOrderStatus, reqVO.getOrderStatus()) // 订单状态
             .eqIfPresent(SrmPurchaseOrderDO::getCreator, reqVO.getCreator())
             .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序

@@ -78,7 +78,7 @@ public class SrmSupplierDTO {
     /**
      * 付款条款ID
      */
-    private String paymentTermsId;
+    private Long paymentTermsId;
 
     /**
      * 送达地址

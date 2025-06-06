@@ -110,7 +110,7 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     private String address;
 
     @Schema(description = "付款条款")
-    private String paymentTermsId;
+    private String paymentTerms;
 
     @Schema(description = "采购状态")
     private Integer orderStatus;

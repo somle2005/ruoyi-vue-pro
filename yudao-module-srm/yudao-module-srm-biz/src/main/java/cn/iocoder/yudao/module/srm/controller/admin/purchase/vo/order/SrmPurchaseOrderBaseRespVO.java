@@ -122,8 +122,8 @@ public class SrmPurchaseOrderBaseRespVO extends BaseVO {
     @Schema(description = "结算账户编号")
     private Long accountId;
 
-    @Schema(description = "付款条款")
-    private String paymentTermsId;
+    @Schema(description = "付款条款ID")
+    private Long paymentTermsId;
 
     @Schema(description = "采购主体编号")
     private Long purchaseCompanyId;

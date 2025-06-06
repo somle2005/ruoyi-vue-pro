@@ -35,7 +35,7 @@ public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> 
             .eqIfPresent(SrmPurchaseOrderDO::getWarehouseId, vo.getWarehouseId()).eqIfPresent(SrmPurchaseOrderDO::getOffStatus, vo.getOffStatus())
             .eqIfPresent(SrmPurchaseOrderDO::getExecuteStatus, vo.getExecuteStatus()).eqIfPresent(SrmPurchaseOrderDO::getInboundStatus, vo.getInboundStatus())
             .eqIfPresent(SrmPurchaseOrderDO::getPayStatus, vo.getPayStatus()).eqIfPresent(SrmPurchaseOrderDO::getAuditStatus, vo.getAuditStatus())
-            .likeIfPresent(SrmPurchaseOrderDO::getAddress, vo.getAddress()).likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, vo.getPaymentTermsId())
+            .likeIfPresent(SrmPurchaseOrderDO::getAddress, vo.getAddress()).likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, vo.getPaymentTerms())
             .eqIfPresent(SrmPurchaseOrderDO::getOrderStatus, vo.getOrderStatus());
     }
 
