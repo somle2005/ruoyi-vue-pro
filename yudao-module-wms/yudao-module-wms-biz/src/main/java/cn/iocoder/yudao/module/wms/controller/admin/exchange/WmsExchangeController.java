@@ -160,7 +160,7 @@ public class WmsExchangeController {
 
     @PutMapping("/agree")
     @Operation(summary = "同意审批")
-    @PreAuthorize("@ss.hasPermission('wms:exchange:agree')")
+    @PreAuthorize("@ss.hasPermission('wms:exchange:audit')")
     public CommonResult<Boolean> agree(@RequestBody WmsApprovalReqVO approvalReqVO) {
         exchangeService.approve(WmsExchangeAuditStatus.Event.AGREE, approvalReqVO);
         return success(true);
@@ -168,7 +168,7 @@ public class WmsExchangeController {
 
     @PutMapping("/reject")
     @Operation(summary = "驳回审批")
-    @PreAuthorize("@ss.hasPermission('wms:exchange:reject')")
+    @PreAuthorize("@ss.hasPermission('wms:exchange:audit')")
     public CommonResult<Boolean> reject(@RequestBody WmsApprovalReqVO approvalReqVO) {
         exchangeService.approve(WmsExchangeAuditStatus.Event.REJECT, approvalReqVO);
         return success(true);
