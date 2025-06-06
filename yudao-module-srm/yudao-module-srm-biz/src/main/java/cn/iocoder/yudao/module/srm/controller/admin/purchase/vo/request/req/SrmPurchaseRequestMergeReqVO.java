@@ -42,8 +42,8 @@ public class SrmPurchaseRequestMergeReqVO {
     @NotBlank(message = "订单币别名称不能为空")
     private String currencyName;
 
-    @Schema(description = "付款条款ID")
-    private Long paymentTermsId;
+    @Schema(description = "付款条款")
+    private String paymentTerms;
 
     @Schema(description = "装运港")
     private String fromPortName;

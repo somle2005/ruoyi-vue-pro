@@ -95,6 +95,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_RETURN_IN_ITEM_IN_ID_NOT_SAME = new ErrorCode(1_030_103_011, "退货项中存在多个入库单的入库项");
     ErrorCode PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON = new ErrorCode(1_030_103_012, "反审核失败，退货单已生成出库单({}),非草稿状态,无法撤销");
     ErrorCode PURCHASE_RETURN_PROCESS_FAIL_WMS_OUTBOUND_EXISTS = new ErrorCode(1_030_103_013, "创建出库单失败，原因:{}");
+    ErrorCode PURCHASE_RETURN_QTY_EXCEED_IN_QTY = new ErrorCode(1_030_103_015, "退货数量({})超过入库数量({})");
     //PURCHASE_RETURN_WAREHOUSE_NOT_EXISTS
     ErrorCode PURCHASE_RETURN_PROCESS_FAIL_WAREHOUSE_ID_DONT_EXISTS = new ErrorCode(1_030_103_014, "创建出库单需要退货明细中仓库ID不为空");
 

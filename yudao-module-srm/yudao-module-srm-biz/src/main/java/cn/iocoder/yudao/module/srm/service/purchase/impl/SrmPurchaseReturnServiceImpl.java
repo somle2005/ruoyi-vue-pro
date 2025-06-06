@@ -9,6 +9,8 @@ import cn.iocoder.yudao.framework.common.util.number.MoneyUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.srm.config.machine.outItem.SrmPurchaseOutItemCountContext;
+import cn.iocoder.yudao.module.srm.config.machine.outItem.SrmPurchaseOutMachineContext;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnSaveReqVO;
@@ -18,6 +20,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.*;
 import cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
+import cn.iocoder.yudao.module.srm.enums.status.SrmOutboundStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmReturnStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
@@ -47,8 +50,7 @@ import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.
 import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.srm.enums.SrmEventEnum.RETURN_CANCEL;
 import static cn.iocoder.yudao.module.srm.enums.SrmEventEnum.RETURN_COMPLETE;
-import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN_AUDIT_STATE_MACHINE_NAME;
-import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME;
+import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.*;
 import static jodd.util.StringUtil.truncate;
 
 /**
@@ -76,6 +78,10 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseReturnAuditReqVO> auditStatusMachine;
     @Resource(name = PURCHASE_RETURN_REFUND_STATE_MACHINE_NAME)
     StateMachine<SrmReturnStatus, SrmEventEnum, SrmPurchaseReturnDO> refundStateMachine;
+    @Resource(name = PURCHASE_RETURN_OUT_STORAGE_STATE_MACHINE_NAME)
+    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutMachineContext> outStorageStateMachine;
+    @Resource(name = PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME)
+    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountContext> itemOutStorageStateMachine;
     @Autowired
     private WmsOutboundApi wmsOutboundApi;
 
@@ -162,6 +168,23 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         }
     }
 
+    /**
+     * 校验退货数量不能超过入库数量
+     *
+     * @param items 退货项列表
+     */
+    private void checkReturnQtyNotExceedInQty(List<SrmPurchaseReturnSaveReqVO.Item> items) {
+        for (SrmPurchaseReturnSaveReqVO.Item item : items) {
+            SrmPurchaseInItemDO inItem = inItemMapper.selectById(item.getArriveItemId());
+            if (inItem == null) {
+                throw exception(PURCHASE_IN_ITEM_NOT_EXISTS, item.getArriveItemId());
+            }
+            if (item.getQty().compareTo(inItem.getActualQty()) > 0) {
+                throw exception(PURCHASE_RETURN_QTY_EXCEED_IN_QTY, item.getQty(), inItem.getActualQty());
+            }
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseReturn(SrmPurchaseReturnSaveReqVO vo) {
@@ -173,11 +196,14 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         checkInItemId(item);
         // 1.2.2 校验退货项对应的入库单供应商是否一致
         checkInSupplierConsistent(item);
+        // 1.2.3 校验退货数量不能超过入库数量
+        checkReturnQtyNotExceedInQty(vo.getItems());
 
         // 1.3 校验结算账户
 //        erpAccountApi.validateAccount(vo.getAccountId());
         // 1.4 生成退货单号，并校验唯一性
         voSetNo(vo);
+
         //兜底设置退货时间
         vo.setReturnTime(vo.getReturnTime() == null ? LocalDateTime.now() : vo.getReturnTime());
 
@@ -194,7 +220,17 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
 
         // 3. 更新主子表状态
         initMasterStatus(purchaseReturn);
+        //更新行状态
+        initSlaveStatus(item);
         return purchaseReturn.getId();
+    }
+
+    private void initSlaveStatus(List<SrmPurchaseReturnItemDO> item) {
+        for (SrmPurchaseReturnItemDO returnItemDO : item) {
+            SrmPurchaseOutItemCountContext outed = SrmPurchaseOutItemCountContext.builder().outItemId(returnItemDO.getArriveItemId()).build();
+            itemOutStorageStateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.OUT_STORAGE_INIT, outed);
+        }
+
     }
 
     /**
@@ -226,6 +262,8 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     private void initMasterStatus(SrmPurchaseReturnDO purchaseReturn) {
         auditStatusMachine.fireEvent(SrmAuditStatus.DRAFT, SrmEventEnum.AUDIT_INIT, SrmPurchaseReturnAuditReqVO.builder().ids(Collections.singletonList(purchaseReturn.getId())).build());
         refundStateMachine.fireEvent(SrmReturnStatus.NOT_RETURN, SrmEventEnum.RETURN_INIT, purchaseReturn);
+        //出库状态
+        outStorageStateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.OUT_STORAGE_INIT, new SrmPurchaseOutMachineContext().setReturnId(purchaseReturn.getId()));
     }
 
     /**
@@ -305,7 +343,9 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         checkInItemId(purchaseReturnItems);
         // 1.6 校验退货项对应的入库单供应商是否一致
         checkInSupplierConsistent(purchaseReturnItems);
-        // 1.7 校验单号
+        // 1.7 校验退货数量不能超过入库数量
+        checkReturnQtyNotExceedInQty(vo.getItems());
+        // 1.8 校验单号
         SrmPurchaseReturnDO oldReturn = validatePurchaseReturnExists(vo.getId());
         if (vo.getCode() != null && !vo.getCode().equals(oldReturn.getCode())) {
             voSetNo(vo);

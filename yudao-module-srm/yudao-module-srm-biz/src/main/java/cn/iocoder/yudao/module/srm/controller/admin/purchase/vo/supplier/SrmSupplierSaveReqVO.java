@@ -68,7 +68,7 @@ public class SrmSupplierSaveReqVO {
     private String bankAddress;
 
     @Schema(description = "付款条款ID")
-    @NotBlank(message = "付款条款ID不能为空")
+    @NotNull(message = "付款条款ID不能为空")
     private Long paymentTermsId;
 
     @Schema(description = "送达地址")

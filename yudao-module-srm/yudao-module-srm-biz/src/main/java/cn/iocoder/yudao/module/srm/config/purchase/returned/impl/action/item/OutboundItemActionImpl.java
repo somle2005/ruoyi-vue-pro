@@ -103,5 +103,6 @@ public class OutboundItemActionImpl implements Action<SrmOutboundStatus, SrmEven
 
         // 更新订单退货数量
         srmPurchaseOrderService.updatePurchaseOrderReturnCount(srmPurchaseOrderItemDO.getOrderId(), Map.of(returnItemDO.getArriveItemId(), newReturnCount));
+        log.debug("采购退货状态机,订单退货数量更新：订单项ID={}，退货数量 {} -> {}", srmPurchaseOrderItemDO.getId(), existingReturnCount, newReturnCount);
     }
 }
