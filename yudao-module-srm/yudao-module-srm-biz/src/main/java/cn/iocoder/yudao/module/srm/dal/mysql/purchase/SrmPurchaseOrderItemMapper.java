@@ -68,7 +68,7 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .eqIfPresent(SrmPurchaseOrderDO::getWarehouseId, reqVO.getWarehouseId()) // 仓库ID
             .eqIfPresent(SrmPurchaseOrderDO::getOffStatus, reqVO.getOffStatus()) // 关闭状态
             .eqIfPresent(SrmPurchaseOrderDO::getExecuteStatus, reqVO.getExecuteStatus()) // 执行状态
-            .eqIfPresent(SrmPurchaseOrderDO::getInboundStatus, reqVO.getInboundStatus()) // 入库状态
+            .inIfPresent(SrmPurchaseOrderDO::getInboundStatus, reqVO.getInboundStatusList()) // 入库状态
             .eqIfPresent(SrmPurchaseOrderDO::getPayStatus, reqVO.getPayStatus()) // 付款状态
             .eqIfPresent(SrmPurchaseOrderDO::getAuditStatus, reqVO.getAuditStatus()) // 审核状态
             .likeIfPresent(SrmPurchaseOrderDO::getAddress, reqVO.getAddress()) // 收货地址
