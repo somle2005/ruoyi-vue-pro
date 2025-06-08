@@ -71,7 +71,7 @@ public class TmsFirstMileItemDO extends TenantBaseDO {
      */
     private String remark;
     /**
-     * 实际发货数
+     * 实际发货数(回填)
      */
     private Integer outboundClosedQty;
     /**
@@ -79,7 +79,7 @@ public class TmsFirstMileItemDO extends TenantBaseDO {
      */
     private Integer outboundPlanQty;
     /**
-     * 已入库数量
+     * 已入库数量(回填)
      */
     private Integer inboundClosedQty;
     /**

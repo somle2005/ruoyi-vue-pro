@@ -4,6 +4,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.transfer.item.vo.TmsTransfer
 import cn.iocoder.yudao.module.tms.dal.dataobject.transfer.item.TmsTransferItemDO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -12,6 +13,7 @@ import java.util.List;
  *
  * @author wdy
  */
+@Validated
 public interface TmsTransferItemService {
 
     /**
@@ -102,7 +104,7 @@ public interface TmsTransferItemService {
      * @param id          调拨单明细编号
      * @param outboundQty 出库数量
      */
-    void updateTransferItemOutbound(Long id, Integer outboundQty);
+    void updateTransferItemOutbound(@NotNull(message = "调拨单明细ID不能为空") Long id, Integer outboundQty);
 
-    void updateTransferItemInbound(@NotNull(message = "调拨入库单明细ID不能为空") Long itemId, int i);
+    void updateTransferItemInbound(@NotNull(message = "调拨单明细ID不能为空") Long itemId, int i);
 }

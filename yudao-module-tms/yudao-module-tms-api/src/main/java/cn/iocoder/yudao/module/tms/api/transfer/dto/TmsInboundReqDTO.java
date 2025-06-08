@@ -1,5 +1,8 @@
 package cn.iocoder.yudao.module.tms.api.transfer.dto;
 
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
@@ -18,12 +21,13 @@ public class TmsInboundReqDTO {
     /**
      * 主键
      */
-    @NotNull(message = "调拨入库单主键ID不能为空")
+    @NotNull(message = "调拨入库单编号审核回调主键ID不能为空")
     private Long id;
 
     /**
      * 单据号
      */
+    @NotBlank(message = "调拨入库单编号审核回调不能为空")
     private String code;
 
     /**
@@ -54,7 +58,7 @@ public class TmsInboundReqDTO {
     /**
      * 来源单据ID
      */
-    @NotNull(message = "调拨入库单来源单据ID不能为空")
+    @NotNull(message = "调拨入库单编号审核回调来源单据ID不能为空")
     private Long upstreamId;
 
     /**
@@ -75,6 +79,7 @@ public class TmsInboundReqDTO {
     /**
      * 入库单明细列表
      */
-    @Size(min = 1, message = "调拨入库单明细列表至少有一个")
-    private List<TmsInboundItemReqDTO> itemList;
+    @Size(min = 1, message = "调拨入库单编号审核回调,明细列表至少有一个")
+    @NotEmpty(message = "调拨入库单编号审核回调,明细列表不能为空")
+    private List<@Valid TmsInboundItemReqDTO> itemList;
 } 

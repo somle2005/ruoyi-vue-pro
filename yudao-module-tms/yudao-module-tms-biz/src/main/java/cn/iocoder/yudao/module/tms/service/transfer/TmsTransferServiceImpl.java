@@ -9,6 +9,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
+import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsTransferStatusUpdateDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsCompanyRespVO;
@@ -36,6 +37,7 @@ import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundItemSaveReqDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseQueryDTO;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseSimpleDTO;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -72,6 +74,8 @@ public class TmsTransferServiceImpl implements TmsTransferService {
     private final FmsCompanyApi fmsCompanyApi;
     private final WmsWarehouseApi wmsWarehouseApi;
     private final WmsOutboundApi wmsOutboundApi;
+    private final AdminUserApi adminUserApi;
+
     @Resource(name = TRANSFER_AUDIT_STATE_MACHINE)
     private StateMachine<TmsAuditStatus, TmsEventEnum, TmsTransferAuditReqVO> transferAuditStateMachine;
     @Autowired
@@ -236,7 +240,15 @@ public class TmsTransferServiceImpl implements TmsTransferService {
         assembleProducts(itemVOs);
         assembleCompany(itemVOs);
         assembleWarehouse(Collections.singletonList(respVO));
-
+        adminUserApi.prepareFill(Collections.singletonList(respVO))
+            .mapping(TmsTransferRespVO::getCreator, TmsTransferRespVO::setCreatorName)
+            .mapping(TmsTransferRespVO::getUpdater, TmsTransferRespVO::setUpdaterName)
+            .mapping(TmsTransferRespVO::getAuditorId, TmsTransferRespVO::setAuditorName)
+            .fill();
+        adminUserApi.prepareFill(respVO.getItems())
+            .mapping(TmsTransferItemRespVO::getCreator, TmsTransferItemRespVO::setCreatorName)
+            .mapping(TmsTransferItemRespVO::getUpdater, TmsTransferItemRespVO::setUpdaterName)
+            .fill();
         return respVO;
     }
 
@@ -353,6 +365,19 @@ public class TmsTransferServiceImpl implements TmsTransferService {
         }
 
         List<TmsTransferRespVO> respVOList = assembleTransferVOList(boPageResult.getList());
+        adminUserApi.prepareFill(respVOList)
+            .mapping(TmsTransferRespVO::getCreator, TmsTransferRespVO::setCreatorName)
+            .mapping(TmsTransferRespVO::getUpdater, TmsTransferRespVO::setUpdaterName)
+            .mapping(TmsTransferRespVO::getAuditorId, TmsTransferRespVO::setAuditorName)
+            .fill();
+        List<TmsTransferItemRespVO> itemRespVOList = respVOList.stream()
+            .filter(vo -> vo.getItems() != null)
+            .flatMap(vo -> vo.getItems().stream())
+            .toList();
+        adminUserApi.prepareFill(itemRespVOList)
+            .mapping(TmsTransferItemRespVO::getCreator, TmsTransferItemRespVO::setCreatorName)
+            .mapping(TmsTransferItemRespVO::getUpdater, TmsTransferItemRespVO::setUpdaterName)
+            .fill();
 
         return new PageResult<>(respVOList, boPageResult.getTotal());
     }
@@ -377,7 +402,7 @@ public class TmsTransferServiceImpl implements TmsTransferService {
                 //2.0 创建出库单(待审核)
                 TmsTransferBO tmsTransferBO = getTransferBO(reqVO.getId());
                 try {
-                    createWmsOutbound(tmsTransferBO);
+                    this.createWmsOutbound(tmsTransferBO);
                 } catch (Exception e) {
                     throw exception(TRANSFER_CREATE_OUT_STOCK_ERROR, truncate(e.getMessage(), 200));
                 }
@@ -453,11 +478,24 @@ public class TmsTransferServiceImpl implements TmsTransferService {
      * @param transferId 调拨单ID
      */
     private void abandonWmsOutbound(Long transferId) {
-        List<WmsOutboundDTO> dtoList = wmsOutboundApi.getOutboundList(BillType.TMS_TRANSFER.getValue(), transferId);
-        dtoList.forEach(wmsOutboundDTO -> {
-            // 作废 WMS 出库单
-            wmsOutboundApi.abandonOutbound(wmsOutboundDTO.getId(), "调拨单反审核");
-        });
+        List<WmsOutboundDTO> dtoList = Optional.ofNullable(wmsOutboundApi.getOutboundList(BillType.TMS_TRANSFER.getValue(), transferId))
+            .orElse(Collections.emptyList());
+        if (CollUtil.isEmpty(dtoList)) {
+            return;
+        }
+
+        //  收集所有非草稿
+        List<String> nonDraftCodes = dtoList.stream()
+            .filter(dto -> !Objects.equals(dto.getAuditStatus(), WmsOutboundAuditStatus.DRAFT.getValue()))
+            .map(WmsOutboundDTO::getCode)
+            .collect(Collectors.toList());
+
+        if (CollUtil.isNotEmpty(nonDraftCodes)) {
+            throw exception(TRANSFER_ITEM_REVOKE_FAIL_OUT_STOCK_EXISTS, String.join(",", nonDraftCodes));
+        }
+
+        // 作废
+        dtoList.forEach(dto -> wmsOutboundApi.abandonOutbound(dto.getId(), "调拨单反审核"));
     }
 
     @Override

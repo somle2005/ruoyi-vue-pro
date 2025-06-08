@@ -10,7 +10,8 @@ import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
-import cn.iocoder.yudao.module.tms.api.first.TmsFistMileDTO;
+import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileItemUpdateDTO;
+import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileUpdateDTO;
 import cn.iocoder.yudao.module.tms.api.first.mile.request.TmsFistMileRequestItemDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
@@ -350,7 +351,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
                 //2. 生成对应出库单
                 TmsFirstMileBO tmsFirstMileBO = getFirstMileBO(reqVO.getId());
                 //3.0 创建出库单,为每个仓库创建不同得出库单。
-                createWmsOutbound(tmsFirstMileBO);
+                this.createWmsOutbound(tmsFirstMileBO);
             } else {
                 //不通过
                 auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.REJECT, reqVO);
@@ -359,7 +360,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             //反审核
             auditStateMachine.fireEvent(TmsAuditStatus.fromCode(tmsFirstMileDO.getAuditStatus()), TmsEventEnum.WITHDRAW_REVIEW, reqVO);
             //作废WMS出库单
-            abandonWmsOutbound(tmsFirstMileDO.getId());
+            this.abandonWmsOutbound(tmsFirstMileDO.getId());
         }
         //
         LogRecordContext.putVariable("code", tmsFirstMileDO.getCode());
@@ -439,17 +440,24 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
      * @param firstMileId 头程单ID
      */
     private void abandonWmsOutbound(Long firstMileId) {
-        List<WmsOutboundDTO> dtoList = wmsOutboundApi.getOutboundList(First_MILE_SOURCE_TYPE, firstMileId);
-        dtoList.forEach(wmsOutboundDTO -> {
-            //如果出库单是草稿状态 -> 作废
-            if (Objects.equals(wmsOutboundDTO.getAuditStatus(), WmsOutboundAuditStatus.DRAFT.getValue())) {
-                // 作废 WMS 出库单
-                wmsOutboundApi.abandonOutbound(wmsOutboundDTO.getId(), "头程单反审核");
-            } else {
-                //提示
-                throw exception(FIRST_MILE_WMS_OUTBOUND_NOT_CAN_ABANDON, wmsOutboundDTO.getCode());
-            }
-        });
+        List<WmsOutboundDTO> dtoList = Optional.ofNullable(wmsOutboundApi.getOutboundList(First_MILE_SOURCE_TYPE, firstMileId))
+            .orElse(Collections.emptyList());
+        if (CollUtil.isEmpty(dtoList)) {
+            return;
+        }
+
+        // 收集所有非草稿
+        List<String> nonDraftCodes = dtoList.stream()
+            .filter(dto -> !Objects.equals(dto.getAuditStatus(), WmsOutboundAuditStatus.DRAFT.getValue()))
+            .map(WmsOutboundDTO::getCode)
+            .collect(Collectors.toList());
+
+        if (CollUtil.isNotEmpty(nonDraftCodes)) {
+            throw exception(FIRST_MILE_WMS_OUTBOUND_NOT_CAN_ABANDON, String.join(",", nonDraftCodes));
+        }
+
+        // 作废
+        dtoList.forEach(dto -> wmsOutboundApi.abandonOutbound(dto.getId(), "头程单反审核"));
     }
 
     // ==================== 子表（头程单明细） ====================
@@ -572,13 +580,43 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     /**
      * 更新头程单状态
      *
-     * @param tmsFistMileDTO dto
+     * @param dto dto
      */
     @Override
-    public void updateFirstMileStatus(TmsFistMileDTO tmsFistMileDTO) {
-        validateFirstMileExists(tmsFistMileDTO.getId());
-        TmsFirstMileDO firstMileDO = BeanUtils.toBean(tmsFistMileDTO, TmsFirstMileDO.class);
-        firstMileMapper.updateById(firstMileDO);
+    @Transactional(rollbackFor = Exception.class)
+    public void updateFirstMileStatus(TmsFistMileUpdateDTO dto) {
+        // 1. 校验头程单是否存在
+        TmsFirstMileDO firstMile = validateFirstMileExists(dto.getId());
+
+        // 2. 更新头程单状态
+        TmsFirstMileDO updateObj = new TmsFirstMileDO();
+        updateObj.setId(dto.getId());
+
+        if (dto.getAuditStatus() != null) {
+            updateObj.setAuditStatus(dto.getAuditStatus());
+        }
+        if (dto.getAuditAdvice() != null) {
+            updateObj.setAuditAdvice(dto.getAuditAdvice());
+        }
+
+        // 2.2 设置出库信息
+        if (dto.getOutboundStatus() != null) {
+            updateObj.setOutboundStatus(dto.getOutboundStatus());
+        }
+        if (dto.getOutboundTime() != null) {
+            updateObj.setOutboundTime(dto.getOutboundTime());
+        }
+
+        // 2.3 设置入库信息
+        if (dto.getInboundStatus() != null) {
+            updateObj.setInboundStatus(dto.getInboundStatus());
+        }
+        if (dto.getInboundTime() != null) {
+            updateObj.setInboundTime(dto.getInboundTime());
+        }
+
+        // 3. 执行更新
+        firstMileMapper.updateById(updateObj);
     }
 
     /**
@@ -621,5 +659,49 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
                         TmsFirstMileRequestItemDO::getId,
                         item -> requestMap.get(item.getRequestId())
                 ));
+    }
+
+    @Override
+    public TmsFirstMileItemDO validateFirstMileItemExists(Long id) {
+        TmsFirstMileItemDO item = firstMileItemMapper.selectById(id);
+        if (item == null) {
+            throw exception(FIRST_MILE_ITEM_NOT_EXISTS, id);
+        }
+        return item;
+    }
+
+    @Override
+    public List<TmsFirstMileItemDO> validateFirstMileItemExists(List<Long> ids) {
+        if (CollUtil.isEmpty(ids)) {
+            return Collections.emptyList();
+        }
+        List<TmsFirstMileItemDO> items = firstMileItemMapper.selectByIds(new HashSet<>(ids));
+        if (items.size() != ids.size()) {
+            // 找出不存在的ID
+            Set<Long> existIds = items.stream().map(TmsFirstMileItemDO::getId).collect(Collectors.toSet());
+            List<Long> notExistIds = ids.stream().filter(id -> !existIds.contains(id)).collect(Collectors.toList());
+            throw exception(FIRST_MILE_ITEM_NOT_EXISTS, notExistIds);
+        }
+        return items;
+    }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    public void updateFirstMileItemOutbound(TmsFistMileItemUpdateDTO dto) {
+        // 1. 校验明细行是否存在
+        TmsFirstMileItemDO item = validateFirstMileItemExists(dto.getId());
+
+        // 2. 更新出库和入库数量
+        TmsFirstMileItemDO updateObj = new TmsFirstMileItemDO();
+        if (dto.getInOutType() == true) {
+            updateObj.setId(dto.getId());
+            updateObj.setInboundClosedQty(dto.getInboundQty());
+        } else {
+            updateObj.setId(dto.getId());
+            updateObj.setOutboundClosedQty(dto.getOutboundQty());
+        }
+
+        // 3. 执行更新
+        firstMileItemMapper.updateById(updateObj);
     }
 }
