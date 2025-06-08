@@ -729,6 +729,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             firstMile.setTotalQty(0);
             firstMile.setTotalWeight(BigDecimal.ZERO);
             firstMile.setTotalVolume(BigDecimal.ZERO);
+            firstMile.setNetWeight(BigDecimal.ZERO);
             return;
         }
 
@@ -736,6 +737,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         int totalQty = 0;
         BigDecimal totalWeight = BigDecimal.ZERO;
         BigDecimal totalVolume = BigDecimal.ZERO;
+        BigDecimal netWeight = BigDecimal.ZERO;
 
         for (TmsFirstMileItemDO item : items) {
             // 获取产品信息
@@ -748,16 +750,18 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             item.setPackageLength(BigDecimal.valueOf(product.getPackageLength()));
             item.setPackageWidth(BigDecimal.valueOf(product.getPackageWidth()));
             item.setPackageHeight(BigDecimal.valueOf(product.getPackageHeight()));
-            item.setPackageWeight(product.getPackageWeight());
+            item.setPackageWeight(product.getWeight());
 
             // 累加总数量
             if (item.getQty() != null) {
                 totalQty += item.getQty();
             }
 
-            // 累加毛重
-            if (product.getPackageWeight() != null && item.getQty() != null) {
-                totalWeight = totalWeight.add(product.getPackageWeight().multiply(BigDecimal.valueOf(item.getQty())));
+            // 累加毛重和净重
+            if (product.getWeight() != null && item.getQty() != null) {
+                totalWeight = totalWeight.add(product.getWeight().multiply(BigDecimal.valueOf(item.getQty())));
+                // 累加净重 = 包装重量 * 数量
+                netWeight = netWeight.add(product.getPackageWeight().multiply(BigDecimal.valueOf(item.getQty())));
             }
 
             // 计算单个物品的体积（长*宽*高）并乘以数量
@@ -775,5 +779,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         firstMile.setTotalQty(totalQty);
         firstMile.setTotalWeight(totalWeight);
         firstMile.setTotalVolume(totalVolume);
+        firstMile.setNetWeight(netWeight);
     }
 }

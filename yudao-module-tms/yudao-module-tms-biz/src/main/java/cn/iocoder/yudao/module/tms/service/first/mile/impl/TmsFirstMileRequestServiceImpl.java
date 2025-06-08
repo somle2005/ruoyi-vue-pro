@@ -411,27 +411,35 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         if (requestItemDOS == null || requestItemDOS.isEmpty()) {
             firstMileRequest.setTotalWeight(BigDecimal.ZERO);
             firstMileRequest.setTotalVolume(BigDecimal.ZERO);
+//            firstMileRequest.setNetWeight(BigDecimal.ZERO);
             return;
         }
+
         // 计算总重量和总体积
         BigDecimal totalWeight = BigDecimal.ZERO;
         BigDecimal totalVolume = BigDecimal.ZERO;
+        BigDecimal netWeight = BigDecimal.ZERO;
+
         for (TmsFirstMileRequestItemDO item : requestItemDOS) {
             // 获取产品信息
             ErpProductDTO product = erpProductApi.getProductDto(item.getProductId());
             if (product == null) {
                 continue;
             }
+
             // 设置明细项的包装长宽高
             item.setPackageLength(BigDecimal.valueOf(product.getPackageLength()));
             item.setPackageWidth(BigDecimal.valueOf(product.getPackageWidth()));
             item.setPackageHeight(BigDecimal.valueOf(product.getPackageHeight()));
-            item.setPackageWeight(product.getPackageWeight());
-            
-            // 累加毛重
-            if (product.getPackageWeight() != null && item.getQty() != null) {
-                totalWeight = totalWeight.add(product.getPackageWeight().multiply(BigDecimal.valueOf(item.getQty())));
+            item.setPackageWeight(product.getWeight());
+
+            // 累加毛重和净重
+            if (product.getWeight() != null && item.getQty() != null) {
+                totalWeight = totalWeight.add(product.getWeight().multiply(BigDecimal.valueOf(item.getQty())));
+                // 累加净重 = 包装重量 * 数量
+                netWeight = netWeight.add(product.getPackageWeight().multiply(BigDecimal.valueOf(item.getQty())));
             }
+
             // 计算单个物品的体积（长*宽*高）并乘以数量
             if (product.getPackageLength() != null && product.getPackageWidth() != null && product.getPackageHeight() != null && item.getQty() != null) {
                 BigDecimal itemVolume = BigDecimal.valueOf(product.getPackageLength())
@@ -443,8 +451,10 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
                 totalVolume = totalVolume.add(itemVolume);
             }
         }
+
         firstMileRequest.setTotalWeight(totalWeight);
         firstMileRequest.setTotalVolume(totalVolume);
+//        firstMileRequest.setNetWeight(netWeight);
     }
 
     @Override
