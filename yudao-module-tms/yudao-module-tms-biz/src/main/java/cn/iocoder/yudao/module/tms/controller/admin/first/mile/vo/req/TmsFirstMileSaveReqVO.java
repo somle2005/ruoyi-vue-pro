@@ -73,14 +73,6 @@ public class TmsFirstMileSaveReqVO {
     @DiffLogField(name = "预计到货日期")
     private LocalDateTime arrivePlanTime;
 
-    @Schema(description = "货柜体积（m³）")
-    @DiffLogField(name = "货柜体积")
-    private BigDecimal totalVolume;
-
-    @Schema(description = "货柜毛重（kg）")
-    @DiffLogField(name = "货柜毛重")
-    private BigDecimal totalWeight;
-
     @Schema(description = "货柜净重（kg）")
     @DiffLogField(name = "货柜净重")
     private BigDecimal netWeight;

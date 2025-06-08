@@ -6,8 +6,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 @Schema(description = "管理后台 - 头程单明细新增/修改 Request VO")
 @Data
 public class TmsFirstMileItemSaveReqVO {
@@ -47,21 +45,6 @@ public class TmsFirstMileItemSaveReqVO {
     @Schema(description = "发出仓ID", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "发出仓ID不能为空")
     private Long fromWarehouseId;
-
-    @Schema(description = "包装长（cm）")
-    private BigDecimal packageLength;
-
-    @Schema(description = "包装宽（cm）")
-    private BigDecimal packageWidth;
-
-    @Schema(description = "包装高（cm）")
-    private BigDecimal packageHeight;
-
-    @Schema(description = "毛重（kg）")
-    private BigDecimal packageWeight;
-
-    @Schema(description = "体积（m³）")
-    private BigDecimal volume;
 
     @Schema(description = "销售公司ID")
     @NotNull(message = "销售公司不能为空")

@@ -9,6 +9,8 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileItemUpdateDTO;
 import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileUpdateDTO;
@@ -57,6 +59,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -88,6 +91,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final TmsNoRedisDAO noRedisDAO;
     private final WmsWarehouseApi warehouseApi;
     private final WmsOutboundApi wmsOutboundApi;
+    private final ErpProductApi erpProductApi;
     @Autowired
     @Lazy
     TmsFirstMileRequestService tmsFirstMileRequestService;
@@ -119,7 +123,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             bizNo = "{{#id}}",
             success = "创建了头程单【{{#vo.code}}】")
     public Long createFirstMile(TmsFirstMileSaveReqVO vo) {
-
         //1.0 校验
         warehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
 
@@ -127,7 +130,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             if (validCodeDuplicate(vo.getCode())) {
                 throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
             }
-//            validCodeDateIsToday(vo);
             String pattern = "^" + FIRST_MILE_CODE_DUPLICATE + "-\\d{8}-[0-8]\\d{5}$";
             if (vo.getCode().matches(pattern)) {
                 //如果符合再设置max序号
@@ -138,6 +140,11 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         }
 
         TmsFirstMileDO firstMile = BeanUtils.toBean(vo, TmsFirstMileDO.class);
+
+        // 计算主表的总数量、总重量和总体积
+        List<TmsFirstMileItemDO> items = BeanUtils.toBean(vo.getFirstMileItems(), TmsFirstMileItemDO.class);
+        calculateTotalInfo(firstMile, items);
+        
         firstMileMapper.insert(firstMile);
 
         Long firstMileId = firstMile.getId();
@@ -202,7 +209,13 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_UPDATE_FAIL_APPROVE);
 
         //1.0 更新头程单
-        firstMileMapper.updateById(BeanUtils.toBean(vo, TmsFirstMileDO.class));
+        TmsFirstMileDO updateObj = BeanUtils.toBean(vo, TmsFirstMileDO.class);
+
+        // 计算主表的总数量、总重量和总体积
+        List<TmsFirstMileItemDO> items = BeanUtils.toBean(vo.getFirstMileItems(), TmsFirstMileItemDO.class);
+        calculateTotalInfo(updateObj, items);
+
+        firstMileMapper.updateById(updateObj);
 
         //2.0 更新头程单子表
         updateFirstMileItemList(vo.getId(), vo.getFirstMileItems());
@@ -703,5 +716,64 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         // 3. 执行更新
         firstMileItemMapper.updateById(updateObj);
+    }
+
+    /**
+     * 计算主表的总数量、总重量和总体积
+     *
+     * @param firstMile 主表对象
+     * @param items     子表对象列表
+     */
+    private void calculateTotalInfo(TmsFirstMileDO firstMile, List<TmsFirstMileItemDO> items) {
+        if (items == null || items.isEmpty()) {
+            firstMile.setTotalQty(0);
+            firstMile.setTotalWeight(BigDecimal.ZERO);
+            firstMile.setTotalVolume(BigDecimal.ZERO);
+            return;
+        }
+
+        // 计算总数量、总重量和总体积
+        int totalQty = 0;
+        BigDecimal totalWeight = BigDecimal.ZERO;
+        BigDecimal totalVolume = BigDecimal.ZERO;
+
+        for (TmsFirstMileItemDO item : items) {
+            // 获取产品信息
+            ErpProductDTO product = erpProductApi.getProductDto(item.getProductId());
+            if (product == null) {
+                continue;
+            }
+
+            // 设置明细项的包装长宽高
+            item.setPackageLength(BigDecimal.valueOf(product.getPackageLength()));
+            item.setPackageWidth(BigDecimal.valueOf(product.getPackageWidth()));
+            item.setPackageHeight(BigDecimal.valueOf(product.getPackageHeight()));
+            item.setPackageWeight(product.getPackageWeight());
+
+            // 累加总数量
+            if (item.getQty() != null) {
+                totalQty += item.getQty();
+            }
+
+            // 累加毛重
+            if (product.getPackageWeight() != null && item.getQty() != null) {
+                totalWeight = totalWeight.add(product.getPackageWeight().multiply(BigDecimal.valueOf(item.getQty())));
+            }
+
+            // 计算单个物品的体积（长*宽*高）并乘以数量
+            if (product.getPackageLength() != null && product.getPackageWidth() != null && product.getPackageHeight() != null && item.getQty() != null) {
+                BigDecimal itemVolume = BigDecimal.valueOf(product.getPackageLength())
+                    .multiply(BigDecimal.valueOf(product.getPackageWidth()))
+                    .multiply(BigDecimal.valueOf(product.getPackageHeight()))
+                    .multiply(BigDecimal.valueOf(item.getQty()));
+                // 设置明细项的体积
+                item.setVolume(itemVolume);
+                totalVolume = totalVolume.add(itemVolume);
+            }
+        }
+
+        firstMile.setTotalQty(totalQty);
+        firstMile.setTotalWeight(totalWeight);
+        firstMile.setTotalVolume(totalVolume);
     }
 }
