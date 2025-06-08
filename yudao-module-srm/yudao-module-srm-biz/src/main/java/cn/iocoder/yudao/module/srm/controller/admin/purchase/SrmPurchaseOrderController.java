@@ -60,7 +60,6 @@ public class SrmPurchaseOrderController {
     @Autowired
     @Lazy
     SrmPurchaseOrderService purchaseOrderService;
-    //    warehouse
 
     @PostMapping("/create")
     @Operation(summary = "创建采购订单")

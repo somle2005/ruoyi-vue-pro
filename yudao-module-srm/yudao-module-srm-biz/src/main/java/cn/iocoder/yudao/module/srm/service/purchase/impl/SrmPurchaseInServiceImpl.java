@@ -13,7 +13,6 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
-import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.srm.config.machine.SrmOrderInCountContext;
@@ -85,12 +84,12 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
     private final SrmPurchaseInMapper purchaseInMapper;
     private final SrmPurchaseInItemMapper purchaseInItemMapper;
-    private final ErpProductApi erpProductApi;
     private final SrmNoRedisDAO noRedisDAO;
-    private final FmsAccountApi erpAccountApi;
     private final SrmPurchaseReturnItemMapper srmPurchaseReturnItemMapper;
-    private final WmsInboundApi wmsInboundApi;
     private final SrmSupplierService supplierService;
+    private final ErpProductApi erpProductApi;
+    private final WmsInboundApi wmsInboundApi;
+    private final FmsCompanyApi fmsCompanyApi;
     @Resource
     @Lazy // 延迟加载，避免循环依赖
     SrmPurchaseOrderService purchaseOrderService;
@@ -109,8 +108,6 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     private StateMachine<SrmAuditStatus, SrmEventEnum, SrmPurchaseInAuditReqVO> purchaseInAuditStateMachine;
     @Resource(name = PURCHASE_IN_STORAGE_STATE_MACHINE)
     private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountContext> purchaseInStorageMachine;
-    @Autowired
-    private FmsCompanyApi fmsCompanyApi;
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,

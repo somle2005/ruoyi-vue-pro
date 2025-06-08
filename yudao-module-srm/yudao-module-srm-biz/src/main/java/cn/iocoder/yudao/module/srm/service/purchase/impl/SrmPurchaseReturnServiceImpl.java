@@ -576,17 +576,23 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
      * @param returnId 采购退货单ID
      */
     private void abandonWmsOutbound(Long returnId) {
-        List<WmsOutboundDTO> dtoList = wmsOutboundApi.getOutboundList(BillType.SRM_PURCHASE_RETURN.getValue(), returnId);
-        dtoList.forEach(wmsOutboundDTO -> {
-            //如果出库单是草稿状态 -> 作废
-            if (Objects.equals(wmsOutboundDTO.getAuditStatus(), WmsOutboundAuditStatus.DRAFT.getValue())) {
-                // 作废 WMS 出库单
-                wmsOutboundApi.abandonOutbound(wmsOutboundDTO.getId(), "采购退货反审核");
-            } else {
-                //提示
-                throw exception(PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON, wmsOutboundDTO.getCode());
-            }
-        });
+        List<WmsOutboundDTO> dtoList = Optional.ofNullable(wmsOutboundApi.getOutboundList(BillType.SRM_PURCHASE_RETURN.getValue(), returnId))
+            .orElse(Collections.emptyList());
+        if (CollUtil.isEmpty(dtoList)) {
+            return;
+        }
+        //  收集所有非草稿
+        List<String> nonDraftCodes = dtoList.stream()
+            .filter(dto -> !Objects.equals(dto.getAuditStatus(), WmsOutboundAuditStatus.DRAFT.getValue()))
+            .map(WmsOutboundDTO::getCode)
+            .collect(Collectors.toList());
+
+        if (CollUtil.isNotEmpty(nonDraftCodes)) {
+            throw exception(PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON, String.join(",", nonDraftCodes));
+        }
+
+        // 作废出库单
+        dtoList.forEach(dto -> wmsOutboundApi.abandonOutbound(dto.getId(), "采购退货反审核"));
     }
 
     @Override
@@ -608,7 +614,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                     auditStatusMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, req);
                     //创建 WMS 出库单(草稿)
                     try {
-                        createWmsOutbound(purchaseReturnDO, returnItemDOS);
+                        this.createWmsOutbound(purchaseReturnDO, returnItemDOS);
                     } catch (Exception e) {
                         log.error("创建WMS出库单失败", e);
                         throw exception(PURCHASE_RETURN_PROCESS_FAIL_WMS_OUTBOUND_EXISTS, truncate(e.getMessage(), 200));
