@@ -181,10 +181,10 @@ public class TmsCustomRuleServiceImpl implements TmsCustomRuleService {
             return;
         }
         // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
-        String barCode = erpProductApi.getProductDto(productId).getCode();
+        String productCode = erpProductApi.getProductDto(productId).getCode();
         String countryDesc = dictDataApi.getDictDataLabel(TmsDictTypeConstants.COUNTRY_CODE, countryCode);
-        ThrowUtil.ifThrow(id == null, NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE, barCode + countryDesc);
-        ThrowUtil.ifThrow(!tmsCustomRuleDO.getId().equals(id), NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE, barCode + countryDesc);
+        ThrowUtil.ifThrow(id == null, NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE, productCode + countryDesc);
+        ThrowUtil.ifThrow(!tmsCustomRuleDO.getId().equals(id), NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE, productCode + countryDesc);
     }
 
     private void baseValidator(TmsCustomRuleSaveReqVO vo) {

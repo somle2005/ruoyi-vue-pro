@@ -89,11 +89,11 @@ public class ErpToEccangConverter {
         String countrySuffix = ObjectUtil.isNotEmpty(countryCode)
             ? getCountrySuffix(dictDataApi.getDictData(TmsDictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode)).getLabel())
             : "";
-        String barCode = productDTO.getCode();
+        String productCode = productDTO.getCode();
         String suffix = countrySuffix.isEmpty() ? "" : "-" + countrySuffix;
         eccangProduct.setProductTitle(productDTO.getName() + suffix);
-        eccangProduct.setProductTitleEn(CharSequenceUtil.isNotBlank(barCode) ? barCode + suffix : barCode);
-        eccangProduct.setProductSku(CharSequenceUtil.isNotBlank(barCode) ? barCode + suffix : barCode);
+        eccangProduct.setProductTitleEn(CharSequenceUtil.isNotBlank(productCode) ? productCode + suffix : productCode);
+        eccangProduct.setProductSku(CharSequenceUtil.isNotBlank(productCode) ? productCode + suffix : productCode);
         //申报币种
         Optional.ofNullable(customRuleDTO.getDeclaredValueCurrencyCode())
             .map(String::valueOf)

@@ -91,19 +91,19 @@ public class ErpToKingdeeConverter {
         // 获取产品名称
         String productName = productDTO.getName();
         // 获取产品条码
-        String barCode = productDTO.getCode();
+        String productCode = productDTO.getCode();
         // 如果国家编码不为空，且产品条码不为空，设置SKU
         if (ObjectUtil.isNotEmpty(countryCode)) {
             DictDataRespDTO dictData = dictDataApi.getDictData(TmsDictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
-            if (CharSequenceUtil.isNotBlank(barCode)) {
+            if (CharSequenceUtil.isNotBlank(productCode)) {
                 String countrySuffix = getCountrySuffix(dictData.getLabel());
-                reqVO.setNumber(barCode + "-" + countrySuffix);
+                reqVO.setNumber(productCode + "-" + countrySuffix);
                 reqVO.setName(productName + "-" + countrySuffix);
             }
         }
         // 如果国家编码为空，且产品名称不为空，设置SKU
-        else if (ObjectUtil.isNotEmpty(productName) && ObjectUtil.isNotEmpty(barCode)) {
-            reqVO.setNumber(barCode);
+        else if (ObjectUtil.isNotEmpty(productName) && ObjectUtil.isNotEmpty(productCode)) {
+            reqVO.setNumber(productCode);
             reqVO.setName(productName);
         }
         reqVO.setBarcode(productDTO.getCode());

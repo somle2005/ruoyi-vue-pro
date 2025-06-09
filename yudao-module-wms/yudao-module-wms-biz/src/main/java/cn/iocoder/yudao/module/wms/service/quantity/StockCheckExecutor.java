@@ -281,7 +281,6 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
                 throw exception(STOCK_BIN_SELLABLE_QTY_NOT_ENOUGH, stockBin.getBin().getName(), product.getCode());
             }
 
-
             WmsInboundItemLogicDO inboundItemLogicDO = inboundItemLogicDOMap.get(outboundItemSaveReqVO.getProductId());
             if (inboundItemLogicDO == null) {
                 // 求最早的入库批次
