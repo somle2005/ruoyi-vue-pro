@@ -126,6 +126,27 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         }
     }
 
+    /**
+     * 校验头程单编号
+     *
+     * @param code      编号
+     * @param excludeId 排除的ID（更新时使用）
+     */
+    private void validateFirstMileCode(String code, Long excludeId) {
+        // 1. 校验编号是否重复
+        boolean isDuplicate = excludeId != null ? validCodeDuplicate(code, excludeId) : validCodeDuplicate(code);
+        if (isDuplicate) {
+            throw exception(FIRST_MILE_CODE_DUPLICATE, code);
+        }
+
+        // 2. 校验编号格式
+        String pattern = "^" + TmsNoRedisDAO.FIRST_MILE_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$";
+        if (code.matches(pattern)) {
+            // 如果符合格式，设置最大序号
+            noRedisDAO.setManualSerial(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, code);
+        }
+    }
+
     @Override
     @Idempotent
     @Transactional(rollbackFor = Exception.class)
@@ -138,16 +159,9 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         warehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
 
         if (vo.getCode() != null) {
-            if (validCodeDuplicate(vo.getCode())) {
-                throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
-            }
-            String pattern = "^" + TmsNoRedisDAO.FIRST_MILE_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$";
-            if (vo.getCode().matches(pattern)) {
-                //如果符合再设置max序号
-                noRedisDAO.setManualSerial(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, vo.getCode());
-            }
+            validateFirstMileCode(vo.getCode(), null);
         } else {
-            vo.setCode(noRedisDAO.generate(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, FIRST_MILE_CODE_DUPLICATE));
+            vo.setCode(noRedisDAO.generate(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, FIRST_MILE_CODE_GENERATE_FAIL));
         }
 
         TmsFirstMileDO firstMile = BeanUtils.toBean(vo, TmsFirstMileDO.class);
@@ -210,12 +224,9 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         //校验code
         if (!Objects.equals(vo.getCode(), tmsFirstMileDO.getCode())) {
-            validCodeDateIsToday(vo);
-            if (validCodeDuplicate(vo.getCode(), vo.getId())) {
-                throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
-            }
-            noRedisDAO.setManualSerial(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, vo.getCode());
+            validateFirstMileCode(vo.getCode(), vo.getId());
         }
+
         //校验状态
         statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_UPDATE_FAIL_APPROVE);
 
