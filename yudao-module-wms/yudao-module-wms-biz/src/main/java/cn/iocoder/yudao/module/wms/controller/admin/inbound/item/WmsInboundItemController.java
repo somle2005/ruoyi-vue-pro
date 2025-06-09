@@ -242,7 +242,7 @@ public class WmsInboundItemController {
 
             inboundItemBinVO.setWarehouseName(itemRespVO.getWarehouse().getName());
             inboundItemBinVO.setInboundCode(itemRespVO.getInbound().getCode());
-            inboundItemBinVO.setProductCode(itemRespVO.getProduct().getBarCode());
+            inboundItemBinVO.setProductCode(itemRespVO.getProduct().getCode());
 
             WmsStockType stockType = WmsStockType.parse(itemRespVO.getStockType());
             inboundItemBinVO.setStockTypeLabel(stockType.getLabel());
@@ -323,7 +323,7 @@ public class WmsInboundItemController {
                 continue;
             }
             if (itemRespVO.getProduct() != null) {
-                exportVO.setProductCode(itemRespVO.getProduct().getBarCode());
+                exportVO.setProductCode(itemRespVO.getProduct().getCode());
                 exportVO.setProductName(itemRespVO.getProduct().getName());
             }
             if (itemRespVO.getWarehouse() != null) {

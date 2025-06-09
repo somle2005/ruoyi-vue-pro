@@ -104,9 +104,7 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
         // 更新
         int makePendingQty = Math.max(exists.getMakePendingQty() + updateReqVO.getMakePendingQty(), 0);
         exists.setMakePendingQty(makePendingQty);
-        stockWarehouseMapper.updateByProductIdAndWarehouseId(updateReqVO);
-//        stockWarehouseMapper.updateById(exists);
-        // 返回
+        stockWarehouseMapper.updateById(exists);
     }
 
     /**

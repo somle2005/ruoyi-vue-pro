@@ -170,7 +170,7 @@ public class WmsStockBinController {
             }
             xlsVO.setWarehouseName(vo.getWarehouse().getName());
             xlsVO.setBinName(vo.getBin().getName());
-            xlsVO.setProductCode(vo.getProduct().getBarCode());
+            xlsVO.setProductCode(vo.getProduct().getCode());
         }
 
         // 导出 Excel

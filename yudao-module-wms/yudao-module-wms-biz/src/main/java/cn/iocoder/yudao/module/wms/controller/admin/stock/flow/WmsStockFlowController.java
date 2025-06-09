@@ -168,7 +168,7 @@ public class WmsStockFlowController {
 
     private void applyExcelVO(WmsStockFlowWarehouseExcelVO excelVO, WmsStockFlowRespVO flowRespVO) {
         excelVO.setWarehouseName(flowRespVO.getWarehouse().getName());
-        excelVO.setProductCode(flowRespVO.getProduct().getBarCode());
+        excelVO.setProductCode(flowRespVO.getProduct().getCode());
         excelVO.setFlowTime(DateUtils.formatLocalDateTime(flowRespVO.getCreateTime()));
         if(flowRespVO.getInbound()!=null) {
             excelVO.setReasonBillCode(flowRespVO.getInbound().getCode());
@@ -210,7 +210,7 @@ public class WmsStockFlowController {
 
     private void applyExcelVO(WmsStockFlowBinExcelVO excelVO, WmsStockFlowRespVO flowRespVO) {
         excelVO.setWarehouseName(flowRespVO.getWarehouse().getName());
-        excelVO.setProductCode(flowRespVO.getProduct().getBarCode());
+        excelVO.setProductCode(flowRespVO.getProduct().getCode());
         excelVO.setFlowTime(DateUtils.formatLocalDateTime(flowRespVO.getCreateTime()));
         if(flowRespVO.getInbound()!=null) {
             excelVO.setReasonBillCode(flowRespVO.getInbound().getCode());
@@ -252,7 +252,7 @@ public class WmsStockFlowController {
 
     private void applyExcelVO(WmsStockFlowLogicExcelVO excelVO, WmsStockFlowRespVO flowRespVO) {
         excelVO.setWarehouseName(flowRespVO.getWarehouse().getName());
-        excelVO.setProductCode(flowRespVO.getProduct().getBarCode());
+        excelVO.setProductCode(flowRespVO.getProduct().getCode());
         excelVO.setFlowTime(DateUtils.formatLocalDateTime(flowRespVO.getCreateTime()));
         if(flowRespVO.getInbound()!=null) {
             excelVO.setReasonBillCode(flowRespVO.getInbound().getCode());
