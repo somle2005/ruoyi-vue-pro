@@ -64,7 +64,7 @@ public class TmsTransferDO extends BaseDO {
      */
     private String auditAdvice;
     /**
-     * 出库状态
+     * 出库状态(wms的状态字典)
      */
     private Integer outboundStatus;
     /**
@@ -72,7 +72,7 @@ public class TmsTransferDO extends BaseDO {
      */
     private LocalDateTime outboundTime;
     /**
-     * 入库状态
+     * 入库状态(wms的状态字典)
      */
     private Integer inboundStatus;
     /**
