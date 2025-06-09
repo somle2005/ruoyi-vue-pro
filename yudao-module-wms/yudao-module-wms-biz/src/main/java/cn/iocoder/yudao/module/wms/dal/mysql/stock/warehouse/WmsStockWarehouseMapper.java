@@ -6,7 +6,6 @@ import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehousePageReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
@@ -98,13 +97,6 @@ public interface WmsStockWarehouseMapper extends BaseMapperX<WmsStockWarehouseDO
         LambdaQueryWrapperX<WmsStockWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
         wrapper.in(WmsStockWarehouseDO::getProductId, productIds);
         return selectList(wrapper);
-    }
-
-    default void updateByProductIdAndWarehouseId(WmsStockWarehouseSaveReqVO updateReqVO) {
-        LambdaQueryWrapperX<WmsStockWarehouseDO> wrapper = new LambdaQueryWrapperX<>();
-        wrapper.eq(WmsStockWarehouseDO::getProductId, updateReqVO.getProductId())
-            .eq(WmsStockWarehouseDO::getWarehouseId, updateReqVO.getWarehouseId());
-        return;
     }
 
 }

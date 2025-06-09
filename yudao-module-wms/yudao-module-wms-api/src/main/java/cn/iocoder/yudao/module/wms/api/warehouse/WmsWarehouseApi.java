@@ -32,7 +32,7 @@ public interface WmsWarehouseApi {
     /**
      * 更新仓库库存
      *
-     * @param updateReqVO 更新信息
+     * @param updateReqVO 产品ID, 仓库ID，在制数量
      * @return 仓库库存
      */
     Boolean updateStockWarehouse(WmsWareHouseUpdateReqDTO updateReqVO);
