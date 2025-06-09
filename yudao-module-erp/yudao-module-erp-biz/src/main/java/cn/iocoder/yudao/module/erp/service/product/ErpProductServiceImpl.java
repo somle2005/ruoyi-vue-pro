@@ -481,12 +481,4 @@ public class ErpProductServiceImpl implements ErpProductService {
         //判断登记是否符合要求
         ThrowUtil.ifThrow(!levels.contains(level), DEPT_LEVEL_NOT_MATCH);
     }
-
-    @Override
-    public List<Long> listProductIdByProductCode(String productCode) {
-        if (StrUtil.isBlank(productCode)) {
-            return Collections.emptyList();
-        }
-        return productMapper.selectIdListByBarCode(productCode);
-    }
 }

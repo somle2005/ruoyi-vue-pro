@@ -174,9 +174,4 @@ public class ErpProductServiceDelegator implements ErpProductService {
         return service.getProductCountByUnitId(unitId);
     }
 
-    @Override
-    public List<Long> listProductIdByProductCode(String barCode) {
-        ErpProductService service = getDefaultService();
-        return service.listProductIdByProductCode(barCode);
-    }
 }
