@@ -298,16 +298,19 @@ public class EccangService {
 
     public Stream<EccangPage> getOrderArchivePages(EccangOrderVO orderParams, Integer year) {
         orderParams.setYear(year);
+        Stream<EccangPage> stream;
         try {
-            return getOrderUnarchivePages(orderParams);
+            stream = getOrderUnarchivePages(orderParams);
         } catch (EccangResponseException e) {
-            boolean noArchive = e.getEccangError().stream().anyMatch(err -> "10001".equals(err.getErrorCode()));
-            if (noArchive) {
-                log.info("当前{}年不存在归档信息, 跳过", year);
-                return Stream.empty();
+            for (EccangResponse.EccangError eccangError : e.getEccangError()) {
+                if (eccangError.getErrorCode().equals("10001")) {
+                    log.info("当前{}年不存在归档信息,跳过", year);
+                    return Stream.empty();//跳过
+                }
             }
             throw e;
         }
+        return stream;
     }
 
 
