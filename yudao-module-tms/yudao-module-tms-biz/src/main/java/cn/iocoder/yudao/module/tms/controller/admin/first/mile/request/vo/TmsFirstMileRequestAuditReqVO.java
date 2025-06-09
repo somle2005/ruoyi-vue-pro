@@ -11,7 +11,7 @@ import lombok.Data;
 public class TmsFirstMileRequestAuditReqVO {
 
     @NotNull(message = "头程申请单ID不能为空")
-    @Schema(description = "头程申请单ID集合")
+    @Schema(description = "头程申请单ID")
     @DiffLogField(name = "头程申请单ID")
     private Long requestId;
 

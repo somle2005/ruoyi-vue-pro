@@ -48,7 +48,7 @@ public interface TmsErrorCodeConstants {
     ErrorCode FIRST_MILE_REQUEST_STATUS_MACHINE_ERROR = new ErrorCode(1_030_900_001, "无法在({})状态下触发({})事件");
 
     // ========== 头程单 1-030-901-000 ==========
-    ErrorCode FIRST_MILE_NOT_EXISTS = new ErrorCode(1_030_901_001, "头程单不存在");
+    ErrorCode FIRST_MILE_NOT_EXISTS = new ErrorCode(1_030_901_001, "头程单编号({})不存在");
     ErrorCode FIRST_MILE_ID_NOT_EXISTS = new ErrorCode(1_030_901_002, "头程单ID({})不存在");
     ErrorCode FIRST_MILE_CODE_GENERATE_FAIL = new ErrorCode(1_030_901_003, "头程单编号生成失败,大于999999");
     ErrorCode FIRST_MILE_CODE_DUPLICATE = new ErrorCode(1_030_901_004, "头程单编号({})已存在");

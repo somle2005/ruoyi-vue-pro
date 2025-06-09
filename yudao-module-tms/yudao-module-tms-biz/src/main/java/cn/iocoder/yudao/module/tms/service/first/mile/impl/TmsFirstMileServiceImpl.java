@@ -287,7 +287,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     public TmsFirstMileDO validateFirstMileExists(Long id) {
         TmsFirstMileDO tmsFirstMileDO = firstMileMapper.selectById(id);
         if (tmsFirstMileDO == null) {
-            throw exception(FIRST_MILE_NOT_EXISTS);
+            throw exception(FIRST_MILE_NOT_EXISTS, id);
         }
         return tmsFirstMileDO;
     }

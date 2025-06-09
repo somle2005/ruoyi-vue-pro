@@ -33,7 +33,6 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -146,7 +145,7 @@ public class TmsFirstMileRequestController {
     @PutMapping("/submit-audit")
     @Operation(summary = "提交审核")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:submit-audit')")
-    public CommonResult<Boolean> submitAudit(@Valid @RequestBody TmsFirstMileRequestSubmitAuditReqVO reqVO) {
+    public CommonResult<Boolean> submitAudit(@Validated @RequestBody TmsFirstMileRequestSubmitAuditReqVO reqVO) {
         firstMileRequestService.submitAudit(reqVO.getIds());
         return success(true);
     }
@@ -154,7 +153,7 @@ public class TmsFirstMileRequestController {
     @PutMapping("/audit-status")
     @Operation(summary = "审核/反审核")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:audit-status')")
-    public CommonResult<Boolean> audit(TmsFirstMileRequestAuditReqVO reqVO) {
+    public CommonResult<Boolean> audit(@RequestBody TmsFirstMileRequestAuditReqVO reqVO) {
         firstMileRequestService.review(reqVO);
         return success(true);
     }
@@ -163,7 +162,7 @@ public class TmsFirstMileRequestController {
     @PutMapping("/update-item-status")
     @Operation(summary = "启用/禁用申请单子项")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:item-off')")
-    public CommonResult<Boolean> updateItemStatus(@Valid @RequestBody TmsFirstMileRequestItemOffReqVO reqVO) {
+    public CommonResult<Boolean> updateItemStatus(@Validated @RequestBody TmsFirstMileRequestItemOffReqVO reqVO) {
         firstMileRequestService.switchTmsFirstMileOpenStatus(reqVO.getItemIds(), reqVO.getEnable());
         return success(true);
     }
@@ -186,7 +185,7 @@ public class TmsFirstMileRequestController {
     @PostMapping("/get-product-stock")
     @Operation(summary = "获取产品可用库存")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:query')")
-    public CommonResult<TmsFirstMileRequestProductStockRespVO> getProductStock(@Valid @RequestBody TmsFirstMileRequestProductStockReqVO reqVO) {
+    public CommonResult<TmsFirstMileRequestProductStockRespVO> getProductStock(@Validated @RequestBody TmsFirstMileRequestProductStockReqVO reqVO) {
         Map<Long, WmsStockLogicDTO> stockMap = wmsStockLogicApi.selectByDeptIdAndProductIdAndCountryIdMap(reqVO.getDeptId(), reqVO.getProductIds(), reqVO.getCountry());
         
         // 转换为 ProductStock 列表
