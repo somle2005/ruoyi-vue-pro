@@ -1,25 +1,25 @@
 package com.somle.esb.job;
 
 
-import com.somle.eccang.model.EccangStockCheckBatchLogVO;
+import com.somle.eccang.model.EccangInventoryBatchLogVO;
 import com.somle.esb.model.OssData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EccangStockCheckBatchLogDataJob extends EccangDataJob {
+public class EccangInventoryBatchLogDataJob extends EccangDataJob {
 
 
     @Override
     public String execute(String param) throws Exception {
         setDate(param);
-        EccangStockCheckBatchLogVO eccangStockCheckBatchLogVO = new EccangStockCheckBatchLogVO();
-        eccangStockCheckBatchLogVO.setDateFrom(beforeYesterdayFirstSecond);
-        eccangStockCheckBatchLogVO.setDateTo(beforeYesterdayLastSecond);
-        eccangService.getStockCheckBatchLog(eccangStockCheckBatchLogVO)
+        EccangInventoryBatchLogVO eccangInventoryBatchLogVO = new EccangInventoryBatchLogVO();
+        eccangInventoryBatchLogVO.setDateFrom(beforeYesterdayFirstSecond);
+        eccangInventoryBatchLogVO.setDateTo(beforeYesterdayLastSecond);
+        eccangService.getInventoryBatchLog(eccangInventoryBatchLogVO)
             .forEach(page -> {
                 OssData data = OssData.builder()
                     .database(DATABASE)
-                    .tableName("stockCheck_batch_log")
+                    .tableName("inventory_batch_log")
                     .syncType("inc")
                     .requestTimestamp(System.currentTimeMillis())
                     .folderDate(beforeYesterday)
