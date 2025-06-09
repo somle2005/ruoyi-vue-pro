@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileRespVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
@@ -129,6 +130,8 @@ public interface TmsFirstMileService {
     List<TmsFirstMileItemDO> getFirstMileItemListByRequestItemId(Long requestItemId);
 
     // ==================== 子表（出运订单费用明细） ====================
+    //装配库存公司
+    void assembleTmsFirstMileStockRespVO(TmsFirstMileRespVO tmsFirstMileRespVO);
 
     /**
      * 根据源ID获取费用列表

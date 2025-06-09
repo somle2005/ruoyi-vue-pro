@@ -1,12 +1,14 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo;
 
 import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Schema(description = "管理后台 - 头程单明细 Response VO")
 @Data
@@ -53,6 +55,8 @@ public class TmsFirstMileItemRespVO extends BaseVO {
     @Schema(description = "库存公司")
     private Long companyId;
 
+    @Schema(description = "库存信息(分页不做渲染)")
+    private List<TmsFirstMileStockRespVO> stock;
     //库存公司名称
     @Schema(description = "库存公司名称")
     @ExcelProperty("库存公司名称")

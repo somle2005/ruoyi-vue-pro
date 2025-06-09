@@ -11,16 +11,21 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
+import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileItemUpdateDTO;
 import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileUpdateDTO;
 import cn.iocoder.yudao.module.tms.api.first.mile.request.TmsFistMileRequestItemDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingSaveReqVO;
 import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
@@ -43,6 +48,8 @@ import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import cn.iocoder.yudao.module.tms.service.vessel.tracking.TmsVesselTrackingService;
+import cn.iocoder.yudao.module.wms.api.inbound.item.WmsInboundItemApi;
+import cn.iocoder.yudao.module.wms.api.inbound.item.dto.WmsInboundItemBinDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.WmsOutboundApi;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
@@ -63,6 +70,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.*;
@@ -92,6 +100,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final WmsWarehouseApi warehouseApi;
     private final WmsOutboundApi wmsOutboundApi;
     private final ErpProductApi erpProductApi;
+    private final WmsInboundItemApi wmsInboundItemApi;
     @Autowired
     @Lazy
     TmsFirstMileRequestService tmsFirstMileRequestService;
@@ -100,6 +109,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     StateMachine<TmsAuditStatus, TmsEventEnum, TmsFirstMileAuditReqVO> auditStateMachine;
     @Resource(name = FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE)
     StateMachine<TmsOrderStatus, TmsEventEnum, TmsFistMileRequestItemDTO> requestItemOrderStateMachine;
+    @Autowired
+    private FmsCompanyApi fmsCompanyApi;
 
 
     //校验code中间日期是否是当天
@@ -487,6 +498,25 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Override
     public List<TmsFirstMileItemDO> getFirstMileItemListByRequestItemId(Long requestItemId) {
         return firstMileItemMapper.selectListByRequestItemId(requestItemId);
+    }
+
+    @Override
+    public void assembleTmsFirstMileStockRespVO(TmsFirstMileRespVO tmsFirstMileRespVO) {
+        Long toWarehouseId = tmsFirstMileRespVO.getToWarehouseId();
+        Set<Long> productIds = tmsFirstMileRespVO.getFirstMileItems().stream().map(TmsFirstMileItemRespVO::getProductId).collect(Collectors.toSet());
+        Map<Long, List<WmsInboundItemBinDTO>> inboundItemBinMap = wmsInboundItemApi.getInboundItemBinMap(toWarehouseId, productIds, true);
+        //companyId inboundItemBinMap
+        Set<Long> companyIds = inboundItemBinMap.values().stream().flatMap(List::stream).flatMap(item -> {
+            return Stream.of(item.getCompanyId(), item.getInboundCompanyId());
+        }).collect(Collectors.toSet());
+        Map<Long, FmsCompanyDTO> companyMap = fmsCompanyApi.getCompanyMap(companyIds);
+        //
+        tmsFirstMileRespVO.getFirstMileItems().forEach(item -> {
+            item.setStock(BeanUtils.toBean(inboundItemBinMap.get(item.getProductId()), TmsFirstMileStockRespVO.class, stock -> {
+                stock.setCompanyName(companyMap.get(stock.getCompanyId()).getName());
+                stock.setInboundCompanyName(companyMap.get(stock.getInboundCompanyId()).getName());
+            }));
+        });
     }
 
     private void createFirstMileItemList(Long firstMileId, List<TmsFirstMileItemSaveReqVO> list) {
