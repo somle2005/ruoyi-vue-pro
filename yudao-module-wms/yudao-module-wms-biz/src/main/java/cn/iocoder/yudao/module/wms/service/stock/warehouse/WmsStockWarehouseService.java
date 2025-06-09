@@ -26,7 +26,7 @@ public interface WmsStockWarehouseService {
     WmsStockWarehouseDO createStockWarehouse(@Valid WmsStockWarehouseSaveReqVO createReqVO);
 
     /**
-     * 更新仓库库存
+     * 更新仓库库信息(在制数量)
      *
      * @param updateReqVO 更新信息
      */

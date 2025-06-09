@@ -30,7 +30,7 @@ public interface WmsWarehouseApi {
     List<WmsWarehouseDTO> selectList(WmsWarehouseListReqDTO reqDTO);
 
     /**
-     * 更新仓库库存
+     * 更新仓库库信息(在制数量)
      *
      * @param updateReqVO 产品ID, 仓库ID，在制数量
      * @return 仓库库存

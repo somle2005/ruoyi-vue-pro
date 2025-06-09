@@ -26,7 +26,7 @@ public interface WmsStockWarehouseMapper extends BaseMapperX<WmsStockWarehouseDO
     default PageResult<WmsStockWarehouseDO> selectPage(WmsStockWarehousePageReqVO reqVO) {
         MPJLambdaWrapperX<WmsStockWarehouseDO> wrapper = new MPJLambdaWrapperX();
         // 连接产品视图
-        wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockWarehouseDO::getProductId).likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode()).eqIfExists(WmsProductDO::getDeptId, reqVO.getProductDeptId());
+        wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockWarehouseDO::getProductId).likeIfExists(WmsProductDO::getCode, reqVO.getProductCode()).eqIfExists(WmsProductDO::getDeptId, reqVO.getProductDeptId());
         // 按仓库
         // 按产品ID
         wrapper.eqIfPresent(WmsStockWarehouseDO::getWarehouseId, reqVO.getWarehouseId())

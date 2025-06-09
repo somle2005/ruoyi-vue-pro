@@ -146,7 +146,7 @@ public class WmsStockLogicController {
             WmsStockLogicRespVO vo = voMap.get(excelVO.getId());
             if (vo != null) {
                 excelVO.setWarehouseName(vo.getWarehouse().getName());
-                excelVO.setProductCode(vo.getProduct().getBarCode());
+                excelVO.setProductCode(vo.getProduct().getCode());
                 excelVO.setCompanyName(vo.getCompany().getName());
                 excelVO.setDeptName(vo.getDept().getName());
             }
