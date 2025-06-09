@@ -16,6 +16,7 @@ import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -28,6 +29,7 @@ import java.util.List;
  * @description: 入库单 API 实现
  */
 @Service
+@Slf4j
 public class WmsInboundApiImpl implements WmsInboundApi {
 
     @Resource
@@ -57,6 +59,7 @@ public class WmsInboundApiImpl implements WmsInboundApi {
             createReqVO.setCompanyId(999L);
         }
         WmsInboundDO inbound = inboundService.createInbound(createReqVO);
+        log.info("wms入库单已创建: {}", inbound.getCode());
         //外部模块生成的入库单，直接发起审批
         WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
         approvalReqVO.setBillType(BillType.WMS_INBOUND.getValue());

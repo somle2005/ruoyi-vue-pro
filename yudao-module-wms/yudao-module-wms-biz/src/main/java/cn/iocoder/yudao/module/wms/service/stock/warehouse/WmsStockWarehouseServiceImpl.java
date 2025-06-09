@@ -94,7 +94,8 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
      * @sign : DC724E64364D70F5
      */
     @Override
-    public WmsStockWarehouseDO updateStockWarehouse(WmsStockWarehouseSaveReqVO updateReqVO) {
+    @Transactional(rollbackFor = Exception.class)
+    public void updateStockWarehouse(WmsStockWarehouseSaveReqVO updateReqVO) {
         // 校验存在
         WmsStockWarehouseDO exists = validateStockWarehouseExists(updateReqVO.getProductId(), updateReqVO.getWarehouseId());
 //        if (!Objects.equals(updateReqVO.getId(), exists.getId()) && Objects.equals(updateReqVO.getWarehouseId(), exists.getWarehouseId()) && Objects.equals(updateReqVO.getProductId(), exists.getProductId())) {
@@ -103,9 +104,9 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
         // 更新
         int makePendingQty = Math.max(exists.getMakePendingQty() + updateReqVO.getMakePendingQty(), 0);
         exists.setMakePendingQty(makePendingQty);
-        stockWarehouseMapper.updateById(exists);
+        stockWarehouseMapper.updateByProductIdAndWarehouseId(updateReqVO);
+//        stockWarehouseMapper.updateById(exists);
         // 返回
-        return exists;
     }
 
     /**

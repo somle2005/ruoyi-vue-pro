@@ -1,11 +1,11 @@
 package cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo;
 
 import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import java.util.*;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
+ * @author jisencai
  * @table-fields : outbound_pending_qty,product_id,transit_qty,shelving_pending_qty,available_qty,id,defective_qty,make_pending_qty,return_transit_qty,sellable_qty,warehouse_id
  */
 @Schema(description = "管理后台 - 仓库库存新增/修改 Request VO")

@@ -30,7 +30,7 @@ public interface WmsStockWarehouseService {
      *
      * @param updateReqVO 更新信息
      */
-    WmsStockWarehouseDO updateStockWarehouse(@Valid WmsStockWarehouseSaveReqVO updateReqVO);
+    void updateStockWarehouse(@Valid WmsStockWarehouseSaveReqVO updateReqVO);
 
     /**
      * 删除仓库库存

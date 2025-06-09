@@ -65,8 +65,8 @@ public class wmsWarehouseApiImpl implements WmsWarehouseApi {
     }
 
     @Override
-    public Boolean updateStockWarehouse(WmsWareHouseUpdateReqDTO updateReqVO){
-        stockWarehouseService.updateStockWarehouse(BeanUtils.toBean(updateReqVO, WmsStockWarehouseSaveReqVO.class));
+    public Boolean updateStockWarehouse(WmsWareHouseUpdateReqDTO wmsWareHouseUpdateReqDTO) {
+        stockWarehouseService.updateStockWarehouse(BeanUtils.toBean(wmsWareHouseUpdateReqDTO, WmsStockWarehouseSaveReqVO.class));
         return true;
     }
 
