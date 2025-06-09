@@ -213,7 +213,7 @@ public class SrmPurchaseRequestController {
             //供应商信息
             MapUtils.findAndThen(supplierMap, purchaseRequest.getSupplierId(), supplier -> purchaseRequest.setSupplierName(supplier.getName()));
             purchaseRequest.setItems(BeanUtils.toBean(purchaseRequestItemMap.get(purchaseRequest.getId()), SrmPurchaseRequestItemRespVO.class, item -> {
-                MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName()).setProductBarCode(product.getCode())
+                MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName()).setProductCode(product.getCode())
                     .setProductUnitName(unitMap.get(product.getUnitId()).getName()).setProductUnitId(unitMap.get(product.getUnitId()).getId())
                     .setCode(product.getCode()));
                 //产品仓库填充

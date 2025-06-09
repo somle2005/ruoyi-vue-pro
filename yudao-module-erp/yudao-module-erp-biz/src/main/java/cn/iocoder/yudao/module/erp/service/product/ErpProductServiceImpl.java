@@ -483,10 +483,10 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
-    public List<Long> listProductIdByBarCode(String barCode) {
-        if (StrUtil.isBlank(barCode)) {
+    public List<Long> listProductIdByProductCode(String productCode) {
+        if (StrUtil.isBlank(productCode)) {
             return Collections.emptyList();
         }
-        return productMapper.selectIdListByBarCode(barCode);
+        return productMapper.selectIdListByBarCode(productCode);
     }
 }

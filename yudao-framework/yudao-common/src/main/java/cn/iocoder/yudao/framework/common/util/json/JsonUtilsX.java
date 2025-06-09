@@ -24,7 +24,7 @@ import java.util.*;
  **/
 @Slf4j
 public class JsonUtilsX {
-    private static ObjectMapper objectMapper = new ObjectMapper();
+    private static final ObjectMapper objectMapper = new ObjectMapper();
 
     static {
         objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
@@ -174,22 +174,6 @@ public class JsonUtilsX {
             throw new RuntimeException("JSON解析异常", e);
         }
     }
-
-    /**
-     * 将JsonNode转换为指定类型的对象
-     *
-     * @param node          JsonNode对象
-     * @param typeReference 类型引用
-     * @return 转换后的对象
-     */
-    public static <T> T parseObject(JsonNode node, TypeReference<T> typeReference) {
-        try {
-            return objectMapper.convertValue(node, typeReference);
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("JSON转换异常", e);
-        }
-    }
-
 //    /**
 //     * 将字符串解析成指定类型的对象
 //     * 使用 {@link #parseObject(String, Class)} 时，在@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS) 的场景下，

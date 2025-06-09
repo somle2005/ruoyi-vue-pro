@@ -131,7 +131,7 @@ public class CrmClueServiceImpl implements CrmClueService {
             Collection<String> countryCodes = reqVO.getCountryCodes().stream()
                 .map(String::valueOf)
                 .toList();
-            dictDataApi.validateDictDataList(CrmDictTypeConstants.COUNTRY_CODE, countryCodes);
+            dictDataApi.validateDictDataList(CrmDictTypeConstants.CRM_COUNTRY_CODE, countryCodes);
         }
     }
 
