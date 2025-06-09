@@ -7,8 +7,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
 
-import java.math.BigDecimal;
-
 @Schema(description = "管理后台 - 头程申请表明细新增/修改 Request VO")
 @Data
 public class TmsFirstMileRequestItemSaveReqVO {
@@ -31,26 +29,6 @@ public class TmsFirstMileRequestItemSaveReqVO {
     @NotNull(message = "申请数量不能为空")
     @DiffLogField(name = "申请数量")
     private Integer qty;
-
-    @Schema(description = "包装长（cm）")
-    @DiffLogField(name = "包装长")
-    private BigDecimal packageLength;
-
-    @Schema(description = "包装宽（cm）")
-    @DiffLogField(name = "包装宽")
-    private BigDecimal packageWidth;
-
-    @Schema(description = "包装高（cm）")
-    @DiffLogField(name = "包装高")
-    private BigDecimal packageHeight;
-
-    @Schema(description = "毛重（kg）")
-    @DiffLogField(name = "毛重")
-    private BigDecimal packageWeight;
-
-    @Schema(description = "体积（m³）")
-    @DiffLogField(name = "体积")
-    private BigDecimal volume;
 
     @Schema(description = "备注")
     @DiffLogField(name = "备注")

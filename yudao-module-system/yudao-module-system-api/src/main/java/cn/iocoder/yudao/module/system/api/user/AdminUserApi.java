@@ -182,8 +182,7 @@ public interface AdminUserApi {
 
             Set<Long> userIds = new HashSet<>();
             for (T t : collection) {
-                for (int i = 0; i < getters.size(); i++) {
-                    Function<T, ?> getter = getters.get(i);
+                for (Function<T, ?> getter : getters) {
                     Object userId = getter.apply(t);
                     userIds.add(NumberUtils.parseLong(userId));
                 }

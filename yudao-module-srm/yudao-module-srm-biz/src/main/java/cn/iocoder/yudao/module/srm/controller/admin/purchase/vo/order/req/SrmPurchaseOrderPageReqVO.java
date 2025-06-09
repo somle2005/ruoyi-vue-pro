@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
@@ -97,8 +98,8 @@ public class SrmPurchaseOrderPageReqVO extends PageParam {
     @Schema(description = "执行状态")
     private Integer executeStatus;
 
-    @Schema(description = "入库状态")
-    private Integer inboundStatus;
+    @Schema(description = "入库状态(多选)")
+    private List<Integer> inboundStatusList;
 
     @Schema(description = "付款状态")
     private Integer payStatus;

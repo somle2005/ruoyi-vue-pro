@@ -77,7 +77,7 @@ public class TmsTransferApiImpl implements TmsTransferApi {
 
         //4.0 创建对应入库单
         try {
-            createInbound(reqDTO);
+            this.createInbound(reqDTO);
         } catch (Exception e) {
             throw exception(TRANSFER_CREATE_IN_STOCK_ERROR, truncate(e.getMessage(), 200));
         }
@@ -108,7 +108,7 @@ public class TmsTransferApiImpl implements TmsTransferApi {
                         .productId(item.getProductId())
                         .planQty(item.getQty())
                         .deptId(item.getDeptId()) //行库存部门ID
-                        .companyId(item.getStockCompanyId())
+                        .companyId(item.getStockCompanyId()) //行库存公司ID
                         .remark(item.getRemark())
                         .upstreamId(item.getId())
                         .build())
@@ -126,6 +126,7 @@ public class TmsTransferApiImpl implements TmsTransferApi {
      * @param reqDTO 入库单信息
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void afterInboundAudit(TmsInboundReqDTO reqDTO) {
         // 1.0 校验上游类型是否是调拨入库
         if (!Objects.equals(reqDTO.getUpstreamType(), BillType.TMS_TRANSFER.getValue())) {
@@ -138,7 +139,7 @@ public class TmsTransferApiImpl implements TmsTransferApi {
             .toList();
         List<TmsTransferItemDO> items = transferItemService.validateTransferItemExists(itemIds);
 
-        // 3.0 获取主单并更新入库时间、入库状态、入库单ID、入库单编码
+        // 3.0 更新入库时间、入库状态、入库单ID、入库单编码
         transferService.updateTransferStatus(new TmsTransferStatusUpdateDTO()
             .setId(items.get(0).getTransferId())
             .setInboundTime(reqDTO.getInboundTime())
@@ -148,7 +149,7 @@ public class TmsTransferApiImpl implements TmsTransferApi {
         );
 
         // 3.1 填充子项的入库明细数值
-        for (var inboundItem : reqDTO.getItemList()) {
+        for (TmsInboundItemReqDTO inboundItem : reqDTO.getItemList()) {
             transferItemService.updateTransferItemInbound(
                 inboundItem.getUpstreamId(),
                 inboundItem.getActualQty()

@@ -27,6 +27,10 @@ public class TmsTransferRespVO {
     @ExcelProperty("创建人ID")
     private String creator;
 
+    @Schema(description = "创建人姓名")
+    @ExcelProperty("创建人姓名")
+    private String creatorName;
+
     @Schema(description = "创建时间")
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
@@ -34,6 +38,10 @@ public class TmsTransferRespVO {
     @Schema(description = "更新人ID")
     @ExcelProperty("更新人ID")
     private String updater;
+
+    @ExcelProperty("更新人姓名")
+    @Schema(description = "更新人姓名")
+    private String updaterName;
 
     @Schema(description = "更新时间")
     @ExcelProperty("更新时间")
@@ -60,6 +68,10 @@ public class TmsTransferRespVO {
     @Schema(description = "审核人ID")
     @ExcelProperty("审核人ID")
     private Long auditorId;
+
+    @Schema(description = "审核人姓名")
+    @ExcelProperty("审核人姓名")
+    private String auditorName;
 
     @Schema(description = "审核状态")
     @ExcelProperty("审核状态")

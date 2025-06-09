@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.tms.api.first;
+package cn.iocoder.yudao.module.tms.api.first.mile.dto;
 
 import lombok.Data;
 
@@ -8,7 +8,7 @@ import java.time.LocalDateTime;
  * 头程单DTO
  */
 @Data
-public class TmsFistMileDTO {
+public class TmsFistMileUpdateDTO {
 
     /**
      * 头程单ID
@@ -24,11 +24,7 @@ public class TmsFistMileDTO {
     private String auditAdvice;
 
     /**
-     * 实际送仓时间
-     */
-    private LocalDateTime deliveryActualTime;
-    /**
-     * 发货状态
+     * 出库状态
      */
     private Integer outboundStatus;
     /**

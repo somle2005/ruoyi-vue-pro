@@ -2,7 +2,8 @@ package cn.iocoder.yudao.module.tms.service.first.mile;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
-import cn.iocoder.yudao.module.tms.api.first.TmsFistMileDTO;
+import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileItemUpdateDTO;
+import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileUpdateDTO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileAuditReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMilePageReqVO;
@@ -54,6 +55,22 @@ public interface TmsFirstMileService {
      * @return tmsFirstMileDO
      */
     TmsFirstMileDO validateFirstMileExists(Long id);
+
+    /**
+     * 校验明细行存在
+     *
+     * @param id 明细行ID
+     * @return 明细行
+     */
+    TmsFirstMileItemDO validateFirstMileItemExists(Long id);
+
+    /**
+     * 批量校验明细行存在
+     *
+     * @param ids 明细行ID列表
+     * @return 明细行列表
+     */
+    List<TmsFirstMileItemDO> validateFirstMileItemExists(List<Long> ids);
 
     /**
      * 获得头程单
@@ -124,9 +141,16 @@ public interface TmsFirstMileService {
     /**
      * 更新头程单状态
      *
-     * @param tmsFistMileDTO dto
+     * @param tmsFistMileUpdateDTO dto
      */
-    void updateFirstMileStatus(TmsFistMileDTO tmsFistMileDTO);
+    void updateFirstMileStatus(TmsFistMileUpdateDTO tmsFistMileUpdateDTO);
+
+    /**
+     * 更新头程单明细出库信息
+     *
+     * @param dto 出库信息
+     */
+    void updateFirstMileItemOutbound(TmsFistMileItemUpdateDTO dto);
 
     /**
      * 批量查询申请单MAP

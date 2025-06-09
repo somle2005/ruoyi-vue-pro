@@ -134,11 +134,8 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     public void updateTransferItemOutbound(Long id, Integer outboundQty) {
         // 1. 校验存在
         validateTransferItemExists(id);
-
         // 2. 更新出库信息
-        TmsTransferItemDO updateObj = new TmsTransferItemDO();
-        updateObj.setOutboundClosedQty(outboundQty);
-        transferItemMapper.updateById(updateObj);
+        transferItemMapper.updateById(new TmsTransferItemDO().setId(id).setOutboundClosedQty(outboundQty));
     }
 
     @Override
@@ -146,10 +143,7 @@ public class TmsTransferItemServiceImpl implements TmsTransferItemService {
     public void updateTransferItemInbound(Long itemId, int i) {
         // 1. 校验存在
         validateTransferItemExists(itemId);
-
         //2.0 更新入库信息
-        TmsTransferItemDO updateObj = new TmsTransferItemDO();
-        updateObj.setInboundClosedQty(i);
-        transferItemMapper.updateById(updateObj);
+        transferItemMapper.updateById(new TmsTransferItemDO().setId(itemId).setInboundClosedQty(i));
     }
 }

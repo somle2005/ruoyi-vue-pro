@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestAuditReqVO;
@@ -111,6 +112,8 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
 
         // 计算主表的总重量和总体积
         List<TmsFirstMileRequestItemDO> requestItemDOS = TmsFirstMileRequestConvert.convertItemList(vo.getItems());
+        //校验产品是否存在
+        erpProductApi.validProductList(requestItemDOS.stream().map(TmsFirstMileRequestItemDO::getProductId).distinct().toList());
         calculateTotalWeightAndVolume(firstMileRequest, requestItemDOS);
 
         //code 校验
@@ -408,23 +411,50 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
         if (requestItemDOS == null || requestItemDOS.isEmpty()) {
             firstMileRequest.setTotalWeight(BigDecimal.ZERO);
             firstMileRequest.setTotalVolume(BigDecimal.ZERO);
+//            firstMileRequest.setNetWeight(BigDecimal.ZERO);
             return;
         }
+
         // 计算总重量和总体积
         BigDecimal totalWeight = BigDecimal.ZERO;
         BigDecimal totalVolume = BigDecimal.ZERO;
+        BigDecimal netWeight = BigDecimal.ZERO;
+
         for (TmsFirstMileRequestItemDO item : requestItemDOS) {
-            // 累加毛重
-            if (item.getPackageWeight() != null) {
-                totalWeight = totalWeight.add(item.getPackageWeight());
+            // 获取产品信息
+            ErpProductDTO product = erpProductApi.getProductDto(item.getProductId());
+            if (product == null) {
+                continue;
             }
-            // 累加体积
-            if (item.getVolume() != null) {
-                totalVolume = totalVolume.add(item.getVolume());
+
+            // 设置明细项的包装长宽高
+            item.setPackageLength(BigDecimal.valueOf(product.getPackageLength()));
+            item.setPackageWidth(BigDecimal.valueOf(product.getPackageWidth()));
+            item.setPackageHeight(BigDecimal.valueOf(product.getPackageHeight()));
+            item.setPackageWeight(product.getWeight());
+
+            // 累加毛重和净重
+            if (product.getWeight() != null && item.getQty() != null) {
+                totalWeight = totalWeight.add(product.getWeight().multiply(BigDecimal.valueOf(item.getQty())));
+                // 累加净重 = 包装重量 * 数量
+                netWeight = netWeight.add(product.getPackageWeight().multiply(BigDecimal.valueOf(item.getQty())));
+            }
+
+            // 计算单个物品的体积（长*宽*高）并乘以数量
+            if (product.getPackageLength() != null && product.getPackageWidth() != null && product.getPackageHeight() != null && item.getQty() != null) {
+                BigDecimal itemVolume = BigDecimal.valueOf(product.getPackageLength())
+                    .multiply(BigDecimal.valueOf(product.getPackageWidth()))
+                    .multiply(BigDecimal.valueOf(product.getPackageHeight()))
+                    .multiply(BigDecimal.valueOf(item.getQty()));
+                // 设置明细项的体积
+                item.setVolume(itemVolume);
+                totalVolume = totalVolume.add(itemVolume);
             }
         }
+
         firstMileRequest.setTotalWeight(totalWeight);
         firstMileRequest.setTotalVolume(totalVolume);
+//        firstMileRequest.setNetWeight(netWeight);
     }
 
     @Override
@@ -510,37 +540,6 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     @Transactional(rollbackFor = Exception.class)
     public Long mergeFirstMileRequest(TmsFirstMileSaveReqVO createReqVO) {
         return firstMileService.createFirstMile(createReqVO);
-        //        // 1. 校验头程申请单是否存在
-        //        List<TmsFirstMileRequestDO> requestList = firstMileRequestMapper.selectByIds(ids);
-        //        if (CollectionUtils.isEmpty(requestList)) {
-        //            throw exception(FIRST_MILE_REQUEST_NOT_EXISTS);
-        //        }
-        //
-        //        // 2. 校验头程申请单状态
-        //        requestList.forEach(request -> {
-        //            // 校验是否已关闭
-        //            if (!Objects.equals(request.getOffStatus(), TmsOffStatus.OPEN.getCode())) {
-        //                throw exception(FIRST_MILE_REQUEST_OFF_STATUS_NOT_ALLOWED, request.getCode(), TmsOffStatus.fromCode(request.getOffStatus()).getDesc());
-        //            }
-        //            // 校验是否已审核
-        //            if (!Objects.equals(request.getAuditStatus(), TmsAuditStatus.APPROVED.getCode())) {
-        //                throw exception(FIRST_MILE_REQUEST_AUDIT_STATUS_NOT_ALLOWED, request.getCode(), TmsAuditStatus.fromCode(request.getAuditStatus()).getDesc());
-        //            }
-        //        });
-        //
-        //        // 3. 获取所有头程申请明细
-        //        List<TmsFirstMileRequestItemDO> itemList = firstMileRequestItemMapper.selectListByRequestIds(ids);
-        //        if (CollectionUtils.isEmpty(itemList)) {
-        //            throw exception(FIRST_MILE_REQUEST_ITEM_NOT_EXISTS);
-        //        }
-        //
-        //        // 4. 创建头程单
-        //        TmsFirstMileSaveReqVO createReqVO = new TmsFirstMileSaveReqVO();
-        //        // 转换明细
-        //        createReqVO.setFirstMileItems(TmsFirstMileRequestConvert.convertToFirstMileItemList(itemList));
-        //
-        //        // 5. 创建头程单
-        //        return firstMileService.createFirstMile(createReqVO);
     }
 
     /**

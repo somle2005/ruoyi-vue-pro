@@ -67,7 +67,7 @@ public interface TmsErrorCodeConstants {
     ErrorCode FEE_NOT_EXISTS = new ErrorCode(1_030_902_001, "费用不存在,ID={},类型={}");
 
     // ========== 头程单明细 1-030-903-000 ==========
-    ErrorCode FIRST_MILE_ITEM_NOT_EXISTS = new ErrorCode(1_030_903_001, "头程单明细不存在");
+    ErrorCode FIRST_MILE_ITEM_NOT_EXISTS = new ErrorCode(1_030_903_001, "头程单明细编号({})不存在");
 
     // ========== 出运跟踪信息 1-030-904-000 ==========
     ErrorCode VESSEL_TRACKING_NOT_EXISTS = new ErrorCode(1_030_904_001, "出运跟踪信息表不存在");
@@ -85,4 +85,5 @@ public interface TmsErrorCodeConstants {
 
     // ========== 调拨单明细 1-030-907-000 ==========
     ErrorCode TRANSFER_ITEM_NOT_EXISTS = new ErrorCode(1_030_907_001, "调拨单明细{}不存在");
+    ErrorCode TRANSFER_ITEM_REVOKE_FAIL_OUT_STOCK_EXISTS = new ErrorCode(1_030_907_002, "调拨单明细{}撤销失败，调拨单已生成出库单({}),非草稿状态,无法撤销");
 }
