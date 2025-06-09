@@ -26,4 +26,6 @@ public interface TmsDictTypeConstants {
     String COUNTRY_CODE = "country_code";
     // 货币代码
     String CURRENCY_CODE = "currency_code";
+
+    String ERP_LOGISTIC_ATTRIBUTE = "erp_logistic_attribute";
 }

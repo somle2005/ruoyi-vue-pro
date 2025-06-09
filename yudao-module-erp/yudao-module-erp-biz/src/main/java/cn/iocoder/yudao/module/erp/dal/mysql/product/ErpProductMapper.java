@@ -65,7 +65,7 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
      * @Author Wqh
      * @Description 根据颜色，系列，型号查询出最大的流水号
      * @Date 13:36 2024/10/21
-     * @Param [barCode]
+     * @Param [code]
      **/
     default ErpProductDO selectMaxSerialByColorAndModelAndSeries(String color, String model, String series) {
         return selectOne(new LambdaQueryWrapperX<ErpProductDO>()
@@ -89,26 +89,26 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
     }
 
     /**
-     * 根据条码(barCode)查询出id列表
+     * 根据条码(code)查询出id列表
      *
-     * @param barCode SKU（编码
+     * @param code SKU（编码
      * @return id集合
      */
-    default List<Long> selectIdListByBarCode(String barCode) {
+    default List<Long> selectIdListByCode(String code) {
         return selectList(new LambdaQueryWrapperX<ErpProductDO>()
-            .eq(ErpProductDO::getCode, barCode)
+            .eq(ErpProductDO::getCode, code)
             .select(ErpProductDO::getId))
             .stream().map(ErpProductDO::getId).toList();
     }
 
     /**
-     * 根据条码(barCode)查询出id列表
+     * 根据条码(code)查询出id列表
      *
-     * @param barCodes SKU（编码
+     * @param codes SKU（编码
      * @return ErpProductDO 集合
      */
-    default List<ErpProductDO> selectByCodes(Collection<String> barCodes){
+    default List<ErpProductDO> selectByCodes(Collection<String> codes){
         return selectList(new LambdaQueryWrapperX<ErpProductDO>()
-            .in(ErpProductDO::getCode, barCodes));
+            .in(ErpProductDO::getCode, codes));
     }
 }
