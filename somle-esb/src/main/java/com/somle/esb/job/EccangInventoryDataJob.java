@@ -5,18 +5,18 @@ import com.somle.esb.model.OssData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EccangStockCheckDataJob extends EccangDataJob {
+public class EccangInventoryDataJob extends EccangDataJob {
 
 
     @Override
     public String execute(String param) throws Exception {
         setDate(param);
 
-        eccangService.getStockCheck()
+        eccangService.getInventory()
                 .forEach(page -> {
                     OssData data = OssData.builder()
                             .database(DATABASE)
-                        .tableName("stockCheck")
+                        .tableName("inventory")
                             .syncType("full")
                             .requestTimestamp(System.currentTimeMillis())
                             .folderDate(today)
