@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.tms.controller.admin.fee.vo;
 
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
@@ -26,6 +27,7 @@ public class TmsFeeSaveReqVO {
 
     @Schema(description = "费用类型（如运输费、关税）;字典", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "费用类型不能为空")
+    @Min(value = 1, message = "费用类型不能小于1")
     private Integer costType;
 
     @Schema(description = "金额", requiredMode = Schema.RequiredMode.REQUIRED)
@@ -34,6 +36,7 @@ public class TmsFeeSaveReqVO {
 
     @Schema(description = "币种;名称（如 USD、CNY） 字典", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "币种;不能为空")
+    @Min(value = 1, message = "币种类型不能小于1")
     private Integer currencyType;
 
     @Schema(description = "备注")

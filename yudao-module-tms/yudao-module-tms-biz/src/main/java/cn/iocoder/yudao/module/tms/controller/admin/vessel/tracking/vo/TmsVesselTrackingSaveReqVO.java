@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo;
 
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
@@ -48,9 +49,12 @@ public class TmsVesselTrackingSaveReqVO {
     private Long transitPort;
 
     @Schema(description = "目的港")
+    @NotNull(message = "目的港不能为空")
     private Long toPort;
 
     @Schema(description = "装运港")
+    @NotNull(message = "装运港不能为空")
+    @Min(value = 1, message = "装运港不能小于1")
     private Long fromPort;
 
     @Schema(description = "船公司（供应商id）")
