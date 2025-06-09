@@ -42,6 +42,8 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderWordBO;
+import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
+import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWareHouseUpdateReqDTO;
 import com.aspose.words.Document;
 import com.aspose.words.SaveFormat;
 import com.deepoove.poi.XWPFTemplate;
@@ -133,6 +135,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     private SrmPurchaseRequestService srmPurchaseRequestService;
     @Resource(name = SrmChannelEnum.PURCHASE_ORDER)
     MessageChannel purchaseOrderChannel;
+    @Autowired
+    private WmsWarehouseApi wmsWarehouseApi;
 
     /**
      * 校验是否存在入库项
@@ -317,6 +321,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseOrderJson(SrmPurchaseOrderSaveJsonReqVO reqVO) {
         SrmPurchaseOrderDO purchaseOrder = validatePurchaseOrderExists(reqVO.getId());
         //不处于已审核 -> e
@@ -487,6 +492,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseOrderInCount(Long itemId, Map<Long, BigDecimal> inCountMap) {
         List<SrmPurchaseOrderItemDO> orderItems = purchaseOrderItemMapper.selectListByOrderId(itemId);
         // 1. 更新每个采购订单项
@@ -506,6 +512,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseOrderReturnCount(Long orderId, Map<Long, BigDecimal> returnCountMap) {
         List<SrmPurchaseOrderItemDO> orderItems = purchaseOrderItemMapper.selectListByOrderId(orderId);
         // 1. 更新对应的采购订单项
@@ -722,6 +729,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         bizNo = "{{#vo.orderIds[0]}}",
         extra = "{{#code}}",
         success = "{{#vo.reviewed ? (#vo.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购订单【{{#code}}】")
+    @Transactional(rollbackFor = Exception.class)
     public void reviewPurchaseOrder(SrmPurchaseOrderAuditReqVO vo) {
         // 查询采购订单信息
         SrmPurchaseOrderDO orderDO = purchaseOrderMapper.selectById(vo.getOrderIds().get(0));
@@ -737,6 +745,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             if (vo.getPass()) {
                 log.debug("采购订单通过审核，ID: {}", orderDO.getId());
                 orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, vo);
+                //更新WMS仓库在制数量
+                this.updateWareHouseGNumber(orderDO, false);
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", orderDO.getId());
                 orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, vo);
@@ -750,7 +760,29 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             });
             log.debug("采购订单撤回审核，ID: {}", orderDO.getId());
             orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, vo);
+            //减少wms对应产品的在制数量
+            this.updateWareHouseGNumber(orderDO, true);
         }
+    }
+
+    /**
+     * 更新WMS仓库在制数量
+     *
+     * @param orderDO 订单DO
+     */
+    private void updateWareHouseGNumber(SrmPurchaseOrderDO orderDO, Boolean isReverse) {
+        // 获取订单项列表
+        List<SrmPurchaseOrderItemDO> orderItems = purchaseOrderItemMapper.selectListByOrderId(orderDO.getId());
+        // 遍历订单项，更新每个产品的在制数量
+        for (SrmPurchaseOrderItemDO item : orderItems) {
+            WmsWareHouseUpdateReqDTO reqDTO = new WmsWareHouseUpdateReqDTO();
+            reqDTO.setProductId(item.getProductId());
+            reqDTO.setWarehouseId(item.getWarehouseId());
+            // 根据isReverse参数决定是否使用负数
+            reqDTO.setMakePendingQty(isReverse ? item.getQty().negate().intValue() : item.getQty().intValue());
+            wmsWarehouseApi.updateStockWarehouse(reqDTO);
+        }
+
     }
 
     @Override
