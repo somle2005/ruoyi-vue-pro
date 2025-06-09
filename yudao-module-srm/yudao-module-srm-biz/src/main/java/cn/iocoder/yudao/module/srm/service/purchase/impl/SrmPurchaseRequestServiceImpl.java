@@ -180,7 +180,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         return convertList(items, o -> BeanUtils.toBean(o, SrmPurchaseRequestItemsDO.class, item -> {
             //产品名称
             item.setProductName(dtoMap.get(item.getProductId()).getName());
-            item.setBarCode(dtoMap.get(item.getProductId()).getBarCode());
+            item.setBarCode(dtoMap.get(item.getProductId()).getCode());
             //产品单位名称(产品必有单位)
             item.setProductUnitName(erpProductUnitApi.getProductUnitList(Collections.singleton(dtoMap.get(item.getProductId()).getUnitId())).get(0).getName());
         }));

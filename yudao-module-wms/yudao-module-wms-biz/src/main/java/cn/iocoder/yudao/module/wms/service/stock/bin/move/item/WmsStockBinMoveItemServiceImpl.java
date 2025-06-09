@@ -211,7 +211,7 @@ public class WmsStockBinMoveItemServiceImpl implements WmsStockBinMoveItemServic
         Map<String, WmsProductRespSimpleVO> productVOMap = new HashMap<>();
         for (ErpProductDTO productDTO : productDTOMap.values()) {
             WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
-            productVOMap.put(productDTO.getBarCode(), productVO);
+            productVOMap.put(productDTO.getCode(), productVO);
         }
         StreamX.from(impVOList).assemble(productVOMap, WmsStockBinMoveImportExcelVO::getProductCode, (e, p) -> {
             if (p != null) {

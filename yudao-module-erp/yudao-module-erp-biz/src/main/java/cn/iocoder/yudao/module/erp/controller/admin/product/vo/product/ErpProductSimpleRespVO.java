@@ -15,7 +15,7 @@ public class ErpProductSimpleRespVO {
     private String name;
 
     @Schema(description = "SKU（编码）")
-    private String barCode;
+    private String code;
 
     @Schema(description = "产品分类编号")
     private Long categoryId;

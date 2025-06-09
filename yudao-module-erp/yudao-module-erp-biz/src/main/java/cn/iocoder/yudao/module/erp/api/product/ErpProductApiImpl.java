@@ -39,6 +39,7 @@ public class ErpProductApiImpl implements ErpProductApi {
     }
 
     //获得所有产品DTO，根据ids，如果ids为null返回所有
+    @Override
     public List<ErpProductDTO> listProductDTOs(List<Long> ids) {
         List<ErpProductDO> dos;
         if (ids != null) {
@@ -96,11 +97,6 @@ public class ErpProductApiImpl implements ErpProductApi {
     @Override
     public List<ErpProductRespDTO> getProductDTOListByStatus(Boolean status) {
         return erpProductService.getProductDTOListByStatus(status);
-    }
-
-    @Override
-    public List<Long> listProductIdByBarCode(String barCode) {
-        return erpProductService.listProductIdByBarCode(barCode);
     }
 
     @Override

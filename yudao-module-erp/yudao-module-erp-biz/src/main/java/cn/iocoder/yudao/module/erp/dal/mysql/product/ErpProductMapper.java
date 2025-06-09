@@ -22,26 +22,23 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
 
     default PageResult<ErpProductDO> selectPage(ErpProductPageReqVO reqVO) {
         MPJLambdaWrapper<ErpProductDO> orderByDesc = new MPJLambdaWrapperX<ErpProductDO>()
-            .betweenIfPresent(ErpProductDO::getCreateTime, reqVO.getCreateTime()) // 添加创建时间查询
-            .betweenIfPresent(ErpProductDO::getUpdateTime, reqVO.getUpdateTime())  // 添加修改时间查询
-            .likeIfExists(ErpProductDO::getName, reqVO.getName())
+            .betweenIfPresent(ErpProductDO::getCreateTime, reqVO.getCreateTime())
+            .betweenIfPresent(ErpProductDO::getUpdateTime, reqVO.getUpdateTime())
             .eqIfExists(ErpProductDO::getCategoryId, reqVO.getCategoryId())
-            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode())
+            .likeIfExists(ErpProductDO::getCode, reqVO.getCode())
             .likeIfExists(ErpProductDO::getBrand, reqVO.getBrand())
             .eqIfExists(ErpProductDO::getDeptId, reqVO.getDeptId())
             .likeIfExists(ErpProductDO::getSeries, reqVO.getSeries())
             .eqIfExists(ErpProductDO::getStatus, reqVO.getStatus())
-            .likeIfExists(ErpProductDO::getPackageWidth, reqVO.getPackageWidth())  // 包装宽度查询
-            .likeIfExists(ErpProductDO::getPackageLength, reqVO.getPackageLength())  // 包装长度查询
-            .likeIfExists(ErpProductDO::getPackageHeight, reqVO.getPackageHeight())  // 包装高度查询
-            .likeIfExists(ErpProductDO::getPackageWeight, reqVO.getPackageWeight())  // 包装重量查询
-            .likeIfExists(ErpProductDO::getWidth, reqVO.getWidth())  // 宽度查询
-            .likeIfExists(ErpProductDO::getLength, reqVO.getLength()) // 长度查询
-            .likeIfExists(ErpProductDO::getHeight, reqVO.getHeight())  // 高度查询
-            .likeIfExists(ErpProductDO::getWeight, reqVO.getWeight())  // 重量查询
-            // 创建人 模糊
+            .likeIfExists(ErpProductDO::getPackageWidth, reqVO.getPackageWidth())
+            .likeIfExists(ErpProductDO::getPackageLength, reqVO.getPackageLength())
+            .likeIfExists(ErpProductDO::getPackageHeight, reqVO.getPackageHeight())
+            .likeIfExists(ErpProductDO::getPackageWeight, reqVO.getPackageWeight())
+            .likeIfExists(ErpProductDO::getWidth, reqVO.getWidth())
+            .likeIfExists(ErpProductDO::getLength, reqVO.getLength())
+            .likeIfExists(ErpProductDO::getHeight, reqVO.getHeight())
+            .likeIfExists(ErpProductDO::getWeight, reqVO.getWeight())
             .eqIfExists(ErpProductDO::getCreator, reqVO.getCreator())
-            // 更新人 模糊
             .eqIfExists(ErpProductDO::getUpdater, reqVO.getUpdater())
             .orderByDesc(ErpProductDO::getId);
         return selectPage(reqVO, orderByDesc);
@@ -56,7 +53,7 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
     }
 
     default ErpProductDO selectByCode(String code) {
-        return selectOne(ErpProductDO::getBarCode, code);
+        return selectOne(ErpProductDO::getCode, code);
     }
 
     default List<ErpProductDO> selectListByStatus(Boolean status) {
@@ -99,7 +96,7 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
      */
     default List<Long> selectIdListByBarCode(String barCode) {
         return selectList(new LambdaQueryWrapperX<ErpProductDO>()
-            .like(ErpProductDO::getBarCode, barCode)
+            .eq(ErpProductDO::getCode, barCode)
             .select(ErpProductDO::getId))
             .stream().map(ErpProductDO::getId).toList();
     }
@@ -112,6 +109,6 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
      */
     default List<ErpProductDO> selectByCodes(Collection<String> barCodes){
         return selectList(new LambdaQueryWrapperX<ErpProductDO>()
-            .in(ErpProductDO::getBarCode, barCodes));
+            .in(ErpProductDO::getCode, barCodes));
     }
 }

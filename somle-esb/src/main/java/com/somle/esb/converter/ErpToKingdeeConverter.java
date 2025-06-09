@@ -91,7 +91,7 @@ public class ErpToKingdeeConverter {
         // 获取产品名称
         String productName = productDTO.getName();
         // 获取产品条码
-        String barCode = productDTO.getBarCode();
+        String barCode = productDTO.getCode();
         // 如果国家编码不为空，且产品条码不为空，设置SKU
         if (ObjectUtil.isNotEmpty(countryCode)) {
             DictDataRespDTO dictData = dictDataApi.getDictData(TmsDictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode));
@@ -106,7 +106,7 @@ public class ErpToKingdeeConverter {
             reqVO.setNumber(barCode);
             reqVO.setName(productName);
         }
-        reqVO.setBarcode(productDTO.getBarCode());
+        reqVO.setBarcode(productDTO.getCode());
         // 报关品名
         reqVO.setProducingPace(customRuleDTO.getDeclaredType());
         reqVO.setDeclaredTypeEn(customRuleDTO.getDeclaredTypeEn());
@@ -147,9 +147,9 @@ public class ErpToKingdeeConverter {
         KingdeeProductSaveReqVO reqVO = new KingdeeProductSaveReqVO();
         //普通
         reqVO.setCheckType("1");
-        reqVO.setNumber(productDTO.getBarCode());
+        reqVO.setNumber(productDTO.getCode());
         reqVO.setName(productDTO.getName());
-        reqVO.setBarcode(productDTO.getBarCode());
+        reqVO.setBarcode(productDTO.getCode());
         reqVO.setCostMethod("2");
 
         reqVO.setGrossWeight(String.valueOf(productDTO.getPackageWeight()));

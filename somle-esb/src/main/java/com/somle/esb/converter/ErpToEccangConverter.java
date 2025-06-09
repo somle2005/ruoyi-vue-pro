@@ -89,7 +89,7 @@ public class ErpToEccangConverter {
         String countrySuffix = ObjectUtil.isNotEmpty(countryCode)
             ? getCountrySuffix(dictDataApi.getDictData(TmsDictTypeConstants.COUNTRY_CODE, String.valueOf(countryCode)).getLabel())
             : "";
-        String barCode = productDTO.getBarCode();
+        String barCode = productDTO.getCode();
         String suffix = countrySuffix.isEmpty() ? "" : "-" + countrySuffix;
         eccangProduct.setProductTitle(productDTO.getName() + suffix);
         eccangProduct.setProductTitleEn(CharSequenceUtil.isNotBlank(barCode) ? barCode + suffix : barCode);
@@ -134,8 +134,8 @@ public class ErpToEccangConverter {
         EccangProduct eccangProduct = setDefaultValue(new EccangProduct());
         //SKU和标题
         eccangProduct.setProductTitle(productDTO.getName());
-        eccangProduct.setProductTitleEn(productDTO.getBarCode());
-        eccangProduct.setProductSku(productDTO.getBarCode());
+        eccangProduct.setProductTitleEn(productDTO.getCode());
+        eccangProduct.setProductSku(productDTO.getCode());
         this.setProductSizeAndWeight(eccangProduct, productDTO, (product, dto) -> {
         });
         this.setProductCategoriesAndOrganizationId(eccangProduct, productDTO, userMap);
