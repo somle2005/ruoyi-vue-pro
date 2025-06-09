@@ -173,6 +173,7 @@ logging:
             srm: debug
             oms: debug
             tms: debug
+            wms: debug
           framework:
             template: debug
     root: info

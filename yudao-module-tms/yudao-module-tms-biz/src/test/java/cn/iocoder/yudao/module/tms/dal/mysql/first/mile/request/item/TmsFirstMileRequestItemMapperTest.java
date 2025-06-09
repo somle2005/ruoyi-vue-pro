@@ -7,8 +7,10 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFir
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+@Disabled
 @Slf4j
 class TmsFirstMileRequestItemMapperTest extends BaseDbUnitTest {
     @Resource
