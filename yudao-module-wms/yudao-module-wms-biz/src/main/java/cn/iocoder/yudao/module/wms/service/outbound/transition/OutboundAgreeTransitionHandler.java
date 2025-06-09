@@ -8,8 +8,6 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveItemReqDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveReqDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.transfer.TmsTransferApi;
-import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsOutboundItemReqDTO;
-import cn.iocoder.yudao.module.tms.api.transfer.dto.TmsOutboundReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
@@ -45,12 +43,5 @@ public class OutboundAgreeTransitionHandler extends BaseOutboundTransitionHandle
             srmReturnSaveReqDTO.setItems(BeanUtils.toBean(outboundVO.getItemList(), SrmReturnSaveItemReqDTO.class));
             srmPurchaseReturnApi.updatePurchaseReturnItemQty(srmReturnSaveReqDTO);
         }
-        //更新TMS调拨单状态机
-        if (outboundVO.getUpstreamType().equals(BillType.TMS_TRANSFER.getValue())) {
-            TmsOutboundReqDTO tmsOutboundReqDTO = BeanUtils.toBean(outboundVO, TmsOutboundReqDTO.class);
-            tmsOutboundReqDTO.setItems(BeanUtils.toBean(outboundVO.getItemList(), TmsOutboundItemReqDTO.class));
-            tmsTransferApi.afterOutboundAudit(tmsOutboundReqDTO);
-        }
-
     }
 }

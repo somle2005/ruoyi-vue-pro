@@ -73,6 +73,7 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
         wrapper.selectAs(WmsPickupDO::getCode,WmsInboundItemBinQueryDO::getPickupCode);
         wrapper.selectAs(WmsPickupItemDO::getQty,WmsInboundItemBinQueryDO::getPickupQty);
         wrapper.select(AGE_COL_EXPR);
+        wrapper.select(WmsInboundDO::getInboundTime);
 
         // 控制顺序
         if(olderFirst) {

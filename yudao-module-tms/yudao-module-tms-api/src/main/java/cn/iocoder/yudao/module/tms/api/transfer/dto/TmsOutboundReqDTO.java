@@ -11,6 +11,7 @@ import java.util.List;
 
 /**
  * 调拨出库请求 DTO
+ * @author jisencai
  */
 @Data
 public class TmsOutboundReqDTO {

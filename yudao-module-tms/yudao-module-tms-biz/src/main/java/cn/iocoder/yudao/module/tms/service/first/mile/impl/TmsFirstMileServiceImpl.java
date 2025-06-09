@@ -517,14 +517,41 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         Set<Long> productIds = tmsFirstMileRespVO.getFirstMileItems().stream().map(TmsFirstMileItemRespVO::getProductId).collect(Collectors.toSet());
         Map<Long, List<WmsInboundItemBinDTO>> inboundItemBinMap = wmsInboundItemApi.getInboundItemBinMap(toWarehouseId, productIds, true);
         //companyId inboundItemBinMap
-        Set<Long> companyIds = inboundItemBinMap.values().stream().flatMap(List::stream).flatMap(item -> Stream.of(item.getCompanyId(), item.getInboundCompanyId())).collect(Collectors.toSet());
+//        Set<Long> companyIds = inboundItemBinMap.values().stream().flatMap(List::stream).flatMap(item -> Stream.of(item.getCompanyId(), item.getInboundCompanyId())).collect(Collectors.toSet());
+//        Map<Long, FmsCompanyDTO> companyMap = fmsCompanyApi.getCompanyMap(companyIds);
+//        //
+//        tmsFirstMileRespVO.getFirstMileItems().forEach(item ->
+//            item.setStock(BeanUtils.toBean(inboundItemBinMap.get(item.getProductId()), TmsFirstMileStockRespVO.class, stock -> {
+//                stock.setCompanyName(companyMap.get(stock.getCompanyId()).getName());
+//                stock.setInboundCompanyName(companyMap.get(stock.getInboundCompanyId()).getName());
+//            })));
+        Set<Long> companyIds = inboundItemBinMap.values().stream()
+            .flatMap(List::stream)
+            .flatMap(item -> Stream.of(item.getCompanyId(), item.getInboundCompanyId()))
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet());
+
         Map<Long, FmsCompanyDTO> companyMap = fmsCompanyApi.getCompanyMap(companyIds);
-        //
-        tmsFirstMileRespVO.getFirstMileItems().forEach(item ->
-            item.setStock(BeanUtils.toBean(inboundItemBinMap.get(item.getProductId()), TmsFirstMileStockRespVO.class, stock -> {
-                stock.setCompanyName(companyMap.get(stock.getCompanyId()).getName());
-                stock.setInboundCompanyName(companyMap.get(stock.getInboundCompanyId()).getName());
-            })));
+
+        tmsFirstMileRespVO.getFirstMileItems().forEach(item -> {
+            TmsFirstMileStockRespVO stockVO = Optional.ofNullable(inboundItemBinMap.get(item.getProductId()))
+                .filter(list -> !list.isEmpty())
+                .map(list -> list.get(0)) // 取第一个元素
+                .map(source -> BeanUtils.toBean(source, TmsFirstMileStockRespVO.class))
+                .orElse(new TmsFirstMileStockRespVO());
+
+            stockVO.setCompanyName(
+                Optional.ofNullable(companyMap.get(stockVO.getCompanyId()))
+                    .map(FmsCompanyDTO::getName)
+                    .orElse("未知公司"));
+
+            stockVO.setInboundCompanyName(
+                Optional.ofNullable(companyMap.get(stockVO.getInboundCompanyId()))
+                    .map(FmsCompanyDTO::getName)
+                    .orElse("未知公司"));
+
+            item.setStock(Collections.singletonList(stockVO));
+        });
     }
 
     private void createFirstMileItemList(Long firstMileId, List<TmsFirstMileItemSaveReqVO> list) {
