@@ -27,7 +27,7 @@ public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
         wrapper.in(WmsStockFlowDO::getReason, reqVO.getReason());
         // 连接产品视图
         if (reqVO.getProductCode() != null) {
-            wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockFlowDO::getProductId).likeIfExists(WmsProductDO::getProductCode, reqVO.getProductCode());
+            wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockFlowDO::getProductId).likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode());
         }
         wrapper.eqIfPresent(WmsStockFlowDO::getWarehouseId, reqVO.getWarehouseId());
         wrapper.eqIfPresent(WmsStockFlowDO::getDirection, reqVO.getDirection());

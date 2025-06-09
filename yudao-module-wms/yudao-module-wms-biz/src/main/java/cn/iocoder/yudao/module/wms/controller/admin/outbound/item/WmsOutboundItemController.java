@@ -161,7 +161,7 @@ public class WmsOutboundItemController {
                 continue;
             }
             if (itemRespVO.getProduct() != null) {
-                exportVO.setProductCode(itemRespVO.getProduct().getProductCode());
+                exportVO.setProductCode(itemRespVO.getProduct().getBarCode());
             }
             exportVO.setWarehouseName(warehouse.getName());
             exportVO.setOutboundCode(outboundDO.getCode());

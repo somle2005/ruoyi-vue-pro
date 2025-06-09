@@ -126,7 +126,7 @@ public class SrmPurchaseReturnItemDO extends TenantBaseDO {
     /**
      * 产品sku
      */
-    private String productCode;
+    private String barCode;
     /**
      * 产品名称
      */

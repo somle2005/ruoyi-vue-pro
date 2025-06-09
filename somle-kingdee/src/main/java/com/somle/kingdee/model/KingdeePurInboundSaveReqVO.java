@@ -308,7 +308,7 @@ public class KingdeePurInboundSaveReqVO {
         /**
          * 条形码
          */
-        private String productcode;
+        private String barcode;
 
         /**
          * 批次号

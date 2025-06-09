@@ -14,10 +14,10 @@ import java.util.List;
 public class KingdeePurRetReqVO {
 
     /**
-     * 条形码 (productcode)
+     * 条形码 (Barcode)
      * 非必填 (Optional)
      */
-    private String productcode;
+    private String barcode;
 
     /**
      * 单据编码 (Bill number)

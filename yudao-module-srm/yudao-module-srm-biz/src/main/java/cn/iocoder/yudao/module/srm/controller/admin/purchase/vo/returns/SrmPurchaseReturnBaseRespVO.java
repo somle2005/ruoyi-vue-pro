@@ -160,7 +160,7 @@ public class SrmPurchaseReturnBaseRespVO {
         private String productName;
 
         @Schema(description = "产品SKU")
-        private String productCode;
+        private String barCode;
 
         @Schema(description = "报关品名")
         private String declaredType;

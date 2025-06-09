@@ -59,7 +59,7 @@ public class ProductSkuDO extends BaseDO {
     /**
      * 商品条码
      */
-    private String productCode;
+    private String barCode;
     /**
      * 图片地址
      */

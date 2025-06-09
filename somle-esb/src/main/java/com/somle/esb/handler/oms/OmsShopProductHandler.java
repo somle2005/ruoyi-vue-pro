@@ -51,7 +51,7 @@ public class OmsShopProductHandler {
             .shopName(productDTO.getShop().getName())
             .relations(StreamX.from(productDTO.getItems()).map(item -> SkuRelationDTO.Relation.builder()
                 // 如果是非生产环境加 TEST- 前缀区别
-                .productSku(SpringUtils.isProd() ? "" : "TEST-" + item.getProduct().getProductCode())
+                .productSku(SpringUtils.isProd() ? "" : "TEST-" + item.getProduct().getBarCode())
                 .productSkuQty(item.getQty())
                 .build()).toList())
             .build();

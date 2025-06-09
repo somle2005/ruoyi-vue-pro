@@ -103,7 +103,7 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
         dto.setGrossPrice(item.getGrossPrice());
         dto.setGrossTotalPrice(item.getTotalPrice());
         dto.setWarehouseId(item.getWarehouseId());
-        dto.setProductCode(item.getProductCode());
+        dto.setBarCode(item.getBarCode());
         dto.setDeclaredType(item.getDeclaredType());
         dto.setContainerRate(item.getContainerRate());
         dto.setApplicantId(item.getApplicantId());

@@ -30,7 +30,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
         return new MPJLambdaWrapperX<SrmPurchaseRequestItemsDO>()
             .selectAll(SrmPurchaseRequestItemsDO.class)
             .eqIfPresent(SrmPurchaseRequestItemsDO::getProductId, req.getProductId())
-            .likeIfPresent(SrmPurchaseRequestItemsDO::getProductCode, req.getProductCode())
+            .likeIfPresent(SrmPurchaseRequestItemsDO::getBarCode, req.getBarCode())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductName, req.getProductName())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductUnitName, req.getProductUnitName())
             .orderByDesc(SrmPurchaseRequestItemsDO::getCreateTime) // 按时间降序排序

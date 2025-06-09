@@ -26,7 +26,7 @@ public interface WmsStockBinProductMapper extends BaseMapperX<WmsProductDO> {
         wrapper.distinct();
         wrapper.selectAll(WmsProductDO.class);
 
-        wrapper.likeIfExists(WmsProductDO::getProductCode, reqVO.getProductCode())
+        wrapper.likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode())
             .eqIfExists(WmsProductDO::getDeptId, reqVO.getProductDeptId());
 
         // 连接仓位视图

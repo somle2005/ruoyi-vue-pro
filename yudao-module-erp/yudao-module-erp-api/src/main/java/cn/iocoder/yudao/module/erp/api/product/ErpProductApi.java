@@ -45,7 +45,7 @@ public interface ErpProductApi {
         if(CollectionUtils.isEmpty(codes)) {
             return new HashMap<>();
         }
-        return convertMap(listProductsByCodes(codes), ErpProductDTO::getProductCode);
+        return convertMap(listProductsByCodes(codes), ErpProductDTO::getBarCode);
     }
 
 
@@ -82,9 +82,9 @@ public interface ErpProductApi {
     List<ErpProductRespDTO> getProductDTOListByStatus(Boolean status);
 
     /**
-     * 根据productcode模糊查询productId集合
+     * 根据barCode模糊查询productId集合
      */
-    List<Long> listProductIdByProductCode(String productCode);
+    List<Long> listProductIdByBarCode(String barCode);
 
     /**
      * 获得产品 VO 列表

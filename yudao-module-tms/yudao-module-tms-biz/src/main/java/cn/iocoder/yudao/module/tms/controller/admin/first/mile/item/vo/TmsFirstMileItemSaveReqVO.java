@@ -22,7 +22,7 @@ public class TmsFirstMileItemSaveReqVO {
     private Long productId;
 
     @Schema(description = "FBA条码")
-    private String fbaProductCode;
+    private String fbaBarCode;
 
     @Schema(description = "件数")
     private Integer qty;

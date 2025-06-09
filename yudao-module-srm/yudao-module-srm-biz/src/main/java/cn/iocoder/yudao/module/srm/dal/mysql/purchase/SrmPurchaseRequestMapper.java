@@ -39,7 +39,7 @@ public interface SrmPurchaseRequestMapper extends BaseMapperX<SrmPurchaseRequest
 //        return queryWrapper(reqVO)
 //            .innerJoin(SrmPurchaseRequestItemsDO.class, SrmPurchaseRequestItemsDO::getRequestId, SrmPurchaseRequestDO::getId,
 //                on -> on.eqIfExists(SrmPurchaseRequestItemsDO::getProductId, reqVO.getProductId())
-//                    .likeIfExists(SrmPurchaseRequestItemsDO::getProductCode, reqVO.getProductCode())
+//                    .likeIfExists(SrmPurchaseRequestItemsDO::getBarCode, reqVO.getBarCode())
 //                    .likeIfExists(SrmPurchaseRequestItemsDO::getProductUnitName, reqVO.getProductUnitName())
 //                    .likeIfExists(SrmPurchaseRequestItemsDO::getProductName, reqVO.getProductName())).selectAll(SrmPurchaseRequestItemsDO.class)
 //            .selectAsClass(SrmPurchaseRequestItemsDO.class, SrmPurchaseRequestBO.class);

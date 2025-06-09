@@ -196,7 +196,7 @@ public class SrmPurchaseInBaseRespVO {
         private String declaredTypeEn;
 
         @Schema(description = "条码")
-        private String productCode;
+        private String barCode;
 
         @Schema(description = "x码")
         private String fbaCode;

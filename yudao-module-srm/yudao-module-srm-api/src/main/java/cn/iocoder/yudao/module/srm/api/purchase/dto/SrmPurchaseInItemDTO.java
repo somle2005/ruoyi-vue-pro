@@ -143,7 +143,7 @@ public class SrmPurchaseInItemDTO {
     /**
      * 产品条码
      */
-    private String productCode;
+    private String barCode;
 
     /**
      * 箱率

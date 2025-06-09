@@ -106,7 +106,7 @@ public class ErpStockMoveController {
                     ErpStockDO stock = stockService.getStock(item.getProductId(), item.getFromWarehouseId());
                     item.setStockCount(stock != null ? stock.getCount() : BigDecimal.ZERO);
                     MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName())
-                        .setProductProductCode(product.getProductCode()).setProductUnitName(product.getUnitName()));
+                            .setProductBarCode(product.getBarCode()).setProductUnitName(product.getUnitName()));
                 }))));
     }
 
@@ -149,7 +149,7 @@ public class ErpStockMoveController {
         return BeanUtils.toBean(pageResult, ErpStockMoveRespVO.class, stockMove -> {
             stockMove.setItems(BeanUtils.toBean(stockMoveItemMap.get(stockMove.getId()), ErpStockMoveRespVO.Item.class,
                     item -> MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName())
-                        .setProductProductCode(product.getProductCode()).setProductUnitName(product.getUnitName()))));
+                            .setProductBarCode(product.getBarCode()).setProductUnitName(product.getUnitName()))));
             stockMove.setProductNames(CollUtil.join(stockMove.getItems(), "，", ErpStockMoveRespVO.Item::getProductName));
             // TODO 芋艿：
 //            MapUtils.findAndThen(customerMap, stockMove.getCustomerId(), supplier -> stockMove.setCustomerName(supplier.getName()));

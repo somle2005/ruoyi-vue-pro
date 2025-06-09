@@ -26,7 +26,7 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
             .betweenIfPresent(ErpProductDO::getUpdateTime, reqVO.getUpdateTime())  // 添加修改时间查询
             .likeIfExists(ErpProductDO::getName, reqVO.getName())
             .eqIfExists(ErpProductDO::getCategoryId, reqVO.getCategoryId())
-            .likeIfExists(ErpProductDO::getProductCode, reqVO.getProductCode())
+            .likeIfExists(ErpProductDO::getBarCode, reqVO.getBarCode())
             .likeIfExists(ErpProductDO::getBrand, reqVO.getBrand())
             .eqIfExists(ErpProductDO::getDeptId, reqVO.getDeptId())
             .likeIfExists(ErpProductDO::getSeries, reqVO.getSeries())
@@ -56,7 +56,7 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
     }
 
     default ErpProductDO selectByCode(String code) {
-        return selectOne(ErpProductDO::getProductCode, code);
+        return selectOne(ErpProductDO::getBarCode, code);
     }
 
     default List<ErpProductDO> selectListByStatus(Boolean status) {
@@ -68,7 +68,7 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
      * @Author Wqh
      * @Description 根据颜色，系列，型号查询出最大的流水号
      * @Date 13:36 2024/10/21
-     * @Param [productCode]
+     * @Param [barCode]
      **/
     default ErpProductDO selectMaxSerialByColorAndModelAndSeries(String color, String model, String series) {
         return selectOne(new LambdaQueryWrapperX<ErpProductDO>()
@@ -92,26 +92,26 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
     }
 
     /**
-     * 根据条码(productCode)查询出id列表
+     * 根据条码(barCode)查询出id列表
      *
-     * @param productCode SKU（编码
+     * @param barCode SKU（编码
      * @return id集合
      */
-    default List<Long> selectIdListByProductCode(String productCode) {
+    default List<Long> selectIdListByBarCode(String barCode) {
         return selectList(new LambdaQueryWrapperX<ErpProductDO>()
-            .like(ErpProductDO::getProductCode, productCode)
+            .like(ErpProductDO::getBarCode, barCode)
             .select(ErpProductDO::getId))
             .stream().map(ErpProductDO::getId).toList();
     }
 
     /**
-     * 根据条码(productCode)查询出id列表
+     * 根据条码(barCode)查询出id列表
      *
-     * @param productcodes SKU（编码
+     * @param barCodes SKU（编码
      * @return ErpProductDO 集合
      */
-    default List<ErpProductDO> selectByCodes(Collection<String> productcodes) {
+    default List<ErpProductDO> selectByCodes(Collection<String> barCodes){
         return selectList(new LambdaQueryWrapperX<ErpProductDO>()
-            .in(ErpProductDO::getProductCode, productcodes));
+            .in(ErpProductDO::getBarCode, barCodes));
     }
 }

@@ -41,7 +41,7 @@ public class ErpProductPageReqVO extends PageParam {
     private Long deptId;
 
     @Schema(description = "SKU（编码）")
-    private String productCode;
+    private String barCode;
 
     @Schema(description = "单位编号")
     private Long unitId;

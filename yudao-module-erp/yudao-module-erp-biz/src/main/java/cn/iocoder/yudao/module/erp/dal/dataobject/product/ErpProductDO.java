@@ -39,7 +39,7 @@ public class ErpProductDO extends TenantBaseDO {
     /**
      * SKU（编码）
      */
-    private String productCode;
+    private String barCode;
     /**
      * 产品分类编号
      */

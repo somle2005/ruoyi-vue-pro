@@ -19,6 +19,6 @@ public class TmsCustomRuleListRespVO {
     private Long productId;
 
     @Schema(description = "条形码")
-    private String fbaProductCode;
+    private String fbaBarCode;
 
 }

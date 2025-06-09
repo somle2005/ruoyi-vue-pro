@@ -52,7 +52,7 @@ public class TmsCustomRuleDTO {
     /**
      * 条形码
      */
-    private String fbaProductCode;
+    private String fbaBarCode;
 
     private ErpProductDTO productDTO;
 }

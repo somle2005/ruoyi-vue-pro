@@ -10,7 +10,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWareho
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import org.apache.ibatis.annotations.Mapper;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -26,7 +25,7 @@ public interface WmsStockWarehouseMapper extends BaseMapperX<WmsStockWarehouseDO
     default PageResult<WmsStockWarehouseDO> selectPage(WmsStockWarehousePageReqVO reqVO) {
         MPJLambdaWrapperX<WmsStockWarehouseDO> wrapper = new MPJLambdaWrapperX();
         // 连接产品视图
-        wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockWarehouseDO::getProductId).likeIfExists(WmsProductDO::getProductCode, reqVO.getProductCode()).eqIfExists(WmsProductDO::getDeptId, reqVO.getProductDeptId());
+        wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockWarehouseDO::getProductId).likeIfExists(WmsProductDO::getBarCode, reqVO.getProductCode()).eqIfExists(WmsProductDO::getDeptId, reqVO.getProductDeptId());
         // 按仓库
         // 按产品ID
         wrapper.eqIfPresent(WmsStockWarehouseDO::getWarehouseId, reqVO.getWarehouseId())
