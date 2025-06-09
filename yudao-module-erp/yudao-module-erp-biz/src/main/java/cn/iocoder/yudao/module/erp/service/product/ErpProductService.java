@@ -139,5 +139,5 @@ public interface ErpProductService {
     /**
      * 根据Code模糊查询productId集合
      */
-    List<Long> listProductIdByBarCode(String barCode);
+    List<Long> listProductIdByProductCode(String code);
 }

@@ -44,10 +44,6 @@ public class SrmPurchaseRequestItemRespVO extends BaseVO {
     @ExcelProperty("产品名称")
     private String productName;
 
-    @Schema(description = "产品sku", example = "A9985")
-    @ExcelProperty("产品条码")
-    private String productBarCode;
-
     @Schema(description = "产品单位名称", example = "盒")
     @ExcelProperty("产品单位名称")
     private String productUnitName;
