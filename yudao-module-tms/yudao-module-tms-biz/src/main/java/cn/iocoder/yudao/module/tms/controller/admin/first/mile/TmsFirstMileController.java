@@ -109,6 +109,7 @@ public class TmsFirstMileController {
         if (mileRespVOS == null || mileRespVOS.isEmpty()) {
             return success(null);
         }
+        firstMileService.assembleTmsFirstMileStockRespVO(mileRespVOS.get(0));
         return success(mileRespVOS.get(0));
     }
 

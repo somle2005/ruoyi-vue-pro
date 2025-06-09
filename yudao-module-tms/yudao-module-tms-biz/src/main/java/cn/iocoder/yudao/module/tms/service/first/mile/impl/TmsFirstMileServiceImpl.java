@@ -141,7 +141,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             if (validCodeDuplicate(vo.getCode())) {
                 throw exception(FIRST_MILE_CODE_DUPLICATE, vo.getCode());
             }
-            String pattern = "^" + FIRST_MILE_CODE_DUPLICATE + "-\\d{8}-[0-8]\\d{5}$";
+            String pattern = "^" + TmsNoRedisDAO.FIRST_MILE_NO_PREFIX + "-\\d{8}-[0-8]\\d{5}$";
             if (vo.getCode().matches(pattern)) {
                 //如果符合再设置max序号
                 noRedisDAO.setManualSerial(TmsNoRedisDAO.FIRST_MILE_NO_PREFIX, vo.getCode());
@@ -506,17 +506,14 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         Set<Long> productIds = tmsFirstMileRespVO.getFirstMileItems().stream().map(TmsFirstMileItemRespVO::getProductId).collect(Collectors.toSet());
         Map<Long, List<WmsInboundItemBinDTO>> inboundItemBinMap = wmsInboundItemApi.getInboundItemBinMap(toWarehouseId, productIds, true);
         //companyId inboundItemBinMap
-        Set<Long> companyIds = inboundItemBinMap.values().stream().flatMap(List::stream).flatMap(item -> {
-            return Stream.of(item.getCompanyId(), item.getInboundCompanyId());
-        }).collect(Collectors.toSet());
+        Set<Long> companyIds = inboundItemBinMap.values().stream().flatMap(List::stream).flatMap(item -> Stream.of(item.getCompanyId(), item.getInboundCompanyId())).collect(Collectors.toSet());
         Map<Long, FmsCompanyDTO> companyMap = fmsCompanyApi.getCompanyMap(companyIds);
         //
-        tmsFirstMileRespVO.getFirstMileItems().forEach(item -> {
+        tmsFirstMileRespVO.getFirstMileItems().forEach(item ->
             item.setStock(BeanUtils.toBean(inboundItemBinMap.get(item.getProductId()), TmsFirstMileStockRespVO.class, stock -> {
                 stock.setCompanyName(companyMap.get(stock.getCompanyId()).getName());
                 stock.setInboundCompanyName(companyMap.get(stock.getInboundCompanyId()).getName());
-            }));
-        });
+            })));
     }
 
     private void createFirstMileItemList(Long firstMileId, List<TmsFirstMileItemSaveReqVO> list) {
