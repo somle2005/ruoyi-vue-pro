@@ -1,6 +1,6 @@
 package com.somle.esb.job;
 
-import com.somle.eccang.model.req.EccangInventoryBatchReqVO;
+import com.somle.eccang.model.req.EccangStockCheckBatchReqVO;
 import com.somle.esb.model.OssData;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,7 +11,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 //获取批次库存
 @Component
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
-public class EccangInventoryBatchDataJob extends EccangDataJob {
+public class EccangStockCheckBatchDataJob extends EccangDataJob {
 
 
     @Override
@@ -20,14 +20,14 @@ public class EccangInventoryBatchDataJob extends EccangDataJob {
 
         AtomicInteger totalPages = new AtomicInteger();  // 追踪处理的总页数
         AtomicInteger totalCount = new AtomicInteger();  // 追踪处理的总数
-        EccangInventoryBatchReqVO vo = EccangInventoryBatchReqVO.builder().build();
-        eccangService.getInventoryBatch(vo).forEach(page -> {
+        EccangStockCheckBatchReqVO vo = EccangStockCheckBatchReqVO.builder().build();
+        eccangService.getStockCheckBatch(vo).forEach(page -> {
             totalPages.getAndIncrement();  // 增加页面计数
             totalCount.getAndUpdate(v -> page.getTotal());  // 增加总记录数
 
             OssData data = OssData.builder()
                 .database(DATABASE)
-                .tableName("inventory_batch")
+                .tableName("stockCheck_batch")
                 .syncType("full")
                 .requestTimestamp(System.currentTimeMillis())
                 .folderDate(today)

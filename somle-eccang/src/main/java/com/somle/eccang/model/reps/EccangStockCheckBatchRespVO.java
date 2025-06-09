@@ -5,8 +5,8 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 @Data
-//eccang-InventoryBatch 响应体
-public class EccangInventoryBatchRespVO {
+//eccang-StockCheckBatch 响应体
+public class EccangStockCheckBatchRespVO {
 
     /**
      * 批次库存id

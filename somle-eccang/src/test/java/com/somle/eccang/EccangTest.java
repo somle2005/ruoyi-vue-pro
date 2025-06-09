@@ -62,22 +62,22 @@ public class EccangTest extends SomleBaseSpringTest {
     }
 
     @Test
-    void getInventory() {
-        var result = service.getInventory();
+    void getStockCheck() {
+        var result = service.getStockCheck();
         log.info(result.toString());
     }
 
     @Test
-    void getInventoryBatchLog() {
+    void getStockCheckBatchLog() {
         var date = LocalDate.of(2024, 12, 19);
         var time1 = LocalTime.of(0, 0, 0);
         var time2 = LocalTime.of(23, 59, 59);
         var datetime1 = LocalDateTime.of(date, time1);
         var datetime2 = LocalDateTime.of(date, time2);
-        EccangInventoryBatchLogVO vo = new EccangInventoryBatchLogVO();
+        EccangStockCheckBatchLogVO vo = new EccangStockCheckBatchLogVO();
         vo.setDateFrom(datetime1);
         vo.setDateTo(datetime2);
-        var result = service.getInventoryBatchLog(vo);
+        var result = service.getStockCheckBatchLog(vo);
         log.error(String.valueOf(result.toList().size()));
     }
 
