@@ -204,4 +204,12 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
     public List<WmsWarehouseDO> selectList(WmsWarehouseListReqDTO reqDTO) {
         return warehouseMapper.selectList(reqDTO);
     }
+
+    /**
+     * 获得转换单仓库列表
+     */
+    @Override
+    public List<WmsWarehouseDO> getSimpleListForExchange(Integer exchange) {
+        return warehouseMapper.getSimpleListForExchange(exchange);
+    }
 }

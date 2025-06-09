@@ -112,4 +112,11 @@ public interface WmsWarehouseService {
      */
     List<WmsWarehouseDO> selectList(WmsWarehouseListReqDTO reqDTO);
 
+    /**
+     * 获得转换单仓库列表
+     *
+     * @param exchange 转换单类型
+     * @return 仓库列表
+     */
+    List<WmsWarehouseDO> getSimpleListForExchange(Integer exchange);
 }

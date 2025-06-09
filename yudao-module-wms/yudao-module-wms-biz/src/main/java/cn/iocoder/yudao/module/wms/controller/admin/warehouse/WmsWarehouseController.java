@@ -138,4 +138,16 @@ public class WmsWarehouseController {
         // 导出 Excel
         ExcelUtils.write(response, "仓库.xls", "数据", WmsWarehouseRespVO.class, BeanUtils.toBean(list, WmsWarehouseRespVO.class));
     }
+
+    @GetMapping("/simple-list/exchange")
+    @Operation(summary = "获得转换单仓库列表")
+    @PreAuthorize("@ss.hasPermission('wms:warehouse:query')")
+    public CommonResult<List<WmsWarehouseSimpleRespVO>> getWarehouseSimpleListForExchange(Integer exchange) {
+        // 查询数据
+        List<WmsWarehouseDO> doList = warehouseService.getSimpleListForExchange(exchange);
+        // 转换
+        List<WmsWarehouseSimpleRespVO> voList = BeanUtils.toBean(doList, WmsWarehouseSimpleRespVO.class);
+        // 返回
+        return success(voList);
+    }
 }

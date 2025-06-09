@@ -11,6 +11,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
+ * @author jisencai
  * @table-fields : code,remark,id,audit_status,type,warehouse_id
  */
 @Schema(description = "管理后台 - 换货单新增/修改 Request VO")

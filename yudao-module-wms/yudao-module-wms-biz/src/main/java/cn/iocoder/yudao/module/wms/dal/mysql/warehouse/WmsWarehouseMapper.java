@@ -3,9 +3,11 @@ package cn.iocoder.yudao.module.wms.dal.mysql.warehouse;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
+import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.vo.WmsWarehouseListReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehousePageReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.zone.WmsWarehouseZoneDO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.List;
@@ -119,6 +121,22 @@ public interface WmsWarehouseMapper extends BaseMapperX<WmsWarehouseDO> {
                     .eqIfPresent(WmsWarehouseDO::getPostcode, reqDTO.getPostcode())
                 .eqIfPresent(WmsWarehouseDO::getAddressLine3, reqDTO.getAddressLine3());
         }
+        return selectList(queryWrapper);
+    }
+
+    /**
+     * 获取拥有良品/次品库区的仓库列表
+     *
+     * @param exchange 分区类型: 1-标准品 , 2-不良品
+     * @return 库区列表
+     */
+    default List<WmsWarehouseDO> getSimpleListForExchange(Integer exchange) {
+        MPJLambdaWrapperX<WmsWarehouseDO> queryWrapper = new MPJLambdaWrapperX<>();
+        queryWrapper.selectAll(WmsWarehouseDO.class);
+        queryWrapper.leftJoin(WmsWarehouseZoneDO.class, on ->
+                on.eq(WmsWarehouseZoneDO::getWarehouseId, WmsWarehouseDO::getId))
+            .eq(WmsWarehouseZoneDO::getPartitionType, exchange);
+        queryWrapper.groupBy(WmsWarehouseDO::getId);
         return selectList(queryWrapper);
     }
 }
