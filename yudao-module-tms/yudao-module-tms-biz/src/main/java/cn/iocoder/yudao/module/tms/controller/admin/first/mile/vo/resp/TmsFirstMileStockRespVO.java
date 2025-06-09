@@ -29,6 +29,9 @@ public class TmsFirstMileStockRespVO {
     @Schema(description = "公司编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long companyId;
 
+    @Schema(description = "公司名称")
+    private String companyName;
+
     // ========== 入库信息 ==========
 
     @Schema(description = "入库部门编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
@@ -37,8 +40,8 @@ public class TmsFirstMileStockRespVO {
     @Schema(description = "入库公司编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
     private Long inboundCompanyId;
 
-    @Schema(description = "入库状态", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    private Integer inboundStatus;
+    @Schema(description = "入库公司名称")
+    private String inboundCompanyName;
 
     @Schema(description = "实际入库量", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
     private Integer actualQty;
@@ -60,12 +63,6 @@ public class TmsFirstMileStockRespVO {
 
     // ========== 库位信息 ==========
 
-    @Schema(description = "库位编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "1024")
-    private Long binId;
-
-//    @Schema(description = "库位编码", requiredMode = Schema.RequiredMode.REQUIRED, example = "BIN001")
-//    private String binCode;
-
     @Schema(description = "仓位可用库存", requiredMode = Schema.RequiredMode.REQUIRED, example = "100")
     private Integer binAvailableQty;
 
@@ -75,22 +72,5 @@ public class TmsFirstMileStockRespVO {
     @Schema(description = "仓位待出库库存", requiredMode = Schema.RequiredMode.REQUIRED, example = "10")
     private Integer binOutboundPendingQty;
 
-    // ========== 上架信息 ==========
 
-    @Schema(description = "上架单ID", example = "PICK001")
-    private String pickupId;
-
-    @Schema(description = "上架数量", example = "100")
-    private Integer pickupQty;
-
-    @Schema(description = "上架单号", example = "PICK001")
-    private String pickupCode;
-
-    // ========== 其他信息 ==========
-
-    @Schema(description = "库龄", example = "30")
-    private Integer age;
-
-    @Schema(description = "备注", example = "测试备注")
-    private String remark;
 } 
