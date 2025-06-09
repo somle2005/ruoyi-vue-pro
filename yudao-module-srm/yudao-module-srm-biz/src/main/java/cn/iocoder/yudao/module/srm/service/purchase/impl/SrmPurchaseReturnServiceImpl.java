@@ -418,7 +418,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
                 .setProductUnitId(inItem.getProductUnitId())
                 .setProductUnitName(inItem.getProductUnitName())
                 .setWarehouseId(inItem.getWarehouseId())
-                .setBarCode(inItem.getBarCode())
+                .setProductCode(inItem.getProductCode())
                 .setDeclaredType(inItem.getDeclaredType())
                 .setDeclaredTypeEn(inItem.getDeclaredTypeEn())
                 .setContainerRate(inItem.getContainerRate())

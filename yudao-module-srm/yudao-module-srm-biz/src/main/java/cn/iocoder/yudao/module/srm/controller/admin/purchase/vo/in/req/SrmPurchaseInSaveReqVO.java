@@ -208,7 +208,7 @@ public class SrmPurchaseInSaveReqVO {
 
         @Schema(description = "产品sku")
         @NotBlank(message = "产品sku不能为空")
-        private String barCode;
+        private String productCode;
 
         @Schema(description = "产品名称")
         @NotBlank(message = "产品名称不能为空")

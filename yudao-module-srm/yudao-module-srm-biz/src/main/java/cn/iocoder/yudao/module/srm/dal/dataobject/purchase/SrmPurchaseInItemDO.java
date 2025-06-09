@@ -157,5 +157,5 @@ public class SrmPurchaseInItemDO extends TenantBaseDO {
     /**
      * 产品sku
      */
-    private String barCode;
+    private String productCode;
 }

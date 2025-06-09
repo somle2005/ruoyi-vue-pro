@@ -101,6 +101,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
         }
         SrmPurchaseInItemDTO dto = BeanUtils.toBean(item, SrmPurchaseInItemDTO.class);
         // 特殊字段映射
+        dto.setProductCode(item.getProductCode());
         dto.setMaterialId(item.getProductId());
 //        dto.setMaterialCode(item.getProductCode());
         dto.setMaterialName(item.getProductName());

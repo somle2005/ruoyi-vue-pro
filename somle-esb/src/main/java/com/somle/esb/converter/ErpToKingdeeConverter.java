@@ -440,7 +440,7 @@ public class ErpToKingdeeConverter {
         }
 
         // 6. 条码信息
-        entity.setBarcode(StrUtil.trimToNull(item.getBarCode()));
+        entity.setBarcode(StrUtil.trimToNull(item.getProductCode()));
 
         return entity;
     }

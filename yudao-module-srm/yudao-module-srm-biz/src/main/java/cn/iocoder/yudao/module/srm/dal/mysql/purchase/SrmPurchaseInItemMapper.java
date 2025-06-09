@@ -40,7 +40,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 .likeIfPresent(SrmPurchaseInItemDO::getProductName, itemQuery.getProductName())
                 .likeIfPresent(SrmPurchaseInItemDO::getDeclaredType, itemQuery.getDeclaredType())
                 .likeIfPresent(SrmPurchaseInItemDO::getDeclaredTypeEn, itemQuery.getDeclaredTypeEn())
-                .likeIfPresent(SrmPurchaseInItemDO::getBarCode, itemQuery.getBarCode())
+                .likeIfPresent(SrmPurchaseInItemDO::getProductCode, itemQuery.getProductCode())
                 // ========== 仓库信息 ==========
                 .eqIfPresent(SrmPurchaseInItemDO::getWarehouseId, itemQuery.getWarehouseId())
                 // ========== 订单信息 ==========

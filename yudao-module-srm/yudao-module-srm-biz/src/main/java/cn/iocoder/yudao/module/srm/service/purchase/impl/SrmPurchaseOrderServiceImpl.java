@@ -409,7 +409,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             ErpProductDTO product = dtoMap.get(item.getProductId());
             item.setProductUnitId(product.getUnitId());
             item.setProductName(product.getName());
-            item.setBarCode(product.getCode());
+            item.setProductCode(product.getCode());
             item.setProductUnitName(erpProductUnitApi.getProductUnitList(Collections.singleton(product.getUnitId())).get(0).getName());
 
             // 设置采购申请单相关信息

@@ -483,7 +483,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         inItemDO.setDeclaredTypeEn(orderItemDO.getDeclaredTypeEn());
         inItemDO.setFbaCode(orderItemDO.getFbaCode());
         inItemDO.setContainerRate(orderItemDO.getContainerRate());
-        inItemDO.setBarCode(orderItemDO.getBarCode());
+        inItemDO.setProductCode(orderItemDO.getProductCode());
 
         //产品价格
         inItemDO.setGrossPrice(orderItemDO.getGrossPrice());
