@@ -3,12 +3,14 @@ package com.somle.walmart.service;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
+import cn.iocoder.yudao.framework.common.util.general.CoreUtils;
 import cn.iocoder.yudao.framework.common.util.io.IoUtils;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
+import com.somle.walmart.model.WalmartErrorListVO;
 import com.somle.walmart.model.WalmartToken;
 import com.somle.walmart.model.reps.WalmartAllProductsRepsVO;
 import com.somle.walmart.model.reps.WalmartInventoryResp;
@@ -20,7 +22,9 @@ import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
 import org.apache.tomcat.util.codec.binary.Base64;
+import org.springframework.http.HttpStatus;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -29,7 +33,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
@@ -41,6 +44,9 @@ public abstract class WalmartClient {
     public WalmartToken token;
 
     private String accessToken;
+
+    private OkHttpClient client = new OkHttpClient().newBuilder()
+        .build();
 
     public WalmartClient(WalmartToken token) {
         this.token = token;
@@ -71,6 +77,8 @@ public abstract class WalmartClient {
     }
 
     abstract Headers headers();
+
+    abstract Map<String, String> generateHeaders();
 
     abstract HttpUrl url(String endpoint);
 
@@ -235,7 +243,7 @@ public abstract class WalmartClient {
             }
             offset += limit;
             //防止限流
-            TimeUnit.SECONDS.sleep(2);
+//            TimeUnit.SECONDS.sleep(2);
             walmartAllItemsResVO.getItemResponse().stream().forEach(item -> {
                 WalmartInventoryResp inventory = getInventory(item.getSku());
                 if (inventory.getQuantity() != null) {
@@ -274,8 +282,7 @@ public abstract class WalmartClient {
 
     @SneakyThrows
     public WalmartItemDetailResp retrieveSingleItemFullDetail(String sku) {
-        OkHttpClient client = new OkHttpClient().newBuilder()
-            .build();
+
         HttpUrl url = url("v4/items/" + sku);
         HttpUrl.Builder urlBuilder = url.newBuilder();
         urlBuilder.addQueryParameter("productIdType", "SKU");
@@ -286,13 +293,54 @@ public abstract class WalmartClient {
             .headers(headers())
             .build();
 
-        Response response = client.newCall(request).execute();
-        var bodyString = response.body().string();
-        //防止限流
-        TimeUnit.SECONDS.sleep(2);
-        WalmartItemDetailResp walmartItemDetailResp = JSON.parseObject(bodyString, WalmartItemDetailResp.class);
+        WalmartItemDetailResp walmartItemDetailResp = null;
+
+        walmartItemDetailResp = CoreUtils.retry(ctx -> {
+            // 获取当前重试次数
+            int retryCount = ctx.getRetryCount();
+            if (retryCount != 0) {
+                // 记录每次重试的日志
+                log.debug("遇到错误: {}", ctx.getLastThrowable().getStackTrace().toString());
+                log.debug("正在请求url= {},第 {} 次重试。", request.url(), retryCount);
+            }
+            try (Response response = client.newCall(request).execute();) {
+
+                var bodyString = response.body().string();
+                WalmartItemDetailResp resp = JSON.parseObject(bodyString, WalmartItemDetailResp.class);
+                return resp;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
         return walmartItemDetailResp;
     }
+
+
+//    /**
+//     * @param sku sku
+//     * @Description: 获取库存
+//     * @return:
+//     */
+//    @SneakyThrows
+//    public WalmartInventoryResp getInventory(String sku) {
+//        OkHttpClient client = new OkHttpClient().newBuilder()
+//            .build();
+//        HttpUrl url = url("/v3/inventory");
+//        HttpUrl.Builder urlBuilder = url.newBuilder();
+//        urlBuilder.addQueryParameter("sku", sku);
+//        Request request = new Request.Builder()
+//            .url(urlBuilder.build().toString())
+//            .method("GET", null)
+//            .headers(headers())
+//            .build();
+//
+//        Response response = client.newCall(request).execute();
+//        var bodyString = response.body().string();
+//        //防止限流
+////        TimeUnit.SECONDS.sleep(2);
+//        WalmartInventoryResp walmartInventoryResp = JSON.parseObject(bodyString, WalmartInventoryResp.class);
+//        return walmartInventoryResp;
+//    }
 
 
     /**
@@ -313,11 +361,50 @@ public abstract class WalmartClient {
             .headers(headers())
             .build();
 
-        Response response = client.newCall(request).execute();
-        var bodyString = response.body().string();
-        //防止限流
-        TimeUnit.SECONDS.sleep(2);
-        WalmartInventoryResp walmartInventoryResp = JSON.parseObject(bodyString, WalmartInventoryResp.class);
-        return walmartInventoryResp;
+        WalmartInventoryResp WalmartInventoryResp = null;
+
+        WalmartInventoryResp = CoreUtils.retry(ctx -> {
+            // 获取当前重试次数
+            int retryCount = ctx.getRetryCount();
+            if (retryCount != 0) {
+                // 记录每次重试的日志
+                log.debug("遇到错误: {}", ctx.getLastThrowable().getStackTrace().toString());
+                log.debug("正在请求url= {},第 {} 次重试。", request.url(), retryCount);
+            }
+            try (Response response = client.newCall(request).execute();) {
+
+                var bodyString = response.body().string();
+                WalmartInventoryResp walmartInventoryResp = JSON.parseObject(bodyString, WalmartInventoryResp.class);
+                return walmartInventoryResp;
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        return WalmartInventoryResp;
+    }
+
+
+    @SneakyThrows
+    public void validateResponse(Response response) {
+        switch (response.code()) {
+            case 200:
+                break;
+            case 202:
+                break;
+            case 403:
+                var error = WebUtils.parseResponse(response, WalmartErrorListVO.class);
+                switch (error.getErrors().get(0).getCode()) {
+                    case "Unauthorized":
+                        log.error(error.toString());
+                        throw new RuntimeException("Error unauthorized");
+                    default:
+                        break;
+                }
+                throw new RuntimeException("Error creating report: " + error);
+            case 429:
+                throw new HttpClientErrorException(HttpStatus.TOO_MANY_REQUESTS, response.body().string());
+            default:
+                throw new RuntimeException("Unknown response code: " + response.code() + "Detail: " + response.body().string());
+        }
     }
 }

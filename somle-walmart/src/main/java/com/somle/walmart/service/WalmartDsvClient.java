@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 
+import java.util.Map;
+
 // https://developer.walmart.com/doc/us/us-supplier/us-supplier-getstarted/
 @Slf4j
 public class WalmartDsvClient extends WalmartClient {
@@ -22,6 +24,11 @@ public class WalmartDsvClient extends WalmartClient {
         return normalHeaders().newBuilder()
             .add("WM_CONSUMER.CHANNEL.TYPE", token.getConsumerChannelType())
             .build();
+    }
+
+    @Override
+    Map<String, String> generateHeaders() {
+        return Map.of("WM_CONSUMER.CHANNEL.TYPE", token.getConsumerChannelType());
     }
 
     @Override

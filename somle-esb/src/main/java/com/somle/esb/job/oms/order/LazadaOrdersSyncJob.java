@@ -2,7 +2,7 @@ package com.somle.esb.job.oms.order;
 
 import cn.iocoder.yudao.module.oms.api.dto.OmsOrderSaveReqDTO;
 import com.somle.esb.converter.oms.LazadaToOmsConverter;
-import com.somle.staples.service.LazadaService;
+import com.somle.shopify.service.LazadaService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

@@ -1,4 +1,4 @@
-package com.somle.staples.service;
+package com.somle.shopify.service;
 
 import cn.iocoder.yudao.framework.test.core.ut.SomleBaseDbUnitTest;
 import com.somle.lazada.sdk.api.LazopClient;

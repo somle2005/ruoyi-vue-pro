@@ -6,6 +6,8 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.HttpUrl;
 
+import java.util.Map;
+
 // https://developer.walmart.com/api/us/mp/auth
 @Slf4j
 public class WalmartMarketplaceClient extends WalmartClient{
@@ -19,6 +21,11 @@ public class WalmartMarketplaceClient extends WalmartClient{
         return normalHeaders().newBuilder()
                 .add("WM_SVC.NAME", token.getSvcName())
                 .build();
+    }
+
+    @Override
+    Map<String, String> generateHeaders() {
+        return Map.of("WM_SVC.NAME", token.getSvcName());
     }
 
     @Override

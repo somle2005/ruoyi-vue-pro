@@ -1,4 +1,4 @@
-package com.somle.staples.service;
+package com.somle.shopify.service;
 
 
 import cn.hutool.json.JSONUtil;

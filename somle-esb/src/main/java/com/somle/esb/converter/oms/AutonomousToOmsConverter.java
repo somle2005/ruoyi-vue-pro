@@ -118,7 +118,7 @@ public class AutonomousToOmsConverter {
             OmsOrderSaveReqDTO omsOrderSaveReqDTO = new OmsOrderSaveReqDTO();
             MapUtils.findAndThen(existOrderMap, order.getOrderDetailId(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
             omsOrderSaveReqDTO.setPlatformCode(this.platform.toString());
-            omsOrderSaveReqDTO.setExternalId(order.getOrderDetailCode());
+            omsOrderSaveReqDTO.setExternalId(order.getOrderDetailId());
             omsOrderSaveReqDTO.setShopId(omsShopDTO.getId());
             omsOrderSaveReqDTO.setOrderCreateTime(order.getDateCreated());
             if (order.getAmount() != null) {
