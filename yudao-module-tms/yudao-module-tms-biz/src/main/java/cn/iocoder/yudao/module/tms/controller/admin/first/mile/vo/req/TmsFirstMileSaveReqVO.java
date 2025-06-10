@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
+import jakarta.validation.constraints.Size;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -90,6 +91,7 @@ public class TmsFirstMileSaveReqVO {
 
     @Schema(description = "头程单明细列表")
     @DiffLogField(name = "头程单明细列表")
+    @Size(min = 1, message = "头程单明细列表不能为空,至少存在一个")
     private List<TmsFirstMileItemSaveReqVO> firstMileItems;
 
     @Schema(description = "出运订单费用明细列表")

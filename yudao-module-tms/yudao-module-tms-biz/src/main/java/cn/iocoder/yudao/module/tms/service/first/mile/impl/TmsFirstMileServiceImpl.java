@@ -7,12 +7,14 @@ import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.ErrorCode;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileItemUpdateDTO;
 import cn.iocoder.yudao.module.tms.api.first.mile.dto.TmsFistMileUpdateDTO;
@@ -38,6 +40,7 @@ import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.item.TmsFirstMileItemMap
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.TmsFirstMileRequestMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
 import cn.iocoder.yudao.module.tms.dal.redis.no.TmsNoRedisDAO;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.TmsLogRecordConstants;
 import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
@@ -61,6 +64,7 @@ import com.mzt.logapi.context.LogRecordContext;
 import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -86,6 +90,7 @@ import static jodd.util.StringUtil.truncate;
  * @author wdy
  */
 @Service
+@Slf4j
 @Validated
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TmsFirstMileServiceImpl implements TmsFirstMileService {
@@ -103,6 +108,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final ErpProductApi erpProductApi;
     private final WmsInboundItemApi wmsInboundItemApi;
     private final TmsPortInfoService tmsPortInfoService;
+    private final DictDataApi dictDataApi;
     @Autowired
     @Lazy
     TmsFirstMileRequestService tmsFirstMileRequestService;
@@ -154,11 +160,11 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
         subType = TmsLogRecordConstants.TMS_FIRST_MILE_CREATE_SUB_TYPE,
-            bizNo = "{{#id}}",
-            success = "创建了头程单【{{#vo.code}}】")
+        bizNo = "{{#id}}",
+        success = "创建了头程单【{{#vo.code}}】")
     public Long createFirstMile(TmsFirstMileSaveReqVO vo) {
         //1.0 校验
-        validateFirstMileCreate(vo);
+        validateFirstMile(vo, null);
 
         if (vo.getCode() != null) {
             validateFirstMileCode(vo.getCode(), null);
@@ -167,11 +173,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         }
 
         TmsFirstMileDO firstMile = BeanUtils.toBean(vo, TmsFirstMileDO.class);
-
-        // 计算主表的总数量、总重量和总体积
-        List<TmsFirstMileItemDO> items = BeanUtils.toBean(vo.getFirstMileItems(), TmsFirstMileItemDO.class);
         firstMileMapper.insert(firstMile);
-
         Long firstMileId = firstMile.getId();
 
         //2.0 保存头程明细
@@ -201,19 +203,28 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     }
 
     /**
-     * 校验头程单创建参数
+     * 校验头程单参数
      *
-     * @param vo 创建参数
+     * @param vo           头程单参数
+     * @param oldFirstMile 原头程单（更新时使用）
      */
-    private void validateFirstMileCreate(TmsFirstMileSaveReqVO vo) {
-        // 1.1 校验目标仓库
-        validateToWarehouse(vo.getToWarehouseId());
-
-        // 1.2 校验头程单明细
+    private void validateFirstMile(TmsFirstMileSaveReqVO vo, TmsFirstMileDO oldFirstMile) {
+        // 1. 校验仓库
+        Set<Long> warehouseIds = vo.getFirstMileItems().stream().flatMap(item -> Stream.of(item.getFromWarehouseId())).collect(Collectors.toSet());
+        warehouseIds.addAll(Stream.of(vo.getToWarehouseId()).collect(Collectors.toSet()));
+        warehouseApi.validWarehouseList(warehouseIds);
+        // 2. 校验头程单明细
         validateFirstMileItems(vo.getFirstMileItems());
-
-        // 1.3 校验港口信息
+        // 3. 校验港口信息
         validateVesselTrackingPorts(vo.getVesselTracking());
+        // 4. 校验货柜类型
+        Optional.ofNullable(vo.getCabinetType()).ifPresent(i -> dictDataApi.validateDictDataList(TmsDictTypeConstants.TMS_LOGISTIC_TYPE, Collections.singleton(String.valueOf(i))));
+        // 5. 校验公司
+        Set<Long> mainCompanyIds = Stream.of(vo.getSalesCompanyId(), vo.getExportCompanyId(), vo.getTransitCompanyId()).collect(Collectors.toSet());
+        Set<Long> companyIds = vo.getFirstMileItems().stream().flatMap(item -> Stream.of(item.getSalesCompanyId(), item.getCompanyId())).collect(Collectors.toSet());
+        mainCompanyIds.addAll(companyIds);
+        fmsCompanyApi.validateCompany(mainCompanyIds);
+
     }
 
     /**
@@ -293,8 +304,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
         subType = TmsLogRecordConstants.TMS_FIRST_MILE_UPDATE_SUB_TYPE,
-            bizNo = "{{#vo.id}}",
-            success = "更新了头程单【{{#vo.code}}】: {_DIFF{#vo}}")
+        bizNo = "{{#vo.id}}",
+        success = "更新了头程单【{{#vo.code}}】: {_DIFF{#vo}}")
     public void updateFirstMile(TmsFirstMileSaveReqVO vo) {
         vo.initId(); //初始化上游ID
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(vo.getId());
@@ -308,7 +319,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_UPDATE_FAIL_APPROVE);
 
         //校验更新参数
-        validateFirstMileUpdate(vo, tmsFirstMileDO);
+        validateFirstMile(vo, tmsFirstMileDO);
 
         //1.0 更新头程单
         TmsFirstMileDO updateObj = BeanUtils.toBean(vo, TmsFirstMileDO.class);
@@ -338,44 +349,12 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         }
     }
 
-    /**
-     * 校验头程单更新参数
-     *
-     * @param vo           更新参数
-     * @param oldFirstMile 原头程单
-     */
-    private void validateFirstMileUpdate(TmsFirstMileSaveReqVO vo, TmsFirstMileDO oldFirstMile) {
-        // 1. 校验目标仓库
-        if (!Objects.equals(vo.getToWarehouseId(), oldFirstMile.getToWarehouseId())) {
-            validateToWarehouse(vo.getToWarehouseId());
-        }
-
-        // 2. 校验头程单明细
-        validateFirstMileItems(vo.getFirstMileItems());
-
-        // 3. 校验港口信息
-        validateVesselTrackingPorts(vo.getVesselTracking());
-    }
-
-    /**
-     * 校验船运信息
-     *
-     * @param vesselTracking 船运信息
-     */
-    private void validateVesselTracking(TmsVesselTrackingSaveReqVO vesselTracking) {
-        // TODO: 添加船运信息校验逻辑
-        // 例如：校验船名、航次号等必填信息
-        if (vesselTracking != null) {
-            // vesselTrackingApi.validVesselTracking(vesselTracking);
-        }
-    }
-
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
         subType = TmsLogRecordConstants.TMS_FIRST_MILE_DELETE_SUB_TYPE,
-            bizNo = "{{#id}}",
-            success = "删除了头程单【{{#code}}】")
+        bizNo = "{{#id}}",
+        success = "删除了头程单【{{#code}}】")
     public void deleteFirstMile(Long id) {
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(id);
         statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_DELETE_FAIL_APPROVE);
@@ -446,17 +425,17 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
         subType = TmsLogRecordConstants.TMS_FIRST_MILE_SUBMIT_AUDIT_SUB_TYPE,
-            bizNo = "{{#ids[0]}}",
-            success = "提交了头程单【{{#codes}}】审核")
+        bizNo = "{{#ids[0]}}",
+        success = "提交了头程单【{{#codes}}】审核")
     public void submitAudit(List<Long> ids) {
         // 1. 获取头程单信息，用于记录日志
         List<TmsFirstMileDO> firstMiles = ids.stream()
-                .map(this::validateFirstMileExists)
-                .toList();
+            .map(this::validateFirstMileExists)
+            .toList();
         // 记录操作日志上下文
         String codes = firstMiles.stream()
-                .map(TmsFirstMileDO::getCode)
-                .collect(Collectors.joining("、"));
+            .map(TmsFirstMileDO::getCode)
+            .collect(Collectors.joining("、"));
         LogRecordContext.putVariable("codes", codes);
 
         // 2. 更新状态
@@ -487,8 +466,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,
         subType = TmsLogRecordConstants.TMS_FIRST_MILE_AUDIT_SUB_TYPE,
-            bizNo = "{{#reqVO.id}}",
-            success = "{{#reqVO.reviewed ? (#reqVO.pass ? '审核通过' : '审核不通过') : '反审核'}}了头程单【{{#code}}】")
+        bizNo = "{{#reqVO.id}}",
+        success = "{{#reqVO.reviewed ? (#reqVO.pass ? '审核通过' : '审核不通过') : '反审核'}}了头程单【{{#code}}】")
     public void review(TmsFirstMileAuditReqVO reqVO) {
         TmsFirstMileDO tmsFirstMileDO = validateFirstMileExists(reqVO.getId());
         if (Boolean.TRUE.equals(reqVO.getReviewed())) {
@@ -529,19 +508,20 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             }));
 
         // 2. 为每个仓库创建出库单
-        warehouseItemsMap.forEach((warehouseId, items) -> {
-            // 构建出库单基本信息
-            WmsOutboundImportReqDTO importReqDTO = buildOutboundBaseInfo(firstMileBO);
-            importReqDTO.setWarehouseId(warehouseId); // 设置仓库ID
-            // 构建出库单明细信息，将相同仓库的头程项合并到一个出库单中
-            importReqDTO.setItemList(buildOutboundItems(items));
-            // 生成出库单
-            try {
+        try {
+            warehouseItemsMap.forEach((warehouseId, items) -> {
+                // 构建出库单基本信息
+                WmsOutboundImportReqDTO importReqDTO = buildOutboundBaseInfo(firstMileBO);
+                importReqDTO.setWarehouseId(warehouseId); // 设置仓库ID
+                // 构建出库单明细信息，将相同仓库的头程项合并到一个出库单中
+                importReqDTO.setItemList(buildOutboundItems(items));
+                // 生成出库单
+                log.debug("头程单生成出库单：{}", JsonUtils.toJsonString(importReqDTO));
                 wmsOutboundApi.generateOutbound(importReqDTO);
-            } catch (Exception e) {
-                throw exception(FIRST_MILE_PROCESS_FAIL_WMS_OUTBOUND_EXISTS, truncate(e.getMessage(), 200));
-            }
-        });
+            });
+        } catch (Exception e) {
+            throw exception(FIRST_MILE_PROCESS_FAIL_WMS_OUTBOUND_EXISTS, truncate(e.getMessage(), 200));
+        }
     }
 
     /**
@@ -558,6 +538,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         importReqDTO.setUpstreamType(First_MILE_SOURCE_TYPE); // 来源单据类型
         importReqDTO.setRemark(firstMileBO.getRemark()); // 备注
         importReqDTO.setOutboundTime(firstMileBO.getOutboundTime()); // 出库时间
+        importReqDTO.setCompanyId(firstMileBO.getExportCompanyId()); //  出口公司ID
         return importReqDTO;
     }
 
@@ -604,7 +585,11 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         }
 
         // 作废
-        dtoList.forEach(dto -> wmsOutboundApi.abandonOutbound(dto.getId(), "头程单反审核"));
+        try {
+            dtoList.forEach(dto -> wmsOutboundApi.abandonOutbound(dto.getId(), "头程单反审核"));
+        } catch (Exception e) {
+            throw exception(FEE_WMS_OUTBOUND_NOT_CAN_ABANDON, truncate(e.getMessage(), 200));
+        }
     }
 
     // ==================== 子表（头程单明细） ====================
@@ -864,8 +849,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         // 2. 获取主单ID列表
         Set<Long> requestIds = items.stream()
-                .map(TmsFirstMileRequestItemDO::getRequestId)
-                .collect(Collectors.toSet());
+            .map(TmsFirstMileRequestItemDO::getRequestId)
+            .collect(Collectors.toSet());
 
 
         // 3. 查询主单信息
@@ -876,14 +861,14 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         // 4. 构建主单Map
         Map<Long, TmsFirstMileRequestDO> requestMap = requests.stream()
-                .collect(Collectors.toMap(TmsFirstMileRequestDO::getId, request -> request));
+            .collect(Collectors.toMap(TmsFirstMileRequestDO::getId, request -> request));
 
         // 5. 构建子项ID到主单的映射
         return items.stream()
-                .collect(Collectors.toMap(
-                        TmsFirstMileRequestItemDO::getId,
-                        item -> requestMap.get(item.getRequestId())
-                ));
+            .collect(Collectors.toMap(
+                TmsFirstMileRequestItemDO::getId,
+                item -> requestMap.get(item.getRequestId())
+            ));
     }
 
     @Override

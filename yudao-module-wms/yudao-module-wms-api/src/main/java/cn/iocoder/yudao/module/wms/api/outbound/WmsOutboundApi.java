@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.wms.api.outbound;
 
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -10,6 +11,7 @@ import java.util.List;
  * @date: 2025/4/28 17:03
  * @description: 出库单 API
  */
+@Validated
 public interface WmsOutboundApi {
 
     /**
