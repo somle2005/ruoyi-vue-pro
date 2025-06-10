@@ -36,6 +36,7 @@ public class TmsFirstMileSaveReqVO {
 
     @Schema(description = "单据日期")
     @DiffLogField(name = "单据日期")
+//    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     private LocalDateTime billTime;
 
     @Schema(description = "物流商ID")
@@ -97,6 +98,7 @@ public class TmsFirstMileSaveReqVO {
 
     @Schema(description = "船期信息")
     @DiffLogField(name = "船期信息")
+    @NotNull(message = "船期信息不能为空")
     private TmsVesselTrackingSaveReqVO2 vesselTracking;
 
 

@@ -47,6 +47,7 @@ import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
+import cn.iocoder.yudao.module.tms.service.port.info.TmsPortInfoService;
 import cn.iocoder.yudao.module.tms.service.vessel.tracking.TmsVesselTrackingService;
 import cn.iocoder.yudao.module.wms.api.inbound.item.WmsInboundItemApi;
 import cn.iocoder.yudao.module.wms.api.inbound.item.dto.WmsInboundItemBinDTO;
@@ -101,6 +102,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
     private final WmsOutboundApi wmsOutboundApi;
     private final ErpProductApi erpProductApi;
     private final WmsInboundItemApi wmsInboundItemApi;
+    private final TmsPortInfoService tmsPortInfoService;
     @Autowired
     @Lazy
     TmsFirstMileRequestService tmsFirstMileRequestService;
@@ -156,7 +158,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             success = "创建了头程单【{{#vo.code}}】")
     public Long createFirstMile(TmsFirstMileSaveReqVO vo) {
         //1.0 校验
-        warehouseApi.validWarehouseList(Collections.singleton(vo.getToWarehouseId()));
+        validateFirstMileCreate(vo);
 
         if (vo.getCode() != null) {
             validateFirstMileCode(vo.getCode(), null);
@@ -198,6 +200,83 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         return firstMileId;
     }
 
+    /**
+     * 校验头程单创建参数
+     *
+     * @param vo 创建参数
+     */
+    private void validateFirstMileCreate(TmsFirstMileSaveReqVO vo) {
+        // 1.1 校验目标仓库
+        validateToWarehouse(vo.getToWarehouseId());
+
+        // 1.2 校验头程单明细
+        validateFirstMileItems(vo.getFirstMileItems());
+
+        // 1.3 校验港口信息
+        validateVesselTrackingPorts(vo.getVesselTracking());
+    }
+
+    /**
+     * 校验目标仓库
+     *
+     * @param toWarehouseId 目标仓库ID
+     */
+    private void validateToWarehouse(Long toWarehouseId) {
+        warehouseApi.validWarehouseList(Collections.singleton(toWarehouseId));
+    }
+
+    /**
+     * 校验头程单明细
+     *
+     * @param items 明细列表
+     */
+    private void validateFirstMileItems(List<TmsFirstMileItemSaveReqVO> items) {
+        // 1. 校验明细列表非空
+        if (CollUtil.isEmpty(items)) {
+            throw exception(FIRST_MILE_ITEM_NOT_EXISTS);
+        }
+
+        // 2. 校验明细中的仓库ID和销售公司ID
+        Set<Long> warehouseIds = new HashSet<>();
+        Set<Long> companyIds = new HashSet<>();
+        items.forEach(item -> {
+            if (item.getFromWarehouseId() != null) {
+                warehouseIds.add(item.getFromWarehouseId());
+            }
+            if (item.getCompanyId() != null) {
+                companyIds.add(item.getCompanyId());
+            }
+        });
+
+        // 校验仓库列表
+        if (!warehouseIds.isEmpty()) {
+            warehouseApi.validWarehouseList(warehouseIds);
+        }
+
+        // 校验销售公司列表
+        if (!companyIds.isEmpty()) {
+            fmsCompanyApi.validateCompany(companyIds);
+        }
+    }
+
+    /**
+     * 校验船运信息中的港口
+     *
+     * @param vesselTracking 船运信息
+     */
+    private void validateVesselTrackingPorts(TmsVesselTrackingSaveReqVO vesselTracking) {
+        if (vesselTracking != null) {
+            Set<Long> portIds = Stream.of(
+                    vesselTracking.getFromPort(),
+                    vesselTracking.getToPort(),
+                    vesselTracking.getTransitPort()
+                )
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+            tmsPortInfoService.validatePortInfoExistsList(portIds);
+        }
+    }
+
     //草稿+审核不通过才能修改
     private void statusCheckForEdit(TmsFirstMileDO tmsFirstMileDO, ErrorCode errorCode) {
         // 只有草稿状态或审核不通过状态才能修改
@@ -228,6 +307,9 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         //校验状态
         statusCheckForEdit(tmsFirstMileDO, FIRST_MILE_UPDATE_FAIL_APPROVE);
 
+        //校验更新参数
+        validateFirstMileUpdate(vo, tmsFirstMileDO);
+
         //1.0 更新头程单
         TmsFirstMileDO updateObj = BeanUtils.toBean(vo, TmsFirstMileDO.class);
 
@@ -255,6 +337,39 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             tmsVesselTrackingService.deleteVesselTracking(vo.getId(), First_MILE_SOURCE_TYPE);
         }
     }
+
+    /**
+     * 校验头程单更新参数
+     *
+     * @param vo           更新参数
+     * @param oldFirstMile 原头程单
+     */
+    private void validateFirstMileUpdate(TmsFirstMileSaveReqVO vo, TmsFirstMileDO oldFirstMile) {
+        // 1. 校验目标仓库
+        if (!Objects.equals(vo.getToWarehouseId(), oldFirstMile.getToWarehouseId())) {
+            validateToWarehouse(vo.getToWarehouseId());
+        }
+
+        // 2. 校验头程单明细
+        validateFirstMileItems(vo.getFirstMileItems());
+
+        // 3. 校验港口信息
+        validateVesselTrackingPorts(vo.getVesselTracking());
+    }
+
+    /**
+     * 校验船运信息
+     *
+     * @param vesselTracking 船运信息
+     */
+    private void validateVesselTracking(TmsVesselTrackingSaveReqVO vesselTracking) {
+        // TODO: 添加船运信息校验逻辑
+        // 例如：校验船名、航次号等必填信息
+        if (vesselTracking != null) {
+            // vesselTrackingApi.validVesselTracking(vesselTracking);
+        }
+    }
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     @LogRecord(type = TmsLogRecordConstants.TMS_FIRST_MILE_TYPE,

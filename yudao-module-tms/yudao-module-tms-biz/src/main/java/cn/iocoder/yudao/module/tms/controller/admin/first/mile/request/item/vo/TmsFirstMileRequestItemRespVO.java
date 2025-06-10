@@ -48,6 +48,28 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
     @ExcelProperty("申请数量")
     private Integer qty;
 
+    //    快照产品信息
+    /**
+     * 包装长（mm）(单个产品)
+     */
+    private BigDecimal packageLength;
+    /**
+     * 包装宽（mm）(单个产品)
+     */
+    private BigDecimal packageWidth;
+    /**
+     * 包装高（mm）(单个产品)
+     */
+    private BigDecimal packageHeight;
+    /**
+     * 毛重（kg）(单个产品)
+     */
+    private BigDecimal packageWeight;
+    /**
+     * 基础重量(kg)(单个产品)
+     */
+    private BigDecimal weight;
+
     @Schema(description = "包装长（mm）")
     private BigDecimal totalPackageLength;
 
@@ -94,7 +116,6 @@ public class TmsFirstMileRequestItemRespVO extends BaseVO {
 
     @Schema(description = "版本号")
     private Integer revision;
-
 
     @Schema(description = "备注")
     @ExcelProperty("备注")

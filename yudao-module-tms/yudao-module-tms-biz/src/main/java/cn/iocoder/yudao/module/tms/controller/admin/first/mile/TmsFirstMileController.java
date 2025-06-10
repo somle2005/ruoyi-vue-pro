@@ -299,16 +299,6 @@ public class TmsFirstMileController {
                     MapUtils.findAndThen(productMap, item.getProductId(), product -> {
                         itemRespVO.setProductName(product.getName())
                             .setProductSku(product.getCode());
-                        // 计算明细行的总包装长度等，使用明细行的快照信息
-                        if (item.getPackageLength() != null) {
-                            itemRespVO.setTotalPackageLength(item.getPackageLength().multiply(new BigDecimal(item.getQty())));
-                        }
-                        if (item.getPackageWidth() != null) {
-                            itemRespVO.setTotalPackageWidth(item.getPackageWidth().multiply(new BigDecimal(item.getQty())));
-                        }
-                        if (item.getPackageHeight() != null) {
-                            itemRespVO.setTotalPackageHeight(item.getPackageHeight().multiply(new BigDecimal(item.getQty())));
-                        }
                     });
                     //部门
                     MapUtils.findAndThen(deptMap, item.getDeptId(), dept -> itemRespVO.setDeptName(dept.getName()));
@@ -316,6 +306,17 @@ public class TmsFirstMileController {
                     MapUtils.findAndThen(warehouseMap, item.getFromWarehouseId(), warehouse -> itemRespVO.setFromWarehouseName(warehouse.getName()));
                     //上游单据CODE
                     MapUtils.findAndThen(requestMap, item.getRequestItemId(), request -> itemRespVO.setRequestCode(request.getCode()));
+
+                    // 计算明细行的总包装长度等，使用明细行的快照信息
+                    if (item.getPackageLength() != null) {
+                        itemRespVO.setTotalPackageLength(item.getPackageLength().multiply(new BigDecimal(item.getQty())));
+                    }
+                    if (item.getPackageWidth() != null) {
+                        itemRespVO.setTotalPackageWidth(item.getPackageWidth().multiply(new BigDecimal(item.getQty())));
+                    }
+                    if (item.getPackageHeight() != null) {
+                        itemRespVO.setTotalPackageHeight(item.getPackageHeight().multiply(new BigDecimal(item.getQty())));
+                    }
 
                     return itemRespVO;
                 }).collect(Collectors.toList());
@@ -327,7 +328,7 @@ public class TmsFirstMileController {
 
                 // 计算体积、包装重量和净重的汇总
                 double totalVolume = items.stream()
-                    .mapToDouble(item -> item.getVolume() != null ? item.getVolume().multiply(new BigDecimal(item.getQty())).doubleValue() : 0)
+                    .mapToDouble(item -> item.getTotalVolume() != null ? item.getTotalVolume().multiply(new BigDecimal(item.getQty())).doubleValue() : 0)
                     .sum();
                 double totalPackageWeight = items.stream()
                     .mapToDouble(item -> item.getPackageWeight() != null ? item.getPackageWeight().multiply(new BigDecimal(item.getQty())).doubleValue() : 0)

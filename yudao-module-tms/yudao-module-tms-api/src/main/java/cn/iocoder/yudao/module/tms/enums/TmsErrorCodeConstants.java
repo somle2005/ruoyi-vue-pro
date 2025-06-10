@@ -74,7 +74,7 @@ public interface TmsErrorCodeConstants {
     ErrorCode VESSEL_TRACKING_LOG_NOT_EXISTS = new ErrorCode(1_030_904_002, "出运跟踪信息表日志不存在");
 
     // ========== 港口信息 1-030-905-000 ==========
-    ErrorCode PORT_INFO_NOT_EXISTS = new ErrorCode(1_030_905_001, "TMS港口信息不存在");
+    ErrorCode PORT_INFO_NOT_EXISTS = new ErrorCode(1_030_905_001, "TMS港口信息(编号:{})不存在");
     ErrorCode PORT_INFO_NAME_DUPLICATE = new ErrorCode(1_030_905_002, "港口名称{}已存在");
 
     // ========== 调拨单 1-030-906-000 ==========
