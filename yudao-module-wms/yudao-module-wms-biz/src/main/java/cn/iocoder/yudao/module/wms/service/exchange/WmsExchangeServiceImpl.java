@@ -230,7 +230,8 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
      **/
     @Override
     public void finishExchange(WmsExchangeDO exchangeDO, List<WmsExchangeItemDO> exchangeItemDOList) {
-         // 暂无实现逻辑
+
+        // 暂无实现逻辑
     }
 
     /**
