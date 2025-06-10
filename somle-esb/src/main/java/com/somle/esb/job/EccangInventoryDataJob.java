@@ -5,7 +5,7 @@ import com.somle.esb.model.OssData;
 import org.springframework.stereotype.Component;
 
 @Component
-public class EccangInventoryDataJob extends EccangDataJob{
+public class EccangInventoryDataJob extends EccangDataJob {
 
 
     @Override
@@ -13,19 +13,19 @@ public class EccangInventoryDataJob extends EccangDataJob{
         setDate(param);
 
         eccangService.getInventory()
-                .forEach(page -> {
-                    OssData data = OssData.builder()
-                            .database(DATABASE)
-                            .tableName("inventory")
-                            .syncType("full")
-                            .requestTimestamp(System.currentTimeMillis())
-                            .folderDate(today)
-                            .content(page)
-                            .headers(null)
-                            .build();
-                    service.send(data);
-                });
-        
+            .forEach(page -> {
+                OssData data = OssData.builder()
+                    .database(DATABASE)
+                    .tableName("inventory")
+                    .syncType("full")
+                    .requestTimestamp(System.currentTimeMillis())
+                    .folderDate(today)
+                    .content(page)
+                    .headers(null)
+                    .build();
+                service.send(data);
+            });
+
         return "data upload success";
     }
 }

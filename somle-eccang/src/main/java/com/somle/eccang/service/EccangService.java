@@ -45,7 +45,7 @@ public class EccangService {
 
     private EccangToken token;
     private final int pageSize = 100;
-    private Limiter limiter = new Limiter(20);
+    private final Limiter limiter = new Limiter(20);
 
     @Autowired
     EccangTokenRepository tokenRepo;

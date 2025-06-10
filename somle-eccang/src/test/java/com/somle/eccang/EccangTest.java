@@ -1,14 +1,16 @@
 package com.somle.eccang;
 
+import cn.iocoder.yudao.framework.test.core.ut.SomleBaseSpringTest;
 import com.somle.eccang.config.EccangIntegrationConfig;
 import com.somle.eccang.model.*;
 import com.somle.eccang.repository.EccangTokenRepository;
 import com.somle.eccang.service.EccangService;
-import cn.iocoder.yudao.framework.test.core.ut.SomleBaseSpringTest;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.*;
-
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 
 import java.time.LocalDate;
