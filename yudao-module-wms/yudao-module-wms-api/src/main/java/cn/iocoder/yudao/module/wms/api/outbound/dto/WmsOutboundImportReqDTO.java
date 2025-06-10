@@ -44,7 +44,7 @@ public class WmsOutboundImportReqDTO {
     /**
      * 库存财务公司ID
      */
-    @NotNull(message = "库存财务公司ID不能为空", groups = {ValidationGroup.create.class})
+//    @NotNull(message = "库存财务公司ID不能为空", groups = {ValidationGroup.create.class})
     private Long companyId;
 
 //    /**

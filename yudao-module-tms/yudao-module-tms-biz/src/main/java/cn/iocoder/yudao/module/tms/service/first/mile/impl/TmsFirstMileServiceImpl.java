@@ -81,7 +81,7 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_AUDIT_STATE_MACHINE;
 import static cn.iocoder.yudao.module.tms.enums.TmsStateMachines.FIRST_MILE_REQUEST_ITEM_ORDER_STATE_MACHINE;
-import static cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType.OUTBOUND_BILL;
+import static cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType.FIRST_MILE;
 import static jodd.util.StringUtil.truncate;
 
 /**
@@ -531,7 +531,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
      */
     private WmsOutboundImportReqDTO buildOutboundBaseInfo(TmsFirstMileBO firstMileBO) {
         WmsOutboundImportReqDTO importReqDTO = new WmsOutboundImportReqDTO();
-        importReqDTO.setType(OUTBOUND_BILL.getValue()); // 订单出库
+        importReqDTO.setType(FIRST_MILE.getValue()); // 订单出库
         importReqDTO.setUpstreamId(firstMileBO.getId()); // 来源单据ID
         importReqDTO.setUpstreamCode(firstMileBO.getCode()); // 来源单据编码
         importReqDTO.setUpstreamType(First_MILE_SOURCE_TYPE); // 来源单据类型
