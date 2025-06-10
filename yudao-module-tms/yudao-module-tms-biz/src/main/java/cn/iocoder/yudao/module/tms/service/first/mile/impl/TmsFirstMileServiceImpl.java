@@ -223,7 +223,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         Set<Long> mainCompanyIds = Stream.of(vo.getSalesCompanyId(), vo.getExportCompanyId(), vo.getTransitCompanyId()).collect(Collectors.toSet());
         Set<Long> companyIds = vo.getFirstMileItems().stream().flatMap(item -> Stream.of(item.getSalesCompanyId(), item.getCompanyId())).collect(Collectors.toSet());
         mainCompanyIds.addAll(companyIds);
-        fmsCompanyApi.validateCompany(companyIds.stream().filter(Objects::nonNull).collect(Collectors.toSet()));
+//        fmsCompanyApi.validateCompany(companyIds.stream().filter(Objects::nonNull).collect(Collectors.toSet()));
     }
 
     /**
