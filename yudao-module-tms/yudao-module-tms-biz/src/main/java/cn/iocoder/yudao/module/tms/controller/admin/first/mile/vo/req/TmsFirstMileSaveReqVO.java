@@ -73,15 +73,6 @@ public class TmsFirstMileSaveReqVO {
     @DiffLogField(name = "预计到货日期")
     private LocalDateTime arrivePlanTime;
 
-
-    @Schema(description = "货柜货值（按最近采购价）")
-    @DiffLogField(name = "货柜货值")
-    private BigDecimal totalValue;
-
-    @Schema(description = "货柜件数")
-    @DiffLogField(name = "货柜件数")
-    private Integer totalQty;
-
     @Schema(description = "备注")
     @DiffLogField(name = "备注")
     private String remark;

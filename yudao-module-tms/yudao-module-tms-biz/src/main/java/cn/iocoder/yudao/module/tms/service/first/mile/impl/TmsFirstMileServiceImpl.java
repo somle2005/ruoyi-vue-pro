@@ -168,8 +168,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         // 计算主表的总数量、总重量和总体积
         List<TmsFirstMileItemDO> items = BeanUtils.toBean(vo.getFirstMileItems(), TmsFirstMileItemDO.class);
-        calculateTotalInfo(firstMile, items);
-        
         firstMileMapper.insert(firstMile);
 
         Long firstMileId = firstMile.getId();
@@ -235,7 +233,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         // 计算主表的总数量、总重量和总体积
         List<TmsFirstMileItemDO> items = BeanUtils.toBean(vo.getFirstMileItems(), TmsFirstMileItemDO.class);
-        calculateTotalInfo(updateObj, items);
 
         firstMileMapper.updateById(updateObj);
 
@@ -554,12 +551,43 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         });
     }
 
+    /**
+     * 设置产品快照信息
+     *
+     * @param itemList 头程单明细列表
+     */
+    private void setProductSnapshotInfo(List<TmsFirstMileItemDO> itemList) {
+        if (CollUtil.isEmpty(itemList)) {
+            return;
+        }
+        // 1. 获取产品信息
+        final Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(itemList.stream()
+            .map(TmsFirstMileItemDO::getProductId)
+            .collect(Collectors.toSet()));
+        // 2. 设置产品快照信息
+        itemList.forEach(item -> {
+            // 否则从产品信息中获取
+            ErpProductDTO product = productMap.get(item.getProductId());
+            if (product != null) {
+                // 将Integer转换为BigDecimal
+                item.setPackageLength(BigDecimal.valueOf(product.getPackageLength()));
+                item.setPackageWidth(BigDecimal.valueOf(product.getPackageWidth()));
+                item.setPackageHeight(BigDecimal.valueOf(product.getPackageHeight()));
+                item.setPackageWeight(product.getPackageWeight());
+                item.setWeight(product.getWeight());
+            }
+        });
+    }
+
     private void createFirstMileItemList(Long firstMileId, List<TmsFirstMileItemSaveReqVO> list) {
         if (CollUtil.isEmpty(list)) {
             return;
         }
         List<TmsFirstMileItemDO> itemList = BeanUtils.toBean(list, TmsFirstMileItemDO.class);
         itemList.forEach(item -> item.setFirstMileId(firstMileId));
+
+        // 设置产品快照信息
+        setProductSnapshotInfo(itemList);
         firstMileItemMapper.insertBatch(itemList);
         //item如果存在关联，则联动
         syncClosedQty(itemList, true);
@@ -599,6 +627,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         if (CollUtil.isNotEmpty(diffedList.get(0))) {
             diffedList.get(0).forEach(item -> item.setFirstMileId(firstMileId));
+            // 设置新增明细的产品快照信息
+            setProductSnapshotInfo(diffedList.get(0));
             firstMileItemMapper.insertBatch(diffedList.get(0));
             syncClosedQty(diffedList.get(0), true);
         }
@@ -614,6 +644,8 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
                     , TmsEventEnum.ORDER_ADJUSTMENT
                     , TmsFistMileRequestItemDTO.builder().itemId(item.getRequestItemId()).qty(changeQty).build());
             });
+            // 设置更新明细的产品快照信息
+            setProductSnapshotInfo(diffedList.get(1));
             firstMileItemMapper.updateBatch(diffedList.get(1));
         }
         if (CollUtil.isNotEmpty(diffedList.get(2))) {
@@ -783,67 +815,4 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         firstMileItemMapper.updateById(updateObj);
     }
 
-    /**
-     * 计算主表的总数量、总重量和总体积
-     *
-     * @param firstMile 主表对象
-     * @param items     子表对象列表
-     */
-    private void calculateTotalInfo(TmsFirstMileDO firstMile, List<TmsFirstMileItemDO> items) {
-        if (items == null || items.isEmpty()) {
-            firstMile.setTotalQty(0);
-            firstMile.setTotalWeight(BigDecimal.ZERO);
-            firstMile.setTotalVolume(BigDecimal.ZERO);
-            firstMile.setNetWeight(BigDecimal.ZERO);
-            return;
-        }
-
-        // 计算总数量、总重量和总体积
-        int totalQty = 0;
-        BigDecimal totalWeight = BigDecimal.ZERO;
-        BigDecimal totalVolume = BigDecimal.ZERO;
-        BigDecimal netWeight = BigDecimal.ZERO;
-
-        for (TmsFirstMileItemDO item : items) {
-            // 获取产品信息
-            ErpProductDTO product = erpProductApi.getProductDto(item.getProductId());
-            if (product == null) {
-                continue;
-            }
-
-            // 设置明细项的包装长宽高
-            item.setPackageLength(BigDecimal.valueOf(product.getPackageLength()));
-            item.setPackageWidth(BigDecimal.valueOf(product.getPackageWidth()));
-            item.setPackageHeight(BigDecimal.valueOf(product.getPackageHeight()));
-            item.setPackageWeight(product.getWeight());
-
-            // 累加总数量
-            if (item.getQty() != null) {
-                totalQty += item.getQty();
-            }
-
-            // 累加毛重和净重
-            if (product.getWeight() != null && item.getQty() != null) {
-                totalWeight = totalWeight.add(product.getWeight().multiply(BigDecimal.valueOf(item.getQty())));
-                // 累加净重 = 包装重量 * 数量
-                netWeight = netWeight.add(product.getPackageWeight().multiply(BigDecimal.valueOf(item.getQty())));
-            }
-
-            // 计算单个物品的体积（长*宽*高）并乘以数量
-            if (product.getPackageLength() != null && product.getPackageWidth() != null && product.getPackageHeight() != null && item.getQty() != null) {
-                BigDecimal itemVolume = BigDecimal.valueOf(product.getPackageLength())
-                    .multiply(BigDecimal.valueOf(product.getPackageWidth()))
-                    .multiply(BigDecimal.valueOf(product.getPackageHeight()))
-                    .multiply(BigDecimal.valueOf(item.getQty()));
-                // 设置明细项的体积
-                item.setVolume(itemVolume);
-                totalVolume = totalVolume.add(itemVolume);
-            }
-        }
-
-        firstMile.setTotalQty(totalQty);
-        firstMile.setTotalWeight(totalWeight);
-        firstMile.setTotalVolume(totalVolume);
-        firstMile.setNetWeight(netWeight);
-    }
 }
