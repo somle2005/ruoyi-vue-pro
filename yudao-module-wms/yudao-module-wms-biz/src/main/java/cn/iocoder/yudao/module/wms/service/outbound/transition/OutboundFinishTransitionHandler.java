@@ -18,6 +18,7 @@ import cn.iocoder.yudao.module.wms.service.quantity.OutboundFinishExecutor;
 import cn.iocoder.yudao.module.wms.service.quantity.context.OutboundContext;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -47,6 +48,7 @@ public class OutboundFinishTransitionHandler extends BaseOutboundTransitionHandl
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void perform(Integer from, Integer to, WmsOutboundAuditStatus.Event event, TransitionContext<WmsOutboundDO> context) {
         super.perform(from, to, event, context);
         // 调整库存
