@@ -215,7 +215,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         warehouseApi.validWarehouseList(warehouseIds);
         // 2. 校验头程单明细
         validateFirstMileItems(vo.getFirstMileItems());
-        // 3. 校验港口信息
+        // 3. 校验港口信息/admin-api/tms/first-mile/create
         validateVesselTrackingPorts(vo.getVesselTracking());
         // 4. 校验货柜类型
         Optional.ofNullable(vo.getCabinetType()).ifPresent(i -> dictDataApi.validateDictDataList(TmsDictTypeConstants.TMS_LOGISTIC_TYPE, Collections.singleton(String.valueOf(i))));
@@ -223,8 +223,7 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
         Set<Long> mainCompanyIds = Stream.of(vo.getSalesCompanyId(), vo.getExportCompanyId(), vo.getTransitCompanyId()).collect(Collectors.toSet());
         Set<Long> companyIds = vo.getFirstMileItems().stream().flatMap(item -> Stream.of(item.getSalesCompanyId(), item.getCompanyId())).collect(Collectors.toSet());
         mainCompanyIds.addAll(companyIds);
-        fmsCompanyApi.validateCompany(mainCompanyIds);
-
+        fmsCompanyApi.validateCompany(companyIds.stream().filter(Objects::nonNull).collect(Collectors.toSet()));
     }
 
     /**
