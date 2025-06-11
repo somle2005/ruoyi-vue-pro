@@ -656,4 +656,9 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             throw exception(INBOUND_ABANDON_NOT_ALLOWED);
         }
     }
+
+    @Override
+    public WmsInboundDO getByWarehouseIdAndProductId(Long warehouseId, Long productId) {
+        return inboundMapper.getByWarehouseIdAndProductId(warehouseId, productId);
+    }
 }

@@ -13,6 +13,7 @@ import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.dept.DeptSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSimpleRespVO;
@@ -28,6 +29,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWareho
 import cn.iocoder.yudao.module.wms.controller.admin.stockcheck.vo.WmsStockCheckRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
@@ -45,6 +47,7 @@ import cn.iocoder.yudao.module.wms.dal.mysql.stock.flow.WmsStockFlowMapper;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockType;
+import cn.iocoder.yudao.module.wms.service.exchange.WmsExchangeService;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsInboundItemFlowService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
@@ -87,6 +90,10 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     @Resource
     @Lazy
     private WmsWarehouseService warehouseService;
+
+    @Resource
+    @Lazy
+    private WmsExchangeService exchangeService;
 
     @Resource
     @Lazy
@@ -424,8 +431,18 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
                 continue;
             }
             Integer getOutboundAvailableQty = inboundItemFlowSimpleVO.getOutboundAvailableQty();
-            respVO.setAvailableQty(getOutboundAvailableQty - respVO.getDeltaQty());
+            respVO.setAvailableQty(getOutboundAvailableQty - respVO.getDeltaQty() * respVO.getDirection());
         }
+    }
+
+    @Override
+    public void assembleExchange(List<WmsStockFlowRespVO> list) {
+        List<WmsStockFlowRespVO> stockCheckFlowList = StreamX.from(list).filter(
+            v -> Objects.equals(WmsStockReason.EXCHANGE.getValue(), v.getReason())
+        ).toList();
+        List<WmsExchangeDO> exchangeDOList = exchangeService.selectByIds(StreamX.from(stockCheckFlowList).toList(WmsStockFlowRespVO::getReasonBillId));
+        Map<Long, WmsExchangeRespVO> exchangeMap = StreamX.from(exchangeDOList).toMap(WmsExchangeDO::getId, elem -> BeanUtils.toBean(elem, WmsExchangeRespVO.class));
+        StreamX.from(stockCheckFlowList).assemble(exchangeMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setExchange);
     }
 
     @Override
