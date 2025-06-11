@@ -13,15 +13,14 @@ import org.springframework.stereotype.Component;
 @Aspect
 @Component
 @Slf4j
-public class SrmSyncLogAspect {
+public class SyncLogAspect {
 
-    @Around("@annotation(srmSyncLog)")
-    public Object around(ProceedingJoinPoint pjp, SrmSyncLog srmSyncLog) throws Throwable {
-        String desc = srmSyncLog.value();
+    @Around("@annotation(syncLog)")
+    public Object around(ProceedingJoinPoint pjp, SyncLog syncLog) throws Throwable {
+        String desc = syncLog.value();
         String methodName = pjp.getSignature().getName();
         long start = System.currentTimeMillis();
         Object[] args = pjp.getArgs();
-
         try {
             log.info("[{}] 开始同步，参数：{}", desc.isEmpty() ? methodName : desc, JSONUtil.parse(args));
             Object result = pjp.proceed();

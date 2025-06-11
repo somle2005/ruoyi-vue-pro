@@ -479,7 +479,6 @@ public class KingdeeClient {
      * @return KingdeeResponse
      */
     public KingdeeResponse savePurOrder(KingdeePurOrderSaveReqVO order) {
-        log.debug("保存采购订单");
         String endUrl = "/jdy/v2/scm/pur_order";
         TreeMap<String, String> params = new TreeMap<>();
         order.setIgnoreWarn(false);//忽略告警信息(如：名称已存在)保存客户
@@ -493,7 +492,6 @@ public class KingdeeClient {
      * @return KingdeeResponse
      */
     public KingdeeResponse savePurInbound(KingdeePurInboundSaveReqVO inbound) {
-        log.debug("保存采购入库单");
         String endUrl = "/jdy/v2/scm/pur_inbound";
         TreeMap<String, String> params = new TreeMap<>();
         return postResponse(endUrl, params, inbound);
@@ -506,7 +504,6 @@ public class KingdeeClient {
      * @return KingdeeResponse
      */
     public KingdeeResponse savePurReturn(KingdeePurReturnSaveReqVO returnOrder) {
-        log.debug("保存采购退货单");
         String endUrl = "/jdy/v2/scm/pur_ret";
         TreeMap<String, String> params = new TreeMap<>();
         return postResponse(endUrl, params, returnOrder);
@@ -519,7 +516,6 @@ public class KingdeeClient {
      * @return 分页数据流
      */
     public Stream<KingdeePage> streamPurReturn(KingdeePurReturnReqVO vo) {
-        log.debug("获取采购退货单列表");
         String endpoint = "/jdy/v2/scm/pur_ret";
         return StreamX.iterate(
             getPage(JsonUtilsX.toJSONObject(vo), endpoint),
@@ -538,7 +534,6 @@ public class KingdeeClient {
      * @return 单页数据
      */
     public KingdeePage getPurReturnPage(KingdeePurReturnReqVO vo) {
-        log.debug("获取单页采购退货单列表");
         String endpoint = "/jdy/v2/scm/pur_ret";
         return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
     }
@@ -607,7 +602,6 @@ public class KingdeeClient {
      * @return 供应商列表分页数据
      */
     public KingdeePage getSupplierList(KingdeeSupplierQueryReqVO queryReqVO) {
-        log.debug("获取供应商列表，查询参数：{}", queryReqVO);
         String endUrl = "/jdy/v2/bd/supplier";
         KingdeeResponse response = getResponse(endUrl, JsonUtilsX.toJSONObject(queryReqVO));
         return response.getData(KingdeePage.class);

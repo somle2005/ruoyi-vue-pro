@@ -8,6 +8,6 @@ import java.lang.annotation.*;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
-public @interface SrmSyncLog {
+public @interface SyncLog {
     String value() default ""; // 可选描述
 }

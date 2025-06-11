@@ -3,13 +3,9 @@ package com.somle.esb.handler.srm;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
-import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
-import com.somle.esb.aspect.SrmSyncLog;
+import com.somle.esb.aspect.SyncLog;
 import com.somle.esb.converter.ErpToKingdeeConverter;
 import com.somle.kingdee.model.KingdeePurInboundSaveReqVO;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
@@ -25,6 +21,8 @@ import org.springframework.stereotype.Component;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 /**
  * srm 消费端
@@ -42,97 +40,80 @@ public class SrmHandler {
     private final SrmPurchaseReturnApi srmPurchaseReturnApi;
     private final ErpToKingdeeConverter erpToKingdeeConverter;
 
-    //消费供应商
-    @SrmSyncLog("同步供应商到金蝶")
+    @SyncLog("同步供应商到金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.SUPPLIER)
     public void syncSuppliersToKingdee(@Payload List<Long> supplierIds) {
-        // 通过API获取供应商信息
-        List<SrmSupplierDTO> suppliers = srmSupplierApi.validateSupplierIds(new HashSet<>(supplierIds));
-        if (suppliers.isEmpty()) {
-            log.warn("[syncSuppliersToKingdee] 未找到需要同步的供应商信息");
-            return;
-        }
-        // 转换为金蝶供应商
-        List<KingdeeSupplierSaveVO> kingdeeSupplierSaveVOS = erpToKingdeeConverter.convertSupplierDTOList(suppliers);
-        // 同步到金蝶
-        int total = kingdeeSupplierSaveVOS.size();
-        for (int i = 0; i < total; i++) {
-            KingdeeSupplierSaveVO supplier = kingdeeSupplierSaveVOS.get(i);
-            kingdeeService.addSupplier(supplier);
-            log.info("[syncSuppliersToKingdee] 同步进度：{}/{}，供应商：{}", i + 1, total, supplier.getNumber());
-        }
-        log.info("[syncSuppliersToKingdee] 同步完成，共处理：{}个供应商", total);
+        syncToKingdee(
+            supplierIds,
+            ids -> srmSupplierApi.validateSupplierIds(new HashSet<>(ids)),
+            erpToKingdeeConverter::convertSupplierDTOList,
+            kingdeeService::addSupplier,
+            "供应商",
+            KingdeeSupplierSaveVO::getNumber
+        );
     }
 
-    //消费采购订单
-    @SrmSyncLog("同步采购订单到金蝶")
+    @SyncLog("同步采购订单到金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_ORDER)
     public void syncPurchaseOrdersToKingdee(@Payload List<Long> orderIds) {
-        log.info("[syncPurchaseOrdersToKingdee] 开始同步采购订单到金蝶，数量：{}", orderIds.size());
-        // 通过API获取采购订单信息
-        List<SrmPurchaseOrderDTO> orders = srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(orderIds));
-        if (orders.isEmpty()) {
-            log.warn("[syncPurchaseOrdersToKingdee] 未找到需要同步的采购订单信息");
-            return;
-        }
-
-        // 转换为金蝶采购订单
-        List<KingdeePurOrderSaveReqVO> kingdeeOrders = erpToKingdeeConverter.convertOrderDTOList(orders);
-        // 同步到金蝶
-        int total = kingdeeOrders.size();
-        for (int i = 0; i < total; i++) {
-            KingdeePurOrderSaveReqVO order = kingdeeOrders.get(i);
-            kingdeeService.savePurchaseOrder(order);
-            log.info("[syncPurchaseOrdersToKingdee] 同步进度：{}/{}，订单：{}", i + 1, total, order.getBillNo());
-        }
-        log.info("[syncPurchaseOrdersToKingdee] 同步完成，共处理：{}个订单", total);
+        syncToKingdee(
+            orderIds,
+            ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
+            erpToKingdeeConverter::convertOrderDTOList,
+            kingdeeService::savePurchaseOrder,
+            "采购订单",
+            KingdeePurOrderSaveReqVO::getBillNo
+        );
     }
 
-    //消费采购入库(到货)单
-    @SrmSyncLog("同步采购入库单到金蝶")
+    @SyncLog("同步采购入库单到金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_IN)
     public void syncPurchaseInToKingdee(@Payload List<Long> inIds) {
-        log.info("[syncPurchaseInToKingdee] 开始同步采购入库单到金蝶，数量：{}", inIds.size());
-        // 通过API获取采购入库单信息
-        List<SrmPurchaseInDTO> inOrders = srmPurchaseInApi.getPurchaseInList(inIds);
-        if (inOrders.isEmpty()) {
-            log.warn("[syncPurchaseInToKingdee] 未找到需要同步的采购入库单信息");
-            return;
-        }
-
-        // 转换为金蝶采购入库单
-        List<KingdeePurInboundSaveReqVO> kingdeeInOrders = erpToKingdeeConverter.convertInDTOList(inOrders);
-        // 同步到金蝶
-        int total = kingdeeInOrders.size();
-        for (int i = 0; i < total; i++) {
-            KingdeePurInboundSaveReqVO inOrder = kingdeeInOrders.get(i);
-            kingdeeService.savePurInbound(inOrder);
-            log.info("[syncPurchaseInToKingdee] 同步进度：{}/{}，入库单：{}", i + 1, total, inOrder.getBillNo());
-        }
-        log.info("[syncPurchaseInToKingdee] 同步完成，共处理：{}个入库单", total);
+        syncToKingdee(
+            inIds,
+            srmPurchaseInApi::getPurchaseInList,
+            erpToKingdeeConverter::convertInDTOList,
+            kingdeeService::savePurInbound,
+            "采购入库单",
+            KingdeePurInboundSaveReqVO::getBillNo
+        );
     }
 
-    //消费采购退货单
-    @SrmSyncLog("同步采购退货单到金蝶")
+    @SyncLog("同步采购退货单到金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_RETURN)
     public void syncPurchaseReturnToKingdee(@Payload List<Long> returnIds) {
-        log.info("[syncPurchaseReturnToKingdee] 开始同步采购退货单到金蝶，数量：{}", returnIds.size());
-        // 通过API获取采购退货单信息
-        List<SrmPurchaseReturnDTO> returnOrders = srmPurchaseReturnApi.getPurchaseReturnList(returnIds);
-        if (returnOrders.isEmpty()) {
-            log.warn("[syncPurchaseReturnToKingdee] 未找到需要同步的采购退货单信息");
+        syncToKingdee(
+            returnIds,
+            srmPurchaseReturnApi::getPurchaseReturnList,
+            erpToKingdeeConverter::convertReturnDTOList,
+            kingdeeService::savePurOutbound,
+            "采购退货单",
+            KingdeePurReturnSaveReqVO::getBillNo
+        );
+    }
+
+
+    private <T, R> void syncToKingdee(
+        List<Long> ids,
+        Function<List<Long>, List<T>> validator,
+        Function<List<T>, List<R>> converter,
+        Consumer<R> syncer,
+        String logType,
+        Function<R, Object> numberGetter
+    ) {
+        List<T> dtos = validator.apply(ids);
+        if (dtos.isEmpty()) {
+            log.warn("[{}] 未找到需要同步的信息", logType);
             return;
         }
-
-        // 转换为金蝶采购退货单
-        List<KingdeePurReturnSaveReqVO> kingdeeReturnOrders = erpToKingdeeConverter.convertReturnDTOList(returnOrders);
-        // 同步到金蝶
-        int total = kingdeeReturnOrders.size();
+        List<R> kingdeeObjs = converter.apply(dtos);
+        int total = kingdeeObjs.size();
         for (int i = 0; i < total; i++) {
-            KingdeePurReturnSaveReqVO returnOrder = kingdeeReturnOrders.get(i);
-            kingdeeService.savePurOutbound(returnOrder);
-            log.info("[syncPurchaseReturnToKingdee] 同步进度：{}/{}，退货单：{}", i + 1, total, returnOrder.getBillNo());
+            R obj = kingdeeObjs.get(i);
+            syncer.accept(obj);
+            log.info("[{}] 同步进度：{}/{}，标识：{}", logType, i + 1, total, numberGetter.apply(obj));
         }
-        log.info("[syncPurchaseReturnToKingdee] 同步完成，共处理：{}个退货单", total);
+        log.info("[{}] 同步完成，共处理：{}个", logType, total);
     }
+
 }
