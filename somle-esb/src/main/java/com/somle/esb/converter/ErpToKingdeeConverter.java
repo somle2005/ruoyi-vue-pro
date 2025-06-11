@@ -198,60 +198,6 @@ public class ErpToKingdeeConverter {
     }
 
     public KingdeeAuxInfoDetail toKingdee(DeptRespDTO erpDepartment) {
-        // Map<String, String> departmentMap = new HashMap<>();
-        // departmentMap.put("ABD美视区1组", "ABD0101");
-        // departmentMap.put("ABD美视区2组", "ABD0102");
-        // departmentMap.put("ABD美视区", "ABD0199");
-        // departmentMap.put("ABD欧视区1组", "ABD0201");
-        // departmentMap.put("ABD欧视区2组", "ABD0202");
-        // departmentMap.put("ABD欧视区", "ABD0299");
-        // departmentMap.put("ABD加视区1组", "ABD0301");
-        // departmentMap.put("ABD加视综合区", "ABD0399");
-        // departmentMap.put("ABD亚视区1组", "ABD0401");
-        // departmentMap.put("ABD亚视区", "ABD0499");
-        // departmentMap.put("ABD视听事业部", "ABD9999");
-        // departmentMap.put("CBD美创组", "CBD0101");
-        // departmentMap.put("CBD欧创1组", "CBD0102");
-        // departmentMap.put("CBD欧创2组", "CBD0103");
-        // departmentMap.put("CBD加创组", "CBD0105");
-        // departmentMap.put("CBD亚创组", "CBD0106");
-        // departmentMap.put("CBD美亚独立站", "CBD0201");
-        // departmentMap.put("CBD美亚业务部", "CBD9901");
-        // departmentMap.put("CBD欧洲业务部", "CBD9902");
-        // departmentMap.put("CBD创意事业部", "CBD9999");
-        // departmentMap.put("DCD国内品牌事业部", "DCD9999");
-        // departmentMap.put("EBD美办区1组", "EBD0101");
-        // departmentMap.put("EBD美办区2组", "EBD0102");
-        // departmentMap.put("EBD美办区", "EBD0199");
-        // departmentMap.put("EBD欧办区1组", "EBD0201");
-        // departmentMap.put("EBD欧办区2组", "EBD0202");
-        // departmentMap.put("EBD欧办区3组", "EBD0203");
-        // departmentMap.put("EBD欧办区4组", "EBD0204");
-        // departmentMap.put("EBD欧办区", "EBD0299");
-        // departmentMap.put("EBD加办区1组", "EBD0301");
-        // departmentMap.put("EBD加办综合区", "EBD0399");
-        // departmentMap.put("EBD亚办区1组", "EBD0401");
-        // departmentMap.put("EBD亚办区", "EBD0499");
-        // departmentMap.put("EBD办公事业部", "EBD9999");
-        // departmentMap.put("HCD美家1组", "HCD0101");
-        // departmentMap.put("HCD美家二区1组", "HCD0201");
-        // departmentMap.put("HCD美家二区2组", "HCD0202");
-        // departmentMap.put("HCD美家3组", "HCD0301");
-        // departmentMap.put("HCD美家四区1组", "HCD0401");
-        // departmentMap.put("HCD美家四区2组", "HCD0402");
-        // departmentMap.put("HCD欧家区1组", "HCD0501");
-        // departmentMap.put("HCD欧家区2组", "HCD0502");
-        // departmentMap.put("HCD欧家区", "HCD0599");
-        // departmentMap.put("HCD加家区1组", "HCD0601");
-        // departmentMap.put("HCD加家区2组", "HCD0602");
-        // departmentMap.put("HCD加家区", "HCD0699");
-        // departmentMap.put("HCD亚家区1组", "HCD0701");
-        // departmentMap.put("HCD独立站组", "HCD0801");
-        // departmentMap.put("HCD路易十六业务部1组", "HCD0901");
-        // departmentMap.put("HCD斯嘉丽业务部", "HCD1099");
-        // departmentMap.put("HCDwayfair组", "HCD1101");
-        // departmentMap.put("HCD家居事业部", "HCD9999");
-
         KingdeeAuxInfoDetail department = new KingdeeAuxInfoDetail();
         String number = String.valueOf(erpDepartment.getId());
         String name = String.valueOf(erpDepartment.getName());
@@ -281,6 +227,24 @@ public class ErpToKingdeeConverter {
      */
     public List<KingdeePurInboundSaveReqVO> convertInDTOList(List<SrmPurchaseInDTO> inOrders) {
         return null;
+    }
+
+    /**
+     * 将 SRM 采购订单列表转换为金蝶采购订单列表
+     * 过滤掉null值，确保返回的列表不包含null元素
+     *
+     * @param orders SRM采购订单列表
+     * @return 金蝶采购订单列表，如果输入为null则返回空列表
+     */
+    public List<KingdeePurOrderSaveReqVO> convertOrderDTOList(List<SrmPurchaseOrderDTO> orders) {
+        if (orders == null) {
+            return Collections.emptyList();
+        }
+        return orders.stream()
+            .filter(Objects::nonNull)
+            .map(this::convertOrderDTO)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
     /**
@@ -314,53 +278,35 @@ public class ErpToKingdeeConverter {
      * 包括：单据日期、单据编号、供应商信息、备注、总金额、外部单号等
      *
      * @param target 目标对象（金蝶采购订单）
-     * @param source 源对象（SRM采购订单）
+     * @param dto 源对象（SRM采购订单）
      */
-    public void convertBasicInfo(KingdeePurOrderSaveReqVO target, SrmPurchaseOrderDTO source) {
+    public void convertBasicInfo(KingdeePurOrderSaveReqVO target, SrmPurchaseOrderDTO dto) {
         // 单据日期：格式化为 yyyy-MM-dd
-        if (source.getOrderDate() != null) {
-            target.setBillDate(DateUtil.format(source.getOrderDate(), "yyyy-MM-dd"));
+        if (dto.getBillTime() != null) {
+            target.setBillDate(DateUtil.format(dto.getBillTime(), "yyyy-MM-dd"));
         }
 
         // 单据编号
-        target.setBillNo(StrUtil.trimToNull(source.getOrderNo()));
+        target.setBillNo(StrUtil.trimToNull(dto.getCode()));
 
-        // 供应商信息：ID转为字符串，编码去除空格
-        if (source.getSupplierId() != null) {
-            target.setSupplierId(String.valueOf(source.getSupplierId()));
-        }
-        target.setSupplierNumber(StrUtil.trimToNull(source.getSupplierCode()));
+        //TODO  供应商信息：ID转为字符串，编码去除空格  client拿ID
+//        if (dto.getSupplierId() != null) {
+//            target.setSupplierId(String.valueOf(dto.getSupplierId()));
+//        }
+        //supplier_number
 
         // 备注
-        target.setRemark(StrUtil.trimToNull(source.getRemark()));
+        target.setRemark(StrUtil.trimToNull(dto.getRemark()));
 
         // 总金额：BigDecimal转Double
-        if (source.getTotalAmount() != null) {
-            target.setTotalAmount(source.getTotalAmount().doubleValue());
+        if (dto.getTotalPrice() != null) {
+            target.setTotalAmount(dto.getTotalPrice().doubleValue());
         }
 
         // 外部单号：ID转为字符串
-        if (source.getId() != null) {
-            target.setOutsidePkId(String.valueOf(source.getId()));
+        if (dto.getId() != null) {
+            target.setOutsidePkId(String.valueOf(dto.getId()));
         }
-    }
-
-    /**
-     * 将 SRM 采购订单列表转换为金蝶采购订单列表
-     * 过滤掉null值，确保返回的列表不包含null元素
-     *
-     * @param orders SRM采购订单列表
-     * @return 金蝶采购订单列表，如果输入为null则返回空列表
-     */
-    public List<KingdeePurOrderSaveReqVO> convertOrderDTOList(List<SrmPurchaseOrderDTO> orders) {
-        if (orders == null) {
-            return Collections.emptyList();
-        }
-        return orders.stream()
-            .filter(Objects::nonNull)
-            .map(this::convertOrderDTO)
-            .filter(Objects::nonNull)
-            .toList();
     }
 
     /**
@@ -378,7 +324,7 @@ public class ErpToKingdeeConverter {
             .filter(Objects::nonNull)
             .map(this::convertToMaterialEntity)
             .filter(Objects::nonNull)
-            .toList();
+            .collect(Collectors.toList());
     }
 
     /**
@@ -399,38 +345,41 @@ public class ErpToKingdeeConverter {
         KingdeePurOrderSaveReqVO.MaterialEntity entity = new KingdeePurOrderSaveReqVO.MaterialEntity();
 
         // 1. 物料信息
-        entity.setMaterialId(String.valueOf(item.getMaterialId()));
-        entity.setMaterialNumber(StrUtil.trimToNull(item.getMaterialCode()));
+        entity.setMaterialId(String.valueOf(item.getProductId()));
+        entity.setMaterialNumber(StrUtil.trimToNull(item.getProductCode()));
 
         // 2. 数量信息
-        if (item.getQuantity() != null) {
-            entity.setQty(item.getQuantity().doubleValue());
+        if (item.getQty() != null) {
+            entity.setQty(item.getQty().doubleValue());
         }
-        if (item.getPrice() != null) {
-            entity.setPrice(item.getPrice().toString());
+        if (item.getProductPrice() != null) {
+            entity.setPrice(item.getProductPrice().toString());
         }
-        if (item.getAmount() != null) {
-            entity.setAmount(item.getAmount().toString());
+        if (item.getTotalPrice() != null) {
+            entity.setAmount(item.getTotalPrice().toString());
         }
 
         // 3. 单位信息
-        entity.setUnitId(StrUtil.trimToNull(item.getUnit())); // 单位ID
-        entity.setUnitNumber(StrUtil.trimToNull(item.getUnit())); // 单位编码
+        if (item.getProductUnitId() != null) {
+            entity.setUnitId(String.valueOf(item.getProductUnitId()));
+        }
+        entity.setUnitNumber(StrUtil.trimToNull(item.getProductUnitName()));
 
         // 4. 其他信息
         entity.setComment(StrUtil.trimToNull(item.getRemark()));
-        entity.setDeliveryDate(item.getDeliveryDate());
-        if (item.getWarehouseId() != null) {
-            entity.setStockId(String.valueOf(item.getWarehouseId()));
+        if (item.getDeliveryTime() != null) {
+            entity.setDeliveryDate(DateUtil.format(item.getDeliveryTime(), "yyyy-MM-dd"));
         }
-        entity.setStockNumber(StrUtil.trimToNull(item.getWarehouseName()));
+//        if (item.getWarehouseId() != null) {
+//            entity.setStockId(String.valueOf(item.getWarehouseId()));
+//        }
 
         // 5. 税率相关信息
         if (item.getTaxRate() != null) {
             entity.setCess(String.valueOf(item.getTaxRate()));
         }
-        if (item.getTaxAmount() != null) {
-            entity.setTaxAmount(String.valueOf(item.getTaxAmount()));
+        if (item.getTax() != null) {
+            entity.setTaxAmount(String.valueOf(item.getTax()));
         }
         if (item.getGrossPrice() != null) {
             entity.setActTaxPrice(String.valueOf(item.getGrossPrice()));

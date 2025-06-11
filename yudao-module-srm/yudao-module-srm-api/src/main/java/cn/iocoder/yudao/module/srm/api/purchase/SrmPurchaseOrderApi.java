@@ -10,13 +10,6 @@ import java.util.Set;
  */
 public interface SrmPurchaseOrderApi {
 
-    /**
-     * 获得采购订单列表
-     *
-     * @param ids 采购订单编号列表
-     * @return 采购订单列表
-     */
-    List<SrmPurchaseOrderDTO> getPurchaseOrderList(List<Long> ids);
 
     /**
      * 验证采购订单ID是否存在

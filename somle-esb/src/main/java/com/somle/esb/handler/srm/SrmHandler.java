@@ -1,5 +1,6 @@
 package com.somle.esb.handler.srm;
 
+import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
@@ -103,7 +104,7 @@ public class SrmHandler {
     ) {
         List<T> dtos = validator.apply(ids);
         if (dtos.isEmpty()) {
-            log.warn("[{}] 未找到需要同步的信息", logType);
+            log.warn("[{}] 未找到需要同步的信息,入参:{}", logType, JSONUtil.parse(ids));
             return;
         }
         List<R> kingdeeObjs = converter.apply(dtos);
