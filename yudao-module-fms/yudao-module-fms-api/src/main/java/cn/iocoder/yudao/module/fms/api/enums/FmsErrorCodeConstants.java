@@ -60,7 +60,5 @@ public interface FmsErrorCodeConstants {
 
     // ========== Fms财务公司 1-030-611-000 ==========
     ErrorCode FINANCE_SUBJECT_NOT_EXISTS = new ErrorCode(1_030_611_000, "Fms财务公司({})不存在");
-    // ========== 海关产品分类表1-030-607-000 ==========
-    ErrorCode CUSTOM_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_607_001, "海关产品分类表不存在");
-    ErrorCode CUSTOM_PRODUCT_EXISTS = new ErrorCode(1_030_607_002, "产品已存在关联，添加失败");
+
 }
