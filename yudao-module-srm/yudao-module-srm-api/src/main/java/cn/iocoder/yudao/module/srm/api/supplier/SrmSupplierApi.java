@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * 供应商 API 接口
@@ -36,4 +37,12 @@ public interface SrmSupplierApi {
      * @return 供应商 Map
      */
     Map<Long, SrmSupplierDTO> getSupplierMap(Collection<Long> ids);
+
+    /**
+     * 验证供应商ID是否存在
+     *
+     * @param ids 供应商编号集合
+     * @return 存在的供应商列表
+     */
+    List<SrmSupplierDTO> validateSupplierIds(Set<Long> ids);
 } 

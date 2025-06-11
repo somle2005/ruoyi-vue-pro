@@ -175,7 +175,6 @@ public class KingdeeClient {
      * @param number 产品编号
      * @return 产品详情
      */
-//    @Cacheable(value = ErpRedisKeyConstants.KINGDEE_MATERIAL, key = "#number", unless = "#result.errcode != '0'")
     public KingdeeResponse getMaterial(String number) {
         String endUrl = "/jdy/v2/bd/material_detail";
         TreeMap<String, String> params = new TreeMap<>();
@@ -195,6 +194,7 @@ public class KingdeeClient {
         }
         setUnitId("立方厘米", kingdeeUnit -> reqVO.setVolumeUnitId(kingdeeUnit.getId()));
         setUnitId("kg", kingdeeUnit -> reqVO.setWeightUnitId(kingdeeUnit.getId()));
+        //金蝶产品单位目前固定是`套`
         setUnitId("套", kingdeeUnit -> reqVO.setBaseUnitId(kingdeeUnit.getId()));
         try {
             Optional.ofNullable(getAuxInfoByNumber(reqVO.getSaleDepartmentId().toString()))

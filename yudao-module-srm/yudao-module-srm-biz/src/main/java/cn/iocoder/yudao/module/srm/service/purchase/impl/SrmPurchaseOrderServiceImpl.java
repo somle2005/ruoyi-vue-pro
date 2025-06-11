@@ -627,7 +627,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     private SrmPurchaseOrderDO validatePurchaseOrderExists(Long id) {
         SrmPurchaseOrderDO purchaseOrder = purchaseOrderMapper.selectById(id);
         if (purchaseOrder == null) {
-            throw exception(PURCHASE_ORDER_NOT_EXISTS);
+            throw exception(PURCHASE_ORDER_NOT_EXISTS, id);
         }
         return purchaseOrder;
     }
@@ -734,7 +734,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 查询采购订单信息
         SrmPurchaseOrderDO orderDO = purchaseOrderMapper.selectById(vo.getOrderIds().get(0));
         if (orderDO == null) {
-            throw exception(PURCHASE_ORDER_NOT_EXISTS);
+            throw exception(PURCHASE_ORDER_NOT_EXISTS, vo.getOrderIds().get(0));
         }
         //日志上下文
         LogRecordContext.putVariable("code", orderDO.getCode());
@@ -945,12 +945,12 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     public void submitAudit(Collection<Long> orderIds) {
         // 提前校验传入的订单ID是否存在
         if (CollUtil.isEmpty(orderIds)) {
-            throw exception(PURCHASE_ORDER_NOT_EXISTS);
+            throw exception(PURCHASE_ORDER_NOT_EXISTS, orderIds);
         }
         // 1. 批量查询订单信息
         List<SrmPurchaseOrderDO> orderDOS = purchaseOrderMapper.selectByIds(orderIds);
         if (CollUtil.isEmpty(orderDOS)) {
-            throw exception(PURCHASE_ORDER_NOT_EXISTS);
+            throw exception(PURCHASE_ORDER_NOT_EXISTS, orderIds);
         }
         // 获取单据编号用于日志记录
         String codes = CollUtil.join(orderDOS.stream().map(SrmPurchaseOrderDO::getCode).collect(Collectors.toList()), ",");
