@@ -633,7 +633,6 @@ public class KingdeeClient {
      * 结果会被缓存120分钟
      */
     public Map<String, KingdeeSupplierSaveVO> getAllSupplierList(KingdeeSupplierQueryReqVO queryReqVO) {
-
         if (queryReqVO == null) {
             queryReqVO = new KingdeeSupplierQueryReqVO();
         }
@@ -665,45 +664,19 @@ public class KingdeeClient {
                 }
                 throw exception(SUPPLIER_LIST_LOADING, "数据正在加载中，请稍后重试。");
             }
+
+            // 双重检查
             cachedData = redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY);
             if (cachedData != null) {
                 log.debug("从缓存获取供应商列表数据（双重检查）");
                 return JsonUtilsX.parseObject(cachedData, new TypeReference<>() {
                 });
             }
-            // 4. 拉取第一页
-            String endpoint = "/jdy/v2/bd/supplier";
-            KingdeePage firstPage = getPage(JsonUtilsX.toJSONObject(queryReqVO), endpoint);
-            int totalPages = firstPage.getTotalPage();
-            if (totalPages > 500) {
-                throw exception(KingDeeErrorCodeConstants.SUPPLIER_LIST_FAIL, "页数过大(" + totalPages + ")，请缩小范围");
-            }
 
-            // 5. 拉取剩余页数据
-            List<CompletableFuture<KingdeePage>> futures = new ArrayList<>();
-            futures.add(CompletableFuture.completedFuture(firstPage));
+            // 2. 从API获取数据
+            Map<String, KingdeeSupplierSaveVO> result = fetchSupplierDataFromApi(queryReqVO);
 
-            for (int page = 2; page <= totalPages; page++) {
-                final int currentPage = page;
-                KingdeeSupplierQueryReqVO finalQueryReqVO = queryReqVO;
-                futures.add(CompletableFuture.supplyAsync(() -> {
-                    KingdeeSupplierQueryReqVO supplierQueryReqVO = cn.iocoder.yudao.framework.common.util.object.BeanUtils.toBean(finalQueryReqVO, KingdeeSupplierQueryReqVO.class,
-                        fqr -> fqr.setPage(currentPage));
-                    log.debug("线程[{}]开始获取第{}页数据,页数{}", Thread.currentThread().getName(), currentPage, supplierQueryReqVO.getPageSize());
-                    return getPage(JsonUtilsX.toJSONObject(supplierQueryReqVO), endpoint);
-                }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor()));
-            }
-
-            // 6. 汇总
-            Map<String, KingdeeSupplierSaveVO> result = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-                .thenApply(v -> futures.stream().map(CompletableFuture::join)
-                    .flatMap(page -> page.getRowsList(KingdeeSupplierSaveVO.class).stream())
-                    .collect(Collectors.toMap(KingdeeSupplierSaveVO::getName, supplier -> supplier, (oldVal, newVal) -> {
-                        log.warn("发现重复的供应商名称：{}", oldVal.getName());
-                        return oldVal;
-                    }))).join();
-
-            // 7. 缓存
+            // 3. 缓存数据
             if (!result.isEmpty()) {
                 redisTemplate.opsForValue().set(SUPPLIER_CACHE_KEY, JsonUtilsX.toJsonString(result), 120, TimeUnit.MINUTES);
                 log.debug("供应商列表数据已缓存，过期时间120分钟");
@@ -714,7 +687,7 @@ public class KingdeeClient {
             log.error("获取供应商列表数据异常", e);
             throw exception(KingDeeErrorCodeConstants.SUPPLIER_LIST_FAIL, e.getMessage());
         } finally {
-            // 8. 释放锁
+            // 4. 释放锁
             if (locked && lock.isHeldByCurrentThread()) {
                 lock.unlock();
             }
@@ -722,7 +695,96 @@ public class KingdeeClient {
     }
 
     /**
-     * 删除所有供应列表缓存
+     * 直接从金蝶API获取供应商数据
+     *
+     * @param queryReqVO 查询参数
+     * @return 供应商数据Map
+     */
+    private Map<String, KingdeeSupplierSaveVO> fetchSupplierDataFromApi(KingdeeSupplierQueryReqVO queryReqVO) {
+        String endpoint = "/jdy/v2/bd/supplier";
+        // 1. 获取第一页数据
+        KingdeePage firstPage = getPage(JsonUtilsX.toJSONObject(queryReqVO), endpoint);
+        int totalPages = firstPage.getTotalPage();
+        if (totalPages > 500) {
+            throw new RuntimeException("供应商页数过大(" + totalPages + ")，请缩小范围");
+        }
+
+        // 2. 拉取所有页数据
+        List<CompletableFuture<KingdeePage>> futures = new ArrayList<>();
+        futures.add(CompletableFuture.completedFuture(firstPage));
+
+        for (int page = 2; page <= totalPages; page++) {
+            final int currentPage = page;
+            futures.add(CompletableFuture.supplyAsync(() -> {
+                KingdeeSupplierQueryReqVO supplierQueryReqVO = cn.iocoder.yudao.framework.common.util.object.BeanUtils.toBean(queryReqVO, KingdeeSupplierQueryReqVO.class,
+                    fqr -> fqr.setPage(currentPage));
+                log.debug("线程[{}]开始获取第{}页数据", Thread.currentThread().getName(), currentPage);
+                return getPage(JsonUtilsX.toJSONObject(supplierQueryReqVO), endpoint);
+            }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor()));
+        }
+
+        // 3. 汇总数据
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+            .thenApply(v -> futures.stream().map(CompletableFuture::join)
+                .flatMap(page -> page.getRowsList(KingdeeSupplierSaveVO.class).stream())
+                .collect(Collectors.toMap(KingdeeSupplierSaveVO::getName, supplier -> supplier, (oldVal, newVal) -> {
+                    log.warn("发现重复的供应商名称：{}", oldVal.getName());
+                    return oldVal;
+                }))).join();
+    }
+
+    /**
+     * 平滑刷新供应商缓存
+     * 直接调用金蝶API获取新数据，再覆盖旧缓存
+     */
+    public void refreshSupplierCache() {
+        log.info("开始平滑刷新供应商缓存");
+        try {
+            // 1. 准备参数
+            KingdeeSupplierQueryReqVO queryReqVO = new KingdeeSupplierQueryReqVO();
+            String SUPPLIER_CACHE_KEY = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + this.token.getAccountName() + ":" + Objects.hash(token.getAppKey(), JsonUtilsX.toJsonString(queryReqVO));
+
+            // 2. 获取旧数据用于对比
+            String oldData = redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY);
+
+            // 3. 获取新数据
+            Map<String, KingdeeSupplierSaveVO> newData = fetchSupplierDataFromApi(queryReqVO);
+            if (newData.isEmpty()) {
+                log.warn("获取新供应商数据为空，取消刷新");
+                return;
+            }
+
+            // 4. 更新缓存
+            redisTemplate.opsForValue().set(SUPPLIER_CACHE_KEY, JsonUtilsX.toJsonString(newData), 120, TimeUnit.MINUTES);
+
+            // 5. 记录变更
+            if (oldData != null) {
+                Map<String, KingdeeSupplierSaveVO> oldMap = JsonUtilsX.parseObject(oldData, new TypeReference<>() {
+                });
+                int added = 0, removed = 0, updated = 0;
+                for (String key : newData.keySet()) {
+                    if (!oldMap.containsKey(key)) {
+                        added++;
+                    } else if (!oldMap.get(key).equals(newData.get(key))) {
+                        updated++;
+                    }
+                }
+                for (String key : oldMap.keySet()) {
+                    if (!newData.containsKey(key)) {
+                        removed++;
+                    }
+                }
+                log.info("供应商缓存平滑刷新完成，新增{}个，更新{}个，删除{}个", added, updated, removed);
+            } else {
+                log.info("供应商缓存平滑刷新完成，新增{}个供应商", newData.size());
+            }
+        } catch (Exception e) {
+            log.error("供应商缓存平滑刷新失败", e);
+        }
+    }
+
+    /**
+     * 删除所有租户供应列表缓存
      *
      * @return 删除的缓存数量
      */
