@@ -7,6 +7,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+/**
+ * @author jisencai
+ */
 @Tag(name = "入库单库存详情扣减")
 @RestController
 @RequestMapping("/wms/inbound-item-flow")
@@ -55,7 +58,7 @@ public class WmsInboundItemFlowController {
 //    @PreAuthorize("@ss.hasPermission('wms:inbound-item-flow:query')")
 //    public CommonResult<WmsInboundItemFlowRespVO> getInboundItemFlow(@RequestParam("id") Long id) {
 //        // 查询数据
-//        WmsInboundItemFlowDO inboundItemFlow = inboundItemFlowService.getInboundItemFlow(id);
+//        WmsItemFlowDO inboundItemFlow = inboundItemFlowService.getInboundItemFlow(id);
 //        if (inboundItemFlow == null) {
 //            throw exception(INBOUND_ITEM_FLOW_NOT_EXISTS);
 //        }
@@ -78,7 +81,7 @@ public class WmsInboundItemFlowController {
 //    @PreAuthorize("@ss.hasPermission('wms:inbound-item-flow:query')")
 //    public CommonResult<PageResult<WmsInboundItemFlowRespVO>> getInboundItemFlowPage(@Valid WmsInboundItemFlowPageReqVO pageReqVO) {
 //        // 查询数据
-//        PageResult<WmsInboundItemFlowDO> doPageResult = inboundItemFlowService.getInboundItemFlowPage(pageReqVO);
+//        PageResult<WmsItemFlowDO> doPageResult = inboundItemFlowService.getInboundItemFlowPage(pageReqVO);
 //        // 转换
 //        PageResult<WmsInboundItemFlowRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsInboundItemFlowRespVO.class);
 //        // 人员姓名填充
@@ -96,7 +99,7 @@ public class WmsInboundItemFlowController {
 //    @ApiAccessLog(operateType = EXPORT)
 //    public void exportInboundItemFlowExcel(@Valid WmsInboundItemFlowPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
 //        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-//        List<WmsInboundItemFlowDO> list = inboundItemFlowService.getInboundItemFlowPage(pageReqVO).getList();
+//        List<WmsItemFlowDO> list = inboundItemFlowService.getInboundItemFlowPage(pageReqVO).getList();
 //        // 导出 Excel
 //        ExcelUtils.write(response, "入库单库存详情扣减.xls", "数据", WmsInboundItemFlowRespVO.class, BeanUtils.toBean(list, WmsInboundItemFlowRespVO.class));
 //    }

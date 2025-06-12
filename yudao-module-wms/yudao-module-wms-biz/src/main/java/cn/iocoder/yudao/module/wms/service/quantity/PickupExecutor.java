@@ -7,7 +7,7 @@ import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.WmsPickupDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
@@ -150,7 +150,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         inboundItemService.updateById(inboundItemDO);
 
         // 记录流水
-        WmsInboundItemFlowDO flowDO = new WmsInboundItemFlowDO();
+        WmsItemFlowDO flowDO = new WmsItemFlowDO();
         flowDO.setInboundId(inboundItemDO.getInboundId());
         flowDO.setInboundItemId(inboundItemDO.getId());
         flowDO.setProductId(inboundItemDO.getProductId());
