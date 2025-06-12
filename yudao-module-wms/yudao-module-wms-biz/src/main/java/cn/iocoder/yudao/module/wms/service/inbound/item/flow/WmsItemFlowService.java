@@ -3,7 +3,6 @@ package cn.iocoder.yudao.module.wms.service.inbound.item.flow;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.flow.vo.WmsInboundItemFlowSaveReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundItemFlowDetailVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import jakarta.validation.Valid;
 
@@ -60,8 +59,6 @@ public interface WmsItemFlowService {
      */
     List<WmsItemFlowDO> selectByInboundId(Long inboundId, int limit);
 
-    List<WmsItemFlowDO> selectByInboundIds(List<Long> inboundIds, int limit);
-
     void insert(WmsItemFlowDO flowDO);
 
     List<WmsItemFlowDO> selectByActionId(Long latestOutboundActionId);
@@ -84,7 +81,4 @@ public interface WmsItemFlowService {
      * 按 ID 集合查询 WmsItemFlowDO
      */
     List<WmsItemFlowDO> selectByIds(List<Long> idList);
-
-    List<WmsInboundItemFlowDetailVO> selectByProductIdAndBinIdAndWarehouseId(Long productId, Long binId, Long warehouseId, int limit);
-
 }

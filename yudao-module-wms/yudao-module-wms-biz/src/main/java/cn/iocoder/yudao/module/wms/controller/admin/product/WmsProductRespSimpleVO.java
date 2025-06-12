@@ -48,7 +48,5 @@ public class WmsProductRespSimpleVO extends BaseDO {
     @ExcelProperty("主图")
     private String primaryImageUrl;
 
-    @Schema(description = "可用数量", example = "")
-    @ExcelProperty("可用数量")
-    private Integer availableQty;
+
 }
