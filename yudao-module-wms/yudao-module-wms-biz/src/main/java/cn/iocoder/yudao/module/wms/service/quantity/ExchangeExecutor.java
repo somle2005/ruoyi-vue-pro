@@ -34,7 +34,6 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
@@ -43,7 +42,7 @@ import static cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeType.TO_ITEM
 import static com.fhs.common.constant.Constant.MAX_INT;
 
 /**
- * @author: LeeFJ
+ * @author: LeeFJd
  * @date: 2025/3/25 9:34
  * @description: 库位移动数量执行器
  */
