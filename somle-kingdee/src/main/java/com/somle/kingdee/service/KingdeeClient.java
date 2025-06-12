@@ -88,12 +88,7 @@ public class KingdeeClient {
         params.put("app_key", appKey);
         params.put("app_signature", appSignature);
         String apiSignature = getApiSignature(reqMtd, endUrl, params, ctime);
-        var request = RequestX.builder()
-            .requestMethod(RequestX.Method.GET)
-            .url(fullUrl)
-            .queryParams(params)
-            .headers(getAuthHeaders(ctime, apiSignature))
-            .build();
+        var request = RequestX.builder().requestMethod(RequestX.Method.GET).url(fullUrl).queryParams(params).headers(getAuthHeaders(ctime, apiSignature)).build();
         KingdeeResponse response = WebUtils.sendRequest(request, KingdeeResponse.class);
         return response.getData(JSONObject.class).getString("app-token");
     }
@@ -106,12 +101,7 @@ public class KingdeeClient {
         TreeMap<String, String> params = new TreeMap<>();
         params.put("outerInstanceId", outerInstanceId);
         String apiSignature = getApiSignature(reqMtd, endUrl, params, ctime);
-        var request = RequestX.builder()
-            .requestMethod(RequestX.Method.POST)
-            .url(fullUrl)
-            .queryParams(params)
-            .headers(getAuthHeaders(ctime, apiSignature))
-            .build();
+        var request = RequestX.builder().requestMethod(RequestX.Method.POST).url(fullUrl).queryParams(params).headers(getAuthHeaders(ctime, apiSignature)).build();
         KingdeeResponse response = WebUtils.sendRequest(request, KingdeeResponse.class);
         return response.getDataList(KingdeeToken.class).get(0);
 
@@ -199,10 +189,7 @@ public class KingdeeClient {
         //金蝶产品单位目前固定是`套`
         setUnitId("套", kingdeeUnit -> reqVO.setBaseUnitId(kingdeeUnit.getId()));
         try {
-            Optional.ofNullable(getAuxInfoByNumber(reqVO.getSaleDepartmentId().toString()))
-                .ifPresent(kingdeeUnit ->
-                    setCustomFieldSafely(reqVO, "部门", kingdeeUnit.getId())
-                );
+            Optional.ofNullable(getAuxInfoByNumber(reqVO.getSaleDepartmentId().toString())).ifPresent(kingdeeUnit -> setCustomFieldSafely(reqVO, "部门", kingdeeUnit.getId()));
         } catch (Exception e) {
             log.debug("getAuxInfoByNumber error for sale department ID: {}", reqVO.getSaleDepartmentId(), e);
         }
@@ -246,18 +233,15 @@ public class KingdeeClient {
         String endUrl = "/jdy/v2/bd/supplier";
         KingdeeSupplierSaveVO supplierCopy = new KingdeeSupplierSaveVO();
         BeanUtils.copyProperties(kingdeeSupplierSaveVO, supplierCopy);
-        try {
-            // 查询所有供应商MAP，根据ID来更新对应供应商
-            Map<String, KingdeeSupplierSaveVO> map = this.getAllSupplierList(null);
-            Optional.ofNullable(map.get(supplierCopy.getName())).ifPresent(requestVO -> supplierCopy.setId(requestVO.getId()));
-        } catch (Exception e) {
-            log.debug("id not found for {}adding new", supplierCopy.getNumber());
-            throw exception(KingDeeErrorCodeConstants.SUPPLIER_LIST_SYNC_FAIL, this.token.getAccountName(), kingdeeSupplierSaveVO.getId() + kingdeeSupplierSaveVO.getName());
-        }
+        // 查询所有供应商MAP，根据ID来更新对应供应商
+        Map<String, KingdeeSupplierSaveVO> map = this.getAllSupplierList(null);
+        Optional.ofNullable(map.get(supplierCopy.getName())).ifPresent(requestVO -> supplierCopy.setId(requestVO.getId()));
 //        supplierCopy.setIgnoreWarn(true);//忽略告警信息(如：单价为0)保存
         //删除缓存
-        this.deleteSupplierCache();
-        return postResponse(endUrl, new TreeMap<>(), supplierCopy);
+//        this.deleteSupplierCache();
+        KingdeeResponse kingdeeResponse = postResponse(endUrl, new TreeMap<>(), supplierCopy);
+        this.refreshSupplierCache();
+        return kingdeeResponse;
     }
 
     public KingdeeResponse getSupplier(String number) {
@@ -291,15 +275,13 @@ public class KingdeeClient {
 
     public Stream<KingdeeResponse> list(String endpoint) {
         log.debug("kingdee listing");
-        return Stream.iterate(1, n -> n + 1)
-            .map(n -> {
-                String endUrl = endpoint;
-                TreeMap<String, String> params = new TreeMap<>();
-                params.put("page_size", "100"); //max 100
-                params.put("page", String.valueOf(n));
-                return getResponse(endUrl, params);
-            })
-            .takeWhile(n -> n.getData(KingdeePage.class).getPage() <= n.getData(KingdeePage.class).getTotalPage());
+        return Stream.iterate(1, n -> n + 1).map(n -> {
+            String endUrl = endpoint;
+            TreeMap<String, String> params = new TreeMap<>();
+            params.put("page_size", "100"); //max 100
+            params.put("page", String.valueOf(n));
+            return getResponse(endUrl, params);
+        }).takeWhile(n -> n.getData(KingdeePage.class).getPage() <= n.getData(KingdeePage.class).getTotalPage());
     }
 
     public KingdeeResponse post(String endpoint, JSONObject payload) {
@@ -316,9 +298,7 @@ public class KingdeeClient {
         TreeMap<String, String> params = new TreeMap<>();
         params.put("number", number);
         KingdeeResponse response = getResponse(endUrl, params);
-        Optional<KingdeeAuxInfo> first = response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfo.class).stream()
-            .filter(n -> n.getNumber().equals(number))
-            .findFirst();
+        Optional<KingdeeAuxInfo> first = response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfo.class).stream().filter(n -> n.getNumber().equals(number)).findFirst();
         return first.orElse(null);
     }
 
@@ -328,9 +308,7 @@ public class KingdeeClient {
         TreeMap<String, String> params = new TreeMap<>();
         params.put("name", name);
         KingdeeResponse response = getResponse(endUrl, params);
-        Optional<KingdeeAuxInfo> first = response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfo.class).stream()
-            .filter(n -> n.getName().equals(name))
-            .findFirst();
+        Optional<KingdeeAuxInfo> first = response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfo.class).stream().filter(n -> n.getName().equals(name)).findFirst();
         return first.orElse(null);
     }
 
@@ -340,9 +318,7 @@ public class KingdeeClient {
         TreeMap<String, String> params = new TreeMap<>();
         params.put("number", number);
         KingdeeResponse response = getResponse(endUrl, params);
-        return response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfoType.class).stream()
-            .filter(n -> n.getNumber().equals(number))
-            .findFirst().get();
+        return response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfoType.class).stream().filter(n -> n.getNumber().equals(number)).findFirst().get();
     }
 
     public Stream<KingdeeCustomField> getCustomField(String entity_number) {
@@ -356,22 +332,16 @@ public class KingdeeClient {
     }
 
     public KingdeeCustomField getCustomFieldByDisplayName(String entity_number, String displayName) {
-        return getCustomField(entity_number)
-            .filter(n -> n.getDisplayName().equals(displayName))
-            .findFirst().get();
+        return getCustomField(entity_number).filter(n -> n.getDisplayName().equals(displayName)).findFirst().get();
     }
 
     public Stream<KingdeePage> getAllPurRequest(KingdeePurRequestReqVO vo) {
         log.debug("fetching purchase request");
         String endUrl = "/jdy/v2/scm/pur_request";
-        return StreamX.iterate(
-            getPage(JsonUtilsX.toJSONObject(vo), endUrl),
-            KingdeePage::hasNext,
-            page -> {
-                vo.setPage(String.valueOf(page.getPage() + 1));
-                return getPage(JsonUtilsX.toJSONObject(vo), endUrl);
-            }
-        );
+        return StreamX.iterate(getPage(JsonUtilsX.toJSONObject(vo), endUrl), KingdeePage::hasNext, page -> {
+            vo.setPage(String.valueOf(page.getPage() + 1));
+            return getPage(JsonUtilsX.toJSONObject(vo), endUrl);
+        });
     }
 
     /**
@@ -413,11 +383,7 @@ public class KingdeeClient {
             CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
             // 5. 获取所有结果
-            return allFutures.thenApply(v ->
-                futures.stream()
-                    .map(CompletableFuture::join)
-                    .collect(Collectors.toList())
-            ).join().stream();
+            return allFutures.thenApply(v -> futures.stream().map(CompletableFuture::join).collect(Collectors.toList())).join().stream();
 
         } catch (Exception e) {
             log.error("获取采购订单数据异常", e);
@@ -434,14 +400,10 @@ public class KingdeeClient {
     public Stream<KingdeePage> streamPurInbound(KingdeePurInboundReqVO vo) {
         log.debug("获取采购入库单列表");
         String endpoint = "/jdy/v2/scm/pur_inbound";
-        return StreamX.iterate(
-            getPage(JsonUtilsX.toJSONObject(vo), endpoint),
-            KingdeePage::hasNext,
-            page -> {
-                vo.setPage(String.valueOf(page.getPage() + 1));
-                return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
-            }
-        );
+        return StreamX.iterate(getPage(JsonUtilsX.toJSONObject(vo), endpoint), KingdeePage::hasNext, page -> {
+            vo.setPage(String.valueOf(page.getPage() + 1));
+            return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
+        });
     }
 
     /**
@@ -537,14 +499,10 @@ public class KingdeeClient {
      */
     public Stream<KingdeePage> streamPurReturn(KingdeePurReturnReqVO vo) {
         String endpoint = "/jdy/v2/scm/pur_ret";
-        return StreamX.iterate(
-            getPage(JsonUtilsX.toJSONObject(vo), endpoint),
-            KingdeePage::hasNext,
-            page -> {
-                vo.setPage(String.valueOf(page.getPage() + 1));
-                return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
-            }
-        );
+        return StreamX.iterate(getPage(JsonUtilsX.toJSONObject(vo), endpoint), KingdeePage::hasNext, page -> {
+            vo.setPage(String.valueOf(page.getPage() + 1));
+            return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
+        });
     }
 
     /**
@@ -564,21 +522,10 @@ public class KingdeeClient {
         Map<String, String> headers = getApiHeaders(cts, signature, token.getAppToken());
         KingdeeResponse response;
         if ("POST".equals(requestMethod)) {
-            var request = RequestX.builder()
-                .requestMethod(RequestX.Method.POST)
-                .url(BASE_HOST + endUrl)
-                .queryParams(params)
-                .headers(headers)
-                .payload(body)
-                .build();
+            var request = RequestX.builder().requestMethod(RequestX.Method.POST).url(BASE_HOST + endUrl).queryParams(params).headers(headers).payload(body).build();
             response = WebUtils.sendRequest(request, KingdeeResponse.class);
         } else {
-            var request = RequestX.builder()
-                .requestMethod(RequestX.Method.GET)
-                .url(BASE_HOST + endUrl)
-                .queryParams(params)
-                .headers(headers)
-                .build();
+            var request = RequestX.builder().requestMethod(RequestX.Method.GET).url(BASE_HOST + endUrl).queryParams(params).headers(headers).build();
             response = WebUtils.sendRequest(request, KingdeeResponse.class);
         }
 
@@ -652,17 +599,13 @@ public class KingdeeClient {
         try {
             locked = lock.tryLock(0, 10, TimeUnit.SECONDS);
             if (!locked) {
-                Map<String, KingdeeSupplierSaveVO> result = CacheSpinWaitUtils.spinWaitForCache(
-                    () -> redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY),
-                    json -> JsonUtilsX.parseObject(json, new TypeReference<>() {
-                    }),
-                    1000 * 10, 200
-                );
+                Map<String, KingdeeSupplierSaveVO> result = CacheSpinWaitUtils.spinWaitForCache(() -> redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY), json -> JsonUtilsX.parseObject(json, new TypeReference<>() {
+                }), 1000 * 10, 200);
                 if (result != null) {
                     log.debug("等待期间获取到缓存数据，直接返回");
                     return result;
                 }
-                throw exception(SUPPLIER_LIST_LOADING, "数据正在加载中，请稍后重试。");
+                throw exception(SUPPLIER_LIST_LOADING);
             }
 
             // 双重检查
@@ -703,9 +646,10 @@ public class KingdeeClient {
     private Map<String, KingdeeSupplierSaveVO> fetchSupplierDataFromApi(KingdeeSupplierQueryReqVO queryReqVO) {
         String endpoint = "/jdy/v2/bd/supplier";
         // 1. 获取第一页数据
+        queryReqVO.setPageSize(1000);
         KingdeePage firstPage = getPage(JsonUtilsX.toJSONObject(queryReqVO), endpoint);
         int totalPages = firstPage.getTotalPage();
-        if (totalPages > 500) {
+        if (totalPages > 100) {
             throw new RuntimeException("供应商页数过大(" + totalPages + ")，请缩小范围");
         }
 
@@ -716,21 +660,18 @@ public class KingdeeClient {
         for (int page = 2; page <= totalPages; page++) {
             final int currentPage = page;
             futures.add(CompletableFuture.supplyAsync(() -> {
-                KingdeeSupplierQueryReqVO supplierQueryReqVO = cn.iocoder.yudao.framework.common.util.object.BeanUtils.toBean(queryReqVO, KingdeeSupplierQueryReqVO.class,
-                    fqr -> fqr.setPage(currentPage));
+                KingdeeSupplierQueryReqVO supplierQueryReqVO = cn.iocoder.yudao.framework.common.util.object.BeanUtils.toBean(queryReqVO, KingdeeSupplierQueryReqVO.class, fqr -> fqr.setPage(currentPage));
                 log.debug("线程[{}]开始获取第{}页数据", Thread.currentThread().getName(), currentPage);
                 return getPage(JsonUtilsX.toJSONObject(supplierQueryReqVO), endpoint);
             }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor()));
         }
 
         // 3. 汇总数据
-        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
-            .thenApply(v -> futures.stream().map(CompletableFuture::join)
-                .flatMap(page -> page.getRowsList(KingdeeSupplierSaveVO.class).stream())
-                .collect(Collectors.toMap(KingdeeSupplierSaveVO::getName, supplier -> supplier, (oldVal, newVal) -> {
-                    log.warn("发现重复的供应商名称：{}", oldVal.getName());
-                    return oldVal;
-                }))).join();
+        return CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenApply(v ->
+            futures.stream().map(CompletableFuture::join).flatMap(page -> page.getRowsList(KingdeeSupplierSaveVO.class).stream()).collect(Collectors.toMap(KingdeeSupplierSaveVO::getName, supplier -> supplier, (oldVal, newVal) -> {
+                log.warn("发现重复的供应商名称：{}", oldVal.getName());
+                return oldVal;
+            }))).join();
     }
 
     /**
@@ -743,40 +684,60 @@ public class KingdeeClient {
             // 1. 准备参数
             KingdeeSupplierQueryReqVO queryReqVO = new KingdeeSupplierQueryReqVO();
             String SUPPLIER_CACHE_KEY = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + this.token.getAccountName() + ":" + Objects.hash(token.getAppKey(), JsonUtilsX.toJsonString(queryReqVO));
+            String LOCK_KEY = SUPPLIER_CACHE_KEY + ":lock";
 
-            // 2. 获取旧数据用于对比
-            String oldData = redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY);
-
-            // 3. 获取新数据
-            Map<String, KingdeeSupplierSaveVO> newData = fetchSupplierDataFromApi(queryReqVO);
-            if (newData.isEmpty()) {
-                log.warn("获取新供应商数据为空，取消刷新");
-                return;
-            }
-
-            // 4. 更新缓存
-            redisTemplate.opsForValue().set(SUPPLIER_CACHE_KEY, JsonUtilsX.toJsonString(newData), 120, TimeUnit.MINUTES);
-
-            // 5. 记录变更
-            if (oldData != null) {
-                Map<String, KingdeeSupplierSaveVO> oldMap = JsonUtilsX.parseObject(oldData, new TypeReference<>() {
-                });
-                int added = 0, removed = 0, updated = 0;
-                for (String key : newData.keySet()) {
-                    if (!oldMap.containsKey(key)) {
-                        added++;
-                    } else if (!oldMap.get(key).equals(newData.get(key))) {
-                        updated++;
-                    }
+            // 2. 获取锁
+            RLock lock = redissonClient.getLock(LOCK_KEY);
+            boolean locked = false;
+            try {
+                locked = lock.tryLock(0, 30, TimeUnit.SECONDS);
+                if (!locked) {
+                    log.warn("获取刷新锁失败，其他线程正在刷新供应商缓存");
+                    return;
                 }
-                for (String key : oldMap.keySet()) {
-                    if (!newData.containsKey(key)) {
-                        removed++;
-                    }
+
+                // 3. 获取旧数据用于对比
+                String oldData = redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY);
+
+                // 4. 获取新数据
+                Map<String, KingdeeSupplierSaveVO> newData = fetchSupplierDataFromApi(queryReqVO);
+                if (newData.isEmpty()) {
+                    log.warn("获取新供应商数据为空，取消刷新");
+                    return;
                 }
-                log.info("供应商缓存平滑刷新完成，新增{}个，更新{}个，删除{}个", added, updated, removed);
-            } else {
-                log.info("供应商缓存平滑刷新完成，新增{}个供应商", newData.size());
+
+                // 5. 更新缓存
+                redisTemplate.opsForValue().set(SUPPLIER_CACHE_KEY, JsonUtilsX.toJsonString(newData), 120, TimeUnit.MINUTES);
+
+                // 6. 记录变更
+                if (oldData != null) {
+                    Map<String, KingdeeSupplierSaveVO> oldMap = JsonUtilsX.parseObject(oldData, new TypeReference<>() {
+                    });
+                    List<String> addedNames = new ArrayList<>();
+                    List<String> removedNames = new ArrayList<>();
+                    List<String> updatedNames = new ArrayList<>();
+
+                    for (String key : newData.keySet()) {
+                        if (!oldMap.containsKey(key)) {
+                            addedNames.add(key);
+                        } else if (!oldMap.get(key).equals(newData.get(key))) {
+                            updatedNames.add(key);
+                        }
+                    }
+                    for (String key : oldMap.keySet()) {
+                        if (!newData.containsKey(key)) {
+                            removedNames.add(key);
+                        }
+                    }
+                    log.info("供应商缓存平滑刷新完成，新增{}个[{}]，更新{}个[{}]，删除{}个[{}]", addedNames.size(), String.join(",", addedNames), updatedNames.size(), String.join(",", updatedNames), removedNames.size(), String.join(",", removedNames));
+                } else {
+                    log.info("供应商缓存平滑刷新完成，新增{}个供应商[{}]", newData.size(), String.join(",", newData.keySet()));
+                }
+            } finally {
+                // 7. 释放锁
+                if (locked && lock.isHeldByCurrentThread()) {
+                    lock.unlock();
+                }
             }
         } catch (Exception e) {
             log.error("供应商缓存平滑刷新失败", e);

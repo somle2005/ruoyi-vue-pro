@@ -22,7 +22,7 @@ public class EsbController {
     @Autowired
     private EsbService service;
     @Resource(name = SrmChannelEnum.SUPPLIER)
-    MessageChannel purchaseOrderChannel;
+    MessageChannel messageChannel;
     @Autowired
     private SrmSupplierApi srmSupplierApi;
 
@@ -59,7 +59,7 @@ public class EsbController {
     @PostMapping("/syncSuppliers")
     public String syncSuppliers() {
         List<Long> list = srmSupplierApi.getSupplierList().stream().map(SrmSupplierDTO::getId).distinct().toList();
-        purchaseOrderChannel.send(MessageBuilder.withPayload(list).build());
+        messageChannel.send(MessageBuilder.withPayload(list).build());
         return "success";
     }
 

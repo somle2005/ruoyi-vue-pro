@@ -15,7 +15,6 @@ import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.handler.annotation.Payload;
 import org.springframework.stereotype.Component;
@@ -30,7 +29,6 @@ import java.util.function.Function;
  */
 @Slf4j
 @Component
-@Profile("prod")
 @RequiredArgsConstructor
 @SuppressWarnings("all")
 public class SrmHandler {
@@ -112,7 +110,7 @@ public class SrmHandler {
         for (int i = 0; i < total; i++) {
             R obj = kingdeeObjs.get(i);
             syncer.accept(obj);
-            log.info("[{}] 同步进度：{}/{}，标识：{}", logType, i + 1, total, numberGetter.apply(obj));
+            log.info("[{}] 同步进度：{}/{}，标识(ID)：{}", logType, i + 1, total, numberGetter.apply(obj));
         }
         log.info("[{}] 同步完成，共处理：{}个", logType, total);
     }
