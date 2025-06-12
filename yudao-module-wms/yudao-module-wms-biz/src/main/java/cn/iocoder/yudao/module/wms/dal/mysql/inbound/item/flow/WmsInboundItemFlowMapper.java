@@ -35,22 +35,22 @@ public interface WmsInboundItemFlowMapper extends BaseMapperX<WmsItemFlowDO> {
     }
 
     /**
-     * 按 inboundId 查询 WmsItemFlowDO
+     * 按 inboundId 查询 WmsInboundItemFlowDO
      */
-    default List<WmsItemFlowDO> selectByInboundId(Long inboundId, int limit) {
+    default List<WmsInboundItemFlowDO> selectByInboundId(Long inboundId, int limit) {
         WmsInboundItemFlowPageReqVO reqVO = new WmsInboundItemFlowPageReqVO();
         reqVO.setPageSize(limit);
         reqVO.setPageNo(1);
-        LambdaQueryWrapperX<WmsItemFlowDO> wrapper = new LambdaQueryWrapperX<>();
-        wrapper.eq(WmsItemFlowDO::getInboundId, inboundId);
+        LambdaQueryWrapperX<WmsInboundItemFlowDO> wrapper = new LambdaQueryWrapperX<>();
+        wrapper.eq(WmsInboundItemFlowDO::getInboundId, inboundId);
         return selectPage(reqVO, wrapper).getList();
     }
 
     /**
-     * 按 outbound_action_id 查询 WmsItemFlowDO 清单
+     * 按 outbound_action_id 查询 WmsInboundItemFlowDO 清单
      */
-    default List<WmsItemFlowDO> selectByOutboundActionId(Long outboundActionId) {
-        return selectList(new LambdaQueryWrapperX<WmsItemFlowDO>().eq(WmsItemFlowDO::getOutboundActionId, outboundActionId));
+    default List<WmsInboundItemFlowDO> selectByOutboundActionId(Long outboundActionId) {
+        return selectList(new LambdaQueryWrapperX<WmsInboundItemFlowDO>().eq(WmsInboundItemFlowDO::getOutboundActionId, outboundActionId));
     }
 
 
