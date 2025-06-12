@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.srm.api.supplier;
 
+import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
@@ -63,6 +64,14 @@ public class SrmSupplierApiImpl implements SrmSupplierApi {
             throw exception(SrmErrorCodeConstants.SUPPLIER_NOT_EXISTS, notExistIds);
         }
         // 3. 转换为 DTO 并返回
+        return BeanUtils.toBean(list, SrmSupplierDTO.class);
+    }
+
+    @Override
+    public List<SrmSupplierDTO> getSupplierList() {
+        // 1. 获取所有供应商
+        List<SrmSupplierDO> list = supplierService.getSupplierListByStatus(CommonStatusEnum.ENABLE);
+        // 2. 转换为 DTO 并返回
         return BeanUtils.toBean(list, SrmSupplierDTO.class);
     }
 } 

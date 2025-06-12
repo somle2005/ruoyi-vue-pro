@@ -4,7 +4,9 @@ import com.somle.dingtalk.service.DingTalkService;
 import com.somle.esb.model.Domain;
 import com.somle.esb.service.EsbService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DingTalkDataJob extends DataJob{
     @Autowired
     EsbService service;

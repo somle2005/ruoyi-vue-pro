@@ -119,8 +119,8 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     }
 
     @Override
-    public List<SrmSupplierDO> getSupplierListByStatus(Integer status) {
-        return supplierMapper.selectListByStatus(status);
+    public List<SrmSupplierDO> getSupplierListByStatus(CommonStatusEnum status) {
+        return supplierMapper.selectListByStatus(status.getStatus());
     }
 
     /**

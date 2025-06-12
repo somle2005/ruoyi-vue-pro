@@ -242,7 +242,7 @@ public class KingdeeClient {
      * @param kingdeeSupplierSaveVO 供应商
      * @return 供应商
      */
-    public KingdeeResponse addSupplier(KingdeeSupplierSaveVO kingdeeSupplierSaveVO) {
+    public KingdeeResponse saveSupplier(KingdeeSupplierSaveVO kingdeeSupplierSaveVO) {
         String endUrl = "/jdy/v2/bd/supplier";
         KingdeeSupplierSaveVO supplierCopy = new KingdeeSupplierSaveVO();
         BeanUtils.copyProperties(kingdeeSupplierSaveVO, supplierCopy);

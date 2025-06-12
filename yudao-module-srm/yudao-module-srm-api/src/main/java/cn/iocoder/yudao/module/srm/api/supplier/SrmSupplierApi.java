@@ -45,4 +45,11 @@ public interface SrmSupplierApi {
      * @return 存在的供应商列表
      */
     List<SrmSupplierDTO> validateSupplierIds(Set<Long> ids);
+
+    /**
+     * 获得所有供应商列表
+     *
+     * @return 供应商列表
+     */
+    List<SrmSupplierDTO> getSupplierList();
 } 

@@ -89,7 +89,7 @@ public class KingdeeService {
     }
 
     public void addSupplier(KingdeeSupplierSaveVO kingdeeSupplierSaveVO) {
-        clients.parallelStream().forEach(n -> n.addSupplier(kingdeeSupplierSaveVO));
+        clients.parallelStream().forEach(n -> n.saveSupplier(kingdeeSupplierSaveVO));
     }
 
 

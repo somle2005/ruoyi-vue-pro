@@ -782,7 +782,6 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             reqDTO.setMakePendingQty(isReverse ? item.getQty().negate().intValue() : item.getQty().intValue());
             wmsWarehouseApi.updateStockWarehouse(reqDTO);
         }
-
     }
 
     @Override
