@@ -209,6 +209,11 @@
             <artifactId>somle-autonomous</artifactId>
             <version>${revision}</version>
         </dependency>
+        <dependency>
+            <groupId>com.somle</groupId>
+            <artifactId>somle-mediamarkt</artifactId>
+            <version>${revision}</version>
+        </dependency>
 
 
     </dependencies>

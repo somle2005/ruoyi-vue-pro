@@ -15,6 +15,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -46,11 +47,11 @@ public class AutonomousToOmsConverter {
             .collect(Collectors.toMap(omsShopDO -> omsShopDO.getExternalId(), omsShopDO -> omsShopDO));
 
         OmsShopSaveReqDTO shopDTO = new OmsShopSaveReqDTO();
-        MapUtils.findAndThen(existShopMap, autonomousAccount.getEmail(), omsShopDTO -> shopDTO.setId(omsShopDTO.getId()));
+        MapUtils.findAndThen(existShopMap, autonomousAccount.getEmail() + "#" + autonomousAccount.getSite(), omsShopDTO -> shopDTO.setId(omsShopDTO.getId()));
         shopDTO.setName(null);
-        shopDTO.setExternalName(autonomousAccount.getEmail());
+        shopDTO.setExternalName(autonomousAccount.getEmail() + "#" + autonomousAccount.getSite());
         shopDTO.setCode(null);
-        shopDTO.setExternalId(autonomousAccount.getEmail());
+        shopDTO.setExternalId(autonomousAccount.getEmail() + "#" + autonomousAccount.getSite());
         shopDTO.setPlatformCode(this.platform.toString());
         shopDTO.setType(ShopTypeEnum.ONLINE.getType());
         return shopDTO;
@@ -58,12 +59,10 @@ public class AutonomousToOmsConverter {
 
     public List<OmsShopProductSaveReqDTO> toProducts(List<AutonomousProductResp.Product> products, AutonomousAccount autonomousAccount) {
 
-        OmsShopDTO omsShopDTO = omsShopApi.getShopByPlatformShopCode(autonomousAccount.getEmail());
+        OmsShopDTO omsShopDTO = omsShopApi.getShopByPlatformShopCode(autonomousAccount.getEmail() + "#" + autonomousAccount.getSite());
         if (omsShopDTO == null) {
             throw exception(OMS_SYNC_SHOP_INFO_FIRST, this.platform.toString());
         }
-
-
         List<OmsShopProductDTO> existShopProducts = omsShopProductApi.getByShopIds(List.of(omsShopDTO.getId()));
         // 使用Map存储已存在的店铺产品信息，key=sourceId, value=OmsShopProductDO
         Map<String, OmsShopProductDTO> existShopProductMap = Optional.ofNullable(existShopProducts)
@@ -78,28 +77,36 @@ public class AutonomousToOmsConverter {
                 OmsShopProductSaveReqDTO shopProductDTO = new OmsShopProductSaveReqDTO();
                 String sku = skus.get(i);
                 AutonomousProductResp.ProductUrl productUrl = product.getProductUrls().get(i);
-                MapUtils.findAndThen(existShopProductMap, sku + "#" + productUrl.getSequenceCode(), omsShopProductDO -> shopProductDTO.setId(omsShopProductDO.getId()));
+                MapUtils.findAndThen(existShopProductMap, productUrl.getSequenceCode() + "#" + autonomousAccount.getSite(), omsShopProductDO -> shopProductDTO.setId(omsShopProductDO.getId()));
                 shopProductDTO.setShopId(omsShopDTO.getId());
                 shopProductDTO.setCode(sku);
-                shopProductDTO.setExternalId(sku + "#" + productUrl.getSequenceCode());
+                shopProductDTO.setExternalId(productUrl.getSequenceCode() + "#" + autonomousAccount.getSite());
                 shopProductDTO.setName(productUrl.getName());
                 shopProductDTO.setUrl(productUrl.getSeoUrl());
-//                if (ObjectUtil.isNotEmpty(productUrl.getPrice()) && ObjectUtil.isNotEmpty(productUrl.getPrice().getUsd())) {
-//                    shopProductDTO.setPrice(new BigDecimal(productUrl.getPrice().getUsd()));
-//                }
+                if (autonomousAccount.getSite().equals("USD")) {
+                    shopProductDTO.setPrice(new BigDecimal(productUrl.getPrice().getUsd()));
+                    shopProductDTO.setCurrencyCode(autonomousAccount.getSite());
+                    shopProductDTO.setSellableQty(productUrl.getPriorityByWarehouse().get("US").getInStock());
+                }
+                if (autonomousAccount.getSite().equals("CAD")) {
+                    shopProductDTO.setPrice(new BigDecimal(productUrl.getPrice().getCad()));
+                    shopProductDTO.setCurrencyCode(autonomousAccount.getSite());
+                    shopProductDTO.setSellableQty(productUrl.getPriorityByWarehouse().get("CA").getInStock());
+                }
                 omsShopProductDOs.add(shopProductDTO);
             }
         }
         return omsShopProductDOs;
     }
 
+    //该平台一个订单中只会有一个sku，如果有多个sku会自动拆分订单
     public List<OmsOrderSaveReqDTO> toOrders(List<AutonomousOrderResp.OrderDetail> orders, AutonomousAccount autonomousAccount) {
 
         if (CollectionUtil.isEmpty(orders)) {
             return CollectionUtil.empty(List.class);
         }
 
-        OmsShopDTO omsShopDTO = omsShopApi.getShopByPlatformShopCode(autonomousAccount.getEmail());
+        OmsShopDTO omsShopDTO = omsShopApi.getShopByPlatformShopCode(autonomousAccount.getEmail() + "#" + autonomousAccount.getSite());
         if (omsShopDTO == null) {
             throw exception(OMS_SYNC_SHOP_INFO_FIRST, this.platform.toString());
         }
@@ -116,11 +123,12 @@ public class AutonomousToOmsConverter {
 
         for (AutonomousOrderResp.OrderDetail order : orders) {
             OmsOrderSaveReqDTO omsOrderSaveReqDTO = new OmsOrderSaveReqDTO();
-            MapUtils.findAndThen(existOrderMap, order.getOrderDetailId(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
+            MapUtils.findAndThen(existOrderMap, order.getOrderDetailCode(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
             omsOrderSaveReqDTO.setPlatformCode(this.platform.toString());
-            omsOrderSaveReqDTO.setExternalId(order.getOrderDetailId());
+            omsOrderSaveReqDTO.setExternalId(order.getOrderDetailCode());
             omsOrderSaveReqDTO.setShopId(omsShopDTO.getId());
             omsOrderSaveReqDTO.setOrderCreateTime(order.getDateCreated());
+            omsOrderSaveReqDTO.setPayTime(order.getDateCreated());
             if (order.getAmount() != null) {
                 omsOrderSaveReqDTO.setTotalPrice(order.getAmount());
             }
@@ -129,12 +137,13 @@ public class AutonomousToOmsConverter {
             omsOrderSaveReqDTO.setEmail(order.getEmail());
             omsOrderSaveReqDTO.setExternalAddress(order.getShippingAddress());
             omsOrderSaveReqDTO.setRecipientName(order.getFullName());
-            omsOrderSaveReqDTO.setAddress1(order.getShippingName());
+            omsOrderSaveReqDTO.setAddress1(order.getShippingAddress());
             omsOrderSaveReqDTO.setRecipientCountryCode(order.getCountry());
             omsOrderSaveReqDTO.setState(order.getStateRegion());
             omsOrderSaveReqDTO.setCity(order.getCity());
             omsOrderSaveReqDTO.setPostalCode(order.getPostalCode());
-
+            omsOrderSaveReqDTO.setPhone(order.getPhone());
+            omsOrderSaveReqDTO.setBuyerCountryCode(order.getCountry());
 
             Collection<String> skus = order.getSkus().values();
             List<OmsOrderItemSaveReqDTO> omsOrderItemSaveReqDTOs = new ArrayList<>();

@@ -2,6 +2,7 @@ package com.somle.esb.service;
 
 import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import com.somle.esb.model.OssData;
+import com.somle.rakuten.service.RakutenService;
 import com.somle.shopify.service.ShopifyService;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
@@ -26,6 +27,9 @@ public class EsbService {
 
     @Autowired
     ShopifyService shopifyService;
+
+    @Resource
+    RakutenService  rakutenService;
 
     @Autowired
     private ConfigApi configApi;
@@ -54,8 +58,9 @@ public class EsbService {
                         .build();
                 })
                 .build();
-
-            shopifyService.shopifyClients.get(0).setWebClient(client);
+            //给shopify和rakuten设置网络代理
+            shopifyService.shopifyClients.forEach(shopifyClient -> shopifyClient.setWebClient(client));
+            rakutenService.rakutenClients.forEach(rakutenClient -> rakutenClient.setWebClient(client));
             log.info("using proxy");
         } catch (Exception e) {
             log.error("not using proxy");

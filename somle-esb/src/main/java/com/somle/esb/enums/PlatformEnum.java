@@ -24,6 +24,7 @@ public enum PlatformEnum {
     LAZADA(true, null),
     DSV(true, null),
     HOME24(true, null),
+    MEDIAMARKT(true, null),
     SHOPEE(true, "https://www.shopee.com.my/");
 
 

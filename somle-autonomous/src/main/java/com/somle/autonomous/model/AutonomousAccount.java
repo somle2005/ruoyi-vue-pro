@@ -6,11 +6,14 @@ import lombok.Data;
 
 @Entity
 @Data
+@Table(name = "autonomous_account")
 public class AutonomousAccount {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    //站点
+    private String site;
 
     private String email;
 

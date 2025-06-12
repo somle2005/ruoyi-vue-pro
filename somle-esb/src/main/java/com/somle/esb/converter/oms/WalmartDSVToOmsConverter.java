@@ -87,7 +87,9 @@ public class WalmartDSVToOmsConverter {
 
                 shopProductDTO.setName(itemResponse.getProductName());
                 shopProductDTO.setSellableQty(itemResponse.getSellableQty());
-                shopProductDTO.setPrice(new BigDecimal(itemResponse.getSalePrice()));
+                if (itemResponse.getSalePrice() != null) {
+                    shopProductDTO.setPrice(new BigDecimal(itemResponse.getSalePrice()));
+                }
                 shopProductDTO.setCurrencyCode(itemResponse.getCurrency());
                 omsShopProductDOs.add(shopProductDTO);
             }

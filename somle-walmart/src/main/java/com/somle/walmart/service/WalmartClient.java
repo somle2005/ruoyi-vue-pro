@@ -244,12 +244,12 @@ public abstract class WalmartClient {
             offset += limit;
             //防止限流
 //            TimeUnit.SECONDS.sleep(2);
-            walmartAllItemsResVO.getItemResponse().stream().forEach(item -> {
-                WalmartInventoryResp inventory = getInventory(item.getSku());
-                if (inventory.getQuantity() != null) {
-                    item.setSellableQty(inventory.getQuantity().getAmount());
-                }
-            });
+//            walmartAllItemsResVO.getItemResponse().stream().forEach(item -> {
+//                WalmartInventoryResp inventory = getInventory(item.getSku());
+//                if (inventory.getQuantity() != null) {
+//                    item.setSellableQty(inventory.getQuantity().getAmount());
+//                }
+//            });
             allProducts.addAll(walmartAllItemsResVO.getItemResponse());
         }
         return allProducts;
@@ -304,7 +304,6 @@ public abstract class WalmartClient {
                 log.debug("正在请求url= {},第 {} 次重试。", request.url(), retryCount);
             }
             try (Response response = client.newCall(request).execute();) {
-
                 var bodyString = response.body().string();
                 WalmartItemDetailResp resp = JSON.parseObject(bodyString, WalmartItemDetailResp.class);
                 return resp;

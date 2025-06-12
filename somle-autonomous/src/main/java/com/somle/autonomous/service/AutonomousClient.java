@@ -129,9 +129,10 @@ public class AutonomousClient {
     }
 
     public List<AutonomousProductResp.Product> getAllProduct() {
+        //特别注意这个limit,必须设置成10或者20，否则抓取产品sku不全，有问题，Autonomous官方bug
         AutonomousProductReq vo = AutonomousProductReq.builder()
-            .page(0)
-            .limit(100)
+            .page(1)
+            .limit(20)
             .build();
         List<AutonomousProductResp.Product> data = new ArrayList<>();
         AutonomousProductResp product = getProduct(vo);

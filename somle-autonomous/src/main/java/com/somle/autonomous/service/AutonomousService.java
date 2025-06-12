@@ -1,5 +1,6 @@
 package com.somle.autonomous.service;
 
+import com.somle.autonomous.model.AutonomousAccount;
 import com.somle.autonomous.model.AutonomousAuthToken;
 import com.somle.autonomous.repository.AutonomousAccountRepository;
 import jakarta.annotation.PostConstruct;

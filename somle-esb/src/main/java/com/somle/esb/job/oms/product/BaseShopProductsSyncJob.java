@@ -22,7 +22,8 @@ public abstract class BaseShopProductsSyncJob implements JobHandler {
     public String execute(String param) throws Exception {
         // 设置租户为默认租户
         TenantContextHolder.setTenantId(TenantId.DEFAULT.getId());
-        omsShopProductApi.createOrUpdateShopByPlatform(listProducts());
+        List<OmsShopProductSaveReqDTO>  successedList = listProducts();
+        omsShopProductApi.createOrUpdateShopByPlatform(successedList);
         return "sync shop products success!";
     }
 

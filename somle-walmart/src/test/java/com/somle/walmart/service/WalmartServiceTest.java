@@ -46,7 +46,7 @@ class WalmartServiceTest extends SomleBaseDbUnitTest {
     @Test
     void getAllProducts() {
         var vo = WalmartAllProductsReqVO.builder()
-            .offset(3075)
+            .offset(0)
             .limit(200)
             .build();
 

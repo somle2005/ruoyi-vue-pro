@@ -22,8 +22,10 @@ import com.somle.rakuten.model.req.RakutenInventoryReqVO;
 import com.somle.rakuten.model.req.RakutenOrderReqVO;
 import com.somle.rakuten.model.req.RakutenOrderSearchReqVO;
 import com.somle.rakuten.util.ZonedDateTimeConverter;
+import lombok.Setter;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.OkHttpClient;
 import okhttp3.Response;
 
 import java.time.LocalDateTime;
@@ -41,9 +43,13 @@ public class RakutenClient {
 
     public RakutenTokenEntityDO entity;
 
+    @Setter
+    private OkHttpClient webClient;
+
     public RakutenClient(RakutenTokenEntityDO entity) {
         this.accessToken = generateAuthorization(entity);
         this.entity = entity;
+        this.webClient = new OkHttpClient();
     }
 
     /**
@@ -68,7 +74,7 @@ public class RakutenClient {
             .url(BASE_URL + endpoint)
             .headers(getHeaders())
             .build();
-        Response response = WebUtils.sendRequest(request);
+        Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();
         String bodyString = response.body().string();
         RakutenProductsRepsVO repsVO = JSONUtil.toBean(bodyString, RakutenProductsRepsVO.class);
         return repsVO;
@@ -115,7 +121,7 @@ public class RakutenClient {
             .headers(getHeaders())
             .payload(vo)
             .build();
-        Response response = WebUtils.sendRequest(request);
+        Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();
         String bodyString = response.body().string();
         RakutenOrderRepsVO repsVO = JSON.parseObject(bodyString, RakutenOrderRepsVO.class);
         return repsVO.getOrderModelList();
@@ -133,7 +139,7 @@ public class RakutenClient {
             .headers(getHeaders())
             .payload(payload)
             .build();
-        Response response = WebUtils.sendRequest(request);
+        Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();
         String bodyString = response.body().string();
         RakutenInventoryRepsVO repsVO = JSON.parseObject(bodyString, RakutenInventoryRepsVO.class);
         return repsVO;
@@ -156,7 +162,7 @@ public class RakutenClient {
             .headers(getHeaders())
             .payload(vo)
             .build();
-        Response response = WebUtils.sendRequest(request);
+        Response response = webClient.newCall(WebUtils.toOkHttp(request)).execute();
         String bodyString = response.body().string();
         RakutenSearchOrderRepsVO repsVO = JSONUtil.toBean(bodyString, RakutenSearchOrderRepsVO.class);
         return repsVO;
@@ -209,6 +215,7 @@ public class RakutenClient {
 
     }
 
+    @SneakyThrows
     private Response sendPostRequest(String endpoint, String requestBody) {
         var request = RequestX.builder()
             .requestMethod(RequestX.Method.POST)
@@ -216,7 +223,7 @@ public class RakutenClient {
             .headers(getHeaders())
             .payload(JsonUtilsX.parseObject(requestBody, JSONObject.class))
             .build();
-        return WebUtils.sendRequest(request);
+        return webClient.newCall(WebUtils.toOkHttp(request)).execute();
     }
 
     private Map<String, String> getHeaders() {
