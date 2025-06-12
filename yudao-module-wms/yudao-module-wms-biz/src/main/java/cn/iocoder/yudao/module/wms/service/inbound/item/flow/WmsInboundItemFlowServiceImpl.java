@@ -27,7 +27,7 @@ import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.INBOUND_NO
  * @author 李方捷
  */
 @Service
-public class WmsInboundItemFlowServiceImpl implements WmsInboundItemFlowService {
+public class WmsInboundItemFlowServiceImpl implements WmsItemFlowService {
 
     @Resource
     @Lazy

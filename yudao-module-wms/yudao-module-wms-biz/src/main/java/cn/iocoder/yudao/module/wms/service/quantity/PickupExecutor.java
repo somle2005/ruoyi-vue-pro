@@ -16,7 +16,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWareho
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
-import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsInboundItemFlowService;
+import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsItemFlowService;
 import cn.iocoder.yudao.module.wms.service.quantity.context.PickupContext;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -46,7 +46,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
 
     @Resource
     @Lazy
-    private WmsInboundItemFlowService inboundItemFlowService;
+    private WmsItemFlowService itemFlowService;
 
     public PickupExecutor() {
         super(WmsStockReason.PICKUP);
@@ -165,7 +165,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         flowDO.setActualQty(inboundItemDO.getActualQty());
         flowDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty());
 
-        inboundItemFlowService.insert(flowDO);
+        itemFlowService.insert(flowDO);
 
         return flowDO.getId();
 

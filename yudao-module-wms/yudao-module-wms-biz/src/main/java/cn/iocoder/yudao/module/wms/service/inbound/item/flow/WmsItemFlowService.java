@@ -14,7 +14,7 @@ import java.util.Set;
  *
  * @author 李方捷
  */
-public interface WmsInboundItemFlowService {
+public interface WmsItemFlowService {
 
     /**
      * 创建入库单库存详情扣减

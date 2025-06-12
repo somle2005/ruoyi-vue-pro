@@ -49,7 +49,7 @@ import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockType;
 import cn.iocoder.yudao.module.wms.service.exchange.WmsExchangeService;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
-import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsInboundItemFlowService;
+import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsItemFlowService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
 import cn.iocoder.yudao.module.wms.service.quantity.InboundExecutor;
@@ -137,7 +137,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Resource
     @Lazy
-    private WmsInboundItemFlowService inboundItemFlowService;
+    private WmsItemFlowService itemFlowService;
 
     @Resource
     private DeptApi deptApi;
@@ -500,7 +500,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
 
     @Override
     public void assembleInboundItemFlow(List<WmsStockFlowRespVO> list) {
-        List<WmsItemFlowDO> inboundItemFlowDOS = inboundItemFlowService.selectByIds(StreamX.from(list).toSet(WmsStockFlowRespVO::getInboundItemFlowId));
+        List<WmsItemFlowDO> inboundItemFlowDOS = itemFlowService.selectByIds(StreamX.from(list).toSet(WmsStockFlowRespVO::getInboundItemFlowId));
         Map<Long, WmsInboundItemFlowSimpleVO> inboundItemFlowDOMap = StreamX.from(inboundItemFlowDOS).toMap(WmsItemFlowDO::getId, e -> BeanUtils.toBean(e, WmsInboundItemFlowSimpleVO.class));
         StreamX.from(list).assemble(inboundItemFlowDOMap, WmsStockFlowRespVO::getInboundItemFlowId, WmsStockFlowRespVO::setInboundItemFlow);
         InboundExecutor.setShelveAvailableQty(inboundItemFlowDOMap.values());
