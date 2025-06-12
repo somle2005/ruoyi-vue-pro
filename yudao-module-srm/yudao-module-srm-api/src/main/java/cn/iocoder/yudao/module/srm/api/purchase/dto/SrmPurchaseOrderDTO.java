@@ -24,6 +24,8 @@ public class SrmPurchaseOrderDTO {
      * 供应商编号(乙方)
      */
     private Long supplierId;
+    //供应商名称
+    private String supplierName;
     /**
      * 结算账户编号
      */

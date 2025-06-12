@@ -1,6 +1,8 @@
 package cn.iocoder.yudao.module.srm.api.purchase;
 
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
+import jakarta.validation.constraints.NotEmpty;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Set;
@@ -8,8 +10,8 @@ import java.util.Set;
 /**
  * 采购订单 API 接口
  */
+@Validated
 public interface SrmPurchaseOrderApi {
-
 
     /**
      * 验证采购订单ID是否存在
@@ -17,5 +19,5 @@ public interface SrmPurchaseOrderApi {
      * @param ids 采购订单编号集合
      * @return 存在的采购订单列表
      */
-    List<SrmPurchaseOrderDTO> validatePurchaseOrderIds(Set<Long> ids);
+    List<SrmPurchaseOrderDTO> validatePurchaseOrderIds(@NotEmpty(message = "采购订单编号不能为空") Set<Long> ids);
 } 

@@ -3,6 +3,8 @@ package cn.iocoder.yudao.module.srm.api.purchase;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderItemDTO;
+import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
+import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants;
@@ -30,6 +32,9 @@ public class SrmPurchaseOrderApiImpl implements SrmPurchaseOrderApi {
     @Autowired
     @Lazy
     private SrmPurchaseOrderService purchaseOrderService;
+    @Autowired
+    @Lazy
+    private SrmSupplierApi supplierApi;
 
 
     @Override
@@ -46,9 +51,15 @@ public class SrmPurchaseOrderApiImpl implements SrmPurchaseOrderApi {
         }
         // 3. 转换为 DTO 并返回
         Map<Long, List<SrmPurchaseOrderItemDO>> map = purchaseOrderService.getPurchaseOrderItemListByOrderIds(ids).stream().collect(Collectors.groupingBy(SrmPurchaseOrderItemDO::getOrderId));
-        return BeanUtils.toBean(list, SrmPurchaseOrderDTO.class,
+        List<SrmPurchaseOrderDTO> dtoList = BeanUtils.toBean(list, SrmPurchaseOrderDTO.class,
             order -> order.setItems(BeanUtils.toBean(map.get(order.getId()), SrmPurchaseOrderItemDTO.class))
         );
+        //3.1 构造供应商name
+        Map<Long, SrmSupplierDTO> supplierMap = supplierApi.getSupplierMap(list.stream().map(SrmPurchaseOrderDO::getSupplierId).collect(Collectors.toSet()));
+        dtoList.forEach(order -> {
+            order.setSupplierName(supplierMap.get(order.getSupplierId()).getName());
+        });
+        return dtoList;
     }
 
 } 

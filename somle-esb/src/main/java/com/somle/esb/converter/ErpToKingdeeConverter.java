@@ -293,8 +293,7 @@ public class ErpToKingdeeConverter {
 //        if (dto.getSupplierId() != null) {
 //            target.setSupplierId(String.valueOf(dto.getSupplierId()));
 //        }
-        //supplier_number
-        target.setSupplierNumber(dto.getSupplierId().toString());
+        target.setSupplierNumber(dto.getSupplierName());
 
         // 备注
         target.setRemark(StrUtil.trimToNull(dto.getRemark()));

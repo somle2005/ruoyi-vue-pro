@@ -35,6 +35,7 @@ import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static com.somle.kingdee.enums.KingDeeErrorCodeConstants.SUPPLIER_LIST_LOADING;
+import static com.somle.kingdee.enums.KingDeeErrorCodeConstants.SUPPLIER_NOT_EXIST;
 import static com.somle.kingdee.util.SignatureUtils.*;
 
 /**
@@ -42,6 +43,7 @@ import static com.somle.kingdee.util.SignatureUtils.*;
  */
 @Slf4j
 @Data
+@SuppressWarnings("UnusedReturnValue")
 public class KingdeeClient {
 
     private KingdeeToken token;
@@ -253,6 +255,8 @@ public class KingdeeClient {
             throw exception(KingDeeErrorCodeConstants.SUPPLIER_LIST_SYNC_FAIL, this.token.getAccountName(), kingdeeSupplierSaveVO.getId() + kingdeeSupplierSaveVO.getName());
         }
 //        supplierCopy.setIgnoreWarn(true);//忽略告警信息(如：单价为0)保存
+        //删除缓存
+        this.deleteSupplierCache();
         return postResponse(endUrl, new TreeMap<>(), supplierCopy);
     }
 
@@ -387,32 +391,28 @@ public class KingdeeClient {
 
         // 2. 从Spring容器获取通用线程池
         ThreadPoolExecutor executorService = AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor();
-        log.debug("使用通用线程池，核心线程数：{}，最大线程数：{}",
-            executorService.getCorePoolSize(), executorService.getMaximumPoolSize());
+        log.debug("使用通用线程池，核心线程数：{}，最大线程数：{}", executorService.getCorePoolSize(), executorService.getMaximumPoolSize());
 
         try {
-            // 3. 创建所有页的异步任务
+            // 3. 所有页
             List<CompletableFuture<KingdeePage>> futures = new ArrayList<>();
-            // 添加第一页的结果
             futures.add(CompletableFuture.completedFuture(firstPage));
-
-            // 创建剩余页的异步任务
+            // 创建剩余页
             for (int page = 2; page <= totalPages; page++) {
                 final int currentPage = page;
                 CompletableFuture<KingdeePage> future = CompletableFuture.supplyAsync(() -> {
                     KingdeePurOrderReqVO pageVO = new KingdeePurOrderReqVO();
                     BeanUtils.copyProperties(vo, pageVO);
                     pageVO.setPage(String.valueOf(currentPage));
-                    log.info("线程[{}]开始获取第{}页数据", Thread.currentThread().getName(), currentPage);
+                    log.info("线程[{}]获取第{}页数据", Thread.currentThread().getName(), currentPage);
                     return getPage(JsonUtilsX.toJSONObject(pageVO), endUrl);
                 }, executorService);
                 futures.add(future);
             }
-
-            // 4. 等待所有任务完成并收集结果
+            // 4. 等待
             CompletableFuture<Void> allFutures = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]));
 
-            // 5. 获取所有结果并转换为Stream
+            // 5. 获取所有结果
             return allFutures.thenApply(v ->
                 futures.stream()
                     .map(CompletableFuture::join)
@@ -481,7 +481,13 @@ public class KingdeeClient {
     public KingdeeResponse savePurOrder(KingdeePurOrderSaveReqVO order) {
         String endUrl = "/jdy/v2/scm/pur_order";
         //供应商
-        Long id = Long.valueOf(order.getSupplierNumber());
+        String id = order.getSupplierNumber();//erp供应商ID
+        KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null).get(order.getSupplierNumber());
+        //不存在 -> e
+        if (supplierSaveVO == null) {
+            throw exception(SUPPLIER_NOT_EXIST, order.getSupplierNumber());
+        }
+        order.setSupplierId(supplierSaveVO.getId());
 
         //产品
         order.getMaterialEntity().forEach(material -> {
@@ -627,27 +633,28 @@ public class KingdeeClient {
      * 结果会被缓存120分钟
      */
     public Map<String, KingdeeSupplierSaveVO> getAllSupplierList(KingdeeSupplierQueryReqVO queryReqVO) {
+
         if (queryReqVO == null) {
             queryReqVO = new KingdeeSupplierQueryReqVO();
         }
-        String cacheKey = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + this.token.getAccountName() + ":" + Objects.hash(token.getAppKey(), JsonUtilsX.toJsonString(queryReqVO));
-        String lockKey = cacheKey + ":lock";
+        String SUPPLIER_CACHE_KEY = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + this.token.getAccountName() + ":" + Objects.hash(token.getAppKey(), JsonUtilsX.toJsonString(queryReqVO));
+        String LOCK_KEY = SUPPLIER_CACHE_KEY + ":lock";
 
         // 1. 尝试从缓存获取
-        String cachedData = redisTemplate.opsForValue().get(cacheKey);
+        String cachedData = redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY);
         if (cachedData != null) {
             log.debug("从缓存获取供应商列表数据");
             return JsonUtilsX.parseObject(cachedData, new TypeReference<>() {
             });
         }
 
-        RLock lock = redissonClient.getLock(lockKey);
+        RLock lock = redissonClient.getLock(LOCK_KEY);
         boolean locked = false;
         try {
             locked = lock.tryLock(0, 10, TimeUnit.SECONDS);
             if (!locked) {
                 Map<String, KingdeeSupplierSaveVO> result = CacheSpinWaitUtils.spinWaitForCache(
-                    () -> redisTemplate.opsForValue().get(cacheKey),
+                    () -> redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY),
                     json -> JsonUtilsX.parseObject(json, new TypeReference<>() {
                     }),
                     1000 * 10, 200
@@ -658,14 +665,12 @@ public class KingdeeClient {
                 }
                 throw exception(SUPPLIER_LIST_LOADING, "数据正在加载中，请稍后重试。");
             }
-
-            cachedData = redisTemplate.opsForValue().get(cacheKey);
+            cachedData = redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY);
             if (cachedData != null) {
                 log.debug("从缓存获取供应商列表数据（双重检查）");
                 return JsonUtilsX.parseObject(cachedData, new TypeReference<>() {
                 });
             }
-
             // 4. 拉取第一页
             String endpoint = "/jdy/v2/bd/supplier";
             KingdeePage firstPage = getPage(JsonUtilsX.toJSONObject(queryReqVO), endpoint);
@@ -682,23 +687,25 @@ public class KingdeeClient {
                 final int currentPage = page;
                 KingdeeSupplierQueryReqVO finalQueryReqVO = queryReqVO;
                 futures.add(CompletableFuture.supplyAsync(() -> {
-                    KingdeeSupplierQueryReqVO supplierQueryReqVO = cn.iocoder.yudao.framework.common.util.object.BeanUtils.toBean(finalQueryReqVO, KingdeeSupplierQueryReqVO.class, fqr -> fqr.setPage(currentPage));
+                    KingdeeSupplierQueryReqVO supplierQueryReqVO = cn.iocoder.yudao.framework.common.util.object.BeanUtils.toBean(finalQueryReqVO, KingdeeSupplierQueryReqVO.class,
+                        fqr -> fqr.setPage(currentPage));
                     log.debug("线程[{}]开始获取第{}页数据,页数{}", Thread.currentThread().getName(), currentPage, supplierQueryReqVO.getPageSize());
                     return getPage(JsonUtilsX.toJSONObject(supplierQueryReqVO), endpoint);
                 }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor()));
             }
 
             // 6. 汇总
-            Map<String, KingdeeSupplierSaveVO> result = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).thenApply(v -> futures.stream().map(CompletableFuture::join)
-                .flatMap(page -> page.getRowsList(KingdeeSupplierSaveVO.class).stream())
-                .collect(Collectors.toMap(KingdeeSupplierSaveVO::getName, supplier -> supplier, (oldVal, newVal) -> {
-                    log.warn("发现重复的供应商名称：{}", oldVal.getName());
-                    return oldVal;
-            }))).join();
+            Map<String, KingdeeSupplierSaveVO> result = CompletableFuture.allOf(futures.toArray(new CompletableFuture[0]))
+                .thenApply(v -> futures.stream().map(CompletableFuture::join)
+                    .flatMap(page -> page.getRowsList(KingdeeSupplierSaveVO.class).stream())
+                    .collect(Collectors.toMap(KingdeeSupplierSaveVO::getName, supplier -> supplier, (oldVal, newVal) -> {
+                        log.warn("发现重复的供应商名称：{}", oldVal.getName());
+                        return oldVal;
+                    }))).join();
 
             // 7. 缓存
             if (!result.isEmpty()) {
-                redisTemplate.opsForValue().set(cacheKey, JsonUtilsX.toJsonString(result), 120, TimeUnit.MINUTES);
+                redisTemplate.opsForValue().set(SUPPLIER_CACHE_KEY, JsonUtilsX.toJsonString(result), 120, TimeUnit.MINUTES);
                 log.debug("供应商列表数据已缓存，过期时间120分钟");
             }
             return result;
