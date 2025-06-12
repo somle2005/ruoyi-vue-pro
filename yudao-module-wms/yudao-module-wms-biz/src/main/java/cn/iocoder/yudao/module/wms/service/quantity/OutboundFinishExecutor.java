@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.wms.service.quantity;
 
 import cn.hutool.core.util.IdUtil;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
+import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
@@ -54,6 +55,9 @@ public class OutboundFinishExecutor extends OutboundExecutor {
      */
     @Override
     protected WmsStockFlowDirection updateStockWarehouseQty(WmsStockWarehouseDO stockWarehouseDO, WmsOutboundItemRespVO item, Integer quantity) {
+
+        // 校验本方法在事务中
+        JdbcUtils.requireTransaction();
 
         Integer actualQty=item.getActualQty();
 
