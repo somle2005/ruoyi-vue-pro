@@ -801,4 +801,22 @@ public class KingdeeClient {
         }
     }
 
+    /**
+     * 取消采购订单
+     *
+     * @param orderNumbers 需要取消的采购订单编号列表
+     * @return KingdeeResponse
+     */
+    public KingdeeResponse cancelPurOrder(List<String> orderNumbers) {
+        String endUrl = "/jdy/v2/scm/pur_order_cancel";
+        TreeMap<String, String> params = new TreeMap<>();
+
+        // 构建请求体
+        JSONObject payload = new JSONObject();
+//        payload.put("entity_number", "2"); // 采购订单的实体编号
+        payload.put("out_side_pks", orderNumbers);
+
+        return postResponse(endUrl, params, payload);
+    }
+
 }
