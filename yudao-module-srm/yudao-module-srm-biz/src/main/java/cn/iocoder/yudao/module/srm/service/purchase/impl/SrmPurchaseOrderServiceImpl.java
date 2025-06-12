@@ -273,8 +273,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         initSlaveStatus(orderItems);
         //回填log记录
         LogRecordContext.putVariable("id", orderDO.getId());
-        //发送消息
-        purchaseOrderChannel.send(MessageBuilder.withPayload(Collections.singletonList(orderDO.getId())).build());
+
         return orderDO.getId();
     }
 
@@ -316,8 +315,6 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 2.2 更新订单项
         updatePurchaseOrderItemList(vo.getId(), purchaseOrderItems);
         vo.getItems().sort(Comparator.comparing(SrmPurchaseOrderSaveReqVO.Item::getId, Comparator.nullsFirst(Long::compareTo)));
-        //发送消息
-        purchaseOrderChannel.send(MessageBuilder.withPayload(Collections.singletonList(vo.getId())).build());
     }
 
     @Override
@@ -747,6 +744,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.AGREE, vo);
                 //更新WMS仓库在制数量
                 this.updateWareHouseGNumber(orderDO, false);
+                //同步 -> 金蝶订单
+                purchaseOrderChannel.send(MessageBuilder.withPayload(Collections.singletonList(orderDO.getId())).build());
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", orderDO.getId());
                 orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, vo);
@@ -762,6 +761,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, vo);
             //减少wms对应产品的在制数量
             this.updateWareHouseGNumber(orderDO, true);
+            //TODO 作废金蝶采购订单
         }
     }
 
