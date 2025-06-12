@@ -13,6 +13,7 @@ import com.somle.kingdee.enums.KingDeeErrorCodeConstants;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.model.vo.KingdeeSupplierQueryReqVO;
+import com.somle.kingdee.util.CacheSpinWaitUtils;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.redisson.api.RLock;
@@ -25,7 +26,6 @@ import java.time.LocalDateTime;
 import java.time.ZoneOffset;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
@@ -164,7 +164,7 @@ public class KingdeeClient {
             KingdeeUnit kingdeeUnit = getResponse(endUrl, params).getData(KingdeeUnit.class);
             callback.accept(kingdeeUnit, null);
         } catch (Exception e) {
-            log.debug("getMeasureUnitByNumber error,当前产品的单位也许不存在。", e);
+            log.debug("getMeasureUnitByNumber error,当前产品的单位: {},不存在。", number, e);
             callback.accept(null, e);
         }
     }
@@ -480,6 +480,20 @@ public class KingdeeClient {
      */
     public KingdeeResponse savePurOrder(KingdeePurOrderSaveReqVO order) {
         String endUrl = "/jdy/v2/scm/pur_order";
+        //供应商
+        Long id = Long.valueOf(order.getSupplierNumber());
+
+        //产品
+        order.getMaterialEntity().forEach(material -> {
+            material.setMaterialId(this.getMaterial(material.getMaterialNumber()).getData(JSONObject.class).getString("id"));
+            //单位ID
+            setUnitId("套", kingdeeUnit -> {
+                material.setUnitId(kingdeeUnit.getId());
+                material.setUnitNumber(kingdeeUnit.getNumber());
+            });
+
+        });
+
         TreeMap<String, String> params = new TreeMap<>();
         order.setIgnoreWarn(false);//忽略告警信息(如：名称已存在)保存客户
         return postResponse(endUrl, params, order);
@@ -608,8 +622,9 @@ public class KingdeeClient {
     }
 
     /**
-     * 获取所有供应商列表（不分页），以供应商名称为key的Map形式返回
-     * 结果会被缓存10分钟
+     * 获取所有供应商Map; <供应商名称:供应商>
+     * <p>
+     * 结果会被缓存120分钟
      */
     public Map<String, KingdeeSupplierSaveVO> getAllSupplierList(KingdeeSupplierQueryReqVO queryReqVO) {
         if (queryReqVO == null) {
@@ -631,7 +646,17 @@ public class KingdeeClient {
         try {
             locked = lock.tryLock(0, 10, TimeUnit.SECONDS);
             if (!locked) {
-                throw exception(SUPPLIER_LIST_LOADING);
+                Map<String, KingdeeSupplierSaveVO> result = CacheSpinWaitUtils.spinWaitForCache(
+                    () -> redisTemplate.opsForValue().get(cacheKey),
+                    json -> JsonUtilsX.parseObject(json, new TypeReference<>() {
+                    }),
+                    1000 * 10, 200
+                );
+                if (result != null) {
+                    log.debug("等待期间获取到缓存数据，直接返回");
+                    return result;
+                }
+                throw exception(SUPPLIER_LIST_LOADING, "数据正在加载中，请稍后重试。");
             }
 
             cachedData = redisTemplate.opsForValue().get(cacheKey);
@@ -645,32 +670,21 @@ public class KingdeeClient {
             String endpoint = "/jdy/v2/bd/supplier";
             KingdeePage firstPage = getPage(JsonUtilsX.toJSONObject(queryReqVO), endpoint);
             int totalPages = firstPage.getTotalPage();
+            if (totalPages > 500) {
+                throw exception(KingDeeErrorCodeConstants.SUPPLIER_LIST_FAIL, "页数过大(" + totalPages + ")，请缩小范围");
+            }
 
             // 5. 拉取剩余页数据
             List<CompletableFuture<KingdeePage>> futures = new ArrayList<>();
             futures.add(CompletableFuture.completedFuture(firstPage));
-            Semaphore semaphore = new Semaphore(10); // 并发10个
 
             for (int page = 2; page <= totalPages; page++) {
                 final int currentPage = page;
                 KingdeeSupplierQueryReqVO finalQueryReqVO = queryReqVO;
                 futures.add(CompletableFuture.supplyAsync(() -> {
-                    try {
-                        semaphore.acquire();
-                        try {
-                            KingdeeSupplierQueryReqVO pageVO = new KingdeeSupplierQueryReqVO();
-                            BeanUtils.copyProperties(finalQueryReqVO, pageVO);
-                            pageVO.setPage(currentPage);
-                            log.debug("线程[{}]开始获取第{}页数据,页数{}", Thread.currentThread().getName(), currentPage, pageVO.getPageSize());
-                            return getPage(JsonUtilsX.toJSONObject(pageVO), endpoint);
-                        } finally {
-                            semaphore.release();
-                        }
-                    } catch (InterruptedException e) {
-                        log.error("获取供应商列表数据异常", e);
-                        Thread.currentThread().interrupt();
-                        throw exception(KingDeeErrorCodeConstants.SUPPLIER_LIST_BREAK, e.getMessage());
-                    }
+                    KingdeeSupplierQueryReqVO supplierQueryReqVO = cn.iocoder.yudao.framework.common.util.object.BeanUtils.toBean(finalQueryReqVO, KingdeeSupplierQueryReqVO.class, fqr -> fqr.setPage(currentPage));
+                    log.debug("线程[{}]开始获取第{}页数据,页数{}", Thread.currentThread().getName(), currentPage, supplierQueryReqVO.getPageSize());
+                    return getPage(JsonUtilsX.toJSONObject(supplierQueryReqVO), endpoint);
                 }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor()));
             }
 

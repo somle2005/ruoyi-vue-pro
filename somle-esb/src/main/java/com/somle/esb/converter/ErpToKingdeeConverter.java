@@ -266,9 +266,7 @@ public class ErpToKingdeeConverter {
         convertBasicInfo(vo, order);
 
         // 2. 转换商品分录
-        if (order.getItems() != null) {
-            vo.setMaterialEntity(convertToMaterialEntity(order.getItems()));
-        }
+        vo.setMaterialEntity(convertToMaterialEntity(order.getItems()));
 
         return vo;
     }
@@ -278,12 +276,14 @@ public class ErpToKingdeeConverter {
      * 包括：单据日期、单据编号、供应商信息、备注、总金额、外部单号等
      *
      * @param target 目标对象（金蝶采购订单）
-     * @param dto 源对象（SRM采购订单）
+     * @param dto    源对象（SRM采购订单）
      */
     public void convertBasicInfo(KingdeePurOrderSaveReqVO target, SrmPurchaseOrderDTO dto) {
         // 单据日期：格式化为 yyyy-MM-dd
         if (dto.getBillTime() != null) {
             target.setBillDate(DateUtil.format(dto.getBillTime(), "yyyy-MM-dd"));
+        } else {
+            target.setBillDate(DateUtil.format(LocalDateTime.now(), "yyyy-MM-dd"));
         }
 
         // 单据编号
@@ -294,6 +294,7 @@ public class ErpToKingdeeConverter {
 //            target.setSupplierId(String.valueOf(dto.getSupplierId()));
 //        }
         //supplier_number
+        target.setSupplierNumber(dto.getSupplierId().toString());
 
         // 备注
         target.setRemark(StrUtil.trimToNull(dto.getRemark()));
@@ -304,9 +305,7 @@ public class ErpToKingdeeConverter {
         }
 
         // 外部单号：ID转为字符串
-        if (dto.getId() != null) {
-            target.setOutsidePkId(String.valueOf(dto.getId()));
-        }
+        target.setOutsidePkId(String.valueOf(dto.getId()));
     }
 
     /**
@@ -344,14 +343,11 @@ public class ErpToKingdeeConverter {
         }
         KingdeePurOrderSaveReqVO.MaterialEntity entity = new KingdeePurOrderSaveReqVO.MaterialEntity();
 
-        // 1. 物料信息
-        entity.setMaterialId(String.valueOf(item.getProductId()));
+        // 1. 产品SKU信息
         entity.setMaterialNumber(StrUtil.trimToNull(item.getProductCode()));
 
         // 2. 数量信息
-        if (item.getQty() != null) {
-            entity.setQty(item.getQty().doubleValue());
-        }
+        entity.setQty(item.getQty().doubleValue());
         if (item.getProductPrice() != null) {
             entity.setPrice(item.getProductPrice().toString());
         }
@@ -360,19 +356,16 @@ public class ErpToKingdeeConverter {
         }
 
         // 3. 单位信息
-        if (item.getProductUnitId() != null) {
-            entity.setUnitId(String.valueOf(item.getProductUnitId()));
-        }
         entity.setUnitNumber(StrUtil.trimToNull(item.getProductUnitName()));
 
         // 4. 其他信息
         entity.setComment(StrUtil.trimToNull(item.getRemark()));
         if (item.getDeliveryTime() != null) {
             entity.setDeliveryDate(DateUtil.format(item.getDeliveryTime(), "yyyy-MM-dd"));
+        } else {
+            entity.setDeliveryDate(DateUtil.format(LocalDateTime.now(), "yyyy-MM-dd"));
         }
-//        if (item.getWarehouseId() != null) {
-//            entity.setStockId(String.valueOf(item.getWarehouseId()));
-//        }
+
 
         // 5. 税率相关信息
         if (item.getTaxRate() != null) {
@@ -387,9 +380,6 @@ public class ErpToKingdeeConverter {
         if (item.getGrossTotalPrice() != null) {
             entity.setAllAmount(String.valueOf(item.getGrossTotalPrice()));
         }
-
-        // 6. 条码信息
-        entity.setBarcode(StrUtil.trimToNull(item.getProductCode()));
 
         return entity;
     }

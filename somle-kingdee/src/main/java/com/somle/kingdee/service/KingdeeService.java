@@ -61,6 +61,11 @@ public class KingdeeService {
             .allMatch(this::saveToken);
     }
 
+    @Scheduled(cron = "0 0 */2 * * *")
+    public void refreshAllSupplierList() {
+        clients.parallelStream().forEach(n -> n.getAllSupplierList(new KingdeeSupplierQueryReqVO()));
+    }
+
     public boolean saveToken(KingdeeToken token) {
         boolean success = false;
         try {

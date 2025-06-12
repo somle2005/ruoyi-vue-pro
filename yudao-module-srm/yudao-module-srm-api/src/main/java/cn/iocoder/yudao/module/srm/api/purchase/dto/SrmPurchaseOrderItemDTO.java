@@ -165,6 +165,9 @@ public class SrmPurchaseOrderItemDTO {
      */
     private String declaredTypeEn;
 
+    /**
+     * 产品编码
+     */
     private String productCode;
     /**
      * 产品名称

@@ -39,8 +39,7 @@ public class KingdeePurOrderSaveReqVO {
      * 必填
      */
     @NotEmpty(message = "商品分录不能为空")
-    @Valid
-    private List<MaterialEntity> materialEntity;
+    private List<@Valid MaterialEntity> materialEntity;
 
     /**
      * 供应商ID
