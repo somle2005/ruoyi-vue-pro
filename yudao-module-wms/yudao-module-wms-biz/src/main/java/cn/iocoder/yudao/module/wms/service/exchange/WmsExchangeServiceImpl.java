@@ -6,21 +6,43 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.config.ExchangeStateMachineConfigure;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangePageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.exchange.vo.WmsExchangeSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.item.vo.WmsStockBinMoveItemSaveReqVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.item.WmsExchangeItemDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.exchange.WmsExchangeMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.exchange.item.WmsExchangeItemMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.stock.warehouse.WmsStockWarehouseMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
 import cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeAuditStatus;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
+import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundType;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
+import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
+import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
+import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
+import cn.iocoder.yudao.module.wms.service.stock.bin.move.WmsStockBinMoveService;
+import cn.iocoder.yudao.module.wms.service.stock.flow.WmsStockFlowService;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.stock.flow.WmsStockFlowService;
@@ -34,13 +56,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.time.LocalDateTime;
+import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static java.lang.Boolean.TRUE;
 
 /**
  * 换货单 Service 实现类
@@ -72,6 +93,12 @@ public class WmsExchangeServiceImpl implements WmsExchangeService {
     @Resource
     @Lazy
     protected WmsStockFlowService stockFlowService;
+
+    @Resource
+    private WmsOutboundService outboundService;
+
+    @Resource
+    private WmsStockBinMoveService stockBinMoveService;
 
     @Resource(name = ExchangeStateMachineConfigure.STATE_MACHINE_NAME)
     private StateMachine<Integer, WmsExchangeAuditStatus.Event, TransitionContext<WmsExchangeDO>> exchangeStateMachine;
