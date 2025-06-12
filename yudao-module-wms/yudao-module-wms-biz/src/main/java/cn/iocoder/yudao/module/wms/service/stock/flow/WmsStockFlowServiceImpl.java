@@ -505,9 +505,9 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         StreamX.from(list).assemble(inboundItemFlowDOMap, WmsStockFlowRespVO::getInboundItemFlowId, WmsStockFlowRespVO::setInboundItemFlow);
         InboundExecutor.setShelveAvailableQty(inboundItemFlowDOMap.values());
 
-        List<Long> inboundIds=StreamX.from(inboundItemFlowDOMap.values()).toList(WmsInboundItemFlowSimpleVO::getInboundId);
+        List<Long> inboundIds = StreamX.from(inboundItemFlowDOMap.values()).toList(WmsInboundItemFlowSimpleVO::getInboundId);
         List<WmsInboundDO> inboundDOList = inboundService.selectByIds(inboundIds);
-        Map<Long,WmsInboundDO> inboundDOMap=StreamX.from(inboundDOList).toMap(WmsInboundDO::getId);
+        Map<Long, WmsInboundDO> inboundDOMap = StreamX.from(inboundDOList).toMap(WmsInboundDO::getId);
         for (WmsStockFlowRespVO flowRespVO : list) {
             WmsInboundItemFlowSimpleVO inboundItemFlow = flowRespVO.getInboundItemFlow();
             if(inboundItemFlow!=null) {
