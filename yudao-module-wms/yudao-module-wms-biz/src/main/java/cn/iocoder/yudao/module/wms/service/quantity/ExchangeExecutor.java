@@ -162,7 +162,7 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         WmsItemFlowDO itemFlowDO = wmsInboundItemFlowService.selectByInboundId(inboundDO.getId(), 1).get(0);
 
         // 记录批次流水(item_flow)
-        this.updateStockFlow(exchangeDO, itemDO, OUT.getValue());
+        List<WmsItemFlowDO> itemFlowOutList = updateStockFlow(exchangeDO, itemDO, OUT.getValue());
         // 记录库存流水(stockFlow)
         stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, OUT, itemDO.getProductId(), fromStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), itemFlowDO.getId());
 
@@ -177,7 +177,7 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         stockBinService.insertOrUpdate(toStockBinDO);
 
         // 记录批次流水(item_flow)
-        this.updateStockFlow(exchangeDO, itemDO, IN.getValue());
+        List<WmsItemFlowDO> itemFlowInList = updateStockFlow(exchangeDO, itemDO, IN.getValue());
         // 记录库存流水(stockFlow)
         stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, IN, itemDO.getProductId(), toStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), itemFlowDO.getId());
     }
