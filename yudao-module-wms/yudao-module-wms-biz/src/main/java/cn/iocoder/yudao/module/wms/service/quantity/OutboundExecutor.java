@@ -103,8 +103,8 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
 
             // 如果未指定归属，则按入库批次的先进先出进行处理
             if (deptId == null || companyId == null) {
-                //todo 获取批次列表，然后根据可售数量判断取多个批次的库存
-                List<WmsInboundItemLogicDO> inboundItemLogicList = inboundService.getInboundItemLogicList(warehouseId, productId, true);
+                //获取批次列表，然后根据可售数量判断取多个批次的库存
+                List<WmsInboundItemLogicDO> inboundItemLogicList = inboundService.getInboundItemLogicList(warehouseId, productId, deptId, true);
                 if (inboundItemLogicList == null) {
                     throw exception(STOCK_LOGIC_NOT_EXISTS);
                 }
