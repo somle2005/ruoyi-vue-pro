@@ -81,12 +81,15 @@ public interface WmsInboundItemFlowMapper extends BaseMapperX<WmsItemFlowDO> {
     /**
      * 根据产品ID，库位ID和仓库ID查询
      */
-    default List<WmsInboundItemFlowDetailVO> selectByProductIdAndBinIdAndWarehouseId(Long productId, Long binId, Long warehouseId, Integer limit) {
+    default List<WmsInboundItemFlowDetailVO> selectByProductIdAndBinIdAndWarehouseId(Long warehouseId, Long binId, Long productId, int limit) {
         MPJLambdaWrapperX<WmsItemFlowDO> wrapper = new MPJLambdaWrapperX<>();
         wrapper.selectAs(WmsItemFlowDO::getId, "id")
             .selectAs(WmsItemFlowDO::getInboundItemId, "inboundItemId")
+            .selectAs(WmsItemFlowDO::getInboundId, "inboundId")
             .selectAs(WmsItemFlowDO::getProductId, "productId")
             .selectAs(WmsItemFlowDO::getOutboundAvailableQty, "outboundAvailableQty")
+            .selectAs(WmsInboundDO::getWarehouseId, "warehouseId")
+            .selectAs(WmsStockBinDO::getBinId, "binId")
             .selectAs(WmsItemFlowDO::getCreateTime, "createTime")
             .innerJoin(WmsInboundItemDO.class, WmsInboundItemDO::getId, WmsItemFlowDO::getInboundItemId)
             .innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemDO::getInboundId)
@@ -96,9 +99,7 @@ public interface WmsInboundItemFlowMapper extends BaseMapperX<WmsItemFlowDO> {
             .eqIfPresent(WmsInboundDO::getWarehouseId, warehouseId)
             .orderByAsc(WmsInboundDO::getCreateTime)
             .last("LIMIT " + limit);
-        List<WmsItemFlowDO> rtnList1 = selectList(wrapper);
-        List<WmsInboundItemFlowDetailVO> rtnList = selectJoinList(WmsInboundItemFlowDetailVO.class, wrapper);
 
-        return rtnList;
+        return selectJoinList(WmsInboundItemFlowDetailVO.class, wrapper);
     }
 }

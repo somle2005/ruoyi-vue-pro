@@ -165,8 +165,8 @@ public class WmsInboundItemFlowServiceImpl implements WmsItemFlowService {
     }
 
     @Override
-    public List<WmsInboundItemFlowDetailVO> selectByProductIdAndBinIdAndWarehouseId(Long productId, Long binId, Long warehouseId, int limit) {
-        return inboundItemFlowMapper.selectByProductIdAndBinIdAndWarehouseId(productId, binId, warehouseId, 1000);
+    public List<WmsInboundItemFlowDetailVO> selectByProductIdAndBinIdAndWarehouseId(Long warehouseId, Long binId, Long productId, int limit) {
+        return inboundItemFlowMapper.selectByProductIdAndBinIdAndWarehouseId(warehouseId, binId, productId, 1000);
     }
 
 }
