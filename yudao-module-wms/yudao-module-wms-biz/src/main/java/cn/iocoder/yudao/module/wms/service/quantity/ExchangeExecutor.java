@@ -42,7 +42,7 @@ import static cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeType.TO_ITEM
 import static com.fhs.common.constant.Constant.MAX_INT;
 
 /**
- * @author: LeeFJ
+ * @author: LeeFJd
  * @date: 2025/3/25 9:34
  * @description: 库位移动数量执行器
  */
