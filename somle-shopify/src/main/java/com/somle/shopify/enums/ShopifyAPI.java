@@ -20,7 +20,8 @@ public enum ShopifyAPI {
     GET_ORDERS("获取 Shopify 订单信息", "/admin/api/2024-10/orders.json", RequestX.Method.GET, "orders", JSONArray.class),
     GET_PRODUCTS("获取 Shopify 商品信息", "/admin/api/2024-10/products.json", RequestX.Method.GET, "products", JSONArray.class),
     GET_PRODUCT_COUNT("获取 Shopify 商品数量", "/admin/api/2024-10/products/count.json", RequestX.Method.GET, "count", JSONArray.class),
-    GET_PAYOUTS("获取 Shopify 结算信息", "/admin/api/2024-10/shopify_payments/payouts.json", RequestX.Method.GET, "payouts", JSONArray.class);
+    GET_PAYOUTS("获取 Shopify 结算信息", "/admin/api/2024-10/shopify_payments/payouts.json", RequestX.Method.GET, "payouts", JSONArray.class),
+    GRAPHQL("获取商品、订单...等信息", "/admin/api/2025-04/graphql.json", RequestX.Method.POST, "", JSONObject.class);
 
     private String action;
     private String url;

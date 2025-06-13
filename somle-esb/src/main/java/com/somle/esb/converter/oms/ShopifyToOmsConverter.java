@@ -10,9 +10,9 @@ import cn.iocoder.yudao.module.oms.api.OmsShopProductApi;
 import cn.iocoder.yudao.module.oms.api.dto.*;
 import cn.iocoder.yudao.module.oms.api.enums.shop.ShopTypeEnum;
 import com.somle.esb.enums.PlatformEnum;
-import com.somle.shopify.model.reps.ShopifyOrderRepsVO;
-import com.somle.shopify.model.reps.ShopifyShopProductRepsVO;
-import com.somle.shopify.model.reps.ShopifyShopRepsVO;
+import com.somle.shopify.model.graphql.ShopifyGraphqlOrder;
+import com.somle.shopify.model.graphql.ShopifyGraphqlProduct;
+import com.somle.shopify.model.graphql.ShopifyGraphqlShopInfo;
 import com.somle.shopify.service.ShopifyClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -43,11 +43,11 @@ public class ShopifyToOmsConverter {
     @Resource
     OmsOrderApi omsOrderApi;
 
-    private ShopifyShopRepsVO shopifyShopRepsVO;
+    private ShopifyGraphqlShopInfo shopifyGraphqlShopInfo;
 
     private PlatformEnum platform = PlatformEnum.SHOPIFY;
 
-    public OmsShopSaveReqDTO toShops(ShopifyShopRepsVO shopInfoDTO) {
+    public OmsShopSaveReqDTO toShops(ShopifyGraphqlShopInfo shopifyGraphqlShopInfo) {
 
         List<OmsShopDTO> existShops = omsShopApi.getByPlatformCode(this.platform.toString());
         // 使用Map存储已存在的店铺，key = platformShopCode, value = OmsShopDO
@@ -57,33 +57,31 @@ public class ShopifyToOmsConverter {
             .collect(Collectors.toMap(omsShopDO -> omsShopDO.getExternalId(), omsShopDO -> omsShopDO));
 
         OmsShopSaveReqDTO shopDTO = new OmsShopSaveReqDTO();
-        MapUtils.findAndThen(existShopMap, shopInfoDTO.getId().toString(), omsShopDTO -> shopDTO.setId(omsShopDTO.getId()));
+        MapUtils.findAndThen(existShopMap, shopifyGraphqlShopInfo.getId().toString(), omsShopDTO -> shopDTO.setId(omsShopDTO.getId()));
         shopDTO.setName(null);
-        shopDTO.setExternalName(shopInfoDTO.getName());
+        shopDTO.setExternalName(shopifyGraphqlShopInfo.getName());
         shopDTO.setCode(null);
-        shopDTO.setExternalId(shopInfoDTO.getId().toString());
+        shopDTO.setExternalId(shopifyGraphqlShopInfo.getId());
         shopDTO.setPlatformCode(this.platform.toString());
         shopDTO.setType(ShopTypeEnum.ONLINE.getType());
         return shopDTO;
     }
 
-    public List<OmsShopProductSaveReqDTO> toProducts(List<ShopifyShopProductRepsVO> product, ShopifyClient shopifyClient) {
-        if (shopifyClient.getShop() == null) {
+    public List<OmsShopProductSaveReqDTO> toProducts(List<ShopifyGraphqlProduct> product, ShopifyClient shopifyClient) {
+        if (shopifyClient.getShopInfo() == null) {
             throw exception(OMS_SYNC_SHOP_INFO_LACK);
         }
 
         //根据client再次请求获取店铺信息,shopify一个店铺对应一个client
-        if (shopifyShopRepsVO == null) {
-            shopifyShopRepsVO = shopifyClient.getShop();
+        if (shopifyGraphqlShopInfo == null) {
+            shopifyGraphqlShopInfo = shopifyClient.getShopInfo();
         }
 
-
-        OmsShopDTO omsShopDO = omsShopApi.getShopByPlatformShopCode(shopifyShopRepsVO.getId().toString());
+        OmsShopDTO omsShopDO = omsShopApi.getShopByPlatformShopCode(shopifyGraphqlShopInfo.getId());
 
         if (omsShopDO == null) {
             throw exception(OMS_SYNC_SHOP_INFO_FIRST, this.platform.toString());
         }
-
         List<OmsShopProductDTO> existShopProducts = omsShopProductApi.getByShopIds(List.of(omsShopDO.getId()));
         // 使用Map存储已存在的店铺产品信息，key=sourceId, value=OmsShopProductDO
         Map<String, OmsShopProductDTO> existShopProductMap = Optional.ofNullable(existShopProducts)
@@ -91,16 +89,16 @@ public class ShopifyToOmsConverter {
             .stream()
             .collect(Collectors.toMap(omsShopProductDO -> omsShopProductDO.getExternalId(), omsShopProductDO -> omsShopProductDO));
 
-
         List<OmsShopProductSaveReqDTO> omsShopProductDOs = product.stream()
             .flatMap(shopifyProductRepsDTO ->
-                shopifyProductRepsDTO.getVariants().stream()
-                    .map(variant -> {
+                shopifyProductRepsDTO.getVariants().getEdges().stream()
+                    .map(variantEdge -> {
+                        ShopifyGraphqlProduct.Variant variant = variantEdge.getNode();
                         OmsShopProductSaveReqDTO shopProductDTO = new OmsShopProductSaveReqDTO();
-                        MapUtils.findAndThen(existShopProductMap, variant.getId().toString(), omsShopProductDO -> shopProductDTO.setId(omsShopProductDO.getId()));
+                        MapUtils.findAndThen(existShopProductMap, variant.getId(), omsShopProductDO -> shopProductDTO.setId(omsShopProductDO.getId()));
                         shopProductDTO.setShopId(omsShopDO.getId());
                         shopProductDTO.setCode(variant.getSku());
-                        shopProductDTO.setExternalId(variant.getId().toString());
+                        shopProductDTO.setExternalId(variant.getId());
                         shopProductDTO.setName(shopifyProductRepsDTO.getTitle() + " " + variant.getTitle());
                         if (variant.getPrice() != null) {
                             shopProductDTO.setPrice(new BigDecimal(variant.getPrice()));
@@ -112,18 +110,18 @@ public class ShopifyToOmsConverter {
         return omsShopProductDOs;
     }
 
-    public List<OmsOrderSaveReqDTO> toOrders(List<ShopifyOrderRepsVO> orders, ShopifyClient shopifyClient) {
+    public List<OmsOrderSaveReqDTO> toOrders(List<ShopifyGraphqlOrder> orders, ShopifyClient shopifyClient) {
 
         if (CollectionUtil.isEmpty(orders)) {
             return CollectionUtil.empty(List.class);
         }
 
         //根据client再次请求获取店铺信息,shopify一个店铺对应一个client
-        if (shopifyShopRepsVO == null) {
-            shopifyShopRepsVO = shopifyClient.getShop();
+        if (shopifyGraphqlShopInfo == null) {
+            shopifyGraphqlShopInfo = shopifyClient.getShopInfo();
         }
 
-        OmsShopDTO omsShopDO = omsShopApi.getShopByPlatformShopCode(shopifyShopRepsVO.getId().toString());
+        OmsShopDTO omsShopDO = omsShopApi.getShopByPlatformShopCode(shopifyGraphqlShopInfo.getId());
         if (omsShopDO == null) {
             throw exception(OMS_SYNC_SHOP_INFO_FIRST, this.platform.toString());
         }
@@ -150,22 +148,24 @@ public class ShopifyToOmsConverter {
 
         List<OmsOrderSaveReqDTO> omsOrderSaveReqDTOs = new ArrayList<>();
 
-        for (ShopifyOrderRepsVO order : orders) {
+        for (ShopifyGraphqlOrder order : orders) {
             OmsOrderSaveReqDTO omsOrderSaveReqDTO = new OmsOrderSaveReqDTO();
-            MapUtils.findAndThen(existOrderMap, order.getId().toString() + order.getName(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
+            MapUtils.findAndThen(existOrderMap, order.getId() + order.getName(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
             omsOrderSaveReqDTO.setPlatformCode(this.platform.toString());
-            omsOrderSaveReqDTO.setExternalId(order.getId().toString() + order.getName());
+            omsOrderSaveReqDTO.setExternalId(order.getId() + order.getName());
             omsOrderSaveReqDTO.setShopId(omsShopDO.getId());
-            omsOrderSaveReqDTO.setTotalPrice(new BigDecimal(order.getTotalPrice()));
-            omsOrderSaveReqDTO.setBuyerName(order.getCustomer().getFirstName() + " " + order.getCustomer().getLastName());
-            omsOrderSaveReqDTO.setPhone(order.getCustomer().getPhone());
-            omsOrderSaveReqDTO.setEmail(order.getCustomer().getEmail());
+            omsOrderSaveReqDTO.setTotalPrice(order.getCurrentTotalPriceSet().getShopMoney().getAmount());
+            omsOrderSaveReqDTO.setBuyerName(order.getShippingAddress().getName());
+            omsOrderSaveReqDTO.setPhone(order.getShippingAddress().getPhone());
+            omsOrderSaveReqDTO.setEmail("");
             omsOrderSaveReqDTO.setOrderCreateTime(parseTime(order.getCreatedAt()));
             omsOrderSaveReqDTO.setPayTime(parseTime(order.getCreatedAt()));
-
-            ShopifyOrderRepsVO.ShippingAddressDTO shippingAddress = order.getShippingAddress();
+            omsOrderSaveReqDTO.setCompanyName(order.getShippingAddress().getCompany());
+            omsOrderSaveReqDTO.setBuyerCountryCode(order.getShippingAddress().getCountryCodeV2());
+            omsOrderSaveReqDTO.setRecipientName(order.getShippingAddress().getName());
+            ShopifyGraphqlOrder.ShippingAddress shippingAddress = order.getShippingAddress();
             if (ObjectUtil.isNotEmpty(shippingAddress)) {
-                omsOrderSaveReqDTO.setRecipientCountryCode(shippingAddress.getCountryCode());
+                omsOrderSaveReqDTO.setRecipientCountryCode(shippingAddress.getCountryCodeV2());
                 omsOrderSaveReqDTO.setState(shippingAddress.getProvinceCode());
                 omsOrderSaveReqDTO.setCity(shippingAddress.getCity());
                 omsOrderSaveReqDTO.setExternalAddress(JsonUtilsX.toJsonString(order.getShippingAddress()));
@@ -178,18 +178,19 @@ public class ShopifyToOmsConverter {
                 omsOrderSaveReqDTO.setPostalCode(shippingAddress.getZip());
             }
 
-            List<ShopifyOrderRepsVO.LineItemsDTO> lineItems = order.getLineItems();
+            List<ShopifyGraphqlOrder.LineItemEdge> edges = order.getLineItems().getEdges();
             List<OmsOrderItemSaveReqDTO> omsOrderItemSaveReqDTOs = new ArrayList<>();
-            for (ShopifyOrderRepsVO.LineItemsDTO lineItem : lineItems) {
+            for (ShopifyGraphqlOrder.LineItemEdge lineItem : edges) {
                 OmsOrderItemSaveReqDTO omsOrderItemSaveReqDTO = new OmsOrderItemSaveReqDTO();
+                ShopifyGraphqlOrder.LineItemNode itemNode = lineItem.getNode();
                 if (ObjectUtil.isNotEmpty(existShopProductMap.get(omsOrderSaveReqDTO.getShopId()))
-                    && ObjectUtil.isNotEmpty(existShopProductMap.get(omsOrderSaveReqDTO.getShopId()).get(lineItem.getSku()))
+                    && ObjectUtil.isNotEmpty(existShopProductMap.get(omsOrderSaveReqDTO.getShopId()).get(itemNode.getSku()))
                 ) {
-                    omsOrderItemSaveReqDTO.setShopProductId(existShopProductMap.get(omsOrderSaveReqDTO.getShopId()).get(lineItem.getSku()).getId());
+                    omsOrderItemSaveReqDTO.setShopProductId(existShopProductMap.get(omsOrderSaveReqDTO.getShopId()).get(itemNode.getSku()).getId());
                 }
-                omsOrderItemSaveReqDTO.setExternalId(lineItem.getId().toString());
-                omsOrderItemSaveReqDTO.setQty(lineItem.getQuantity());
-                omsOrderItemSaveReqDTO.setPrice(new BigDecimal(lineItem.getPrice()));
+                omsOrderItemSaveReqDTO.setExternalId(itemNode.getId());
+                omsOrderItemSaveReqDTO.setQty(itemNode.getQuantity().intValue());
+                omsOrderItemSaveReqDTO.setPrice(itemNode.getOriginalUnitPriceSet().getShopMoney().getAmount());
                 omsOrderItemSaveReqDTOs.add(omsOrderItemSaveReqDTO);
             }
             omsOrderSaveReqDTO.setOmsOrderItemSaveReqDTOList(omsOrderItemSaveReqDTOs);

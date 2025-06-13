@@ -16,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.net.InetSocketAddress;
 import java.net.Proxy;
+import java.util.concurrent.TimeUnit;
 
 
 @Slf4j
@@ -29,7 +30,7 @@ public class EsbService {
     ShopifyService shopifyService;
 
     @Resource
-    RakutenService  rakutenService;
+    RakutenService rakutenService;
 
     @Autowired
     private ConfigApi configApi;
@@ -50,14 +51,15 @@ public class EsbService {
             Proxy proxy = new Proxy(Proxy.Type.HTTP, new InetSocketAddress(proxyHost, proxyPort));
 
             OkHttpClient client = new OkHttpClient.Builder()
-                .proxy(proxy)
-                .proxyAuthenticator((route, response) -> {
-                    String credential = okhttp3.Credentials.basic(proxyUsername, proxyPassword);
-                    return response.request().newBuilder()
-                        .header("Proxy-Authorization", credential)
-                        .build();
-                })
-                .build();
+                    .connectTimeout(30000, TimeUnit.MILLISECONDS).readTimeout(30000, TimeUnit.MILLISECONDS)
+                    .proxy(proxy)
+                    .proxyAuthenticator((route, response) -> {
+                        String credential = okhttp3.Credentials.basic(proxyUsername, proxyPassword);
+                        return response.request().newBuilder()
+                                .header("Proxy-Authorization", credential)
+                                .build();
+                    })
+                    .build();
             //给shopify和rakuten设置网络代理
             shopifyService.shopifyClients.forEach(shopifyClient -> shopifyClient.setWebClient(client));
             rakutenService.rakutenClients.forEach(rakutenClient -> rakutenClient.setWebClient(client));

@@ -3,12 +3,17 @@ package com.somle.shopify.service;
 import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.util.json.JSONArray;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.somle.shopify.enums.ShopifyAPI;
+import com.somle.shopify.exception.ShopifyApiException;
 import com.somle.shopify.model.ShopifyToken;
+import com.somle.shopify.model.graphql.*;
+import com.somle.shopify.enums.ShopifyGraphqlConst;
 import com.somle.shopify.model.reps.ShopifyOrderRepsVO;
 import com.somle.shopify.model.reps.ShopifyPayoutRepsVO;
 import com.somle.shopify.model.reps.ShopifyShopProductRepsVO;
@@ -24,7 +29,6 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -69,91 +73,11 @@ public class ShopifyClient {
 
         // 按逗号分割多个链接，遍历查找 rel="next" 的条目
         return Arrays.stream(linkHeader.split("\\s*,\\s*"))
-            .filter(link -> hasRelNext(link))
-            .findFirst()
-            .map(link -> extractPageInfoFromUrl(link))
-            .orElse(null);
+                .filter(link -> hasRelNext(link))
+                .findFirst()
+                .map(link -> extractPageInfoFromUrl(link))
+                .orElse(null);
     }
-
-//    @SneakyThrows
-//    public String getShop1() {
-//        DefaultGraphqlQuery query = new DefaultGraphqlQuery("ShopMetafield");
-//        query.addParameter("namespace", "my_fields");
-//        query.addParameter("key", "copyright_year");
-//        query.addResultAttributes(
-//            "accountOwner"
-//        );
-//        ResultAttributtes accountOwner = new ResultAttributtes("accountOwner");
-//        accountOwner.addResultAttributes("accountType", "active");
-//
-//
-//        query.addResultAttributes(accountOwner);
-//
-//
-//        OkHttpClient client = new OkHttpClient().newBuilder().build();
-//        MediaType mediaType = MediaType.parse("application/json");
-//        RequestBody requestBody = RequestBody.create(mediaType, query.toString());
-//
-//        Headers.Builder headerBuilder = new Headers.Builder();
-//        headerBuilder.add("Accept", "application/json");
-//        headerBuilder.add("Content-Type", "application/json");
-//        headerBuilder.add(SHOPIFY_ACCESS_TOKEN, token.getAccessToken());
-//        Request request = new Request.Builder()
-//            .url(url + "/admin/api/2024-10/graphql.json")
-//            .method("POST", requestBody)
-//            .headers(headerBuilder.build())
-//            .build();
-//        Response response = client.newCall(request).execute();
-//        String result = response.body().string();
-//        return result;
-//    }
-
-
-//    @SneakyThrows
-//    public String getShop2() {
-//        // 手动构造 GraphQL 查询
-////        String query = "query ShopMetafield($namespace: String!, $key: String!) {"
-////            + "  shop {"
-////            + "    copyrightYear: metafield(namespace: $namespace, key: $key) {"
-////            + "      value"
-////            + "    }"
-////            + "  }"
-////            + "}";
-//        String query = "query ShopMetafield($namespace: String!, $key: String!) {\n" +
-//            "    shop {\n" +
-//            "        copyrightYear: metafield(namespace: $namespace, key: $key) {\n" +
-//            "            value,\n" +
-//            "            id\n" +
-//            "        }\n" +
-//            "    }\n" +
-//            "}";
-//
-//        // 构造变量
-//        String variables = String.format("{ \"namespace\": \"%s\", \"key\": \"%s\" }", "my_fields", "copyright_year");
-//
-//        // 构建请求体
-//        String jsonBody = String.format("{ \"query\": \"%s\", \"variables\": %s }", query, variables);
-//
-//        OkHttpClient client = new OkHttpClient();
-//        MediaType mediaType = MediaType.parse("application/json");
-//        RequestBody requestBody = RequestBody.create(jsonBody, mediaType);
-//
-//        Headers headers = new Headers.Builder()
-//            .add("Accept", "application/json")
-//            .add("Content-Type", "application/json")
-//            .add("X-Shopify-Access-Token", token.getAccessToken())
-//            .build();
-//
-//        Request request = new Request.Builder()
-//            .url(url + "/admin/api/2024-10/graphql.json")
-//            .post(requestBody)
-//            .headers(headers)
-//            .build();
-//
-//        Response response = client.newCall(request).execute();
-//        String result = response.body().string();
-//        return response.body().string();
-//    }
 
     // 检查 Link 条目是否包含 rel="next"（大小写不敏感）
     private static boolean hasRelNext(String linkEntry) {
@@ -169,11 +93,11 @@ public class ShopifyClient {
 
             // 解析查询参数为 Map
             Map<String, String> queryParams = Arrays.stream(uri.getQuery().split("&"))
-                .map(param -> param.split("=", 2))
-                .collect(Collectors.toMap(
-                    arr -> arr[0],
-                    arr -> arr.length > 1 ? arr[1] : "",
-                    (existing, replacement) -> existing));
+                    .map(param -> param.split("=", 2))
+                    .collect(Collectors.toMap(
+                            arr -> arr[0],
+                            arr -> arr.length > 1 ? arr[1] : "",
+                            (existing, replacement) -> existing));
 
             return queryParams.get("page_info");
         } catch (URISyntaxException | NullPointerException e) {
@@ -188,6 +112,9 @@ public class ShopifyClient {
         JSONObject shop = getResult(ShopifyAPI.GET_SHOP, new HashMap<>());
         return JsonUtilsX.parseObject(shop, ShopifyShopRepsVO.class);
     }
+
+
+
 
     /**
      * 获得订单信息
@@ -205,11 +132,11 @@ public class ShopifyClient {
         }
 
         var request = RequestX.builder()
-            .requestMethod(ShopifyAPI.GET_ORDERS.method())
-            .url(url + ShopifyAPI.GET_ORDERS.url())
-            .headers(getHeaders())
-            .queryParams(params)
-            .build();
+                .requestMethod(ShopifyAPI.GET_ORDERS.method())
+                .url(url + ShopifyAPI.GET_ORDERS.url())
+                .headers(getHeaders())
+                .queryParams(params)
+                .build();
         Response response = sendRequest(request);
         Headers headers = response.headers();
         String bodyString = response.body().string();
@@ -224,6 +151,94 @@ public class ShopifyClient {
         }).toList();
         return orders;
     }
+
+    /**
+     * 获得店铺信息
+     **/
+    public ShopifyGraphqlShopInfo getShopInfo() {
+        try {
+            ShopifyGraphqlRequest<ShopifyGraphqlCommonPageQuery> graphqlRequest = new ShopifyGraphqlRequest<>();
+            graphqlRequest.setQuery(ShopifyGraphqlConst.SHOP_INFO_QUERY);
+            var request = RequestX.builder()
+                    .requestMethod(ShopifyAPI.GRAPHQL.method())
+                    .url(url + ShopifyAPI.GRAPHQL.url())
+                    .headers(getHeaders())
+                    .payload(graphqlRequest)
+                    .build();
+            Response response = sendRequest(request);
+            String bodyString = response.body().string();
+            TypeReference<ShopifyGraphqlResponse<ShopifyGraphqlShopInfoResult>> typeRef = new TypeReference<>() {
+            };
+            ShopifyGraphqlResponse<ShopifyGraphqlShopInfoResult> shopifyGraphqlResponse = JsonUtils.parseObject(bodyString, typeRef);
+            if (shopifyGraphqlResponse.getErrors() != null) {
+                log.error("Shopify shopInfo API error: {}", shopifyGraphqlResponse.getErrors());
+                throw new ShopifyApiException("shopInfo Request Failed");
+            }
+            return shopifyGraphqlResponse.getData().getShop();
+        } catch (Exception e) {
+            log.error("Shopify shopInfo API error:", e);
+            throw new ShopifyApiException("Failed to parse Shopify response", e);
+        }
+    }
+
+
+    @SneakyThrows
+    public ShopifyGraphqlOrderPageResult orderPageQuery(ShopifyGraphqlCommonPageQuery shopifyGraphqlCommonPageQuery) {
+        try {
+            log.info("Shopify GraphqlOrder PageQuery: {}", shopifyGraphqlCommonPageQuery);
+            ShopifyGraphqlRequest<ShopifyGraphqlCommonPageQuery> graphqlRequest = new ShopifyGraphqlRequest<>();
+            graphqlRequest.setQuery(ShopifyGraphqlConst.ORDER_PAGE_QUERY);
+            graphqlRequest.setVariables(shopifyGraphqlCommonPageQuery);
+            var request = RequestX.builder()
+                    .requestMethod(ShopifyAPI.GRAPHQL.method())
+                    .url(url + ShopifyAPI.GRAPHQL.url())
+                    .headers(getHeaders())
+                    .payload(graphqlRequest)
+                    .build();
+            Response response = sendRequest(request);
+            String bodyString = response.body().string();
+            TypeReference<ShopifyGraphqlResponse<ShopifyGraphqlOrderPageResult>> typeRef = new TypeReference<>() {
+            };
+            ShopifyGraphqlResponse<ShopifyGraphqlOrderPageResult> shopifyGraphqlResponse = JsonUtils.parseObject(bodyString, typeRef);
+            if (shopifyGraphqlResponse.getErrors() != null) {
+                log.error("Shopify orderPageQuery API error: {}", shopifyGraphqlResponse.getErrors());
+                throw new ShopifyApiException("OrderPageQuery Request Failed");
+            }
+            return shopifyGraphqlResponse.getData();
+        } catch (Exception e) {
+            log.error("Shopify orderPageQuery API error:", e);
+            throw new ShopifyApiException("Failed to parse Shopify response", e);
+        }
+    }
+
+    public ShopifyGraphqlProductPageResult productPageQuery(ShopifyGraphqlCommonPageQuery shopifyGraphqlCommonPageQuery) {
+        try {
+            log.info("Shopify GraphqlProduct PageQuery: {}", shopifyGraphqlCommonPageQuery);
+            ShopifyGraphqlRequest<ShopifyGraphqlCommonPageQuery> graphqlRequest = new ShopifyGraphqlRequest<>();
+            graphqlRequest.setQuery(ShopifyGraphqlConst.PRODUCT_PAGE_QUERY);
+            graphqlRequest.setVariables(shopifyGraphqlCommonPageQuery);
+            var request = RequestX.builder()
+                    .requestMethod(ShopifyAPI.GRAPHQL.method())
+                    .url(url + ShopifyAPI.GRAPHQL.url())
+                    .headers(getHeaders())
+                    .payload(graphqlRequest)
+                    .build();
+            Response response = sendRequest(request);
+            String bodyString = response.body().string();
+            TypeReference<ShopifyGraphqlResponse<ShopifyGraphqlProductPageResult>> typeRef = new TypeReference<>() {
+            };
+            ShopifyGraphqlResponse<ShopifyGraphqlProductPageResult> shopifyGraphqlResponse = JsonUtils.parseObject(bodyString, typeRef);
+            if (shopifyGraphqlResponse.getErrors() != null) {
+                log.error("Shopify productPageQuery API error: {}", shopifyGraphqlResponse.getErrors());
+                throw new ShopifyApiException("ProductPageQuery Request Failed");
+            }
+            return shopifyGraphqlResponse.getData();
+        } catch (Exception e) {
+            log.error("Shopify productPageQuery API error:", e);
+            throw new ShopifyApiException("Failed to parse Shopify response", e);
+        }
+    }
+
 
     @SneakyThrows
     public List<ShopifyOrderRepsVO> getAllOrders(LocalDateTime createdAtMin, LocalDateTime createdAtMax) {
@@ -274,11 +289,11 @@ public class ShopifyClient {
         Response response = null;
         try {
             var request = RequestX.builder()
-                .requestMethod(api.method())
-                .url(url + api.url())
-                .headers(getHeaders())
-                .queryParams(params)
-                .build();
+                    .requestMethod(api.method())
+                    .url(url + api.url())
+                    .headers(getHeaders())
+                    .queryParams(params)
+                    .build();
             response = sendRequest(request);
             var bodyString = response.body().string();
             JSONObject result = JsonUtilsX.parseObject(bodyString, JSONObject.class);
@@ -318,7 +333,7 @@ public class ShopifyClient {
     @SneakyThrows
     private Response sendRequest(RequestX request) {
         // 设置一个链接超时时间，防止报请求超时错误
-        webClient = new OkHttpClient().newBuilder().connectTimeout(30000, TimeUnit.MILLISECONDS).readTimeout(30000, TimeUnit.MILLISECONDS).build();
+//        webClient = new OkHttpClient().newBuilder().connectTimeout(30000, TimeUnit.MILLISECONDS).readTimeout(30000, TimeUnit.MILLISECONDS).build();
         return webClient.newCall(WebUtils.toOkHttp(request)).execute();
     }
 

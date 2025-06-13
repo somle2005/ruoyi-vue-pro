@@ -22,7 +22,7 @@ public class ShopifyShopsSyncJob extends BaseShopsSyncJob {
     @Override
     public List<OmsShopSaveReqDTO> listShops() {
         List<OmsShopSaveReqDTO> shops = shopifyService.shopifyClients.stream().map(client -> {
-            OmsShopSaveReqDTO omsShopSaveReqDTO = shopifyToOmsConverter.toShops(client.getShop());
+            OmsShopSaveReqDTO omsShopSaveReqDTO = shopifyToOmsConverter.toShops(client.getShopInfo());
             return omsShopSaveReqDTO;
         }).toList();
         return shops;
