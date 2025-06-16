@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.framework.template.core;
 
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.template.config.TemplateConfigFactory;
 import cn.iocoder.yudao.framework.template.config.TemplatePolicy;
 import com.aspose.words.Document;
@@ -36,7 +37,8 @@ public class TemplateManager {
     public void preloadTemplatesOnStartup() {
         log.info("TemplateRegister 策略实例数：{}", configureFactory.getRegisters().size());
         log.info("开始执行模板预热任务...");
-        preloadWordAndPdfTemplates();
+        TemplateManager manager = SpringUtils.getBean(TemplateManager.class);
+        manager.preloadWordAndPdfTemplates();
     }
 
     @Async
