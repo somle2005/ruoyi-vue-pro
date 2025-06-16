@@ -46,7 +46,7 @@ import static com.fhs.common.constant.Constant.MAX_INT;
 import static com.fhs.common.constant.Constant.ONE;
 
 /**
- * @author: LeeFJd
+ * @author: LeeFJ
  * @date: 2025/3/25 9:34
  * @description: 库位移动数量执行器
  */
