@@ -39,7 +39,7 @@ public class SrmHandler {
     private final SrmPurchaseReturnApi srmPurchaseReturnApi;
     private final ErpToKingdeeConverter erpToKingdeeConverter;
 
-    @SyncLog("同步供应商到金蝶")
+    @SyncLog("供应商 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.SUPPLIER)
     public void syncSuppliersToKingdee(@Payload List<Long> supplierIds) {
         syncToKingdee(
@@ -52,7 +52,7 @@ public class SrmHandler {
         );
     }
 
-    @SyncLog("同步采购订单到金蝶")
+    @SyncLog("采购订单 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_ORDER)
     public void syncPurchaseOrdersToKingdee(@Payload List<Long> orderIds) {
         syncToKingdee(
@@ -65,7 +65,7 @@ public class SrmHandler {
         );
     }
 
-    @SyncLog("同步采购入库单到金蝶")
+    @SyncLog("采购入库单 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_IN)
     public void syncPurchaseInToKingdee(@Payload List<Long> inIds) {
         syncToKingdee(
@@ -78,7 +78,7 @@ public class SrmHandler {
         );
     }
 
-    @SyncLog("同步采购退货单到金蝶")
+    @SyncLog("采购退货单 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_RETURN)
     public void syncPurchaseReturnToKingdee(@Payload List<Long> returnIds) {
         syncToKingdee(

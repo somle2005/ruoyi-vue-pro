@@ -1,6 +1,7 @@
 package com.somle.kingdee.service;
 
 import cn.hutool.core.util.ObjUtil;
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
@@ -149,14 +150,29 @@ public class KingdeeClient {
     }
 
     public void getMeasureUnitByNumber(String number, BiConsumer<KingdeeUnit, Exception> callback) {
+        String accountName = this.getToken().getAccountName(); // 获取公司名称
+        String cacheKey = KingdeeRedisKeyConstants.KINGDEE_MEASURE_UNIT + ":" + accountName + ":" + number;
+        String lockKey = cacheKey + ":lock";
+
         try {
-            String endUrl = "/jdy/v2/bd/measure_unit_detail";
-            TreeMap<String, String> params = new TreeMap<>();
-            params.put("number", number);
-            KingdeeUnit kingdeeUnit = getResponse(endUrl, params).getData(KingdeeUnit.class);
-            callback.accept(kingdeeUnit, null);
+            KingdeeUnit result = CacheSpinWaitUtils.getOrLoad(
+                redisTemplate,
+                redissonClient,
+                cacheKey,
+                lockKey,
+                60, TimeUnit.MINUTES,
+                new TypeReference<>() {
+                },
+                () -> {
+                    String endUrl = "/jdy/v2/bd/measure_unit_detail";
+                    TreeMap<String, String> params = new TreeMap<>();
+                    params.put("number", number);
+                    return this.getResponse(endUrl, params).getData(KingdeeUnit.class);
+                }
+            );
+            callback.accept(result, null);
         } catch (Exception e) {
-            log.debug("getMeasureUnitByNumber error,当前产品的单位: {},不存在。", number, e);
+            log.debug("getMeasureUnitByNumber error, 账套: {}, 单位编号: {} 查询失败", accountName, number, e);
             callback.accept(null, e);
         }
     }
@@ -174,6 +190,9 @@ public class KingdeeClient {
         return getResponse(endUrl, params);
     }
 
+    /**
+     * 保存商品信息
+     */
     public KingdeeResponse addProduct(KingdeeProductSaveReqVO product) {
         KingdeeProductSaveReqVO reqVO = new KingdeeProductSaveReqVO();
         BeanUtils.copyProperties(product, reqVO);
@@ -321,18 +340,44 @@ public class KingdeeClient {
         return response.getData(KingdeePage.class).getRowsList(KingdeeAuxInfoType.class).stream().filter(n -> n.getNumber().equals(number)).findFirst().get();
     }
 
-    public Stream<KingdeeCustomField> getCustomField(String entity_number) {
-        log.debug("fetching custom field");
-        String endUrl = "/jdy/v2/sys/custom_field";
-        TreeMap<String, String> params = new TreeMap<>();
-        params.put("entity_number", entity_number);
-        KingdeeResponse response = getResponse(endUrl, params);
-        var data = response.getData(KingdeeCustomFieldRespVO.class);
-        return data.getHead().stream();
+    public Stream<KingdeeCustomField> getCustomField(String entityNumber) {
+        String accountName = token.getAccountName();
+        String cacheKey = KingdeeRedisKeyConstants.KINGDEE_CUSTOM_FIELD + ":" + accountName + ":" + entityNumber;
+        String lockKey = cacheKey + ":lock";
+
+        try {
+            List<KingdeeCustomField> list = CacheSpinWaitUtils.getOrLoad(
+                redisTemplate,
+                redissonClient,
+                cacheKey,
+                lockKey,
+                60, TimeUnit.MINUTES,
+                new TypeReference<List<KingdeeCustomField>>() {
+                },
+                () -> {
+                    String endUrl = "/jdy/v2/sys/custom_field";
+                    TreeMap<String, String> params = new TreeMap<>();
+                    params.put("entity_number", entityNumber);
+                    KingdeeResponse response = getResponse(endUrl, params);
+                    var data = response.getData(KingdeeCustomFieldRespVO.class);
+                    return data.getHead();
+                }
+            );
+            return list != null ? list.stream() : Stream.empty();
+        } catch (Exception e) {
+            log.error("getCustomField 获取失败 entityNumber={}", entityNumber, e);
+            return Stream.empty(); // fail-safe fallback
+        }
     }
 
-    public KingdeeCustomField getCustomFieldByDisplayName(String entity_number, String displayName) {
-        return getCustomField(entity_number).filter(n -> n.getDisplayName().equals(displayName)).findFirst().get();
+
+    public KingdeeCustomField getCustomFieldByDisplayName(String entityNumber, String displayName) {
+        return getCustomField(entityNumber)
+            .filter(n -> displayName.equals(n.getDisplayName()))
+            .findFirst()
+            .orElseThrow(() -> new IllegalArgumentException(StrUtil.format(
+                "未找到显示名称为 '{}' 的金蝶自定义字段 (entity={})", displayName, entityNumber
+            )));
     }
 
     public Stream<KingdeePage> getAllPurRequest(KingdeePurRequestReqVO vo) {

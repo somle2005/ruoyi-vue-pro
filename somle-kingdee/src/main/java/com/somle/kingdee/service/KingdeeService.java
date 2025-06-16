@@ -63,7 +63,7 @@ public class KingdeeService {
 
     @Scheduled(cron = "0 0 */2 * * *")
     public void refreshAllSupplierList() {
-        clients.parallelStream().forEach(n -> n.refreshSupplierCache());
+        clients.parallelStream().forEach(KingdeeClient::refreshSupplierCache);
     }
 
     public boolean saveToken(KingdeeToken token) {

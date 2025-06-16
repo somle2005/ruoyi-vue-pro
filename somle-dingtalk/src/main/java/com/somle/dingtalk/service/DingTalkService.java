@@ -1,40 +1,33 @@
 package com.somle.dingtalk.service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
+import cn.iocoder.yudao.framework.common.util.json.JSONObject;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
+import cn.iocoder.yudao.framework.common.util.web.RequestX;
+import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiUserListidRequest;
 import com.dingtalk.api.request.OapiV2UserGetRequest;
 import com.dingtalk.api.response.OapiUserListidResponse;
 import com.dingtalk.api.response.OapiV2UserGetResponse;
-import cn.iocoder.yudao.framework.common.util.json.JSONObject;
-import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
-import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import jakarta.annotation.PostConstruct;
-
-import lombok.SneakyThrows;
-import okhttp3.Response;
-import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.integration.support.MessageBuilder;
-//import org.springframework.messaging.MessageChannel;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import com.somle.dingtalk.model.DingTalkDepartment;
-// import com.somle.model.DingTalkDepartmentMap.DingTalkDepartment;
-// import com.somle.model.DingTalkDepartmentMap;
 import com.somle.dingtalk.model.DingTalkResponse;
 import com.somle.dingtalk.model.DingTalkToken;
 import com.somle.dingtalk.repository.DingTalkTokenRepository;
-import cn.iocoder.yudao.framework.common.util.web.WebUtils;
-
+import jakarta.annotation.PostConstruct;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -86,17 +79,19 @@ public class DingTalkService {
     }
 
     @SneakyThrows
-    public void sendRobotMessage(String content, String accessToken) {
+    public void sendRobotMessage(String title, String markdownText, String accessToken) {
         var endpoint = "/robot/send";
-        var keyword = "ALERT";
+//        var keyword = "ALERT";
         // 构造消息内容
         JSONObject json = new JSONObject();
-        json.put("msgtype", "text");
+        json.put("msgtype", "markdown");
 
-        JSONObject text = new JSONObject();
-        text.put("content", keyword + "\n" + content);
+        JSONObject markdown = new JSONObject();
+        markdown.put("title", title);           // 钉钉弹窗标题
+        markdown.put("text", markdownText);     // markdown 内容
 
-        json.put("text", text);
+
+        json.put("markdown", markdown);
 
         var queryParams = Map.of("access_token", accessToken);
 

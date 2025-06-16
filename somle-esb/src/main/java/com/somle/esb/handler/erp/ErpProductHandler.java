@@ -5,13 +5,14 @@ import cn.iocoder.yudao.module.tms.api.logistic.customrule.TmsCustomRuleApi;
 import cn.iocoder.yudao.module.tms.api.logistic.customrule.dto.TmsCustomRuleDTO;
 import com.somle.eccang.model.EccangProduct;
 import com.somle.eccang.service.EccangService;
+import com.somle.esb.aspect.SyncLog;
 import com.somle.esb.converter.ErpToEccangConverter;
 import com.somle.esb.converter.ErpToKingdeeConverter;
 import com.somle.kingdee.model.KingdeeProductSaveReqVO;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.context.annotation.Profile;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.integration.annotation.ServiceActivator;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.handler.annotation.Payload;
@@ -29,7 +30,6 @@ import java.util.Optional;
  */
 @Slf4j
 @Component
-@Profile("prod")
 @RequiredArgsConstructor
 public class ErpProductHandler {
 
@@ -40,26 +40,31 @@ public class ErpProductHandler {
     private final MessageChannel erpCustomRuleChannel;
     private final TmsCustomRuleApi tmsCustomRuleApi;
 
+    @Value("${srm.sync.eccang:true}")
+    private boolean activeSyncEccang;
+
+    @SyncLog("产品 -> 易仓")
     @ServiceActivator(inputChannel = "erpProductChannel")
     public void syncProductsToEccang(@Payload List<ErpProductDTO> erpProductDTOS) {
+        if (!activeSyncEccang) {
+            return;
+        }
         erpProductDTOS.forEach(erpProductDTO -> syncProduct(erpProductDTO.getId()));
         List<EccangProduct> eccangProducts = erpToEccangConverter.convertByErpProducts(erpProductDTOS);
         for (EccangProduct eccangProduct : eccangProducts) {
             log.debug(eccangProduct.toString());
             eccangService.addBatchProduct(List.of(eccangProduct));
         }
-        log.info("syncProductsToEccang end,sku = ({})", eccangProducts.stream().map(EccangProduct::getProductSku).toList());
     }
 
+    @SyncLog("产品 -> 金蝶")
     @ServiceActivator(inputChannel = "erpProductChannel")
     public void syncProductsToKingdee(@Payload List<ErpProductDTO> products) {
-        log.info("syncProductsToKingdee");
         products.forEach(erpProductDTO -> syncProduct(erpProductDTO.getId()));
         List<KingdeeProductSaveReqVO> kingdee = erpToKingdeeConverter.toKingdeeProducts(products);
         for (KingdeeProductSaveReqVO reqVO : kingdee) {
             kingdeeService.addProduct(reqVO);
         }
-        log.info("syncProductsToKingdee end");
     }
 
     private void syncProduct(Long ErpProductDOId) {

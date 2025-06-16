@@ -8,6 +8,8 @@ debug: false
 
 srm:
   enable-preload: false
+  sync:
+    eccang: false
 
 --- #################### 数据库相关配置 ####################
 

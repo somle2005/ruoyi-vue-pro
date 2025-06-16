@@ -9,8 +9,8 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
-import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpSyncProductDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductPageReqVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
@@ -190,19 +190,9 @@ public class ErpProductServiceImpl implements ErpProductService {
 
     private void syncProduct(ErpProductDO productDO, Boolean isUpdate) {
         Long loginUserId = SecurityFrameworkUtils.getLoginUserId();
-        ErpProductDTO erpProductDTO = BeanUtils.toBean(productDO, ErpProductDTO.class);
-        erpProductDTO.setCreator(String.valueOf(loginUserId));
-
-        // 如果是更新操作，可拓展处理海关规则逻辑
-        if (Boolean.TRUE.equals(isUpdate)) {
-            // 如需覆盖海关规则，在此处理
-            // List<TmsCustomRuleDTO> dtos = tmsCustomRuleApi.listCustomRuleDTOsByProductId(productDO.getId());
-            // if (!CollectionUtils.isEmpty(dtos)) {
-            //     erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos.stream().distinct().toList()).build());
-            // }
-        }
+        ErpSyncProductDTO syncProductDTO = new ErpSyncProductDTO(Collections.singleton(productDO.getId()), loginUserId);
         // 同步产品数据
-        erpProductChannel.send(MessageBuilder.withPayload(List.of(erpProductDTO)).build());
+        erpProductChannel.send(MessageBuilder.withPayload(List.of(syncProductDTO)).build());
     }
 
 
