@@ -61,9 +61,10 @@ public class IntegrationConfig {
 
         //title根据上游异常类型 动态封装描述字符串'采购订单'
         String markdown = formatErrorMarkdown(
-            "消费失败",
+            "ALERT",
             rootCause,
             message.getHeaders(),
+            payload,
             payload.getClass().getSimpleName(),
             getActiveProfile()
         );
@@ -84,7 +85,7 @@ public class IntegrationConfig {
     /**
      * 构造钉钉 Markdown 格式告警内容
      */
-    private String formatErrorMarkdown(String title, Throwable rootCause, Object headers, String type, String env) {
+    private String formatErrorMarkdown(String title, Throwable rootCause, Object headers, Object payload, String type, String env) {
         return StrUtil.format(
             """
                 ## 🚨 {}
@@ -94,22 +95,24 @@ public class IntegrationConfig {
                 **📦 异常类型**：`{}`
                 
                 **💥 异常摘要**：
-                > {}: {}
+                ```
+                {}: {}
+                ```
+                **🧾 请求头**：
+                > {}
                 
-                **🧾 消息头**：
-                ```
-                {}
-                ```
+                **📄 请求体**：
+                > {}
                 
                 **🕒 时间**：{}
                 
-                请尽快处理。
                 """,
             title,
             env,
             type,
             rootCause.getClass().getName(), StrUtil.nullToDefault(rootCause.getMessage(), "无异常信息"),
             headers,
+            payload,
             cn.hutool.core.date.DateUtil.now()
         );
     }

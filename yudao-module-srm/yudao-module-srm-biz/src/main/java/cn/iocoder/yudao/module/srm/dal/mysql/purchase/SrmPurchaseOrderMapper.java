@@ -9,6 +9,8 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * ERP 采购订单 Mapper
  *
@@ -52,6 +54,19 @@ public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> 
 
     default SrmPurchaseOrderDO selectByNo(String no) {
         return selectOne(SrmPurchaseOrderDO::getCode, no);
+    }
+
+    /**
+     * 查询所有采购订单的 ID 列表
+     *
+     * @return 采购订单 ID 列表
+     */
+    default List<Long> selectAllOrderIds() {
+        return selectList(new MPJLambdaWrapperX<SrmPurchaseOrderDO>()
+            .select(SrmPurchaseOrderDO::getId))
+            .stream()
+            .map(SrmPurchaseOrderDO::getId)
+            .toList();
     }
 
     //查询BO，根据订单项的erpPurchaseRequestItemNo查出对应的BO

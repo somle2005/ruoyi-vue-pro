@@ -964,4 +964,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             orderAuditMachine.fireEvent(SrmAuditStatus.fromCode(orderDO.getAuditStatus()), SrmEventEnum.SUBMIT_FOR_REVIEW,
                 SrmPurchaseOrderAuditReqVO.builder().orderIds(Collections.singletonList(orderDO.getId())).build()));
     }
+
+    @Override
+    public List<Long> listPurchaseOrderIds() {
+        return purchaseOrderMapper.selectAllOrderIds();
+    }
 }

@@ -32,7 +32,7 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 public class DingTalkService {
-    private DingTalkToken token;
+    private volatile DingTalkToken token;
     private final String HOST = "https://api.dingtalk.com";
     private final String BASE_HOST = "https://oapi.dingtalk.com";
 
@@ -49,6 +49,21 @@ public class DingTalkService {
     private void init() {
         this.token = tokenRepository.findAll().get(0);
     }
+
+    /**
+     * 懒加载并发锁初始化
+     */
+    private DingTalkToken getToken() {
+        if (this.token == null) {
+            synchronized (this) {
+                if (this.token == null) {
+                    this.token = tokenRepository.findAll().get(0);
+                }
+            }
+        }
+        return this.token;
+    }
+
 
 
     // public String getAccessToken() {
@@ -117,7 +132,7 @@ public class DingTalkService {
         String endUrl = "/topapi/v2/department/get";
 
         Map<String, String> params = Map.of(
-            "access_token", token.getAccessToken()
+            "access_token", this.getToken().getAccessToken()
         );
         Map<String, String> headers = Map.of(
         );
@@ -144,7 +159,7 @@ public class DingTalkService {
 //        OapiV2DepartmentGetRequest req = new OapiV2DepartmentGetRequest();
 //        req.setDeptId(deptId);
 //        req.setLanguage("zh_CN");
-//        OapiV2DepartmentGetResponse rsp = client.execute(req, token.getAccessToken());
+//        OapiV2DepartmentGetResponse rsp = client.execute(req, this.getToken().getAccessToken());
 //        return rsp.getResult();
 
     }
@@ -189,7 +204,7 @@ public class DingTalkService {
         String endUrl = "/topapi/v2/department/listsub";
 
         Map<String, String> params = Map.of(
-            "access_token", token.getAccessToken()
+            "access_token", this.getToken().getAccessToken()
         );
         Map<String, String> headers = Map.of(
         );
@@ -265,7 +280,7 @@ public class DingTalkService {
         String endUrl = "/topapi/v2/department/update";
         
         Map<String, String> params = Map.of(
-            "access_token", token.getAccessToken()
+            "access_token", this.getToken().getAccessToken()
         );
         Map<String, String> headers = Map.of(
         );
@@ -337,7 +352,7 @@ public class DingTalkService {
         DingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/topapi/user/listid");
         OapiUserListidRequest req = new OapiUserListidRequest();
         req.setDeptId(deptId);
-        OapiUserListidResponse rsp = client.execute(req, token.getAccessToken());
+        OapiUserListidResponse rsp = client.execute(req, this.getToken().getAccessToken());
         return rsp.getResult().getUseridList();
     }
 
@@ -347,7 +362,7 @@ public class DingTalkService {
         OapiV2UserGetRequest req = new OapiV2UserGetRequest();
         req.setUserid(userId);
         req.setLanguage("zh_CN");
-        OapiV2UserGetResponse rsp = client.execute(req, token.getAccessToken());
+        OapiV2UserGetResponse rsp = client.execute(req, this.getToken().getAccessToken());
         return rsp.getResult();
     }
 

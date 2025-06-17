@@ -488,11 +488,11 @@ public class KingdeeClient {
     public KingdeeResponse savePurOrder(KingdeePurOrderSaveReqVO order) {
         String endUrl = "/jdy/v2/scm/pur_order";
         //供应商
-        String id = order.getSupplierNumber();//erp供应商ID
-        KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null).get(order.getSupplierNumber());
+        String supplierId = order.getSupplierNumber();//erp供应商ID(在convert的时候放在number了)
+        KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null).get(supplierId);
         //不存在 -> e
         if (supplierSaveVO == null) {
-            throw exception(SUPPLIER_NOT_EXIST, order.getSupplierNumber());
+            throw exception(SUPPLIER_NOT_EXIST, supplierId);
         }
         order.setSupplierId(supplierSaveVO.getId());
 

@@ -110,7 +110,7 @@ public class SrmHandler {
         for (int i = 0; i < total; i++) {
             R obj = kingdeeObjs.get(i);
             syncer.accept(obj);
-            log.info("[{}] 同步进度：{}/{}，标识(ID)：{}", logType, i + 1, total, numberGetter.apply(obj));
+            log.info("[{}] 同步进度：{}/{}，唯一标识(ID)：{}", logType, i + 1, total, numberGetter.apply(obj));
         }
         log.info("[{}] 同步完成，共处理：{}个", logType, total);
     }

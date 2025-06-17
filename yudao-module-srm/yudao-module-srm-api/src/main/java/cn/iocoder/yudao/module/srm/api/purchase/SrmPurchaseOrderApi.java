@@ -20,4 +20,11 @@ public interface SrmPurchaseOrderApi {
      * @return 存在的采购订单列表
      */
     List<SrmPurchaseOrderDTO> validatePurchaseOrderIds(@NotEmpty(message = "采购订单编号不能为空") Set<Long> ids);
+
+    /**
+     * 获取所有采购订单ID
+     *
+     * @return 采购订单ID列表
+     */
+    List<Long> listPurchaseOrderIds();
 } 

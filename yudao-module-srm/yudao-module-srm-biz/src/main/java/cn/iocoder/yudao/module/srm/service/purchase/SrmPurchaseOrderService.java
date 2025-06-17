@@ -220,4 +220,11 @@ public interface SrmPurchaseOrderService {
      * @return 最新的采购订单编号
      */
     String getMaxSerialNumber();
+
+    /**
+     * 获取所有采购订单的id
+     *
+     * @return 采购订单id集合
+     */
+    List<Long> listPurchaseOrderIds();
 }

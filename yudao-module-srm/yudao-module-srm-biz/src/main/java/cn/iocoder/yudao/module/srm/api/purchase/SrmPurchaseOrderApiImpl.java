@@ -62,4 +62,13 @@ public class SrmPurchaseOrderApiImpl implements SrmPurchaseOrderApi {
         return dtoList;
     }
 
-} 
+    /**
+     * 获取所有采购订单ID
+     *
+     * @return 采购订单ID列表
+     */
+    @Override
+    public List<Long> listPurchaseOrderIds() {
+        return purchaseOrderService.listPurchaseOrderIds();
+    }
+}
