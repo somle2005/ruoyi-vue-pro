@@ -11,6 +11,8 @@ import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.somle.kingdee.constant.KingdeeRedisKeyConstants;
 import com.somle.kingdee.enums.KingDeeErrorCodeConstants;
+import com.somle.kingdee.enums.KingdeeEntityType;
+import com.somle.kingdee.enums.KingdeeOperateType;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.model.vo.KingdeeSupplierQueryReqVO;
@@ -824,5 +826,50 @@ public class KingdeeClient {
 
         return postResponse(endUrl, params, payload);
     }
+
+    /**
+     * 通用批量操作（审核、反审核、删除等）
+     *
+     * @param entityType  单据或基础资料类型枚举
+     * @param operateType 操作类型枚举
+     * @param ids         单据id列表
+     * @param numbers     编码列表（可选）
+     * @param ignoreWarn  是否忽略告警信息，默认false
+     * @return KingdeeResponse
+     */
+    public KingdeeResponse commonOperate(KingdeeEntityType entityType, KingdeeOperateType operateType, List<String> ids, List<String> numbers, Boolean ignoreWarn) {
+        String endUrl = "/jdy/v2/sys/common_operate";
+        TreeMap<String, String> params = new TreeMap<>();
+
+        // 构建请求体
+        JSONObject payload = new JSONObject();
+        payload.put("entity_number", entityType.getCode());
+        payload.put("operate_type", operateType.getCode());
+        payload.put("ids", ids);
+
+        if (numbers != null && !numbers.isEmpty()) {
+            payload.put("numbers", numbers);
+        }
+
+        if (ignoreWarn != null) {
+            payload.put("ignore_warn", ignoreWarn);
+        }
+
+        log.debug("执行通用操作，实体类型：{}，操作类型：{}，单据数量：{}", entityType.getName(), operateType.getName(), ids.size());
+        return postResponse(endUrl, params, payload);
+    }
+
+    /**
+     * 通用批量操作（审核、反审核、删除等）- 简化版本
+     *
+     * @param entityType  单据或基础资料类型枚举
+     * @param operateType 操作类型枚举
+     * @param ids         单据id列表
+     * @return KingdeeResponse
+     */
+    public KingdeeResponse commonOperate(KingdeeEntityType entityType, KingdeeOperateType operateType, List<String> ids) {
+        return commonOperate(entityType, operateType, ids, null, false);
+    }
+
 
 }
