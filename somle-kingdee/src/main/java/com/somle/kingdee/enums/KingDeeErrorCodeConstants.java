@@ -12,4 +12,5 @@ public interface KingDeeErrorCodeConstants {
 
     // ========== 采购订单 2-000-002-000 ==========
     ErrorCode PURCHASE_ORDER_SAVE_SUCCESS_BUT_NO_ID = new ErrorCode(2_000_002_001, "保存采购订单{}成功但未返回订单ID");
+    ErrorCode PURCHASE_ORDER_NOT_EXIST = new ErrorCode(2_000_002_002, "采购订单{}不存在");
 }

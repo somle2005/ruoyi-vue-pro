@@ -465,6 +465,9 @@ public class KingdeeClient {
         return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
     }
 
+    /**
+     * 获得采购订单详情
+     */
     public KingdeePurOrderDetail getPurOrderDetail(String purOrderNumber) {
         String endUrl = "/jdy/v2/scm/pur_order_detail";
         TreeMap<String, String> params = new TreeMap<>();
@@ -523,13 +526,47 @@ public class KingdeeClient {
     }
 
     /**
+     * 反审核采购订单+删除采购订单
+     *
+     * @param purCode 采购订单编号
+     * @return KingdeeResponse 最后一次操作的响应结果
+     */
+    public KingdeeResponse unAuditPurOrder(String purCode) {
+        log.debug("反审核并删除采购订单，订单code：{}", purCode);
+        // 1. 获取采购订单详情
+        KingdeePurOrderDetail purOrderDetail = this.getPurOrderDetail(purCode);
+        if (purOrderDetail == null) {
+            throw exception(KingDeeErrorCodeConstants.PURCHASE_ORDER_NOT_EXIST, purCode);
+        }
+
+        // 2. 执行反审核操作
+        List<String> orderIds = Collections.singletonList(purOrderDetail.getId());
+        KingdeeResponse unAuditResponse = commonOperate(KingdeeEntityType.PUR_BILL_ORDER, KingdeeOperateType.UNAUDIT, orderIds);
+        if (!unAuditResponse.getErrcode().equals("0")) {
+            log.error("反审核采购订单失败：{}", unAuditResponse.getDescription());
+            return unAuditResponse;
+        }
+
+        // 3. 执行删除操作
+        log.debug("开始删除采购订单，订单ID：{}", purOrderDetail.getId());
+        KingdeeResponse deleteResponse = commonOperate(KingdeeEntityType.PUR_BILL_ORDER, KingdeeOperateType.DELETE, orderIds);
+        if (!deleteResponse.getErrcode().equals("0")) {
+            log.error("删除采购订单失败：{}", deleteResponse.getDescription());
+        } else {
+            log.info("采购订单反审核并删除成功，订单编号：{}", purCode);
+        }
+
+        return deleteResponse;
+    }
+
+    /**
      * 保存、更新+审核采购订单
      */
     public KingdeeResponse saveAndAuditPurOrder(KingdeePurOrderSaveReqVO order) {
         log.debug("保存并审核采购订单，订单编号：{}", order.getBillNo());
 
         // 1. 先保存采购订单
-        KingdeeResponse saveResponse = savePurOrder(order);
+        KingdeeResponse saveResponse = this.savePurOrder(order);
         if (!saveResponse.getErrcode().equals("0")) {
             log.error("保存采购订单失败：{}", saveResponse.getDescription());
             return saveResponse;
