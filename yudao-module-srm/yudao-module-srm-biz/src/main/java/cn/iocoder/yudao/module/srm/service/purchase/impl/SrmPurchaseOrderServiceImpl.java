@@ -969,4 +969,12 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     public List<Long> listPurchaseOrderIds() {
         return purchaseOrderMapper.selectAllOrderIds();
     }
+
+    @Override
+    public List<Long> listPurchaseOrderIdsByCodes(List<String> codes) {
+        if (CollUtil.isEmpty(codes)) {
+            return Collections.emptyList();
+        }
+        return purchaseOrderMapper.selectOrderIdsByCodes(codes);
+    }
 }

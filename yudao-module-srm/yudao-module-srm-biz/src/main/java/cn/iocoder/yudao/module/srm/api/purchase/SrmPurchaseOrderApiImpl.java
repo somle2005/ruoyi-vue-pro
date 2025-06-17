@@ -9,6 +9,7 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
@@ -70,5 +71,16 @@ public class SrmPurchaseOrderApiImpl implements SrmPurchaseOrderApi {
     @Override
     public List<Long> listPurchaseOrderIds() {
         return purchaseOrderService.listPurchaseOrderIds();
+    }
+
+    /**
+     * 根据采购订单code集合获取订单ID
+     *
+     * @param codes 采购订单code集合
+     * @return 采购订单ID列表
+     */
+    @Override
+    public List<Long> listPurchaseOrderIdsByCodes(@NotEmpty(message = "采购订单code不能为空") List<String> codes) {
+        return purchaseOrderService.listPurchaseOrderIdsByCodes(codes);
     }
 }

@@ -9,4 +9,7 @@ public interface KingDeeErrorCodeConstants {
     ErrorCode SUPPLIER_LIST_LOADING = new ErrorCode(2_000_001_003, "供应商锁获取超时，请重试");
     ErrorCode SUPPLIER_LIST_SYNC_FAIL = new ErrorCode(2_000_001_004, "({})供应商同步失败，供应商:({})");
     ErrorCode SUPPLIER_NOT_EXIST = new ErrorCode(2_000_001_005, "金蝶供应商:{} 缓存中不存在,同步失败");
+
+    // ========== 采购订单 2-000-002-000 ==========
+    ErrorCode PURCHASE_ORDER_SAVE_SUCCESS_BUT_NO_ID = new ErrorCode(2_000_002_001, "保存采购订单{}成功但未返回订单ID");
 }

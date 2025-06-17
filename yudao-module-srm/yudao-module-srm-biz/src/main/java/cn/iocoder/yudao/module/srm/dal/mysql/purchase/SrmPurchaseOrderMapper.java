@@ -9,6 +9,7 @@ import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -64,6 +65,24 @@ public interface SrmPurchaseOrderMapper extends BaseMapperX<SrmPurchaseOrderDO> 
     default List<Long> selectAllOrderIds() {
         return selectList(new MPJLambdaWrapperX<SrmPurchaseOrderDO>()
             .select(SrmPurchaseOrderDO::getId))
+            .stream()
+            .map(SrmPurchaseOrderDO::getId)
+            .toList();
+    }
+
+    /**
+     * 根据采购订单code集合查询订单ID列表
+     *
+     * @param codes 采购订单code集合
+     * @return 采购订单ID列表
+     */
+    default List<Long> selectOrderIdsByCodes(List<String> codes) {
+        if (codes == null || codes.isEmpty()) {
+            return Collections.emptyList();
+        }
+        return selectList(new MPJLambdaWrapperX<SrmPurchaseOrderDO>()
+            .select(SrmPurchaseOrderDO::getId)
+            .in(SrmPurchaseOrderDO::getCode, codes))
             .stream()
             .map(SrmPurchaseOrderDO::getId)
             .toList();

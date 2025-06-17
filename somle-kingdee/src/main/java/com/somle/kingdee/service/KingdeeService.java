@@ -103,6 +103,13 @@ public class KingdeeService {
     }
 
     /**
+     * 保存+审核采购订单
+     */
+    public void saveAndAuditPurchaseOrder(@Validated KingdeePurOrderSaveReqVO purchaseOrder) {
+        clients.parallelStream().forEach(n -> n.saveAndAuditPurOrder(purchaseOrder));
+    }
+
+    /**
      * 保存采购入库单
      *
      * @param purInbound 采购入库单

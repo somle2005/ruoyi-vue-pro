@@ -515,6 +515,51 @@ public class KingdeeClient {
     }
 
     /**
+     * 审核采购订单
+     */
+    public KingdeeResponse auditPurOrder(List<String> orderIds) {
+        log.debug("审核采购订单，订单ID：{}", orderIds);
+        return commonOperate(KingdeeEntityType.PUR_BILL_ORDER, KingdeeOperateType.AUDIT, orderIds);
+    }
+
+    /**
+     * 保存、更新+审核采购订单
+     */
+    public KingdeeResponse saveAndAuditPurOrder(KingdeePurOrderSaveReqVO order) {
+        log.debug("保存并审核采购订单，订单编号：{}", order.getBillNo());
+
+        // 1. 先保存采购订单
+        KingdeeResponse saveResponse = savePurOrder(order);
+        if (!saveResponse.getErrcode().equals("0")) {
+            log.error("保存采购订单失败：{}", saveResponse.getDescription());
+            return saveResponse;
+        }
+
+        // 2. 从保存响应中获取订单ID
+        JSONObject data = saveResponse.getData(JSONObject.class);
+        List<String> orderIds = data.getStringList("ids");
+        if (orderIds == null || orderIds.isEmpty()) {
+            log.error("保存采购订单成功但未返回订单ID");
+            throw exception(KingDeeErrorCodeConstants.PURCHASE_ORDER_SAVE_SUCCESS_BUT_NO_ID, order.getBillNo());
+        }
+        String orderId = orderIds.get(0); // 取第一个订单ID
+
+        // 3. 审核采购订单
+        log.debug("开始审核采购订单，订单ID：{}", orderId);
+        KingdeeResponse auditResponse = auditPurOrder(List.of(orderId));
+
+        if (!auditResponse.getErrcode().equals("0")) {
+            log.error("审核采购订单失败：{}", auditResponse.getDescription());
+            // 审核失败时，可以考虑是否要删除已保存的订单
+            // 这里暂时返回审核失败的响应
+        } else {
+            log.info("采购订单保存并审核成功，订单ID：{}", orderId);
+        }
+
+        return auditResponse;
+    }
+
+    /**
      * 保存采购入库单
      *
      * @param inbound 采购入库单数据

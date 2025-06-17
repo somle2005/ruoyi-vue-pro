@@ -5,9 +5,11 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpSyncProductDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
+import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import com.somle.esb.converter.ErpToKingdeeConverter;
 import com.somle.esb.service.EsbService;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
@@ -22,10 +24,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -90,14 +89,13 @@ public class EsbController {
     @PostMapping("/syncPurchaseOrder")
     public String syncPurchaseOrder(@RequestParam("orderId") Long orderId) {
         // 校验订单是否存在
-        srmPurchaseOrderApi.validatePurchaseOrderIds(Collections.singleton(orderId));
         List<Long> set = List.of(orderId);
         syncToKingdee(
             set,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             erpToKingdeeConverter::convertOrderDTOList,
             kingdeeService::savePurchaseOrder,
-            "采购订单",
+            "采购订单保存",
             KingdeePurOrderSaveReqVO::getBillNo
         );
         return "success";
@@ -144,18 +142,46 @@ public class EsbController {
 
 
     /**
-     * 同步所有采购订单 -> 金蝶
+     * 同步采购订单 -> 金蝶
+     * <p>
+     * 已审核就覆盖+审核
+     * @param orderCodes 采购订单code集合，可选参数，如果不传则全量同步
      */
     @PostMapping("/syncAllPurchaseOrder")
-    public String syncAllPurchaseOrder() {
-        // 获取所有采购订单
-        List<Long> orderIds = srmPurchaseOrderApi.listPurchaseOrderIds();
+    public String syncAllPurchaseOrder(@RequestParam(value = "orderCodes", required = false) List<String> orderCodes) {
+        List<Long> orderIds;
+        List<SrmPurchaseOrderDTO> purchaseOrderDTOS;
+
+        if (orderCodes != null && !orderCodes.isEmpty()) {
+            // 根据code集合获取订单ID
+            orderIds = srmPurchaseOrderApi.listPurchaseOrderIdsByCodes(orderCodes);
+            if (orderIds.isEmpty()) {
+                log.warn("[采购订单] 未找到指定code的采购订单，入参:{}", JSONUtil.parse(orderCodes));
+                return "success";
+            }
+            purchaseOrderDTOS = srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(orderIds));
+        } else {
+            // 全量同步
+            orderIds = srmPurchaseOrderApi.listPurchaseOrderIds();
+            purchaseOrderDTOS = srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(orderIds));
+        }
+
+        //采购单编号map
+        Map<String, SrmPurchaseOrderDTO> purchaseOrderMap = purchaseOrderDTOS.stream().collect(Collectors.toMap(SrmPurchaseOrderDTO::getCode, v -> v));
         syncToKingdee(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             erpToKingdeeConverter::convertOrderDTOList,
-            kingdeeService::savePurchaseOrder,
-            "采购订单",
+            kingdeePurOrderSaveReqVO -> {
+                if (purchaseOrderMap.containsKey(kingdeePurOrderSaveReqVO.getBillNo())) {
+                    SrmPurchaseOrderDTO purchaseOrder = purchaseOrderMap.get(kingdeePurOrderSaveReqVO.getBillNo());
+                    // 判断是否已审核
+                    if (Objects.equals(purchaseOrder.getAuditStatus(), SrmAuditStatus.APPROVED.getCode())) {
+                        kingdeeService.saveAndAuditPurchaseOrder(kingdeePurOrderSaveReqVO);
+                    }
+                }
+            },
+            "采购订单保存&审核",
             KingdeePurOrderSaveReqVO::getBillNo
         );
         return "success";
