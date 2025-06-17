@@ -3,8 +3,10 @@ package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req;
 import com.mzt.logapi.starter.annotation.DiffLogAllFields;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.List;
 
@@ -13,6 +15,8 @@ import java.util.List;
 @Data
 @Builder
 @DiffLogAllFields
+@NoArgsConstructor
+@AllArgsConstructor
 public class SrmPurchaseRequestAuditReqVO {
     // 请求ID
     @NotNull(message = "申请单ID不能为空")
