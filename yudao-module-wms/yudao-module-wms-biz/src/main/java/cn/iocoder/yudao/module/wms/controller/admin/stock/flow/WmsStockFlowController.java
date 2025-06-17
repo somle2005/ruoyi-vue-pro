@@ -32,6 +32,9 @@ import java.util.Map;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
+/**
+ * @author jisencai
+ */
 @Tag(name = "库存流水")
 @RestController
 @RequestMapping("/wms/stock-flow")

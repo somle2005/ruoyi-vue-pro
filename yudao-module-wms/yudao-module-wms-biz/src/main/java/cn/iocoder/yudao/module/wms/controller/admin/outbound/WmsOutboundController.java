@@ -199,12 +199,12 @@ public class WmsOutboundController {
         return success(true);
     }
 
-    @PostMapping("/validate")
-    @Operation(summary = "头程单提交校验")
-    public CommonResult<Boolean> validateOutboundData(@RequestBody List<WmsOutboundValidateReqDTO> validateReqDTOList) {
-        // 调用服务层进行校验
-        boolean result = outboundService.validateOutboundData(validateReqDTOList);
-        // 返回校验结果
-        return success(result);
-    }
+//    @PostMapping("/validate")
+//    @Operation(summary = "头程单提交校验")
+//    public CommonResult<Boolean> validateOutboundData(@RequestBody List<WmsOutboundValidateReqDTO> validateReqDTOList) {
+//        // 调用服务层进行校验
+//        boolean result = outboundService.validateOutboundData(validateReqDTOList);
+//        // 返回校验结果
+//        return success(result);
+//    }
 }
