@@ -89,8 +89,9 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
             pickupItemDO.setInboundItemId(inboundItemVO.getId());
             pickupItemDO.setProductId(inboundItemVO.getProductId());
             pickupItemDO.setPickupId(pickup.getId());
+            Integer direction = pickupItemDO.getQty() > 0 ? WmsStockFlowDirection.IN.getValue() : WmsStockFlowDirection.OUT.getValue();
             // 调整仓位库存
-            this.processItem(pickup, pickupItemDO, inboundMap.get(inboundItemVO.getInboundId()), inboundItemVO);
+            this.processItem(pickup, pickupItemDO, inboundMap.get(inboundItemVO.getInboundId()), inboundItemVO, direction);
             inboundItemService.updateById(BeanUtils.toBean(inboundItemVO, WmsInboundItemDO.class));
         }
 
@@ -104,9 +105,9 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
     /**
      * 处理明细行
      **/
-    private void processItem(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO) {
+    private void processItem(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO, Integer direction) {
         Long flowId = this.processInboundItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
-        this.processStockBin(pickup, pickupItemDO, inboundDO, inboundItemVO,flowId);
+        this.processStockBin(pickup, pickupItemDO, inboundDO, inboundItemVO, flowId, direction);
         this.processStockWarehouseItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
         this.processStockLogicItem(pickup, pickupItemDO, inboundDO, inboundItemVO);
     }
@@ -115,7 +116,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
     /**
      * 处理库存仓位
      **/
-    private void processStockBin(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO,Long flowId) {
+    private void processStockBin(WmsPickupDO pickup, WmsPickupItemDO pickupItemDO, WmsInboundDO inboundDO, WmsInboundItemRespVO inboundItemVO, Long flowId, Integer direction) {
 
         JdbcUtils.requireTransaction();
         WmsStockBinDO stockBinDO = stockBinService.getStockBin(pickupItemDO.getBinId(), inboundItemVO.getProductId(), true);
@@ -127,7 +128,9 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         // 保存
         stockBinService.insertOrUpdate(stockBinDO);
         // 记录流水
-        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.IN, inboundItemVO.getProductId(), stockBinDO, pickupItemDO.getQty(), pickupItemDO.getPickupId(), pickupItemDO.getId(),flowId);
+//        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.IN, inboundItemVO.getProductId(), stockBinDO, pickupItemDO.getQty(), pickupItemDO.getPickupId(), pickupItemDO.getId(),flowId);
+        stockFlowService.createForStockBin(this.getReason(), WmsStockFlowDirection.parse(direction), inboundItemVO.getProductId(), stockBinDO, Math.abs(pickupItemDO.getQty()),
+            pickupItemDO.getPickupId(), pickupItemDO.getId(), stockBinDO.getBinId(), stockBinDO.getSellableQty() - pickupItemDO.getQty(), stockBinDO.getSellableQty(), inboundDO.getId());
     }
 
     /**
@@ -184,7 +187,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         Long productId = inboundItemVO.getProductId();
         Integer quantity = pickupItemDO.getQty();
 
-        //List<WmsStockBinDO> stockBinList = stockBinService.selectStockBin(warehouseId, productId);
+//        List<WmsStockBinDO> stockBinList = stockBinService.selectStockBin(warehouseId, productId);
 
 //        Integer availableQuantity = 0;
 //        Integer sellableQuantity = 0;

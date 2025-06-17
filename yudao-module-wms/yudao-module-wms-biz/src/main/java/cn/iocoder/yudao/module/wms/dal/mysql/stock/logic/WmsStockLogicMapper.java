@@ -73,12 +73,12 @@ public interface WmsStockLogicMapper extends BaseMapperX<WmsStockLogicDO> {
         MPJLambdaWrapperX<WmsStockLogicDO> wrapper = new MPJLambdaWrapperX<>();
         // 连接仓库表
         wrapper.innerJoin(WmsWarehouseDO.class, WmsWarehouseDO::getId, WmsStockLogicDO::getWarehouseId)
-            //限定国家
+            // 限定国家
             .eqIfPresent(WmsWarehouseDO::getCountry, country)
             // 按部门ID和产品ID查询
-            //指定部门
+            // 指定部门
             .eqIfPresent(WmsStockLogicDO::getDeptId, deptId)
-            //指定产品集合
+            // 指定产品集合
             .in(WmsStockLogicDO::getProductId, productIds);
         return selectList(wrapper);
     }

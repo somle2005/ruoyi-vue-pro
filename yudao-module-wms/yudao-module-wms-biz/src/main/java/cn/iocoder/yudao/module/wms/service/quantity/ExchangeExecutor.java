@@ -11,7 +11,6 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinResp
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWarehouseProductVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.item.WmsExchangeItemDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
@@ -158,15 +157,16 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 保存
         stockBinService.insertOrUpdate(fromStockBinDO);
         //查询入库批次
-        WmsInboundDO inboundDO = inboundService.getByWarehouseIdAndProductId(exchangeDO.getWarehouseId(), itemDO.getProductId());
-        WmsItemFlowDO itemFlowDO = wmsInboundItemFlowService.selectByInboundId(inboundDO.getId(), 1).get(0);
+//        WmsInboundDO inboundDO = inboundService.getByWarehouseIdAndProductId(exchangeDO.getWarehouseId(), itemDO.getProductId());
+//        WmsItemFlowDO itemFlowDO = wmsInboundItemFlowService.selectByInboundId(inboundDO.getId(), 1).get(0);
 
         // 记录批次流水(item_flow)
-        List<WmsItemFlowDO> itemFlowOutList = updateStockFlow(exchangeDO, itemDO, OUT.getValue());
+//        List<WmsItemFlowDO> itemFlowOutList = updateStockFlow(exchangeDO, itemDO, OUT.getValue());
         // 记录库存流水(stockFlow)
-        for (WmsItemFlowDO itemFlow : itemFlowOutList) {
-            stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, OUT, itemDO.getProductId(), fromStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), itemFlow.getId());
-        }
+//        for (WmsItemFlowDO itemFlow : itemFlowOutList) {
+        stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, OUT, itemDO.getProductId(), fromStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), null);
+//        }
+        //todo 添加库存流水详情
 
         // 入方
         WmsStockBinDO toStockBinDO = stockBinService.getStockBin(itemDO.getToBinId(), itemDO.getProductId(), true);
@@ -178,11 +178,11 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         stockBinService.insertOrUpdate(toStockBinDO);
 
         // 记录批次流水(item_flow)
-        List<WmsItemFlowDO> itemFlowInList = updateStockFlow(exchangeDO, itemDO, IN.getValue());
+//        List<WmsItemFlowDO> itemFlowInList = updateStockFlow(exchangeDO, itemDO, IN.getValue());
         // 记录库存流水(stockFlow)
-        for (WmsItemFlowDO itemFlow : itemFlowInList) {
-            stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, IN, itemDO.getProductId(), toStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), itemFlow.getId());
-        }
+//        for (WmsItemFlowDO itemFlow : itemFlowInList) {
+        stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, IN, itemDO.getProductId(), toStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), null);
+//        }
     }
 
     /**
@@ -269,9 +269,9 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
                 inboundItemDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty() + deltaQty);
                 inboundItemDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty() + deltaQty);
             } else {
-                newFlowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty()/* - deltaQty*/);
-                newFlowDO.setActualQty(inboundItemDO.getActualQty()/* - deltaQty*/);
-                newFlowDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty()/* - deltaQty*/);
+                newFlowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty());
+                newFlowDO.setActualQty(inboundItemDO.getActualQty());
+                newFlowDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty());
             }
 
             itemFlowList.add(newFlowDO);

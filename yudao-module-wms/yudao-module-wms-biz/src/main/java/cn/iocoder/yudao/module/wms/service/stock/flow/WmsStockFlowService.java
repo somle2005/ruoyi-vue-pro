@@ -113,4 +113,6 @@ public interface WmsStockFlowService {
     void assembleBinStock(List<WmsStockFlowRespVO> list);
 
     void assembleExchange(List<WmsStockFlowRespVO> list);
+
+    void createForStockBin(WmsStockReason reason, WmsStockFlowDirection wmsStockFlowDirection, Long productId, WmsStockBinDO fromStockBinDO, Integer qty, Long binMoveId, Long id, Long binId, Integer binBeforeQty, Integer binAfterQty, Long inboundId);
 }

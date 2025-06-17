@@ -199,4 +199,16 @@ public class WmsStockFlowRespVO {
     @Schema(description = "库位库存", example = "")
     @ExcelProperty("库位库存")
     private WmsStockBinRespVO stockBin;
+
+    @Schema(description = "库位ID", example = "")
+    private Long binId;
+
+    @Schema(description = "入库单ID", example = "")
+    private Long inboundId;
+
+    @Schema(description = "库位改变前数量", example = "")
+    private Integer binBeforeQty;
+
+    @Schema(description = "库位改变后数量", example = "")
+    private Integer binAfterQty;
 }
