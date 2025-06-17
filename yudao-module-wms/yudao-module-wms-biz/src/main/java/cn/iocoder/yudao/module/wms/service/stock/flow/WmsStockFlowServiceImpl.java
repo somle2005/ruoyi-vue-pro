@@ -20,6 +20,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSimpl
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowSaveReqVO;
@@ -424,16 +425,39 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     }
 
     @Override
-    public void assembleBatchAvailableQty(List<WmsStockFlowRespVO> list) {
-        for (WmsStockFlowRespVO respVO : list) {
-            WmsInboundItemFlowSimpleVO inboundItemFlowSimpleVO = respVO.getInboundItemFlow();
-            if(inboundItemFlowSimpleVO == null) {
-                continue;
-            }
-            Integer getOutboundAvailableQty = inboundItemFlowSimpleVO.getOutboundAvailableQty();
-            respVO.setAvailableQty(getOutboundAvailableQty - respVO.getDeltaQty() * respVO.getDirection());
+    public void assembleBinStock(List<WmsStockFlowRespVO> list) {
+        if (list == null || list.isEmpty()) {
+            return;
         }
+
+        List<WmsWarehouseBinRespVO> binList = StreamX.from(list).map(WmsStockFlowRespVO::getBin).filter(Objects::nonNull).toList();
+
+        if (binList.isEmpty()) {
+            return;
+        }
+
+        List<Long> binIds = binList.stream().map(WmsWarehouseBinRespVO::getId).filter(Objects::nonNull).distinct().toList();
+
+        List<WmsStockBinDO> stockBinList = stockBinService.selectStockBinByIds(binIds);
+        Map<Long, WmsStockBinDO> stockBinMap = StreamX.from(stockBinList).toMap(WmsStockBinDO::getId);
+
+        if (stockBinMap.isEmpty()) {
+            return;
+        }
+
+        StreamX.from(list).forEach(itemFlow -> {
+            WmsWarehouseBinRespVO bin = itemFlow.getBin();
+            if (bin == null || bin.getId() == null) {
+                return;
+            }
+
+            WmsStockBinDO stockBin = stockBinMap.get(bin.getId());
+            if (stockBin != null) {
+                itemFlow.setStockBin(BeanUtils.toBean(stockBin, WmsStockBinRespVO.class));
+            }
+        });
     }
+
 
     @Override
     public void assembleExchange(List<WmsStockFlowRespVO> list) {

@@ -102,7 +102,7 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
             List<Long> companyIds = new ArrayList<>();
 
             // 如果未指定归属，则按入库批次的先进先出进行处理
-            if (deptId == null || companyId == null) {
+            if (/*deptId == null || */companyId == null) {
                 //获取批次列表，然后根据可售数量判断取多个批次的库存
                 List<WmsInboundItemLogicDO> inboundItemLogicList = inboundService.getInboundItemLogicList(warehouseId, productId, deptId, true);
                 if (inboundItemLogicList == null) {
@@ -124,13 +124,18 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
                 companyIds.add(companyId);
             }
 
+            List<Long> uniqueDeptIds = deptIds.stream().distinct().toList();
+            List<Long> uniqueCompanyIds = companyIds.stream().distinct().toList();
+
             // 执行出库的原子操作
             Integer quantity= getExecuteQty(item);
-            for (int i = 0; i < deptIds.size(); i++) {
-                companyId = companyIds.get(i);
-                deptId = deptIds.get(i);
-                // 执行单个出库详情
-                this.outboundSingleItem(outboundRespVO, item, companyId, deptId, warehouseId, item.getBinId(), productId, quantity, outboundRespVO.getId(), item.getId());
+            for (int i = 0; i < uniqueCompanyIds.size(); i++) {
+                for (int j = 0; j < uniqueDeptIds.size(); j++) {
+                    companyId = companyIds.get(i);
+                    deptId = deptIds.get(j);
+                    // 执行单个出库详情
+                    this.outboundSingleItem(outboundRespVO, item, companyId, deptId, warehouseId, item.getBinId(), productId, quantity, outboundRespVO.getId(), item.getId());
+                }
             }
         }
         updateOutbound(outboundRespVO);

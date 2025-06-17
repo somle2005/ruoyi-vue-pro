@@ -8,7 +8,6 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
-import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundValidateReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.*;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
@@ -121,6 +120,7 @@ public class WmsOutboundController {
         outboundService.assembleDept(voPageResult.getList());
         outboundService.assembleCompany(voPageResult.getList());
         outboundService.assembleApprovalHistory(voPageResult.getList());
+        outboundService.assembleUpstreamType(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
 			.mapping(WmsOutboundRespVO::getCreator, WmsOutboundRespVO::setCreatorName)

@@ -36,5 +36,10 @@ public interface WmsOutboundApi {
      *
      * @param importReqVO 入参
      */
-    void generateOutbound(WmsOutboundImportReqDTO importReqVO);
+    void generateOutbound(@Validated WmsOutboundImportReqDTO importReqVO);
+
+    /**
+     * 校验货物可出库数量
+     */
+    Boolean validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList);
 }

@@ -22,6 +22,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Map;
@@ -53,6 +54,7 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void execute(PickupContext context) {
 
         // 确认在事务内
@@ -233,10 +235,10 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         if(deptId==null) {
             deptId=inboundDO.getDeptId();
         }
-        // 如果入库单及明细上未指定部门,默认按产品的部门ID
-        if (deptId == null) {
-            deptId = inboundItemVO.getProduct().getDeptId();
-        }
+//        // 如果入库单及明细上未指定部门,默认按产品的部门ID
+//        if (deptId == null) {
+//            deptId = inboundItemVO.getProduct().getDeptId();
+//        }
 
 
         // 刷新逻辑库存

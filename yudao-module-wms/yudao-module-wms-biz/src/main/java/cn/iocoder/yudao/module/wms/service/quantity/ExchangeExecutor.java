@@ -16,7 +16,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
-import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsInboundItemFlowMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsItemFlowMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.flow.WmsStockFlowMapper;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
@@ -63,7 +63,7 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
 
     @Resource
     @Lazy
-    private WmsInboundItemFlowMapper inboundItemFlowMapper;
+    private WmsItemFlowMapper inboundItemFlowMapper;
 
     @Resource
     private WmsInboundItemService inboundItemService;
@@ -164,8 +164,9 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 记录批次流水(item_flow)
         List<WmsItemFlowDO> itemFlowOutList = updateStockFlow(exchangeDO, itemDO, OUT.getValue());
         // 记录库存流水(stockFlow)
-        stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, OUT, itemDO.getProductId(), fromStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), itemFlowDO.getId());
-
+        for (WmsItemFlowDO itemFlow : itemFlowOutList) {
+            stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, OUT, itemDO.getProductId(), fromStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), itemFlow.getId());
+        }
 
         // 入方
         WmsStockBinDO toStockBinDO = stockBinService.getStockBin(itemDO.getToBinId(), itemDO.getProductId(), true);
@@ -179,7 +180,9 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 记录批次流水(item_flow)
         List<WmsItemFlowDO> itemFlowInList = updateStockFlow(exchangeDO, itemDO, IN.getValue());
         // 记录库存流水(stockFlow)
-        stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, IN, itemDO.getProductId(), toStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), itemFlowDO.getId());
+        for (WmsItemFlowDO itemFlow : itemFlowInList) {
+            stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, IN, itemDO.getProductId(), toStockBinDO, itemDO.getQty(), itemDO.getExchangeId(), itemDO.getId(), itemFlow.getId());
+        }
     }
 
     /**
@@ -260,13 +263,19 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
                 newFlowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty() + deltaQty);
                 newFlowDO.setActualQty(inboundItemDO.getActualQty() + deltaQty);
                 newFlowDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty() + deltaQty);
+                //更新明细行详情
+                //inboundItemDO.setPlanQty(inboundItemDO.getPlanQty() + deltaQty);
+                //inboundItemDO.setActualQty(inboundItemDO.getActualQty() + deltaQty);
+                inboundItemDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty() + deltaQty);
+                inboundItemDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty() + deltaQty);
             } else {
-                newFlowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty());
-                newFlowDO.setActualQty(inboundItemDO.getActualQty());
-                newFlowDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty());
+                newFlowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty()/* - deltaQty*/);
+                newFlowDO.setActualQty(inboundItemDO.getActualQty()/* - deltaQty*/);
+                newFlowDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty()/* - deltaQty*/);
             }
 
             itemFlowList.add(newFlowDO);
+
 
         }
         // 保存详情与流水
@@ -302,12 +311,12 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         }
         if (type == TO_GOOD.getValue()) {
             // 可用量
-            stockWarehouseDO.setAvailableQty(stockWarehouseDO.getAvailableQty() - quantity);
+            stockWarehouseDO.setAvailableQty(stockWarehouseDO.getAvailableQty() + quantity);
             if (stockWarehouseDO.getAvailableQty() < 0) {
                 throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
             }
             // 可售量
-            stockWarehouseDO.setSellableQty(stockWarehouseDO.getSellableQty() - quantity);
+            stockWarehouseDO.setSellableQty(stockWarehouseDO.getSellableQty() + quantity);
             if (stockWarehouseDO.getSellableQty() < 0) {
                 throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
             }

@@ -37,6 +37,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,6 +97,7 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void execute(StockCheckContext context) {
 
         // 确认在事务内

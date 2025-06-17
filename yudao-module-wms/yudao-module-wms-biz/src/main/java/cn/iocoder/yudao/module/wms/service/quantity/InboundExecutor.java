@@ -17,6 +17,7 @@ import cn.iocoder.yudao.module.wms.service.stock.logic.WmsStockLogicService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
@@ -44,6 +45,7 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void execute(InboundContext context) {
 
         final WmsInboundRespVO inboundRespVO = inboundService.getInboundWithItemList(context.getInboundId());

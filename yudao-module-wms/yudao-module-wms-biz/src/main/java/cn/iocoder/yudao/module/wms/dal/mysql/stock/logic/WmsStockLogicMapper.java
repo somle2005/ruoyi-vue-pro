@@ -48,6 +48,8 @@ public interface WmsStockLogicMapper extends BaseMapperX<WmsStockLogicDO> {
         wrapper.eq(WmsStockLogicDO::getCompanyId, companyId);
         wrapper.eqIfPresent(WmsStockLogicDO::getDeptId, deptId);
         wrapper.eq(WmsStockLogicDO::getProductId, productId);
+        wrapper.orderByAsc(WmsStockLogicDO::getCreateTime);
+        wrapper.last("limit 1");
         return selectOne(wrapper);
     }
 

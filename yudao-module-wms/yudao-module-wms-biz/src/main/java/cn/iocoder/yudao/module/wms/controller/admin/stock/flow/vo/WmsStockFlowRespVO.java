@@ -9,6 +9,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSimpl
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.product.WmsProductRespSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.move.vo.WmsStockBinMoveRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.logic.move.vo.WmsStockLogicMoveRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsStockWarehouseSimpleVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stockcheck.vo.WmsStockCheckRespVO;
@@ -195,7 +196,7 @@ public class WmsStockFlowRespVO {
     @ExcelProperty("公司")
     private FmsCompanySimpleRespVO company;
 
-
-
-
+    @Schema(description = "库位库存", example = "")
+    @ExcelProperty("库位库存")
+    private WmsStockBinRespVO stockBin;
 }

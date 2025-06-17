@@ -89,4 +89,8 @@ public interface WmsOutboundService {
     void forceAbandon(WmsApprovalReqVO approvalReqVO);
 
     void auditAgree(WmsApprovalReqVO approvalReqVO);
+
+    void assembleUpstreamType(List<WmsOutboundRespVO> list);
+
+    boolean validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList);
 }

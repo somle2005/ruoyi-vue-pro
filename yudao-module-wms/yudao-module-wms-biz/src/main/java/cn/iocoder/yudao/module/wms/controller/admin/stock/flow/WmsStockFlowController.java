@@ -112,6 +112,7 @@ public class WmsStockFlowController {
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageBin(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.BIN.getValue());
         pageReqVO.setReason(new Integer[]{WmsStockReason.INBOUND.getValue(), WmsStockReason.PICKUP.getValue(), WmsStockReason.OUTBOUND_FINISH.getValue(), WmsStockReason.EXCHANGE.getValue()});
+//        pageReqVO.setReason(new Integer[]{WmsStockReason.STOCK_BIN_MOVE.getValue()});
         return getStockFlowPage(pageReqVO);
     }
 
@@ -137,7 +138,7 @@ public class WmsStockFlowController {
         stockFlowService.assembleLogicMove(voPageResult.getList());
         stockFlowService.assembleExchange(voPageResult.getList());
         //批次可用库存数量显示为库存变更前数量
-        stockFlowService.assembleBatchAvailableQty(voPageResult.getList());
+        stockFlowService.assembleBinStock(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
 			.mapping(WmsStockFlowRespVO::getCreator, WmsStockFlowRespVO::setCreatorName)

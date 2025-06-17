@@ -14,6 +14,7 @@ import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import jakarta.annotation.Resource;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 
@@ -136,7 +137,7 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     }
 
     @Override
-    public void generateOutbound(WmsOutboundImportReqDTO importReqVO) {
+    public void generateOutbound(@Validated WmsOutboundImportReqDTO importReqVO) {
         WmsOutboundRespVO wmsOutboundRespVO = outboundService.generateOutbound(BeanUtils.toBean(importReqVO, WmsOutboundImportReqVO.class));
         outboundService.approve(WmsOutboundAuditStatus.Event.SUBMIT, BeanUtils.toBean(wmsOutboundRespVO, WmsApprovalReqVO.class));
         BeanUtils.toBean(wmsOutboundRespVO, WmsOutboundDTO.class);

@@ -141,6 +141,7 @@ public interface WmsInboundItemLogicQueryMapper extends BaseMapperX<WmsInboundIt
 
         wrapper.innerJoin(WmsStockBinDO.class, WmsStockBinDO::getWarehouseId, WmsInboundDO::getWarehouseId).
             eq(WmsStockBinDO::getProductId, productId).
+            gt(WmsStockBinDO::getSellableQty, 0).
             select(WmsStockBinDO::getBinId).
             select(WmsStockBinDO::getSellableQty);
 

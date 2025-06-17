@@ -34,7 +34,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.zone.WmsWarehouseZon
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemBinQueryMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemQueryMapper;
-import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsInboundItemFlowMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsItemFlowMapper;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
@@ -79,7 +79,7 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
 
     @Resource
     @Lazy
-    private WmsInboundItemFlowMapper inboundItemFlowMapper;
+    private WmsItemFlowMapper inboundItemFlowMapper;
 
     @Resource
     @Lazy

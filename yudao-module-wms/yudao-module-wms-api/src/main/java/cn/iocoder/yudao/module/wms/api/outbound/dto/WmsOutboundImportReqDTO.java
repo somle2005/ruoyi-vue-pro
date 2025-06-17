@@ -25,7 +25,7 @@ public class WmsOutboundImportReqDTO {
     /**
      * WMS出库单类型
      */
-    @NotNull(message = "WMS出库单类型不能为空", groups = { ValidationGroup.create.class })
+    @NotNull(message = "WMS出库单类型不能为空")
     @InEnum(WmsOutboundType.class)
     private Integer type;
 

@@ -265,6 +265,11 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         wmsOutboundService.approve(WmsOutboundAuditStatus.Event.FINISH, approvalReqVO);
     }
 
+    @Override
+    public void assembleUpstreamType(List<WmsOutboundRespVO> list) {
+        list.forEach(o -> o.setUpstreamType(o.getUpstreamType() == null ? o.getType() : o.getUpstreamType()));
+    }
+
 
     /**
      * @sign : E1DA4E6302BF0EFA

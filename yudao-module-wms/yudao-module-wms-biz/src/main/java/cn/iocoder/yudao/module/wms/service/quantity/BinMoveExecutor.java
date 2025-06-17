@@ -24,6 +24,7 @@ import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -66,6 +67,7 @@ public class BinMoveExecutor extends QuantityExecutor<BinMoveContext> {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void execute(BinMoveContext context) {
 
         WmsPickupSaveReqVO fromPickup=new WmsPickupSaveReqVO();
