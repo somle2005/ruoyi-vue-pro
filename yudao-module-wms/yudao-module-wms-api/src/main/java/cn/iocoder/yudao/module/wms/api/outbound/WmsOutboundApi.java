@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.wms.api.outbound;
 
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundValidateReqDTO;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;

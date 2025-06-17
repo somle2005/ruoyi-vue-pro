@@ -3,10 +3,12 @@ package cn.iocoder.yudao.module.wms.api.outbound;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundValidateReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundImportReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
+import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import jakarta.annotation.Resource;
@@ -136,7 +138,13 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     @Override
     public void generateOutbound(WmsOutboundImportReqDTO importReqVO) {
         WmsOutboundRespVO wmsOutboundRespVO = outboundService.generateOutbound(BeanUtils.toBean(importReqVO, WmsOutboundImportReqVO.class));
+        outboundService.approve(WmsOutboundAuditStatus.Event.SUBMIT, BeanUtils.toBean(wmsOutboundRespVO, WmsApprovalReqVO.class));
         BeanUtils.toBean(wmsOutboundRespVO, WmsOutboundDTO.class);
+    }
+
+    @Override
+    public Boolean validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList) {
+        return outboundService.validateOutboundData(validateReqDTOList);
     }
 
 }

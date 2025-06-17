@@ -8,6 +8,7 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundValidateReqDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.*;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
@@ -196,5 +197,14 @@ public class WmsOutboundController {
     public CommonResult<Boolean> finish(@RequestBody WmsApprovalReqVO approvalReqVO) {
         outboundService.approve(WmsOutboundAuditStatus.Event.FINISH, approvalReqVO);
         return success(true);
+    }
+
+    @PostMapping("/validate")
+    @Operation(summary = "头程单提交校验")
+    public CommonResult<Boolean> validateOutboundData(@RequestBody List<WmsOutboundValidateReqDTO> validateReqDTOList) {
+        // 调用服务层进行校验
+        boolean result = outboundService.validateOutboundData(validateReqDTOList);
+        // 返回校验结果
+        return success(result);
     }
 }
