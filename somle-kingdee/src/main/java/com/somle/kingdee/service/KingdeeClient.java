@@ -245,7 +245,7 @@ public class KingdeeClient {
 
 
     /**
-     * 添加供应商
+     * 添加供应商(+更新cache)
      *
      * @param kingdeeSupplierSaveVO 供应商
      * @return 供应商
@@ -545,6 +545,7 @@ public class KingdeeClient {
             throw exception(KingDeeErrorCodeConstants.PURCHASE_ORDER_NOT_EXIST, purCode);
         }
 
+        //1.1  TDOO 查询金蝶是否存在采购订单
         // 2. 执行反审核操作
         List<String> orderIds = Collections.singletonList(purOrderDetail.getId());
         KingdeeResponse unAuditResponse = commonOperate(KingdeeEntityType.PUR_BILL_ORDER, KingdeeOperateType.UNAUDIT, orderIds);
@@ -718,6 +719,7 @@ public class KingdeeClient {
         if (queryReqVO == null) {
             queryReqVO = new KingdeeSupplierQueryReqVO();
         }
+
         String SUPPLIER_CACHE_KEY = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + this.token.getAccountName() + ":" + Objects.hash(token.getAppKey(), JsonUtilsX.toJsonString(queryReqVO));
         String LOCK_KEY = SUPPLIER_CACHE_KEY + ":lock";
 
@@ -765,11 +767,15 @@ public class KingdeeClient {
             log.error("获取供应商列表数据异常", e);
             throw exception(KingDeeErrorCodeConstants.SUPPLIER_LIST_FAIL, e.getMessage());
         } finally {
-            // 4. 释放锁
             if (locked && lock.isHeldByCurrentThread()) {
-                lock.unlock();
+                try {
+                    lock.unlock();
+                } catch (Exception ex) {
+                    log.error("释放供应商缓存锁失败", ex);
+                }
             }
         }
+
     }
 
     /**
@@ -825,7 +831,7 @@ public class KingdeeClient {
             RLock lock = redissonClient.getLock(LOCK_KEY);
             boolean locked = false;
             try {
-                locked = lock.tryLock(0, 30, TimeUnit.SECONDS);
+                locked = lock.tryLock(5, 30, TimeUnit.SECONDS);
                 if (!locked) {
                     log.warn("获取刷新锁失败，其他线程正在刷新供应商缓存");
                     return;
@@ -838,6 +844,7 @@ public class KingdeeClient {
                 Map<String, KingdeeSupplierSaveVO> newData = fetchSupplierDataFromApi(queryReqVO);
                 if (newData.isEmpty()) {
                     log.warn("获取新供应商数据为空，取消刷新");
+                    redisTemplate.delete(SUPPLIER_CACHE_KEY);
                     return;
                 }
 
