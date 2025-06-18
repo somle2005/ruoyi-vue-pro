@@ -43,8 +43,8 @@ public class KingdeeService {
     public void init() {
         // clientList = tokenRepository.findAll().stream().map(n->new KingdeeClient(n)).toList();
         this.clients = this.outerInstanceIds.stream()
-            .map(n -> new KingdeeClient(tokenRepository.findByOuterInstanceId(n), stringRedisTemplate, redissonClient))
-            .toList();
+                .map(n -> new KingdeeClient(tokenRepository.findByOuterInstanceId(n), stringRedisTemplate, redissonClient))
+                .toList();
         log.debug("kingdee client size: {}", clients.size());
     }
 
@@ -57,16 +57,16 @@ public class KingdeeService {
     public boolean refreshAuths() {
         this.init();
         return clients.parallelStream()
-            .map(KingdeeClient::refreshAuth)
-            .allMatch(this::saveToken);
+                .map(KingdeeClient::refreshAuth)
+                .allMatch(this::saveToken);
     }
 
     @Scheduled(cron = "0 0 */2 * * *")
     public void refreshAllSupplierList() {
         executeBatchOperation(
-            "刷新供应商列表",
-            "all",
-            KingdeeClient::refreshSupplierCache
+                "刷新供应商列表",
+                "all",
+                KingdeeClient::refreshSupplierCache
         );
     }
 
@@ -82,27 +82,42 @@ public class KingdeeService {
         return success;
     }
 
-    public void addDepartment(KingdeeAuxInfoDetail department) {
-        executeBatchOperation(
-            "添加部门",
-            department.getName(),
-            client -> client.addDepartment(department)
+    /**
+     * 添加部门
+     *
+     * @param department 部门信息
+     */
+    public List<KingdeeResponse> addDepartment(KingdeeAuxInfoDetail department) {
+        return executeBatchOperationWithResult(
+                "添加部门",
+                department.getName(),
+                client -> client.addDepartment(department)
         );
     }
 
-    public void addProduct(KingdeeProductSaveReqVO product) {
-        executeBatchOperation(
-            "添加产品",
-            product.getNumber(),
-            client -> client.addProduct(product)
+    /**
+     * 添加产品
+     *
+     * @param product 产品信息
+     */
+    public List<KingdeeResponse> addProduct(KingdeeProductSaveReqVO product) {
+        return executeBatchOperationWithResult(
+                "添加产品",
+                product.getNumber(),
+                client -> client.addProduct(product)
         );
     }
 
-    public void addSupplier(KingdeeSupplierSaveVO kingdeeSupplierSaveVO) {
-        executeBatchOperation(
-            "添加供应商",
-            kingdeeSupplierSaveVO.getName(),
-            client -> client.saveSupplier(kingdeeSupplierSaveVO)
+    /**
+     * 添加供应商
+     *
+     * @param kingdeeSupplierSaveVO 供应商信息
+     */
+    public List<KingdeeResponse> addSupplier(KingdeeSupplierSaveVO kingdeeSupplierSaveVO) {
+        return executeBatchOperationWithResult(
+                "添加供应商",
+                kingdeeSupplierSaveVO.getName(),
+                client -> client.saveSupplier(kingdeeSupplierSaveVO)
         );
     }
 
@@ -110,13 +125,12 @@ public class KingdeeService {
      * 保存采购订单
      *
      * @param purchaseOrder 采购订单
-     * @return 所有客户端的操作结果列表
      */
     public List<KingdeeResponse> savePurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
         return executeBatchOperationWithResult(
-            "保存采购订单",
-            purchaseOrder.getBillNo(),
-            client -> client.savePurOrder(purchaseOrder)
+                "保存采购订单",
+                purchaseOrder.getBillNo(),
+                client -> client.savePurOrder(purchaseOrder)
         );
     }
 
@@ -124,13 +138,12 @@ public class KingdeeService {
      * 保存+审核采购订单
      *
      * @param purchaseOrder 采购订单
-     * @return 所有客户端的操作结果列表
      */
     public List<KingdeeResponse> saveAndAuditPurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
         return executeBatchOperationWithResult(
-            "保存并审核采购订单",
-            purchaseOrder.getBillNo(),
-            client -> client.saveAndAuditPurOrder(purchaseOrder)
+                "保存并审核采购订单",
+                purchaseOrder.getBillNo(),
+                client -> client.saveAndAuditPurOrder(purchaseOrder)
         );
     }
 
@@ -138,13 +151,12 @@ public class KingdeeService {
      * 反审核+删除采购订单
      *
      * @param purCode 采购订单编号
-     * @return 所有客户端的操作结果列表
      */
     public List<KingdeeResponse> unAuditPurchaseOrder(String purCode) {
         return executeBatchOperationWithResult(
-            "取消审核采购订单",
-            purCode,
-            client -> client.unAuditPurOrder(purCode)
+                "取消审核采购订单",
+                purCode,
+                client -> client.unAuditPurOrder(purCode)
         );
     }
 
@@ -152,13 +164,12 @@ public class KingdeeService {
      * 保存采购入库单
      *
      * @param purInbound 采购入库单
-     * @return 所有客户端的操作结果列表
      */
     public List<KingdeeResponse> savePurInbound(KingdeePurInboundSaveReqVO purInbound) {
         return executeBatchOperationWithResult(
-            "保存采购入库单",
-            purInbound.getBillNo(),
-            client -> client.savePurInbound(purInbound)
+                "保存采购入库单",
+                purInbound.getBillNo(),
+                client -> client.savePurInbound(purInbound)
         );
     }
 
@@ -166,13 +177,12 @@ public class KingdeeService {
      * 保存采购出库单
      *
      * @param purOutbound 采购出库单
-     * @return 所有客户端的操作结果列表
      */
     public List<KingdeeResponse> savePurOutbound(KingdeePurReturnSaveReqVO purOutbound) {
         return executeBatchOperationWithResult(
-            "保存采购出库单",
-            purOutbound.getBillNo(),
-            client -> client.savePurReturn(purOutbound)
+                "保存采购出库单",
+                purOutbound.getBillNo(),
+                client -> client.savePurReturn(purOutbound)
         );
     }
 
@@ -202,8 +212,8 @@ public class KingdeeService {
      */
     public Integer deleteSupplierCache() {
         return clients.parallelStream()
-            .mapToInt(KingdeeClient::deleteSupplierCache)
-            .sum();
+                .mapToInt(KingdeeClient::deleteSupplierCache)
+                .sum();
     }
 
     private void executeBatchOperation(String operation, String identifier,
@@ -215,12 +225,11 @@ public class KingdeeService {
     }
 
     /**
-     * 执行批量操作并返回结果
+     * 单线程处理N个公司执行同步
      *
      * @param operation         操作名称
      * @param identifier        标识符
      * @param operationFunction 操作函数
-     * @return 所有客户端的操作结果列表
      */
     private List<KingdeeResponse> executeBatchOperationWithResult(String operation, String identifier,
                                                                   java.util.function.Function<KingdeeClient, KingdeeResponse> operationFunction) {

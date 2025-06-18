@@ -43,7 +43,7 @@ public class SrmHandler {
     @SyncLog("供应商 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.SUPPLIER)
     public void syncSuppliersToKingdee(@Payload List<Long> supplierIds) {
-        SyncUtils.syncToKingdeeAsync(
+        List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             supplierIds,
             ids -> srmSupplierApi.validateSupplierIds(new HashSet<>(ids)),
             erpToKingdeeConverter::convertSupplierDTOList,

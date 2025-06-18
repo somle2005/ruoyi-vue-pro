@@ -272,7 +272,13 @@ public class KingdeeClient {
         return getResponse(endUrl, params);
     }
 
-    public void addDepartment(KingdeeAuxInfoDetail department) {
+    /**
+     * 添加部门
+     *
+     * @param department 部门信息
+     * @return KingdeeResponse
+     */
+    public KingdeeResponse addDepartment(KingdeeAuxInfoDetail department) {
         //拷贝数据，避免并发下产生的线程安全问题
         KingdeeAuxInfoDetail departmentCopy = new KingdeeAuxInfoDetail();
         BeanUtils.copyProperties(department, departmentCopy);
@@ -291,7 +297,7 @@ public class KingdeeClient {
         }
         departmentCopy.setGroupId(groupId);
 
-        KingdeeResponse response = postResponse("/jdy/v2/bd/aux_info", new TreeMap<>(), departmentCopy);
+        return postResponse("/jdy/v2/bd/aux_info", new TreeMap<>(), departmentCopy);
     }
 
     public Stream<KingdeeResponse> list(String endpoint) {
