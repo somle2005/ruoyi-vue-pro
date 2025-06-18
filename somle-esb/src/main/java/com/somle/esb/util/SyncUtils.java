@@ -11,7 +11,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 /**
  * 同步工具类
@@ -61,7 +60,7 @@ public class SyncUtils {
                 int current = completedCount.incrementAndGet();
                 log.error("[{}] 同步失败：{}/{}，唯一标识(ID)：{}，错误信息：{}", logType, current, total, identifier, e.getMessage(), e);
             }
-        }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor())).collect(Collectors.toList());
+        }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor())).toList();
 
         // 等待所有任务完成
         CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();

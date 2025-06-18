@@ -89,26 +89,6 @@ public class EsbController {
     }
 
     /**
-     * 根据订单ID同步采购订单到金蝶系统
-     *
-     * @param orderId 采购订单ID
-     * @return 同步结果
-     */
-    @PostMapping("/syncPurchaseOrder")
-    public String syncPurchaseOrder(@RequestParam("orderId") Long orderId) {
-        List<Long> orderIds = List.of(orderId);
-        SyncUtils.syncToKingdeeAsync(
-            orderIds,
-            ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
-            erpToKingdeeConverter::convertOrderDTOList,
-            kingdeeService::savePurchaseOrder,
-            "采购订单保存",
-            KingdeePurOrderSaveReqVO::getBillNo
-        );
-        return "success";
-    }
-
-    /**
      * 根据订单ID删除金蝶采购订单
      *
      * @param orderId 采购订单ID
