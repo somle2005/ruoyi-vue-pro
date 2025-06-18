@@ -2,6 +2,7 @@ package com.somle.kingdee.service;
 
 import cn.hutool.core.util.ObjUtil;
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.SecureUtil;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import cn.iocoder.yudao.framework.common.util.json.JSONObject;
@@ -258,8 +259,6 @@ public class KingdeeClient {
         Map<String, KingdeeSupplierSaveVO> map = this.getAllSupplierList(null);
         Optional.ofNullable(map.get(supplierCopy.getName())).ifPresent(requestVO -> supplierCopy.setId(requestVO.getId()));
 //        supplierCopy.setIgnoreWarn(true);//忽略告警信息(如：单价为0)保存
-        //删除缓存
-//        this.deleteSupplierCache();
         KingdeeResponse kingdeeResponse = postResponse(endUrl, new TreeMap<>(), supplierCopy);
         this.refreshSupplierCache();
         return kingdeeResponse;
@@ -719,8 +718,9 @@ public class KingdeeClient {
         if (queryReqVO == null) {
             queryReqVO = new KingdeeSupplierQueryReqVO();
         }
+        String queryJson = JsonUtilsX.toJsonString(queryReqVO);
+        String SUPPLIER_CACHE_KEY = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + this.token.getAccountName() + ":" + SecureUtil.md5(token.getAppKey() + ":" + queryJson);
 
-        String SUPPLIER_CACHE_KEY = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + this.token.getAccountName() + ":" + Objects.hash(token.getAppKey(), JsonUtilsX.toJsonString(queryReqVO));
         String LOCK_KEY = SUPPLIER_CACHE_KEY + ":lock";
 
         // 1. 尝试从缓存获取
@@ -734,7 +734,7 @@ public class KingdeeClient {
         RLock lock = redissonClient.getLock(LOCK_KEY);
         boolean locked = false;
         try {
-            locked = lock.tryLock(0, 10, TimeUnit.SECONDS);
+            locked = lock.tryLock(10, 20, TimeUnit.SECONDS);
             if (!locked) {
                 Map<String, KingdeeSupplierSaveVO> result = CacheSpinWaitUtils.spinWaitForCache(() -> redisTemplate.opsForValue().get(SUPPLIER_CACHE_KEY), json -> JsonUtilsX.parseObject(json, new TypeReference<>() {
                 }), 1000 * 10, 200);
@@ -824,7 +824,8 @@ public class KingdeeClient {
         try {
             // 1. 准备参数
             KingdeeSupplierQueryReqVO queryReqVO = new KingdeeSupplierQueryReqVO();
-            String SUPPLIER_CACHE_KEY = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + this.token.getAccountName() + ":" + Objects.hash(token.getAppKey(), JsonUtilsX.toJsonString(queryReqVO));
+            String queryJson = JsonUtilsX.toJsonString(queryReqVO);
+            String SUPPLIER_CACHE_KEY = KingdeeRedisKeyConstants.KINGDEE_SUPPLIER_LIST + ":" + this.token.getAccountName() + ":" + SecureUtil.md5(token.getAppKey() + ":" + queryJson);
             String LOCK_KEY = SUPPLIER_CACHE_KEY + ":lock";
 
             // 2. 获取锁

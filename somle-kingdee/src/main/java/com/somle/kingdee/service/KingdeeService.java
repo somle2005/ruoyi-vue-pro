@@ -151,14 +151,8 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> savePurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
         return clients.parallelStream()
-            .map(client -> {
-                log.debug("执行保存采购订单操作，client={}，identifier={}", client.getToken().getAccountName(), purchaseOrder.getBillNo());
-                //根据供应商名称 == token公司名称 ->同步
-                if (isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client)) {
-                    return client.savePurOrder(purchaseOrder);
-                }
-                return null;
-            })
+//            .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
+            .map(client -> client.savePurOrder(purchaseOrder))
             .collect(java.util.stream.Collectors.toList());
     }
 
@@ -169,14 +163,8 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> saveAndAuditPurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
         return clients.parallelStream()
-            .map(client -> {
-                log.debug("执行保存并审核采购订单操作，client={}，identifier={}", client.getToken().getAccountName(), purchaseOrder.getBillNo());
-                //根据供应商名称 == token公司名称 ->同步
-                if (isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client)) {
-                    return client.saveAndAuditPurOrder(purchaseOrder);
-                }
-                return null;
-            })
+//            .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
+            .map(client -> client.saveAndAuditPurOrder(purchaseOrder))
             .collect(java.util.stream.Collectors.toList());
     }
 
@@ -187,15 +175,12 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> unAuditPurchaseOrder(String purCode) {
         return clients.parallelStream()
-            .map(client -> {
+            .filter(client -> {
                 log.debug("执行取消审核采购订单操作，client={}，identifier={}", client.getToken().getAccountName(), purCode);
                 SrmPurchaseOrderDTO purchaseOrderDTO = srmPurchaseOrderApi.getPurchaseOrderByCode(purCode);
-                //根据供应商名称 == token公司名称 ->同步
-                if (isSupplierNameMatch(purchaseOrderDTO.getSupplierName(), client)) {
-                    return client.unAuditPurOrder(purCode);
-                }
-                return null;
+                return isSupplierNameMatch(purchaseOrderDTO.getSupplierName(), client);
             })
+            .map(client -> client.unAuditPurOrder(purCode))
             .collect(java.util.stream.Collectors.toList());
     }
 

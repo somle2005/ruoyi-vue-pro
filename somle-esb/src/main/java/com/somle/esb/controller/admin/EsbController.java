@@ -158,8 +158,8 @@ public class EsbController {
             "采购订单保存&审核",
             KingdeePurOrderSaveReqVO::getBillNo
         );
-
-        return CommonResult.success(results);
+        Map<String, Object> map = Map.of("size", results.size(), "results", results);
+        return CommonResult.success(map);
     }
 
     /**

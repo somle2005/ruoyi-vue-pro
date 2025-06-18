@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
  * 同步工具类 提供多线程同步操作的通用方法
  */
 @Slf4j
+@SuppressWarnings("all")
 public class SyncUtils {
 
     /**
@@ -62,20 +63,18 @@ public class SyncUtils {
                 Object identifier = numberGetter.apply(obj);
                 failedIdentifiers.add(identifier);
                 int current = completedCount.incrementAndGet();
-                log.error("[{}] 同步失败：{}/{}，唯一标识(ID)：{}，错误信息：{}", logType, current, total, identifier,
-                        e.getMessage(), e);
+                log.error("[{}] 同步失败：{}/{}，唯一标识(ID)：{}，错误信息：{}", logType, current, total, identifier, e.getMessage());
                 // 返回null表示失败，调用方需要处理
                 return null;
             }
-        }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor())).collect(Collectors.toList());
+        }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor())).toList();
 
         // 等待所有任务完成并收集结果
         List<S> results = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
 
         log.info("[{}] 同步完成，共处理：{}个，成功：{}个，失败：{}个", logType, total, successCount.get(), failCount.get());
         if (failCount.get() > 0) {
-            log.warn("[{}] 存在{}个同步失败的数据，失败的唯一标识符：{}", logType, failCount.get(),
-                    JSONUtil.parse(failedIdentifiers));
+            log.warn("[{}] 存在{}个同步失败的数据，失败的唯一标识符：{}", logType, failCount.get(), JSONUtil.parse(failedIdentifiers));
         }
 
         return results;
@@ -117,15 +116,13 @@ public class SyncUtils {
                 failCount++;
                 Object identifier = numberGetter.apply(obj);
                 failedIdentifiers.add(identifier);
-                log.error("[{}] 同步失败：{}/{}，唯一标识(ID)：{}，错误信息：{}", logType, i + 1, total, identifier,
-                        e.getMessage(), e);
+                log.error("[{}] 同步失败：{}/{}，唯一标识(ID)：{}，错误信息：{}", logType, i + 1, total, identifier, e.getMessage(), e);
             }
         }
 
         log.info("[{}] 同步完成，共处理：{}个，成功：{}个，失败：{}个", logType, total, successCount, failCount);
         if (failCount > 0) {
-            log.warn("[{}] 存在{}个同步失败的数据，失败的唯一标识符：{}", logType, failCount,
-                    JSONUtil.parse(failedIdentifiers));
+            log.warn("[{}] 存在{}个同步失败的数据，失败的唯一标识符：{}", logType, failCount, JSONUtil.parse(failedIdentifiers));
         }
     }
 } 

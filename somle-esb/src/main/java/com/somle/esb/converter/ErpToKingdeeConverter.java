@@ -370,8 +370,8 @@ public class ErpToKingdeeConverter {
         }
         KingdeePurOrderSaveReqVO.MaterialEntity entity = new KingdeePurOrderSaveReqVO.MaterialEntity();
 
-        //商品分录id，新增不传该字段，修改必传
-        entity.setId(String.valueOf(item.getId()));
+        //辅助属性 <-> itemID
+        entity.setAuxPropId(String.valueOf(item.getId()));
         // 1. 产品SKU信息
         entity.setMaterialNumber(StrUtil.trimToNull(item.getProductCode()));
 
