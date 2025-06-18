@@ -40,7 +40,7 @@ public class ErpProductHandler {
     private final MessageChannel erpCustomRuleChannel;
     private final TmsCustomRuleApi tmsCustomRuleApi;
 
-    @Value("${srm.sync.eccang:true}")
+    @Value("${srm.sync.eccang:false}")
     private boolean activeSyncEccang;
 
     @SyncLog("产品 -> 易仓")

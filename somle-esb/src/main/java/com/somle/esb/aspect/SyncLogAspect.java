@@ -39,10 +39,10 @@ public class SyncLogAspect {
             }
 
             double durationSeconds = (System.currentTimeMillis() - start) / 1000.0;
-            log.info(String.format("[%s] 同步完成，数量: %d，耗时：%.3f s",
-                desc.isEmpty() ? methodName : desc,
-                count,
-                durationSeconds));
+            log.info("[{}] 同步完成，数量: {}，耗时：{} s",
+                    desc.isEmpty() ? methodName : desc,
+                    count,
+                    String.format("%.3f", durationSeconds));
             return result;
         } catch (Exception e) {
             log.error("[{}] 同步异常：{}, 入参是:{}", desc.isEmpty() ? methodName : desc, e.getMessage(), JSONUtil.parse(args), e);

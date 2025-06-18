@@ -1,4 +1,4 @@
-package com.somle.kingdee.controller;
+package com.somle.kingdee.controller.admin;
 
 
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
@@ -9,6 +9,7 @@ import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.model.vo.KingdeeSupplierQueryReqVO;
 import com.somle.kingdee.model.vo.KingdeeTokenVO;
 import com.somle.kingdee.service.KingdeeService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,7 +78,7 @@ public class KingdeeController {
         }
     }
 
-    // 获取所有供应商列表
+    @Operation(summary = "获取所有供应商列表")
     @GetMapping("/getAllSupplierList")
     @ResponseBody
     public CommonResult<Map<String, KingdeeSupplierSaveVO>> getAllSupplierList() {
@@ -85,20 +86,14 @@ public class KingdeeController {
         return CommonResult.success(kingdeeService.getAllSupplierList(queryReqVO));
     }
 
-    /**
-     * 删除供应商缓存
-     *
-     * @return 删除的缓存数量
-     */
+    @Operation(summary = "删除供应商缓存")
     @DeleteMapping("/supplier/cache")
     @ResponseBody
     public CommonResult<Integer> deleteSupplierCache() {
         return CommonResult.success(kingdeeService.deleteSupplierCache());
     }
 
-    /**
-     * 增加供应商-测试
-     */
+    @Operation(summary = "增加供应商-测试")
     @PostMapping("/addSupplier")
     @ResponseBody
     public CommonResult<KingdeeSupplierSaveVO> addSupplier(

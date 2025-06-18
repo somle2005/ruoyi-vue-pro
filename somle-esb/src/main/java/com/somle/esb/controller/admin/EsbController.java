@@ -1,4 +1,4 @@
-package com.somle.esb.controller;
+package com.somle.esb.controller.admin;
 
 import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
