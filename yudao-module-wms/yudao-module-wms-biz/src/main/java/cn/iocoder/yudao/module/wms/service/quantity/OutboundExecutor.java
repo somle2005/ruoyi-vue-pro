@@ -242,7 +242,11 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         stockBinService.insertOrUpdate(stockBinDO);
         // 记录流水
         for (WmsItemFlowDO flowDO : itemFlowList) {
-            stockFlowService.createForStockBin(this.getReason(), wmsStockFlowDirection, productId, stockBinDO, flowDO.getOutboundAvailableDeltaQty(), outboundId, outboundItemId,flowDO.getId());
+            //stockFlowService.createForStockBin(this.getReason(), wmsStockFlowDirection, productId, stockBinDO, flowDO.getOutboundAvailableDeltaQty(), outboundId, outboundItemId,flowDO.getId());
+            //记录库位变化快照值
+            Integer beforeQty = stockBinDO.getSellableQty() - quantity * flowDO.getDirection();
+            Integer afterQty = stockBinDO.getSellableQty();
+            stockFlowService.createForStockBin(this.getReason(), wmsStockFlowDirection, productId, stockBinDO, flowDO.getOutboundAvailableDeltaQty(), outboundId, outboundItemId, binId, beforeQty, afterQty, flowDO.getInboundId());
         }
 
     }

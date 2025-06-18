@@ -128,10 +128,9 @@ public class BinMoveExecutor extends QuantityExecutor<BinMoveContext> {
             WmsStockBinRespVO toStockBin = stockBinMap.get(makeStockKey(binMoveItemDO.getToBinId(),binMoveItemDO.getProductId()));
             if (fromStockBin == null) {
                 throw exception(STOCK_BIN_NOT_EXISTS);
-            }
-            //目标库位无数据时，新建库位库存记录
-            if (toStockBin == null) {
-                toStockBin = fromStockBin;
+            } else if (toStockBin == null) {
+                //目标库位无数据时，新建库位库存记录
+                toStockBin = new WmsStockBinRespVO(fromStockBin);
                 toStockBin.setBinId(binMoveItemDO.getToBinId());
                 toStockBin.setId(null);
                 toStockBin.setSellableQty(ZERO);
@@ -162,14 +161,12 @@ public class BinMoveExecutor extends QuantityExecutor<BinMoveContext> {
     /**
      * 通过拣货完成上下架移库操作
      **/
-    private void processStockBin(Long inboundId,Long warehouseId,WmsStockBinMoveItemDO binMoveItemDO,WmsStockBinRespVO fromStockBinVO,WmsStockBinRespVO toStockBinVO,List<WmsPickupItemSaveReqVO> fromPickupItemList,List<WmsPickupItemSaveReqVO> toPickupItemList) {
+    private void processStockBin(Long inboundId, Long warehouseId, WmsStockBinMoveItemDO binMoveItemDO, WmsStockBinRespVO fromStockBinVO, WmsStockBinRespVO toStockBinVO, List<WmsPickupItemSaveReqVO> fromPickupItemList, List<WmsPickupItemSaveReqVO> toPickupItemList) {
 
         JdbcUtils.requireTransaction();
 
         // 处理出方
         WmsStockBinDO fromStockBinDO = BeanUtils.toBean(fromStockBinVO,WmsStockBinDO.class);
-        //
-
 
         fromStockBinDO.setAvailableQty(fromStockBinDO.getAvailableQty()-binMoveItemDO.getQty());
         if(fromStockBinDO.getAvailableQty()<0) {

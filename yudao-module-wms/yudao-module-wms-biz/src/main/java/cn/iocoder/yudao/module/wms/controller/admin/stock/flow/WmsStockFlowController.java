@@ -115,7 +115,7 @@ public class WmsStockFlowController {
     @PreAuthorize("@ss.hasPermission('wms:stock-flow:query')")
     public CommonResult<PageResult<WmsStockFlowRespVO>> getStockFlowPageBin(@Valid @RequestBody WmsStockFlowPageReqVO pageReqVO) {
         pageReqVO.setStockType(WmsStockType.BIN.getValue());
-        pageReqVO.setReason(new Integer[]{INBOUND.getValue(), PICKUP.getValue(), OUTBOUND_FINISH.getValue(), EXCHANGE.getValue(), STOCK_BIN_MOVE.getValue(), PICKUP.getValue()});
+        pageReqVO.setReason(new Integer[]{INBOUND.getValue(), PICKUP.getValue(), OUTBOUND_FINISH.getValue(), EXCHANGE.getValue(), STOCK_BIN_MOVE.getValue(), PICKUP.getValue(), OUTBOUND_SUBMIT.getValue(), OUTBOUND_REJECT.getValue()});
 //        pageReqVO.setReason(new Integer[]{WmsStockReason.STOCK_BIN_MOVE.getValue()});
         return getStockFlowPage(pageReqVO);
     }
