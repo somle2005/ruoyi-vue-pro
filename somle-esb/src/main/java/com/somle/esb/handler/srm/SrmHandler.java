@@ -49,7 +49,9 @@ public class SrmHandler {
             erpToKingdeeConverter::convertSupplierDTOList,
             kingdeeService::addSupplier,
             "供应商创建",
-            KingdeeSupplierSaveVO::getNumber
+            (KingdeeSupplierSaveVO supplier) -> {
+                return supplier.getId() + " " + supplier.getNumber();
+            }
         );
     }
 

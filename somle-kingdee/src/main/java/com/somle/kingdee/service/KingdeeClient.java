@@ -258,7 +258,7 @@ public class KingdeeClient {
         // 查询所有供应商MAP，根据ID来更新对应供应商
         Map<String, KingdeeSupplierSaveVO> map = this.getAllSupplierList(null);
         Optional.ofNullable(map.get(supplierCopy.getName())).ifPresent(requestVO -> supplierCopy.setId(requestVO.getId()));
-//        supplierCopy.setIgnoreWarn(true);//忽略告警信息(如：单价为0)保存
+        supplierCopy.setIgnoreWarn(true);//忽略告警信息(如：单价为0)保存
         KingdeeResponse kingdeeResponse = postResponse(endUrl, new TreeMap<>(), supplierCopy);
         this.refreshSupplierCache();
         return kingdeeResponse;

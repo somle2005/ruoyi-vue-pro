@@ -74,17 +74,38 @@ public class EsbController {
     }
 
     /**
-     * 同步所有供应商数据到金蝶系统
+     * 同步供应商数据到金蝶系统
+     * 支持全量同步或指定供应商名称同步
      *
+     * @param supplierNames 供应商名称列表，可选参数，不传则全量同步
      * @return 同步结果
      */
     @PostMapping("/syncSuppliers")
-    public String syncSuppliers() {
-        List<Long> supplierIds = srmSupplierApi.getSupplierList()
-            .stream()
-            .map(SrmSupplierDTO::getId)
-            .distinct()
-            .toList();
+    public String syncSuppliers(@RequestParam(value = "supplierNames", required = false) List<String> supplierNames) {
+        List<Long> supplierIds;
+        
+        if (supplierNames != null && !supplierNames.isEmpty()) {
+            // 根据供应商名称获取供应商ID
+            List<SrmSupplierDTO> suppliers = srmSupplierApi.getSupplierList();
+            supplierIds = suppliers.stream()
+                .filter(supplier -> supplierNames.contains(supplier.getName()))
+                .map(SrmSupplierDTO::getId)
+                .distinct()
+                .toList();
+
+            if (supplierIds.isEmpty()) {
+                log.warn("[供应商] 未找到指定名称的供应商，入参:{}", JSONUtil.parse(supplierNames));
+                return "未找到指定名称的供应商";
+            }
+        } else {
+            // 全量同步
+            supplierIds = srmSupplierApi.getSupplierList()
+                .stream()
+                .map(SrmSupplierDTO::getId)
+                .distinct()
+                .toList();
+        }
+        
         tmsSupplierChannel.send(MessageBuilder.withPayload(supplierIds).build());
         return "success";
     }
