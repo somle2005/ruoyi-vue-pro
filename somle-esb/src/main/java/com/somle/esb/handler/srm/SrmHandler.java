@@ -50,7 +50,7 @@ public class SrmHandler {
             kingdeeService::addSupplier,
             "供应商创建",
             (KingdeeSupplierSaveVO supplier) -> {
-                return supplier.getId() + " " + supplier.getNumber();
+                return supplier.getId() + "-" + supplier.getNumber();
             }
         );
     }

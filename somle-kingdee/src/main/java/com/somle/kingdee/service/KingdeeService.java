@@ -2,6 +2,7 @@ package com.somle.kingdee.service;
 
 
 import cn.hutool.core.util.StrUtil;
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
@@ -33,17 +34,17 @@ import java.util.function.Consumer;
 @ConfigurationProperties(prefix = "kingdee")
 public class KingdeeService {
 
+    private List<String> outerInstanceIds;
+    private List<KingdeeClient> clients;
+
     @Autowired
-    StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private KingdeeTokenRepository tokenRepository;
     @Autowired
     private RedissonClient redissonClient;
     @Autowired
     private SrmSupplierApi srmSupplierApi;
-
-    private List<String> outerInstanceIds;
-    private List<KingdeeClient> clients;
     @Autowired
     private SrmPurchaseOrderApi srmPurchaseOrderApi;
 
@@ -135,12 +136,16 @@ public class KingdeeService {
 
     /**
      * 比较供应商名称是否匹配当前客户端名称
-     *
+     * <p>
+     * 正式环境严格匹配。其余环境true
      * @param supplierName 供应商名称
      * @param client       金蝶客户端
      * @return 是否匹配
      */
     private boolean isSupplierNameMatch(String supplierName, KingdeeClient client) {
+        if (!SpringUtils.isProd()) {
+            return true;
+        }
         return Objects.equals(StrUtil.trim(supplierName), StrUtil.trim(client.getToken().getAccountName()));
     }
 
@@ -151,7 +156,7 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> savePurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
         return clients.parallelStream()
-//            .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
+            .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
             .map(client -> client.savePurOrder(purchaseOrder))
             .collect(java.util.stream.Collectors.toList());
     }
@@ -163,7 +168,7 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> saveAndAuditPurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
         return clients.parallelStream()
-//            .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
+            .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
             .map(client -> client.saveAndAuditPurOrder(purchaseOrder))
             .collect(java.util.stream.Collectors.toList());
     }
