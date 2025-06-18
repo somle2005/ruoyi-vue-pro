@@ -241,7 +241,7 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
         pickupSaveReqVO.setUpstreamCode(stockCheckDO.getCode());
         pickupSaveReqVO.setUpstreamType(BillType.WMS_STOCKCHECK.getValue());
         // 执行拣货
-        pickupService.createForStockCheck(pickupSaveReqVO);
+        pickupService.createForStockCheck(pickupSaveReqVO, inboundDO);
 
     }
 

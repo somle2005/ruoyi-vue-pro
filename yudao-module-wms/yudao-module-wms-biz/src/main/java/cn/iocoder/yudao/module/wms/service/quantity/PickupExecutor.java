@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
+import cn.iocoder.yudao.module.system.enums.somle.CompanyCode;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
@@ -29,6 +30,7 @@ import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static com.fhs.common.constant.Constant.ZERO;
 
 /**
  * @author: LeeFJ
@@ -232,7 +234,6 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
             companyId = inboundDO.getCompanyId();
         }
 
-
         // 部门ID首先考虑明细行，明细行未指定时使用单据中的部门ID
         Long deptId = inboundItemVO.getDeptId();
         if(deptId==null) {
@@ -243,17 +244,25 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
 //            deptId = inboundItemVO.getProduct().getDeptId();
 //        }
 
-
         // 刷新逻辑库存
         // wmsStockLogicService.refreshForPickup(pickup.getWarehouseId(), inboundDO.getCompanyId(), deptId,inboundItemVO.getProductId(), pickup.getId(), pickupItemDO.getId(),);
 
         // 校验本方法在事务中
         JdbcUtils.requireTransaction();
+        companyId = companyId == null ? CompanyCode.SOMILE.getValue() : companyId;
         // 查询库存记录
         WmsStockLogicDO stockLogicDO = stockLogicService.getByUkProductOwner(warehouseId, companyId, deptId, productId, false);
         // 如果不存在就创建
         if (stockLogicDO == null) {
-            throw exception(STOCK_LOGIC_NOT_EXISTS);
+            stockLogicDO = WmsStockLogicDO.builder()
+                .deptId(deptId)
+                .warehouseId(warehouseId)
+                .companyId(companyId)
+                .productId(productId)
+                .availableQty(quantity)
+                .outboundPendingQty(ZERO)
+                .shelvePendingQty(ZERO)
+                .build();
         } else {
             // 如果存在就修改
             // 可用量
