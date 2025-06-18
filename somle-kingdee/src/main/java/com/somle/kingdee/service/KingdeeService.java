@@ -1,6 +1,10 @@
 package com.somle.kingdee.service;
 
 
+import cn.iocoder.yudao.framework.common.exception.ErrorCode;
+import cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil;
+import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
+import com.somle.kingdee.enums.KingDeeErrorCodeConstants;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.model.vo.KingdeeSupplierQueryReqVO;
@@ -15,11 +19,13 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Consumer;
 
 // https://open.jdy.com/#/files/api/detail?index=2&categrayId=3cc8ee9a663e11eda5c84b5d383a2b93&id=adfe4a24712711eda0b307c6992ee459
 @Slf4j
@@ -63,7 +69,12 @@ public class KingdeeService {
 
     @Scheduled(cron = "0 0 */2 * * *")
     public void refreshAllSupplierList() {
-        clients.parallelStream().forEach(KingdeeClient::refreshSupplierCache);
+        executeBatchOperationWithExceptionHandling(
+            "刷新供应商列表",
+            "all",
+            KingdeeClient::refreshSupplierCache,
+            KingDeeErrorCodeConstants.SUPPLIER_LIST_REFRESH_FAIL
+        );
     }
 
     public boolean saveToken(KingdeeToken token) {
@@ -78,35 +89,69 @@ public class KingdeeService {
         return success;
     }
 
-
     public void addDepartment(KingdeeAuxInfoDetail department) {
-        clients.parallelStream().forEach(n-> n.addDepartment(department));
+        executeBatchOperationWithExceptionHandling(
+            "添加部门",
+            department.getName(),
+            client -> client.addDepartment(department),
+            KingDeeErrorCodeConstants.DEPARTMENT_ADD_FAIL
+        );
     }
 
-
     public void addProduct(KingdeeProductSaveReqVO product) {
-        clients.parallelStream().forEach(n-> n.addProduct(product));
+        executeBatchOperationWithExceptionHandling(
+            "添加产品",
+            product.getNumber(),
+            client -> client.addProduct(product),
+            KingDeeErrorCodeConstants.PRODUCT_ADD_FAIL
+        );
     }
 
     public void addSupplier(KingdeeSupplierSaveVO kingdeeSupplierSaveVO) {
-        clients.parallelStream().forEach(n -> n.saveSupplier(kingdeeSupplierSaveVO));
+        executeBatchOperationWithExceptionHandling(
+            "添加供应商",
+            kingdeeSupplierSaveVO.getName(),
+            client -> client.saveSupplier(kingdeeSupplierSaveVO),
+            KingDeeErrorCodeConstants.SUPPLIER_ADD_FAIL
+        );
     }
-
 
     /**
      * 保存采购订单
      *
      * @param purchaseOrder 采购订单
      */
-    public void savePurchaseOrder(@Validated KingdeePurOrderSaveReqVO purchaseOrder) {
-        clients.parallelStream().forEach(n -> n.savePurOrder(purchaseOrder));
+    public void savePurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
+        executeBatchOperationWithExceptionHandling(
+            "保存采购订单",
+            purchaseOrder.getBillNo(),
+            client -> client.savePurOrder(purchaseOrder),
+            KingDeeErrorCodeConstants.PURCHASE_ORDER_SAVE_FAIL
+        );
     }
 
     /**
      * 保存+审核采购订单
      */
-    public void saveAndAuditPurchaseOrder(@Validated KingdeePurOrderSaveReqVO purchaseOrder) {
-        clients.parallelStream().forEach(n -> n.saveAndAuditPurOrder(purchaseOrder));
+    public void saveAndAuditPurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
+        executeBatchOperationWithExceptionHandling(
+            "保存并审核采购订单",
+            purchaseOrder.getBillNo(),
+            client -> client.saveAndAuditPurOrder(purchaseOrder),
+            KingDeeErrorCodeConstants.PURCHASE_ORDER_SAVE_AND_AUDIT_FAIL
+        );
+    }
+
+    /**
+     * 反审核+删除采购订单
+     */
+    public void unAuditPurchaseOrder(String purCode) {
+        executeBatchOperationWithExceptionHandling(
+            "取消审核采购订单",
+            purCode,
+            client -> client.unAuditPurOrder(purCode),
+            KingDeeErrorCodeConstants.PURCHASE_ORDER_BATCH_UNAUDIT_FAIL
+        );
     }
 
     /**
@@ -114,8 +159,13 @@ public class KingdeeService {
      *
      * @param purInbound 采购入库单
      */
-    public void savePurInbound(@Validated KingdeePurInboundSaveReqVO purInbound) {
-        clients.parallelStream().forEach(n -> n.savePurInbound(purInbound));
+    public void savePurInbound(KingdeePurInboundSaveReqVO purInbound) {
+        executeBatchOperationWithExceptionHandling(
+            "保存采购入库单",
+            purInbound.getBillNo(),
+            client -> client.savePurInbound(purInbound),
+            KingDeeErrorCodeConstants.PUR_INBOUND_SAVE_FAIL
+        );
     }
 
     /**
@@ -123,15 +173,21 @@ public class KingdeeService {
      *
      * @param purOutbound 采购出库单
      */
-    public void savePurOutbound(@Validated KingdeePurReturnSaveReqVO purOutbound) {
-        clients.parallelStream().forEach(n -> n.savePurReturn(purOutbound));
+    public void savePurOutbound(KingdeePurReturnSaveReqVO purOutbound) {
+        executeBatchOperationWithExceptionHandling(
+            "保存采购出库单",
+            purOutbound.getBillNo(),
+            client -> client.savePurReturn(purOutbound),
+            KingDeeErrorCodeConstants.PUR_OUTBOUND_SAVE_FAIL
+        );
     }
 
     /**
-     *  获得数据库所有令牌
+     * 获得数据库所有令牌
+     *
      * @return List<KingdeeToken>
      */
-    public List<KingdeeToken> listKingdeeTokens () {
+    public List<KingdeeToken> listKingdeeTokens() {
         return tokenRepository.findAll();
     }
 
@@ -155,4 +211,33 @@ public class KingdeeService {
             .mapToInt(KingdeeClient::deleteSupplierCache)
             .sum();
     }
+
+    private void executeBatchOperationWithExceptionHandling(String operation, String identifier,
+                                                            Consumer<KingdeeClient> operationConsumer,
+                                                            ErrorCode errorCode) {
+
+        List<CompletableFuture<String>> futures = clients.stream()
+            .map(client -> CompletableFuture.supplyAsync(() -> {
+                try {
+                    operationConsumer.accept(client);
+                    return null; // 表示成功
+                } catch (Exception e) {
+                    log.error("{}失败，={}，identifier={}，原因：{}", operation, client.getToken().getAccountName(), identifier, e.getMessage(), e);
+                    return client.getToken().getAccountName();
+                }
+            }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor()))
+            .toList();
+
+        // 等待所有任务完成
+        List<String> failedClients = futures.stream()
+            .map(CompletableFuture::join)
+            .filter(Objects::nonNull)
+            .toList();
+
+
+        if (!failedClients.isEmpty()) {
+            throw ServiceExceptionUtil.exception(errorCode, "失败客户端：" + String.join(",", failedClients));
+        }
+    }
+
 }

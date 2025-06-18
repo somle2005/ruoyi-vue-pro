@@ -55,7 +55,6 @@ public class EsbController {
     private final ErpToKingdeeConverter erpToKingdeeConverter;
     private final KingdeeService kingdeeService;
 
-    // ========== 系统管理接口 ==========
 
     /**
      * 打印所有 Spring Bean
@@ -109,6 +108,26 @@ public class EsbController {
             kingdeeService::savePurchaseOrder,
             "采购订单保存",
             KingdeePurOrderSaveReqVO::getBillNo
+        );
+        return "success";
+    }
+
+    /**
+     * 根据订单ID删除金蝶采购订单
+     *
+     * @param orderId 采购订单ID
+     * @return 删除结果
+     */
+    @PostMapping("/unAuditPurchaseOrder")
+    public String unAuditPurchaseOrder(@RequestParam("orderId") Long orderId) {
+        List<Long> orderIds = List.of(orderId);
+        syncToKingdee(
+            orderIds,
+            ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
+            dtos -> dtos.stream().map(SrmPurchaseOrderDTO::getCode).collect(Collectors.toList()),
+            kingdeeService::unAuditPurchaseOrder,
+            "采购订单反审核删除",
+            String::toString
         );
         return "success";
     }
@@ -180,7 +199,6 @@ public class EsbController {
         return "success";
     }
 
-    // ========== 私有辅助方法 ==========
 
     /**
      * 通用同步到金蝶的方法

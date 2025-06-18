@@ -24,7 +24,7 @@ public class SrmMessageChannelConfig {
     /**
      * 采购订单消息通道
      */
-    @Bean(SrmChannelEnum.PURCHASE_ORDER)
+    @Bean(SrmChannelEnum.PURCHASE_ORDER_AUDIT)
     public MessageChannel purchaseOrderChannel() {
         return new PublishSubscribeChannel(AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor());
     }

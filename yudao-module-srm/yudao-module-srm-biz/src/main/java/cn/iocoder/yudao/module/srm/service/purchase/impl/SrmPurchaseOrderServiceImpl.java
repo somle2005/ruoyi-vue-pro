@@ -134,7 +134,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Autowired
     @Lazy
     private SrmPurchaseRequestService srmPurchaseRequestService;
-    @Resource(name = SrmChannelEnum.PURCHASE_ORDER)
+    @Resource(name = SrmChannelEnum.PURCHASE_ORDER_AUDIT)
     MessageChannel purchaseOrderChannel;
     @Autowired
     private WmsWarehouseApi wmsWarehouseApi;

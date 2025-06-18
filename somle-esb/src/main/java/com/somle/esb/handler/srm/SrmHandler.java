@@ -4,6 +4,7 @@ import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import com.somle.esb.aspect.SyncLog;
@@ -23,6 +24,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 /**
  * srm 消费端
@@ -47,21 +49,34 @@ public class SrmHandler {
             ids -> srmSupplierApi.validateSupplierIds(new HashSet<>(ids)),
             erpToKingdeeConverter::convertSupplierDTOList,
             kingdeeService::addSupplier,
-            "供应商",
+            "供应商创建",
             KingdeeSupplierSaveVO::getNumber
         );
     }
 
     @SyncLog("采购订单 -> 金蝶")
-    @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_ORDER)
+    @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_ORDER_AUDIT)
     public void syncPurchaseOrdersToKingdee(@Payload List<Long> orderIds) {
         syncToKingdee(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             erpToKingdeeConverter::convertOrderDTOList,
             kingdeeService::savePurchaseOrder,
-            "采购订单审核通过",
+            "采购订单创建审核",
             KingdeePurOrderSaveReqVO::getBillNo
+        );
+    }
+
+    @SyncLog("采购订单 -> 金蝶")
+    @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_ORDER_REVERSE)
+    public void syncPurchaseOrdersReverseToKingdee(@Payload List<Long> orderIds) {
+        syncToKingdee(
+            orderIds,
+            ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
+            dtos -> dtos.stream().map(SrmPurchaseOrderDTO::getCode).collect(Collectors.toList()),
+            kingdeeService::unAuditPurchaseOrder,
+            "采购订单反审核删除",
+            String::toString
         );
     }
 
@@ -91,7 +106,6 @@ public class SrmHandler {
         );
     }
 
-
     private <T, R> void syncToKingdee(
         List<Long> ids,
         Function<List<Long>, List<T>> validator,
@@ -114,5 +128,4 @@ public class SrmHandler {
         }
         log.info("[{}] 同步完成，共处理：{}个", logType, total);
     }
-
 }
