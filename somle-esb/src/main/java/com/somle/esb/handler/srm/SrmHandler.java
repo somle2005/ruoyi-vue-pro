@@ -81,7 +81,7 @@ public class SrmHandler {
 
     }
 
-    @SyncLog("采购入库单 -> 金蝶")
+    @SyncLog("采购到货单 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_IN)
     public void syncPurchaseInToKingdee(@Payload List<Long> inIds) {
         List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
@@ -89,7 +89,7 @@ public class SrmHandler {
             srmPurchaseInApi::getPurchaseInList,
             erpToKingdeeConverter::convertInDTOList,
             kingdeeService::savePurInbound,
-            "采购入库单",
+                "采购到货单",
             KingdeePurInboundSaveReqVO::getBillNo
         );
 

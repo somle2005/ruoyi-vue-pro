@@ -161,13 +161,13 @@ public class KingdeeService {
     }
 
     /**
-     * 保存采购入库单
+     * 保存采购到货单
      *
-     * @param purInbound 采购入库单
+     * @param purInbound 采购到货单
      */
     public List<KingdeeResponse> savePurInbound(KingdeePurInboundSaveReqVO purInbound) {
         return executeBatchOperationWithResult(
-                "保存采购入库单",
+                "保存采购到货单",
                 purInbound.getBillNo(),
                 client -> client.savePurInbound(purInbound)
         );
