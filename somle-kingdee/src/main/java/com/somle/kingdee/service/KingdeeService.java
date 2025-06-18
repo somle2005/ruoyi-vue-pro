@@ -1,6 +1,11 @@
 package com.somle.kingdee.service;
 
 
+import cn.hutool.core.util.StrUtil;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
+import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
+import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.model.vo.KingdeeSupplierQueryReqVO;
@@ -18,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
 
@@ -34,9 +40,13 @@ public class KingdeeService {
     private KingdeeTokenRepository tokenRepository;
     @Autowired
     private RedissonClient redissonClient;
+    @Autowired
+    private SrmSupplierApi srmSupplierApi;
 
     private List<String> outerInstanceIds;
     private List<KingdeeClient> clients;
+    @Autowired
+    private SrmPurchaseOrderApi srmPurchaseOrderApi;
 
     //TODO 优化: 启动后异步初始化，懒加载
     @PostConstruct
@@ -122,6 +132,17 @@ public class KingdeeService {
     }
 
     /**
+     * 比较供应商名称是否匹配当前客户端名称
+     *
+     * @param supplierName 供应商名称
+     * @param client 金蝶客户端
+     * @return 是否匹配
+     */
+    private boolean isSupplierNameMatch(String supplierName, KingdeeClient client) {
+        return Objects.equals(StrUtil.trim(supplierName), StrUtil.trim(client.getToken().getAccountName()));
+    }
+
+    /**
      * 保存采购订单
      *
      * @param purchaseOrder 采购订单
@@ -130,7 +151,14 @@ public class KingdeeService {
         return executeBatchOperationWithResult(
                 "保存采购订单",
                 purchaseOrder.getBillNo(),
-                client -> client.savePurOrder(purchaseOrder)
+                client -> {
+                    //根据供应商名称 == token公司名称 ->同步
+                    SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(Long.valueOf(purchaseOrder.getSupplierNumber()));
+                    if (isSupplierNameMatch(supplierDTO.getName(), client)) {
+                        return client.savePurOrder(purchaseOrder);
+                    }
+                    return null;
+                }
         );
     }
 
@@ -143,7 +171,14 @@ public class KingdeeService {
         return executeBatchOperationWithResult(
                 "保存并审核采购订单",
                 purchaseOrder.getBillNo(),
-                client -> client.saveAndAuditPurOrder(purchaseOrder)
+                client -> {
+                    //根据供应商名称 == token公司名称 ->同步
+                    SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(Long.valueOf(purchaseOrder.getSupplierNumber()));
+                    if (isSupplierNameMatch(supplierDTO.getName(), client)) {
+                        return client.saveAndAuditPurOrder(purchaseOrder);
+                    }
+                    return null;
+                }
         );
     }
 
@@ -153,10 +188,22 @@ public class KingdeeService {
      * @param purCode 采购订单编号
      */
     public List<KingdeeResponse> unAuditPurchaseOrder(String purCode) {
+        AtomicReference<KingdeeResponse> kingdeeResponse = new AtomicReference<>();
         return executeBatchOperationWithResult(
                 "取消审核采购订单",
                 purCode,
-                client -> client.unAuditPurOrder(purCode)
+                client -> {
+                    srmPurchaseOrderApi.listPurchaseOrderIdsByCodes(List.of(purCode)).stream().findFirst().ifPresent(
+                            purchaseOrderId -> {
+                                SrmPurchaseOrderDTO purchaseOrderDTO = srmPurchaseOrderApi.getPurchaseOrderByCode(purCode);
+                                //根据供应商名称 == token公司名称 ->同步
+                                if (isSupplierNameMatch(purchaseOrderDTO.getSupplierName(), client)) {
+                                    kingdeeResponse.set(client.unAuditPurOrder(purCode));
+                                }
+                            }
+                    );
+                    return kingdeeResponse.get();
+                }
         );
     }
 

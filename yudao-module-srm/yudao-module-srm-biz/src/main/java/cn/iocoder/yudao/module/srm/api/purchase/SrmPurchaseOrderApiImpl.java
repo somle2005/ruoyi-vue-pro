@@ -83,4 +83,34 @@ public class SrmPurchaseOrderApiImpl implements SrmPurchaseOrderApi {
     public List<Long> listPurchaseOrderIdsByCodes(@NotEmpty(message = "采购订单code不能为空") List<String> codes) {
         return purchaseOrderService.listPurchaseOrderIdsByCodes(codes);
     }
+
+    /**
+     * 根据采购订单code获取采购订单
+     *
+     * @param code 采购订单code
+     * @return 采购订单DTO
+     */
+    @Override
+    public SrmPurchaseOrderDTO getPurchaseOrderByCode(@NotEmpty(message = "采购订单code不能为空") String code) {
+        // 1. 根据code获取采购订单
+        SrmPurchaseOrderDO orderDO = purchaseOrderService.getPurchaseOrderByCode(code);
+        if (orderDO == null) {
+            throw exception(SrmErrorCodeConstants.PURCHASE_ORDER_NOT_EXISTS, code);
+        }
+
+        // 2. 获取采购订单项列表
+        List<SrmPurchaseOrderItemDO> orderItems = purchaseOrderService.getPurchaseOrderItemListByOrderId(orderDO.getId());
+
+        // 3. 转换为DTO
+        SrmPurchaseOrderDTO orderDTO = BeanUtils.toBean(orderDO, SrmPurchaseOrderDTO.class);
+        orderDTO.setItems(BeanUtils.toBean(orderItems, SrmPurchaseOrderItemDTO.class));
+
+        // 4. 设置供应商名称
+        SrmSupplierDTO supplierDTO = supplierApi.getSupplier(orderDO.getSupplierId());
+        if (supplierDTO != null) {
+            orderDTO.setSupplierName(supplierDTO.getName());
+        }
+
+        return orderDTO;
+    }
 }

@@ -977,4 +977,9 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         }
         return purchaseOrderMapper.selectOrderIdsByCodes(codes);
     }
+
+    @Override
+    public SrmPurchaseOrderDO getPurchaseOrderByCode(String code) {
+        return purchaseOrderMapper.selectByNo(code);
+    }
 }

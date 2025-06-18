@@ -13,6 +13,7 @@ import com.somle.esb.converter.ErpToKingdeeConverter;
 import com.somle.esb.service.EsbService;
 import com.somle.esb.util.SyncUtils;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
+import com.somle.kingdee.model.KingdeeResponse;
 import com.somle.kingdee.service.KingdeeService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
@@ -97,7 +98,7 @@ public class EsbController {
     @PostMapping("/unAuditPurchaseOrder")
     public CommonResult<Object> unAuditPurchaseOrder(@RequestParam("orderId") Long orderId) {
         List<Long> orderIds = List.of(orderId);
-        List<List<com.somle.kingdee.model.KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
+        List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             dtos -> dtos.stream().map(SrmPurchaseOrderDTO::getCode).collect(Collectors.toList()),
@@ -138,7 +139,7 @@ public class EsbController {
         Map<String, SrmPurchaseOrderDTO> purchaseOrderMap = purchaseOrderDTOS.stream()
             .collect(Collectors.toMap(SrmPurchaseOrderDTO::getCode, v -> v));
 
-        List<List<com.somle.kingdee.model.KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
+        List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             erpToKingdeeConverter::convertOrderDTOList,
@@ -152,7 +153,7 @@ public class EsbController {
                         return kingdeeService.savePurchaseOrder(kingdeePurOrderSaveReqVO);
                     }
                 }
-                return kingdeeService.savePurchaseOrder(kingdeePurOrderSaveReqVO);
+                return null;
             },
             "采购订单保存&审核",
             KingdeePurOrderSaveReqVO::getBillNo

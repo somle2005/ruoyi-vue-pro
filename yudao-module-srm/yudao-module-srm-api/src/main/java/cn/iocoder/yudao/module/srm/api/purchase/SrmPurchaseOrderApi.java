@@ -35,4 +35,13 @@ public interface SrmPurchaseOrderApi {
      * @return 采购订单ID列表
      */
     List<Long> listPurchaseOrderIdsByCodes(@NotEmpty(message = "采购订单code不能为空") List<String> codes);
+
+    /**
+     * 根据采购订单code拿到采购订单
+     *
+     * @param code 采购订单code
+     * @return 采购订单DTO
+     */
+    SrmPurchaseOrderDTO getPurchaseOrderByCode(@NotEmpty(message = "采购订单code不能为空") String code);
+
 } 

@@ -235,4 +235,12 @@ public interface SrmPurchaseOrderService {
      * @return 采购订单ID列表
      */
     List<Long> listPurchaseOrderIdsByCodes(List<String> codes);
+
+    /**
+     * 根据采购订单code获取采购订单
+     *
+     * @param code 采购订单code
+     * @return 采购订单
+     */
+    SrmPurchaseOrderDO getPurchaseOrderByCode(String code);
 }
