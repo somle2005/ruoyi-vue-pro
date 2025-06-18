@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.function.Function;
 
 // https://open.jdy.com/#/files/api/detail?index=2&categrayId=3cc8ee9a663e11eda5c84b5d383a2b93&id=adfe4a24712711eda0b307c6992ee459
 @Slf4j
@@ -53,8 +54,8 @@ public class KingdeeService {
     public void init() {
         // clientList = tokenRepository.findAll().stream().map(n->new KingdeeClient(n)).toList();
         this.clients = this.outerInstanceIds.stream()
-                .map(n -> new KingdeeClient(tokenRepository.findByOuterInstanceId(n), stringRedisTemplate, redissonClient))
-                .toList();
+            .map(n -> new KingdeeClient(tokenRepository.findByOuterInstanceId(n), stringRedisTemplate, redissonClient))
+            .toList();
         log.debug("kingdee client size: {}", clients.size());
     }
 
@@ -67,16 +68,16 @@ public class KingdeeService {
     public boolean refreshAuths() {
         this.init();
         return clients.parallelStream()
-                .map(KingdeeClient::refreshAuth)
-                .allMatch(this::saveToken);
+            .map(KingdeeClient::refreshAuth)
+            .allMatch(this::saveToken);
     }
 
     @Scheduled(cron = "0 0 */2 * * *")
     public void refreshAllSupplierList() {
         executeBatchOperation(
-                "刷新供应商列表",
-                "all",
-                KingdeeClient::refreshSupplierCache
+            "刷新供应商列表",
+            "all",
+            KingdeeClient::refreshSupplierCache
         );
     }
 
@@ -99,9 +100,9 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> addDepartment(KingdeeAuxInfoDetail department) {
         return executeBatchOperationWithResult(
-                "添加部门",
-                department.getName(),
-                client -> client.addDepartment(department)
+            "添加部门",
+            department.getName(),
+            client -> client.addDepartment(department)
         );
     }
 
@@ -112,9 +113,9 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> addProduct(KingdeeProductSaveReqVO product) {
         return executeBatchOperationWithResult(
-                "添加产品",
-                product.getNumber(),
-                client -> client.addProduct(product)
+            "添加产品",
+            product.getNumber(),
+            client -> client.addProduct(product)
         );
     }
 
@@ -125,9 +126,9 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> addSupplier(KingdeeSupplierSaveVO kingdeeSupplierSaveVO) {
         return executeBatchOperationWithResult(
-                "添加供应商",
-                kingdeeSupplierSaveVO.getName(),
-                client -> client.saveSupplier(kingdeeSupplierSaveVO)
+            "添加供应商",
+            kingdeeSupplierSaveVO.getName(),
+            client -> client.saveSupplier(kingdeeSupplierSaveVO)
         );
     }
 
@@ -135,7 +136,7 @@ public class KingdeeService {
      * 比较供应商名称是否匹配当前客户端名称
      *
      * @param supplierName 供应商名称
-     * @param client 金蝶客户端
+     * @param client       金蝶客户端
      * @return 是否匹配
      */
     private boolean isSupplierNameMatch(String supplierName, KingdeeClient client) {
@@ -149,16 +150,16 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> savePurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
         return executeBatchOperationWithResult(
-                "保存采购订单",
-                purchaseOrder.getBillNo(),
-                client -> {
-                    //根据供应商名称 == token公司名称 ->同步
-                    SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(Long.valueOf(purchaseOrder.getSupplierNumber()));
-                    if (isSupplierNameMatch(supplierDTO.getName(), client)) {
-                        return client.savePurOrder(purchaseOrder);
-                    }
-                    return null;
+            "保存采购订单",
+            purchaseOrder.getBillNo(),
+            client -> {
+                //根据供应商名称 == token公司名称 ->同步
+                SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(Long.valueOf(purchaseOrder.getSupplierNumber()));
+                if (isSupplierNameMatch(supplierDTO.getName(), client)) {
+                    return client.savePurOrder(purchaseOrder);
                 }
+                return null;
+            }
         );
     }
 
@@ -169,16 +170,16 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> saveAndAuditPurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
         return executeBatchOperationWithResult(
-                "保存并审核采购订单",
-                purchaseOrder.getBillNo(),
-                client -> {
-                    //根据供应商名称 == token公司名称 ->同步
-                    SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(Long.valueOf(purchaseOrder.getSupplierNumber()));
-                    if (isSupplierNameMatch(supplierDTO.getName(), client)) {
-                        return client.saveAndAuditPurOrder(purchaseOrder);
-                    }
-                    return null;
+            "保存并审核采购订单",
+            purchaseOrder.getBillNo(),
+            client -> {
+                //根据供应商名称 == token公司名称 ->同步
+                SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(Long.valueOf(purchaseOrder.getSupplierNumber()));
+                if (isSupplierNameMatch(supplierDTO.getName(), client)) {
+                    return client.saveAndAuditPurOrder(purchaseOrder);
                 }
+                return null;
+            }
         );
     }
 
@@ -190,20 +191,20 @@ public class KingdeeService {
     public List<KingdeeResponse> unAuditPurchaseOrder(String purCode) {
         AtomicReference<KingdeeResponse> kingdeeResponse = new AtomicReference<>();
         return executeBatchOperationWithResult(
-                "取消审核采购订单",
-                purCode,
-                client -> {
-                    srmPurchaseOrderApi.listPurchaseOrderIdsByCodes(List.of(purCode)).stream().findFirst().ifPresent(
-                            purchaseOrderId -> {
-                                SrmPurchaseOrderDTO purchaseOrderDTO = srmPurchaseOrderApi.getPurchaseOrderByCode(purCode);
-                                //根据供应商名称 == token公司名称 ->同步
-                                if (isSupplierNameMatch(purchaseOrderDTO.getSupplierName(), client)) {
-                                    kingdeeResponse.set(client.unAuditPurOrder(purCode));
-                                }
-                            }
-                    );
-                    return kingdeeResponse.get();
-                }
+            "取消审核采购订单",
+            purCode,
+            client -> {
+                srmPurchaseOrderApi.listPurchaseOrderIdsByCodes(List.of(purCode)).stream().findFirst().ifPresent(
+                    purchaseOrderId -> {
+                        SrmPurchaseOrderDTO purchaseOrderDTO = srmPurchaseOrderApi.getPurchaseOrderByCode(purCode);
+                        //根据供应商名称 == token公司名称 ->同步
+                        if (isSupplierNameMatch(purchaseOrderDTO.getSupplierName(), client)) {
+                            kingdeeResponse.set(client.unAuditPurOrder(purCode));
+                        }
+                    }
+                );
+                return kingdeeResponse.get();
+            }
         );
     }
 
@@ -214,9 +215,9 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> savePurInbound(KingdeePurInboundSaveReqVO purInbound) {
         return executeBatchOperationWithResult(
-                "保存采购到货单",
-                purInbound.getBillNo(),
-                client -> client.savePurInbound(purInbound)
+            "保存采购到货单",
+            purInbound.getBillNo(),
+            client -> client.savePurInbound(purInbound)
         );
     }
 
@@ -227,9 +228,9 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> savePurOutbound(KingdeePurReturnSaveReqVO purOutbound) {
         return executeBatchOperationWithResult(
-                "保存采购出库单",
-                purOutbound.getBillNo(),
-                client -> client.savePurReturn(purOutbound)
+            "保存采购出库单",
+            purOutbound.getBillNo(),
+            client -> client.savePurReturn(purOutbound)
         );
     }
 
@@ -259,8 +260,8 @@ public class KingdeeService {
      */
     public Integer deleteSupplierCache() {
         return clients.parallelStream()
-                .mapToInt(KingdeeClient::deleteSupplierCache)
-                .sum();
+            .mapToInt(KingdeeClient::deleteSupplierCache)
+            .sum();
     }
 
     private void executeBatchOperation(String operation, String identifier,
@@ -279,22 +280,22 @@ public class KingdeeService {
      * @param operationFunction 操作函数
      */
     private List<KingdeeResponse> executeBatchOperationWithResult(String operation, String identifier,
-                                                                  java.util.function.Function<KingdeeClient, KingdeeResponse> operationFunction) {
+                                                                  Function<KingdeeClient, KingdeeResponse> operationFunction) {
         return clients.parallelStream()
-                .map(client -> {
-                    log.debug("执行{}操作，client={}，identifier={}", operation, client.getToken().getAccountName(), identifier);
-                    try {
-                        return operationFunction.apply(client);
-                    } catch (Exception e) {
-                        log.error("执行{}操作失败，client={}，identifier={}，错误：{}", operation, client.getToken().getAccountName(), identifier, e.getMessage(), e);
-                        // 创建一个错误响应
-                        KingdeeResponse errorResponse = new KingdeeResponse();
-                        errorResponse.setErrcode("-1");
-                        errorResponse.setDescription("操作执行失败：" + e.getMessage());
-                        return errorResponse;
-                    }
-                })
-                .collect(java.util.stream.Collectors.toList());
+            .map(client -> {
+                log.debug("执行{}操作，client={}，identifier={}", operation, client.getToken().getAccountName(), identifier);
+                try {
+                    return operationFunction.apply(client);
+                } catch (Exception e) {
+                    log.error("执行{}操作失败，client={}，identifier={}，错误：{}", operation, client.getToken().getAccountName(), identifier, e.getMessage(), e);
+                    // 创建一个错误响应
+                    KingdeeResponse errorResponse = new KingdeeResponse();
+                    errorResponse.setErrcode("-1");
+                    errorResponse.setDescription("操作执行失败：" + e.getMessage());
+                    return errorResponse;
+                }
+            })
+            .collect(java.util.stream.Collectors.toList());
     }
 
 }

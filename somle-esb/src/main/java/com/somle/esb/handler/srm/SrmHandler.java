@@ -60,7 +60,7 @@ public class SrmHandler {
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             erpToKingdeeConverter::convertOrderDTOList,
-                kingdeeService::saveAndAuditPurchaseOrder,
+            kingdeeService::saveAndAuditPurchaseOrder,
             "采购订单创建审核",
             KingdeePurOrderSaveReqVO::getBillNo
         );
@@ -89,7 +89,7 @@ public class SrmHandler {
             srmPurchaseInApi::getPurchaseInList,
             erpToKingdeeConverter::convertInDTOList,
             kingdeeService::savePurInbound,
-                "采购到货单",
+            "采购到货单",
             KingdeePurInboundSaveReqVO::getBillNo
         );
 
