@@ -12,6 +12,7 @@ import com.somle.esb.util.SyncUtils;
 import com.somle.kingdee.model.KingdeePurInboundSaveReqVO;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
 import com.somle.kingdee.model.KingdeePurReturnSaveReqVO;
+import com.somle.kingdee.model.KingdeeResponse;
 import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.service.KingdeeService;
 import lombok.RequiredArgsConstructor;
@@ -55,7 +56,7 @@ public class SrmHandler {
     @SyncLog("采购订单 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_ORDER_AUDIT)
     public void syncPurchaseOrdersToKingdee(@Payload List<Long> orderIds) {
-        SyncUtils.syncToKingdeeAsync(
+        List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             erpToKingdeeConverter::convertOrderDTOList,
@@ -63,12 +64,13 @@ public class SrmHandler {
             "采购订单创建审核",
             KingdeePurOrderSaveReqVO::getBillNo
         );
+
     }
 
     @SyncLog("采购订单 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_ORDER_REVERSE)
     public void syncPurchaseOrdersReverseToKingdee(@Payload List<Long> orderIds) {
-        SyncUtils.syncToKingdeeAsync(
+        List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             dtos -> dtos.stream().map(SrmPurchaseOrderDTO::getCode).collect(Collectors.toList()),
@@ -76,12 +78,13 @@ public class SrmHandler {
             "采购订单反审核删除",
             String::toString
         );
+
     }
 
     @SyncLog("采购入库单 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_IN)
     public void syncPurchaseInToKingdee(@Payload List<Long> inIds) {
-        SyncUtils.syncToKingdeeAsync(
+        List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             inIds,
             srmPurchaseInApi::getPurchaseInList,
             erpToKingdeeConverter::convertInDTOList,
@@ -89,12 +92,14 @@ public class SrmHandler {
             "采购入库单",
             KingdeePurInboundSaveReqVO::getBillNo
         );
+
+
     }
 
     @SyncLog("采购退货单 -> 金蝶")
     @ServiceActivator(inputChannel = SrmChannelEnum.PURCHASE_RETURN)
     public void syncPurchaseReturnToKingdee(@Payload List<Long> returnIds) {
-        SyncUtils.syncToKingdeeAsync(
+        List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             returnIds,
             srmPurchaseReturnApi::getPurchaseReturnList,
             erpToKingdeeConverter::convertReturnDTOList,
@@ -102,5 +107,6 @@ public class SrmHandler {
             "采购退货单",
             KingdeePurReturnSaveReqVO::getBillNo
         );
+
     }
 }

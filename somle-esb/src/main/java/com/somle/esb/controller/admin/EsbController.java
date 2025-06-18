@@ -1,6 +1,7 @@
 package com.somle.esb.controller.admin;
 
 import cn.hutool.json.JSONUtil;
+import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
@@ -65,7 +66,6 @@ public class EsbController {
 
     /**
      * 同步用户数据
-     * TODO: 待实现具体业务逻辑
      */
     @PostMapping("/syncUsers")
     public String syncUsers() {
@@ -95,9 +95,9 @@ public class EsbController {
      * @return 删除结果
      */
     @PostMapping("/unAuditPurchaseOrder")
-    public String unAuditPurchaseOrder(@RequestParam("orderId") Long orderId) {
+    public CommonResult<Object> unAuditPurchaseOrder(@RequestParam("orderId") Long orderId) {
         List<Long> orderIds = List.of(orderId);
-        SyncUtils.syncToKingdeeAsync(
+        List<List<com.somle.kingdee.model.KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             dtos -> dtos.stream().map(SrmPurchaseOrderDTO::getCode).collect(Collectors.toList()),
@@ -105,7 +105,7 @@ public class EsbController {
             "采购订单反审核删除",
             String::toString
         );
-        return "success";
+        return CommonResult.success(results);
     }
 
     /**
@@ -116,7 +116,7 @@ public class EsbController {
      * @return 同步结果
      */
     @PostMapping("/syncAllPurchaseOrder")
-    public String syncAllPurchaseOrder(@RequestParam(value = "orderCodes", required = false) List<String> orderCodes) {
+    public CommonResult<Object> syncAllPurchaseOrder(@RequestParam(value = "orderCodes", required = false) List<String> orderCodes) {
         List<Long> orderIds;
         List<SrmPurchaseOrderDTO> purchaseOrderDTOS;
 
@@ -125,7 +125,7 @@ public class EsbController {
             orderIds = srmPurchaseOrderApi.listPurchaseOrderIdsByCodes(orderCodes);
             if (orderIds.isEmpty()) {
                 log.warn("[采购订单] 未找到指定code的采购订单，入参:{}", JSONUtil.parse(orderCodes));
-                return "success";
+                return CommonResult.success("未找到指定code的采购订单");
             }
             purchaseOrderDTOS = srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(orderIds));
         } else {
@@ -138,7 +138,7 @@ public class EsbController {
         Map<String, SrmPurchaseOrderDTO> purchaseOrderMap = purchaseOrderDTOS.stream()
             .collect(Collectors.toMap(SrmPurchaseOrderDTO::getCode, v -> v));
 
-        SyncUtils.syncToKingdeeAsync(
+        List<List<com.somle.kingdee.model.KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             erpToKingdeeConverter::convertOrderDTOList,
@@ -147,14 +147,18 @@ public class EsbController {
                     SrmPurchaseOrderDTO purchaseOrder = purchaseOrderMap.get(kingdeePurOrderSaveReqVO.getBillNo());
                     // 判断是否已审核
                     if (Objects.equals(purchaseOrder.getAuditStatus(), cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus.APPROVED.getCode())) {
-                        kingdeeService.saveAndAuditPurchaseOrder(kingdeePurOrderSaveReqVO);
+                        return kingdeeService.saveAndAuditPurchaseOrder(kingdeePurOrderSaveReqVO);
+                    } else {
+                        return kingdeeService.savePurchaseOrder(kingdeePurOrderSaveReqVO);
                     }
                 }
+                return kingdeeService.savePurchaseOrder(kingdeePurOrderSaveReqVO);
             },
             "采购订单保存&审核",
             KingdeePurOrderSaveReqVO::getBillNo
         );
-        return "success";
+
+        return CommonResult.success(results);
     }
 
     /**

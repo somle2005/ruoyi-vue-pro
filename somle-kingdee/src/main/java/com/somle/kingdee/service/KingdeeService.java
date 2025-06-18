@@ -110,9 +110,10 @@ public class KingdeeService {
      * 保存采购订单
      *
      * @param purchaseOrder 采购订单
+     * @return 所有客户端的操作结果列表
      */
-    public void savePurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
-        executeBatchOperation(
+    public List<KingdeeResponse> savePurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
+        return executeBatchOperationWithResult(
             "保存采购订单",
             purchaseOrder.getBillNo(),
             client -> client.savePurOrder(purchaseOrder)
@@ -121,9 +122,12 @@ public class KingdeeService {
 
     /**
      * 保存+审核采购订单
+     *
+     * @param purchaseOrder 采购订单
+     * @return 所有客户端的操作结果列表
      */
-    public void saveAndAuditPurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
-        executeBatchOperation(
+    public List<KingdeeResponse> saveAndAuditPurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
+        return executeBatchOperationWithResult(
             "保存并审核采购订单",
             purchaseOrder.getBillNo(),
             client -> client.saveAndAuditPurOrder(purchaseOrder)
@@ -132,9 +136,12 @@ public class KingdeeService {
 
     /**
      * 反审核+删除采购订单
+     *
+     * @param purCode 采购订单编号
+     * @return 所有客户端的操作结果列表
      */
-    public void unAuditPurchaseOrder(String purCode) {
-        executeBatchOperation(
+    public List<KingdeeResponse> unAuditPurchaseOrder(String purCode) {
+        return executeBatchOperationWithResult(
             "取消审核采购订单",
             purCode,
             client -> client.unAuditPurOrder(purCode)
@@ -145,9 +152,10 @@ public class KingdeeService {
      * 保存采购入库单
      *
      * @param purInbound 采购入库单
+     * @return 所有客户端的操作结果列表
      */
-    public void savePurInbound(KingdeePurInboundSaveReqVO purInbound) {
-        executeBatchOperation(
+    public List<KingdeeResponse> savePurInbound(KingdeePurInboundSaveReqVO purInbound) {
+        return executeBatchOperationWithResult(
             "保存采购入库单",
             purInbound.getBillNo(),
             client -> client.savePurInbound(purInbound)
@@ -158,9 +166,10 @@ public class KingdeeService {
      * 保存采购出库单
      *
      * @param purOutbound 采购出库单
+     * @return 所有客户端的操作结果列表
      */
-    public void savePurOutbound(KingdeePurReturnSaveReqVO purOutbound) {
-        executeBatchOperation(
+    public List<KingdeeResponse> savePurOutbound(KingdeePurReturnSaveReqVO purOutbound) {
+        return executeBatchOperationWithResult(
             "保存采购出库单",
             purOutbound.getBillNo(),
             client -> client.savePurReturn(purOutbound)
@@ -203,6 +212,33 @@ public class KingdeeService {
             log.debug("执行{}操作，client={}，identifier={}", operation, client.getToken().getAccountName(), identifier);
             operationConsumer.accept(client);
         });
+    }
+
+    /**
+     * 执行批量操作并返回结果
+     *
+     * @param operation         操作名称
+     * @param identifier        标识符
+     * @param operationFunction 操作函数
+     * @return 所有客户端的操作结果列表
+     */
+    private List<KingdeeResponse> executeBatchOperationWithResult(String operation, String identifier,
+                                                                  java.util.function.Function<KingdeeClient, KingdeeResponse> operationFunction) {
+        return clients.parallelStream()
+                .map(client -> {
+                    log.debug("执行{}操作，client={}，identifier={}", operation, client.getToken().getAccountName(), identifier);
+                    try {
+                        return operationFunction.apply(client);
+                    } catch (Exception e) {
+                        log.error("执行{}操作失败，client={}，identifier={}，错误：{}", operation, client.getToken().getAccountName(), identifier, e.getMessage(), e);
+                        // 创建一个错误响应
+                        KingdeeResponse errorResponse = new KingdeeResponse();
+                        errorResponse.setErrcode("-1");
+                        errorResponse.setDescription("操作执行失败：" + e.getMessage());
+                        return errorResponse;
+                    }
+                })
+                .collect(java.util.stream.Collectors.toList());
     }
 
 }
