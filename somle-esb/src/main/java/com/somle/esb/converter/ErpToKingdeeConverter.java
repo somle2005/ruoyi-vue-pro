@@ -19,12 +19,12 @@ import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.model.supplier.SupplierBomentity;
-import com.somle.kingdee.service.KingdeeService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,12 +42,35 @@ import static com.somle.esb.util.ConstantConvertUtils.getCountrySuffix;
 public class ErpToKingdeeConverter {
 
     @Autowired
-    KingdeeService kingdeeService;
-
-    @Autowired
     private DeptApi deptApi;
     @Autowired
     private DictDataApi dictDataApi;
+
+    /**
+     * 获取东八区当前时间
+     * 由于系统运行在0区（UTC），需要转换为东八区时间
+     *
+     * @return 东八区当前时间
+     */
+    private LocalDateTime getUtc8Now() {
+        return LocalDateTime.now(ZoneId.of("Asia/Shanghai"));
+    }
+
+    /**
+     * 将0区时间转换为东八区时间
+     * 由于系统运行在0区（UTC），需要将传入的0区时间转换为东八区时间
+     *
+     * @param utcTime 0区时间
+     * @return 东八区时间
+     */
+    private LocalDateTime convertToUtc8(LocalDateTime utcTime) {
+        if (utcTime == null) {
+            return null;
+        }
+        return utcTime.atZone(ZoneId.of("UTC"))
+            .withZoneSameInstant(ZoneId.of("Asia/Shanghai"))
+            .toLocalDateTime();
+    }
 
     /**
      * 将ERP产品列表转换为完整的Kingdee产品列表。
@@ -193,7 +216,8 @@ public class ErpToKingdeeConverter {
         KingdeeAuxInfoDetail department = new KingdeeAuxInfoDetail();
         department.setName(dept.getName());
         department.setNumber(deptId);
-        department.setRemark(LocalDateTime.now().toString());
+        // 将当前UTC时间转换为东八区时间
+        department.setRemark(getUtc8Now().toString());
         return department;
     }
 
@@ -204,7 +228,8 @@ public class ErpToKingdeeConverter {
 
         department.setName(name);
         department.setNumber(number);
-        department.setRemark(LocalDateTime.now().toString());
+        // 将当前UTC时间转换为东八区时间
+        department.setRemark(getUtc8Now().toString());
 
         return department;
     }
@@ -281,9 +306,12 @@ public class ErpToKingdeeConverter {
     public void convertBasicInfo(KingdeePurOrderSaveReqVO target, SrmPurchaseOrderDTO dto) {
         // 单据日期：格式化为 yyyy-MM-dd
         if (dto.getBillTime() != null) {
-            target.setBillDate(DateUtil.format(dto.getBillTime(), "yyyy-MM-dd"));
+            // 将0区时间转换为东八区时间
+            LocalDateTime utc8Time = convertToUtc8(dto.getBillTime());
+            target.setBillDate(DateUtil.format(utc8Time, "yyyy-MM-dd"));
         } else {
-            target.setBillDate(DateUtil.format(LocalDateTime.now(), "yyyy-MM-dd"));
+            // 将当前UTC时间转换为东八区时间
+            target.setBillDate(DateUtil.format(getUtc8Now(), "yyyy-MM-dd"));
         }
 
         // 单据编号
@@ -362,9 +390,12 @@ public class ErpToKingdeeConverter {
         // 4. 其他信息
         entity.setComment(StrUtil.trimToNull(item.getRemark()));
         if (item.getDeliveryTime() != null) {
-            entity.setDeliveryDate(DateUtil.format(item.getDeliveryTime(), "yyyy-MM-dd"));
+            // 将0区时间转换为东八区时间
+            LocalDateTime utc8Time = convertToUtc8(item.getDeliveryTime());
+            entity.setDeliveryDate(DateUtil.format(utc8Time, "yyyy-MM-dd"));
         } else {
-            entity.setDeliveryDate(DateUtil.format(LocalDateTime.now(), "yyyy-MM-dd"));
+            // 将当前UTC时间转换为东八区时间
+            entity.setDeliveryDate(DateUtil.format(getUtc8Now(), "yyyy-MM-dd"));
         }
 
 

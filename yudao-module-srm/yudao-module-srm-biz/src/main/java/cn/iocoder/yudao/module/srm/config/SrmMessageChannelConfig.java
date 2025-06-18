@@ -22,12 +22,21 @@ public class SrmMessageChannelConfig {
     }
 
     /**
-     * 采购订单消息通道
+     * 采购订单(创建审核)消息通道
      */
     @Bean(SrmChannelEnum.PURCHASE_ORDER_AUDIT)
     public MessageChannel purchaseOrderChannel() {
         return new PublishSubscribeChannel(AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor());
     }
+
+    /**
+     * 采购订单(反审核删除)消息通道
+     */
+    @Bean(SrmChannelEnum.PURCHASE_ORDER_REVERSE)
+    public MessageChannel purchaseOrderReverseChannel() {
+        return new PublishSubscribeChannel(AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor());
+    }
+
 
     /**
      * 采购入库单消息通道

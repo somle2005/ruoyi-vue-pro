@@ -136,6 +136,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     private SrmPurchaseRequestService srmPurchaseRequestService;
     @Resource(name = SrmChannelEnum.PURCHASE_ORDER_AUDIT)
     MessageChannel purchaseOrderChannel;
+    @Resource(name = SrmChannelEnum.PURCHASE_ORDER_REVERSE)
+    MessageChannel purchaseOrderReverseChannel;
     @Autowired
     private WmsWarehouseApi wmsWarehouseApi;
     @Autowired
@@ -764,7 +766,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.WITHDRAW_REVIEW, vo);
             //减少wms对应产品的在制数量
             this.updateWareHouseGNumber(orderDO, true);
-            //TODO 作废金蝶采购订单
+            //同步 -> 作废金蝶采购订单
+            purchaseOrderReverseChannel.send(MessageBuilder.withPayload(Collections.singletonList(orderDO.getId())).build());
         }
     }
 
