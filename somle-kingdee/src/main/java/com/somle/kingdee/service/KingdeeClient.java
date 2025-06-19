@@ -692,7 +692,98 @@ public class KingdeeClient {
      * 保存+审核 采购退货单
      */
     public KingdeeResponse saveAndAuditPurchaseReturn(KingdeePurReturnSaveReqVO returnOrder) {
-        return null;
+        // 1. 校验金蝶采购退货单是否已存在
+        KingdeePage existingReturn = null;
+        try {
+            KingdeePurReturnReqVO queryVO = new KingdeePurReturnReqVO();
+            queryVO.setBillNo(returnOrder.getBillNo());
+            existingReturn = this.getPurReturnPage(queryVO);
+        } catch (RuntimeException e) {
+            log.info("采购退货单不存在，采购退货单编号：{}, 响应: {}", returnOrder.getBillNo(), e.getMessage());
+        }
+
+        // 如果已存在，则直接返回
+        if (existingReturn != null && !existingReturn.getRowsList(KingdeePurReturnSaveReqVO.class).isEmpty()) {
+            log.info("采购退货单已存在，跳过处理，单号：{}", returnOrder.getBillNo());
+            return new KingdeeResponse(); // 返回空响应
+        }
+
+        // 2. 处理供应商信息
+        String erpSupplierId = returnOrder.getSupplierNumber();
+        SrmSupplierApi srmSupplierApi = SpringUtils.getBean(SrmSupplierApi.class);
+        KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null)
+            .get(srmSupplierApi.getSupplier(Long.valueOf(erpSupplierId)).getName());
+        if (supplierSaveVO == null) {
+            throw exception(SUPPLIER_NOT_EXIST, erpSupplierId);
+        }
+        returnOrder.setSupplierId(supplierSaveVO.getId());
+
+        // 3. 处理明细行信息
+        returnOrder.getMaterialEntity().forEach(material -> {
+            // 设置产品ID
+            material.setMaterialId(this.getMaterial(material.getMaterialNumber())
+                .getData(JSONObject.class).getString("id"));
+
+            // 设置单位ID
+            setUnitId("套", kingdeeUnit -> material.setUnitId(kingdeeUnit.getId()));
+
+            // 设置仓库信息
+            String stockId = material.getStockId();
+            WmsWarehouseApi warehouseApi = SpringUtils.getBean(WmsWarehouseApi.class);
+            Map<Long, WmsWarehouseDTO> warehouseMap = warehouseApi.getWarehouseMap(List.of(Long.valueOf(stockId)));
+            material.setStockNumber(warehouseMap.get(Long.valueOf(stockId)).getCode());
+            material.setStockId(null);
+
+            // 处理来源单据信息
+            String srcBillNo = material.getSrcBillNo();
+            if (srcBillNo == null) {
+                throw exception(KingDeeErrorCodeConstants.PUR_INBOUND_NOT_EXIST, returnOrder.getBillNo());
+            }
+
+            // 获取来源采购入库单信息
+            KingdeePurInboundDetail inboundDetail = this.getPurInboundDetail(srcBillNo);
+            if (inboundDetail != null) {
+                material.setSrcBillTypeId(KingdeeEntityType.PUR_BILL_INBOUND.getCode());
+                material.setSrcInterId(inboundDetail.getId());
+
+                // 匹配入库单行
+                inboundDetail.getMaterialEntity().stream()
+                    .filter(inboundLine -> inboundLine.getMaterialNumber().equals(material.getMaterialNumber()))
+                    .findFirst()
+                    .ifPresent(inboundLine -> material.setSrcEntryId(inboundLine.getId()));
+            }
+        });
+
+        // 4. 保存采购退货单
+        KingdeeResponse saveResponse = this.savePurReturn(returnOrder);
+        if (!saveResponse.getErrcode().equals("0")) {
+            log.error("保存采购退货单失败：{}", saveResponse.getDescription());
+            return saveResponse;
+        }
+
+        // 5. 获取保存后的单据ID并审核
+        JSONObject data = saveResponse.getData(JSONObject.class);
+        List<String> orderIds = data.getStringList("ids");
+        if (orderIds == null || orderIds.isEmpty()) {
+            log.error("保存采购退货单成功但未返回单据ID");
+            throw exception(KingDeeErrorCodeConstants.PURCHASE_ORDER_SAVE_SUCCESS_BUT_NO_ID, returnOrder.getBillNo());
+        }
+
+        // 6. 执行审核操作
+        log.debug("开始审核采购退货单，单据ID：{}", orderIds.get(0));
+        KingdeeResponse auditResponse = commonOperate(
+            KingdeeEntityType.PUR_BILL_RETURN,
+            KingdeeOperateType.AUDIT,
+            orderIds
+        );
+
+        if (!auditResponse.getErrcode().equals("0")) {
+            log.error("审核采购退货单失败：{}", auditResponse.getDescription());
+        } else {
+            log.info("采购退货单保存并审核成功，单据ID：{}", orderIds.get(0));
+        }
+
+        return auditResponse;
     }
 
     /**
