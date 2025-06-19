@@ -12,8 +12,11 @@ import java.util.Map;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class KingdeeProductSaveReqVO {
 
-
-    //自定义字段为引用辅助资料、引用基础资料时，提交单据保存接口，自定义字段名需要增加【_id】后缀，自定义字段值为：对应辅助资料或基础资料的id
+    /**
+     * 自定义字段为引用辅助资料、引用基础资料时，提交单据保存接口，自定义字段名需要增加【_id】后缀，自定义字段值为：对应辅助资料或基础资料的id
+     * <p>
+     * <a href="https://open.jdy.com/#/files/api/detail?id=76567ff2a06311edaa4b3d71bf0fce53&noside=true">...</a>
+     */
     public void setCustomField(KingdeeCustomField customField, String value) {
         //5：基础资料，6：引用基础资料属性
         if (customField.getFieldType() == 5 || customField.getFieldType() == 6) {

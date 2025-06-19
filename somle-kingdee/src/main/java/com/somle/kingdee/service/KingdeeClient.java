@@ -202,6 +202,26 @@ public class KingdeeClient {
     }
 
     /**
+     * 根据字段名称获取id，如果有该字段、则设置value，没有就日志记录。辅助资料
+     *
+     * @param entityType   实体类型枚举，如KingdeeEntityType.PUR_BILL_ORDER
+     * @param displayName  属性名称
+     * @param fieldValue   属性值
+     * @param setter       回调，接收KingdeeCustomField和fieldValue
+     */
+    public void setCustomFieldSafely(KingdeeEntityType entityType, String displayName, String fieldValue,
+                                     BiConsumer<KingdeeCustomField, String> setter) {
+        try {
+            KingdeeCustomField customField = getCustomFieldByDisplayName(entityType.getCode(), displayName);
+            if (customField != null) {
+                setter.accept(customField, fieldValue);
+            }
+        } catch (Exception e) {
+            log.debug("custom field {} skipped for {}", displayName, token.getAccountName(), e);
+        }
+    }
+
+    /**
      * 保存商品信息
      */
     public KingdeeResponse addProduct(KingdeeProductSaveReqVO product) {
@@ -219,37 +239,20 @@ public class KingdeeClient {
         //金蝶产品单位目前固定是`套`
         setUnitId("套", kingdeeUnit -> reqVO.setBaseUnitId(kingdeeUnit.getId()));
         try {
-            Optional.ofNullable(getAuxInfoByNumber(reqVO.getSaleDepartmentId().toString())).ifPresent(kingdeeUnit -> setCustomFieldSafely(reqVO, "部门", kingdeeUnit.getId()));
+            Optional.ofNullable(getAuxInfoByNumber(reqVO.getSaleDepartmentId().toString())).ifPresent(kingdeeUnit ->
+                setCustomFieldSafely(KingdeeEntityType.MATERIAL, "部门", kingdeeUnit.getId(), reqVO::setCustomField)
+            );
         } catch (Exception e) {
             log.debug("getAuxInfoByNumber error for sale department ID: {}", reqVO.getSaleDepartmentId(), e);
         }
-        setCustomFieldSafely(reqVO, "部门", reqVO.getDeclaredTypeZh());
-        setCustomFieldSafely(reqVO, "报关品名", reqVO.getDeclaredTypeZh());
-        setCustomFieldSafely(reqVO, "报关品名(英文)", reqVO.getDeclaredTypeEn());
+        setCustomFieldSafely(KingdeeEntityType.MATERIAL, "部门", reqVO.getDeclaredTypeZh(), reqVO::setCustomField);
+        setCustomFieldSafely(KingdeeEntityType.MATERIAL, "报关品名", reqVO.getDeclaredTypeZh(), reqVO::setCustomField);
+        setCustomFieldSafely(KingdeeEntityType.MATERIAL, "报关品名(英文)", reqVO.getDeclaredTypeEn(), reqVO::setCustomField);
         reqVO.setIgnoreWarn(true);//保存覆盖已存在产品
         log.debug("adding product");
         String endUrl = "/jdy/v2/bd/material";
         TreeMap<String, String> params = new TreeMap<>();
         return postResponse(endUrl, params, reqVO);
-    }
-
-
-    /**
-     * 根据字段名称获取id，如果有该字段、则设置value，没有就日志记录。辅助资料
-     *
-     * @param reqVO       对象
-     * @param displayName 属性名称
-     * @param fieldValue  属性值
-     */
-    private void setCustomFieldSafely(KingdeeProductSaveReqVO reqVO, String displayName, String fieldValue) {
-        try {
-            KingdeeCustomField customField = getCustomFieldByDisplayName("bd_material", displayName);
-            if (customField != null) {
-                reqVO.setCustomField(customField, fieldValue);
-            }
-        } catch (Exception e) {
-            log.debug("custom field {} skipped for {}", displayName, token.getAccountName(), e);
-        }
     }
 
 
@@ -367,7 +370,7 @@ public class KingdeeClient {
                 cacheKey,
                 lockKey,
                 60, TimeUnit.MINUTES,
-                new TypeReference<List<KingdeeCustomField>>() {
+                new TypeReference<>() {
                 },
                 () -> {
                     String endUrl = "/jdy/v2/sys/custom_field";
@@ -525,7 +528,7 @@ public class KingdeeClient {
             //自定义字段-付款条款
             SrmPurchaseOrderApi srmPurchaseOrderApi = SpringUtils.getBean(SrmPurchaseOrderApi.class);
             SrmPurchaseOrderDTO purchaseOrderDTO = srmPurchaseOrderApi.getPurchaseOrderByCode(saveReqVO.getBillNo());
-            setCustomFieldSafely(saveReqVO, "付款条款", purchaseOrderDTO.getPaymentTerms());
+            setCustomFieldSafely(KingdeeEntityType.PUR_BILL_ORDER, "付款条款", purchaseOrderDTO.getPaymentTerms(), saveReqVO::setCustomField);
         });
 
         TreeMap<String, String> params = new TreeMap<>();
@@ -665,7 +668,7 @@ public class KingdeeClient {
                 Long orderItemId = srmPurchaseInItemDTO.getOrderItemId();
 
                 //3.0 渲染订单ID+行ID
-                material.setSrcBillTypeId("pur_bill_order");
+                material.setSrcBillTypeId(KingdeeEntityType.PUR_BILL_ORDER.getCode());
                 KingdeePurOrderDetail kingdeePurOrderDetail = this.getPurOrderDetail(srcOrderBillNo);
                 //通过注册证号(itemID)匹配采购单行
                 kingdeePurOrderDetail.getMaterialEntity().stream().filter(materialTemp -> materialTemp.getProRegNo().equals(orderItemId.toString()))
