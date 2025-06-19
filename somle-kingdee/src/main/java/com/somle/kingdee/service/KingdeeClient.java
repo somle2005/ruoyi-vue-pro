@@ -12,6 +12,7 @@ import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInItemDTO;
+import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -503,11 +504,11 @@ public class KingdeeClient {
     public KingdeeResponse savePurOrder(KingdeePurOrderSaveReqVO order) {
         String endUrl = "/jdy/v2/scm/pur_order";
         //供应商
-        String supplierId = order.getSupplierNumber();//erp供应商ID(在convert的时候放在number了)
-        KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null).get(supplierId);
+        String supplierName = order.getSupplierNumber();//erp供应商ID(在convert的时候放在number了)
+        KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null).get(supplierName);
         //不存在 -> e
         if (supplierSaveVO == null) {
-            throw exception(SUPPLIER_NOT_EXIST, supplierId);
+            throw exception(SUPPLIER_NOT_EXIST, supplierName);
         }
         order.setSupplierId(supplierSaveVO.getId());
 
@@ -617,16 +618,23 @@ public class KingdeeClient {
         List<KingdeeResponse> responseList = new ArrayList<>();
 
         // 校验金蝶采购入库单是否存在
-        KingdeePurInboundDetail purInboundDetail = this.getPurInboundDetail(inbound.getBillNo());
+        KingdeePurInboundDetail purInboundDetail = null;
+        try {
+            purInboundDetail = this.getPurInboundDetail(inbound.getBillNo());
+        } catch (RuntimeException e) {
+            log.info("采购入库单不存在，采购入库单编号：{},响应: {}", inbound.getBillNo(), e.getMessage());
+        }
+
         //判断存在
         if (purInboundDetail == null) {
             //1,0 根据到货行查找采购订单
             //供应商ID
-            String supplierId = inbound.getSupplierNumber();
-            KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null).get(supplierId);
+            String erpSupplierId = inbound.getSupplierNumber();
+            SrmSupplierApi srmSupplierApi = SpringUtils.getBean(SrmSupplierApi.class);
+            KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null).get(srmSupplierApi.getSupplier(Long.valueOf(erpSupplierId)).getName());
             //不存在 -> e
             if (supplierSaveVO == null) {
-                throw exception(SUPPLIER_NOT_EXIST, supplierId);
+                throw exception(SUPPLIER_NOT_EXIST, erpSupplierId);
             }
             inbound.setSupplierId(supplierSaveVO.getId());
             inbound.getMaterialEntity().forEach(material -> {
@@ -655,9 +663,9 @@ public class KingdeeClient {
                 kingdeePurOrderDetail.getMaterialEntity().stream().filter(materialTemp -> materialTemp.getAuxPropId().equals(orderItemId.toString()))
                     .findFirst().ifPresent(materialTemp -> material.setSrcEntryId(materialTemp.getId()));
                 material.setSrcInterId(kingdeePurOrderDetail.getId());
-                //4.0 保存采购入库单
-                responseList.add(this.savePurInbound(inbound));
             });
+            //4.0 保存采购入库单
+            responseList.add(this.savePurInbound(inbound));
             //判断审核
             KingdeePurInboundDetail purInboundDetail2 = this.getPurInboundDetail(inbound.getBillNo());
             if (Objects.equals(purInboundDetail2.getBillStatus(), "Z")) {

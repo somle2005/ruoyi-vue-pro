@@ -8,7 +8,7 @@ public interface KingDeeErrorCodeConstants {
     ErrorCode SUPPLIER_LIST_FAIL = new ErrorCode(2_000_001_002, "获取供应商列表数据失败,原因:{}");
     ErrorCode SUPPLIER_LIST_LOADING = new ErrorCode(2_000_001_003, "供应商锁获取超时，请重试");
     ErrorCode SUPPLIER_LIST_SYNC_FAIL = new ErrorCode(2_000_001_004, "({})供应商同步失败，供应商:({})");
-    ErrorCode SUPPLIER_NOT_EXIST = new ErrorCode(2_000_001_005, "金蝶供应商:{} 缓存中不存在,同步失败");
+    ErrorCode SUPPLIER_NOT_EXIST = new ErrorCode(2_000_001_005, "金蝶供应商编号:({}) 缓存中不存在,同步失败");
     ErrorCode SUPPLIER_ADD_FAIL = new ErrorCode(2_000_001_006, "添加供应商失败，供应商编号:{}");
     ErrorCode SUPPLIER_LIST_REFRESH_FAIL = new ErrorCode(2_000_001_007, "刷新供应商列表失败，标识:{}");
 

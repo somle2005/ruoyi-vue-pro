@@ -220,11 +220,19 @@ public class EsbController {
         if (kingdeeVos.isEmpty()) {
             return CommonResult.success("没有需要同步的已审核采购入库单");
         }
-        // 6. 调用金蝶保存+审核
-        List<List<KingdeeResponse>> results = kingdeeVos.stream()
-            .map(kingdeeService::saveAuditPurInbound)
-            .toList();
-        // 7. 返回
+        // 6. 调用金蝶保存+审核，收集每个单据的结果（成功或异常）
+        List<Object> results = kingdeeVos.stream().map(vo -> {
+            try {
+                return kingdeeService.saveAuditPurInbound(vo);
+            } catch (Exception e) {
+                log.error("[采购入库单] 同步到金蝶异常，单据号:{}", vo.getBillNo(), e);
+                return Map.of(
+                    "billNo", vo.getBillNo(),
+                    "error", e.getMessage()
+                );
+            }
+        }).toList();
+        // 7. 返回 size 和 results
         return CommonResult.success(Map.of("size", results.size(), "results", results));
     }
 
