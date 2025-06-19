@@ -43,8 +43,6 @@ public class WmsWarehouseController {
     @Resource
     private WmsWarehouseService warehouseService;
 
-
-
     /**
      * @sign : 85CB8518B4499F29
      */
@@ -139,7 +137,7 @@ public class WmsWarehouseController {
         ExcelUtils.write(response, "仓库.xls", "数据", WmsWarehouseRespVO.class, BeanUtils.toBean(list, WmsWarehouseRespVO.class));
     }
 
-    @GetMapping("/simple-list/exchange")
+    @GetMapping("/exchange/simple-list")
     @Operation(summary = "获得转换单仓库列表")
     @PreAuthorize("@ss.hasPermission('wms:warehouse:query')")
     public CommonResult<List<WmsWarehouseSimpleRespVO>> getWarehouseSimpleListForExchange(Integer exchange) {

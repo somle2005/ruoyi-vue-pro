@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo;
 
 import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
+import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockRespVO;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -29,20 +30,14 @@ public class TmsFirstMileItemRespVO extends BaseVO {
 
     @Schema(description = "产品ID")
     private Long productId;
+
+    @Schema(description = "产品信息")
+    TmsProductRespVO product;
     /**
      * FBA条码
      */
     @Schema(description = "FBA条码")
     private String fbaBarCode;
-
-    //产品名称
-    @Schema(description = "产品名称")
-    @ExcelProperty("产品名称")
-    private String productName;
-    //产品SKU
-    @Schema(description = "产品SKU")
-    @ExcelProperty("产品SKU")
-    private String productSku;
 
     @Schema(description = "件数")
     @ExcelProperty("件数")
@@ -93,25 +88,47 @@ public class TmsFirstMileItemRespVO extends BaseVO {
     @ExcelProperty("发出仓名称")
     private String fromWarehouseName;
 
-    @Schema(description = "包装长（cm）")
-    @ExcelProperty("包装长（cm）")
+//    快照产品信息
+    /**
+     * 包装长（mm）(单个产品)
+     */
     private BigDecimal packageLength;
-
-    @Schema(description = "包装宽（cm）")
-    @ExcelProperty("包装宽（cm）")
+    /**
+     * 包装宽（mm）(单个产品)
+     */
     private BigDecimal packageWidth;
-
-    @Schema(description = "包装高（cm）")
-    @ExcelProperty("包装高（cm）")
+    /**
+     * 包装高（mm）(单个产品)
+     */
     private BigDecimal packageHeight;
-
-    @Schema(description = "毛重（kg）")
-    @ExcelProperty("毛重（kg）")
+    /**
+     * 毛重（kg）(单个产品)
+     */
     private BigDecimal packageWeight;
+    /**
+     * 基础重量(kg)(单个产品)
+     */
+    private BigDecimal weight;
 
-    @Schema(description = "体积（m³）")
-    @ExcelProperty("体积（m³）")
-    private BigDecimal volume;
+    @Schema(description = "总包装长（mm）")
+    @ExcelProperty("总包装长（mm）")
+    private BigDecimal totalPackageLength;
+
+    @Schema(description = "总包装宽（mm）")
+    @ExcelProperty("总包装宽（mm）")
+    private BigDecimal totalPackageWidth;
+
+    @Schema(description = "总包装高（mm）")
+    @ExcelProperty("总包装高（mm）")
+    private BigDecimal totalPackageHeight;
+
+    @Schema(description = "总毛重（kg）")
+    @ExcelProperty("总毛重（kg）")
+    private BigDecimal totalPackageWeight;
+
+    @Schema(description = "总体积（m³）")
+    @ExcelProperty("总体积（m³）")
+    private BigDecimal totalVolume;
 
     @Schema(description = "销售公司ID")
     private Long salesCompanyId;

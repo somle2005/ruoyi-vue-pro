@@ -82,7 +82,7 @@ public interface WmsErrorCodeConstants {
     ErrorCode APPROVAL_HISTORY_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_007_005, "审批历史不符合审批条件");
 
     // ========== WMS_STOCK_WAREHOUSE 仓库库存表 2_001_008_000 ==========
-    ErrorCode STOCK_WAREHOUSE_NOT_EXISTS = new ErrorCode(2_001_008_001, "仓库库存不存在");
+    ErrorCode STOCK_WAREHOUSE_NOT_EXISTS = new ErrorCode(2_001_008_001, "{}仓库{}产品库存不存在");
     ErrorCode STOCK_WAREHOUSE_WAREHOUSE_ID_PRODUCT_ID_DUPLICATE = new ErrorCode(2_001_008_002, "仓库ID,产品ID已存在");
     ErrorCode STOCK_WAREHOUSE_BE_REFERRED = new ErrorCode(2_001_008_003, "仓库库存被引用");
     ErrorCode STOCK_WAREHOUSE_CAN_NOT_EDIT = new ErrorCode(2_001_008_004, "仓库库存不允许编辑");
@@ -278,8 +278,8 @@ public interface WmsErrorCodeConstants {
     ErrorCode EXCHANGE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_023_008, "换货单不符合审批条件");
     ErrorCode EXCHANGE_AUDIT_FAIL = new ErrorCode(2_001_023_009, "审核错误，当前换货单状态为{}，在{}状态时才允许{}");
     ErrorCode EXCHANGE_AUDIT_ERROR = new ErrorCode(2_001_023_010, "换货单审核错误");
-    ErrorCode EXCHANGE_ITEM_ITEM_NOT_EXISTS = new ErrorCode(2_001_023_011, "换货单审核错误");
-    ErrorCode EXCHANGE_QUANTITY_ERROR = new ErrorCode(2_001_023_010, "换货单审核错误");
+    ErrorCode EXCHANGE_ITEM_ITEM_NOT_EXISTS = new ErrorCode(2_001_023_011, "换货单产品不存在");
+    ErrorCode EXCHANGE_QUANTITY_ERROR = new ErrorCode(2_001_023_010, "换货单数量错误");
 
     // ========== WMS_EXCHANGE_ITEM 良次换货详情表 2_001_024_000 ==========
     ErrorCode EXCHANGE_ITEM_NOT_EXISTS = new ErrorCode(2_001_024_001, "良次换货详情不存在");

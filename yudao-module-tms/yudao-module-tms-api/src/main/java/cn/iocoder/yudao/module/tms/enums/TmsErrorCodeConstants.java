@@ -56,12 +56,13 @@ public interface TmsErrorCodeConstants {
     ErrorCode FIRST_MILE_CODE_GENERATE_FAIL_MAX_TRY = new ErrorCode(1_030_901_006, "头程单编号，生成失败，重复{}次");
     ErrorCode FIRST_MILE_CODE_FORMAT_ERROR = new ErrorCode(1_030_901_007, "头程单({})编号格式错误");
     ErrorCode FIRST_MILE_ITEM_LIST_NOT_EMPTY = new ErrorCode(1_030_901_008, "头程单明细列表不能为空");
-    ErrorCode FIRST_MILE_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_901_009, "头程单({})状态为({})，不允许修改");
+    ErrorCode FIRST_MILE_UPDATE_FAIL_APPROVE = new ErrorCode(1_030_901_009, "头程单({})状态为({})，头程单部分不允许修改");
     ErrorCode FIRST_MILE_DELETE_FAIL_APPROVE = new ErrorCode(1_030_901_010, "头程单({})状态为({})，不允许删除");
     ErrorCode FIRST_MILE_CREATE_FAIL = new ErrorCode(1_030_901_011, "头程单创建子项失败，原因({})");
     ErrorCode FIRST_MILE_PROCESS_FAIL_WAREHOUSE_ID_DONT_EXISTS = new ErrorCode(1_030_901_012, "创建出库单需要头程明细中仓库ID不为空");
     ErrorCode FIRST_MILE_PROCESS_FAIL_WMS_OUTBOUND_EXISTS = new ErrorCode(1_030_901_013, "头程单创建出库单失败，原因:{}");
     ErrorCode FIRST_MILE_WMS_OUTBOUND_NOT_CAN_ABANDON = new ErrorCode(1_030_901_014, "反审核失败，头程单已生成出库单({}),不处于草稿状态,无法撤销");
+    ErrorCode FEE_WMS_OUTBOUND_NOT_CAN_ABANDON = new ErrorCode(1_030_901_015, "作废出库单失败，原因:{}");
 
     // ========== 费用明细 1-030-902-000 ==========
     ErrorCode FEE_NOT_EXISTS = new ErrorCode(1_030_902_001, "费用不存在,ID={},类型={}");
@@ -74,7 +75,7 @@ public interface TmsErrorCodeConstants {
     ErrorCode VESSEL_TRACKING_LOG_NOT_EXISTS = new ErrorCode(1_030_904_002, "出运跟踪信息表日志不存在");
 
     // ========== 港口信息 1-030-905-000 ==========
-    ErrorCode PORT_INFO_NOT_EXISTS = new ErrorCode(1_030_905_001, "TMS港口信息不存在");
+    ErrorCode PORT_INFO_NOT_EXISTS = new ErrorCode(1_030_905_001, "TMS港口信息(编号:{})不存在");
     ErrorCode PORT_INFO_NAME_DUPLICATE = new ErrorCode(1_030_905_002, "港口名称{}已存在");
 
     // ========== 调拨单 1-030-906-000 ==========

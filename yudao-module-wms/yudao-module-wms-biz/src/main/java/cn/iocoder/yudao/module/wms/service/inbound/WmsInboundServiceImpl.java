@@ -26,7 +26,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSim
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsInboundItemFlowDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
@@ -412,7 +412,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             return;
         }
         for (WmsInboundItemRespVO respVO : itemList) {
-            WmsInboundItemFlowDO inboundItemFlow = WmsInboundItemFlowDO.builder()
+            WmsItemFlowDO inboundItemFlow = WmsItemFlowDO.builder()
                     .inboundId(respVO.getInboundId())
                     .inboundItemId(respVO.getId())
                     .productId(respVO.getProductId())
@@ -498,8 +498,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
 
     /**
      * 按入库顺序获得第一个入库批次
-     * @param warehouseId
-     * @param productId
+     * @param warehouseId 仓库ID
+     * @param productId 产品ID
      * @param olderFirst 是否按入库时间升序
      */
     @Override
@@ -509,8 +509,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
 
     /**
      * 按入库顺序获得第一个入库批次
-     * @param warehouseId
-     * @param productIds
+     * @param warehouseId 仓库ID
+     * @param productIds 产品ID
      * @param olderFirst 是否按入库时间升序
      */
     @Override
@@ -564,9 +564,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         // 拉取明细
         List<WmsInboundItemDO> inboundItemDOS = inboundItemService.selectByInboundId(inbound.getId());
         // 设置实际入库量
-        StreamX.from(inboundItemDOS).assemble(actualQtyMap, WmsInboundItemDO::getProductId, (itemO, qty) -> {
-            itemO.setActualQty(qty);
-        });
+        StreamX.from(inboundItemDOS).assemble(actualQtyMap, WmsInboundItemDO::getProductId, WmsInboundItemDO::setActualQty);
         // 保存实际入库量
         inboundItemService.updateActualQuantity(BeanUtils.toBean(inboundItemDOS, WmsInboundItemSaveReqVO.class));
         // 同意确认收货
@@ -582,9 +580,9 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     public void updateShelvingStatus(Set<Long> ids) {
         for (Long id : ids) {
             List<WmsInboundItemDO> inboundItemDOList = inboundItemMapper.selectByInboundId(id, Integer.MAX_VALUE);
-            Integer none = 0;
-            Integer part = 0;
-            Integer full = 0;
+            int none = 0;
+            int part = 0;
+            int full = 0;
             for (WmsInboundItemDO itemDO : inboundItemDOList) {
                 Integer actualQty = itemDO.getActualQty();
                 Integer ShelveClosedQty = itemDO.getShelveClosedQty();
@@ -635,9 +633,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         // 拉取明细
         List<WmsInboundItemDO> inboundItemDOS = inboundItemService.selectByInboundId(inbound.getId());
         // 设置实际入库量
-        StreamX.from(inboundItemDOS).assemble(actualQtyMap, WmsInboundItemDO::getProductId, (itemO, qty) -> {
-            itemO.setActualQty(qty);
-        });
+        StreamX.from(inboundItemDOS).assemble(actualQtyMap, WmsInboundItemDO::getProductId, WmsInboundItemDO::setActualQty);
         // 保存实际入库量
         inboundItemService.updateActualQuantity(BeanUtils.toBean(inboundItemDOS, WmsInboundItemSaveReqVO.class));
         //
@@ -660,4 +656,23 @@ public class WmsInboundServiceImpl implements WmsInboundService {
             throw exception(INBOUND_ABANDON_NOT_ALLOWED);
         }
     }
+
+    @Override
+    public WmsInboundDO getByWarehouseIdAndProductId(Long warehouseId, Long productId) {
+        return inboundMapper.getByWarehouseIdAndProductId(warehouseId, productId);
+    }
+
+//    /**
+//     * 按 productId、locationId、warehouseId 查询 WmsItemFlowDO
+//     *
+//     * @param productId   产品 ID
+//     * @param binId       库位 ID
+//     * @param warehouseId 仓库 ID
+//     * @return 入库单库存详情扣减列表
+//     */
+//    @Override
+//    public List<WmsInboundItemFlowDetailVO> selectByProductIdAndBinIdAndWarehouseId(Long warehouseId, Long binId, Long productId, int limit) {
+//        return inboundMapper.selectByProductIdAndBinIdAndWarehouseId(productId, binId, warehouseId, limit);
+//    }
+
 }
