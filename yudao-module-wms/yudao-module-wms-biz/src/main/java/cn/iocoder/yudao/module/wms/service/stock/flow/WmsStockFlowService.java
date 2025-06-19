@@ -114,5 +114,37 @@ public interface WmsStockFlowService {
 
     void assembleExchange(List<WmsStockFlowRespVO> list);
 
-    void createForStockBin(WmsStockReason reason, WmsStockFlowDirection wmsStockFlowDirection, Long productId, WmsStockBinDO fromStockBinDO, Integer qty, Long binMoveId, Long id, Long binId, Integer binBeforeQty, Integer binAfterQty, Long inboundId);
+    /**
+     * 创建库存流水 - 库位库存
+     *
+     * @param reason       操作类型
+     * @param direction    方向
+     * @param productId    产品id
+     * @param stockBinDO   库位库存
+     * @param quantity     数量
+     * @param reasonId     单据编号
+     * @param reasonItemId 明细行编号
+     * @param binId        库存货位编号
+     * @param beforeQty    变更前数量
+     * @param afterQty     变更后数量
+     * @param inboundId    入库单编号
+     */
+    void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId, Long binId, Integer beforeQty, Integer afterQty, Long inboundId);
+
+    /**
+     * 创建逻辑库存变化流水
+     *
+     * @param reason       操作类型
+     * @param direction    方向
+     * @param productId    产品id
+     * @param stockLogicDO 逻辑库存
+     * @param quantity     数量
+     * @param reasonId     单据编号
+     * @param reasonItemId 明细行编号
+     * @param beforeQty    变更前数量
+     * @param afterQty     变更后数量
+     * @param inboundId    入库单编号
+     */
+    void createForStockLogic(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockLogicDO stockLogicDO, Integer quantity, Long reasonId, Long reasonItemId, Integer beforeQty, Integer afterQty, Long inboundId);
+
 }

@@ -183,6 +183,9 @@ public interface WmsInboundService {
 
     void forceAbandon(WmsApprovalReqVO approvalReqVO);
 
+    /**
+     * 根据仓库ID，商品ID和库位号查询入库单
+     */
     WmsInboundDO getByWarehouseIdAndProductId(Long warehouseId, Long productId);
 
 //    /**

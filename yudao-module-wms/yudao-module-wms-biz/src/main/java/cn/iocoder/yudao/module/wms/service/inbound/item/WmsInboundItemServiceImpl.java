@@ -79,7 +79,7 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
 
     @Resource
     @Lazy
-    private WmsItemFlowMapper inboundItemFlowMapper;
+    private WmsItemFlowMapper itemFlowMapper;
 
     @Resource
     @Lazy
@@ -290,10 +290,10 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     @Override
     public void saveItems(List<WmsInboundItemDO> itemsToUpdate, List<WmsItemFlowDO> itemFlowList) {
         // 保存流水
-        inboundItemFlowMapper.insertBatch(itemFlowList);
-        Map<Long, WmsItemFlowDO> flowDOMap = StreamX.from(itemFlowList).toMap(WmsItemFlowDO::getInboundItemId);
+        itemFlowMapper.insertBatch(itemFlowList);
+        Map<Long, WmsItemFlowDO> flowDoMap = StreamX.from(itemFlowList).toMap(WmsItemFlowDO::getInboundItemId);
         for (WmsInboundItemDO itemDO : itemsToUpdate) {
-            WmsItemFlowDO flowDO = flowDOMap.get(itemDO.getId());
+            WmsItemFlowDO flowDO = flowDoMap.get(itemDO.getId());
             itemDO.setLatestFlowId(flowDO.getId());
         }
         // 保存余量
@@ -305,9 +305,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
      */
     @Override
     public void assembleWarehouse(List<? extends WmsInboundItemRespVO> list) {
-        Map<Long, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsInboundItemRespVO::getWarehouseId));
-        Map<Long, WmsWarehouseSimpleRespVO> warehouseVOMap = StreamX.from(warehouseDOMap.values()).toMap(WmsWarehouseDO::getId, v -> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
-        StreamX.from(list).assemble(warehouseVOMap, WmsInboundItemRespVO::getWarehouseId, WmsInboundItemRespVO::setWarehouse);
+        Map<Long, WmsWarehouseDO> warehouseDoMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsInboundItemRespVO::getWarehouseId));
+        Map<Long, WmsWarehouseSimpleRespVO> warehouseVoMap = StreamX.from(warehouseDoMap.values()).toMap(WmsWarehouseDO::getId, v -> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
+        StreamX.from(list).assemble(warehouseVoMap, WmsInboundItemRespVO::getWarehouseId, WmsInboundItemRespVO::setWarehouse);
     }
 
     /**

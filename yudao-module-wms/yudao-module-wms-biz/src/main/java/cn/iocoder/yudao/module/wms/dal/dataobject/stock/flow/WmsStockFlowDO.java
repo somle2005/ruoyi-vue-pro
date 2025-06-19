@@ -148,10 +148,10 @@ public class WmsStockFlowDO extends BaseDO {
     /**
      * 库位改变前数量
      */
-    private Integer binBeforeQty;
+    private Integer beforeQty;
 
     /**
      * 库位改变后数量
      */
-    private Integer binAfterQty;
+    private Integer afterQty;
 }

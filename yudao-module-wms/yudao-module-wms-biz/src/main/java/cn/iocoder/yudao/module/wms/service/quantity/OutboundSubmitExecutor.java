@@ -252,7 +252,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         // 待出库量
         stockLogicDO.setOutboundPendingQty(stockLogicDO.getOutboundPendingQty() + quantity);
 
-        return WmsStockFlowDirection.IN;
+        return WmsStockFlowDirection.OUT;
     }
 
     /**

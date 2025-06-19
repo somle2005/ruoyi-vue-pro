@@ -207,8 +207,8 @@ public class WmsStockFlowRespVO {
     private Long inboundId;
 
     @Schema(description = "库位改变前数量", example = "")
-    private Integer binBeforeQty;
+    private Integer beforeQty;
 
     @Schema(description = "库位改变后数量", example = "")
-    private Integer binAfterQty;
+    private Integer afterQty;
 }

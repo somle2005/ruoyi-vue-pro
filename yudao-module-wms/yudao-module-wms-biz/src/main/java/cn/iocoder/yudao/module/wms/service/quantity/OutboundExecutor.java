@@ -219,7 +219,10 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         // 保存
         stockLogicService.insertOrUpdate(stockLogicDO);
         // 记录流水
-        stockFlowService.createForStockLogic(this.getReason(), wmsStockFlowDirection, productId, stockLogicDO, quantity, outboundId, outboundItemId);
+        // stockFlowService.createForStockLogic(this.getReason(), wmsStockFlowDirection, productId, stockLogicDO, quantity, outboundId, outboundItemId);
+        Integer afterQty = stockLogicDO.getAvailableQty();
+        Integer beforeQty = afterQty + quantity * wmsStockFlowDirection.getValue();
+        stockFlowService.createForStockLogic(this.getReason(), wmsStockFlowDirection, productId, stockLogicDO, quantity, outboundId, outboundItemId, beforeQty, afterQty, null);
     }
 
 
@@ -241,7 +244,7 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         // 保存
         stockBinService.insertOrUpdate(stockBinDO);
         // 记录流水
-        //记录库位变化快照值
+        // 记录库位变化快照值
         Integer beforeQty = stockBinDO.getSellableQty() - quantity * itemFlowList.get(0).getDirection();
         Integer afterQty = stockBinDO.getSellableQty();
         stockFlowService.createForStockBin(this.getReason(), wmsStockFlowDirection, productId, stockBinDO, itemFlowList.get(0).getOutboundAvailableDeltaQty(), outboundId, outboundItemId, binId, beforeQty, afterQty, itemFlowList.get(0).getInboundId());

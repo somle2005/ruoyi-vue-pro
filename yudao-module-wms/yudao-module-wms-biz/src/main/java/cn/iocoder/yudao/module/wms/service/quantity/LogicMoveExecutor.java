@@ -6,7 +6,6 @@ import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.move.WmsStockLogicMoveDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.move.item.WmsStockLogicMoveItemDO;
-import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.service.quantity.context.LogicMoveContext;
 import cn.iocoder.yudao.module.wms.service.stock.logic.move.WmsStockLogicMoveService;
@@ -21,6 +20,8 @@ import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection.IN;
+import static cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection.OUT;
 
 /**
  * @author: LeeFJ
@@ -107,7 +108,9 @@ public class LogicMoveExecutor extends QuantityExecutor<LogicMoveContext> {
         // 保存
         stockLogicService.insertOrUpdate(fromStockLogicDO);
         // 记录流水
-        stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.OUT, logicMoveItemDO.getProductId(), fromStockLogicDO, logicMoveItemDO.getQty(), logicMoveItemDO.getLogicMoveId(), logicMoveItemDO.getId());
+        Integer fromAfterQty = fromStockLogicDO.getAvailableQty();
+        Integer fromBeforeQty = fromAfterQty - logicMoveItemDO.getQty() * OUT.getValue();
+        stockFlowService.createForStockLogic(this.getReason(), OUT, logicMoveItemDO.getProductId(), fromStockLogicDO, logicMoveItemDO.getQty(), logicMoveItemDO.getLogicMoveId(), logicMoveItemDO.getId(), fromBeforeQty, fromAfterQty, null);
 
 
         // 入方
@@ -117,7 +120,9 @@ public class LogicMoveExecutor extends QuantityExecutor<LogicMoveContext> {
         // 保存
         stockLogicService.insertOrUpdate(toStockLogicDO);
         // 记录流水
-        stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.IN, logicMoveItemDO.getProductId(), toStockLogicDO, logicMoveItemDO.getQty(), logicMoveItemDO.getLogicMoveId(), logicMoveItemDO.getId());
+        Integer afterQty = toStockLogicDO.getAvailableQty();
+        Integer beforeQty = afterQty - logicMoveItemDO.getQty() * IN.getValue();
+        stockFlowService.createForStockLogic(this.getReason(), IN, logicMoveItemDO.getProductId(), toStockLogicDO, logicMoveItemDO.getQty(), logicMoveItemDO.getLogicMoveId(), logicMoveItemDO.getId(), beforeQty, afterQty, null);
 
     }
 

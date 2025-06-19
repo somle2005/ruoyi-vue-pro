@@ -27,8 +27,8 @@ public interface WmsStockLogicMapper extends BaseMapperX<WmsStockLogicDO> {
         wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockLogicDO::getProductId).likeIfExists(WmsProductDO::getCode, reqVO.getProductCode());
         // 按仓库
         // 按产品ID
-        wrapper.eqIfPresent(WmsStockLogicDO::getWarehouseId, reqVO.getWarehouseId()).
-            eqIfPresent(WmsStockLogicDO::getProductId, reqVO.getProductId());
+        wrapper.eqIfPresent(WmsStockLogicDO::getWarehouseId, reqVO.getWarehouseId());
+        wrapper.eqIfPresent(WmsStockLogicDO::getProductId, reqVO.getProductId());
         wrapper.eqIfPresent(WmsStockLogicDO::getCompanyId, reqVO.getCompanyId());
         wrapper.eqIfPresent(WmsStockLogicDO::getDeptId, reqVO.getDeptId());
         wrapper.betweenIfPresent(WmsStockLogicDO::getCreateTime, reqVO.getCreateTime());

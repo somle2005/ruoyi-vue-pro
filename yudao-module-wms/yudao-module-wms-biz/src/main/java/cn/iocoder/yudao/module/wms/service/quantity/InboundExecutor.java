@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
+import static com.fhs.common.constant.Constant.ZERO;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 
@@ -184,7 +185,9 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
         // 保存
         stockLogicService.insertOrUpdate(stockLogicDO);
         // 记录流水
-        stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.IN, productId, stockLogicDO, actualQuantity, inboundId, inboundItemId);
+        Integer beforeQty = stockLogicDO.getAvailableQty() == null ? ZERO : stockLogicDO.getAvailableQty();
+        Integer afterQty = beforeQty + actualQuantity;
+        stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.IN, productId, stockLogicDO, actualQuantity, inboundId, inboundItemId, beforeQty, afterQty, inboundId);
     }
 
 

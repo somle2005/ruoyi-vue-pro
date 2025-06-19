@@ -236,11 +236,36 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     }
 
     /**
-     * 创建逻辑库存变化流水
+     * 创建逻辑库存变化流水(原方法)
      */
     @Override
     public void createForStockLogic(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockLogicDO stockLogicDO, Integer quantity, Long reasonId, Long reasonItemId) {
         createFor(reason, WmsStockType.LOGIC, direction, stockLogicDO.getId(), stockLogicDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
+            // 采购计划量
+            // stockFlowDO.setPurchasePlanQty(stockLogicDO.getPurchasePlanQty());
+            // 采购在途量
+            // stockFlowDO.setPurchaseTransitQty(stockLogicDO.getPurchaseTransitQty());
+            // 退货在途量
+            // stockFlowDO.setReturnTransitQty(stockLogicDO.getReturnTransitQty());
+            // 可售量，未被单据占用的良品数量
+            // stockFlowDO.setSellableQty(stockLogicDO.getSellableQty());
+            // 可用量，在库的良品数量
+            stockFlowDO.setAvailableQty(stockLogicDO.getAvailableQty());
+            // 待上架数量
+            stockFlowDO.setShelvingPendingQty(stockLogicDO.getShelvePendingQty() + quantity);
+            // 不良品数量
+            // stockFlowDO.setDefectiveQty(stockLogicDO.getItemQty());
+            // 待出库量
+            stockFlowDO.setOutboundPendingQty(stockLogicDO.getOutboundPendingQty());
+        });
+    }
+
+    /**
+     * 创建逻辑库存变化流水(新方法)
+     */
+    @Override
+    public void createForStockLogic(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockLogicDO stockLogicDO, Integer quantity, Long reasonId, Long reasonItemId, Integer beforeQty, Integer afterQty, Long inboundId) {
+        createFor(reason, WmsStockType.LOGIC, direction, stockLogicDO.getId(), stockLogicDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, null, beforeQty, afterQty, inboundId, stockFlowDO -> {
             // 采购计划量
             // stockFlowDO.setPurchasePlanQty(stockLogicDO.getPurchasePlanQty());
             // 采购在途量
@@ -368,8 +393,8 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         stockFlowDO.setDirection(direction.getValue());
         stockFlowDO.setReasonItemId(reasonItemId);
         stockFlowDO.setBinId(binId);
-        stockFlowDO.setBinBeforeQty(beforeQty);
-        stockFlowDO.setBinAfterQty(afterQty);
+        stockFlowDO.setBeforeQty(beforeQty);
+        stockFlowDO.setAfterQty(afterQty);
         stockFlowDO.setInboundId(inboundId);
         if (lastStockFlowDO != null) {
             stockFlowDO.setPrevFlowId(lastStockFlowDO.getId());
