@@ -18,6 +18,7 @@ import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
@@ -39,7 +40,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
     @Lazy
     private SrmPurchaseInService purchaseInService;
     @Resource(name = PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountContext> purchaseInItemStorageStateMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountContext> purchaseInItemStorageStateMachine;
 
     @Override
     public List<SrmPurchaseInDTO> getPurchaseInList(List<Long> ids) {
@@ -72,6 +73,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
      * @param reqDTO 入库单DTO
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseInItemQty(SrmPurchaseInSaveReqDTO reqDTO) {
         //校验
         if (!Objects.equals(reqDTO.getUpstreamType(), BillType.SRM_PURCHASE_IN.getValue())) {
