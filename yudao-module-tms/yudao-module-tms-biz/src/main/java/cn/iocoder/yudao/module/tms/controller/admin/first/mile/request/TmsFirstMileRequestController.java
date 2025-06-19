@@ -268,16 +268,25 @@ public class TmsFirstMileRequestController {
                             }
 
                             // 计算总重量
+                            if (item.getWeight() != null) {
+                                itemRespVO.setTotalWeight(item.getWeight().multiply(new BigDecimal(item.getQty())));
+                            }
+
+                            // 计算总包装重量
                             if (item.getPackageWeight() != null) {
-                                itemRespVO.setTotalWeight(item.getPackageWeight().multiply(new BigDecimal(item.getQty())));
+                                itemRespVO.setTotalPackageWeight(item.getPackageWeight().multiply(new BigDecimal(item.getQty())));
                             }
 
                             // 计算总体积（立方毫米）
                             if (item.getPackageLength() != null && item.getPackageWidth() != null && item.getPackageHeight() != null) {
-                                BigDecimal volume = item.getPackageLength()
+                                // 计算单个产品体积（立方毫米）
+                                BigDecimal singleVolume = item.getPackageLength()
                                     .multiply(item.getPackageWidth())
-                                    .multiply(item.getPackageHeight())
-                                    .multiply(new BigDecimal(item.getQty()));
+                                    .multiply(item.getPackageHeight());
+                                itemRespVO.setVolume(singleVolume);
+
+                                // 计算总体积（立方毫米）
+                                BigDecimal volume = singleVolume.multiply(new BigDecimal(item.getQty()));
                                 itemRespVO.setTotalVolume(volume);
                             }
                         }
