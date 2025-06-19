@@ -12,6 +12,7 @@ import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
+import com.somle.esb.converter.srm.SrmPurInToKingdeeConvert;
 import com.somle.esb.converter.srm.SrmPurOrderToKingdeeConvert;
 import com.somle.esb.service.EsbService;
 import com.somle.esb.util.SyncUtils;
@@ -212,27 +213,23 @@ public class EsbController {
         } else {
             targetDtos = allDtos;
         }
-        // 5. 只同步已审核的单据
-        List<KingdeePurInboundSaveReqVO> kingdeeVos = targetDtos.stream()
+        // 5. 只同步已审核的单据，获取ID列表
+        List<Long> targetIds = targetDtos.stream()
             .filter(dto -> Objects.equals(dto.getAuditStatus(), SrmAuditStatus.APPROVED.getCode()))
-            .map(dto -> new com.somle.esb.converter.srm.SrmPurInToKingdeeConvert().convert(dto))
+            .map(SrmPurchaseInDTO::getId)
             .toList();
-        if (kingdeeVos.isEmpty()) {
+        if (targetIds.isEmpty()) {
             return CommonResult.success("没有需要同步的已审核采购入库单");
         }
-        // 6. 调用金蝶保存+审核，收集每个单据的结果（成功或异常）
-        List<Object> results = kingdeeVos.stream().map(vo -> {
-            try {
-                return kingdeeService.saveAuditPurInbound(vo);
-            } catch (Exception e) {
-                log.error("[采购入库单] 同步到金蝶异常，单据号:{}", vo.getBillNo(), e);
-                return Map.of(
-                    "billNo", vo.getBillNo(),
-                    "error", e.getMessage()
-                );
-            }
-        }).toList();
-        // 7. 返回 size 和 results
+        // 6. 同步
+        List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
+            targetIds,
+            srmPurchaseInApi::getPurchaseInList,
+            SrmPurInToKingdeeConvert::convertInDTOList,
+            kingdeeService::saveAuditPurInbound,
+            "采购入库单保存&审核",
+            KingdeePurInboundSaveReqVO::getBillNo
+        );
         return CommonResult.success(Map.of("size", results.size(), "results", results));
     }
 

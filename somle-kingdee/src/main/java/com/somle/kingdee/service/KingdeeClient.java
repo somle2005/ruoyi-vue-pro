@@ -11,7 +11,9 @@ import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInItemDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
@@ -233,7 +235,7 @@ public class KingdeeClient {
 
 
     /**
-     * 根据字段名称获取id，如果有该字段、则设置value，没有就日志记录
+     * 根据字段名称获取id，如果有该字段、则设置value，没有就日志记录。辅助资料
      *
      * @param reqVO       对象
      * @param displayName 属性名称
@@ -498,34 +500,37 @@ public class KingdeeClient {
     /**
      * 保存采购订单
      *
-     * @param order 采购订单数据_入参
+     * @param saveReqVO 采购订单数据_入参
      * @return KingdeeResponse
      */
-    public KingdeeResponse savePurOrder(KingdeePurOrderSaveReqVO order) {
+    public KingdeeResponse savePurOrder(KingdeePurOrderSaveReqVO saveReqVO) {
         String endUrl = "/jdy/v2/scm/pur_order";
         //供应商
-        String supplierName = order.getSupplierNumber();//erp供应商ID(在convert的时候放在number了)
+        String supplierName = saveReqVO.getSupplierNumber();//erp供应商ID(在convert的时候放在number了)
         KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null).get(supplierName);
         //不存在 -> e
         if (supplierSaveVO == null) {
             throw exception(SUPPLIER_NOT_EXIST, supplierName);
         }
-        order.setSupplierId(supplierSaveVO.getId());
+        saveReqVO.setSupplierId(supplierSaveVO.getId());
 
         //产品
-        order.getMaterialEntity().forEach(material -> {
+        saveReqVO.getMaterialEntity().forEach(material -> {
             material.setMaterialId(this.getMaterial(material.getMaterialNumber()).getData(JSONObject.class).getString("id"));
             //单位ID
             setUnitId("套", kingdeeUnit -> {
                 material.setUnitId(kingdeeUnit.getId());
                 material.setUnitNumber(kingdeeUnit.getNumber());
             });
-
+            //自定义字段-付款条款
+            SrmPurchaseOrderApi srmPurchaseOrderApi = SpringUtils.getBean(SrmPurchaseOrderApi.class);
+            SrmPurchaseOrderDTO purchaseOrderDTO = srmPurchaseOrderApi.getPurchaseOrderByCode(saveReqVO.getBillNo());
+            setCustomFieldSafely(saveReqVO, "付款条款", purchaseOrderDTO.getPaymentTerms());
         });
 
         TreeMap<String, String> params = new TreeMap<>();
-        order.setIgnoreWarn(false);//忽略告警信息(如：名称已存在)保存客户
-        return postResponse(endUrl, params, order);
+        saveReqVO.setIgnoreWarn(false);//忽略告警信息(如：名称已存在)保存客户
+        return postResponse(endUrl, params, saveReqVO);
     }
 
     /**
@@ -550,7 +555,7 @@ public class KingdeeClient {
             throw exception(KingDeeErrorCodeConstants.PURCHASE_ORDER_NOT_EXIST, purCode);
         }
 
-        //1.1  TDOO 查询金蝶是否存在采购订单
+        //1.1  TODO 查询金蝶是否存在采购订单
         // 2. 执行反审核操作
         List<String> orderIds = Collections.singletonList(purOrderDetail.getId());
         KingdeeResponse unAuditResponse = commonOperate(KingdeeEntityType.PUR_BILL_ORDER, KingdeeOperateType.UNAUDIT, orderIds);
@@ -648,6 +653,7 @@ public class KingdeeClient {
                 Map<Long, WmsWarehouseDTO> warehouseMap = warehouseApi.getWarehouseMap(List.of(Long.valueOf(stockId)));
                 material.setStockId(String.valueOf(warehouseMap.get(Long.valueOf(stockId)).getId()));
                 material.setStockNumber(warehouseMap.get(Long.valueOf(stockId)).getCode());
+                material.setStockId(null);
                 //当前明细行订单详情
                 String srcOrderBillNo = material.getSrcOrderBillNo();
                 if (srcOrderBillNo == null) {
@@ -659,10 +665,14 @@ public class KingdeeClient {
                 Long orderItemId = srmPurchaseInItemDTO.getOrderItemId();
 
                 //3.0 渲染订单ID+行ID
+                material.setSrcBillTypeId("pur_bill_order");
                 KingdeePurOrderDetail kingdeePurOrderDetail = this.getPurOrderDetail(srcOrderBillNo);
-                kingdeePurOrderDetail.getMaterialEntity().stream().filter(materialTemp -> materialTemp.getAuxPropId().equals(orderItemId.toString()))
-                    .findFirst().ifPresent(materialTemp -> material.setSrcEntryId(materialTemp.getId()));
+                //通过注册证号(itemID)匹配采购单行
+                kingdeePurOrderDetail.getMaterialEntity().stream().filter(materialTemp -> materialTemp.getProRegNo().equals(orderItemId.toString()))
+                    .findFirst()
+                    .ifPresent(materialTemp -> material.setSrcEntryId(materialTemp.getId()));
                 material.setSrcInterId(kingdeePurOrderDetail.getId());
+                material.setSrcOrderBillNo(kingdeePurOrderDetail.getBillNo());
             });
             //4.0 保存采购入库单
             responseList.add(this.savePurInbound(inbound));

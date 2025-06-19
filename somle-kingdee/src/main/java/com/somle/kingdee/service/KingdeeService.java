@@ -26,6 +26,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 // https://open.jdy.com/#/files/api/detail?index=2&categrayId=3cc8ee9a663e11eda5c84b5d383a2b93&id=adfe4a24712711eda0b307c6992ee459
 @Slf4j
@@ -103,7 +104,7 @@ public class KingdeeService {
                 log.debug("执行添加部门操作，client={}，identifier={}", client.getToken().getAccountName(), department.getName());
                 return client.addDepartment(department);
             })
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     /**
@@ -117,7 +118,7 @@ public class KingdeeService {
                 log.debug("执行添加产品操作，client={}，identifier={}", client.getToken().getAccountName(), product.getNumber());
                 return client.addProduct(product);
             })
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     /**
@@ -131,7 +132,7 @@ public class KingdeeService {
                 log.debug("执行添加供应商操作，client={}，identifier={}", client.getToken().getAccountName(), kingdeeSupplierSaveVO.getName());
                 return client.saveSupplier(kingdeeSupplierSaveVO);
             })
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     /**
@@ -158,7 +159,7 @@ public class KingdeeService {
         return clients.parallelStream()
             .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
             .map(client -> client.savePurOrder(purchaseOrder))
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     /**
@@ -170,7 +171,7 @@ public class KingdeeService {
         return clients.parallelStream()
             .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
             .map(client -> client.saveAndAuditPurOrder(purchaseOrder))
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     /**
@@ -185,7 +186,7 @@ public class KingdeeService {
                 return isSupplierNameMatch(purchaseOrderDTO.getSupplierName(), client);
             })
             .map(client -> client.unAuditPurOrder(purCode))
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     /**
@@ -197,7 +198,7 @@ public class KingdeeService {
         return clients.parallelStream()
             .map(client -> client.saveAuditPurInbound(purInbound))
             .flatMap(List::stream)
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     /**
@@ -211,7 +212,7 @@ public class KingdeeService {
                 log.debug("执行保存采购出库单操作，client={}，identifier={}", client.getToken().getAccountName(), purOutbound.getBillNo());
                 return client.savePurReturn(purOutbound);
             })
-            .collect(java.util.stream.Collectors.toList());
+            .collect(Collectors.toList());
     }
 
     /**

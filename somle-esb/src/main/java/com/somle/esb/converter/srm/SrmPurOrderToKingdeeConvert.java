@@ -133,8 +133,8 @@ public class SrmPurOrderToKingdeeConvert {
         }
         KingdeePurOrderSaveReqVO.MaterialEntity entity = new KingdeePurOrderSaveReqVO.MaterialEntity();
 
-        //辅助属性 <-> itemID
-        entity.setAuxPropId(String.valueOf(item.getId()));
+        //注册证号 <-> itemID
+        entity.setProRegNo(String.valueOf(item.getId()));
         // 1. 产品SKU信息
         entity.setMaterialNumber(StrUtil.trimToNull(item.getProductCode()));
 
