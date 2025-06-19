@@ -132,5 +132,12 @@ public interface SrmPurchaseInService {
      */
     void switchPayStatus(SrmPurchaseInPayReqVO vo);
 
+    /**
+     * 根据明细行ID获取采购到货项
+     *
+     * @param id 明细行ID
+     * @return SrmPurchaseInItemDO
+     */
+    SrmPurchaseInItemDO getPurchaseInItemById(Long id);
 
 }

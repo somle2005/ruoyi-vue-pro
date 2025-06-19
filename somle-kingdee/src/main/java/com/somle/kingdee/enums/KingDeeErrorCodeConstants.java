@@ -28,6 +28,7 @@ public interface KingDeeErrorCodeConstants {
 
     // ========== 采购入库单 2-000-005-000 ==========
     ErrorCode PUR_INBOUND_SAVE_FAIL = new ErrorCode(2_000_005_001, "保存采购入库单失败，单据号:{}");
+    ErrorCode PUR_INBOUND_NOT_EXIST = new ErrorCode(2_000_005_002, "采购到货单{}，上游采购订单编码不存在");
 
     // ========== 采购出库单 2-000-006-000 ==========
     ErrorCode PUR_OUTBOUND_SAVE_FAIL = new ErrorCode(2_000_006_001, "保存采购出库单失败，单据号:{}");

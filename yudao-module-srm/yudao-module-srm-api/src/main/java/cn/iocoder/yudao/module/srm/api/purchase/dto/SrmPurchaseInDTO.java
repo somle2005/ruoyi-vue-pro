@@ -13,24 +13,21 @@ import java.util.List;
 public class SrmPurchaseInDTO {
 
     /**
-     * 采购入库单编号
+     * 主键ID
      */
     private Long id;
 
     /**
-     * 采购入库单编号
+     * 乐观锁
      */
-    private String inNo;
+    private Integer version;
 
     /**
-     * 采购订单编号
+     * 采购到货单据编号
      */
-    private Long orderId;
+    private String code;
 
-    /**
-     * 采购订单编号
-     */
-    private String orderNo;
+    // ========= 基础关联字段 =========
 
     /**
      * 供应商编号
@@ -38,50 +35,141 @@ public class SrmPurchaseInDTO {
     private Long supplierId;
 
     /**
-     * 供应商名称
+     * 结算账户编号
      */
-    private String supplierName;
+    private Long accountId;
 
     /**
-     * 供应商编码
+     * 币别ID
      */
-    private String supplierCode;
+    private Long currencyId;
 
     /**
-     * 入库日期
+     * 汇率
      */
-    private LocalDateTime inDate;
+    private BigDecimal exchangeRate;
 
+    /**
+     * 收货地址
+     */
+    private String address;
+
+    // ========= 单据时间 =========
+
+    /**
+     * 单据日期
+     */
+    private LocalDateTime billTime;
+
+    /**
+     * 入库时间
+     */
+    private LocalDateTime arriveTime;
+
+    /**
+     * 结算日期
+     */
+    private LocalDateTime settlementDate;
+
+    // ========= 数量金额字段 =========
+
+    /**
+     * 合计数量
+     */
+    private BigDecimal totalCount;
+
+    /**
+     * 最终合计价格（= 产品价格合计 + 税额合计 - 折扣金额 + 其他金额）
+     */
+    private BigDecimal totalPrice;
+
+    /**
+     * 合计产品价格
+     */
+    private BigDecimal totalProductPrice;
+
+    /**
+     * 合计税额
+     */
+    private BigDecimal totalGrossPrice;
+
+
+    /**
+     * 优惠率（百分比）
+     */
+    private BigDecimal discountPercent;
+
+    /**
+     * 优惠金额
+     */
+    private BigDecimal discountPrice;
+
+    /**
+     * 其他金额
+     */
+    private BigDecimal otherPrice;
+
+    /**
+     * 已支付金额
+     */
+    private BigDecimal paymentPrice;
+
+    // ========= 审核与对账信息 =========
+
+    /**
+     * 付款状态
+     */
+    private Integer payStatus;
+
+    /**
+     * 审核状态
+     */
+    private Integer auditStatus;
+
+    /**
+     * 审核人ID
+     */
+    private Long auditorId;
+
+    /**
+     * 审核时间
+     */
+    private LocalDateTime auditTime;
+
+    /**
+     * 审核意见
+     */
+    private String auditAdvice;
+
+    /**
+     * 对账状态（false-未对账，true-已对账）
+     */
+    private Boolean reconciliationStatus;
+
+    // ========= 附加信息 =========
     /**
      * 入库状态
      */
-    private Integer status;
+    private Integer inboundStatus;
+    /**
+     * 总毛重，单位：kg
+     */
+    private BigDecimal totalWeight;
 
     /**
-     * 入库总金额
+     * 总体积,毫米，单位：mm³
      */
-    private BigDecimal totalAmount;
+    private BigDecimal totalVolume;
 
     /**
-     * 入库总数量
+     * 附件地址
      */
-    private BigDecimal totalQuantity;
+    private String fileUrl;
 
     /**
      * 备注
      */
     private String remark;
-
-    /**
-     * 创建时间
-     */
-    private LocalDateTime createTime;
-
-    /**
-     * 更新时间
-     */
-    private LocalDateTime updateTime;
-
     /**
      * 入库明细列表
      */

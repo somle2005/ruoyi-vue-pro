@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.srm.api.purchase;
 
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInItemDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmPurchaseInSaveReqDTO;
 import org.springframework.validation.annotation.Validated;
 
@@ -27,4 +28,11 @@ public interface SrmPurchaseInApi {
      */
     void updatePurchaseInItemQty(SrmPurchaseInSaveReqDTO reqDTO);
 
+    /**
+     * 根据明细行ID获得SrmPurchaseInItemDTO
+     *
+     * @param id 明细行ID
+     * @return SrmPurchaseInItemDTO
+     */
+    SrmPurchaseInItemDTO getPurchaseInItemById(Long id);
 } 

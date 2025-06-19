@@ -96,23 +96,12 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
      * @return 入库明细 DTO
      */
     private SrmPurchaseInItemDTO convertInItem(SrmPurchaseInItemDO item) {
-        if (item == null) {
-            return null;
-        }
-        SrmPurchaseInItemDTO dto = BeanUtils.toBean(item, SrmPurchaseInItemDTO.class);
-        // 特殊字段映射
-        dto.setProductCode(item.getProductCode());
-        dto.setMaterialId(item.getProductId());
-//        dto.setMaterialCode(item.getProductCode());
-        dto.setMaterialName(item.getProductName());
-        dto.setUnit(item.getProductUnitName());
-        dto.setQuantity(item.getQty());
-        dto.setPrice(item.getProductPrice());
-        dto.setAmount(item.getTotalPrice());
-        dto.setTaxRate(item.getTaxRate());
-        dto.setTaxAmount(item.getTax());
-        dto.setGrossPrice(item.getGrossPrice());
-        dto.setGrossTotalPrice(item.getTotalProductPrice());
-        return dto;
+        return BeanUtils.toBean(item, SrmPurchaseInItemDTO.class);
+    }
+
+    @Override
+    public SrmPurchaseInItemDTO getPurchaseInItemById(Long id) {
+        SrmPurchaseInItemDO itemDO = purchaseInService.getPurchaseInItemById(id);
+        return convertInItem(itemDO);
     }
 } 

@@ -189,13 +189,14 @@ public class KingdeeService {
     }
 
     /**
-     * 保存采购到货单
+     * 保存+审核采购到货单
      *
      * @param purInbound 采购到货单
      */
     public List<KingdeeResponse> savePurInbound(KingdeePurInboundSaveReqVO purInbound) {
         return clients.parallelStream()
-            .map(client -> client.savePurInbound(purInbound))
+            .map(client -> client.saveAuditPurInbound(purInbound))
+            .flatMap(List::stream)
             .collect(java.util.stream.Collectors.toList());
     }
 

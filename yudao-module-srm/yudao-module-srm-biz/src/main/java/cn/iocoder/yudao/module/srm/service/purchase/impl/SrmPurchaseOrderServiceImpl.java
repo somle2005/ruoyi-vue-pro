@@ -43,6 +43,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderWordBO;
+import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWareHouseUpdateReqDTO;
 import com.aspose.words.Document;
@@ -107,6 +108,8 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     private final FmsCompanyApi erpCompanyApi;
     private final ResourcePatternResolver resourcePatternResolver;
     private final TemplateService templateService;
+    private final WmsWarehouseApi wmsWarehouseApi;
+    private final SrmSupplierService srmSupplierService;
 
     @Resource(name = PURCHASE_ORDER_OFF_STATE_MACHINE_NAME)
     StateMachine<SrmOffStatus, SrmEventEnum, SrmPurchaseOrderDO> orderOffMachine;
@@ -138,10 +141,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     MessageChannel purchaseOrderChannel;
     @Resource(name = SrmChannelEnum.PURCHASE_ORDER_REVERSE)
     MessageChannel purchaseOrderReverseChannel;
-    @Autowired
-    private WmsWarehouseApi wmsWarehouseApi;
-    @Autowired
-    private SrmSupplierService srmSupplierService;
+
 
     /**
      * 校验是否存在入库项
@@ -750,7 +750,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 //更新WMS仓库在制数量
                 this.updateWareHouseGNumber(orderDO, false);
                 //同步 -> 金蝶订单
-                purchaseOrderChannel.send(MessageBuilder.withPayload(Collections.singletonList(orderDO.getId())).build());
+                TransactionUtils.runAfterCommit(() -> purchaseOrderChannel.send(MessageBuilder.withPayload(Collections.singletonList(orderDO.getId())).build()));
             } else {
                 log.debug("采购订单拒绝审核，ID: {}", orderDO.getId());
                 orderAuditMachine.fireEvent(currentStatus, SrmEventEnum.REJECT, vo);
@@ -767,7 +767,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             //减少wms对应产品的在制数量
             this.updateWareHouseGNumber(orderDO, true);
             //同步 -> 作废金蝶采购订单
-            purchaseOrderReverseChannel.send(MessageBuilder.withPayload(Collections.singletonList(orderDO.getId())).build());
+            TransactionUtils.runAfterCommit(() -> purchaseOrderReverseChannel.send(MessageBuilder.withPayload(Collections.singletonList(orderDO.getId())).build()));
         }
     }
 

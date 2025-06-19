@@ -43,23 +43,32 @@ public class SrmPurInToKingdeeConvert {
         KingdeePurInboundSaveReqVO kingdeeOrder = new KingdeePurInboundSaveReqVO();
 
         // 1. 设置基本信息
-        kingdeeOrder.setBillNo(inOrder.getInNo());
-        kingdeeOrder.setSupplierId(String.valueOf(inOrder.getSupplierId()));
-        kingdeeOrder.setSupplierNumber(inOrder.getSupplierCode());
+        kingdeeOrder.setBillNo(inOrder.getCode());
+        kingdeeOrder.setSupplierNumber(String.valueOf(inOrder.getSupplierId()));
         kingdeeOrder.setRemark(inOrder.getRemark());
 
-        // 2. 设置日期
-        if (inOrder.getInDate() != null) {
-            LocalDateTime utc8Time = EsbTimeUtils.convertToUtc8(inOrder.getInDate());
+        // 2. 设置日期 - 使用单据日期
+        if (inOrder.getBillTime() != null) {
+            LocalDateTime utc8Time = EsbTimeUtils.convertToUtc8(inOrder.getBillTime());
             kingdeeOrder.setBillDate(DateUtil.format(utc8Time, "yyyy-MM-dd"));
         }
 
-        // 3. 设置金额
-        if (inOrder.getTotalAmount() != null) {
-            kingdeeOrder.setTotalAmount(inOrder.getTotalAmount());
+        // 3. 设置金额 - 使用最终合计价格
+        if (inOrder.getTotalPrice() != null) {
+            kingdeeOrder.setTotalAmount(inOrder.getTotalPrice());
         }
 
-        // 4. 转换商品分录
+        // 4. 设置币别信息
+        if (inOrder.getCurrencyId() != null) {
+            kingdeeOrder.setCurrencyId(String.valueOf(inOrder.getCurrencyId()));
+        }
+
+        // 5. 设置汇率
+        if (inOrder.getExchangeRate() != null) {
+            kingdeeOrder.setExchangeRate(inOrder.getExchangeRate());
+        }
+
+        // 6. 转换商品分录
         if (inOrder.getItems() != null) {
             List<MaterialEntity> materialEntities = inOrder.getItems().stream()
                 .map(this::convertToMaterialEntity)
@@ -80,32 +89,30 @@ public class SrmPurInToKingdeeConvert {
 
         MaterialEntity entity = new MaterialEntity();
 
-        // 1. 设置商品信息
-        entity.setMaterialId(String.valueOf(item.getMaterialId()));
-        entity.setMaterialNumber(item.getMaterialCode());
+        // 1. 设置商品信息 - 使用产品编码
+        entity.setMaterialNumber(item.getProductCode());
 
-        // 2. 设置数量信息
-        entity.setQty(item.getActualQuantity());
-        if (item.getPrice() != null) {
-            entity.setPrice(item.getPrice());
+        // 2. 设置数量信息 - 使用实际入库数量
+        entity.setQty(item.getActualQty());
+        if (item.getProductPrice() != null) {
+            entity.setPrice(item.getProductPrice());
         }
-        if (item.getAmount() != null) {
-            entity.setAmount(item.getAmount());
+        if (item.getTotalPrice() != null) {
+            entity.setAmount(item.getTotalPrice());
         }
 
         // 3. 设置仓库信息
         entity.setStockId(String.valueOf(item.getWarehouseId()));
-        entity.setStockNumber(item.getWarehouseName());
 
-        // 4. 设置单位信息
-        entity.setUnitId(String.valueOf(item.getProductUnitId()));
+        // 4. 设置单位信息(固定的单位"套")
+//        entity.setUnitId(String.valueOf(item.getProductUnitId()));
 
         // 5. 设置税率相关信息
         if (item.getTaxRate() != null) {
             entity.setCess(item.getTaxRate());
         }
-        if (item.getTaxAmount() != null) {
-            entity.setTaxAmount(item.getTaxAmount());
+        if (item.getTax() != null) {
+            entity.setTaxAmount(item.getTax());
         }
         if (item.getGrossPrice() != null) {
             entity.setTaxPrice(item.getGrossPrice());
@@ -116,6 +123,17 @@ public class SrmPurInToKingdeeConvert {
 
         // 6. 设置备注
         entity.setComment(item.getRemark());
+
+        // 7. 设置源单信息（如果有采购订单关联）
+        if (item.getOrderCode() != null) {
+            entity.setSrcOrderBillNo(item.getOrderCode());
+        }
+//        if (item.getOrderItemId() != null) {
+//            entity.setSrcEntryId(String.valueOf(item.getOrderItemId()));
+//        }
+
+        // 8. 设置辅助属性（使用Item-ID作为辅助属性）
+        entity.setAuxPropId(String.valueOf(item.getId()));
 
         return entity;
     }

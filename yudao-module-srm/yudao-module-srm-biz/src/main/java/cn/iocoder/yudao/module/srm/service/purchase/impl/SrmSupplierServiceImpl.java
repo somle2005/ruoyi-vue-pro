@@ -13,6 +13,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmSupplierMapper;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.payment.term.SrmPaymentTermService;
+import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.MessageBuilder;
@@ -57,7 +58,9 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
         validateSupplierNameDuplicate(supplier.getName(), null);
         supplierMapper.insert(supplier);
         // 发送消息到通道
-        supplierChannel.send(MessageBuilder.withPayload(Collections.singletonList(supplier.getId())).build());
+        TransactionUtils.runAfterCommit(() -> supplierChannel.send(MessageBuilder
+            .withPayload(Collections.singletonList(supplier.getId()))
+            .build()));
         return supplier.getId();
     }
 
@@ -71,7 +74,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
         SrmSupplierDO updateObj = BeanUtils.toBean(updateReqVO, SrmSupplierDO.class);
         supplierMapper.updateById(updateObj);
         // 发送消息到通道
-        supplierChannel.send(MessageBuilder.withPayload(Collections.singletonList(updateObj.getId())).build());
+        TransactionUtils.runAfterCommit(() -> supplierChannel.send(MessageBuilder.withPayload(Collections.singletonList(updateObj.getId())).build()));
     }
 
     @Override

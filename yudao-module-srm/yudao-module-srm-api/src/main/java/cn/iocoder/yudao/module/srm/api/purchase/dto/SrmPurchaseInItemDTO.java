@@ -15,148 +15,131 @@ public class SrmPurchaseInItemDTO {
      */
     private Long id;
 
+    private Integer version;
     /**
-     * 采购入库编号
+     * 采购入库编号 关联 
      */
-    private Long inId;
-
+    private Long arriveId;
     /**
-     * 仓库编号
+     * 仓库编号 关联 
      */
     private Long warehouseId;
-
     /**
-     * 仓库名称
+     * 产品编号 关联 
      */
-    private String warehouseName;
-
+    private Long productId;
     /**
-     * 产品编号
-     */
-    private Long materialId;
-
-    /**
-     * 产品编码
-     */
-    private String materialCode;
-
-    /**
-     * 产品名称
-     */
-    private String materialName;
-
-    /**
-     * 产品单位编号
+     * 产品单位 冗余 
      */
     private Long productUnitId;
-
     /**
      * 产品单位名称
      */
-    private String unit;
-
+    private String productUnitName;
     /**
-     * 产品单价，单位：元
+     * 产品单位单价，单位：元
      */
-    private BigDecimal price;
-
+    private BigDecimal productPrice;
     /**
      * 已付款金额
      */
     private BigDecimal payPrice;
-
     /**
      * 到货数量
      */
-    private BigDecimal quantity;
-
+    private BigDecimal qty;
     /**
      * 实际入库数量
      */
-    private BigDecimal actualQuantity;
-
+    private BigDecimal actualQty;
     /**
      * 实际入库状态
      */
-    private Integer inStatus;
-
+    private Integer inboundStatus;
     /**
-     * 总价，单位：元
+     * 总价，单位：元 totalPrice = productPrice * qty
      */
-    private BigDecimal amount;
-
+    private BigDecimal totalPrice;
     /**
      * 合计产品价格，单位：元
      */
     private BigDecimal totalProductPrice;
-
     /**
      * 合计税额
      */
     private BigDecimal totalGrossPrice;
-
     /**
      * 税率，百分比
      */
     private BigDecimal taxRate;
-
     /**
-     * 税额，单位：元
+     * 税额，单位：元 tax = totalPrice * taxRate
      */
-    private BigDecimal taxAmount;
-
-    /**
-     * 含税单价
-     */
-    private BigDecimal grossPrice;
-
-    /**
-     * 价税合计
-     */
-    private BigDecimal grossTotalPrice;
-
+    private BigDecimal tax;
     /**
      * 备注
      */
     private String remark;
-
     /**
-     * 采购订单项编号
+     * 采购订单项编号 关联 
+     * <p>
+     * 目的：方便更新关联的采购订单项的入库数量
      */
     private Long orderItemId;
-
+    /**
+     * 采购订单编号 关联
+     */
+    private String orderCode;
     /**
      * 付款状态
      */
     private Integer payStatus;
-
+    /**
+     * 含税单价
+     */
+    private BigDecimal grossPrice;
+    /**
+     * 价税合计
+     */
+    private BigDecimal grossTotalPrice;
+    /**
+     * 型号规格(产品带出)
+     */
+    private String model;
+    /**
+     * 单据来源
+     */
+    private String source;
+    /**
+     * 申请人id
+     */
+    private Long applicantId;
+    /**
+     * 申请人部门id
+     */
+    private Long applicationDeptId;
     /**
      * 报关品名
      */
     private String declaredType;
-
     /**
-     * 英文报关品名
+     * 报关品名英文
      */
     private String declaredTypeEn;
-
     /**
-     * 产品条码
+     * 产品名称
      */
-    private String productCode;
-
+    private String productName;
     /**
-     * 箱率
+     * x码
+     */
+    private String fbaCode;
+    /**
+     * 箱率 关联 
      */
     private String containerRate;
-
     /**
-     * 申请人编号
+     * 产品sku
      */
-    private Long applicantId;
-
-    /**
-     * 申请部门编号
-     */
-    private Long applicationDeptId;
+    private String productCode;
 } 
