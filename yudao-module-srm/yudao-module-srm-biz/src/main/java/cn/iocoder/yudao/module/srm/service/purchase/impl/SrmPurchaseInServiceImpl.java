@@ -622,6 +622,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     @Override
+    public SrmPurchaseInDO getPurchaseInByCode(String code) {
+        return purchaseInMapper.selectByNo(code);
+    }
+
+    @Override
     public PageResult<SrmPurchaseInBO> getPurchaseInBOPage(SrmPurchaseInPageReqVO pageReqVO) {
         // 1. 查询分页数据（子表+主表）
         PageResult<SrmPurchaseInItemBO> pageResult = purchaseInItemMapper.selectBOPage(pageReqVO);

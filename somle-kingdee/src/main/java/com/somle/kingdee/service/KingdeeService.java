@@ -2,10 +2,12 @@ package com.somle.kingdee.service;
 
 
 import cn.hutool.core.util.StrUtil;
-import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
+import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.model.vo.KingdeeSupplierQueryReqVO;
@@ -37,6 +39,7 @@ public class KingdeeService {
 
     private List<String> outerInstanceIds;
     private List<KingdeeClient> clients;
+    private Boolean strictSupplierMatch = true; // 是否严格匹配供应商名称，默认为true,非严格模式数据同步给所有公司
 
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
@@ -48,6 +51,8 @@ public class KingdeeService {
     private SrmSupplierApi srmSupplierApi;
     @Autowired
     private SrmPurchaseOrderApi srmPurchaseOrderApi;
+    @Autowired
+    private SrmPurchaseInApi srmPurchaseInApi;
 
     //TODO 优化: 启动后异步初始化，懒加载
     @PostConstruct
@@ -138,13 +143,13 @@ public class KingdeeService {
     /**
      * 比较供应商名称是否匹配当前客户端名称
      * <p>
-     * 正式环境严格匹配。其余环境true
+     * 当 strictSupplierMatch=true 时严格匹配，否则返回 true
      * @param supplierName 供应商名称
      * @param client       金蝶客户端
      * @return 是否匹配
      */
     private boolean isSupplierNameMatch(String supplierName, KingdeeClient client) {
-        if (!SpringUtils.isProd()) {
+        if (!strictSupplierMatch) {
             return true;
         }
         return Objects.equals(StrUtil.trim(supplierName), StrUtil.trim(client.getToken().getAccountName()));
@@ -196,6 +201,12 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> saveAuditPurInbound(KingdeePurInboundSaveReqVO purInbound) {
         return clients.parallelStream()
+            .filter(client -> {
+                SrmPurchaseInDTO purchaseInByCode = srmPurchaseInApi.getPurchaseInByCode(purInbound.getBillNo());
+                Long supplierId = purchaseInByCode.getSupplierId();
+                SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(supplierId);
+                return isSupplierNameMatch(supplierDTO.getName(), client);
+            })
             .map(client -> client.saveAuditPurInbound(purInbound))
             .flatMap(List::stream)
             .collect(Collectors.toList());
@@ -208,10 +219,12 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> savePurOutbound(KingdeePurReturnSaveReqVO purOutbound) {
         return clients.parallelStream()
-            .map(client -> {
-                log.debug("执行保存采购出库单操作，client={}，identifier={}", client.getToken().getAccountName(), purOutbound.getBillNo());
-                return client.savePurReturn(purOutbound);
+            .filter(client -> {
+                Long supplierId = Long.valueOf(purOutbound.getSupplierId());
+                SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(supplierId);
+                return isSupplierNameMatch(supplierDTO.getName(), client);
             })
+            .map(client -> client.savePurReturn(purOutbound))
             .collect(Collectors.toList());
     }
 

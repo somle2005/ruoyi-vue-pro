@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.srm.api.purchase.dto;
 
+import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -13,75 +14,123 @@ import java.util.List;
 public class SrmPurchaseReturnDTO {
 
     /**
-     * 采购退货单编号
+     * 编号
      */
     private Long id;
-
     /**
-     * 采购退货单编号
+     * 乐观锁
      */
-    private String returnNo;
-
+    private Integer version;
     /**
-     * 采购订单编号
+     * 采购退货单号
      */
-    private Long orderId;
-
+    private String code;
     /**
-     * 采购订单编号
+     * 审批状态
+     * <p>
+     * 枚举 {@link SrmAuditStatus}
      */
-    private String orderNo;
-
+    private Integer auditStatus;
+    /**
+     * 审核者id
+     */
+    private Long auditorId;
+    /**
+     * 审核时间
+     */
+    private LocalDateTime auditTime;
+    /**
+     * 审核意见
+     */
+    private String auditAdvice;
     /**
      * 供应商编号
+     * <p>
      */
     private Long supplierId;
+    /**
+     * 结算账户编号
+     * <p>
+     */
+    private Long accountId;
+    /**
+     * 退货时间
+     */
+    private LocalDateTime returnTime;
 
     /**
-     * 供应商名称
+     * 币种编号
      */
-    private String supplierName;
+    private Long currencyId;
+    /**
+     * 价税合计
+     */
+    private BigDecimal grossTotalPrice;
 
     /**
-     * 供应商编码
+     * 合计数量
      */
-    private String supplierCode;
+    private BigDecimal totalCount;
+    /**
+     * 最终合计价格，单位：元
+     * <p>
+     * totalPrice = totalProductPrice + totalGrossPrice - discountPrice + otherPrice
+     */
+    private BigDecimal totalPrice;
+    /**
+     * 总毛重，单位：kg
+     */
+    private BigDecimal totalWeight;
+    /**
+     * 总体积,毫米，单位：mm³
+     */
+    private BigDecimal totalVolume;
+    /**
+     * 已退款金额，单位：元
+     * <p>
+     */
+    private BigDecimal refundPrice;
 
     /**
-     * 退货日期
+     * 合计产品价格，单位：元
      */
-    private LocalDateTime returnDate;
+    private BigDecimal totalProductPrice;
+    /**
+     * 合计税额，单位：元
+     */
+    private BigDecimal totalGrossPrice;
+    /**
+     * 优惠率，百分比
+     */
+    private BigDecimal discountPercent;
+    /**
+     * 优惠金额，单位：元
+     * <p>
+     * discountPrice = (totalProductPrice + totalGrossPrice) * discountPercent
+     */
+    private BigDecimal discountPrice;
+    /**
+     * 其它金额，单位：元
+     */
+    private BigDecimal otherPrice;
 
     /**
-     * 退货状态
+     * 附件地址
      */
-    private Integer status;
-
-    /**
-     * 退货总金额
-     */
-    private BigDecimal totalAmount;
-
-    /**
-     * 退货总数量
-     */
-    private BigDecimal totalQuantity;
-
+    private String fileUrl;
     /**
      * 备注
      */
     private String remark;
 
     /**
-     * 创建时间
+     * 退款状态
      */
-    private LocalDateTime createTime;
-
+    private Integer refundStatus;
     /**
-     * 更新时间
+     * 出库状态
      */
-    private LocalDateTime updateTime;
-
+    private Integer outboundStatus;
     /**
      * 退货明细列表
      */

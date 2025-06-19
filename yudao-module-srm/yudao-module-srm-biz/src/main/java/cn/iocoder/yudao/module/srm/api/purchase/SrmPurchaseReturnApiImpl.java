@@ -2,6 +2,7 @@ package cn.iocoder.yudao.module.srm.api.purchase;
 
 import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnItemDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveItemReqDTO;
@@ -57,23 +58,10 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
 
         // 3. 转换为 DTO 对象
         return returnOrders.stream().map(returnOrder -> {
-            SrmPurchaseReturnDTO dto = new SrmPurchaseReturnDTO();
-            // 3.1 设置基本信息
-            dto.setId(returnOrder.getId());
-            dto.setReturnNo(returnOrder.getCode());
-            dto.setSupplierId(returnOrder.getSupplierId());
-            dto.setReturnDate(returnOrder.getReturnTime());
-            dto.setStatus(returnOrder.getAuditStatus());
-            dto.setTotalAmount(returnOrder.getTotalPrice());
-            dto.setTotalQuantity(returnOrder.getTotalCount());
-            dto.setRemark(returnOrder.getRemark());
-            dto.setCreateTime(returnOrder.getCreateTime());
-            dto.setUpdateTime(returnOrder.getUpdateTime());
-
+            SrmPurchaseReturnDTO dto = BeanUtils.toBean(returnOrder, SrmPurchaseReturnDTO.class);
             // 3.2 设置退货明细
             List<SrmPurchaseReturnItemDO> returnItems = returnItemMap.getOrDefault(returnOrder.getId(), List.of());
             dto.setItems(returnItems.stream().map(this::convertReturnItem).collect(Collectors.toList()));
-            
             return dto;
         }).collect(Collectors.toList());
     }
@@ -85,30 +73,7 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
      * @return 退货明细 DTO
      */
     private SrmPurchaseReturnItemDTO convertReturnItem(SrmPurchaseReturnItemDO item) {
-        if (item == null) {
-            return null;
-        }
-        SrmPurchaseReturnItemDTO dto = new SrmPurchaseReturnItemDTO();
-        dto.setId(item.getId());
-        dto.setMaterialId(item.getProductId());
-        dto.setMaterialCode(item.getProductName());
-        dto.setMaterialName(item.getProductName());
-        dto.setQuantity(item.getQty());
-        dto.setPrice(item.getProductPrice());
-        dto.setAmount(item.getTotalPrice());
-        dto.setUnit(item.getProductUnitName());
-        dto.setRemark(item.getRemark());
-        dto.setTaxRate(item.getTaxRate());
-        dto.setTaxAmount(item.getTax());
-        dto.setGrossPrice(item.getGrossPrice());
-        dto.setGrossTotalPrice(item.getTotalPrice());
-        dto.setWarehouseId(item.getWarehouseId());
-        dto.setProductCode(item.getProductCode());
-        dto.setDeclaredType(item.getDeclaredType());
-        dto.setContainerRate(item.getContainerRate());
-        dto.setApplicantId(item.getApplicantId());
-        dto.setApplicationDeptId(item.getApplicationDeptId());
-        return dto;
+        return BeanUtils.toBean(item, SrmPurchaseReturnItemDTO.class);
     }
 
 

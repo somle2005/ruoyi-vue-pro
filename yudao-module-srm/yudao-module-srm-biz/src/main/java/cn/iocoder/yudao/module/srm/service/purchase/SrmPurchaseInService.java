@@ -147,4 +147,12 @@ public interface SrmPurchaseInService {
      */
     List<Long> listAllPurchaseInIds();
 
+    /**
+     * 根据到货单编号获取采购到货单
+     *
+     * @param code 到货单编号
+     * @return 采购到货单
+     */
+    SrmPurchaseInDO getPurchaseInByCode(String code);
+
 }

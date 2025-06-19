@@ -1,7 +1,6 @@
 package com.somle.esb.converter.srm;
 
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnItemDTO;
 import com.somle.kingdee.model.KingdeePurReturnSaveReqVO;
@@ -30,7 +29,7 @@ public class SrmPurOutToKingdeeConvert {
             return new ArrayList<>();
         }
         return returnOrders.stream()
-            .map(new SrmPurOutToKingdeeConvert()::convert)
+            .map(this::convert)
             .collect(Collectors.toList());
     }
 
@@ -48,20 +47,21 @@ public class SrmPurOutToKingdeeConvert {
         KingdeePurReturnSaveReqVO kingdeeOrder = new KingdeePurReturnSaveReqVO();
 
         // 1. 设置基本信息
-        kingdeeOrder.setBillNo(returnOrder.getReturnNo());
-        kingdeeOrder.setSupplierId(String.valueOf(returnOrder.getSupplierId()));
-        kingdeeOrder.setSupplierNumber(returnOrder.getSupplierCode());
+        kingdeeOrder.setBillNo(returnOrder.getCode());
+        kingdeeOrder.setSupplierId(returnOrder.getSupplierId() == null ? null : String.valueOf(returnOrder.getSupplierId()));
         kingdeeOrder.setRemark(returnOrder.getRemark());
+        //币别
+//        kingdeeOrder.setCurrencyId(returnOrder.getCurrencyId() == null ? null : String.valueOf(returnOrder.getCurrencyId()));
 
         // 2. 设置日期
-        if (returnOrder.getReturnDate() != null) {
-            LocalDateTime utc8Time = convertToUtc8(returnOrder.getReturnDate());
+        if (returnOrder.getReturnTime() != null) {
+            LocalDateTime utc8Time = convertToUtc8(returnOrder.getReturnTime());
             kingdeeOrder.setBillDate(DateUtil.format(utc8Time, "yyyy-MM-dd"));
         }
 
         // 3. 设置金额
-        if (returnOrder.getTotalAmount() != null) {
-            kingdeeOrder.setTotalAmount(returnOrder.getTotalAmount());
+        if (returnOrder.getTotalPrice() != null) {
+            kingdeeOrder.setTotalAmount(returnOrder.getTotalPrice());
         }
 
         // 4. 转换商品分录
@@ -85,20 +85,20 @@ public class SrmPurOutToKingdeeConvert {
         MaterialEntity entity = new MaterialEntity();
 
         // 1. 产品SKU信息
-        entity.setMaterialId(String.valueOf(item.getMaterialId()));
-        entity.setMaterialNumber(StrUtil.trimToNull(item.getMaterialCode()));
+        entity.setMaterialId(item.getProductId() == null ? null : String.valueOf(item.getProductId()));
+        entity.setMaterialNumber(item.getProductCode());
 
         // 2. 数量信息
-        entity.setQty(item.getQuantity());
-        if (item.getPrice() != null) {
-            entity.setPrice(item.getPrice());
+        entity.setQty(item.getQty());
+        if (item.getProductPrice() != null) {
+            entity.setPrice(item.getProductPrice());
         }
-        if (item.getAmount() != null) {
-            entity.setAmount(item.getAmount());
+        if (item.getTotalPrice() != null) {
+            entity.setAmount(item.getTotalPrice());
         }
 
         // 3. 单位信息
-        entity.setUnitId(StrUtil.trimToNull(item.getUnit()));
+        entity.setUnitId(item.getProductUnitId() == null ? null : String.valueOf(item.getProductUnitId()));
 
         // 4. 仓库信息
         if (item.getWarehouseId() != null) {
@@ -109,15 +109,15 @@ public class SrmPurOutToKingdeeConvert {
         if (item.getTaxRate() != null) {
             entity.setCess(item.getTaxRate());
         }
-        if (item.getTaxAmount() != null) {
-            entity.setTaxAmount(item.getTaxAmount());
+        if (item.getTax() != null) {
+            entity.setTaxAmount(item.getTax());
         }
         if (item.getGrossPrice() != null) {
             entity.setTaxPrice(item.getGrossPrice());
         }
 
         // 6. 其他信息
-        entity.setComment(StrUtil.trimToNull(item.getRemark()));
+        entity.setComment(item.getRemark());
 
         return entity;
     }

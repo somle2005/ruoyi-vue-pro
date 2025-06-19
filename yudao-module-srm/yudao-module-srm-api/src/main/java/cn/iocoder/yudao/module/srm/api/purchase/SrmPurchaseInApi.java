@@ -42,4 +42,9 @@ public interface SrmPurchaseInApi {
      * @return 采购到货单ID列表
      */
     List<Long> listAllPurchaseInIds();
+
+    /**
+     * 根据到货code查询SrmPurchaseInDTO
+     */
+    SrmPurchaseInDTO getPurchaseInByCode(String code);
 } 

@@ -111,4 +111,21 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
     public List<Long> listAllPurchaseInIds() {
         return purchaseInService.listAllPurchaseInIds();
     }
-} 
+
+    @Override
+    public SrmPurchaseInDTO getPurchaseInByCode(String code) {
+        // 1. 根据code获取采购入库单
+        SrmPurchaseInDO inOrder = purchaseInService.getPurchaseInByCode(code);
+        if (inOrder == null) {
+            return null;
+        }
+
+        // 2. 获取入库明细列表
+        List<SrmPurchaseInItemDO> inItems = purchaseInService.getPurchaseInItemListByInId(inOrder.getId());
+
+        // 3. 转换为 DTO 对象
+        SrmPurchaseInDTO dto = BeanUtils.toBean(inOrder, SrmPurchaseInDTO.class);
+        dto.setItems(inItems.stream().map(this::convertInItem).collect(Collectors.toList()));
+        return dto;
+    }
+}

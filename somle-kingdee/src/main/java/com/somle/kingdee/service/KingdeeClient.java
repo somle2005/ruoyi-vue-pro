@@ -689,6 +689,13 @@ public class KingdeeClient {
     }
 
     /**
+     * 保存+审核 采购退货单
+     */
+    public KingdeeResponse saveAndAuditPurchaseReturn(KingdeePurReturnSaveReqVO returnOrder) {
+        return null;
+    }
+
+    /**
      * 保存金蝶采购入库单
      */
     public KingdeeResponse savePurInbound(KingdeePurInboundSaveReqVO inbound) {
