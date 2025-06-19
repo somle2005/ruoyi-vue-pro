@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.wms.service.quantity;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
@@ -26,6 +27,7 @@ import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static com.fhs.common.constant.Constant.ZERO;
 
 /**
  * @author: LeeFJ
@@ -195,8 +197,11 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         // 更新库存
         stockWarehouseService.insertOrUpdate(stockWarehouseDO);
         // 记录流水
-        stockFlowService.createForStockWarehouse(this.getReason(),wmsStockFlowDirection, productId, stockWarehouseDO, quantity, outboundId, outboundItemId);
-
+        WmsInboundDO inboundDO = inboundService.getByDetails(warehouseId, productId, companyId, deptId);
+        int beforeQty = stockWarehouseDO.getAvailableQty() == null ? ZERO : stockWarehouseDO.getAvailableQty();
+        Integer afterQty = beforeQty + quantity * wmsStockFlowDirection.getValue();
+        stockFlowService.createForStockWarehouse(this.getReason(), wmsStockFlowDirection, productId, stockWarehouseDO, quantity, outboundId, outboundItemId,
+            beforeQty, afterQty, inboundDO.getId());
     }
 
 
@@ -219,10 +224,10 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         // 保存
         stockLogicService.insertOrUpdate(stockLogicDO);
         // 记录流水
-        // stockFlowService.createForStockLogic(this.getReason(), wmsStockFlowDirection, productId, stockLogicDO, quantity, outboundId, outboundItemId);
-        Integer afterQty = stockLogicDO.getAvailableQty();
-        Integer beforeQty = afterQty + quantity * wmsStockFlowDirection.getValue();
-        stockFlowService.createForStockLogic(this.getReason(), wmsStockFlowDirection, productId, stockLogicDO, quantity, outboundId, outboundItemId, beforeQty, afterQty, null);
+        WmsInboundDO inboundDO = inboundService.getByDetails(warehouseId, productId, companyId, deptId);
+        Integer beforeQty = stockLogicDO.getAvailableQty();
+        Integer afterQty = beforeQty + quantity * wmsStockFlowDirection.getValue();
+        stockFlowService.createForStockLogic(this.getReason(), wmsStockFlowDirection, productId, stockLogicDO, quantity, outboundId, outboundItemId, beforeQty, afterQty, inboundDO.getId());
     }
 
 

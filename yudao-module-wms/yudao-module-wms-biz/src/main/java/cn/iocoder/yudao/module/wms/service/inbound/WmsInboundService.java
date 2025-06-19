@@ -186,7 +186,7 @@ public interface WmsInboundService {
     /**
      * 根据仓库ID，商品ID和库位号查询入库单
      */
-    WmsInboundDO getByWarehouseIdAndProductId(Long warehouseId, Long productId);
+    WmsInboundDO getByDetails(Long warehouseId, Long productId, Long companyId, Long deptId);
 
 //    /**
 //     * 根据产品ID，库位ID和仓库ID查询

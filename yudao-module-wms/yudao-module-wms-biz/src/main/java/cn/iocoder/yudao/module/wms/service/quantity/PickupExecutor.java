@@ -215,7 +215,9 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         // 更新库存
         stockWarehouseService.insertOrUpdate(stockWarehouseDO);
         // 记录流水
-        stockFlowService.createForStockWarehouse(this.getReason(),WmsStockFlowDirection.OUT, productId, stockWarehouseDO, quantity, pickup.getId(), pickupItemDO.getId());
+        Integer beforeQty = stockWarehouseDO.getAvailableQty() == null ? ZERO : stockWarehouseDO.getAvailableQty();
+        Integer afterQty = beforeQty + quantity;
+        stockFlowService.createForStockWarehouse(this.getReason(), WmsStockFlowDirection.OUT, productId, stockWarehouseDO, quantity, pickup.getId(), pickupItemDO.getId(), beforeQty, afterQty, inboundDO.getId());
     }
 
 
@@ -276,7 +278,8 @@ public class PickupExecutor extends QuantityExecutor<PickupContext> {
         // 保存
         stockLogicService.insertOrUpdate(stockLogicDO);
         // 记录流水
-        stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.IN, productId, stockLogicDO, quantity, pickup.getId(), pickupItemDO.getId());
+        stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.IN, productId, stockLogicDO, quantity, pickup.getId(), pickupItemDO.getId(),
+            stockLogicDO.getAvailableQty() - quantity, stockLogicDO.getAvailableQty(), inboundDO.getId());
 
     }
 

@@ -205,7 +205,9 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 更新库存
         stockWarehouseService.insertOrUpdate(stockWarehouseDO);
         // 记录流水
-        stockFlowService.createForStockWarehouse(this.getReason(), wmsStockFlowDirection, item.getProductId(), stockWarehouseDO, item.getQty(), null, null);
+        int beforeQty = stockWarehouseDO.getAvailableQty() == null ? 0 : stockWarehouseDO.getAvailableQty();
+        Integer afterQty = beforeQty + (item.getQty() * wmsStockFlowDirection.getValue());
+        stockFlowService.createForStockWarehouse(this.getReason(), wmsStockFlowDirection, item.getProductId(), stockWarehouseDO, item.getQty(), null, null, beforeQty, afterQty, null);
 
     }
 

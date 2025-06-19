@@ -287,7 +287,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
 //            throw exception(STOCK_BIN_NOT_ENOUGH);
 //        }
 //
-//        //TODO 按库存批次出库暂不实现
+//        //按库存批次出库暂不实现
 //
 //    }
 

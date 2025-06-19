@@ -658,8 +658,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     }
 
     @Override
-    public WmsInboundDO getByWarehouseIdAndProductId(Long warehouseId, Long productId) {
-        return inboundMapper.getByWarehouseIdAndProductId(warehouseId, productId);
+    public WmsInboundDO getByDetails(Long warehouseId, Long productId, Long companyId, Long deptId) {
+        return inboundMapper.getByDetails(warehouseId, productId, companyId, deptId);
     }
 
 //    /**

@@ -165,7 +165,9 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
         // 保存
         stockWarehouseService.insertOrUpdate(stockWarehouseDO);
         // 记录流水
-        stockFlowService.createForStockWarehouse(this.getReason(), WmsStockFlowDirection.IN,productId, stockWarehouseDO, actualQuantity, inboundId, inboundItemId);
+        Integer beforeQty = stockWarehouseDO.getAvailableQty() == null ? ZERO : stockWarehouseDO.getAvailableQty();
+        Integer afterQty = beforeQty + actualQuantity;
+        stockFlowService.createForStockWarehouse(this.getReason(), WmsStockFlowDirection.IN, productId, stockWarehouseDO, actualQuantity, inboundId, inboundItemId, beforeQty, afterQty, inboundId);
 
     }
 
