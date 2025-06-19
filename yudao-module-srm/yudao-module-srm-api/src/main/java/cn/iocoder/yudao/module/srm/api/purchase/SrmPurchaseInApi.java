@@ -13,15 +13,15 @@ import java.util.List;
 public interface SrmPurchaseInApi {
 
     /**
-     * 获得采购入库单列表
+     * 获得采购到货列表
      *
-     * @param ids 采购入库单编号列表
-     * @return 采购入库单列表
+     * @param ids 采购到货编号列表
+     * @return 采购到货列表
      */
     List<SrmPurchaseInDTO> getPurchaseInList(List<Long> ids);
 
     /**
-     * 状态机-变动入库项-入库数量
+     * 回填到货项-入库数量
      * <p>
      * 入库单审核后，回调
      */

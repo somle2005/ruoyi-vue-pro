@@ -10,6 +10,7 @@ import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import com.somle.esb.converter.ErpToKingdeeConverter;
+import com.somle.esb.converter.srm.SrmPurOrderToKingdeeConvert;
 import com.somle.esb.service.EsbService;
 import com.somle.esb.util.SyncUtils;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
@@ -83,7 +84,7 @@ public class EsbController {
     @PostMapping("/syncSuppliers")
     public String syncSuppliers(@RequestParam(value = "supplierNames", required = false) List<String> supplierNames) {
         List<Long> supplierIds;
-        
+
         if (supplierNames != null && !supplierNames.isEmpty()) {
             // 根据供应商名称获取供应商ID
             List<SrmSupplierDTO> suppliers = srmSupplierApi.getSupplierList();
@@ -105,7 +106,7 @@ public class EsbController {
                 .distinct()
                 .toList();
         }
-        
+
         tmsSupplierChannel.send(MessageBuilder.withPayload(supplierIds).build());
         return "success";
     }
@@ -163,7 +164,7 @@ public class EsbController {
         List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
-            erpToKingdeeConverter::convertOrderDTOList,
+            new SrmPurOrderToKingdeeConvert()::convertOrderDTOList,
             kingdeePurOrderSaveReqVO -> {
                 if (purchaseOrderMap.containsKey(kingdeePurOrderSaveReqVO.getBillNo())) {
                     SrmPurchaseOrderDTO purchaseOrder = purchaseOrderMap.get(kingdeePurOrderSaveReqVO.getBillNo());

@@ -55,8 +55,7 @@ public class SyncUtils {
                 S result = syncer.apply(obj);
                 successCount.incrementAndGet();
                 int current = completedCount.incrementAndGet();
-                log.info("[{}] 同步进度：{}/{}，唯一标识(ID)：{} - 成功", logType, current, total,
-                        numberGetter.apply(obj));
+                log.info("[{}] 同步进度：{}/{}，唯一标识(ID)：{} - 成功", logType, current, total, numberGetter.apply(obj));
                 return result;
             } catch (Exception e) {
                 failCount.incrementAndGet();

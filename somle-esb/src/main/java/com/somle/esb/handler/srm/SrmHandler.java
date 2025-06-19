@@ -8,6 +8,9 @@ import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import com.somle.esb.aspect.SyncLog;
 import com.somle.esb.converter.ErpToKingdeeConverter;
+import com.somle.esb.converter.srm.SrmPurInToKingdeeConvert;
+import com.somle.esb.converter.srm.SrmPurOrderToKingdeeConvert;
+import com.somle.esb.converter.srm.SrmPurOutToKingdeeConvert;
 import com.somle.esb.util.SyncUtils;
 import com.somle.kingdee.model.KingdeePurInboundSaveReqVO;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
@@ -61,7 +64,7 @@ public class SrmHandler {
         List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
-            erpToKingdeeConverter::convertOrderDTOList,
+            new SrmPurOrderToKingdeeConvert()::convertOrderDTOList,
             kingdeeService::saveAndAuditPurchaseOrder,
             "采购订单创建审核",
             KingdeePurOrderSaveReqVO::getBillNo
@@ -89,7 +92,7 @@ public class SrmHandler {
         List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             inIds,
             srmPurchaseInApi::getPurchaseInList,
-            erpToKingdeeConverter::convertInDTOList,
+            SrmPurInToKingdeeConvert::convertInDTOList,
             kingdeeService::savePurInbound,
             "采购到货单",
             KingdeePurInboundSaveReqVO::getBillNo
@@ -104,7 +107,7 @@ public class SrmHandler {
         List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             returnIds,
             srmPurchaseReturnApi::getPurchaseReturnList,
-            erpToKingdeeConverter::convertReturnDTOList,
+            new SrmPurOutToKingdeeConvert()::convertReturnDTOList,
             kingdeeService::savePurOutbound,
             "采购退货单",
             KingdeePurReturnSaveReqVO::getBillNo

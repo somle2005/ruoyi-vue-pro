@@ -181,7 +181,6 @@ public class KingdeeService {
     public List<KingdeeResponse> unAuditPurchaseOrder(String purCode) {
         return clients.parallelStream()
             .filter(client -> {
-                log.debug("执行取消审核采购订单操作，client={}，identifier={}", client.getToken().getAccountName(), purCode);
                 SrmPurchaseOrderDTO purchaseOrderDTO = srmPurchaseOrderApi.getPurchaseOrderByCode(purCode);
                 return isSupplierNameMatch(purchaseOrderDTO.getSupplierName(), client);
             })
@@ -196,10 +195,7 @@ public class KingdeeService {
      */
     public List<KingdeeResponse> savePurInbound(KingdeePurInboundSaveReqVO purInbound) {
         return clients.parallelStream()
-            .map(client -> {
-                log.debug("执行保存采购到货单操作，client={}，identifier={}", client.getToken().getAccountName(), purInbound.getBillNo());
-                return client.savePurInbound(purInbound);
-            })
+            .map(client -> client.savePurInbound(purInbound))
             .collect(java.util.stream.Collectors.toList());
     }
 

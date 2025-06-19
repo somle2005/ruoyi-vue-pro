@@ -609,6 +609,11 @@ public class KingdeeClient {
      * @return KingdeeResponse
      */
     public KingdeeResponse savePurInbound(KingdeePurInboundSaveReqVO inbound) {
+        // 校验金蝶采购入库单是否存在
+        //1,0 根据到货行查找采购订单
+        //2.0 根据辅助顺序拿到采购单行
+        //3.0 渲染订单ID+行ID
+        //4.0 保存采购入库单
         String endUrl = "/jdy/v2/scm/pur_inbound";
         TreeMap<String, String> params = new TreeMap<>();
         return postResponse(endUrl, params, inbound);
