@@ -4,15 +4,18 @@ import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
-import com.somle.esb.converter.ErpToKingdeeConverter;
+import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import com.somle.esb.converter.srm.SrmPurOrderToKingdeeConvert;
 import com.somle.esb.service.EsbService;
 import com.somle.esb.util.SyncUtils;
+import com.somle.kingdee.model.KingdeePurInboundSaveReqVO;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
 import com.somle.kingdee.model.KingdeeResponse;
 import com.somle.kingdee.service.KingdeeService;
@@ -50,9 +53,9 @@ public class EsbController {
 
     private final SrmSupplierApi srmSupplierApi;
     private final SrmPurchaseOrderApi srmPurchaseOrderApi;
+    private final SrmPurchaseInApi srmPurchaseInApi;
     private final ErpProductApi erpProductApi;
     private final EsbService service;
-    private final ErpToKingdeeConverter erpToKingdeeConverter;
     private final KingdeeService kingdeeService;
 
     /**
@@ -169,7 +172,7 @@ public class EsbController {
                 if (purchaseOrderMap.containsKey(kingdeePurOrderSaveReqVO.getBillNo())) {
                     SrmPurchaseOrderDTO purchaseOrder = purchaseOrderMap.get(kingdeePurOrderSaveReqVO.getBillNo());
                     // 判断是否已审核
-                    if (Objects.equals(purchaseOrder.getAuditStatus(), cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus.APPROVED.getCode())) {
+                    if (Objects.equals(purchaseOrder.getAuditStatus(), SrmAuditStatus.APPROVED.getCode())) {
                         return kingdeeService.saveAndAuditPurchaseOrder(kingdeePurOrderSaveReqVO);
                     } else {
                         return kingdeeService.savePurchaseOrder(kingdeePurOrderSaveReqVO);
@@ -182,6 +185,47 @@ public class EsbController {
         );
         Map<String, Object> map = Map.of("size", results.size(), "results", results);
         return CommonResult.success(map);
+    }
+
+    /**
+     * 同步采购入库单到金蝶系统 支持全量同步或指定入库单编码同步
+     */
+    @PostMapping("/syncAllPurchaseInbound")
+    public CommonResult<Object> syncAllPurchaseInbound(@RequestParam(value = "inboundCodes", required = false) List<String> inboundCodes) {
+        // 1. 获取所有采购入库单ID
+        List<Long> allIds = srmPurchaseInApi.listAllPurchaseInIds();
+        // 2. 获取所有DTO
+        List<SrmPurchaseInDTO> allDtos = srmPurchaseInApi.getPurchaseInList(allIds);
+        // 3. 构建code->DTO映射
+        Map<String, SrmPurchaseInDTO> codeDtoMap = allDtos.stream().collect(Collectors.toMap(SrmPurchaseInDTO::getCode, v -> v));
+        // 4. 过滤目标DTO
+        List<SrmPurchaseInDTO> targetDtos;
+        if (inboundCodes != null && !inboundCodes.isEmpty()) {
+            targetDtos = inboundCodes.stream()
+                .map(codeDtoMap::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+            if (targetDtos.isEmpty()) {
+                log.warn("[采购入库单] 未找到指定code的采购入库单，入参:{}", JSONUtil.parse(inboundCodes));
+                return CommonResult.success("未找到指定code的采购入库单");
+            }
+        } else {
+            targetDtos = allDtos;
+        }
+        // 5. 只同步已审核的单据
+        List<KingdeePurInboundSaveReqVO> kingdeeVos = targetDtos.stream()
+            .filter(dto -> Objects.equals(dto.getAuditStatus(), SrmAuditStatus.APPROVED.getCode()))
+            .map(dto -> new com.somle.esb.converter.srm.SrmPurInToKingdeeConvert().convert(dto))
+            .toList();
+        if (kingdeeVos.isEmpty()) {
+            return CommonResult.success("没有需要同步的已审核采购入库单");
+        }
+        // 6. 调用金蝶保存+审核
+        List<List<KingdeeResponse>> results = kingdeeVos.stream()
+            .map(kingdeeService::saveAuditPurInbound)
+            .toList();
+        // 7. 返回
+        return CommonResult.success(Map.of("size", results.size(), "results", results));
     }
 
     /**

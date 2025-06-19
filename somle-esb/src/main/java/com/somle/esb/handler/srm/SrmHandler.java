@@ -93,7 +93,7 @@ public class SrmHandler {
             inIds,
             srmPurchaseInApi::getPurchaseInList,
             SrmPurInToKingdeeConvert::convertInDTOList,
-            kingdeeService::savePurInbound,
+            kingdeeService::saveAuditPurInbound,
             "采购到货单",
             KingdeePurInboundSaveReqVO::getBillNo
         );

@@ -193,7 +193,7 @@ public class KingdeeService {
      *
      * @param purInbound 采购到货单
      */
-    public List<KingdeeResponse> savePurInbound(KingdeePurInboundSaveReqVO purInbound) {
+    public List<KingdeeResponse> saveAuditPurInbound(KingdeePurInboundSaveReqVO purInbound) {
         return clients.parallelStream()
             .map(client -> client.saveAuditPurInbound(purInbound))
             .flatMap(List::stream)

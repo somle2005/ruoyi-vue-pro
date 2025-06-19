@@ -1041,4 +1041,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     public SrmPurchaseInItemDO getPurchaseInItemById(Long id) {
         return purchaseInItemMapper.selectById(id);
     }
+
+    @Override
+    public List<Long> listAllPurchaseInIds() {
+        return purchaseInMapper.selectAllIds();
+    }
 }

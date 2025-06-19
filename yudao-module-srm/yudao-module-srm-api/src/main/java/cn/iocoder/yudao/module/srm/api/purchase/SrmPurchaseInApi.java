@@ -35,4 +35,11 @@ public interface SrmPurchaseInApi {
      * @return SrmPurchaseInItemDTO
      */
     SrmPurchaseInItemDTO getPurchaseInItemById(Long id);
+
+    /**
+     * 获取所有采购到货单ID
+     *
+     * @return 采购到货单ID列表
+     */
+    List<Long> listAllPurchaseInIds();
 } 

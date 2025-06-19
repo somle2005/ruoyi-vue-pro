@@ -104,4 +104,9 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
         SrmPurchaseInItemDO itemDO = purchaseInService.getPurchaseInItemById(id);
         return convertInItem(itemDO);
     }
+
+    @Override
+    public List<Long> listAllPurchaseInIds() {
+        return purchaseInService.listAllPurchaseInIds();
+    }
 } 
