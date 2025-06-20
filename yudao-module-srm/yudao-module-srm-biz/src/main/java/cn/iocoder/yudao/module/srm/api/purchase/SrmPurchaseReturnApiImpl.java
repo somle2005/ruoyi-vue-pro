@@ -10,18 +10,23 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveReqDTO;
 import cn.iocoder.yudao.module.srm.config.machine.outItem.SrmPurchaseOutItemCountContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
+import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmOutboundStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
+import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.integration.support.MessageBuilder;
+import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -42,6 +47,8 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
     @Autowired
     @Lazy
     private SrmPurchaseReturnService purchaseReturnService;
+    @Resource(name = SrmChannelEnum.PURCHASE_RETURN)
+    MessageChannel purchaseReturnOutboundChannel;
 
     @Override
     public List<SrmPurchaseReturnDTO> getPurchaseReturnList(List<Long> ids) {
@@ -103,6 +110,8 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
                 .build();
             srmOutboundStateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.OUT_STORAGE_ADJUSTMENT, build);
         });
+        //同步给金蝶数据
+        TransactionUtils.runAfterCommit(() -> purchaseReturnOutboundChannel.send(MessageBuilder.withPayload(Collections.singleton(reqDTO.getUpstreamId())).build()));
     }
 
     @Override

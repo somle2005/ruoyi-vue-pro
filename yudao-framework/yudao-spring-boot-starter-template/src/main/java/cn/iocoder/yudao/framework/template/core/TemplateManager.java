@@ -20,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Configuration
@@ -43,12 +44,21 @@ public class TemplateManager {
     @Async
     public void preloadWordAndPdfTemplates() {
         long start = System.currentTimeMillis();
-        Optional.ofNullable(configureFactory.getRegisters()).ifPresent(registers -> registers.forEach(
-            register -> register.getTemplatePolicies().stream().filter(TemplatePolicy::getEnablePreload).forEach(TemplatePolicy -> {
-                preloadSingleWordTemplate(TemplatePolicy.getResource());
-                preloadSinglePdfTemplate(TemplatePolicy.getResource());
-            })));
-        log.info("全部模板预热完成，耗时 {}ms", System.currentTimeMillis() - start);
+        AtomicBoolean hasPreloaded = new AtomicBoolean(false);
+        Optional.ofNullable(configureFactory.getRegisters()).ifPresent(registers ->
+            registers.forEach(register ->
+                register.getTemplatePolicies().stream()
+                    .filter(TemplatePolicy::getEnablePreload)
+                    .forEach(policy -> {
+                        preloadSingleWordTemplate(policy.getResource());
+                        preloadSinglePdfTemplate(policy.getResource());
+                        hasPreloaded.set(true);
+                    })
+            )
+        );
+        if (hasPreloaded.get()) {
+            log.info("全部模板预热完成，耗时 {}ms", System.currentTimeMillis() - start);
+        }
     }
 
     private void preloadSingleWordTemplate(Resource resource) {
