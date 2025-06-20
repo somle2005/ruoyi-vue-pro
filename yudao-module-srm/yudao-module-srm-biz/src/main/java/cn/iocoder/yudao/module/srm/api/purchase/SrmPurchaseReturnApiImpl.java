@@ -104,4 +104,21 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
             srmOutboundStateMachine.fireEvent(SrmOutboundStatus.NONE_OUTBOUND, SrmEventEnum.OUT_STORAGE_ADJUSTMENT, build);
         });
     }
+
+    @Override
+    public SrmPurchaseReturnDTO getPurchaseReturnByCode(String code) {
+        // 1. 获取采购退货单
+        SrmPurchaseReturnDO returnOrder = purchaseReturnService.getPurchaseReturnByCode(code);
+        if (returnOrder == null) {
+            return null;
+        }
+
+        // 2. 获取退货明细列表
+        List<SrmPurchaseReturnItemDO> returnItems = purchaseReturnService.getPurchaseReturnItemListByReturnId(returnOrder.getId());
+
+        // 3. 转换为 DTO 对象
+        SrmPurchaseReturnDTO dto = BeanUtils.toBean(returnOrder, SrmPurchaseReturnDTO.class);
+        dto.setItems(returnItems.stream().map(this::convertReturnItem).collect(Collectors.toList()));
+        return dto;
+    }
 }

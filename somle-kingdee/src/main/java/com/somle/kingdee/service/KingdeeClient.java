@@ -12,8 +12,10 @@ import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInItemDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
@@ -854,7 +856,14 @@ public class KingdeeClient {
             //备注
             material.setComment(material.getComment());
             material.setSrcBillTypeId(KingdeeEntityType.PUR_BILL_OUTBOUND.getCode());
+            //明细ID
+            Long srmInItemID = Long.valueOf(material.getProRegNo());
             //源单ID
+            SrmPurchaseReturnApi srmPurchaseReturnApi = SpringUtils.getBean(SrmPurchaseReturnApi.class);
+            SrmPurchaseReturnDTO srmPurchaseReturnDTO = srmPurchaseReturnApi.getPurchaseReturnByCode(returnOrder.getBillNo());
+            srmPurchaseReturnDTO.getItems().stream().filter(srmPurchaseReturnItemDTO -> material.getProRegNo().equals(srmPurchaseReturnItemDTO.getId().toString())).findFirst().ifPresent(item -> {
+                //
+            });
         });
         String endUrl = "/jdy/v2/scm/pur_ret";
         TreeMap<String, String> params = new TreeMap<>();

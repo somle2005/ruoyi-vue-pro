@@ -36,7 +36,6 @@ public interface SrmPurchaseReturnService {
      */
     void updatePurchaseReturn(@Valid SrmPurchaseReturnSaveReqVO updateReqVO);
 
-
     /**
      * 更新采购退货的退款金额
      *
@@ -48,9 +47,9 @@ public interface SrmPurchaseReturnService {
     /**
      * 删除采购退货
      *
-     * @param ids 编号数组
+     * @param id 编号
      */
-    void deletePurchaseReturn(List<Long> ids);
+    void deletePurchaseReturn(Long id);
 
     /**
      * 获得采购退货
@@ -60,7 +59,16 @@ public interface SrmPurchaseReturnService {
      */
     SrmPurchaseReturnDO getPurchaseReturn(Long id);
 
+    /**
+     * 根据code获得采购退货
+     *
+     * @param code 编号
+     * @return 采购退货
+     */
+    SrmPurchaseReturnDO getPurchaseReturnByCode(String code);
+
     SrmPurchaseReturnBO getPurchaseBOReturn(Long id);
+
     /**
      * 获取采购退货列表
      *
@@ -84,6 +92,7 @@ public interface SrmPurchaseReturnService {
      * @return 采购退货分页
      */
     PageResult<SrmPurchaseReturnBO> getPurchaseReturnBOPage(SrmPurchaseReturnPageReqVO pageReqVO);
+
     // ==================== 采购退货项 ====================
 
     /**

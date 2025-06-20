@@ -503,20 +503,16 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     @Override
+    public SrmPurchaseReturnDO getPurchaseReturnByCode(String code) {
+        return purchaseReturnMapper.selectOne(SrmPurchaseReturnDO::getCode, code);
+    }
+    @Override
     public SrmPurchaseReturnBO getPurchaseBOReturn(Long id) {
         //主表
         SrmPurchaseReturnDO srmPurchaseReturnDO = purchaseReturnMapper.selectById(id);
         //子表
         List<SrmPurchaseReturnItemDO> srmPurchaseReturnItemDOS = purchaseReturnItemMapper.selectListByReturnId(id);
         return BeanUtils.toBean(srmPurchaseReturnDO, SrmPurchaseReturnBO.class, peek -> peek.setSrmPurchaseReturnItemDOs(srmPurchaseReturnItemDOS));
-    }
-
-    @Override
-    public List<SrmPurchaseReturnDO> getPurchaseReturnList(List<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
-            return new ArrayList<>();
-        }
-        return purchaseReturnMapper.selectListByIds(ids);
     }
 
     @Override
