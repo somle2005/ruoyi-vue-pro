@@ -213,18 +213,19 @@ public class KingdeeService {
     }
 
     /**
-     * 保存采购出库单
+     * 保存+审核采购出库单
      *
      * @param purOutbound 采购出库单
      */
-    public List<KingdeeResponse> savePurOutbound(KingdeePurReturnSaveReqVO purOutbound) {
+    public List<KingdeeResponse> saveAuditPurOutbound(KingdeePurReturnSaveReqVO purOutbound) {
         return clients.parallelStream()
             .filter(client -> {
                 Long supplierId = Long.valueOf(purOutbound.getSupplierId());
                 SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(supplierId);
                 return isSupplierNameMatch(supplierDTO.getName(), client);
             })
-            .map(client -> client.savePurReturn(purOutbound))
+            .map(client -> client.saveAndAuditPurchaseReturn(purOutbound))
+            .flatMap(List::stream)
             .collect(Collectors.toList());
     }
 

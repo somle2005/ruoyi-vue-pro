@@ -15,7 +15,7 @@ import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInItemDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnItemDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
@@ -706,84 +706,11 @@ public class KingdeeClient {
         if (kingdeePurReturnDetail == null) {
             //保存
             responseList.add(this.savePurReturn(returnOrder));
-            kingdeePurReturnDetail = this.getPurReturnDetail(returnOrder.getBillNo());
         }
         //审核
-
-
-        // 2. 处理供应商信息
-        String erpSupplierId = returnOrder.getSupplierNumber();
-        SrmSupplierApi srmSupplierApi = SpringUtils.getBean(SrmSupplierApi.class);
-        KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null)
-            .get(srmSupplierApi.getSupplier(Long.valueOf(erpSupplierId)).getName());
-        if (supplierSaveVO == null) {
-            throw exception(SUPPLIER_NOT_EXIST, erpSupplierId);
-        }
-        returnOrder.setSupplierId(supplierSaveVO.getId());
-
-        // 3. 处理明细行信息
-        returnOrder.getMaterialEntity().forEach(material -> {
-            // 设置产品ID
-            material.setMaterialId(this.getMaterial(material.getMaterialNumber())
-                .getData(JSONObject.class).getString("id"));
-
-            // 设置单位ID
-            setUnitId("套", kingdeeUnit -> material.setUnitId(kingdeeUnit.getId()));
-
-            // 设置仓库信息
-            String stockId = material.getStockId();
-            WmsWarehouseApi warehouseApi = SpringUtils.getBean(WmsWarehouseApi.class);
-            Map<Long, WmsWarehouseDTO> warehouseMap = warehouseApi.getWarehouseMap(List.of(Long.valueOf(stockId)));
-            material.setStockNumber(warehouseMap.get(Long.valueOf(stockId)).getCode());
-            material.setStockId(null);
-
-            // 处理来源单据信息
-            String srcBillNo = material.getSrcBillNo();
-            if (srcBillNo == null) {
-                throw exception(KingDeeErrorCodeConstants.PUR_INBOUND_NOT_EXIST, returnOrder.getBillNo());
-            }
-
-            // 获取来源采购入库单信息
-            KingdeePurInboundDetail inboundDetail = this.getPurInboundDetail(srcBillNo);
-            if (inboundDetail != null) {
-                material.setSrcBillTypeId(KingdeeEntityType.PUR_BILL_INBOUND.getCode());
-                material.setSrcInterId(inboundDetail.getId());
-
-                // 匹配入库单行
-                inboundDetail.getMaterialEntity().stream()
-                    .filter(inboundLine -> inboundLine.getMaterialNumber().equals(material.getMaterialNumber()))
-                    .findFirst()
-                    .ifPresent(inboundLine -> material.setSrcEntryId(inboundLine.getId()));
-            }
-        });
-
-        // 4. 保存采购退货单
-        KingdeeResponse saveResponse = this.savePurReturn(returnOrder);
-        if (!saveResponse.getErrcode().equals("0")) {
-            log.error("保存采购退货单失败：{}", saveResponse.getDescription());
-            return saveResponse;
-        }
-
-        // 5. 获取保存后的单据ID并审核
-        JSONObject data = saveResponse.getData(JSONObject.class);
-        List<String> orderIds = data.getStringList("ids");
-        if (orderIds == null || orderIds.isEmpty()) {
-            log.error("保存采购退货单成功但未返回单据ID");
-            throw exception(KingDeeErrorCodeConstants.PURCHASE_ORDER_SAVE_SUCCESS_BUT_NO_ID, returnOrder.getBillNo());
-        }
-
-        // 6. 执行审核操作
-        log.debug("开始审核采购退货单，单据ID：{}", orderIds.get(0));
-        KingdeeResponse auditResponse = commonOperate(
-            KingdeeEntityType.PUR_BILL_RETURN,
-            KingdeeOperateType.AUDIT,
-            orderIds
-        );
-
-        if (!auditResponse.getErrcode().equals("0")) {
-            log.error("审核采购退货单失败：{}", auditResponse.getDescription());
-        } else {
-            log.info("采购退货单保存并审核成功，单据ID：{}", orderIds.get(0));
+        KingdeePurReturnDetail kingdeePurReturnDetail2 = this.getPurReturnDetail(returnOrder.getBillNo());
+        if (Objects.equals(kingdeePurReturnDetail2.getBillStatus(), "Z")) {
+            responseList.add(this.commonOperate(KingdeeEntityType.PUR_BILL_OUTBOUND, KingdeeOperateType.AUDIT, List.of(kingdeePurReturnDetail2.getId()), null, true));
         }
 
         return responseList;
@@ -857,13 +784,16 @@ public class KingdeeClient {
             material.setComment(material.getComment());
             material.setSrcBillTypeId(KingdeeEntityType.PUR_BILL_OUTBOUND.getCode());
             //明细ID
-            Long srmInItemID = Long.valueOf(material.getProRegNo());
-            //源单ID
             SrmPurchaseReturnApi srmPurchaseReturnApi = SpringUtils.getBean(SrmPurchaseReturnApi.class);
-            SrmPurchaseReturnDTO srmPurchaseReturnDTO = srmPurchaseReturnApi.getPurchaseReturnByCode(returnOrder.getBillNo());
-            srmPurchaseReturnDTO.getItems().stream().filter(srmPurchaseReturnItemDTO -> material.getProRegNo().equals(srmPurchaseReturnItemDTO.getId().toString())).findFirst().ifPresent(item -> {
-                //
-            });
+            Long srmInItemID = Long.valueOf(material.getProRegNo());
+            SrmPurchaseReturnItemDTO srmPurchaseReturnItemDTO = srmPurchaseReturnApi.getPurchaseReturnItemById(srmInItemID);
+            KingdeePurInboundDetail purInboundDetail = this.getPurInboundDetail(srmPurchaseReturnItemDTO.getArriveCode());
+            //源单ID
+            material.setSrcInterId(purInboundDetail.getId());
+            purInboundDetail.getMaterialEntity().stream()
+                .filter(materialEntity -> materialEntity.getProRegNo().equals(srmPurchaseReturnItemDTO.getArriveItemId().toString()))
+                .findFirst()
+                .ifPresent(materialEntity -> material.setSrcEntryId(materialEntity.getId()));
         });
         String endUrl = "/jdy/v2/scm/pur_ret";
         TreeMap<String, String> params = new TreeMap<>();

@@ -121,4 +121,15 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
         dto.setItems(returnItems.stream().map(this::convertReturnItem).collect(Collectors.toList()));
         return dto;
     }
+
+    @Override
+    public SrmPurchaseReturnItemDTO getPurchaseReturnItemById(Long id) {
+        SrmPurchaseReturnItemDO returnItem = purchaseReturnService.getPurchaseReturnItem(id);
+        return convertReturnItem(returnItem);
+    }
+
+    @Override
+    public List<Long> listAllPurchaseReturnIds() {
+        return purchaseReturnService.listAllPurchaseReturnIds();
+    }
 }

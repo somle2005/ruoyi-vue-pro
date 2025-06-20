@@ -542,9 +542,14 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     @Override
-    public List<SrmPurchaseReturnItemDO> getPurchaseReturnItemListByReturnIds(Collection<Long> returnIds) {
+    public SrmPurchaseReturnItemDO getPurchaseReturnItem(Long id) {
+        return purchaseReturnItemMapper.selectById(id);
+    }
+
+    @Override
+    public Map<Long, List<SrmPurchaseReturnItemDO>> getPurchaseReturnItemListByReturnIds(Collection<Long> returnIds) {
         if (CollUtil.isEmpty(returnIds)) {
-            return Collections.emptyList();
+            return Collections.emptyMap();
         }
         return purchaseReturnItemMapper.selectListByReturnIds(returnIds);
     }
@@ -757,5 +762,10 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
             throw exception(PURCHASE_RETURN_ITEM_NOT_EXISTS, CollUtil.subtract(ids, CollUtil.newArrayList(items.stream().map(SrmPurchaseReturnItemDO::getId).collect(Collectors.toSet()))));
         }
         return items;
+    }
+
+    @Override
+    public List<Long> listAllPurchaseReturnIds() {
+        return purchaseReturnMapper.selectAllIds();
     }
 }

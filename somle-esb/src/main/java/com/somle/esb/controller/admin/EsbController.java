@@ -6,18 +6,22 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
 import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
 import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmAuditStatus;
 import com.somle.esb.converter.srm.SrmPurInToKingdeeConvert;
 import com.somle.esb.converter.srm.SrmPurOrderToKingdeeConvert;
+import com.somle.esb.converter.srm.SrmPurOutToKingdeeConvert;
 import com.somle.esb.service.EsbService;
 import com.somle.esb.util.SyncUtils;
 import com.somle.kingdee.model.KingdeePurInboundSaveReqVO;
 import com.somle.kingdee.model.KingdeePurOrderSaveReqVO;
+import com.somle.kingdee.model.KingdeePurReturnSaveReqVO;
 import com.somle.kingdee.model.KingdeeResponse;
 import com.somle.kingdee.service.KingdeeService;
 import jakarta.annotation.Resource;
@@ -55,6 +59,7 @@ public class EsbController {
     private final SrmSupplierApi srmSupplierApi;
     private final SrmPurchaseOrderApi srmPurchaseOrderApi;
     private final SrmPurchaseInApi srmPurchaseInApi;
+    private final SrmPurchaseReturnApi srmPurchaseReturnApi;
     private final ErpProductApi erpProductApi;
     private final EsbService service;
     private final KingdeeService kingdeeService;
@@ -189,7 +194,7 @@ public class EsbController {
     }
 
     /**
-     * 同步采购入库单到金蝶系统 支持全量同步或指定入库单编码同步
+     * 同步采购到货单到金蝶系统 支持全量同步或指定到货单编码同步
      */
     @PostMapping("/syncAllPurchaseInbound")
     public CommonResult<Object> syncAllPurchaseInbound(@RequestParam(value = "inboundCodes", required = false) List<String> inboundCodes) {
@@ -229,6 +234,51 @@ public class EsbController {
             kingdeeService::saveAuditPurInbound,
             "采购入库单保存&审核",
             KingdeePurInboundSaveReqVO::getBillNo
+        );
+        return CommonResult.success(Map.of("size", results.size(), "results", results));
+    }
+
+    /**
+     * 同步采购退货单到金蝶系统 支持全量同步或指定退货单编码同步
+     */
+    @PostMapping("/syncAllPurchaseReturn")
+    public CommonResult<Object> syncAllPurchaseReturn(@RequestParam(value = "returnCodes", required = false) List<String> returnCodes) {
+        // 1. 获取所有采购退货单ID
+        List<Long> allIds = srmPurchaseReturnApi.listAllPurchaseReturnIds();
+        // 2. 获取所有DTO
+        List<SrmPurchaseReturnDTO> allDtos = srmPurchaseReturnApi.getPurchaseReturnList(allIds);
+        // 3. 构建code->DTO映射
+        Map<String, SrmPurchaseReturnDTO> codeDtoMap = allDtos.stream().collect(Collectors.toMap(SrmPurchaseReturnDTO::getCode, v -> v));
+        // 4. 过滤目标DTO
+        List<SrmPurchaseReturnDTO> targetDtos;
+        if (returnCodes != null && !returnCodes.isEmpty()) {
+            targetDtos = returnCodes.stream()
+                .map(codeDtoMap::get)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+            if (targetDtos.isEmpty()) {
+                log.warn("[采购退货单] 未找到指定code的采购退货单，入参:{}", JSONUtil.parse(returnCodes));
+                return CommonResult.success("未找到指定code的采购退货单");
+            }
+        } else {
+            targetDtos = allDtos;
+        }
+        // 5. 只同步已审核的单据，获取ID列表
+        List<Long> targetIds = targetDtos.stream()
+            .filter(dto -> Objects.equals(dto.getAuditStatus(), SrmAuditStatus.APPROVED.getCode()))
+            .map(SrmPurchaseReturnDTO::getId)
+            .toList();
+        if (targetIds.isEmpty()) {
+            return CommonResult.success("没有需要同步的已审核采购退货单");
+        }
+        // 6. 同步
+        List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
+            targetIds,
+            srmPurchaseReturnApi::getPurchaseReturnList,
+            new SrmPurOutToKingdeeConvert()::convertReturnDTOList,
+            kingdeeService::saveAuditPurOutbound,
+            "采购退货单保存&审核",
+            KingdeePurReturnSaveReqVO::getBillNo
         );
         return CommonResult.success(Map.of("size", results.size(), "results", results));
     }

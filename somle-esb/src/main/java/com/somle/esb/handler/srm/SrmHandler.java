@@ -108,7 +108,7 @@ public class SrmHandler {
             returnIds,
             srmPurchaseReturnApi::getPurchaseReturnList,
             new SrmPurOutToKingdeeConvert()::convertReturnDTOList,
-            kingdeeService::savePurOutbound,
+            kingdeeService::saveAuditPurOutbound,
             "采购退货单",
             KingdeePurReturnSaveReqVO::getBillNo
         );

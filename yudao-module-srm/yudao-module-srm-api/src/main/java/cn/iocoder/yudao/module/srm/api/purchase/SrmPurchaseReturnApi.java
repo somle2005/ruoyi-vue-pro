@@ -38,4 +38,9 @@ public interface SrmPurchaseReturnApi {
      * 根据itemID获得明细行
      */
     SrmPurchaseReturnItemDTO getPurchaseReturnItemById(Long id);
+
+    /**
+     * 获取所有采购退货单ID
+     */
+    List<Long> listAllPurchaseReturnIds();
 } 
