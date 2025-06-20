@@ -12,20 +12,6 @@ import java.util.Map;
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class KingdeeProductSaveReqVO {
 
-    /**
-     * 自定义字段为引用辅助资料、引用基础资料时，提交单据保存接口，自定义字段名需要增加【_id】后缀，自定义字段值为：对应辅助资料或基础资料的id
-     * <p>
-     * <a href="https://open.jdy.com/#/files/api/detail?id=76567ff2a06311edaa4b3d71bf0fce53&noside=true">...</a>
-     */
-    public void setCustomField(KingdeeCustomField customField, String value) {
-        //5：基础资料，6：引用基础资料属性
-        if (customField.getFieldType() == 5 || customField.getFieldType() == 6) {
-            this.customField.put(customField.getNumber() + "_id", value);
-        } else {
-            this.customField.put(customField.getNumber(), value);
-        }
-    }
-
     private String baseUnitId; // 基本计量单位的ID，标识商品的基本单位
     private String checkType; // 商品类型，1为普通商品，2为套装，3为服务商品
     private String name; // 商品名称
@@ -100,22 +86,33 @@ public class KingdeeProductSaveReqVO {
     private String volume; // 商品的体积
     private String volumeUnitId; // 体积单位ID
     private String weightUnitId; // 重量单位ID
-
-
     private String high;
     private String length;
     private String grossWeight;// 毛重
     private String wide;
+    // custom
+    private Long saleDepartmentId; //销售部门 ID
 
     // private Float high;
     // private Float length;
     // private Float grossWeight;
     // private Float wide;
-
-    // custom
-    private Long saleDepartmentId; //销售部门 ID
     private String declaredTypeZh;
     private String declaredTypeEn;//报关品名英文
+
+    /**
+     * 自定义字段为引用辅助资料、引用基础资料时，提交单据保存接口，自定义字段名需要增加【_id】后缀，自定义字段值为：对应辅助资料或基础资料的id
+     * <p>
+     * <a href="https://open.jdy.com/#/files/api/detail?id=76567ff2a06311edaa4b3d71bf0fce53&noside=true">...</a>
+     */
+    public void setCustomField(KingdeeCustomField customField, String value) {
+        //5：基础资料，6：引用基础资料属性
+        if (customField.getFieldType() == 5 || customField.getFieldType() == 6) {
+            this.customField.put(customField.getNumber() + "_id", value);
+        } else {
+            this.customField.put(customField.getNumber(), value);
+        }
+    }
 }
 
 @Data

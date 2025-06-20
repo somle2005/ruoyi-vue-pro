@@ -107,8 +107,8 @@ public interface SrmPurchaseOrderService {
             return Collections.emptyMap();
         }
         return orderList.stream()
-                .filter(Objects::nonNull) // 防止列表里有null
-                .collect(Collectors.toMap(SrmPurchaseOrderDO::getId, Function.identity(), (a, b) -> a));//合并函数防止冲突key
+            .filter(Objects::nonNull) // 防止列表里有null
+            .collect(Collectors.toMap(SrmPurchaseOrderDO::getId, Function.identity(), (a, b) -> a));//合并函数防止冲突key
     }
 
 

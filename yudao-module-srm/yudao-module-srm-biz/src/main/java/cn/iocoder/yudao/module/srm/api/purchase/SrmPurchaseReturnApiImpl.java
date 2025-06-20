@@ -37,11 +37,11 @@ import static cn.iocoder.yudao.module.srm.enums.SrmStateMachines.PURCHASE_RETURN
 @Slf4j
 public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
 
+    @Resource(name = PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME)
+    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountContext> srmOutboundStateMachine;
     @Autowired
     @Lazy
     private SrmPurchaseReturnService purchaseReturnService;
-    @Resource(name = PURCHASE_RETURN_ITEM_OUT_STORAGE_STATE_MACHINE_NAME)
-    StateMachine<SrmOutboundStatus, SrmEventEnum, SrmPurchaseOutItemCountContext> srmOutboundStateMachine;
 
     @Override
     public List<SrmPurchaseReturnDTO> getPurchaseReturnList(List<Long> ids) {
@@ -53,8 +53,8 @@ public class SrmPurchaseReturnApiImpl implements SrmPurchaseReturnApi {
 
         // 2. 获取退货明细列表
         Map<Long, List<SrmPurchaseReturnItemDO>> returnItemMap = purchaseReturnService.getPurchaseReturnItemListByReturnIds(
-                        returnOrders.stream().map(SrmPurchaseReturnDO::getId).collect(Collectors.toList()))
-                .stream().collect(Collectors.groupingBy(SrmPurchaseReturnItemDO::getReturnId));
+                returnOrders.stream().map(SrmPurchaseReturnDO::getId).collect(Collectors.toList()))
+            .stream().collect(Collectors.groupingBy(SrmPurchaseReturnItemDO::getReturnId));
 
         // 3. 转换为 DTO 对象
         return returnOrders.stream().map(returnOrder -> {

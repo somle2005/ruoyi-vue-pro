@@ -17,19 +17,19 @@ public class SrmPurchaseInItemDTO {
 
     private Integer version;
     /**
-     * 采购入库编号 关联 
+     * 采购入库编号 关联
      */
     private Long arriveId;
     /**
-     * 仓库编号 关联 
+     * 仓库编号 关联
      */
     private Long warehouseId;
     /**
-     * 产品编号 关联 
+     * 产品编号 关联
      */
     private Long productId;
     /**
-     * 产品单位 冗余 
+     * 产品单位 冗余
      */
     private Long productUnitId;
     /**
@@ -81,7 +81,7 @@ public class SrmPurchaseInItemDTO {
      */
     private String remark;
     /**
-     * 采购订单项编号 关联 
+     * 采购订单项编号 关联
      * <p>
      * 目的：方便更新关联的采购订单项的入库数量
      */
@@ -135,7 +135,7 @@ public class SrmPurchaseInItemDTO {
      */
     private String fbaCode;
     /**
-     * 箱率 关联 
+     * 箱率 关联
      */
     private String containerRate;
     /**

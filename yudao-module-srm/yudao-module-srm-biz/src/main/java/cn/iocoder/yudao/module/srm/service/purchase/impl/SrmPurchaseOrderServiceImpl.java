@@ -134,14 +134,13 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     StateMachine<SrmPaymentStatus, SrmEventEnum, SrmPayCountContext> orderItemPaymentMachine;
     @Resource(name = PURCHASE_ORDER_ITEM_EXECUTION_STATE_MACHINE_NAME)
     StateMachine<SrmExecutionStatus, SrmEventEnum, SrmPurchaseOrderItemDO> orderItemExecutionMachine;
-    @Autowired
-    @Lazy
-    private SrmPurchaseRequestService srmPurchaseRequestService;
     @Resource(name = SrmChannelEnum.PURCHASE_ORDER_AUDIT)
     MessageChannel purchaseOrderChannel;
     @Resource(name = SrmChannelEnum.PURCHASE_ORDER_REVERSE)
     MessageChannel purchaseOrderReverseChannel;
-
+    @Autowired
+    @Lazy
+    private SrmPurchaseRequestService srmPurchaseRequestService;
 
     /**
      * 校验是否存在入库项

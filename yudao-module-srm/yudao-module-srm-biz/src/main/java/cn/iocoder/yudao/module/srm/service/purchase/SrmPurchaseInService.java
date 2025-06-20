@@ -69,10 +69,12 @@ public interface SrmPurchaseInService {
 
     /**
      * 校验入库订单
+     *
      * @param id 入库单id
      * @return SrmPurchaseInDO
      */
     SrmPurchaseInDO validatePurchaseInExists(Long id);
+
     /**
      * 获得采购到货分页
      *

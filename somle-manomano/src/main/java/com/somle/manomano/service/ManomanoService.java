@@ -16,10 +16,9 @@ import java.util.List;
 @Lazy
 public class ManomanoService {
 
+    public List<ManomanoClient> clients;
     @Autowired
     private ManomanoShopRepository shopRepository;
-
-    public List<ManomanoClient> clients;
 
     @PostConstruct
     public void init() {

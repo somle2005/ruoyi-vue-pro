@@ -32,18 +32,15 @@ import java.util.stream.Stream;
 @Slf4j
 @Service
 public class DingTalkService {
-    private volatile DingTalkToken token;
     private final String HOST = "https://api.dingtalk.com";
     private final String BASE_HOST = "https://oapi.dingtalk.com";
-
-
+    @Autowired
+    DingTalkTokenRepository tokenRepository;
 
 
 //    @Autowired
 //    MessageChannel departmentChannel;
-
-    @Autowired
-    DingTalkTokenRepository tokenRepository;
+    private volatile DingTalkToken token;
 
     @PostConstruct
     private void init() {
@@ -65,7 +62,6 @@ public class DingTalkService {
     }
 
 
-
     // public String getAccessToken() {
     //     String url = "https://oapi.dingtalk.com/gettoken?appkey=" + appKey + "&appsecret=" + appSecret;
     //     String response = restTemplate.getForObject(url, String.class);
@@ -75,7 +71,7 @@ public class DingTalkService {
     //     return jsonObject.getString("access_token");
     // }
 
-//    @Scheduled(cron = "0 0 * * * ?") // Executes at the start of every hour
+    //    @Scheduled(cron = "0 0 * * * ?") // Executes at the start of every hour
     @Scheduled(initialDelay = 2000, fixedRate = 3600000)
     public void refreshAuth() {
         String url = HOST + "/v1.0/oauth2/accessToken";
@@ -87,9 +83,9 @@ public class DingTalkService {
             .url(url)
             .payload(payload)
             .build();
-        ObjectNode result= WebUtils.sendRequest(request, ObjectNode.class);
-        JSONObject jsonObject=new JSONObject(result);
-        String accessToken =jsonObject.getString("accessToken");
+        ObjectNode result = WebUtils.sendRequest(request, ObjectNode.class);
+        JSONObject jsonObject = new JSONObject(result);
+        String accessToken = jsonObject.getString("accessToken");
         this.token.setAccessToken(accessToken);
     }
 
@@ -163,15 +159,16 @@ public class DingTalkService {
 //        return rsp.getResult();
 
     }
-    private void validateResponse(DingTalkResponse response){
+
+    private void validateResponse(DingTalkResponse response) {
         // 检查响应是否为空
         if (response == null) {
             throw new RuntimeException("DingTalk返回空响应");
         }
-        if (response.getResult() == null){
+        if (response.getResult() == null) {
             throw new RuntimeException("DingTalk返回空结果");
         }
-        if (!Objects.equals(response.getErrcode(),0)){
+        if (!Objects.equals(response.getErrcode(), 0)) {
             throw new RuntimeException("DingTalk返回异常：" + response.getErrmsg());
         }
         log.debug(response.toString());
@@ -227,7 +224,7 @@ public class DingTalkService {
         // List<DingTalkDepartment> childPath = dept.getPath();
         // childPath.addLast(dept);
         return getOrphans(dept.getDeptId())
-            .map(n->{
+            .map(n -> {
                 n.setLevel(dept.getLevel() + 1);
                 n.setParent(dept);
                 return n;
@@ -241,9 +238,6 @@ public class DingTalkService {
         // replacements.put("家居", "HCD");
         // replacements.put("办公", "EBD");
         // replacements.put("视听", "ABD");
-
-
-
 
 
         // boolean replaced = false;
@@ -262,7 +256,7 @@ public class DingTalkService {
         // if (!replaced && !(ch >= 0 && ch <= 127)) {
         //     name = "$" + name;
         // }
-        
+
         // if (name.startsWith("$") && name.contains("仓")) {
         //     name = "LC" + name.substring(1);
         // } else if (name.startsWith("$")) {
@@ -278,7 +272,7 @@ public class DingTalkService {
     public DingTalkResponse addDepartment(DingTalkDepartment dept) {
         log.info("adding departments");
         String endUrl = "/topapi/v2/department/update";
-        
+
         Map<String, String> params = Map.of(
             "access_token", this.getToken().getAccessToken()
         );
@@ -299,25 +293,25 @@ public class DingTalkService {
     public boolean cleanDepartments() {
         log.info("cleaning departments");
 
-        
-        return getDepartmentStream().map( dept -> {
-            DingTalkDepartment newDept = cleanDepartment(dept);
-            DingTalkResponse response = addDepartment(newDept);
-            boolean success = response.getErrcode() == 200;
-            if (success) {
-                log.debug(newDept.getName() + " cleaned successfully");
-            } else {
-                log.error(newDept.getName() + " clean failed\n" + response.getErrmsg());
-            }
-            return success;
-        })
-        .reduce(true, (a, b) -> a && b);
+
+        return getDepartmentStream().map(dept -> {
+                DingTalkDepartment newDept = cleanDepartment(dept);
+                DingTalkResponse response = addDepartment(newDept);
+                boolean success = response.getErrcode() == 200;
+                if (success) {
+                    log.debug(newDept.getName() + " cleaned successfully");
+                } else {
+                    log.error(newDept.getName() + " clean failed\n" + response.getErrmsg());
+                }
+                return success;
+            })
+            .reduce(true, (a, b) -> a && b);
     }
-    
+
     public Stream<DingTalkDepartment> getChildStream(DingTalkDepartment dept) {
         // List<String> keys = List.of("CBD", "HCD", "EBD", "ABD", "DCD", "VC", "QC", "MC", "FC", "HC", "CC", "PC", "LC");
         List<DingTalkDepartment> childList = getChilds(dept).toList();
-        if ( childList.isEmpty()) {
+        if (childList.isEmpty()) {
             log.debug("null child list");
             return Stream.of();
         } else {
@@ -332,10 +326,6 @@ public class DingTalkService {
         var topDept = getDepartment(1L).setLevel(0);
         return Stream.concat(Stream.of(topDept), getChildStream(topDept));
     }
-
-    
-
-
 
 
 //    public void uploadDepartmentsResursive() {
@@ -374,5 +364,5 @@ public class DingTalkService {
             .map(this::getUserDetail);
     }
 
-    
+
 }

@@ -17,9 +17,6 @@ import java.util.List;
 public interface SrmPurchaseInMapper extends BaseMapperX<SrmPurchaseInDO> {
 
 
-
-
-
     default int updateByIdAndStatus(Long id, Integer status, SrmPurchaseInDO updateObj) {
         return update(updateObj, new LambdaUpdateWrapper<SrmPurchaseInDO>().eq(SrmPurchaseInDO::getId, id).eq(SrmPurchaseInDO::getAuditStatus, status));
     }

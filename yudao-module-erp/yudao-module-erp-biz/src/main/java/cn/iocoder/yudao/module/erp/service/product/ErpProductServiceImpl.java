@@ -59,10 +59,11 @@ import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.USER_NOT_E
 public class ErpProductServiceImpl implements ErpProductService {
 
 
-    @Resource
-    MessageChannel erpProductChannel;
+    private final ReentrantLock LOCK = new ReentrantLock();
     @Resource
     protected ErpProductMapper productMapper;
+    @Resource
+    MessageChannel erpProductChannel;
     @Resource
     ErpProductCategoryService productCategoryService;
     @Resource
@@ -71,9 +72,6 @@ public class ErpProductServiceImpl implements ErpProductService {
     DeptApi deptApi;
     @Resource
     AdminUserApi userApi;
-
-
-    private final ReentrantLock LOCK = new ReentrantLock();
 
     public ErpProductBO toBO(ErpProductSaveReqVO saveReqVO) {
         validateFields(saveReqVO);
@@ -283,6 +281,7 @@ public class ErpProductServiceImpl implements ErpProductService {
         List<ErpProductDO> list = productMapper.selectListByStatus(status);
         return buildProductVOList(list);
     }
+
     @Override
     @Cacheable(cacheNames = PRODUCT_LIST, key = "'DTO'+#status", unless = "#result == null")
     public List<ErpProductRespDTO> getProductDTOListByStatus(Boolean status) {

@@ -86,7 +86,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     }
 
     private void validateSupplierExists(Long id) {
-        if(supplierMapper.selectById(id) == null) {
+        if (supplierMapper.selectById(id) == null) {
             throw exception(SUPPLIER_NOT_EXISTS);
         }
     }
@@ -99,7 +99,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     @Override
     public SrmSupplierDO validateSupplier(Long id) {
         SrmSupplierDO supplier = supplierMapper.selectById(id);
-        if(supplier == null) {
+        if (supplier == null) {
             throw exception(SUPPLIER_NOT_EXISTS);
         }
         if (CommonStatusEnum.isDisable(supplier.getOpenStatus())) {
@@ -111,7 +111,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     @Override
     public List<SrmSupplierDO> getSupplierList(Collection<Long> ids) {
         //ids是空集合
-        if(CollectionUtils.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return emptyList();
         }
         return supplierMapper.selectBatchIds(ids);

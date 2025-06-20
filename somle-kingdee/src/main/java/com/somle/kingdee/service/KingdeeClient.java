@@ -60,9 +60,9 @@ import static com.somle.kingdee.util.SignatureUtils.*;
 @SuppressWarnings("UnusedReturnValue")
 public class KingdeeClient {
 
-    private KingdeeToken token;
     private final StringRedisTemplate redisTemplate;
     private final RedissonClient redissonClient;
+    private KingdeeToken token;
 
 
     public KingdeeClient(KingdeeToken token, StringRedisTemplate redisTemplate, RedissonClient redissonClient) {
@@ -206,10 +206,10 @@ public class KingdeeClient {
     /**
      * 根据字段名称获取id，如果有该字段、则设置value，没有就日志记录。辅助资料
      *
-     * @param entityType   实体类型枚举，如KingdeeEntityType.PUR_BILL_ORDER
-     * @param displayName  属性名称
-     * @param fieldValue   属性值
-     * @param setter       回调，接收KingdeeCustomField和fieldValue
+     * @param entityType  实体类型枚举，如KingdeeEntityType.PUR_BILL_ORDER
+     * @param displayName 属性名称
+     * @param fieldValue  属性值
+     * @param setter      回调，接收KingdeeCustomField和fieldValue
      */
     public void setCustomFieldSafely(KingdeeEntityType entityType, String displayName, String fieldValue,
                                      BiConsumer<KingdeeCustomField, String> setter) {

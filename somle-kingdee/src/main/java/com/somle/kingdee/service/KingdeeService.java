@@ -144,6 +144,7 @@ public class KingdeeService {
      * 比较供应商名称是否匹配当前客户端名称
      * <p>
      * 当 strictSupplierMatch=true 时严格匹配，否则返回 true
+     *
      * @param supplierName 供应商名称
      * @param client       金蝶客户端
      * @return 是否匹配

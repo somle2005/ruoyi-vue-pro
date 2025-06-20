@@ -36,7 +36,6 @@ public class TemplateManager {
     @EventListener(ApplicationReadyEvent.class)
     public void preloadTemplatesOnStartup() {
         log.info("TemplateRegister 策略实例数：{}", configureFactory.getRegisters().size());
-        log.info("开始执行模板预热任务...");
         TemplateManager manager = SpringUtils.getBean(TemplateManager.class);
         manager.preloadWordAndPdfTemplates();
     }
