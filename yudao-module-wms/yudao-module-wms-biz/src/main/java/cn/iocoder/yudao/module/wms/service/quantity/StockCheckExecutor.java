@@ -157,7 +157,6 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
                 outboundItemSaveReqVO.setActualQty(Math.abs(deltaQty));
                 outboundItemSaveReqVO.setBinId(stockCheckBinDO.getBinId());
                 outboundItemSaveReqVOList.add(outboundItemSaveReqVO);
-
             }
 
         }

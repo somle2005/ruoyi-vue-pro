@@ -83,7 +83,7 @@ public interface WmsStockLogicMapper extends BaseMapperX<WmsStockLogicDO> {
         return selectList(wrapper);
     }
 
-    default List<WmsStockLogicDO> selectByDeptIdAndProductId(Long warehouseId, Long productId) {
+    default List<WmsStockLogicDO> selectByWarehouseIdAndProductId(Long warehouseId, Long productId) {
         MPJLambdaWrapperX<WmsStockLogicDO> wrapper = new MPJLambdaWrapperX<>();
         // 连接仓库表
         wrapper.innerJoin(WmsWarehouseDO.class, WmsWarehouseDO::getId, WmsStockLogicDO::getWarehouseId)

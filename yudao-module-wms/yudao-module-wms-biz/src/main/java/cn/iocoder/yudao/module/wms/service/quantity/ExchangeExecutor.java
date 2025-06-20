@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundItemFlowDetailVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.bin.vo.WmsStockBinRespVO;
@@ -14,6 +15,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.item.WmsExchangeItemD
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsItemFlowMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.flow.WmsStockFlowMapper;
@@ -23,6 +25,7 @@ import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
 import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsItemFlowService;
 import cn.iocoder.yudao.module.wms.service.quantity.context.ExchangeContext;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
+import cn.iocoder.yudao.module.wms.service.stock.flow.WmsStockFlowService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +36,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -63,6 +67,9 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
     @Resource
     @Lazy
     private WmsItemFlowMapper inboundItemFlowMapper;
+
+    @Resource
+    protected WmsStockFlowService stockFlowService;
 
     @Resource
     private WmsInboundItemService inboundItemService;
@@ -120,18 +127,111 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
 
         //逐行处理
         for (WmsExchangeItemDO itemDO : exchangeItemDOList) {
-            WmsStockBinRespVO fromStockBin = stockBinMap.get(makeStockKey(itemDO.getFromBinId(), itemDO.getProductId()));
-            WmsStockBinRespVO toStockBin = stockBinMap.get(makeStockKey(itemDO.getToBinId(), itemDO.getProductId()));
-            //处理仓库库存
-            this.processStockWarehouseItem(exchangeDO, itemDO);
-            //处理仓位库存
-            this.processStockBin(exchangeDO, itemDO, fromStockBin, toStockBin);
-
+            this.processSingleItem(exchangeDO, itemDO, stockBinMap);
         }
 
-        // 完成交换单
-//        exchangeService.finishExchange(exchangeDO, exchangeItemDOList);
+    }
 
+    private void processSingleItem(WmsExchangeDO exchangeDO, WmsExchangeItemDO itemDO, Map<String, WmsStockBinRespVO> stockBinMap) {
+        WmsStockBinRespVO fromStockBin = stockBinMap.get(makeStockKey(itemDO.getFromBinId(), itemDO.getProductId()));
+        WmsStockBinRespVO toStockBin = stockBinMap.get(makeStockKey(itemDO.getToBinId(), itemDO.getProductId()));
+        //处理入库批次库存
+        this.processInboundItem(exchangeDO, itemDO);
+        //处理仓库库存
+        this.processStockWarehouseItem(exchangeDO, itemDO);
+        //处理仓位库存
+        this.processStockBin(exchangeDO, itemDO, fromStockBin, toStockBin);
+        //处理逻辑库存
+        this.processStockLogicItem(exchangeDO, itemDO);
+    }
+
+    /**
+     * 处理逻辑库存
+     */
+    private void processStockLogicItem(WmsExchangeDO exchangeDO, WmsExchangeItemDO itemDO) {
+        // 校验本方法在事务中
+        JdbcUtils.requireTransaction();
+
+        Integer type = exchangeDO.getType();
+        Integer qty = itemDO.getQty();
+        Integer direction = Objects.equals(type, TO_ITEM.getValue()) ? OUT.getValue() : IN.getValue();
+
+        // 查询逻辑库存
+        List<WmsStockLogicDO> stockLogicDOS = stockLogicService.selectByWarehouseIdAndProductId(exchangeDO.getWarehouseId(), itemDO.getProductId());
+        if (stockLogicDOS == null) {
+            throw exception(STOCK_LOGIC_NOT_EXISTS);
+        }
+        //更新数值
+        this.updateStockLogicItemQty(qty, direction, stockLogicDOS, itemDO, type);
+
+        // 记录批次流水...
+    }
+
+    private void updateStockLogicItemQty(Integer qty, Integer direction, List<WmsStockLogicDO> stockLogicDOS, WmsExchangeItemDO itemDO, Integer type) {
+        // 更新逻辑库存
+        if (Objects.equals(type, TO_ITEM.getValue())) {
+            for (WmsStockLogicDO stockLogicDO : stockLogicDOS) {
+                if (qty <= 0) {
+                    break;
+                }
+                Integer deltaQty = Math.min(qty, stockLogicDO.getAvailableQty());
+                stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() + deltaQty * direction);
+                stockLogicService.insertOrUpdate(stockLogicDO);
+                // 记录库存流水
+                int beforeQty = stockLogicDO.getAvailableQty() == null ? 0 : stockLogicDO.getAvailableQty();
+                Integer afterQty = beforeQty + (itemDO.getQty() * direction);
+                stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.parse(direction), itemDO.getProductId(), stockLogicDO, itemDO.getQty(), null, null, beforeQty, afterQty, null);
+            }
+        } else {
+            WmsStockLogicDO stockLogicDO = stockLogicDOS.get(0);
+            stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() + qty * direction);
+            stockLogicService.insertOrUpdate(stockLogicDO);
+            // 记录库存流水
+            int beforeQty = stockLogicDO.getAvailableQty() == null ? 0 : stockLogicDO.getAvailableQty();
+            Integer afterQty = beforeQty + (itemDO.getQty() * direction);
+            stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.parse(direction), itemDO.getProductId(), stockLogicDO, itemDO.getQty(), null, null, beforeQty, afterQty, null);
+        }
+    }
+
+    /**
+     * 处理入库批次库存
+     **/
+    private void processInboundItem(WmsExchangeDO exchangeDO, WmsExchangeItemDO itemDO) {
+        // 校验本方法在事务中
+        JdbcUtils.requireTransaction();
+
+        Integer type = exchangeDO.getType();
+        Integer qty = itemDO.getQty();
+        Integer direction = Objects.equals(type, TO_ITEM.getValue()) ? OUT.getValue() : IN.getValue();
+
+        //找出批次
+        List<WmsInboundItemDO> inboundItemList = inboundItemService.selectByWarehouseIdAndProductId(exchangeDO.getWarehouseId(), itemDO.getProductId());
+        if (inboundItemList.isEmpty()) {
+            throw exception(INBOUND_ITEM_NOT_EXISTS);
+        }
+        this.updateInboundItemQty(qty, direction, inboundItemList, itemDO, type);
+        // 记录批次流水...
+    }
+
+    private void updateInboundItemQty(Integer qty, Integer direction, List<WmsInboundItemDO> inboundItemList, WmsExchangeItemDO itemDO, Integer type) {
+        // 更新批次库存
+        if (Objects.equals(type, TO_ITEM.getValue())) {
+            for (WmsInboundItemDO inboundItemDO : inboundItemList) {
+                if (qty <= 0) {
+                    break;
+                }
+                Integer deltaQty = Math.min(qty, inboundItemDO.getOutboundAvailableQty());
+                inboundItemDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty() + deltaQty * direction);
+                inboundItemDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty() + deltaQty * direction);
+                inboundItemService.updateInboundItem(BeanUtils.toBean(inboundItemDO, WmsInboundItemSaveReqVO.class));
+                qty = qty - deltaQty;
+            }
+        } else {
+            WmsInboundItemDO inboundItemDO = inboundItemList.get(0);
+            inboundItemDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty() + qty * direction);
+            inboundItemDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty() + qty * direction);
+            inboundItemService.updateInboundItem(BeanUtils.toBean(inboundItemDO, WmsInboundItemSaveReqVO.class));
+        }
     }
 
 

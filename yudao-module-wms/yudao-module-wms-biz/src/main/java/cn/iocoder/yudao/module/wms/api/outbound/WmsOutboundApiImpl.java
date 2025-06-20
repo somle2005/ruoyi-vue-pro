@@ -140,7 +140,9 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     @Override
     public void generateOutbound(WmsOutboundImportReqDTO importReqVO) {
         WmsOutboundRespVO wmsOutboundRespVO = outboundService.generateOutbound(BeanUtils.toBean(importReqVO, WmsOutboundImportReqVO.class));
-        outboundService.approve(WmsOutboundAuditStatus.Event.SUBMIT, BeanUtils.toBean(wmsOutboundRespVO, WmsApprovalReqVO.class));
+        WmsApprovalReqVO approvalReqVO = new WmsApprovalReqVO();
+        approvalReqVO.setBillId(wmsOutboundRespVO.getId());
+        outboundService.approve(WmsOutboundAuditStatus.Event.SUBMIT, approvalReqVO);
         BeanUtils.toBean(wmsOutboundRespVO, WmsOutboundDTO.class);
     }
 

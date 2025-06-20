@@ -455,10 +455,7 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
             }
         }
 
-
-
         Set<Integer> stockTypes = StreamX.from(zoneDOList).map(WmsWarehouseZoneDO::getStockType).toSet();
-
     }
 
     @Override
@@ -470,4 +467,21 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     public List<WmsInboundItemQueryDO> getInboundItemListForTms(WmsInboundItemListForTmsReqVO listForTmsReqVO) {
         return inboundItemQueryMapper.getInboundItemListForTms(listForTmsReqVO);
     }
+
+    @Override
+    public void assembleInboundItems(List<WmsInboundItemRespVO> list) {
+        //todo
+    }
+
+    @Override
+    public void assembleStockLogic(List<WmsInboundItemRespVO> list) {
+        //todo
+
+    }
+
+    @Override
+    public List<WmsInboundItemDO> selectByWarehouseIdAndProductId(Long warehouseId, Long productId) {
+        return inboundItemQueryMapper.selectByWarehouseIdAndProductId(warehouseId, productId);
+    }
+
 }
