@@ -24,6 +24,7 @@ import java.util.List;
  * @description: 入库单 API 实现
  */
 @Service
+@Validated
 public class WmsOutboundApiImpl implements WmsOutboundApi {
 
     @Resource
@@ -137,7 +138,7 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     }
 
     @Override
-    public void generateOutbound(@Validated WmsOutboundImportReqDTO importReqVO) {
+    public void generateOutbound(WmsOutboundImportReqDTO importReqVO) {
         WmsOutboundRespVO wmsOutboundRespVO = outboundService.generateOutbound(BeanUtils.toBean(importReqVO, WmsOutboundImportReqVO.class));
         outboundService.approve(WmsOutboundAuditStatus.Event.SUBMIT, BeanUtils.toBean(wmsOutboundRespVO, WmsApprovalReqVO.class));
         BeanUtils.toBean(wmsOutboundRespVO, WmsOutboundDTO.class);
