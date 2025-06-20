@@ -1,6 +1,13 @@
 package com.somle.kingdee.service;
 
 
+import cn.hutool.core.util.StrUtil;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseOrderApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
+import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
+import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import com.somle.kingdee.model.*;
 import com.somle.kingdee.model.supplier.KingdeeSupplierSaveVO;
 import com.somle.kingdee.model.vo.KingdeeSupplierQueryReqVO;
@@ -15,11 +22,12 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 // https://open.jdy.com/#/files/api/detail?index=2&categrayId=3cc8ee9a663e11eda5c84b5d383a2b93&id=adfe4a24712711eda0b307c6992ee459
 @Slf4j
@@ -28,15 +36,22 @@ import java.util.concurrent.atomic.AtomicReference;
 @ConfigurationProperties(prefix = "kingdee")
 public class KingdeeService {
 
+    private List<String> outerInstanceIds;
+    private List<KingdeeClient> clients;
+    private Boolean strictSupplierMatch = true; // 是否严格匹配供应商名称，默认为true,非严格模式数据同步给所有公司
+
     @Autowired
-    StringRedisTemplate stringRedisTemplate;
+    private StringRedisTemplate stringRedisTemplate;
     @Autowired
     private KingdeeTokenRepository tokenRepository;
     @Autowired
     private RedissonClient redissonClient;
-
-    private List<String> outerInstanceIds;
-    private List<KingdeeClient> clients;
+    @Autowired
+    private SrmSupplierApi srmSupplierApi;
+    @Autowired
+    private SrmPurchaseOrderApi srmPurchaseOrderApi;
+    @Autowired
+    private SrmPurchaseInApi srmPurchaseInApi;
 
     //TODO 优化: 启动后异步初始化，懒加载
     @PostConstruct
@@ -61,6 +76,11 @@ public class KingdeeService {
             .allMatch(this::saveToken);
     }
 
+    @Scheduled(cron = "0 0 */2 * * *")
+    public void refreshAllSupplierList() {
+        clients.parallelStream().forEach(KingdeeClient::refreshSupplierCache);
+    }
+
     public boolean saveToken(KingdeeToken token) {
         boolean success = false;
         try {
@@ -73,53 +93,145 @@ public class KingdeeService {
         return success;
     }
 
-
-    public void addDepartment(KingdeeAuxInfoDetail department) {
-        clients.parallelStream().forEach(n-> n.addDepartment(department));
+    /**
+     * 添加部门
+     *
+     * @param department 部门信息
+     */
+    public List<KingdeeResponse> addDepartment(KingdeeAuxInfoDetail department) {
+        return clients.parallelStream()
+            .map(client -> {
+                log.debug("执行添加部门操作，client={}，identifier={}", client.getToken().getAccountName(), department.getName());
+                return client.addDepartment(department);
+            })
+            .collect(Collectors.toList());
     }
 
-
-    public void addProduct(KingdeeProductSaveReqVO product) {
-        clients.parallelStream().forEach(n-> n.addProduct(product));
+    /**
+     * 添加产品
+     *
+     * @param product 产品信息
+     */
+    public List<KingdeeResponse> addProduct(KingdeeProductSaveReqVO product) {
+        return clients.parallelStream()
+            .map(client -> {
+                log.debug("执行添加产品操作，client={}，identifier={}", client.getToken().getAccountName(), product.getNumber());
+                return client.addProduct(product);
+            })
+            .collect(Collectors.toList());
     }
 
-    public void addSupplier(KingdeeSupplierSaveVO kingdeeSupplierSaveVO) {
-        clients.parallelStream().forEach(n -> n.addSupplier(kingdeeSupplierSaveVO));
+    /**
+     * 添加供应商
+     *
+     * @param kingdeeSupplierSaveVO 供应商信息
+     */
+    public List<KingdeeResponse> addSupplier(KingdeeSupplierSaveVO kingdeeSupplierSaveVO) {
+        return clients.parallelStream()
+            .map(client -> {
+                log.debug("执行添加供应商操作，client={}，identifier={}", client.getToken().getAccountName(), kingdeeSupplierSaveVO.getName());
+                return client.saveSupplier(kingdeeSupplierSaveVO);
+            })
+            .collect(Collectors.toList());
     }
 
+    /**
+     * 比较供应商名称是否匹配当前客户端名称
+     * <p>
+     * 当 strictSupplierMatch=true 时严格匹配，否则返回 true
+     *
+     * @param supplierName 供应商名称
+     * @param client       金蝶客户端
+     * @return 是否匹配
+     */
+    private boolean isSupplierNameMatch(String supplierName, KingdeeClient client) {
+        if (!strictSupplierMatch) {
+            return true;
+        }
+        return Objects.equals(StrUtil.trim(supplierName), StrUtil.trim(client.getToken().getAccountName()));
+    }
 
     /**
      * 保存采购订单
      *
      * @param purchaseOrder 采购订单
      */
-    public void savePurchaseOrder(@Validated KingdeePurOrderSaveReqVO purchaseOrder) {
-        clients.parallelStream().forEach(n -> n.savePurOrder(purchaseOrder));
+    public List<KingdeeResponse> savePurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
+        return clients.parallelStream()
+            .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
+            .map(client -> client.savePurOrder(purchaseOrder))
+            .collect(Collectors.toList());
     }
 
     /**
-     * 保存采购入库单
+     * 保存+审核采购订单
      *
-     * @param purInbound 采购入库单
+     * @param purchaseOrder 采购订单
      */
-    public void savePurInbound(@Validated KingdeePurInboundSaveReqVO purInbound) {
-        clients.parallelStream().forEach(n -> n.savePurInbound(purInbound));
+    public List<KingdeeResponse> saveAndAuditPurchaseOrder(KingdeePurOrderSaveReqVO purchaseOrder) {
+        return clients.parallelStream()
+            .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
+            .map(client -> client.saveAndAuditPurOrder(purchaseOrder))
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
     }
 
     /**
-     * 保存采购出库单
+     * 反审核+删除采购订单
+     *
+     * @param purCode 采购订单编号
+     */
+    public List<KingdeeResponse> unAuditPurchaseOrder(String purCode) {
+        return clients.parallelStream()
+            .filter(client -> {
+                SrmPurchaseOrderDTO purchaseOrderDTO = srmPurchaseOrderApi.getPurchaseOrderByCode(purCode);
+                return isSupplierNameMatch(purchaseOrderDTO.getSupplierName(), client);
+            })
+            .map(client -> client.unAuditPurOrder(purCode))
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 保存+审核采购到货单
+     *
+     * @param purInbound 采购到货单
+     */
+    public List<KingdeeResponse> saveAuditPurInbound(KingdeePurInboundSaveReqVO purInbound) {
+        return clients.parallelStream()
+            .filter(client -> {
+                SrmPurchaseInDTO purchaseInByCode = srmPurchaseInApi.getPurchaseInByCode(purInbound.getBillNo());
+                Long supplierId = purchaseInByCode.getSupplierId();
+                SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(supplierId);
+                return isSupplierNameMatch(supplierDTO.getName(), client);
+            })
+            .map(client -> client.saveAuditPurInbound(purInbound))
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
+    }
+
+    /**
+     * 保存+审核采购出库单
      *
      * @param purOutbound 采购出库单
      */
-    public void savePurOutbound(@Validated KingdeePurReturnSaveReqVO purOutbound) {
-        clients.parallelStream().forEach(n -> n.savePurReturn(purOutbound));
+    public List<KingdeeResponse> saveAuditPurOutbound(KingdeePurReturnSaveReqVO purOutbound) {
+        return clients.parallelStream()
+            .filter(client -> {
+                Long supplierId = Long.valueOf(purOutbound.getSupplierId());
+                SrmSupplierDTO supplierDTO = srmSupplierApi.getSupplier(supplierId);
+                return isSupplierNameMatch(supplierDTO.getName(), client);
+            })
+            .map(client -> client.saveAndAuditPurchaseReturn(purOutbound))
+            .flatMap(List::stream)
+            .collect(Collectors.toList());
     }
 
     /**
-     *  获得数据库所有令牌
+     * 获得数据库所有令牌
+     *
      * @return List<KingdeeToken>
      */
-    public List<KingdeeToken> listKingdeeTokens () {
+    public List<KingdeeToken> listKingdeeTokens() {
         return tokenRepository.findAll();
     }
 

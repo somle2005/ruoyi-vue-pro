@@ -4,7 +4,6 @@ import cn.iocoder.yudao.framework.common.enums.TimeZoneEnum;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.domain.EntityScan;
 
 import java.util.TimeZone;
 
@@ -18,9 +17,7 @@ import java.util.TimeZone;
  * @author 芋道源码
  */
 @SuppressWarnings("all") // 忽略 IDEA 无法识别 ${yudao.info.base-package}
-@SpringBootApplication(scanBasePackages = {"${yudao.info.base-package}.server", "${yudao.info.base-package}.module", "com.somle"})
-//@EnableJpaRepositories(basePackages = "com.somle")  //esb模块才加载com.somle
-@EntityScan(basePackages = "com.somle")
+@SpringBootApplication(scanBasePackages = {"${yudao.info.base-package}.server", "${yudao.info.base-package}.module"})
 @Slf4j
 public class YudaoServerApplication {
 

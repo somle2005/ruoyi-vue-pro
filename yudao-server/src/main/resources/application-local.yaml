@@ -3,11 +3,14 @@ oss:
 kingdee:
   outerInstanceIds:
     - 409386088805830656 #金蝶沙盒
+  strictSupplierMatch: false # 开发环境不进行严格匹配
 
 debug: false
 
 srm:
   enable-preload: false
+  sync:
+    eccang: false
 
 --- #################### 数据库相关配置 ####################
 

@@ -32,4 +32,12 @@ public interface SrmPurchaseReturnMapper extends BaseMapperX<SrmPurchaseReturnDO
         }
         return selectList(new LambdaQueryWrapper<SrmPurchaseReturnDO>().in(SrmPurchaseReturnDO::getId, ids));
     }
+
+    /**
+     * 查询所有采购退货单ID
+     */
+    default List<Long> selectAllIds() {
+        return selectObjs(new LambdaQueryWrapper<SrmPurchaseReturnDO>().select(SrmPurchaseReturnDO::getId))
+            .stream().map(obj -> (Long) obj).toList();
+    }
 }

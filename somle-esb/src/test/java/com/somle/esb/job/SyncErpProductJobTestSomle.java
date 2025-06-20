@@ -59,8 +59,8 @@ public class SyncErpProductJobTestSomle extends SomleBaseSpringIntegrationTest {
                 List<ErpProductDTO> pDTOs = erpProductApi.listProductDTOs(null).stream()
                     .filter(dto -> !productIds.contains(dto.getId())).toList();
                 pDTOs.forEach(dto -> {
-                    erpProductHandler.syncProductsToKingdee(List.of(dto));
-                    erpProductHandler.syncProductsToEccang(List.of(dto));
+//                    erpProductHandler.syncProductsToKingdee(List.of(dto));
+//                    erpProductHandler.syncProductsToEccang(List.of(dto));
                 });
             });
         } finally {

@@ -17,7 +17,7 @@ import java.util.List;
 
 @Slf4j
 @Component
-public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountContext> {
+public class InStorageActionImpl implements Action<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountContext> {
 
     @Autowired
     private SrmPurchaseInMapper srmPurchaseInMapper;
@@ -84,7 +84,6 @@ public class StorageInActionImpl implements Action<SrmStorageStatus, SrmEventEnu
                 to = SrmStorageStatus.PARTIALLY_IN_STORAGE;
             }
         }
-
 
         // 5. 更新入库单状态
         if (!to.getCode().equals(purchaseIn.getInboundStatus())) {

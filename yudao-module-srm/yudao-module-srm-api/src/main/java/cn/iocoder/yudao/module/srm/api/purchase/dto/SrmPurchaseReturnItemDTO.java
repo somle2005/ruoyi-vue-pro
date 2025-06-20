@@ -9,46 +9,70 @@ import java.math.BigDecimal;
  */
 @Data
 public class SrmPurchaseReturnItemDTO {
-
     /**
      * 编号
      */
     private Long id;
-
     /**
-     * 物料编号
+     * 乐观锁
      */
-    private Long materialId;
-
+    private Integer version;
     /**
-     * 物料编码
+     * 采购退货编号
+     * <p>
      */
-    private String materialCode;
-
+    private Long returnId;
     /**
-     * 物料名称
+     * 到货项id
      */
-    private String materialName;
-
+    private Long arriveItemId;
+    /**
+     * 入库单code
+     */
+    private String arriveCode;
+    /**
+     * 仓库编号
+     * <p>
+     */
+    private Long warehouseId;
+    /**
+     * 产品编号
+     * <p>
+     */
+    private Long productId;
+    /**
+     * 产品单位单位
+     * <p>
+     */
+    private Long productUnitId;
+    /**
+     * 产品单位单价，单位：元
+     */
+    private BigDecimal productPrice;
+    /**
+     * 产品单位名称
+     */
+    private String productUnitName;
     /**
      * 数量
      */
-    private BigDecimal quantity;
-
+    private BigDecimal qty;
     /**
-     * 单价
+     * 总价，单位：元
+     * <p>
+     * totalPrice = productPrice * count
      */
-    private BigDecimal price;
-
+    private BigDecimal totalPrice;
     /**
-     * 金额
+     * 税率，百分比
      */
-    private BigDecimal amount;
-
+    private BigDecimal taxRate;
     /**
-     * 单位
+     * 税额，单位：元
+     * <p>
+     * tax = totalPrice * taxRate
      */
-    private String unit;
+    private BigDecimal tax;
 
     /**
      * 备注
@@ -56,49 +80,9 @@ public class SrmPurchaseReturnItemDTO {
     private String remark;
 
     /**
-     * 税率，百分比
-     */
-    private BigDecimal taxRate;
-
-    /**
-     * 税额，单位：元
-     */
-    private BigDecimal taxAmount;
-
-    /**
      * 含税单价
      */
     private BigDecimal grossPrice;
-
-    /**
-     * 价税合计
-     */
-    private BigDecimal grossTotalPrice;
-
-    /**
-     * 仓库编号
-     */
-    private Long warehouseId;
-
-    /**
-     * 仓库名称
-     */
-    private String warehouseName;
-
-    /**
-     * 产品条码
-     */
-    private String productCode;
-
-    /**
-     * 报关品名
-     */
-    private String declaredType;
-
-    /**
-     * 英文报关品名
-     */
-    private String declaredTypeEn;
 
     /**
      * 箱率
@@ -106,12 +90,40 @@ public class SrmPurchaseReturnItemDTO {
     private String containerRate;
 
     /**
-     * 申请人编号
+     * 申请人id
      */
     private Long applicantId;
 
     /**
-     * 申请部门编号
+     * 申请部门id
      */
     private Long applicationDeptId;
+    /**
+     * 报关品名
+     */
+    private String declaredType;
+    /**
+     * 报关品名英文
+     */
+    private String declaredTypeEn;
+    /**
+     * 产品sku
+     */
+    private String productCode;
+    /**
+     * 产品名称
+     */
+    private String productName;
+    /**
+     * 出库状态
+     */
+    private Integer outboundStatus;
+    /**
+     * 出库数量
+     */
+    private BigDecimal outboundQty;
+    /**
+     * 实际入库数量,取到货单item的实际入库数量
+     */
+    private BigDecimal actualQty;
 } 
