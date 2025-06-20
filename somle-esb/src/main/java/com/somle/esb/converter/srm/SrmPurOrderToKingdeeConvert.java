@@ -80,7 +80,7 @@ public class SrmPurOrderToKingdeeConvert {
         // 单据编号
         target.setBillNo(StrUtil.trimToNull(dto.getCode()));
 
-        //TODO  供应商信息：ID转为字符串，编码去除空格  client拿ID
+        //  供应商信息：ID转为字符串，编码去除空格  client拿ID
 //        if (dto.getSupplierId() != null) {
 //            target.setSupplierId(String.valueOf(dto.getSupplierId()));
 //        }
