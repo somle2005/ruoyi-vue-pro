@@ -83,7 +83,7 @@ public class SrmPurOutToKingdeeConvert {
             return null;
         }
         MaterialEntity entity = new MaterialEntity();
-
+        entity.setProRegNo(String.valueOf(item.getId()));
         // 1. 产品SKU信息
         entity.setMaterialId(item.getProductId() == null ? null : String.valueOf(item.getProductId()));
         entity.setMaterialNumber(item.getProductCode());

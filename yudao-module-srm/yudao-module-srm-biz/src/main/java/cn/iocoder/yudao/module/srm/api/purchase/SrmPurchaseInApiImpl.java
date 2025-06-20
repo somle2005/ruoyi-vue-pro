@@ -10,18 +10,23 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmPurchaseInSaveReqDTO;
 import cn.iocoder.yudao.module.srm.config.machine.inItem.SrmPurchaseInItemCountContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
+import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
+import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -41,6 +46,8 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
     private SrmPurchaseInService purchaseInService;
     @Resource(name = PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
     private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountContext> purchaseInItemStorageStateMachine;
+    @Resource(name = SrmChannelEnum.PURCHASE_IN)
+    private MessageChannel messageChannel;
 
     @Override
     public List<SrmPurchaseInDTO> getPurchaseInList(List<Long> ids) {
@@ -89,6 +96,8 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
                 .build();
             purchaseInItemStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STOCK_ADJUSTMENT, build);
         });
+        //到货单->金蝶
+        TransactionUtils.runAfterCommit(() -> messageChannel.send(MessageBuilder.withPayload(Collections.singletonList(reqDTO.getUpstreamId())).build()));
     }
 
     /**

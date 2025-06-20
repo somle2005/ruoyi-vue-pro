@@ -21,7 +21,7 @@ import java.util.stream.Collectors;
 public class SyncUtils {
 
     /**
-     * 多线程同步方法（支持返回值） 使用CompletableFuture进行异步处理，提高同步效率，并返回同步结果
+     * 多线程同步方法（支持返回值）
      *
      * @param ids          需要同步的ID列表
      * @param validator    数据验证器
@@ -49,7 +49,6 @@ public class SyncUtils {
         Set<Object> failedIdentifiers = ConcurrentHashMap.newKeySet();
         AtomicInteger completedCount = new AtomicInteger(0);
 
-        // 创建异步任务列表
         List<CompletableFuture<S>> futures = kingdeeObjs.stream().map(obj -> CompletableFuture.supplyAsync(() -> {
             try {
                 S result = syncer.apply(obj);
@@ -68,7 +67,6 @@ public class SyncUtils {
             }
         }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor())).toList();
 
-        // 等待所有任务完成并收集结果
         List<S> results = futures.stream().map(CompletableFuture::join).collect(Collectors.toList());
 
         log.info("[{}] 同步完成，共处理：{}个，成功：{}个，失败：{}个", logType, total, successCount.get(), failCount.get());

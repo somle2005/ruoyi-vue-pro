@@ -691,22 +691,23 @@ public class KingdeeClient {
     /**
      * 保存+审核 采购退货单
      */
-    public KingdeeResponse saveAndAuditPurchaseReturn(KingdeePurReturnSaveReqVO returnOrder) {
+    public List<KingdeeResponse> saveAndAuditPurchaseReturn(KingdeePurReturnSaveReqVO returnOrder) {
         // 1. 校验金蝶采购退货单是否已存在
-        KingdeePage existingReturn = null;
+        List<KingdeeResponse> responseList = new ArrayList<>();
+        KingdeePurReturnDetail kingdeePurReturnDetail = null;
         try {
-            KingdeePurReturnReqVO queryVO = new KingdeePurReturnReqVO();
-            queryVO.setBillNo(returnOrder.getBillNo());
-            existingReturn = this.getPurReturnPage(queryVO);
+            kingdeePurReturnDetail = this.getPurReturnDetail(returnOrder.getBillNo());
         } catch (RuntimeException e) {
             log.info("采购退货单不存在，采购退货单编号：{}, 响应: {}", returnOrder.getBillNo(), e.getMessage());
         }
 
-        // 如果已存在，则直接返回
-        if (existingReturn != null && !existingReturn.getRowsList(KingdeePurReturnSaveReqVO.class).isEmpty()) {
-            log.info("采购退货单已存在，跳过处理，单号：{}", returnOrder.getBillNo());
-            return new KingdeeResponse(); // 返回空响应
+        if (kingdeePurReturnDetail == null) {
+            //保存
+            responseList.add(this.savePurReturn(returnOrder));
+            kingdeePurReturnDetail = this.getPurReturnDetail(returnOrder.getBillNo());
         }
+        //审核
+
 
         // 2. 处理供应商信息
         String erpSupplierId = returnOrder.getSupplierNumber();
@@ -783,7 +784,7 @@ public class KingdeeClient {
             log.info("采购退货单保存并审核成功，单据ID：{}", orderIds.get(0));
         }
 
-        return auditResponse;
+        return responseList;
     }
 
     /**
@@ -826,6 +827,35 @@ public class KingdeeClient {
      * @return KingdeeResponse
      */
     public KingdeeResponse savePurReturn(KingdeePurReturnSaveReqVO returnOrder) {
+        //供应商ID
+        String erpSupplierId = returnOrder.getSupplierId();
+        SrmSupplierApi srmSupplierApi = SpringUtils.getBean(SrmSupplierApi.class);
+        KingdeeSupplierSaveVO supplierSaveVO = this.getAllSupplierList(null).get(srmSupplierApi.getSupplier(Long.valueOf(erpSupplierId)).getName());
+        //不存在 -> e
+        if (supplierSaveVO == null) {
+            throw exception(SUPPLIER_NOT_EXIST, erpSupplierId);
+        }
+        returnOrder.setSupplierId(supplierSaveVO.getId());
+        //产品
+        returnOrder.getMaterialEntity().forEach(material -> {
+            //产品
+            material.setMaterialId(this.getMaterial(material.getMaterialNumber()).getData(JSONObject.class).getString("id"));
+            //数量
+            material.setQty(material.getQty());
+            //单位
+            setUnitId("套", kingdeeUnit -> material.setUnitId(kingdeeUnit.getId()));
+            //仓库
+            String stockId = material.getStockId();
+            WmsWarehouseApi warehouseApi = SpringUtils.getBean(WmsWarehouseApi.class);
+            Map<Long, WmsWarehouseDTO> warehouseMap = warehouseApi.getWarehouseMap(List.of(Long.valueOf(stockId)));
+            material.setStockId(String.valueOf(warehouseMap.get(Long.valueOf(stockId)).getId()));
+            material.setStockNumber(warehouseMap.get(Long.valueOf(stockId)).getCode());
+            material.setStockId(null);
+            //备注
+            material.setComment(material.getComment());
+            material.setSrcBillTypeId(KingdeeEntityType.PUR_BILL_OUTBOUND.getCode());
+            //源单ID
+        });
         String endUrl = "/jdy/v2/scm/pur_ret";
         TreeMap<String, String> params = new TreeMap<>();
         return postResponse(endUrl, params, returnOrder);
@@ -846,14 +876,28 @@ public class KingdeeClient {
     }
 
     /**
-     * 获取单页采购退货单列表
-     *
-     * @param vo 查询参数
-     * @return 单页数据
+     * 采购退货单详情
+     **/
+    public KingdeePurReturnDetail getPurReturnDetail(String number) {
+        return getPurReturnDetailByParam("number", number);
+    }
+
+    /**
+     * 根据ID获取金蝶采购退货单详情
      */
-    public KingdeePage getPurReturnPage(KingdeePurReturnReqVO vo) {
-        String endpoint = "/jdy/v2/scm/pur_ret";
-        return getPage(JsonUtilsX.toJSONObject(vo), endpoint);
+    public KingdeePurReturnDetail getPurReturnDetailById(String id) {
+        return getPurReturnDetailByParam("id", id);
+    }
+
+    /**
+     * 获取金蝶采购退货单详情
+     */
+    private KingdeePurReturnDetail getPurReturnDetailByParam(String paramName, String paramValue) {
+        String endUrl = "/jdy/v2/scm/pur_ret_detail";
+        TreeMap<String, String> params = new TreeMap<>();
+        params.put(paramName, paramValue);
+        KingdeeResponse response = getResponse(endUrl, params);
+        return response.getData(KingdeePurReturnDetail.class);
     }
 
     private KingdeeResponse fetchResponse(String requestMethod, String endUrl, TreeMap<String, String> params, Object body) {
