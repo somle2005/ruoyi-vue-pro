@@ -89,7 +89,7 @@ public class SrmSupplierController {
     @Operation(summary = "获得供应商精简列表", description = "只包含被开启的供应商，主要用于前端的下拉选项")
     @PreAuthorize("@ss.hasPermission('srm:supplier:query')")
     public CommonResult<List<SrmSupplierRespVO>> getSupplierSimpleList() {
-        List<SrmSupplierDO> list = supplierService.getSupplierListByStatus(CommonStatusEnum.ENABLE.getStatus());
+        List<SrmSupplierDO> list = supplierService.getSupplierListByStatus(CommonStatusEnum.ENABLE);
         return success(BeanUtils.toBean(list, SrmSupplierRespVO.class));
     }
 

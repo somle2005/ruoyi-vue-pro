@@ -107,8 +107,8 @@ public interface SrmPurchaseOrderService {
             return Collections.emptyMap();
         }
         return orderList.stream()
-                .filter(Objects::nonNull) // 防止列表里有null
-                .collect(Collectors.toMap(SrmPurchaseOrderDO::getId, Function.identity(), (a, b) -> a));//合并函数防止冲突key
+            .filter(Objects::nonNull) // 防止列表里有null
+            .collect(Collectors.toMap(SrmPurchaseOrderDO::getId, Function.identity(), (a, b) -> a));//合并函数防止冲突key
     }
 
 
@@ -220,4 +220,27 @@ public interface SrmPurchaseOrderService {
      * @return 最新的采购订单编号
      */
     String getMaxSerialNumber();
+
+    /**
+     * 获取所有采购订单的id
+     *
+     * @return 采购订单id集合
+     */
+    List<Long> listPurchaseOrderIds();
+
+    /**
+     * 根据采购订单code集合获取订单ID
+     *
+     * @param codes 采购订单code集合
+     * @return 采购订单ID列表
+     */
+    List<Long> listPurchaseOrderIdsByCodes(List<String> codes);
+
+    /**
+     * 根据采购订单code获取采购订单
+     *
+     * @param code 采购订单code
+     * @return 采购订单
+     */
+    SrmPurchaseOrderDO getPurchaseOrderByCode(String code);
 }

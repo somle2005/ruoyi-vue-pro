@@ -11,6 +11,6 @@ import cn.iocoder.yudao.framework.common.exception.ErrorCode;
  */
 public interface ErrorCodeConstants {
     // ========== 同模块系统内部异常（1-020-000-000） ==========
-    ErrorCode DEPT_LEVEL_ERROR = new ErrorCode(1 - 020 - 000 - 000, "经校验部门层级为0，请检查部门层级是否正确");
+    ErrorCode DEPT_LEVEL_ERROR = new ErrorCode(1_020_000_000, "经校验部门层级为0，请检查部门层级是否正确");
 
 }

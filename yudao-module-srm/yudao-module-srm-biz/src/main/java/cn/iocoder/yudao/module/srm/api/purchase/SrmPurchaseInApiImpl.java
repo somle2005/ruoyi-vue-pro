@@ -10,17 +10,23 @@ import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmPurchaseInSaveReqDTO;
 import cn.iocoder.yudao.module.srm.config.machine.inItem.SrmPurchaseInItemCountContext;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
+import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import cn.iocoder.yudao.module.srm.enums.SrmEventEnum;
 import cn.iocoder.yudao.module.srm.enums.status.SrmStorageStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
+import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.messaging.MessageChannel;
+import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -39,7 +45,9 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
     @Lazy
     private SrmPurchaseInService purchaseInService;
     @Resource(name = PURCHASE_IN_ITEM_STORAGE_STATE_MACHINE)
-    StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountContext> purchaseInItemStorageStateMachine;
+    private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInItemCountContext> purchaseInItemStorageStateMachine;
+    @Resource(name = SrmChannelEnum.PURCHASE_IN)
+    private MessageChannel messageChannel;
 
     @Override
     public List<SrmPurchaseInDTO> getPurchaseInList(List<Long> ids) {
@@ -72,6 +80,7 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
      * @param reqDTO 入库单DTO
      */
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseInItemQty(SrmPurchaseInSaveReqDTO reqDTO) {
         //校验
         if (!Objects.equals(reqDTO.getUpstreamType(), BillType.SRM_PURCHASE_IN.getValue())) {
@@ -87,6 +96,8 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
                 .build();
             purchaseInItemStorageStateMachine.fireEvent(SrmStorageStatus.NONE_IN_STORAGE, SrmEventEnum.STOCK_ADJUSTMENT, build);
         });
+        //到货单->金蝶
+        TransactionUtils.runAfterCommit(() -> messageChannel.send(MessageBuilder.withPayload(Collections.singletonList(reqDTO.getUpstreamId())).build()));
     }
 
     /**
@@ -96,23 +107,34 @@ public class SrmPurchaseInApiImpl implements SrmPurchaseInApi {
      * @return 入库明细 DTO
      */
     private SrmPurchaseInItemDTO convertInItem(SrmPurchaseInItemDO item) {
-        if (item == null) {
+        return BeanUtils.toBean(item, SrmPurchaseInItemDTO.class);
+    }
+
+    @Override
+    public SrmPurchaseInItemDTO getPurchaseInItemById(Long id) {
+        SrmPurchaseInItemDO itemDO = purchaseInService.getPurchaseInItemById(id);
+        return convertInItem(itemDO);
+    }
+
+    @Override
+    public List<Long> listAllPurchaseInIds() {
+        return purchaseInService.listAllPurchaseInIds();
+    }
+
+    @Override
+    public SrmPurchaseInDTO getPurchaseInByCode(String code) {
+        // 1. 根据code获取采购入库单
+        SrmPurchaseInDO inOrder = purchaseInService.getPurchaseInByCode(code);
+        if (inOrder == null) {
             return null;
         }
-        SrmPurchaseInItemDTO dto = BeanUtils.toBean(item, SrmPurchaseInItemDTO.class);
-        // 特殊字段映射
-        dto.setProductCode(item.getProductCode());
-        dto.setMaterialId(item.getProductId());
-//        dto.setMaterialCode(item.getProductCode());
-        dto.setMaterialName(item.getProductName());
-        dto.setUnit(item.getProductUnitName());
-        dto.setQuantity(item.getQty());
-        dto.setPrice(item.getProductPrice());
-        dto.setAmount(item.getTotalPrice());
-        dto.setTaxRate(item.getTaxRate());
-        dto.setTaxAmount(item.getTax());
-        dto.setGrossPrice(item.getGrossPrice());
-        dto.setGrossTotalPrice(item.getTotalProductPrice());
+
+        // 2. 获取入库明细列表
+        List<SrmPurchaseInItemDO> inItems = purchaseInService.getPurchaseInItemListByInId(inOrder.getId());
+
+        // 3. 转换为 DTO 对象
+        SrmPurchaseInDTO dto = BeanUtils.toBean(inOrder, SrmPurchaseInDTO.class);
+        dto.setItems(inItems.stream().map(this::convertInItem).collect(Collectors.toList()));
         return dto;
     }
-} 
+}

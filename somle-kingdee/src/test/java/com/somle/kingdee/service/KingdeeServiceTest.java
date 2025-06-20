@@ -172,7 +172,7 @@ public class KingdeeServiceTest extends SomleBaseSpringTest {
         var client = service.getClients().get(0);
         client.refreshAuth();
         for (String[] field : fields) {
-            log.info(client.getCustomField(field[1]).toString());
+//            log.info(client.getCustomField(field[1]).toString());
         }
 //        log.info(client.getCustomField("").toString());
     }

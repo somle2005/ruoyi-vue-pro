@@ -109,12 +109,26 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Resource(name = PURCHASE_IN_STORAGE_STATE_MACHINE)
     private StateMachine<SrmStorageStatus, SrmEventEnum, SrmPurchaseInCountContext> purchaseInStorageMachine;
 
+    //判断当前状态是否可以更新 方法
+    private static void updateStatusCheck(SrmPurchaseInDO srmPurchaseInDO) {
+        //1.1 不处于草稿、审核不通过、审核撤销 状态->e
+        ThrowUtil.ifThrow(
+            !SrmAuditStatus.DRAFT.getCode().equals(srmPurchaseInDO.getAuditStatus()) && !SrmAuditStatus.REJECTED.getCode()
+                .equals(srmPurchaseInDO.getAuditStatus()) && !SrmAuditStatus.REVOKED.getCode()
+                .equals(srmPurchaseInDO.getAuditStatus()), PURCHASE_IN_UPDATE_FAIL_APPROVE, srmPurchaseInDO.getCode(),
+            SrmAuditStatus.fromCode(srmPurchaseInDO.getAuditStatus()).getDesc());
+    }
+
+    public static BigDecimal safe(BigDecimal value) {
+        return value == null ? BigDecimal.ZERO : value;
+    }
+
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
-            subType = LogRecordConstants.SRM_PURCHASE_IN_CREATE_SUB_TYPE,
-            bizNo = "{{#id}}",
-            extra = "{{#vo.code}}",
-            success = "创建了采购到货单【{{#vo.code}}】")
+        subType = LogRecordConstants.SRM_PURCHASE_IN_CREATE_SUB_TYPE,
+        bizNo = "{{#id}}",
+        extra = "{{#vo.code}}",
+        success = "创建了采购到货单【{{#vo.code}}】")
     @Idempotent
     @Transactional(rollbackFor = Exception.class)
     public Long createPurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
@@ -169,9 +183,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
         //1.0 订单项对应到货项未审核 -> e
         List<Long> orderItemIds = voItems.stream()
-                .map(SrmPurchaseInSaveReqVO.Item::getOrderItemId)
-                .distinct()
-                .toList();
+            .map(SrmPurchaseInSaveReqVO.Item::getOrderItemId)
+            .distinct()
+            .toList();
 
         // 1.1 批量获取入库项和入库单信息,减少数据库查询
         List<SrmPurchaseInItemDO> srmPurchaseInItemDOS = purchaseInItemMapper.selectListByOrderItemIds(orderItemIds);
@@ -182,25 +196,25 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
             // 获取订单项信息,用于异常提示
             Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(
-                    purchaseOrderService.getPurchaseOrderItemList(orderItemIds),
-                    SrmPurchaseOrderItemDO::getId
+                purchaseOrderService.getPurchaseOrderItemList(orderItemIds),
+                SrmPurchaseOrderItemDO::getId
             );
 
             // 校验入库单状态,并关联订单项信息
             srmPurchaseInItemDOS.stream()
-                    .filter(item -> {
-                        SrmPurchaseInDO in = inMap.get(item.getArriveId());
-                        return in != null && !Objects.equals(in.getAuditStatus(), SrmAuditStatus.APPROVED.getCode());
-                    })
-                    .findFirst()
-                    .ifPresent(item -> {
-                        SrmPurchaseOrderItemDO orderItem = orderItemMap.get(item.getOrderItemId());
-                        String orderItemInfo = orderItem != null ? String.format("订单项[%s-编号:%s]", orderItem.getProductName(), orderItem.getId()) : String.format("订单项ID[%s]", item.getOrderItemId());
-                        SrmPurchaseInDO in = inMap.get(item.getArriveId());
-                        throw exception(PURCHASE_IN_ITEM_ORDER_ITEM_NOT_AUDIT_PASS,
-                                orderItemInfo, // 订单项信息
-                                in.getCode()); // 到货单编号
-                    });
+                .filter(item -> {
+                    SrmPurchaseInDO in = inMap.get(item.getArriveId());
+                    return in != null && !Objects.equals(in.getAuditStatus(), SrmAuditStatus.APPROVED.getCode());
+                })
+                .findFirst()
+                .ifPresent(item -> {
+                    SrmPurchaseOrderItemDO orderItem = orderItemMap.get(item.getOrderItemId());
+                    String orderItemInfo = orderItem != null ? String.format("订单项[%s-编号:%s]", orderItem.getProductName(), orderItem.getId()) : String.format("订单项ID[%s]", item.getOrderItemId());
+                    SrmPurchaseInDO in = inMap.get(item.getArriveId());
+                    throw exception(PURCHASE_IN_ITEM_ORDER_ITEM_NOT_AUDIT_PASS,
+                        orderItemInfo, // 订单项信息
+                        in.getCode()); // 到货单编号
+                });
         }
 
         // 2.0 校验vo创建数量是否超过了采购订单的采购项可到货数量 voItem.qty >  (SrmPurchaseOrderItemDO.qty - SrmPurchaseOrderItemDO.inboundClosedQty) -> e
@@ -254,29 +268,19 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             Optional.ofNullable(inItemDO.getOrderItemId()).ifPresent(orderItemId -> {
                 SrmPurchaseOrderItemDO orderItemDO = purchaseOrderService.validatePurchaseOrderItemExists(orderItemId);
                 orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInboundStatus()),
-                        SrmEventEnum.STOCK_ADJUSTMENT,
-                        //取反数量
+                    SrmEventEnum.STOCK_ADJUSTMENT,
+                    //取反数量
                     SrmOrderInCountContext.builder().orderItemId(orderItemId).inCount(inItemDO.getQty().negate()).build());
             });
         }
     }
 
-    //判断当前状态是否可以更新 方法
-    private static void updateStatusCheck(SrmPurchaseInDO srmPurchaseInDO) {
-        //1.1 不处于草稿、审核不通过、审核撤销 状态->e
-        ThrowUtil.ifThrow(
-                !SrmAuditStatus.DRAFT.getCode().equals(srmPurchaseInDO.getAuditStatus()) && !SrmAuditStatus.REJECTED.getCode()
-                        .equals(srmPurchaseInDO.getAuditStatus()) && !SrmAuditStatus.REVOKED.getCode()
-                        .equals(srmPurchaseInDO.getAuditStatus()), PURCHASE_IN_UPDATE_FAIL_APPROVE, srmPurchaseInDO.getCode(),
-                SrmAuditStatus.fromCode(srmPurchaseInDO.getAuditStatus()).getDesc());
-    }
-
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
-            subType = LogRecordConstants.SRM_PURCHASE_IN_UPDATE_SUB_TYPE,
-            bizNo = "{{#vo.id}}",
-            extra = "{{#vo.code}}",
-            success = "更新了采购到货单【{{#vo.code}}】: {_DIFF{#vo}}")
+        subType = LogRecordConstants.SRM_PURCHASE_IN_UPDATE_SUB_TYPE,
+        bizNo = "{{#vo.id}}",
+        extra = "{{#vo.code}}",
+        success = "更新了采购到货单【{{#vo.code}}】: {_DIFF{#vo}}")
     @Transactional(rollbackFor = Exception.class)
     public void updatePurchaseIn(@Validated SrmPurchaseInSaveReqVO vo) {
         //默认入库时间
@@ -322,29 +326,25 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
             // 1.6.2 计算需要校验的增量项
             List<SrmPurchaseInSaveReqVO.Item> diffItems = vo.getItems().stream()
-                    .filter(voItem -> {
-                        BigDecimal oldQty = oldItemMap.getOrDefault(voItem.getOrderItemId(), BigDecimal.ZERO);
-                        return oldQty.compareTo(voItem.getQty()) < 0; // 只处理数量增加的项
-                    })
-                    .map(voItem -> {
-                        BigDecimal oldQty = oldItemMap.getOrDefault(voItem.getOrderItemId(), BigDecimal.ZERO);
-                        return new SrmPurchaseInSaveReqVO.Item()
-                                .setId(voItem.getId())
-                                .setOrderItemId(voItem.getOrderItemId())
-                                .setProductName(oldItemNameMap.getOrDefault(voItem.getOrderItemId(), voItem.getProductName()))
-                                .setQty(voItem.getQty().subtract(oldQty)); // 增量数量
-                    })
-                    .collect(Collectors.toList());
+                .filter(voItem -> {
+                    BigDecimal oldQty = oldItemMap.getOrDefault(voItem.getOrderItemId(), BigDecimal.ZERO);
+                    return oldQty.compareTo(voItem.getQty()) < 0; // 只处理数量增加的项
+                })
+                .map(voItem -> {
+                    BigDecimal oldQty = oldItemMap.getOrDefault(voItem.getOrderItemId(), BigDecimal.ZERO);
+                    return new SrmPurchaseInSaveReqVO.Item()
+                        .setId(voItem.getId())
+                        .setOrderItemId(voItem.getOrderItemId())
+                        .setProductName(oldItemNameMap.getOrDefault(voItem.getOrderItemId(), voItem.getProductName()))
+                        .setQty(voItem.getQty().subtract(oldQty)); // 增量数量
+                })
+                .collect(Collectors.toList());
 
             // 1.6.3 校验变更后的数量是否超过可到货数量
             if (CollUtil.isNotEmpty(diffItems)) {
                 validatePurchaseOrderItemQty(diffItems);
             }
         }
-    }
-
-    public static BigDecimal safe(BigDecimal value) {
-        return value == null ? BigDecimal.ZERO : value;
     }
 
     private void calculateTotalPrice(SrmPurchaseInDO purchaseIn, List<SrmPurchaseInItemDO> purchaseInItems) {
@@ -381,16 +381,16 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 // 计算单个产品的总重量 = 产品重量 * 数量
                 if (product.getWeight() != null) {
                     totalWeight = totalWeight.add(
-                            MoneyUtils.priceMultiply(product.getWeight(), item.getQty())
+                        MoneyUtils.priceMultiply(product.getWeight(), item.getQty())
                     );
                 }
                 // 计算单个产品的总体积 = (长 * 宽 * 高) * 数量（单位：立方毫米）
                 if (product.getLength() != null && product.getWidth() != null && product.getHeight() != null) {
                     BigDecimal itemVolume = new BigDecimal(product.getLength())
-                            .multiply(new BigDecimal(product.getWidth()))
-                            .multiply(new BigDecimal(product.getHeight()));
+                        .multiply(new BigDecimal(product.getWidth()))
+                        .multiply(new BigDecimal(product.getHeight()));
                     totalVolume = totalVolume.add(
-                            MoneyUtils.priceMultiply(itemVolume, item.getQty())
+                        MoneyUtils.priceMultiply(itemVolume, item.getQty())
                     );
                 }
             }
@@ -438,11 +438,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
         // 1.2 批量获取采购订单信息
         List<Long> orderIds = orderItemMap.values().stream()
-                .map(SrmPurchaseOrderItemDO::getOrderId)
-                .distinct()
-                .collect(Collectors.toList());
+            .map(SrmPurchaseOrderItemDO::getOrderId)
+            .distinct()
+            .collect(Collectors.toList());
         Map<Long, String> orderCodeMap = convertMap(purchaseOrderService.getPurchaseOrderList(orderIds),
-                SrmPurchaseOrderDO::getId, SrmPurchaseOrderDO::getCode);
+            SrmPurchaseOrderDO::getId, SrmPurchaseOrderDO::getCode);
 
         return convertList(voItems, voItem -> BeanUtils.toBean(voItem, SrmPurchaseInItemDO.class, inItemDO -> {
             //总价
@@ -453,13 +453,13 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             }
             // 存在关联 -> 填充订单项字段
             Optional.ofNullable(inItemDO.getOrderItemId())
-                    .flatMap(orderItemId -> Optional.ofNullable(orderItemMap.get(orderItemId)))
-                    .ifPresent(orderItemDO -> {
-                        copyOrderItemToInItem(orderItemDO, inItemDO);
-                        // 填充采购订单编号
-                        Optional.ofNullable(orderCodeMap.get(orderItemDO.getOrderId()))
-                                .ifPresent(inItemDO::setOrderCode);
-                    });
+                .flatMap(orderItemId -> Optional.ofNullable(orderItemMap.get(orderItemId)))
+                .ifPresent(orderItemDO -> {
+                    copyOrderItemToInItem(orderItemDO, inItemDO);
+                    // 填充采购订单编号
+                    Optional.ofNullable(orderCodeMap.get(orderItemDO.getOrderId()))
+                        .ifPresent(inItemDO::setOrderCode);
+                });
         }));
     }
 
@@ -502,7 +502,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         //1 对比列表
         List<SrmPurchaseInItemDO> oldList = purchaseInItemMapper.selectListByInId(id);
         List<List<SrmPurchaseInItemDO>> diffList = diffList(oldList, newList, // id 不同，就认为是不同的记录
-                (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
+            (oldVal, newVal) -> oldVal.getId().equals(newVal.getId()));
 
         //2 批量添加、修改、删除
         if (CollUtil.isNotEmpty(diffList.get(0))) {
@@ -534,7 +534,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 SrmPurchaseOrderItemDO orderItemDO = purchaseOrderService.validatePurchaseOrderItemExists(orderItemId);
                 //更新订单项入库数量+状态 入库状态机,创建入库单->增加入库数量
                 orderItemStorageMachine.fireEvent(SrmStorageStatus.fromCode(orderItemDO.getInboundStatus())
-                        , SrmEventEnum.STOCK_ADJUSTMENT
+                    , SrmEventEnum.STOCK_ADJUSTMENT
                     , SrmOrderInCountContext.builder().orderItemId(orderItemId).inCount(purchaseInItem.getQty()).build()); //正数
             });
         }
@@ -542,10 +542,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
-            subType = LogRecordConstants.SRM_PURCHASE_IN_DELETE_SUB_TYPE,
-            bizNo = "{{#ids[0]}}",
-            extra = "{{#businessName}}",
-            success = "删除了采购到货单【{{#businessName}}】")
+        subType = LogRecordConstants.SRM_PURCHASE_IN_DELETE_SUB_TYPE,
+        bizNo = "{{#ids[0]}}",
+        extra = "{{#businessName}}",
+        success = "删除了采购到货单【{{#businessName}}】")
     @Transactional(rollbackFor = Exception.class)
     public void deletePurchaseIn(List<Long> ids) {
         // 获取业务名称用于日志记录
@@ -622,6 +622,11 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     @Override
+    public SrmPurchaseInDO getPurchaseInByCode(String code) {
+        return purchaseInMapper.selectByNo(code);
+    }
+
+    @Override
     public PageResult<SrmPurchaseInBO> getPurchaseInBOPage(SrmPurchaseInPageReqVO pageReqVO) {
         // 1. 查询分页数据（子表+主表）
         PageResult<SrmPurchaseInItemBO> pageResult = purchaseInItemMapper.selectBOPage(pageReqVO);
@@ -674,10 +679,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
-            subType = LogRecordConstants.SRM_PURCHASE_IN_AUDIT_SUB_TYPE,
-            bizNo = "{{#inIds[0]}}",
-            extra = "{{#codes}}",
-            success = "提交了采购到货单【{{#codes}}】审核")
+        subType = LogRecordConstants.SRM_PURCHASE_IN_AUDIT_SUB_TYPE,
+        bizNo = "{{#inIds[0]}}",
+        extra = "{{#codes}}",
+        success = "提交了采购到货单【{{#codes}}】审核")
     public void submitAudit(Collection<Long> inIds) {
         // 获取单据编号用于日志记录
         List<SrmPurchaseInDO> ins = purchaseInMapper.selectByIds(inIds);
@@ -693,10 +698,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
     @Override
     @LogRecord(type = LogRecordConstants.SRM_PURCHASE_IN_TYPE,
-            subType = LogRecordConstants.SRM_PURCHASE_IN_SUBMIT_AUDIT_SUB_TYPE,
+        subType = LogRecordConstants.SRM_PURCHASE_IN_SUBMIT_AUDIT_SUB_TYPE,
         bizNo = "{{#req.arriveId}}",
-            extra = "{{#codes}}",
-            success = "{{#req.reviewed ? (#req.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购到货单【{{#codes}}】")
+        extra = "{{#codes}}",
+        success = "{{#req.reviewed ? (#req.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购到货单【{{#codes}}】")
     @Transactional(rollbackFor = Exception.class)
     public void review(SrmPurchaseInAuditReqVO req) {
         // 1. 获取并校验入库单信息
@@ -786,9 +791,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     private boolean isInboundCanAbandon(WmsInboundDTO inbound) {
         return Objects.equals(inbound.getInboundStatus(), WmsInboundStatus.NONE.getValue())
             && (Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.DRAFT.getValue())
-                || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.AUDITING.getValue())
-                || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.REJECT.getValue()));
-        }
+            || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.AUDITING.getValue())
+            || Objects.equals(inbound.getAuditStatus(), WmsInboundAuditStatus.REJECT.getValue()));
+    }
 
     /**
      * 按仓库分组生成入库单
@@ -805,65 +810,65 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 2. 获取关联的采购订单项信息，用于获取订单主表ID
         List<Long> orderItemIds = convertList(inItems, SrmPurchaseInItemDO::getOrderItemId);
         Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(
-                purchaseOrderService.getPurchaseOrderItemList(orderItemIds),
-                SrmPurchaseOrderItemDO::getId
+            purchaseOrderService.getPurchaseOrderItemList(orderItemIds),
+            SrmPurchaseOrderItemDO::getId
         );
 
         // 3. 获取采购订单主表信息，用于获取 purchaseCompanyId
         List<Long> orderIds = orderItemMap.values().stream()
-                .map(SrmPurchaseOrderItemDO::getOrderId)
-                .distinct()
-                .collect(Collectors.toList());
+            .map(SrmPurchaseOrderItemDO::getOrderId)
+            .distinct()
+            .collect(Collectors.toList());
         Map<Long, SrmPurchaseOrderDO> orderMap = convertMap(
-                purchaseOrderService.getPurchaseOrderList(orderIds),
-                SrmPurchaseOrderDO::getId
+            purchaseOrderService.getPurchaseOrderList(orderIds),
+            SrmPurchaseOrderDO::getId
         );
 
         // 4. 按仓库ID分组
         Map<Long, List<SrmPurchaseInItemDO>> warehouseItemMap = inItems.stream()
-                .collect(Collectors.groupingBy(SrmPurchaseInItemDO::getWarehouseId));
+            .collect(Collectors.groupingBy(SrmPurchaseInItemDO::getWarehouseId));
 
         // 5. 为每个仓库生成入库单
         warehouseItemMap.forEach((warehouseId, items) -> {
             // 5.1 构建入库单明细项
             List<WmsInboundItemSaveReqDTO> inboundItems = items.stream()
-                    .map(item -> {
-                        // 获取关联的采购订单项和订单主表信息
-                        SrmPurchaseOrderItemDO orderItem = orderItemMap.get(item.getOrderItemId());
-                        SrmPurchaseOrderDO order = orderItem != null ? orderMap.get(orderItem.getOrderId()) : null;
+                .map(item -> {
+                    // 获取关联的采购订单项和订单主表信息
+                    SrmPurchaseOrderItemDO orderItem = orderItemMap.get(item.getOrderItemId());
+                    SrmPurchaseOrderDO order = orderItem != null ? orderMap.get(orderItem.getOrderId()) : null;
 
-                        return WmsInboundItemSaveReqDTO.builder()
-                                .productId(item.getProductId())
-                                .planQty(item.getQty().intValue())
-                                .deptId(item.getApplicationDeptId())
-                                .companyId(order != null ? order.getPurchaseCompanyId() : null) // 设置库存财务公司ID
-                                .remark(item.getRemark())
-                            .upstreamId(item.getId()) // 到货明细ID
-                                .build();
-                    })
-                    .collect(Collectors.toList());
+                    return WmsInboundItemSaveReqDTO.builder()
+                        .productId(item.getProductId())
+                        .planQty(item.getQty().intValue())
+                        .deptId(item.getApplicationDeptId())
+                        .companyId(order != null ? order.getPurchaseCompanyId() : null) // 设置库存财务公司ID
+                        .remark(item.getRemark())
+                        .upstreamId(item.getId()) // 到货明细ID
+                        .build();
+                })
+                .collect(Collectors.toList());
 
             //获取公司ID集合
             Set<Long> companyIds = inboundItems.stream()
-                    .map(WmsInboundItemSaveReqDTO::getCompanyId)
-                    .filter(Objects::nonNull)
-                    .collect(Collectors.toSet());
-            if(companyIds.size()>1){
+                .map(WmsInboundItemSaveReqDTO::getCompanyId)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toSet());
+            if (companyIds.size() > 1) {
                 throw exception(PURCHASE_IN_ITEM_COMPANY_NOT_MATCH, inDO.getCode());
             }
             // 5.2 创建入库单
             Long inbound = wmsInboundApi.createInbound(
-                    WmsInboundSaveReqDTO.builder()
-                            .type(WmsInboundType.PURCHASE.getValue())
-                        .upstreamType(BillType.SRM_PURCHASE_IN.getValue())
-                        .upstreamId(inDO.getId())
-                        .upstreamCode(inDO.getCode())
-                            .warehouseId(warehouseId)
-                            .itemList(inboundItems)
-                            .auditStatus(WmsInboundAuditStatus.DRAFT.getValue())
-                            .companyId(companyIds.iterator().next())
-                        .arrivalPlanTime(inDO.getArriveTime())
-                            .build()
+                WmsInboundSaveReqDTO.builder()
+                    .type(WmsInboundType.PURCHASE.getValue())
+                    .upstreamType(BillType.SRM_PURCHASE_IN.getValue())
+                    .upstreamId(inDO.getId())
+                    .upstreamCode(inDO.getCode())
+                    .warehouseId(warehouseId)
+                    .itemList(inboundItems)
+                    .auditStatus(WmsInboundAuditStatus.DRAFT.getValue())
+                    .companyId(companyIds.iterator().next())
+                    .arrivalPlanTime(inDO.getArriveTime())
+                    .build()
             );
             log.info("采购到货单[{}]审核通过，创建入库单，ID: {}", inDO.getCode(), inbound);
         });
@@ -875,7 +880,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         List<Long> itemIds = vo.getItems().stream().map(SrmPurchaseInPayReqVO.Item::getId).distinct().toList();
         //map itemId:item
         Map<Long, SrmPurchaseInPayReqVO.Item> itemMap =
-                vo.getItems().stream().collect(Collectors.toMap(SrmPurchaseInPayReqVO.Item::getId, Function.identity()));
+            vo.getItems().stream().collect(Collectors.toMap(SrmPurchaseInPayReqVO.Item::getId, Function.identity()));
         itemIds.stream().distinct().forEach(item -> {
             Long inId = purchaseInItemMapper.selectById(item).getArriveId();
             SrmPurchaseInDO purchaseInDO = purchaseInMapper.selectById(inId);
@@ -938,9 +943,9 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
         // 获取第一个非空币种的订单项作为基准
         SrmPurchaseOrderItemDO baseItem = orderItems.stream()
-                .filter(item -> StrUtil.isNotBlank(item.getCurrencyName()))
-                .findFirst()
-                .orElse(null);
+            .filter(item -> StrUtil.isNotBlank(item.getCurrencyName()))
+            .findFirst()
+            .orElse(null);
 
         if (baseItem == null) {
             return; // 如果没有找到任何有币种的订单项，则不校验
@@ -948,15 +953,15 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
 
         // 校验其他订单项的币种是否与基准币种一致
         orderItems.stream()
-                .filter(item -> StrUtil.isNotBlank(item.getCurrencyName()) && !item.getId().equals(baseItem.getId()))
-                .forEach(item -> {
-                    if (!StrUtil.equals(item.getCurrencyName(), baseItem.getCurrencyName())) {
-                        throw exception(PURCHASE_IN_ITEM_CURRENCY_NOT_MATCH,
-                                item.getId(),
-                                item.getCurrencyName(),
-                                baseItem.getCurrencyName());
-                    }
-                });
+            .filter(item -> StrUtil.isNotBlank(item.getCurrencyName()) && !item.getId().equals(baseItem.getId()))
+            .forEach(item -> {
+                if (!StrUtil.equals(item.getCurrencyName(), baseItem.getCurrencyName())) {
+                    throw exception(PURCHASE_IN_ITEM_CURRENCY_NOT_MATCH,
+                        item.getId(),
+                        item.getCurrencyName(),
+                        baseItem.getCurrencyName());
+                }
+            });
     }
 
     /**
@@ -1035,5 +1040,15 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                     order.getCode()); // 不一致的采购订单编号
             }
         }
+    }
+
+    @Override
+    public SrmPurchaseInItemDO getPurchaseInItemById(Long id) {
+        return purchaseInItemMapper.selectById(id);
+    }
+
+    @Override
+    public List<Long> listAllPurchaseInIds() {
+        return purchaseInMapper.selectAllIds();
     }
 }

@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.srm.api.purchase;
 
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseReturnItemDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.req.SrmReturnSaveReqDTO;
 import org.springframework.validation.annotation.Validated;
 
@@ -23,8 +24,23 @@ public interface SrmPurchaseReturnApi {
 
     /**
      * 状态机-变动退货项-退货数量
-     *<p>
+     * <p>
      * 出库单审核后回调
      */
     void updatePurchaseReturnItemQty(SrmReturnSaveReqDTO reqDTO);
+
+    /**
+     * 根据code获取采购退货单
+     */
+    SrmPurchaseReturnDTO getPurchaseReturnByCode(String code);
+
+    /**
+     * 根据itemID获得明细行
+     */
+    SrmPurchaseReturnItemDTO getPurchaseReturnItemById(Long id);
+
+    /**
+     * 获取所有采购退货单ID
+     */
+    List<Long> listAllPurchaseReturnIds();
 } 

@@ -13,6 +13,7 @@ import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmSupplierMapper;
 import cn.iocoder.yudao.module.srm.enums.SrmChannelEnum;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.payment.term.SrmPaymentTermService;
+import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.integration.support.MessageBuilder;
@@ -57,7 +58,9 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
         validateSupplierNameDuplicate(supplier.getName(), null);
         supplierMapper.insert(supplier);
         // 发送消息到通道
-        supplierChannel.send(MessageBuilder.withPayload(Collections.singletonList(supplier.getId())).build());
+        TransactionUtils.runAfterCommit(() -> supplierChannel.send(MessageBuilder
+            .withPayload(Collections.singletonList(supplier.getId()))
+            .build()));
         return supplier.getId();
     }
 
@@ -71,7 +74,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
         SrmSupplierDO updateObj = BeanUtils.toBean(updateReqVO, SrmSupplierDO.class);
         supplierMapper.updateById(updateObj);
         // 发送消息到通道
-        supplierChannel.send(MessageBuilder.withPayload(Collections.singletonList(updateObj.getId())).build());
+        TransactionUtils.runAfterCommit(() -> supplierChannel.send(MessageBuilder.withPayload(Collections.singletonList(updateObj.getId())).build()));
     }
 
     @Override
@@ -83,7 +86,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     }
 
     private void validateSupplierExists(Long id) {
-        if(supplierMapper.selectById(id) == null) {
+        if (supplierMapper.selectById(id) == null) {
             throw exception(SUPPLIER_NOT_EXISTS);
         }
     }
@@ -96,7 +99,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     @Override
     public SrmSupplierDO validateSupplier(Long id) {
         SrmSupplierDO supplier = supplierMapper.selectById(id);
-        if(supplier == null) {
+        if (supplier == null) {
             throw exception(SUPPLIER_NOT_EXISTS);
         }
         if (CommonStatusEnum.isDisable(supplier.getOpenStatus())) {
@@ -108,7 +111,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     @Override
     public List<SrmSupplierDO> getSupplierList(Collection<Long> ids) {
         //ids是空集合
-        if(CollectionUtils.isEmpty(ids)) {
+        if (CollectionUtils.isEmpty(ids)) {
             return emptyList();
         }
         return supplierMapper.selectBatchIds(ids);
@@ -120,8 +123,8 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     }
 
     @Override
-    public List<SrmSupplierDO> getSupplierListByStatus(Integer status) {
-        return supplierMapper.selectListByStatus(status);
+    public List<SrmSupplierDO> getSupplierListByStatus(CommonStatusEnum status) {
+        return supplierMapper.selectListByStatus(status.getStatus());
     }
 
     /**
