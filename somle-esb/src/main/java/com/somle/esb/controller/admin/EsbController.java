@@ -159,31 +159,16 @@ public class EsbController {
                 log.warn("[采购订单] 未找到指定code的采购订单，入参:{}", JSONUtil.parse(orderCodes));
                 return CommonResult.success("未找到指定code的采购订单");
             }
-            purchaseOrderDTOS = srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(orderIds));
         } else {
             // 全量同步
             orderIds = srmPurchaseOrderApi.listPurchaseOrderIds();
-            purchaseOrderDTOS = srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(orderIds));
         }
-
-        // 构建采购单编号映射
-        Map<String, SrmPurchaseOrderDTO> purchaseOrderMap = purchaseOrderDTOS.stream()
-            .collect(Collectors.toMap(SrmPurchaseOrderDTO::getCode, v -> v));
-
         List<List<KingdeeResponse>> results = SyncUtils.syncToKingdeeWithResult(
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             new SrmPurOrderToKingdeeConvert()::convertOrderDTOList,
             kingdeePurOrderSaveReqVO -> {
-                if (purchaseOrderMap.containsKey(kingdeePurOrderSaveReqVO.getBillNo())) {
-                    SrmPurchaseOrderDTO purchaseOrder = purchaseOrderMap.get(kingdeePurOrderSaveReqVO.getBillNo());
-                    // 判断是否已审核
-                    if (Objects.equals(purchaseOrder.getAuditStatus(), SrmAuditStatus.APPROVED.getCode())) {
-                        return kingdeeService.saveAndAuditPurchaseOrder(kingdeePurOrderSaveReqVO);
-                    } else {
-                        return kingdeeService.savePurchaseOrder(kingdeePurOrderSaveReqVO);
-                    }
-                }
+                kingdeeService.saveAndAuditPurchaseOrder(kingdeePurOrderSaveReqVO);
                 return null;
             },
             "采购订单保存&审核",

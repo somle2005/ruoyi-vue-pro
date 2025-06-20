@@ -27,7 +27,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 // https://open.jdy.com/#/files/api/detail?index=2&categrayId=3cc8ee9a663e11eda5c84b5d383a2b93&id=adfe4a24712711eda0b307c6992ee459
@@ -79,11 +78,7 @@ public class KingdeeService {
 
     @Scheduled(cron = "0 0 */2 * * *")
     public void refreshAllSupplierList() {
-        executeBatchOperation(
-            "刷新供应商列表",
-            "all",
-            KingdeeClient::refreshSupplierCache
-        );
+        clients.parallelStream().forEach(KingdeeClient::refreshSupplierCache);
     }
 
     public boolean saveToken(KingdeeToken token) {
@@ -177,6 +172,7 @@ public class KingdeeService {
         return clients.parallelStream()
             .filter(client -> isSupplierNameMatch(purchaseOrder.getSupplierNumber(), client))
             .map(client -> client.saveAndAuditPurOrder(purchaseOrder))
+            .flatMap(List::stream)
             .collect(Collectors.toList());
     }
 
@@ -259,13 +255,4 @@ public class KingdeeService {
             .mapToInt(KingdeeClient::deleteSupplierCache)
             .sum();
     }
-
-    private void executeBatchOperation(String operation, String identifier,
-                                       Consumer<KingdeeClient> operationConsumer) {
-        clients.parallelStream().forEach(client -> {
-            log.debug("执行{}操作，client={}，identifier={}", operation, client.getToken().getAccountName(), identifier);
-            operationConsumer.accept(client);
-        });
-    }
-
 }

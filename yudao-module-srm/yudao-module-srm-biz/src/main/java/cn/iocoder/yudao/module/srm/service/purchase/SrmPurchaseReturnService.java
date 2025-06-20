@@ -47,7 +47,7 @@ public interface SrmPurchaseReturnService {
     /**
      * 删除采购退货
      *
-     * @param id 编号
+     * @param ids 编号
      */
     void deletePurchaseReturn(List<Long> ids);
 
