@@ -385,7 +385,6 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         }
         purchaseReturnMapper.updateById(new SrmPurchaseReturnDO().setId(id).setRefundPrice(refundPrice));
     }
-
     private List<SrmPurchaseReturnItemDO> validatePurchaseReturnItems(List<SrmPurchaseReturnSaveReqVO.Item> list) {
         // 1. 校验入库项存在，并获取入库项信息
         Set<Long> arriveItemIdSet = list.stream().map(SrmPurchaseReturnSaveReqVO.Item::getArriveItemId).collect(Collectors.toSet());
@@ -516,6 +515,11 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     @Override
+    public List<SrmPurchaseReturnDO> getPurchaseReturnList(Collection<Long> ids) {
+        return List.of();
+    }
+
+    @Override
     public SrmPurchaseReturnDO validatePurchaseReturn(Long id) {
         SrmPurchaseReturnDO purchaseReturn = getPurchaseReturn(id);
         if (ObjectUtil.notEqual(purchaseReturn.getAuditStatus(), SrmAuditStatus.APPROVED.getCode())) {
@@ -547,9 +551,9 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     @Override
-    public Map<Long, List<SrmPurchaseReturnItemDO>> getPurchaseReturnItemListByReturnIds(Collection<Long> returnIds) {
+    public List<SrmPurchaseReturnItemDO> getPurchaseReturnItemListByReturnIds(Collection<Long> returnIds) {
         if (CollUtil.isEmpty(returnIds)) {
-            return Collections.emptyMap();
+            return Collections.emptyList();
         }
         return purchaseReturnItemMapper.selectListByReturnIds(returnIds);
     }
