@@ -49,7 +49,7 @@ public class SyncUtils {
         Set<Object> failedIdentifiers = ConcurrentHashMap.newKeySet();
         AtomicInteger completedCount = new AtomicInteger(0);
 
-        List<CompletableFuture<S>> futures = kingdeeObjs.stream().map(obj -> CompletableFuture.supplyAsync(() -> {
+        List<CompletableFuture<S>> futures = kingdeeObjs.stream().map(obj -> (CompletableFuture<S>) CompletableFuture.supplyAsync(() -> {
             try {
                 S result = syncer.apply(obj);
                 successCount.incrementAndGet();
@@ -62,8 +62,7 @@ public class SyncUtils {
                 failedIdentifiers.add(identifier);
                 int current = completedCount.incrementAndGet();
                 log.error("[{}] 同步失败：{}/{}，唯一标识(ID)：{}，错误信息：{}", logType, current, total, identifier, e.getMessage());
-                // 返回null表示失败，调用方需要处理
-                return null;
+                return e.getMessage();
             }
         }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor())).toList();
 

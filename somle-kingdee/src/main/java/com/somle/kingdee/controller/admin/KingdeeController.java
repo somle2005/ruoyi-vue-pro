@@ -41,9 +41,9 @@ public class KingdeeController {
 
     @PostMapping("/refreshAuth")
     @ResponseBody
-    public void refreshAuth(
+    public CommonResult<Boolean> refreshAuth(
     ) {
-        kingdeeService.refreshAuths();
+        return CommonResult.success(kingdeeService.refreshAuths());
     }
 
     @GetMapping("/listTokens")

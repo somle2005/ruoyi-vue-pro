@@ -167,10 +167,7 @@ public class EsbController {
             orderIds,
             ids -> srmPurchaseOrderApi.validatePurchaseOrderIds(new HashSet<>(ids)),
             new SrmPurOrderToKingdeeConvert()::convertOrderDTOList,
-            kingdeePurOrderSaveReqVO -> {
-                kingdeeService.saveAndAuditPurchaseOrder(kingdeePurOrderSaveReqVO);
-                return null;
-            },
+            kingdeeService::saveAndAuditPurchaseOrder,
             "采购订单保存&审核",
             KingdeePurOrderSaveReqVO::getBillNo
         );
