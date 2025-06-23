@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
+import cn.iocoder.yudao.module.system.enums.somle.CompanyCode;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
@@ -31,7 +32,6 @@ import cn.iocoder.yudao.module.wms.service.outbound.item.WmsOutboundItemService;
 import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
 import cn.iocoder.yudao.module.wms.service.quantity.context.StockCheckContext;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
-import cn.iocoder.yudao.module.wms.service.stock.bin.move.WmsStockBinMoveService;
 import cn.iocoder.yudao.module.wms.service.stockcheck.bin.WmsStockCheckBinService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
@@ -61,10 +61,6 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
     @Resource
     @Lazy
     private WmsStockBinService stockBinService;
-
-    @Resource
-    @Lazy
-    private WmsStockBinMoveService stockBinMoveService;
 
     @Resource
     @Lazy
@@ -107,7 +103,7 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
         List<WmsStockCheckBinDO> wmsStockCheckBinDOList = context.getWmsStockCheckBinDOList();
 
         // 入库单产品明细(按库位汇总)
-        Map<Long, WmsInboundItemSaveReqVO> inboundItemSaveReqVOMap = new HashMap<>();
+        Map<Long, WmsInboundItemSaveReqVO> inboundItemSaveReqVoMap = new HashMap<>();
         // 拣货单产品明细
         List<WmsPickupItemSaveReqVO> pickupItemSaveReqVOList = new ArrayList<>();
         // 出库单产品明细
@@ -126,7 +122,7 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
                 // 设置为盘赢
                 stockCheckBinDO.setStatus(WmsStockCheckStatus.SURPLUS.getValue());
                 // 入库单明细
-                WmsInboundItemSaveReqVO inboundItemSaveReqVO = inboundItemSaveReqVOMap.computeIfAbsent(stockCheckBinDO.getProductId(), productId -> {
+                WmsInboundItemSaveReqVO inboundItemSaveReqVO = inboundItemSaveReqVoMap.computeIfAbsent(stockCheckBinDO.getProductId(), productId -> {
                     WmsInboundItemSaveReqVO inboundItem = new WmsInboundItemSaveReqVO();
                     inboundItem.setActualQty(0);
                     inboundItem.setPlanQty(0);
@@ -162,8 +158,8 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
         }
 
         // 如果有盘盈的货,执行入库和拣货
-        if (!inboundItemSaveReqVOMap.isEmpty()) {
-            executeInboundAndPickup(stockCheckDO, new ArrayList<>(inboundItemSaveReqVOMap.values()), pickupItemSaveReqVOList);
+        if (!inboundItemSaveReqVoMap.isEmpty()) {
+            executeInboundAndPickup(stockCheckDO, new ArrayList<>(inboundItemSaveReqVoMap.values()), pickupItemSaveReqVOList);
         }
 
         // 如果有盘亏的货，执行出库
@@ -183,15 +179,15 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
 
         // 确定归属公司与部门
         Map<Long,Long> deptIdMap=new HashMap<>();
-        Map<Long, WmsInboundItemLogicDO> inboundItemLogicDOMap = new HashMap<>();
+        Map<Long, WmsInboundItemLogicDO> inboundItemLogicMap = new HashMap<>();
         //
         for (WmsInboundItemSaveReqVO inboundItemSaveReqVO : inboundItemSaveReqVOList) {
 
-            WmsInboundItemLogicDO inboundItemLogicDO = inboundItemLogicDOMap.get(inboundItemSaveReqVO.getProductId());
+            WmsInboundItemLogicDO inboundItemLogicDO = inboundItemLogicMap.get(inboundItemSaveReqVO.getProductId());
             if (inboundItemLogicDO == null) {
                 // 求最晚的入库批次
                 inboundItemLogicDO = inboundService.getInboundItemLogic(stockCheckDO.getWarehouseId(), inboundItemSaveReqVO.getProductId(), false);
-                inboundItemLogicDOMap.put(inboundItemSaveReqVO.getProductId(), inboundItemLogicDO);
+                inboundItemLogicMap.put(inboundItemSaveReqVO.getProductId(), inboundItemLogicDO);
             }
             // 求顶级部门
             Long deptId = deptIdMap.get(inboundItemLogicDO.getDeptId());
@@ -263,7 +259,7 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
         Map<String, WmsStockBinRespVO> stockBinMap = StreamX.from(stockBinList).toMap(e -> makeStockKey(e.getBinId(), e.getProductId()));
 
         // 确定归属公司与部门
-        Map<Long, WmsInboundItemLogicDO> inboundItemLogicDOMap = new HashMap<>();
+        Map<Long, WmsInboundItemLogicDO> inboundItemLogicMap = new HashMap<>();
         for (WmsOutboundItemSaveReqVO outboundItemSaveReqVO : outboundItemSaveReqVOList) {
 
             WmsProductRespSimpleVO product = productMap.get(outboundItemSaveReqVO.getProductId());
@@ -282,15 +278,15 @@ public class StockCheckExecutor extends QuantityExecutor<StockCheckContext> {
                 throw exception(STOCK_BIN_SELLABLE_QTY_NOT_ENOUGH, stockBin.getBin().getName(), product.getCode());
             }
 
-            WmsInboundItemLogicDO inboundItemLogicDO = inboundItemLogicDOMap.get(outboundItemSaveReqVO.getProductId());
+            WmsInboundItemLogicDO inboundItemLogicDO = inboundItemLogicMap.get(outboundItemSaveReqVO.getProductId());
             if (inboundItemLogicDO == null) {
                 // 求最早的入库批次
                 inboundItemLogicDO = inboundService.getInboundItemLogic(stockCheckDO.getWarehouseId(), outboundItemSaveReqVO.getProductId(), true);
-                inboundItemLogicDOMap.put(outboundItemSaveReqVO.getProductId(), inboundItemLogicDO);
+                inboundItemLogicMap.put(outboundItemSaveReqVO.getProductId(), inboundItemLogicDO);
             }
 
-            outboundItemSaveReqVO.setCompanyId(inboundItemLogicDO.getCompanyId());
-            outboundItemSaveReqVO.setDeptId(inboundItemLogicDO.getDeptId());
+            outboundItemSaveReqVO.setCompanyId(inboundItemLogicDO.getCompanyId() == null ? CompanyCode.SOMILE.getValue() : inboundItemLogicDO.getCompanyId());
+            outboundItemSaveReqVO.setDeptId(inboundItemLogicDO.getDeptId() == null ? CompanyCode.SOMILE_DEPT.getValue() : inboundItemLogicDO.getDeptId());
         }
 
         // 创建出库单

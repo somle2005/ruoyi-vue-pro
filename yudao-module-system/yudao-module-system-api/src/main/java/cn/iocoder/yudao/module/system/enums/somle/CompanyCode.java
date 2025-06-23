@@ -9,13 +9,18 @@ import java.util.Arrays;
 
 /**
  * 公司编码
- **/
+ *
+ * @author jisencai*/
 @RequiredArgsConstructor
 @Getter
 public enum CompanyCode implements ArrayValuable<Integer>, DictEnum {
 
     // ========== WMS  编码段 0~99 ==========
     SOMILE(6, "宁波索迈"),
+
+
+    // ========== WMS  编码段 50000~60000 ==========
+    SOMILE_DEPT(50001, "索迈部门"),
     ;
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(CompanyCode::getValue).toArray(Integer[]::new);

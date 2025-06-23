@@ -66,6 +66,8 @@ public class WmsInboundItemLogicDO extends BaseDO {
      */
     private Integer sellableQty;
 
+    private Integer outboundAvailableQty;
+
 
 
 

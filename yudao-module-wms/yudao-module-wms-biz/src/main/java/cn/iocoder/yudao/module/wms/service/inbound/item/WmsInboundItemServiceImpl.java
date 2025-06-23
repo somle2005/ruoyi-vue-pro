@@ -133,7 +133,7 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     @Override
     public WmsInboundItemDO updateInboundItem(WmsInboundItemSaveReqVO updateReqVO) {
         // 校验存在
-        WmsInboundItemDO exists = validateInboundItemExists(updateReqVO.getId());
+        validateInboundItemExists(updateReqVO.getId());
         // 按 wms_inbound_item.inbound_id -> wms_inbound.id 的引用关系，校验存在性
         if (updateReqVO.getInboundId() != null) {
             WmsInboundDO inbound = inboundService.getInbound(updateReqVO.getInboundId());
@@ -155,7 +155,7 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     @Transactional(rollbackFor = Exception.class)
     public void deleteInboundItem(Long id) {
         // 校验存在
-        WmsInboundItemDO inboundItem = validateInboundItemExists(id);
+        validateInboundItemExists(id);
         // 删除
         inboundItemMapper.deleteById(id);
     }
@@ -226,17 +226,17 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         if (!inboundStatus.matchAny(WmsInboundStatus.NONE)) {
             throw exception(INBOUND_CAN_NOT_EDIT);
         }
-        Map<Long, WmsInboundItemSaveReqVO> updateReqVOMap = StreamX.from(updateReqVOList).toMap(WmsInboundItemSaveReqVO::getId);
-        List<WmsInboundItemDO> inboundItemDOSInDB = inboundItemMapper.selectByIds(StreamX.from(updateReqVOList).toList(WmsInboundItemSaveReqVO::getId));
-        for (WmsInboundItemDO itemDO : inboundItemDOSInDB) {
-            WmsInboundItemSaveReqVO updateReqVO = updateReqVOMap.get(itemDO.getId());
+        Map<Long, WmsInboundItemSaveReqVO> updateReqMap = StreamX.from(updateReqVOList).toMap(WmsInboundItemSaveReqVO::getId);
+        List<WmsInboundItemDO> inboundItemInDBDos = inboundItemMapper.selectByIds(StreamX.from(updateReqVOList).toList(WmsInboundItemSaveReqVO::getId));
+        for (WmsInboundItemDO itemDO : inboundItemInDBDos) {
+            WmsInboundItemSaveReqVO updateReqVO = updateReqMap.get(itemDO.getId());
             if (updateReqVO.getActualQty() == null || updateReqVO.getActualQty() <= 0) {
                 throw exception(INBOUND_ITEM_ACTUAL_QTY_ERROR);
             }
             itemDO.setActualQty(updateReqVO.getActualQty());
         }
         // 保存
-        inboundItemMapper.updateBatch(inboundItemDOSInDB);
+        inboundItemMapper.updateBatch(inboundItemInDBDos);
     }
 
     /**
@@ -280,8 +280,8 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
      * 按仓库id和商品id查询
      */
     @Override
-    public List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId) {
-        return inboundItemMapper.selectItemListHasAvailableQty(warehouseId, productId);
+    public List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId, Boolean olderFirst) {
+        return inboundItemMapper.selectItemListHasAvailableQty(warehouseId, productId, olderFirst);
     }
 
     /**
@@ -339,9 +339,9 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
      */
     @Override
     public void assembleProducts(List<? extends WmsInboundItemRespVO> itemList) {
-        Map<Long, ErpProductDTO> productDTOMap = productApi.getProductMap(StreamX.from(itemList).map(WmsInboundItemRespVO::getProductId).toList());
+        Map<Long, ErpProductDTO> productDToMap = productApi.getProductMap(StreamX.from(itemList).map(WmsInboundItemRespVO::getProductId).toList());
         Map<Long, WmsProductRespSimpleVO> productVOMap = new HashMap<>();
-        for (ErpProductDTO productDTO : productDTOMap.values()) {
+        for (ErpProductDTO productDTO : productDToMap.values()) {
             WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
             productVOMap.put(productDTO.getId(), productVO);
         }

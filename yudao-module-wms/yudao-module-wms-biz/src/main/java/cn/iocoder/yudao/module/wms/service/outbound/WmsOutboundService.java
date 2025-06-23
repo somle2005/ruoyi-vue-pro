@@ -93,4 +93,6 @@ public interface WmsOutboundService {
     void assembleUpstreamType(List<WmsOutboundRespVO> list);
 
     boolean validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList);
+
+    void assemblePurchaseOrder(List<WmsOutboundRespVO> list);
 }

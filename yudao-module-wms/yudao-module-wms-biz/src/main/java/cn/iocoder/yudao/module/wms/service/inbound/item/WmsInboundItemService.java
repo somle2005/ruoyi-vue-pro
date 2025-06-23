@@ -113,7 +113,7 @@ public interface WmsInboundItemService {
     /**
      * 按仓库id和商品id查询
      */
-    List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId);
+    List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId, Boolean olderFirst);
 
     /**
      * 保存入库单详情

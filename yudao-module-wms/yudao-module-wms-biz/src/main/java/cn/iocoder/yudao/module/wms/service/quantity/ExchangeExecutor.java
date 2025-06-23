@@ -13,12 +13,11 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.warehouse.vo.WmsWareho
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.item.WmsExchangeItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
-import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsItemFlowMapper;
-import cn.iocoder.yudao.module.wms.dal.mysql.stock.flow.WmsStockFlowMapper;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
 import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
@@ -28,7 +27,6 @@ import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.stock.flow.WmsStockFlowService;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,8 +43,10 @@ import static cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeType.TO_GOOD
 import static cn.iocoder.yudao.module.wms.enums.exchange.WmsExchangeType.TO_ITEM;
 import static cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection.IN;
 import static cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection.OUT;
+import static cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason.EXCHANGE;
 import static com.fhs.common.constant.Constant.MAX_INT;
 import static com.fhs.common.constant.Constant.ONE;
+import static java.lang.Boolean.TRUE;
 
 /**
  * @author: LeeFJ
@@ -61,13 +61,6 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
     @Lazy
     private WmsStockBinService stockBinService;
 
-    @Autowired
-    private WmsItemFlowService wmsInboundItemFlowService;
-
-    @Resource
-    @Lazy
-    private WmsItemFlowMapper inboundItemFlowMapper;
-
     @Resource
     protected WmsStockFlowService stockFlowService;
 
@@ -77,9 +70,6 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
     @Resource
     @Lazy
     private WmsItemFlowService itemFlowService;
-
-    @Resource
-    private WmsStockFlowMapper stockFlowMapper;
 
     public ExchangeExecutor() {
         super(WmsStockReason.STOCK_BIN_MOVE);
@@ -99,9 +89,8 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
             throw exception(EXCHANGE_ITEM_ITEM_NOT_EXISTS);
         }
 
-        List<WmsWarehouseProductVO> warehouseProductList = StreamX.from(exchangeItemDOList).toList(item -> {
-            return WmsWarehouseProductVO.builder().warehouseId(exchangeDO.getWarehouseId()).productId(item.getProductId()).build();
-        });
+        List<WmsWarehouseProductVO> warehouseProductList = StreamX.from(exchangeItemDOList).toList(item ->
+            WmsWarehouseProductVO.builder().warehouseId(exchangeDO.getWarehouseId()).productId(item.getProductId()).build());
 
         // 校验源库存是否充足
         List<WmsStockBinRespVO> stockBinList = stockBinService.selectStockBinList(warehouseProductList, false);
@@ -157,39 +146,44 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         Integer direction = Objects.equals(type, TO_ITEM.getValue()) ? OUT.getValue() : IN.getValue();
 
         // 查询逻辑库存
-        List<WmsStockLogicDO> stockLogicDOS = stockLogicService.selectByWarehouseIdAndProductId(exchangeDO.getWarehouseId(), itemDO.getProductId());
-        if (stockLogicDOS == null) {
+        List<WmsStockLogicDO> stockLogicList = stockLogicService.selectByWarehouseIdAndProductId(exchangeDO.getWarehouseId(), itemDO.getProductId());
+        if (stockLogicList == null) {
             throw exception(STOCK_LOGIC_NOT_EXISTS);
         }
         //更新数值
-        this.updateStockLogicItemQty(qty, direction, stockLogicDOS, itemDO, type);
-
-        // 记录批次流水...
+        this.updateStockLogicItemQty(qty, direction, stockLogicList, itemDO, type, exchangeDO);
     }
 
-    private void updateStockLogicItemQty(Integer qty, Integer direction, List<WmsStockLogicDO> stockLogicDOS, WmsExchangeItemDO itemDO, Integer type) {
+    private void updateStockLogicItemQty(Integer qty, Integer direction, List<WmsStockLogicDO> stockLogicList, WmsExchangeItemDO itemDO, Integer type, WmsExchangeDO exchangeDO) {
+        //查询入库批次
+        WmsInboundItemLogicDO inboundItemLogicDO = inboundService.selectInboundItemLogicList(exchangeDO.getWarehouseId(), itemDO.getProductId(), TRUE).stream().
+            findFirst().orElse(null);
+        if (inboundItemLogicDO == null) {
+            throw exception(INBOUND_ITEM_NOT_EXISTS);
+        }
         // 更新逻辑库存
         if (Objects.equals(type, TO_ITEM.getValue())) {
-            for (WmsStockLogicDO stockLogicDO : stockLogicDOS) {
+            for (WmsStockLogicDO stockLogicDO : stockLogicList) {
                 if (qty <= 0) {
                     break;
                 }
                 Integer deltaQty = Math.min(qty, stockLogicDO.getAvailableQty());
+                qty = qty - deltaQty;
                 stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() + deltaQty * direction);
                 stockLogicService.insertOrUpdate(stockLogicDO);
                 // 记录库存流水
-                int beforeQty = stockLogicDO.getAvailableQty() == null ? 0 : stockLogicDO.getAvailableQty();
-                Integer afterQty = beforeQty + (itemDO.getQty() * direction);
-                stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.parse(direction), itemDO.getProductId(), stockLogicDO, itemDO.getQty(), null, null, beforeQty, afterQty, null);
+                int afterQty = stockLogicDO.getAvailableQty() == null ? 0 : stockLogicDO.getAvailableQty();
+                Integer beforeQty = afterQty - (itemDO.getQty() * direction);
+                stockFlowService.createForStockLogic(EXCHANGE, WmsStockFlowDirection.parse(direction), itemDO.getProductId(), stockLogicDO, itemDO.getQty(), exchangeDO.getId(), null, beforeQty, afterQty, inboundItemLogicDO.getId());
             }
         } else {
-            WmsStockLogicDO stockLogicDO = stockLogicDOS.get(0);
+            WmsStockLogicDO stockLogicDO = stockLogicList.get(0);
             stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() + qty * direction);
             stockLogicService.insertOrUpdate(stockLogicDO);
             // 记录库存流水
-            int beforeQty = stockLogicDO.getAvailableQty() == null ? 0 : stockLogicDO.getAvailableQty();
-            Integer afterQty = beforeQty + (itemDO.getQty() * direction);
-            stockFlowService.createForStockLogic(this.getReason(), WmsStockFlowDirection.parse(direction), itemDO.getProductId(), stockLogicDO, itemDO.getQty(), null, null, beforeQty, afterQty, null);
+            int afterQty = stockLogicDO.getAvailableQty() == null ? 0 : stockLogicDO.getAvailableQty();
+            Integer beforeQty = afterQty - (itemDO.getQty() * direction);
+            stockFlowService.createForStockLogic(EXCHANGE, WmsStockFlowDirection.parse(direction), itemDO.getProductId(), stockLogicDO, itemDO.getQty(), exchangeDO.getId(), null, beforeQty, afterQty, inboundItemLogicDO.getId());
         }
     }
 
@@ -257,16 +251,14 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 保存
         stockBinService.insertOrUpdate(fromStockBinDO);
         //查询入库批次
-//        WmsInboundDO inboundDO = inboundService.getByWarehouseIdAndProductId(exchangeDO.getWarehouseId(), itemDO.getProductId());
-//        WmsItemFlowDO itemFlowDO = wmsInboundItemFlowService.selectByInboundId(inboundDO.getId(), 1).get(0);
-
-        // 记录批次流水(item_flow)
-//        List<WmsItemFlowDO> itemFlowOutList = updateStockFlow(exchangeDO, itemDO, OUT.getValue());
+        WmsInboundItemLogicDO inboundItemLogicDO = inboundService.selectInboundItemLogicList(exchangeDO.getWarehouseId(), itemDO.getProductId(), TRUE).stream().
+            findFirst().orElse(null);
+        if (inboundItemLogicDO == null) {
+            throw exception(INBOUND_ITEM_NOT_EXISTS);
+        }
         // 记录库存流水(stockFlow)
-//        for (WmsItemFlowDO itemFlow : itemFlowOutList) {
-        stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, OUT, itemDO.getProductId(), fromStockBinDO, itemDO.getQty(), itemDO.getExchangeId(),
-            itemDO.getId(), fromStockBinDO.getBinId(), fromStockBinVO.getSellableQty(), fromStockBinVO.getSellableQty() - itemDO.getQty(), null);
-//        }
+        stockFlowService.createForStockBin(EXCHANGE, OUT, itemDO.getProductId(), fromStockBinDO, itemDO.getQty(), itemDO.getExchangeId(),
+            itemDO.getId(), fromStockBinDO.getBinId(), fromStockBinVO.getSellableQty(), fromStockBinVO.getSellableQty() - itemDO.getQty(), inboundItemLogicDO.getId());
 
         // 入方
         WmsStockBinDO toStockBinDO = stockBinService.getStockBin(itemDO.getToBinId(), itemDO.getProductId(), true);
@@ -277,11 +269,9 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 保存
         stockBinService.insertOrUpdate(toStockBinDO);
 
-        // 记录批次流水(item_flow)
-//        List<WmsItemFlowDO> itemFlowInList = updateStockFlow(exchangeDO, itemDO, IN.getValue());
         // 记录库存流水(stockFlow)
-        stockFlowService.createForStockBin(WmsStockReason.EXCHANGE, IN, itemDO.getProductId(), toStockBinDO, itemDO.getQty(), itemDO.getExchangeId(),
-            itemDO.getId(), toStockBinDO.getBinId(), toStockBinDO.getSellableQty() - itemDO.getQty(), toStockBinDO.getSellableQty(), null);
+        stockFlowService.createForStockBin(EXCHANGE, IN, itemDO.getProductId(), toStockBinDO, itemDO.getQty(), itemDO.getExchangeId(),
+            itemDO.getId(), toStockBinDO.getBinId(), toStockBinDO.getSellableQty() - itemDO.getQty(), toStockBinDO.getSellableQty(), inboundItemLogicDO.getId());
     }
 
     /**
@@ -293,7 +283,7 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 获得仓库库存记录
         WmsStockWarehouseDO stockWarehouseDO = stockWarehouseService.getStockWarehouse(exchangeDO.getWarehouseId(), item.getProductId(), false);
 
-        WmsStockFlowDirection wmsStockFlowDirection = null;
+        WmsStockFlowDirection wmsStockFlowDirection;
         // 如果没有就创建
         if (stockWarehouseDO == null) {
             throw exception(STOCK_WAREHOUSE_NOT_EXISTS);
@@ -307,7 +297,12 @@ public class ExchangeExecutor extends QuantityExecutor<ExchangeContext> {
         // 记录流水
         int beforeQty = stockWarehouseDO.getAvailableQty() == null ? 0 : stockWarehouseDO.getAvailableQty();
         Integer afterQty = beforeQty + (item.getQty() * wmsStockFlowDirection.getValue());
-        stockFlowService.createForStockWarehouse(this.getReason(), wmsStockFlowDirection, item.getProductId(), stockWarehouseDO, item.getQty(), null, null, beforeQty, afterQty, null);
+        WmsInboundItemLogicDO inboundItemLogicDO = inboundService.selectInboundItemLogicList(exchangeDO.getWarehouseId(), item.getProductId(), TRUE).stream().
+            findFirst().orElse(null);
+        if (inboundItemLogicDO == null) {
+            throw exception(INBOUND_ITEM_NOT_EXISTS);
+        }
+        stockFlowService.createForStockWarehouse(EXCHANGE, wmsStockFlowDirection, item.getProductId(), stockWarehouseDO, item.getQty(), exchangeDO.getId(), null, beforeQty, afterQty, inboundItemLogicDO.getId());
 
     }
 
