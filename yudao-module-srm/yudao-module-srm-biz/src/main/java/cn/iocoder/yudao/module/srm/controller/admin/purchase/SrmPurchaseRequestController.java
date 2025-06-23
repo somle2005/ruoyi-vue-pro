@@ -155,7 +155,7 @@ public class SrmPurchaseRequestController {
     @PostMapping("/page")
     @Operation(summary = "获得ERP采购申请单分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-request:query')")
-    public CommonResult<PageResult<SrmPurchaseRequestRespVO>> getPurchaseRequestPage(@RequestBody(required = false) @Validated SrmPurchaseRequestPageReqVO pageReqVO) {
+    public CommonResult<PageResult<SrmPurchaseRequestRespVO>> getPurchaseRequestPage(@RequestBody(required = false) SrmPurchaseRequestPageReqVO pageReqVO) {
         PageResult<SrmPurchaseRequestBO> pageResult = srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO);
         return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
     }

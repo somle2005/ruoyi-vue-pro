@@ -111,7 +111,7 @@ public class SrmPurchaseOrderController {
     @PostMapping("/page")
     @Operation(summary = "获得采购订单分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-order:query')")
-    public CommonResult<PageResult<SrmPurchaseOrderBaseRespVO>> getPurchaseOrderPage(@Valid @RequestBody(required = false) SrmPurchaseOrderPageReqVO pageReqVO) {
+    public CommonResult<PageResult<SrmPurchaseOrderBaseRespVO>> getPurchaseOrderPage(@RequestBody(required = false) SrmPurchaseOrderPageReqVO pageReqVO) {
         if (pageReqVO == null) {
             pageReqVO = new SrmPurchaseOrderPageReqVO();
         }

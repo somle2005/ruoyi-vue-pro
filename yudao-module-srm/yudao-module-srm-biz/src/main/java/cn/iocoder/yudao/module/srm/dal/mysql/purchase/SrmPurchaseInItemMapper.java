@@ -35,7 +35,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
             SrmPurchaseInPageReqVO.ItemQuery itemQuery = reqVO.getItemQuery();
             wrapper
                 // ========== 产品信息 ==========
-                .eqIfPresent(SrmPurchaseInItemDO::getProductId, itemQuery.getProductId())
+                .inIfPresent(SrmPurchaseInItemDO::getProductId, itemQuery.getProductIds())
                 .eqIfPresent(SrmPurchaseInItemDO::getProductUnitId, itemQuery.getProductUnitId())
                 .likeIfPresent(SrmPurchaseInItemDO::getProductName, itemQuery.getProductName())
                 .likeIfPresent(SrmPurchaseInItemDO::getDeclaredType, itemQuery.getDeclaredType())
@@ -49,7 +49,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 .likeIfPresent(SrmPurchaseInItemDO::getSource, itemQuery.getSource())
                 // ========== 申请人信息 ==========
                 .eqIfPresent(SrmPurchaseInItemDO::getApplicantId, itemQuery.getApplicantId())
-                .eqIfPresent(SrmPurchaseInItemDO::getApplicationDeptId, itemQuery.getApplicationDeptId())
+                .inIfPresent(SrmPurchaseInItemDO::getApplicationDeptId, itemQuery.getApplicationDeptIds())
                 // ========== 状态信息 ==========
                 .eqIfPresent(SrmPurchaseInItemDO::getInboundStatus, itemQuery.getInboundStatus())
                 .eqIfPresent(SrmPurchaseInItemDO::getPayStatus, itemQuery.getPayStatus())

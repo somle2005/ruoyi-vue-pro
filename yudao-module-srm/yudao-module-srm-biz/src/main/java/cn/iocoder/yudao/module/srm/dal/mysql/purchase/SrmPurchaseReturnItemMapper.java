@@ -34,7 +34,7 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .eqIfPresent(SrmPurchaseReturnItemDO::getArriveItemId, vo.getItemQuery().getArriveItemId()) // 入库项id
             .likeIfPresent(SrmPurchaseReturnItemDO::getArriveCode, vo.getItemQuery().getArriveCode()) // 入库单code
             .eqIfPresent(SrmPurchaseReturnItemDO::getWarehouseId, vo.getItemQuery().getWarehouseId()) // 仓库编号
-            .eqIfPresent(SrmPurchaseReturnItemDO::getProductId, vo.getItemQuery().getProductId()) // 产品编号
+            .inIfPresent(SrmPurchaseReturnItemDO::getProductId, vo.getItemQuery().getProductIds()) // 产品编号
             .eqIfPresent(SrmPurchaseReturnItemDO::getProductUnitId, vo.getItemQuery().getProductUnitId()) // 产品单位单位
             .eqIfPresent(SrmPurchaseReturnItemDO::getProductPrice, vo.getItemQuery().getProductPrice()) // 产品单位单价
             .likeIfPresent(SrmPurchaseReturnItemDO::getProductUnitName, vo.getItemQuery().getProductUnitName()) // 产品单位名称
@@ -46,7 +46,7 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .likeIfPresent(SrmPurchaseReturnItemDO::getRemark, vo.getItemQuery().getRemark()) // 备注
             .likeIfPresent(SrmPurchaseReturnItemDO::getContainerRate, vo.getItemQuery().getContainerRate()) // 箱率
             .eqIfPresent(SrmPurchaseReturnItemDO::getApplicantId, vo.getItemQuery().getApplicantId()) // 申请人id
-            .eqIfPresent(SrmPurchaseReturnItemDO::getApplicationDeptId, vo.getItemQuery().getApplicationDeptId()) // 申请部门id
+            .inIfPresent(SrmPurchaseReturnItemDO::getApplicationDeptId, vo.getItemQuery().getApplicationDeptIds()) // 申请部门id
             .likeIfPresent(SrmPurchaseReturnItemDO::getDeclaredType, vo.getItemQuery().getDeclaredType()) // 报关品名
             .likeIfPresent(SrmPurchaseReturnItemDO::getDeclaredTypeEn, vo.getItemQuery().getDeclaredTypeEn()) // 报关品名英文
             .likeIfPresent(SrmPurchaseReturnItemDO::getProductCode, vo.getItemQuery().getProductCode()) // 产品sku

@@ -29,7 +29,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
     default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> buildWrapper(SrmPurchaseRequestPageReqVO req) {
         return new MPJLambdaWrapperX<SrmPurchaseRequestItemsDO>()
             .selectAll(SrmPurchaseRequestItemsDO.class)
-            .eqIfPresent(SrmPurchaseRequestItemsDO::getProductId, req.getProductId())
+            .inIfPresent(SrmPurchaseRequestItemsDO::getProductId, req.getProductIds())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductCode, req.getProductCode())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductName, req.getProductName())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductUnitName, req.getProductUnitName())
@@ -44,7 +44,7 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
             .selectAll(SrmPurchaseRequestDO.class)
             .likeIfPresent(SrmPurchaseRequestDO::getCode, req.getCode())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicantId, req.getApplicantId())
-            .eqIfPresent(SrmPurchaseRequestDO::getApplicationDeptId, req.getApplicationDeptId())
+            .inIfPresent(SrmPurchaseRequestDO::getApplicationDeptId, req.getApplicationDeptIds())
             .betweenIfPresent(SrmPurchaseRequestDO::getBillTime, req.getBillTime())
             .eqIfPresent(SrmPurchaseRequestDO::getAuditorId, req.getAuditorId())
             .betweenIfPresent(SrmPurchaseRequestDO::getAuditTime, req.getAuditTime())

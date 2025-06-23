@@ -7,6 +7,7 @@ import lombok.ToString;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Schema(description = "管理后台 - 头程申请表明细分页 Request VO")
 @Data
@@ -23,7 +24,7 @@ public class TmsFirstMileRequestItemPageReqVO {
     private String code;
 
     @Schema(description = "产品id")
-    private Long productId;
+    private Set<Long> productIds;
 
     @Schema(description = "FBA条码")
     private String fbaBarCode;

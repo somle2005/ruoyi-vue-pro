@@ -29,7 +29,7 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
         }
         return new MPJLambdaWrapperX<TmsFirstMileRequestItemDO>().eqIfPresent(TmsFirstMileRequestItemDO::getId,
                 vo.getId()).betweenIfPresent(TmsFirstMileRequestItemDO::getCreateTime, vo.getCreateTime())
-            .eqIfPresent(TmsFirstMileRequestItemDO::getProductId, vo.getProductId())
+            .inIfPresent(TmsFirstMileRequestItemDO::getProductId, vo.getProductIds())
             .likeIfPresent(TmsFirstMileRequestItemDO::getFbaBarCode, vo.getFbaBarCode())
             .eqIfPresent(TmsFirstMileRequestItemDO::getQty, vo.getQty())
             .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageLength, vo.getPackageLength())
@@ -52,7 +52,7 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
             .eqIfPresent(TmsFirstMileRequestDO::getId, vo.getId())
             .likeIfPresent(TmsFirstMileRequestDO::getCode, vo.getCode())
             .eqIfPresent(TmsFirstMileRequestDO::getRequesterId, vo.getRequesterId())
-            .eqIfPresent(TmsFirstMileRequestDO::getRequestDeptId, vo.getRequestDeptId())
+            .inIfPresent(TmsFirstMileRequestDO::getRequestDeptId, vo.getRequestDeptIds())
             .eqIfPresent(TmsFirstMileRequestDO::getToWarehouseId, vo.getToWarehouseId())
             .eqIfPresent(TmsFirstMileRequestDO::getAuditStatus, vo.getAuditStatus())
             .eqIfPresent(TmsFirstMileRequestDO::getOrderStatus, vo.getOrderStatus())

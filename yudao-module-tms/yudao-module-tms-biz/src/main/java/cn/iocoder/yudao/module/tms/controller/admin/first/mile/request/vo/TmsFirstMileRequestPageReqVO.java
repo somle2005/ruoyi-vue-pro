@@ -8,6 +8,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 @Schema(description = "管理后台 - 头程申请单分页 Request VO")
 @Data
@@ -28,7 +29,7 @@ public class TmsFirstMileRequestPageReqVO extends PageParam {
     private Long requesterId;
 
     @Schema(description = "申请部门ID")
-    private Long requestDeptId;
+    private Set<Long> requestDeptIds;
 
     @Schema(description = "目的仓ID")
     private Long toWarehouseId;

@@ -44,7 +44,7 @@ public interface TmsTransferItemMapper extends BaseMapperX<TmsTransferItemDO> {
             .betweenIfPresent(TmsTransferItemDO::getUpdateTime, vo.getMainQueryVo().getUpdateTime())
             .eqIfPresent(TmsTransferItemDO::getUpdater, vo.getItemQueryVo().getUpdater())
             .eqIfPresent(TmsTransferItemDO::getCreator, vo.getItemQueryVo().getCreator())
-            .eqIfPresent(TmsTransferItemDO::getProductId, vo.getItemQueryVo().getProductId())
+            .inIfPresent(TmsTransferItemDO::getProductId, vo.getItemQueryVo().getProductIds())
             .eqIfPresent(TmsTransferItemDO::getQty, vo.getItemQueryVo().getQty())
             .eqIfPresent(TmsTransferItemDO::getBoxQty, vo.getItemQueryVo().getBoxQty())
             .eqIfPresent(TmsTransferItemDO::getPackageWeight, vo.getItemQueryVo().getPackageWeight())

@@ -8,6 +8,7 @@ import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
@@ -24,7 +25,7 @@ public class SrmPurchaseRequestPageReqVO extends PageParam {
     private Long applicantId;
 
     @Schema(description = "申请部门id")
-    private Long applicationDeptId;
+    private Set<Long> applicationDeptIds;
 
     @Schema(description = "单据日期")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
@@ -77,7 +78,7 @@ public class SrmPurchaseRequestPageReqVO extends PageParam {
     //子表分割线
 
     @Schema(description = "产品id")
-    private Long productId;
+    private Set<Long> productIds;
 
     @Schema(description = "产品sku")
     private String productCode;

@@ -2,13 +2,11 @@ package cn.iocoder.yudao.module.srm.controller.admin.purchase;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
-import cn.iocoder.yudao.framework.common.enums.TimeZoneEnum;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.framework.excel.core.convert.DynamicTimeZoneLocalDateTimeConvert;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
@@ -29,7 +27,6 @@ import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
-import com.google.common.collect.Lists;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -107,7 +104,7 @@ public class SrmPurchaseInController {
     @PostMapping("/page")
     @Operation(summary = "获得采购到货分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:query')")
-    public CommonResult<PageResult<SrmPurchaseInBaseRespVO>> getPurchaseInPage(@Valid @RequestBody(required = false) SrmPurchaseInPageReqVO pageReqVO) {
+    public CommonResult<PageResult<SrmPurchaseInBaseRespVO>> getPurchaseInPage(@RequestBody(required = false) SrmPurchaseInPageReqVO pageReqVO) {
         PageResult<SrmPurchaseInBO> pageResult = purchaseInService.getPurchaseInBOPage(pageReqVO);
         return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
     }

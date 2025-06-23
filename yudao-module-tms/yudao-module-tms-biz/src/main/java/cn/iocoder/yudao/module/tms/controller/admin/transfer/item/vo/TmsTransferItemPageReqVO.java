@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
@@ -33,7 +34,7 @@ public class TmsTransferItemPageReqVO extends PageParam {
     private LocalDateTime[] updateTime;
 
     @Schema(description = "产品id")
-    private Long productId;
+    private Set<Long> productIds;
 
     @Schema(description = "数量")
     private Integer qty;
@@ -60,5 +61,5 @@ public class TmsTransferItemPageReqVO extends PageParam {
     private Integer inboundClosedQty;
 
     @Schema(description = "库存归属部门ID")
-    private Long deptId;
+    private Set<Long> deptIds;
 }

@@ -100,7 +100,7 @@ public class SrmPurchaseReturnController {
     @PostMapping("/page")
     @Operation(summary = "获得采购退货分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:query')")
-    public CommonResult<PageResult<SrmPurchaseReturnBaseRespVO>> getPurchaseReturnPage(@Valid @RequestBody(required = false) SrmPurchaseReturnPageReqVO pageReqVO) {
+    public CommonResult<PageResult<SrmPurchaseReturnBaseRespVO>> getPurchaseReturnPage(@RequestBody(required = false) SrmPurchaseReturnPageReqVO pageReqVO) {
         PageResult<SrmPurchaseReturnBO> pageResult = purchaseReturnService.getPurchaseReturnBOPage(pageReqVO);
         return success(new PageResult<>(bindResult(pageResult.getList()), pageResult.getTotal()));
     }

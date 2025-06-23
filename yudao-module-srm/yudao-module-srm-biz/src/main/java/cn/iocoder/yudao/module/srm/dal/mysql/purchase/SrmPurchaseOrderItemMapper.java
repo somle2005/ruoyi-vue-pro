@@ -24,12 +24,12 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
     default MPJLambdaWrapperX<SrmPurchaseOrderItemDO> buildWrapper(SrmPurchaseOrderPageReqVO reqVO) {
         return new MPJLambdaWrapperX<SrmPurchaseOrderItemDO>()
             .selectAll(SrmPurchaseOrderItemDO.class)
-            .eqIfPresent(SrmPurchaseOrderItemDO::getProductId, reqVO.getProductId()) // 产品ID
+            .inIfPresent(SrmPurchaseOrderItemDO::getProductId, reqVO.getProductIds()) // 产品ID
             .likeIfPresent(SrmPurchaseOrderItemDO::getProductCode, reqVO.getProductCode()) // 产品SKU
             .likeIfPresent(SrmPurchaseOrderItemDO::getProductName, reqVO.getProductName()) // 产品名称
             .likeIfPresent(SrmPurchaseOrderItemDO::getProductUnitName, reqVO.getProductUnitName()) // 产品单位名称
             .eqIfPresent(SrmPurchaseOrderItemDO::getApplicantId, reqVO.getApplicantId()) // 申请人ID
-            .eqIfPresent(SrmPurchaseOrderItemDO::getApplicationDeptId, reqVO.getApplicationDeptId()) // 申请部门ID
+            .inIfPresent(SrmPurchaseOrderItemDO::getApplicationDeptId, reqVO.getApplicationDeptIds()) // 申请部门ID
             .eqIfPresent(SrmPurchaseOrderItemDO::getFbaCode, reqVO.getFbaCode()) // X码
             .likeIfPresent(SrmPurchaseOrderItemDO::getContainerRate, reqVO.getContainerRate()) // 箱率
             .likeIfPresent(SrmPurchaseOrderItemDO::getPurchaseApplyCode, reqVO.getPurchaseApplyCode()) // 原单单号
