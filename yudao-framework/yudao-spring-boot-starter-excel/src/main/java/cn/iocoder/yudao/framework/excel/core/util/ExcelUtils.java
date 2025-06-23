@@ -104,11 +104,11 @@ public class ExcelUtils {
      * @param <T>
      * @throws IOException
      */
-    public static <T> void writeWithHttpHeaderTimeZone(HttpServletResponse response,
-                                                       String filename,
-                                                       String sheetName,
-                                                       Class<T> head,
-                                                       List<T> data) throws IOException {
+    public static <T> void writeWithRequestAttributesTimeZone(HttpServletResponse response,
+                                                              String filename,
+                                                              String sheetName,
+                                                              Class<T> head,
+                                                              List<T> data) throws IOException {
         ZoneId userZoneId = ServletUtils.getTimeZoneId().orElse(TimeZone.getDefault().toZoneId());
         // 输出 Excel
         ExcelWriterSheetBuilder builder = EasyExcel.write(response.getOutputStream(), head)
