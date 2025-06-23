@@ -17,7 +17,7 @@ public interface TmsCustomProductMapper extends BaseMapperX<TmsCustomProductDO> 
 
     default PageResult<TmsCustomProductDO> selectPage(TmsCustomProductPageReqVO reqVO) {
         return selectPage(reqVO, new LambdaQueryWrapperX<TmsCustomProductDO>()
-            .eqIfPresent(TmsCustomProductDO::getProductId, reqVO.getProductId())
+            .inIfPresent(TmsCustomProductDO::getProductId, reqVO.getProductIds())
             .eqIfPresent(TmsCustomProductDO::getCustomCategoryId, reqVO.getCustomCategoryId())
             .betweenIfPresent(TmsCustomProductDO::getCreateTime, reqVO.getCreateTime())
             .betweenIfPresent(TmsCustomProductDO::getUpdateTime, reqVO.getUpdateTime())
