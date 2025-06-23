@@ -3,6 +3,7 @@ package cn.iocoder.yudao.framework.common.util.spring;
 import cn.hutool.core.date.DatePattern;
 import cn.iocoder.yudao.framework.common.enums.TimeZoneEnum;
 import cn.iocoder.yudao.framework.common.enums.WebCommonEnum;
+import cn.iocoder.yudao.framework.common.util.servlet.ServletUtils;
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
@@ -10,6 +11,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
 
 /**
@@ -26,12 +28,9 @@ public class DynamicTimeZoneLocalDateTimeConverter implements Converter<String, 
         }
         //        字符串转换为LocalDateTime
         ZoneId formZoneId = TimeZone.getDefault().toZoneId();
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (Objects.nonNull(requestAttributes)) {
-            Object object = requestAttributes.getAttribute(WebCommonEnum.HTTP_HEADER_TIME_ZONE, RequestAttributes.SCOPE_REQUEST);
-            if (Objects.nonNull(object) && object instanceof String) {
-                formZoneId = ZoneId.of((String) object);
-            }
+        Optional<ZoneId> zoneIdOptional = ServletUtils.getTimeZoneId();
+        if (zoneIdOptional.isPresent()) {
+            formZoneId = zoneIdOptional.get();
         }
         return LocalDateTime.parse(source, DatePattern.NORM_DATETIME_FORMATTER)
                 .atZone(formZoneId)
