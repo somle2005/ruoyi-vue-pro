@@ -2,23 +2,51 @@ package cn.iocoder.yudao.framework.common.util.servlet;
 
 import cn.hutool.core.util.StrUtil;
 import cn.hutool.extra.servlet.JakartaServletUtil;
+import cn.iocoder.yudao.framework.common.enums.WebCommonEnum;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
 import jakarta.servlet.ServletRequest;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
+import java.time.ZoneId;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.TimeZone;
 
 /**
  * 客户端工具类
  *
  * @author 芋道源码
  */
+@Slf4j
 public class ServletUtils {
+
+    /**
+     * 获得用户时区
+     *
+     * @return
+     */
+    public static Optional<ZoneId> getTimeZoneId() {
+        ZoneId userZoneId = null;
+        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
+        if (Objects.nonNull(requestAttributes)) {
+            Object object = requestAttributes.getAttribute(WebCommonEnum.HTTP_HEADER_TIME_ZONE, RequestAttributes.SCOPE_REQUEST);
+            if (Objects.nonNull(object) && object instanceof String strTimeZone) {
+                try {
+                    userZoneId = ZoneId.of(strTimeZone);
+                } catch (Exception e) {
+                    log.error("请求头部 HTTP_HEADER_TIME_ZONE : {} 获取 ZoneId 失败", strTimeZone, e);
+                }
+            }
+        }
+        return Optional.ofNullable(userZoneId);
+    }
 
     /**
      * 返回 JSON 字符串
