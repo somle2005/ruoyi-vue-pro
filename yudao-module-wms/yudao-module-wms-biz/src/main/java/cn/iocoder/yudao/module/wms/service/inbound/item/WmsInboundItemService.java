@@ -7,6 +7,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
 import java.util.Map;
@@ -112,7 +113,7 @@ public interface WmsInboundItemService {
     /**
      * 按仓库id和商品id查询
      */
-    List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId);
+    List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId, Boolean olderFirst);
 
     /**
      * 保存入库单详情
@@ -167,4 +168,19 @@ public interface WmsInboundItemService {
      * @return 入库单详情列表
      */
     List<WmsInboundItemQueryDO> getInboundItemListForTms(WmsInboundItemListForTmsReqVO listForTmsReqVO);
+
+    /**
+     * 装配库存逻辑
+     */
+    void assembleStockLogic(List<WmsInboundItemRespVO> list);
+
+    /**
+     * 根据仓库ID和产品ID查询入库单详情
+     */
+    List<WmsInboundItemDO> selectByWarehouseIdAndProductId(@NotNull(message = "调出仓库ID不能为空") Long warehouseId, Long productId);
+
+    /**
+     * 装配入库单详情的入库单
+     */
+    void assembleInboundItems(List<WmsInboundItemRespVO> list);
 }

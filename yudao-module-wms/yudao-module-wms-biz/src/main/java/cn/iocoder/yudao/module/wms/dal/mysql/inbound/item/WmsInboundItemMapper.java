@@ -42,7 +42,7 @@ public interface WmsInboundItemMapper extends BaseMapperX<WmsInboundItemDO> {
         return selectPage(reqVO, wrapper).getList();
     }
 
-    default List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId) {
+    default List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId, Boolean olderFirst) {
         MPJLambdaWrapperX<WmsInboundItemDO> query = new MPJLambdaWrapperX<>();
 //        query.select(WmsInboundItemDO::getId, WmsInboundItemDO::getInboundId, WmsInboundItemDO::getProductId);
         query.selectAll(WmsInboundItemDO.class);
@@ -50,6 +50,12 @@ public interface WmsInboundItemMapper extends BaseMapperX<WmsInboundItemDO> {
         query.in(WmsInboundDO::getInboundStatus, Arrays.asList(WmsInboundStatus.ALL.getValue(), WmsInboundStatus.PART.getValue()));
         query.eq(WmsInboundDO::getWarehouseId, warehouseId).eq(WmsInboundItemDO::getProductId, productId).last("ORDER BY DATEDIFF(t1.inbound_time, now())+t1.init_age desc");
         query.selectAll(WmsInboundItemDO.class);
+        // 控制顺序
+        if (olderFirst) {
+            query.orderByAsc(WmsInboundDO::getCreateTime);
+        } else {
+            query.orderByDesc(WmsInboundDO::getCreateTime);
+        }
         return selectList(query);
     }
 
