@@ -503,6 +503,11 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     @Override
+    public SrmPurchaseReturnDO getPurchaseReturnByCode(String code) {
+        return purchaseReturnMapper.selectOne(SrmPurchaseReturnDO::getCode, code);
+    }
+
+    @Override
     public SrmPurchaseReturnBO getPurchaseBOReturn(Long id) {
         //主表
         SrmPurchaseReturnDO srmPurchaseReturnDO = purchaseReturnMapper.selectById(id);
@@ -512,11 +517,8 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     }
 
     @Override
-    public List<SrmPurchaseReturnDO> getPurchaseReturnList(List<Long> ids) {
-        if (CollUtil.isEmpty(ids)) {
-            return new ArrayList<>();
-        }
-        return purchaseReturnMapper.selectListByIds(ids);
+    public List<SrmPurchaseReturnDO> getPurchaseReturnList(Collection<Long> ids) {
+        return List.of();
     }
 
     @Override
@@ -543,6 +545,11 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     @Override
     public List<SrmPurchaseReturnItemDO> getPurchaseReturnItemListByReturnId(Long returnId) {
         return purchaseReturnItemMapper.selectListByReturnId(returnId);
+    }
+
+    @Override
+    public SrmPurchaseReturnItemDO getPurchaseReturnItem(Long id) {
+        return purchaseReturnItemMapper.selectById(id);
     }
 
     @Override
@@ -761,5 +768,10 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
             throw exception(PURCHASE_RETURN_ITEM_NOT_EXISTS, CollUtil.subtract(ids, CollUtil.newArrayList(items.stream().map(SrmPurchaseReturnItemDO::getId).collect(Collectors.toSet()))));
         }
         return items;
+    }
+
+    @Override
+    public List<Long> listAllPurchaseReturnIds() {
+        return purchaseReturnMapper.selectAllIds();
     }
 }

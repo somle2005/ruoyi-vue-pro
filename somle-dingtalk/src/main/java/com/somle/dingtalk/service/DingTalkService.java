@@ -1,60 +1,64 @@
 package com.somle.dingtalk.service;
 
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.stream.Stream;
-
+import cn.iocoder.yudao.framework.common.util.json.JSONObject;
+import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
+import cn.iocoder.yudao.framework.common.util.web.RequestX;
+import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.dingtalk.api.DefaultDingTalkClient;
 import com.dingtalk.api.DingTalkClient;
 import com.dingtalk.api.request.OapiUserListidRequest;
 import com.dingtalk.api.request.OapiV2UserGetRequest;
 import com.dingtalk.api.response.OapiUserListidResponse;
 import com.dingtalk.api.response.OapiV2UserGetResponse;
-import cn.iocoder.yudao.framework.common.util.json.JSONObject;
-import cn.iocoder.yudao.framework.common.util.json.JsonUtilsX;
-import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import com.fasterxml.jackson.databind.node.ObjectNode;
-import jakarta.annotation.PostConstruct;
-
-import lombok.SneakyThrows;
-import okhttp3.Response;
-import org.springframework.beans.factory.annotation.Autowired;
-//import org.springframework.integration.support.MessageBuilder;
-//import org.springframework.messaging.MessageChannel;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-
 import com.somle.dingtalk.model.DingTalkDepartment;
-// import com.somle.model.DingTalkDepartmentMap.DingTalkDepartment;
-// import com.somle.model.DingTalkDepartmentMap;
 import com.somle.dingtalk.model.DingTalkResponse;
 import com.somle.dingtalk.model.DingTalkToken;
 import com.somle.dingtalk.repository.DingTalkTokenRepository;
-import cn.iocoder.yudao.framework.common.util.web.WebUtils;
-
+import jakarta.annotation.PostConstruct;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Response;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
 public class DingTalkService {
-    private DingTalkToken token;
     private final String HOST = "https://api.dingtalk.com";
     private final String BASE_HOST = "https://oapi.dingtalk.com";
-
-
+    @Autowired
+    DingTalkTokenRepository tokenRepository;
 
 
 //    @Autowired
 //    MessageChannel departmentChannel;
-
-    @Autowired
-    DingTalkTokenRepository tokenRepository;
+    private volatile DingTalkToken token;
 
     @PostConstruct
     private void init() {
         this.token = tokenRepository.findAll().get(0);
+    }
+
+    /**
+     * 懒加载并发锁初始化
+     */
+    private DingTalkToken getToken() {
+        if (this.token == null) {
+            synchronized (this) {
+                if (this.token == null) {
+                    this.token = tokenRepository.findAll().get(0);
+                }
+            }
+        }
+        return this.token;
     }
 
 
@@ -67,7 +71,7 @@ public class DingTalkService {
     //     return jsonObject.getString("access_token");
     // }
 
-//    @Scheduled(cron = "0 0 * * * ?") // Executes at the start of every hour
+    //    @Scheduled(cron = "0 0 * * * ?") // Executes at the start of every hour
     @Scheduled(initialDelay = 2000, fixedRate = 3600000)
     public void refreshAuth() {
         String url = HOST + "/v1.0/oauth2/accessToken";
@@ -79,24 +83,26 @@ public class DingTalkService {
             .url(url)
             .payload(payload)
             .build();
-        ObjectNode result= WebUtils.sendRequest(request, ObjectNode.class);
-        JSONObject jsonObject=new JSONObject(result);
-        String accessToken =jsonObject.getString("accessToken");
+        ObjectNode result = WebUtils.sendRequest(request, ObjectNode.class);
+        JSONObject jsonObject = new JSONObject(result);
+        String accessToken = jsonObject.getString("accessToken");
         this.token.setAccessToken(accessToken);
     }
 
     @SneakyThrows
-    public void sendRobotMessage(String content, String accessToken) {
+    public void sendRobotMessage(String title, String markdownText, String accessToken) {
         var endpoint = "/robot/send";
-        var keyword = "ALERT";
+//        var keyword = "ALERT";
         // 构造消息内容
         JSONObject json = new JSONObject();
-        json.put("msgtype", "text");
+        json.put("msgtype", "markdown");
 
-        JSONObject text = new JSONObject();
-        text.put("content", keyword + "\n" + content);
+        JSONObject markdown = new JSONObject();
+        markdown.put("title", title);           // 钉钉弹窗标题
+        markdown.put("text", markdownText);     // markdown 内容
 
-        json.put("text", text);
+
+        json.put("markdown", markdown);
 
         var queryParams = Map.of("access_token", accessToken);
 
@@ -122,7 +128,7 @@ public class DingTalkService {
         String endUrl = "/topapi/v2/department/get";
 
         Map<String, String> params = Map.of(
-            "access_token", token.getAccessToken()
+            "access_token", this.getToken().getAccessToken()
         );
         Map<String, String> headers = Map.of(
         );
@@ -149,19 +155,20 @@ public class DingTalkService {
 //        OapiV2DepartmentGetRequest req = new OapiV2DepartmentGetRequest();
 //        req.setDeptId(deptId);
 //        req.setLanguage("zh_CN");
-//        OapiV2DepartmentGetResponse rsp = client.execute(req, token.getAccessToken());
+//        OapiV2DepartmentGetResponse rsp = client.execute(req, this.getToken().getAccessToken());
 //        return rsp.getResult();
 
     }
-    private void validateResponse(DingTalkResponse response){
+
+    private void validateResponse(DingTalkResponse response) {
         // 检查响应是否为空
         if (response == null) {
             throw new RuntimeException("DingTalk返回空响应");
         }
-        if (response.getResult() == null){
+        if (response.getResult() == null) {
             throw new RuntimeException("DingTalk返回空结果");
         }
-        if (!Objects.equals(response.getErrcode(),0)){
+        if (!Objects.equals(response.getErrcode(), 0)) {
             throw new RuntimeException("DingTalk返回异常：" + response.getErrmsg());
         }
         log.debug(response.toString());
@@ -194,7 +201,7 @@ public class DingTalkService {
         String endUrl = "/topapi/v2/department/listsub";
 
         Map<String, String> params = Map.of(
-            "access_token", token.getAccessToken()
+            "access_token", this.getToken().getAccessToken()
         );
         Map<String, String> headers = Map.of(
         );
@@ -217,7 +224,7 @@ public class DingTalkService {
         // List<DingTalkDepartment> childPath = dept.getPath();
         // childPath.addLast(dept);
         return getOrphans(dept.getDeptId())
-            .map(n->{
+            .map(n -> {
                 n.setLevel(dept.getLevel() + 1);
                 n.setParent(dept);
                 return n;
@@ -231,9 +238,6 @@ public class DingTalkService {
         // replacements.put("家居", "HCD");
         // replacements.put("办公", "EBD");
         // replacements.put("视听", "ABD");
-
-
-
 
 
         // boolean replaced = false;
@@ -252,7 +256,7 @@ public class DingTalkService {
         // if (!replaced && !(ch >= 0 && ch <= 127)) {
         //     name = "$" + name;
         // }
-        
+
         // if (name.startsWith("$") && name.contains("仓")) {
         //     name = "LC" + name.substring(1);
         // } else if (name.startsWith("$")) {
@@ -268,9 +272,9 @@ public class DingTalkService {
     public DingTalkResponse addDepartment(DingTalkDepartment dept) {
         log.info("adding departments");
         String endUrl = "/topapi/v2/department/update";
-        
+
         Map<String, String> params = Map.of(
-            "access_token", token.getAccessToken()
+            "access_token", this.getToken().getAccessToken()
         );
         Map<String, String> headers = Map.of(
         );
@@ -289,25 +293,25 @@ public class DingTalkService {
     public boolean cleanDepartments() {
         log.info("cleaning departments");
 
-        
-        return getDepartmentStream().map( dept -> {
-            DingTalkDepartment newDept = cleanDepartment(dept);
-            DingTalkResponse response = addDepartment(newDept);
-            boolean success = response.getErrcode() == 200;
-            if (success) {
-                log.debug(newDept.getName() + " cleaned successfully");
-            } else {
-                log.error(newDept.getName() + " clean failed\n" + response.getErrmsg());
-            }
-            return success;
-        })
-        .reduce(true, (a, b) -> a && b);
+
+        return getDepartmentStream().map(dept -> {
+                DingTalkDepartment newDept = cleanDepartment(dept);
+                DingTalkResponse response = addDepartment(newDept);
+                boolean success = response.getErrcode() == 200;
+                if (success) {
+                    log.debug(newDept.getName() + " cleaned successfully");
+                } else {
+                    log.error(newDept.getName() + " clean failed\n" + response.getErrmsg());
+                }
+                return success;
+            })
+            .reduce(true, (a, b) -> a && b);
     }
-    
+
     public Stream<DingTalkDepartment> getChildStream(DingTalkDepartment dept) {
         // List<String> keys = List.of("CBD", "HCD", "EBD", "ABD", "DCD", "VC", "QC", "MC", "FC", "HC", "CC", "PC", "LC");
         List<DingTalkDepartment> childList = getChilds(dept).toList();
-        if ( childList.isEmpty()) {
+        if (childList.isEmpty()) {
             log.debug("null child list");
             return Stream.of();
         } else {
@@ -322,10 +326,6 @@ public class DingTalkService {
         var topDept = getDepartment(1L).setLevel(0);
         return Stream.concat(Stream.of(topDept), getChildStream(topDept));
     }
-
-    
-
-
 
 
 //    public void uploadDepartmentsResursive() {
@@ -342,7 +342,7 @@ public class DingTalkService {
         DingTalkClient client = new DefaultDingTalkClient("https://oapi.dingtalk.com/topapi/user/listid");
         OapiUserListidRequest req = new OapiUserListidRequest();
         req.setDeptId(deptId);
-        OapiUserListidResponse rsp = client.execute(req, token.getAccessToken());
+        OapiUserListidResponse rsp = client.execute(req, this.getToken().getAccessToken());
         return rsp.getResult().getUseridList();
     }
 
@@ -352,7 +352,7 @@ public class DingTalkService {
         OapiV2UserGetRequest req = new OapiV2UserGetRequest();
         req.setUserid(userId);
         req.setLanguage("zh_CN");
-        OapiV2UserGetResponse rsp = client.execute(req, token.getAccessToken());
+        OapiV2UserGetResponse rsp = client.execute(req, this.getToken().getAccessToken());
         return rsp.getResult();
     }
 
@@ -364,5 +364,5 @@ public class DingTalkService {
             .map(this::getUserDetail);
     }
 
-    
+
 }

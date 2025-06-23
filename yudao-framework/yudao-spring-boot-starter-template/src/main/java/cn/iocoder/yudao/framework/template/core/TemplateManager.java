@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.framework.template.core;
 
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.template.config.TemplateConfigFactory;
 import cn.iocoder.yudao.framework.template.config.TemplatePolicy;
 import com.aspose.words.Document;
@@ -19,6 +20,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 @Slf4j
 @Configuration
@@ -35,19 +37,28 @@ public class TemplateManager {
     @EventListener(ApplicationReadyEvent.class)
     public void preloadTemplatesOnStartup() {
         log.info("TemplateRegister 策略实例数：{}", configureFactory.getRegisters().size());
-        log.info("开始执行模板预热任务...");
-        preloadWordAndPdfTemplates();
+        TemplateManager manager = SpringUtils.getBean(TemplateManager.class);
+        manager.preloadWordAndPdfTemplates();
     }
 
     @Async
     public void preloadWordAndPdfTemplates() {
         long start = System.currentTimeMillis();
-        Optional.ofNullable(configureFactory.getRegisters()).ifPresent(registers -> registers.forEach(
-            register -> register.getTemplatePolicies().stream().filter(TemplatePolicy::getEnablePreload).forEach(TemplatePolicy -> {
-                preloadSingleWordTemplate(TemplatePolicy.getResource());
-                preloadSinglePdfTemplate(TemplatePolicy.getResource());
-            })));
-        log.info("全部模板预热完成，耗时 {}ms", System.currentTimeMillis() - start);
+        AtomicBoolean hasPreloaded = new AtomicBoolean(false);
+        Optional.ofNullable(configureFactory.getRegisters()).ifPresent(registers ->
+            registers.forEach(register ->
+                register.getTemplatePolicies().stream()
+                    .filter(TemplatePolicy::getEnablePreload)
+                    .forEach(policy -> {
+                        preloadSingleWordTemplate(policy.getResource());
+                        preloadSinglePdfTemplate(policy.getResource());
+                        hasPreloaded.set(true);
+                    })
+            )
+        );
+        if (hasPreloaded.get()) {
+            log.info("全部模板预热完成，耗时 {}ms", System.currentTimeMillis() - start);
+        }
     }
 
     private void preloadSingleWordTemplate(Resource resource) {

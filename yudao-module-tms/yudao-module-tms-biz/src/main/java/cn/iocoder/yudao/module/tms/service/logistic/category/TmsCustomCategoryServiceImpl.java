@@ -13,7 +13,6 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.TmsCustomCat
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.item.TmsCustomCategoryItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.logistic.category.TmsCustomCategoryMapper;
 import cn.iocoder.yudao.module.tms.dal.mysql.logistic.category.item.TmsCustomCategoryItemMapper;
-import cn.iocoder.yudao.module.tms.dal.mysql.logistic.customrule.TmsCustomRuleMapper;
 import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants;
 import cn.iocoder.yudao.module.tms.service.logistic.category.bo.TmsCustomCategoryBO;
@@ -48,8 +47,6 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
     @Resource
     private TmsCustomCategoryItemMapper customRuleCategoryItemMapper;
     @Autowired
-    private TmsCustomRuleMapper tmsCustomRuleMapper;
-    @Autowired
     private TmsCustomCategoryItemService itemService;
 
     @Override
@@ -66,7 +63,6 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
         List<TmsCustomCategoryItemDO> itemDOS = TmsCustomCategoryItemConvert.INSTANCE.convert(createReqVO.getCustomRuleCategoryItems());
         itemService.createCustomRuleCategoryItemList(categoryId, itemDOS);
         //同步
-//        this.syncCustomRuleCategory(categoryId);
         return categoryId;
     }
 
@@ -97,7 +93,6 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
         List<TmsCustomCategoryItemDO> itemDOS = BeanUtils.toBean(updateReqVO.getCustomRuleCategoryItems(), TmsCustomCategoryItemDO.class);
         List<Long> itemIds = updateCustomRuleCategoryItemList(categoryId, itemDOS);
         //同步
-//        this.syncCustomRuleCategoryItem(itemIds);
     }
 
     @Override
@@ -227,19 +222,4 @@ public class TmsCustomCategoryServiceImpl implements TmsCustomCategoryService {
         customRuleCategoryItemMapper.deleteByCategoryId(categoryId);
     }
 
-//    //同步海关规则方法 categoryId
-//    private void syncCustomRuleCategory(Long categoryId) {
-//        List<TmsCustomRuleBO> ruleBOS = customRuleMapper.selectBOListEqCountryCodeByCategoryId(new TmsCustomRulePageReqVO(), categoryId);
-//        //获得变更的海关规则ids
-//        List<Long> ids = ruleBOS.stream().map(TmsCustomRuleBO::getId).toList();
-//        erpCustomRuleService.syncErpCustomRule(ids);
-//    }
-//
-//    //同步海关规则方法 categoryItemId
-//    private void syncCustomRuleCategoryItem(List<Long> categoryItemId) {
-//        List<TmsCustomRuleBO> ruleBOS = customRuleMapper.selectBOListEqCountryCodeByItemId(new TmsCustomRulePageReqVO(), categoryItemId);
-//        //获得变更的海关规则ids
-//        List<Long> ids = ruleBOS.stream().map(TmsCustomRuleBO::getId).toList();
-//        erpCustomRuleService.syncErpCustomRule(ids);
-//    }
 }

@@ -95,7 +95,6 @@ public class AsyncTask {
 
     public static class AsyncTaskExecutor {
 
-        public static final String THREAD_NAME_PREFIX = "somle-task-";
         private ThreadPoolTaskScheduler scheduler = null;
         @Getter
         private ThreadPoolTaskExecutor executor = null;
@@ -144,7 +143,7 @@ public class AsyncTask {
             this.executor.setRejectedExecutionHandler(handler);
             // 设置等待所有任务结束后再关闭线程池：优雅关闭
             this.executor.setWaitForTasksToCompleteOnShutdown(true);
-
+            this.executor.setThreadNamePrefix("somle-executor-");
             // 初始化线程池
             this.executor.initialize();
 
@@ -153,7 +152,7 @@ public class AsyncTask {
             // 设置调度器线程池大小
             this.scheduler.setPoolSize(20);
             // 设置线程名前缀：方便在日志中识别线程来源
-            this.scheduler.setThreadNamePrefix(THREAD_NAME_PREFIX);
+            this.scheduler.setThreadNamePrefix("somle-scheduler-");
             // 设置等待时间：关闭时等待任务完成的最长时间
             this.scheduler.setAwaitTerminationSeconds(60);
             // 设置等待所有任务结束后再关闭调度器：优雅关闭

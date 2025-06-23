@@ -8,10 +8,13 @@ kingdee:
     - 94828068241281024
     - 94828281114791936
     - 94829067232219136
+  strictSupplierMatch: true # 生产环境进行严格匹配
 
 
 srm:
   enable-preload: true
+  sync:
+    eccang: true
 --- #################### 数据库相关配置 ####################
 spring:
   # 数据源配置项

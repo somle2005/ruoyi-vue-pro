@@ -1,9 +1,9 @@
 package cn.iocoder.yudao.module.erp.config;
 
+import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.integration.channel.PublishSubscribeChannel;
 import org.springframework.messaging.MessageChannel;
 
@@ -13,13 +13,13 @@ public class ErpIntegrationConfig {
 
     @Bean
     public MessageChannel erpProductChannel() {
-        return new PublishSubscribeChannel(new SimpleAsyncTaskExecutor());
+        return new PublishSubscribeChannel(AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor());
     }
 
 
     @Bean
     public MessageChannel erpCustomRuleChannel() {
-        return new PublishSubscribeChannel(new SimpleAsyncTaskExecutor());
+        return new PublishSubscribeChannel(AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor());
     }
 
 }
