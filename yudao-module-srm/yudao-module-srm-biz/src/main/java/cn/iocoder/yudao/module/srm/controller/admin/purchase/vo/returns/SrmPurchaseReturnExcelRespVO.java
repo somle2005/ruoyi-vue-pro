@@ -13,29 +13,50 @@ import java.time.LocalDateTime;
 @Data
 public class SrmPurchaseReturnExcelRespVO {
     // ========== 主表字段 ==========
+    @ExcelProperty("退货单ID")
+    @ExcelMergeGroup
+    private Long id;
+
     @ExcelProperty("退货单编号")
     @ExcelMergeGroup(unique = true)
     private String code;
-
-    @ExcelProperty("供应商名称")
-    @ExcelMergeGroup
-    private String supplierName;
-
-    @ExcelProperty("单据日期")
-    @ExcelMergeGroup
-    private LocalDateTime billTime;
 
     @ExcelProperty("退货时间")
     @ExcelMergeGroup
     private LocalDateTime returnTime;
 
-    @ExcelProperty("仓库名称")
+    @ExcelProperty("创建人")
     @ExcelMergeGroup
-    private String warehouseName;
+    private String creator;
 
-    @ExcelProperty("审核人名称")
+    @ExcelProperty("创建时间")
     @ExcelMergeGroup
-    private String auditor;
+    private LocalDateTime createTime;
+
+    @ExcelProperty("更新人")
+    @ExcelMergeGroup
+    private String updater;
+
+    @ExcelProperty("更新时间")
+    @ExcelMergeGroup
+    private LocalDateTime updateTime;
+
+    @ExcelProperty("备注")
+    @ExcelMergeGroup
+    private String remark;
+
+    @ExcelProperty("附件地址")
+    @ExcelMergeGroup
+    private String fileUrl;
+
+    @ExcelProperty(value = "审批状态", converter = DictConvert.class)
+    @DictFormat(SrmDictTypeConstants.AUDIT_STATUS)
+    @ExcelMergeGroup
+    private Integer auditStatus;
+
+    @ExcelProperty("审核者姓名")
+    @ExcelMergeGroup
+    private String auditorName;
 
     @ExcelProperty("审核时间")
     @ExcelMergeGroup
@@ -45,57 +66,111 @@ public class SrmPurchaseReturnExcelRespVO {
     @ExcelMergeGroup
     private String auditAdvice;
 
-    @ExcelProperty(value = "审核状态", converter = DictConvert.class)
-    @DictFormat(SrmDictTypeConstants.AUDIT_STATUS)
+    @ExcelProperty("供应商名称")
     @ExcelMergeGroup
-    private Integer auditStatus;
+    private String supplierName;
 
-    @ExcelProperty(value = "开关状态", converter = DictConvert.class)
-    @DictFormat(SrmDictTypeConstants.OFF_STATUS)
+    @ExcelProperty("结算账户名称")
     @ExcelMergeGroup
-    private Integer offStatus;
+    private String accountName;
 
-    @ExcelProperty(value = "退货状态", converter = DictConvert.class)
-    @DictFormat(SrmDictTypeConstants.RETURN_STATUS)
+    @ExcelProperty("币种名称")
     @ExcelMergeGroup
-    private Integer returnStatus;
-
-    @ExcelProperty("备注")
-    @ExcelMergeGroup
-    private String remark;
+    private String currencyName;
 
     @ExcelProperty("合计数量")
     @ExcelMergeGroup
     private BigDecimal totalCount;
 
-    @ExcelProperty("合计金额")
+    @ExcelProperty("合计产品价格")
+    @ExcelMergeGroup
+    private BigDecimal totalProductPrice;
+
+    @ExcelProperty("合计税额")
+    @ExcelMergeGroup
+    private BigDecimal totalGrossPrice;
+
+    @ExcelProperty("价税合计")
+    @ExcelMergeGroup
+    private BigDecimal grossTotalPrice;
+
+    @ExcelProperty("最终合计价格")
     @ExcelMergeGroup
     private BigDecimal totalPrice;
+
+    @ExcelProperty("优惠率")
+    @ExcelMergeGroup
+    private BigDecimal discountPercent;
+
+    @ExcelProperty("优惠金额")
+    @ExcelMergeGroup
+    private BigDecimal discountPrice;
+
+    @ExcelProperty("其他费用")
+    @ExcelMergeGroup
+    private BigDecimal otherPrice;
+
+//    @ExcelProperty(value = "退款状态", converter = DictConvert.class)
+//    @DictFormat(SrmDictTypeConstants.PAYMENT_STATUS)
+//    @ExcelMergeGroup
+//    private Integer refundStatus;
+//
+//    @ExcelProperty("已退款金额")
+//    @ExcelMergeGroup
+//    private BigDecimal refundPrice;
+
+    @ExcelProperty(value = "出库状态", converter = DictConvert.class)
+    @DictFormat(SrmDictTypeConstants.OUTBOUND_STATUS)
+    @ExcelMergeGroup
+    private Integer outboundStatus;
+
+    @ExcelProperty("总毛重")
+    @ExcelMergeGroup
+    private BigDecimal totalWeight;
+
+    @ExcelProperty("总体积")
+    @ExcelMergeGroup
+    private BigDecimal totalVolume;
 
     // ========== 子表字段 ==========
     @ExcelProperty("退货项编号")
     private Long itemId;
 
+    @ExcelProperty("入库单编号")
+    private String arriveCode;
+
     @ExcelProperty("产品名称")
     private String productName;
 
-    @ExcelProperty("产品sku")
+    @ExcelProperty("产品SKU")
     private String productCode;
+
+    @ExcelProperty("报关品名")
+    private String declaredType;
+
+    @ExcelProperty("报关品名英文")
+    private String declaredTypeEn;
 
     @ExcelProperty("产品单位名称")
     private String productUnitName;
 
-    @ExcelProperty("型号")
-    private String model;
+    @ExcelProperty("仓库名称")
+    private String itemWarehouseName;
 
-    @ExcelProperty("退货数量")
+    @ExcelProperty("产品数量")
     private BigDecimal qty;
+
+    @ExcelProperty("仓库产品可售库存")
+    private BigDecimal sellableQty;
+
+    @ExcelProperty("实际入库数量")
+    private BigDecimal actualQty;
+
+    @ExcelProperty("产品单价")
+    private BigDecimal productPrice;
 
     @ExcelProperty("含税单价")
     private BigDecimal grossPrice;
-
-    @ExcelProperty("价税合计")
-    private BigDecimal grossTotalPrice;
 
     @ExcelProperty("税率")
     private BigDecimal taxRate;
@@ -103,23 +178,37 @@ public class SrmPurchaseReturnExcelRespVO {
     @ExcelProperty("税额")
     private BigDecimal tax;
 
-    @ExcelProperty("仓库名称")
-    private String itemWarehouseName;
+    @ExcelProperty("总价")
+    private BigDecimal itemTotalPrice;
 
-    @ExcelProperty(value = "关闭状态", converter = DictConvert.class)
-    @DictFormat(SrmDictTypeConstants.OFF_STATUS)
-    private Integer itemOffStatus;
+    @ExcelProperty("价税合计")
+    private BigDecimal grossTotalPriceItem;
 
-    @ExcelProperty(value = "退货状态", converter = DictConvert.class)
-    @DictFormat(SrmDictTypeConstants.RETURN_STATUS)
-    private Integer itemReturnStatus;
+    @ExcelProperty("申请人姓名")
+    private String applicantName;
 
-    @ExcelProperty("采购到货单编号")
-    private String purchaseInCode;
+    @ExcelProperty("申请部门名称")
+    private String applicationDeptName;
 
-    @ExcelProperty("交货日期")
-    private LocalDateTime deliveryTime;
+    @ExcelProperty(value = "出库状态", converter = DictConvert.class)
+    @DictFormat(SrmDictTypeConstants.OUTBOUND_STATUS)
+    private Integer itemOutboundStatus;
 
-    @ExcelProperty("商品行备注")
+    @ExcelProperty("退货项备注")
     private String itemRemark;
+
+    @ExcelProperty("箱率")
+    private String containerRate;
+
+    @ExcelProperty("退货项创建人")
+    private String itemCreator;
+
+    @ExcelProperty("退货项创建时间")
+    private LocalDateTime itemCreateTime;
+
+    @ExcelProperty("退货项更新人")
+    private String itemUpdater;
+
+    @ExcelProperty("退货项更新时间")
+    private LocalDateTime itemUpdateTime;
 } 

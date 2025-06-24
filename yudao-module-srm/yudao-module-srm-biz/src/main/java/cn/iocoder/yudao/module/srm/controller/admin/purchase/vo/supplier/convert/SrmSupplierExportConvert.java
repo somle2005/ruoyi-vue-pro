@@ -17,21 +17,18 @@ public class SrmSupplierExportConvert {
             SrmSupplierExcelRespVO excel = new SrmSupplierExcelRespVO();
             excel.setId(vo.getId());
             excel.setName(vo.getName());
-            excel.setShortName(vo.getShortName());
-            excel.setCreditCode(vo.getCreditCode());
+            excel.setShortName(vo.getName());
             excel.setContact(vo.getContact());
-            excel.setContactPhone(vo.getContactPhone());
+            excel.setContactPhone(vo.getTelephone());
             excel.setEmail(vo.getEmail());
-            excel.setAddress(vo.getAddress());
+            excel.setAddress(vo.getCompanyAddress());
             excel.setBankName(vo.getBankName());
             excel.setBankAccount(vo.getBankAccount());
             excel.setTaxNo(vo.getTaxNo());
-            excel.setStatus(vo.getStatus());
-            excel.setCreator(vo.getCreator());
+            excel.setStatus(vo.getOpenStatus());
             excel.setCreateTime(vo.getCreateTime());
             excel.setRemark(vo.getRemark());
             if (vo.getSrmPaymentTermsResp() != null) {
-                excel.setPaymentTermId(vo.getSrmPaymentTermsResp().getId());
                 excel.setPaymentTermCreateTime(vo.getSrmPaymentTermsResp().getCreateTime());
                 excel.setPaymentTermZh(vo.getSrmPaymentTermsResp().getPaymentTermZh());
                 excel.setPaymentTermZhForeign(vo.getSrmPaymentTermsResp().getPaymentTermZhForeign());

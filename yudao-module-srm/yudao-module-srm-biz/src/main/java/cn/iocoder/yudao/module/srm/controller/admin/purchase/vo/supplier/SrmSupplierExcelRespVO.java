@@ -19,13 +19,13 @@ public class SrmSupplierExcelRespVO {
     @ExcelMergeGroup
     private String name;
 
-    @ExcelProperty("供应商简称")
+    @ExcelProperty("供应商名称")
     @ExcelMergeGroup
     private String shortName;
-
-    @ExcelProperty("社会统一信用代码")
-    @ExcelMergeGroup
-    private String creditCode;
+//
+//    @ExcelProperty("社会统一信用代码")
+//    @ExcelMergeGroup
+//    private String creditCode;
 
     @ExcelProperty("联系人")
     @ExcelMergeGroup
@@ -59,10 +59,6 @@ public class SrmSupplierExcelRespVO {
     @ExcelProperty(value = "开启状态", converter = DictConvert.class)
     @DictFormat(DictTypeConstants.COMMON_STATUS)
     private Integer status;
-
-    @ExcelProperty("创建人")
-    @ExcelMergeGroup
-    private String creator;
 
     @ExcelProperty("创建时间")
     @ExcelMergeGroup
