@@ -171,7 +171,7 @@ public class SrmPurchaseRequestController {
         // 转换为Excel导出VO
         List<SrmPurchaseRequestExcelRespVO> excelList = buildExcelList(list);
         // 导出 Excel
-        ExcelUtils.write(response, "ERP采购申请单.xls", "SRM采购申请单", SrmPurchaseRequestExcelRespVO.class, excelList);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "ERP采购申请单.xls", "SRM采购申请单", SrmPurchaseRequestExcelRespVO.class, excelList);
     }
 
     /**
@@ -192,6 +192,8 @@ public class SrmPurchaseRequestController {
                     SrmPurchaseRequestExcelRespVO vo = BeanUtils.toBean(main, SrmPurchaseRequestExcelRespVO.class);
                     // 再复制子表字段（会覆盖重复字段）
                     BeanUtils.copyProperties(item, vo);
+                    vo.setLineOffStatus(item.getOffStatus());
+                    vo.setLineOrderStatus(item.getOrderStatus());
                     result.add(vo);
                 }
             }

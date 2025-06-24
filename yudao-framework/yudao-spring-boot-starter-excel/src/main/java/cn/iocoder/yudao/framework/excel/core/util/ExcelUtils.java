@@ -4,6 +4,7 @@ import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.enums.TimeZoneEnum;
 import cn.iocoder.yudao.framework.common.util.servlet.ServletUtils;
 import cn.iocoder.yudao.framework.excel.core.convert.DynamicTimeZoneLocalDateTimeConvert;
+import cn.iocoder.yudao.framework.excel.core.handler.CellMergeStrategy;
 import cn.iocoder.yudao.framework.excel.core.handler.SelectSheetWriteHandler;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.converters.Converter;
@@ -95,14 +96,6 @@ public class ExcelUtils {
 
     /**
      * 通过RequestAttributes获取用户时区
-     *
-     * @param response
-     * @param filename
-     * @param sheetName
-     * @param head
-     * @param data
-     * @param <T>
-     * @throws IOException
      */
     public static <T> void writeWithRequestAttributesTimeZone(HttpServletResponse response,
                                                               String filename,
@@ -117,6 +110,7 @@ public class ExcelUtils {
             .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
             .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
             .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
+            .registerWriteHandler(new CellMergeStrategy(head, data.size()))
             .sheet(sheetName);
         builder.doWrite(data);
         // 设置 header 和 contentType。写在最后的原因是，避免报错时，响应 contentType 已经被修改了

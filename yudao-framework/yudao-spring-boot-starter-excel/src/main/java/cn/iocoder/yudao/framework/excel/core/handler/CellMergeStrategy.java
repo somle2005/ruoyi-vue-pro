@@ -13,50 +13,58 @@ import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * 通用合并 + 居中处理器，基于 @ExcelMergeGroup 注解自动合并并居中
- *
- * @author: wdy
+ * 通用合并 + 居中处理器，基于 @ExcelMergeGroup 注解自动合并并居中，支持唯一标识字段限制合并范围
+ * @author :wdy
  */
 public class CellMergeStrategy implements RowWriteHandler {
+
     private final List<Integer> mergeColumnIndexList;
+    private final List<Integer> uniqueColumnIndexList;
     private final int size;
     private final Map<Integer, Integer> mergeStartRowMap = new HashMap<>();
     private Row lastRow;
 
     public CellMergeStrategy(Class<?> clazz, int size) {
         this.size = size;
-        this.mergeColumnIndexList = resolveMergeColumnIndexes(clazz);
-        this.mergeColumnIndexList.forEach(index -> mergeStartRowMap.put(index, 1));
-    }
-
-    private List<Integer> resolveMergeColumnIndexes(Class<?> clazz) {
         Field[] fields = clazz.getDeclaredFields();
+        List<String> fieldNames = Arrays.stream(fields).map(Field::getName).toList();
 
-        List<String> allFieldNames = Arrays.stream(fields)
-            .map(Field::getName).toList();
+        this.mergeColumnIndexList = new ArrayList<>();
+        this.uniqueColumnIndexList = new ArrayList<>();
 
-        return Arrays.stream(fields)
-            .filter(f -> f.isAnnotationPresent(ExcelMergeGroup.class))
-            .map(Field::getName)
-            .map(allFieldNames::indexOf)
-            .filter(i -> i >= 0)
-            .toList();
+        for (Field field : fields) {
+            if (field.isAnnotationPresent(ExcelMergeGroup.class)) {
+                int index = fieldNames.indexOf(field.getName());
+                if (index >= 0) {
+                    mergeColumnIndexList.add(index);
+                    if (field.getAnnotation(ExcelMergeGroup.class).unique()) {
+                        uniqueColumnIndexList.add(index);
+                    }
+                }
+            }
+        }
+
+        // 初始化每列的起始行
+        mergeColumnIndexList.forEach(i -> mergeStartRowMap.put(i, 1));
     }
 
     @Override
-    public void afterRowDispose(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder, Row row,
-                                Integer relativeRowIndex, Boolean isHead) {
+    public void afterRowDispose(WriteSheetHolder writeSheetHolder, WriteTableHolder writeTableHolder,
+                                Row row, Integer relativeRowIndex, Boolean isHead) {
         if (isHead) return;
 
         Sheet sheet = writeSheetHolder.getSheet();
         int rowIndex = row.getRowNum();
 
         if (rowIndex > 1 && lastRow != null) {
+            // 判断是否属于同一个唯一标识组
+            boolean sameGroup = isSameGroup(row, lastRow);
+
             for (int colIndex : mergeColumnIndexList) {
                 String current = getCellValue(row.getCell(colIndex));
                 String previous = getCellValue(lastRow.getCell(colIndex));
 
-                if (!Objects.equals(current, previous)) {
+                if (!sameGroup || !Objects.equals(current, previous)) {
                     int start = mergeStartRowMap.get(colIndex);
                     int end = rowIndex - 1;
                     if (end > start) {
@@ -73,6 +81,20 @@ public class CellMergeStrategy implements RowWriteHandler {
         }
 
         lastRow = row;
+    }
+
+    /**
+     * 判断两行是否属于同一唯一标识组（即相同唯一列值）
+     */
+    private boolean isSameGroup(Row currentRow, Row lastRow) {
+        for (int colIndex : uniqueColumnIndexList) {
+            String curr = getCellValue(currentRow.getCell(colIndex));
+            String prev = getCellValue(lastRow.getCell(colIndex));
+            if (!Objects.equals(curr, prev)) {
+                return false;
+            }
+        }
+        return true;
     }
 
     private String getCellValue(Cell cell) {
