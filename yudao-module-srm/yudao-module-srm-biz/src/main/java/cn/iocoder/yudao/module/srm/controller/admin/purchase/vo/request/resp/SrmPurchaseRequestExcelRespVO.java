@@ -42,10 +42,6 @@ public class SrmPurchaseRequestExcelRespVO {
     @ExcelMergeGroup
     private LocalDateTime auditTime;
 
-    @ExcelProperty("产品信息")
-    @ExcelMergeGroup
-    private String productNames;
-
     @ExcelProperty("产品总数")
     @ExcelMergeGroup
     private Integer totalCount;
@@ -71,16 +67,6 @@ public class SrmPurchaseRequestExcelRespVO {
     @DictFormat(SrmDictTypeConstants.ORDER_STATUS)
     @ExcelMergeGroup
     private Integer orderStatus;
-
-    @ExcelProperty(value = "主表关闭状态", converter = DictConvert.class)
-    @DictFormat(SrmDictTypeConstants.OFF_STATUS)
-    @ExcelMergeGroup
-    private Integer lineOffStatus;
-
-    @ExcelProperty(value = "主表订购状态", converter = DictConvert.class)
-    @DictFormat(SrmDictTypeConstants.ORDER_STATUS)
-    @ExcelMergeGroup
-    private Integer lineOrderStatus;
 
     @ExcelProperty("收获地址")
     @ExcelMergeGroup
@@ -111,31 +97,33 @@ public class SrmPurchaseRequestExcelRespVO {
     @ExcelProperty("订单项编号")
     private Long id;
 
-    @Schema(description = "产品编号")
-    @ExcelProperty("产品编号")
-    private Long productId;
-
-    @ExcelProperty("产品报关品名")
-    private String declaredType;
-
-    @ExcelProperty("报关品名英文")
-    private String declaredTypeEn;
-
-    @ExcelProperty("产品sku")
-    private String productCode;
-
     @ExcelProperty("产品名称")
     private String productName;
 
     @ExcelProperty("产品单位名称")
     private String productUnitName;
 
-    @ExcelProperty("产品单位ID")
-    private Long productUnitId;
+    @ExcelProperty("产品sku")
+    private String productCode;
 
     @Schema(description = "仓库名称")
     @ExcelProperty("仓库名称")
     private String warehouseName;
+
+    @ExcelProperty("产品报关品名")
+    private String declaredType;
+
+    @ExcelProperty("报关品名英文")
+    private String declaredTypeEn;
+    // ========== 订单项状态 ==========
+
+    @ExcelProperty(value = "行关闭状态", converter = DictConvert.class)
+    @DictFormat(SrmDictTypeConstants.OFF_STATUS)
+    private Integer lineOffStatus;
+
+    @ExcelProperty(value = "行订购状态", converter = DictConvert.class)
+    @DictFormat(SrmDictTypeConstants.ORDER_STATUS)
+    private Integer lineOrderStatus;
 
     // ========== 数量与价格 ==========
 

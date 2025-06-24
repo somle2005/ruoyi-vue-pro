@@ -14,6 +14,7 @@ import java.util.*;
 
 /**
  * 通用合并 + 居中处理器，基于 @ExcelMergeGroup 注解自动合并并居中，支持唯一标识字段限制合并范围
+ *
  * @author :wdy
  */
 public class CellMergeStrategy implements RowWriteHandler {
@@ -33,11 +34,12 @@ public class CellMergeStrategy implements RowWriteHandler {
         this.uniqueColumnIndexList = new ArrayList<>();
 
         for (Field field : fields) {
-            if (field.isAnnotationPresent(ExcelMergeGroup.class)) {
+            ExcelMergeGroup annotation = field.getAnnotation(ExcelMergeGroup.class);
+            if (annotation != null) {
                 int index = fieldNames.indexOf(field.getName());
                 if (index >= 0) {
                     mergeColumnIndexList.add(index);
-                    if (field.getAnnotation(ExcelMergeGroup.class).unique()) {
+                    if (annotation.unique()) {
                         uniqueColumnIndexList.add(index);
                     }
                 }

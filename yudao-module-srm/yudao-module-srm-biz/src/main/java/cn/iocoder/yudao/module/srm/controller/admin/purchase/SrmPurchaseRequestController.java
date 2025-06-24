@@ -190,8 +190,26 @@ public class SrmPurchaseRequestController {
                 for (SrmPurchaseRequestItemRespVO item : main.getItems()) {
                     // 先复制主表字段
                     SrmPurchaseRequestExcelRespVO vo = BeanUtils.toBean(main, SrmPurchaseRequestExcelRespVO.class);
-                    // 再复制子表字段（会覆盖重复字段）
-                    BeanUtils.copyProperties(item, vo);
+                    // 手动设置子表特有字段，避免覆盖主表字段
+                    vo.setId(item.getId());
+                    vo.setDeclaredType(item.getDeclaredType());
+                    vo.setDeclaredTypeEn(item.getDeclaredTypeEn());
+                    vo.setProductCode(item.getProductCode());
+                    vo.setProductName(item.getProductName());
+                    vo.setProductUnitName(item.getProductUnitName());
+                    vo.setWarehouseName(item.getWarehouseName());
+                    vo.setQty(item.getQty());
+                    vo.setReferenceUnitPrice(item.getReferenceUnitPrice());
+                    vo.setGrossPrice(item.getGrossPrice());
+                    vo.setGrossTotalPrice(item.getGrossTotalPrice());
+                    vo.setTax(item.getTax());
+                    vo.setTaxRate(item.getTaxRate());
+                    vo.setApprovedQty(item.getApprovedQty());
+                    vo.setUnOrderCount(item.getUnOrderCount());
+                    vo.setOrderClosedQty(item.getOrderClosedQty());
+                    vo.setInboundClosedQty(item.getInboundClosedQty());
+                    vo.setExpectArrivalDate(item.getExpectArrivalDate());
+                    // 设置子表状态字段到专门的字段
                     vo.setLineOffStatus(item.getOffStatus());
                     vo.setLineOrderStatus(item.getOrderStatus());
                     result.add(vo);
