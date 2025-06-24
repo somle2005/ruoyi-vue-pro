@@ -22,8 +22,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
@@ -57,7 +58,7 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
     /**
      * 根据不同的业务动作获得执行量
      **/
-    protected abstract Integer getExecuteQty(WmsOutboundItemRespVO item);
+    protected abstract Integer getExecuteQty(WmsOutboundItemRespVO item, WmsInboundItemLogicDO batch);
     /**
      * 更新仓库库存量
      **/
@@ -81,6 +82,8 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
      **/
     protected abstract void updateOutbound(WmsOutboundRespVO outboundRespVO);
 
+    protected abstract void validateData(WmsOutboundItemRespVO item, Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap);
+
     @Override
     @Transactional(rollbackFor = Exception.class)
     public void execute(OutboundContext context) {
@@ -92,57 +95,36 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         for (WmsOutboundItemRespVO item : itemList) {
             Long productId = item.getProductId();
             Long companyId = item.getCompanyId();
-            if(companyId==null) {
-                companyId=outboundRespVO.getCompanyId();
+            if (companyId == null) {
+                companyId = outboundRespVO.getCompanyId();
             }
             Long deptId = item.getDeptId();
-            if(deptId==null) {
-                deptId=outboundRespVO.getDeptId();
+            if (deptId == null) {
+                deptId = outboundRespVO.getDeptId();
             }
 
-            List<Long> deptIds = new ArrayList<>();
-            List<Long> companyIds = new ArrayList<>();
+            Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap = new HashMap<>();
 
             // 如果未指定归属，则按入库批次的先进先出进行处理
-            if (/*deptId == null || */companyId == null) {
-                //获取批次列表，然后根据可售数量判断取多个批次的库存
-                List<WmsInboundItemLogicDO> inboundItemLogicList = inboundService.getInboundItemLogicList(warehouseId, productId, deptId, true);
-                if (inboundItemLogicList == null) {
-                    throw exception(STOCK_LOGIC_NOT_EXISTS);
-                }
-                int totalQty = item.getActualQty();
-
-                for (WmsInboundItemLogicDO inboundItemLogic : inboundItemLogicList) {
-                    deptIds.add(inboundItemLogic.getDeptId());
-                    companyIds.add(inboundItemLogic.getCompanyId());
-                    if (inboundItemLogic.getSellableQty() >= totalQty) {
-                        break;
-                    } else {
-                        totalQty = totalQty - inboundItemLogic.getSellableQty();
-                    }
-                }
-            } else {
-                deptIds.add(deptId);
-                companyIds.add(companyId);
+            deptIdCompanyIdMap = retrieveDeptIdCompanyIdMap(warehouseId, productId, companyId, deptId);
+            // 如果没有可出库的批次，则返回
+            if (deptIdCompanyIdMap.isEmpty()) {
+                throw exception(INBOUND_ITEM_OUTBOUND_AVAILABLE_QTY_NOT_ENOUGH);
             }
+            //检查计划库量是否超出库存量
+            this.validateData(item, deptIdCompanyIdMap);
+            deptIdCompanyIdMap.forEach((key, value) -> {
+                //需要变更的库存数量
+                Integer quantity = getExecuteQty(item, value);
+                this.outboundSingleItem(outboundRespVO, item, value.getCompanyId(), value.getDeptId(), warehouseId, item.getBinId(), productId, quantity, outboundRespVO.getId(), item.getId());
+                //todo 从item当中扣减quantity
+//                item.setPlanQty(item.getPlanQty() - quantity);
+            });
 
-            List<Long> uniqueDeptIds = deptIds.stream().distinct().toList();
-            List<Long> uniqueCompanyIds = companyIds.stream().distinct().toList();
-
-            // 执行出库的原子操作
-            Integer quantity= getExecuteQty(item);
-            for (int i = 0; i < uniqueCompanyIds.size(); i++) {
-                for (int j = 0; j < uniqueDeptIds.size(); j++) {
-                    companyId = companyIds.get(i);
-                    deptId = deptIds.get(j);
-                    // 执行单个出库详情
-                    this.outboundSingleItem(outboundRespVO, item, companyId, deptId, warehouseId, item.getBinId(), productId, quantity, outboundRespVO.getId(), item.getId());
-                }
-            }
+            updateOutbound(outboundRespVO);
+            // 完成最终的出库
+            outboundService.finishOutbound(outboundRespVO);
         }
-        updateOutbound(outboundRespVO);
-        // 完成最终的出库
-        outboundService.finishOutbound(outboundRespVO);
 
     }
 
@@ -172,7 +154,7 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         List<WmsItemFlowDO> itemFlowList = this.processInboundItem(outboundRespVO, item, companyId, deptId, warehouseId, binId, productId, quantity, outboundId, outboundItemId);
         this.processStockLogicItem(item, companyId, deptId, warehouseId, binId, productId, quantity, outboundId, outboundItemId);
         this.processStockBinItem(item, companyId, deptId, warehouseId, binId, productId, quantity, outboundId, outboundItemId, itemFlowList);
-        // 当前逻辑,默认全部入库
+        // 当前逻辑,默认全部出库
         return WmsOutboundStatus.ALL;
     }
 
@@ -198,6 +180,9 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         stockWarehouseService.insertOrUpdate(stockWarehouseDO);
         // 记录流水
         WmsInboundDO inboundDO = inboundService.getByDetails(warehouseId, productId, companyId, deptId);
+        if (inboundDO == null) {
+            throw exception(INBOUND_ITEM_NOT_EXISTS);
+        }
         int beforeQty = stockWarehouseDO.getAvailableQty() == null ? ZERO : stockWarehouseDO.getAvailableQty();
         Integer afterQty = beforeQty + quantity * wmsStockFlowDirection.getValue();
         stockFlowService.createForStockWarehouse(this.getReason(), wmsStockFlowDirection, productId, stockWarehouseDO, quantity, outboundId, outboundItemId,
@@ -225,8 +210,8 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         stockLogicService.insertOrUpdate(stockLogicDO);
         // 记录流水
         WmsInboundDO inboundDO = inboundService.getByDetails(warehouseId, productId, companyId, deptId);
-        Integer beforeQty = stockLogicDO.getAvailableQty();
-        Integer afterQty = beforeQty + quantity * wmsStockFlowDirection.getValue();
+        Integer afterQty = stockLogicDO.getAvailableQty();
+        Integer beforeQty = afterQty - quantity * wmsStockFlowDirection.getValue();
         stockFlowService.createForStockLogic(this.getReason(), wmsStockFlowDirection, productId, stockLogicDO, quantity, outboundId, outboundItemId, beforeQty, afterQty, inboundDO.getId());
     }
 
@@ -250,12 +235,28 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
         stockBinService.insertOrUpdate(stockBinDO);
         // 记录流水
         // 记录库位变化快照值
-        Integer beforeQty = stockBinDO.getSellableQty() - quantity * itemFlowList.get(0).getDirection();
+        Integer beforeQty = stockBinDO.getSellableQty() - quantity * wmsStockFlowDirection.getValue();
         Integer afterQty = stockBinDO.getSellableQty();
-        stockFlowService.createForStockBin(this.getReason(), wmsStockFlowDirection, productId, stockBinDO, itemFlowList.get(0).getOutboundAvailableDeltaQty(), outboundId, outboundItemId, binId, beforeQty, afterQty, itemFlowList.get(0).getInboundId());
+        stockFlowService.createForStockBin(this.getReason(), wmsStockFlowDirection, productId, stockBinDO, quantity, outboundId, outboundItemId, binId, beforeQty, afterQty, itemFlowList.get(0).getInboundId());
 
     }
 
+    private Map<String, WmsInboundItemLogicDO> retrieveDeptIdCompanyIdMap(Long warehouseId, Long productId, Long companyId, Long deptId) {
+        //获取批次列表，然后根据可售数量判断取多个批次的库存
+        List<WmsInboundItemLogicDO> inboundItemLogicList = inboundService.getInboundItemLogicList(warehouseId, productId, deptId, companyId, true);
+        if (inboundItemLogicList == null) {
+            throw exception(STOCK_LOGIC_NOT_EXISTS);
+        }
+        Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap = new HashMap<>();
+        for (WmsInboundItemLogicDO inboundItemLogic : inboundItemLogicList) {
+            String key = makeStockKey(inboundItemLogic.getCompanyId(), inboundItemLogic.getDeptId());
+            deptIdCompanyIdMap.put(key, inboundItemLogic);
+        }
+        return deptIdCompanyIdMap;
+    }
 
+    private String makeStockKey(Long companyId, Long deptId) {
+        return companyId + "-" + deptId;
+    }
 
 }

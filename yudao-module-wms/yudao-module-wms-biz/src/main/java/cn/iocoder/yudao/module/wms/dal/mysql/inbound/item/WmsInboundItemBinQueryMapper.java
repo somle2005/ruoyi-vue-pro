@@ -121,7 +121,6 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
                 .gt(WmsStockBinDO::getAvailableQty,0);
         });
 
-
         // 连接产品视图
         if(reqVO.getProductCode()!=null) {
             wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockWarehouseDO::getProductId)

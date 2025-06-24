@@ -160,9 +160,10 @@ public interface WmsInboundService {
      *
      * @param warehouseId 仓库编号
      * @param productId   产品编号
+     * @param companyId   公司编号
      * @param olderFirst  是否按入库时间升序
      */
-    List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, boolean olderFirst);
+    List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, boolean olderFirst);
 
     /**
      * 创建盘点入库单

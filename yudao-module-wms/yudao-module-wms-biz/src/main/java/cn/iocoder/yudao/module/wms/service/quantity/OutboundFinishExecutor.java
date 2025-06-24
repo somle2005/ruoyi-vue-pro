@@ -7,6 +7,7 @@ import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
@@ -45,7 +46,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
     }
 
     @Override
-    protected Integer getExecuteQty(WmsOutboundItemRespVO item) {
+    protected Integer getExecuteQty(WmsOutboundItemRespVO item, WmsInboundItemLogicDO batch) {
         // 取消原先的计划入库量，加上本次的实际入库量
         return item.getActualQty() - item.getPlanQty();
     }
@@ -59,10 +60,10 @@ public class OutboundFinishExecutor extends OutboundExecutor {
         // 校验本方法在事务中
         JdbcUtils.requireTransaction();
 
-        Integer actualQty=item.getActualQty();
+        Integer actualQty = item.getActualQty();
 
         // 可用量
-        stockWarehouseDO.setAvailableQty(stockWarehouseDO.getAvailableQty() - actualQty);
+        stockWarehouseDO.setAvailableQty(stockWarehouseDO.getAvailableQty() - quantity);
         if(stockWarehouseDO.getAvailableQty()<0) {
             throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
         }
@@ -129,9 +130,9 @@ public class OutboundFinishExecutor extends OutboundExecutor {
      **/
     @Override
     protected WmsStockFlowDirection updateStockLogicQty(WmsStockLogicDO stockLogicDO, WmsOutboundItemRespVO item, Integer quantity) {
-        Integer actualQty=item.getActualQty();
+        Integer actualQty = item.getActualQty();
         // 可用量
-        stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() - actualQty);
+        stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() - quantity);
         if (stockLogicDO.getAvailableQty() < 0) {
             throw exception(STOCK_LOGIC_NOT_ENOUGH);
         }
@@ -148,7 +149,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
      **/
     @Override
     protected  WmsStockFlowDirection updateSingleStockBinQty(WmsStockBinDO stockBinDO, WmsOutboundItemRespVO item, Integer quantity) {
-        Integer actualQty=item.getActualQty();
+        Integer actualQty = item.getActualQty();
         // 可用库存
         stockBinDO.setAvailableQty(stockBinDO.getAvailableQty() - actualQty);
         if(stockBinDO.getAvailableQty()<0) {
@@ -178,6 +179,10 @@ public class OutboundFinishExecutor extends OutboundExecutor {
         }
         outboundRespVO.setOutboundStatus(WmsOutboundStatus.ALL.getValue());
         outboundRespVO.setOutboundTime(LocalDateTime.now());
+    }
+
+    @Override
+    protected void validateData(WmsOutboundItemRespVO item, Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap) {
     }
 
 
