@@ -19,14 +19,6 @@ public class SrmSupplierExcelRespVO {
     @ExcelMergeGroup
     private String name;
 
-    @ExcelProperty("供应商名称")
-    @ExcelMergeGroup
-    private String shortName;
-//
-//    @ExcelProperty("社会统一信用代码")
-//    @ExcelMergeGroup
-//    private String creditCode;
-
     @ExcelProperty("联系人")
     @ExcelMergeGroup
     private String contact;

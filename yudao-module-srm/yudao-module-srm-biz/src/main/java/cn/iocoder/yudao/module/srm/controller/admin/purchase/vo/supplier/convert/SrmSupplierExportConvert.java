@@ -17,7 +17,6 @@ public class SrmSupplierExportConvert {
             SrmSupplierExcelRespVO excel = new SrmSupplierExcelRespVO();
             excel.setId(vo.getId());
             excel.setName(vo.getName());
-            excel.setShortName(vo.getName());
             excel.setContact(vo.getContact());
             excel.setContactPhone(vo.getTelephone());
             excel.setEmail(vo.getEmail());
