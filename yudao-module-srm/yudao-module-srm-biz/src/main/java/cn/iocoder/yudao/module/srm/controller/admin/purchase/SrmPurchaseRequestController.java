@@ -168,7 +168,6 @@ public class SrmPurchaseRequestController {
     public void exportPurchaseRequestExcel(@Valid SrmPurchaseRequestPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<SrmPurchaseRequestRespVO> list = bindList(srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO).getList());
-        // 转换为Excel导出VO
         List<SrmPurchaseRequestExcelRespVO> excelList = buildExcelList(list);
         // 导出 Excel
         ExcelUtils.writeWithRequestAttributesTimeZone(response, "ERP采购申请单.xls", "SRM采购申请单", SrmPurchaseRequestExcelRespVO.class, excelList);

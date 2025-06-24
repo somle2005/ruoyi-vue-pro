@@ -9,6 +9,8 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderBaseRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderExcelRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.convert.SrmPurchaseOrderExportConvert;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.*;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
@@ -133,9 +135,11 @@ public class SrmPurchaseOrderController {
     @ApiAccessLog(operateType = EXPORT)
     public void exportPurchaseOrderExcel(@Valid SrmPurchaseOrderPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<SrmPurchaseOrderBaseRespVO> bindList = bindList(purchaseOrderService.getPurchaseOrderBOList(pageReqVO));
+        // 获取主表+子表数据
+        List<SrmPurchaseOrderBaseRespVO> list = bindList(purchaseOrderService.getPurchaseOrderBOList(pageReqVO));
+        List<SrmPurchaseOrderExcelRespVO> excelList = SrmPurchaseOrderExportConvert.buildExcelList(list);
         // 导出 Excel
-        ExcelUtils.write(response, "采购订单.xls", "数据", SrmPurchaseOrderBaseRespVO.class, bindList);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "采购订单.xls", "采购订单", SrmPurchaseOrderExcelRespVO.class, excelList);
     }
 
     @PostMapping("/submitAudit")
