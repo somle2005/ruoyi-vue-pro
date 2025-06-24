@@ -41,12 +41,12 @@ public class DingtalkUserHandler {
         SecurityFrameworkUtils.setLoginUser(loginUser);
         try {
             TenantContextHolder.setTenantId(TenantId.DEFAULT.getId());
-            log.info("begin syncing: " + dingTalkUser.toString());
             AdminUserSaveReqDTO erpUser = dingTalkToErpConverter.toSaveReq(dingTalkUser);
-            log.info("user to add " + erpUser);
             if (erpUser.getId() != null) {
+                log.info("updateUser :{}" , erpUser);
                 adminUserApi.updateUser(erpUser);
             } else {
+                log.info("createUser :{}" , erpUser);
                 adminUserApi.createUser(erpUser);
             }
         } finally {

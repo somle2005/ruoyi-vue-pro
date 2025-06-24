@@ -1,10 +1,13 @@
 package com.somle.esb.converter;
 
+import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.util.string.StrUtils;
+import cn.iocoder.yudao.module.infra.api.config.ConfigApi;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptSaveReqDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
+import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserSaveReqDTO;
 import com.dingtalk.api.response.OapiV2UserGetResponse;
 import com.somle.dingtalk.model.DingTalkDepartment;
@@ -13,19 +16,22 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Objects;
+
 @Slf4j
 @Service
 public class DingTalkToErpConverter {
     @Autowired
-    DingTalkService dingTalkService;
-
-
+    private DingTalkService dingTalkService;
+    @Autowired
+    private ConfigApi configApi;
     @Autowired
     private DeptApi deptApi;
 
     @Autowired
     private AdminUserApi adminUserApi;
-
+    // 后续重构到通用常量
+    static final String USER_INIT_PASSWORD_KEY = "system.user.init-password";
 
     private static final String CHINESE_CHAR_PATTERN = "[\\u4E00-\\u9FA5]+";
     private static final String ENGLISH_CHAR_PATTERN = "^[a-zA-Z\\s]+$";
@@ -101,10 +107,30 @@ public class DingTalkToErpConverter {
     public AdminUserSaveReqDTO toSaveReq(OapiV2UserGetResponse.UserGetResponse user) {
         AdminUserSaveReqDTO erpUser = new AdminUserSaveReqDTO();
         erpUser.setExternalId(user.getUserid().toString());
+        erpUser.setUsername(generateUserName(user.getName()))
+            .setAppendOnDuplicateUsername(false)
+            .setMobile(user.getMobile())
+            .setEmail(user.getEmail())
+            .setNickname(user.getName())
+            .setAvatar(user.getAvatar());
         //try to translate id
         try {
             var result = adminUserApi.getUserByExternalId(user.getUserid());
-            erpUser.setId(result.getId());
+            //老用户
+            if (Objects.nonNull(result)) {
+                erpUser.setId(result.getId());
+                erpUser.setUsername(result.getUsername());
+            }
+            //新用户
+            else {
+                //判断username是否重复
+                AdminUserRespDTO adminUserRespDTO = adminUserApi.getUserByUsername(erpUser.getUsername());
+                if (Objects.nonNull(adminUserRespDTO)) {
+                    erpUser.setAppendOnDuplicateUsername(true);
+                }
+                String initPassword = configApi.getConfigValueByKey(USER_INIT_PASSWORD_KEY);
+                erpUser.setPassword(initPassword);
+            }
         } catch (Exception e) {
             log.debug("user external id not found: " + user.getUserid());
         }
@@ -115,16 +141,9 @@ public class DingTalkToErpConverter {
         } catch (Exception e) {
             log.debug("dept external id not found: " + user.getDeptIdList().get(0));
         }
-        //translate the rest
-        erpUser
-            .setUsername(generateUserName(user.getName()))
-            .setAppendOnDuplicateUsername(true)
-            .setMobile(user.getMobile())
-            .setEmail(user.getEmail())
-            .setNickname(user.getName())
-            .setAvatar(user.getAvatar());
         return erpUser;
     }
+
     /**
      * @Author Wqh
      * @Description 自动生成用户名

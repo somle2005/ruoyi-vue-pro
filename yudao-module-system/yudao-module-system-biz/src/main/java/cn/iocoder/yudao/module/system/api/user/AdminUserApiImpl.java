@@ -107,6 +107,11 @@ public class AdminUserApiImpl implements AdminUserApi {
         return userService.createUser(createReqDTO);
     }
 
+    @Override
+    public AdminUserRespDTO getUserByUsername(String userName) {
+        AdminUserDO adminUserDO = userService.getUserByUsername(userName);
+        return BeanUtils.toBean(adminUserDO, AdminUserRespDTO.class);
+    }
 
 
 }

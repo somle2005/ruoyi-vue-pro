@@ -116,7 +116,7 @@ public interface AdminUserApi {
     **/
     Long createUser(AdminUserSaveReqDTO erpUser);
 
-
+    AdminUserRespDTO getUserByUsername(String userName);
 
 
     public static class OperatorBuilder<T> {
