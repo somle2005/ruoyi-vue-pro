@@ -50,10 +50,6 @@ public class SrmPurchaseInExcelRespVO {
     @ExcelMergeGroup
     private Integer auditStatus;
 
-    @ExcelProperty(value = "开关状态", converter = DictConvert.class)
-    @DictFormat(SrmDictTypeConstants.OFF_STATUS)
-    @ExcelMergeGroup
-    private Integer offStatus;
 
     @ExcelProperty(value = "入库状态", converter = DictConvert.class)
     @DictFormat(SrmDictTypeConstants.STORAGE_STATUS)
@@ -106,10 +102,6 @@ public class SrmPurchaseInExcelRespVO {
     @ExcelProperty("仓库名称")
     private String itemWarehouseName;
 
-    @ExcelProperty(value = "关闭状态", converter = DictConvert.class)
-    @DictFormat(SrmDictTypeConstants.OFF_STATUS)
-    private Integer itemOffStatus;
-
     @ExcelProperty(value = "入库状态", converter = DictConvert.class)
     @DictFormat(SrmDictTypeConstants.STORAGE_STATUS)
     private Integer itemInboundStatus;
@@ -117,8 +109,12 @@ public class SrmPurchaseInExcelRespVO {
     @ExcelProperty("采购订单编号")
     private String purchaseOrderCode;
 
-    @ExcelProperty("交货日期")
-    private LocalDateTime deliveryTime;
+    // ========== 申请人信息 ==========
+    @ExcelProperty("申请人名称")
+    private String applicantName;
+
+    @ExcelProperty("申请部门名称")
+    private String applicationDeptName;
 
     @ExcelProperty("商品行备注")
     private String itemRemark;

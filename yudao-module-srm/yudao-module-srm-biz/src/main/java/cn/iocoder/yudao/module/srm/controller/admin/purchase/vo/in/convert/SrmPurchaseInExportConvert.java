@@ -19,13 +19,10 @@ public class SrmPurchaseInExportConvert {
                 vo.setCode(main.getCode());
                 vo.setSupplierName(main.getSupplierName());
                 vo.setBillTime(main.getBillTime());
-                vo.setInTime(main.getInTime());
-                vo.setWarehouseName(main.getWarehouseName());
-                vo.setAuditor(main.getAuditor());
+                vo.setInTime(main.getArriveTime());
                 vo.setAuditTime(main.getAuditTime());
                 vo.setAuditAdvice(main.getAuditAdvice());
                 vo.setAuditStatus(main.getAuditStatus());
-                vo.setOffStatus(main.getOffStatus());
                 vo.setInboundStatus(main.getInboundStatus());
                 vo.setRemark(main.getRemark());
                 vo.setTotalCount(main.getTotalCount());
@@ -38,13 +35,11 @@ public class SrmPurchaseInExportConvert {
                     vo.setCode(main.getCode());
                     vo.setSupplierName(main.getSupplierName());
                     vo.setBillTime(main.getBillTime());
-                    vo.setInTime(main.getInTime());
-                    vo.setWarehouseName(main.getWarehouseName());
-                    vo.setAuditor(main.getAuditor());
+                    vo.setInTime(main.getArriveTime());
+                    vo.setAuditor(main.getAuditorName());
                     vo.setAuditTime(main.getAuditTime());
                     vo.setAuditAdvice(main.getAuditAdvice());
                     vo.setAuditStatus(main.getAuditStatus());
-                    vo.setOffStatus(main.getOffStatus());
                     vo.setInboundStatus(main.getInboundStatus());
                     vo.setRemark(main.getRemark());
                     vo.setTotalCount(main.getTotalCount());
@@ -61,12 +56,11 @@ public class SrmPurchaseInExportConvert {
                     vo.setTaxRate(item.getTaxRate());
                     vo.setTax(item.getTax());
                     vo.setItemWarehouseName(item.getWarehouseName());
-                    vo.setItemOffStatus(item.getOffStatus());
                     vo.setItemInboundStatus(item.getInboundStatus());
-                    vo.setPurchaseOrderCode(item.getPurchaseOrderCode());
-                    vo.setPurchaseOrderItemId(item.getPurchaseOrderItemId());
-                    vo.setDeliveryTime(item.getDeliveryTime());
+                    vo.setPurchaseOrderCode(item.getOrderCode());
                     vo.setItemRemark(item.getRemark());
+                    vo.setApplicantName(item.getApplicantName());
+                    vo.setApplicationDeptName(item.getApplicationDeptName());
                     result.add(vo);
                 }
             }
