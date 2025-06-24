@@ -1,5 +1,8 @@
 package com.somle.esb.handler;
 
+import cn.hutool.core.util.RandomUtil;
+import cn.hutool.core.util.StrUtil;
+import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.framework.common.enums.UserTypeEnum;
 import cn.iocoder.yudao.framework.security.core.LoginUser;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
@@ -33,7 +36,6 @@ public class DingtalkUserHandler {
 
     @ServiceActivator(inputChannel = "dingtalkUserOutputChannel")
     public void syncUser(@Payload OapiV2UserGetResponse.UserGetResponse dingTalkUser) {
-
         LoginUser loginUser = new LoginUser();
         loginUser.setId(ADMIN_USER_ID);
         loginUser.setUserType(UserTypeEnum.ADMIN.getValue());
@@ -47,12 +49,26 @@ public class DingtalkUserHandler {
             if (erpUser.getId() != null) {
                 adminUserApi.updateUser(erpUser);
             } else {
+                this.fillDefaultPassword(erpUser);
                 adminUserApi.createUser(erpUser);
             }
+        } catch (Exception e) {
+            log.error("dingding syncUser:{}\n", JSONUtil.toJsonStr(dingTalkUser), e);
         } finally {
             TenantContextHolder.clear();
         }
 
 
+    }
+
+    private void fillDefaultPassword(AdminUserSaveReqDTO erpUser) {
+        String password = erpUser.getPassword();
+        String mobile = erpUser.getMobile();
+        if (StrUtil.isBlank(password)) {
+            //随机密码 or 截取手机号后6位作为密码
+            password = StrUtil.isBlank(mobile) ?
+                RandomUtil.randomString(6) : mobile.substring(mobile.length() - 6);
+            erpUser.setPassword(password);
+        }
     }
 }
