@@ -118,5 +118,19 @@ public class ExcelUtils {
         response.setContentType("application/vnd.ms-excel;charset=UTF-8");
     }
 
+    public static <T> ExcelWriterSheetBuilder buildExcelWriterSheetBuilder(Integer sheetNo,
+                                                                           String sheetName,
+                                                                           Class<T> head,
+                                                                           List<T> data) {
+        ZoneId userZoneId = ServletUtils.getTimeZoneId().orElse(TimeZone.getDefault().toZoneId());
+        // 输出 Excel
+        ExcelWriterSheetBuilder builder = EasyExcel.writerSheet(sheetNo, sheetName)
+            .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
+            .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
+            .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
+            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
+            .registerWriteHandler(new CellMergeStrategy(head, data.size()));
+        return builder;
+    }
 
 }
