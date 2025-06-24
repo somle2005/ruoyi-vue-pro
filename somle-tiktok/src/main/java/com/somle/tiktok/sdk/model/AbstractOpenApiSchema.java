@@ -19,7 +19,6 @@ import java.util.Objects;
 /**
  * Abstract class for oneOf,anyOf schemas defined in OpenAPI spec
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
 public abstract class AbstractOpenApiSchema {
 
     // schema type (e.g. oneOf, anyOf)

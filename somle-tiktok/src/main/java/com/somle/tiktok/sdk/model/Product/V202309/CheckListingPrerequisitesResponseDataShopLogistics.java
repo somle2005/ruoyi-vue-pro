@@ -29,7 +29,7 @@ import java.util.Set;
 /**
  * CheckListingPrerequisitesResponseDataShopLogistics
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+
 public class CheckListingPrerequisitesResponseDataShopLogistics {
     public static final String SERIALIZED_NAME_DELIVERY_OPTION = "delivery_option";
     public static final String SERIALIZED_NAME_PICKUP_WAREHOUSE = "pickup_warehouse";

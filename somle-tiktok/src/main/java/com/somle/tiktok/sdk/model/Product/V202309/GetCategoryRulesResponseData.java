@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * GetCategoryRulesResponseData
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+
 public class GetCategoryRulesResponseData {
     public static final String SERIALIZED_NAME_ALLOWED_SPECIAL_PRODUCT_TYPES = "allowed_special_product_types";
     public static final String SERIALIZED_NAME_COD = "cod";

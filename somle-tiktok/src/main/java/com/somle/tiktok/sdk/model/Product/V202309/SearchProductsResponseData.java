@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * SearchProductsResponseData
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+
 public class SearchProductsResponseData {
     public static final String SERIALIZED_NAME_NEXT_PAGE_TOKEN = "next_page_token";
     public static final String SERIALIZED_NAME_PRODUCTS = "products";

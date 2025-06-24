@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * GetOrderDetailResponseDataOrders
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+ 
 public class GetOrderDetailResponseDataOrders {
     public static final String SERIALIZED_NAME_AUTO_COMBINE_GROUP_ID = "auto_combine_group_id";
     public static final String SERIALIZED_NAME_BUYER_EMAIL = "buyer_email";

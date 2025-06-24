@@ -29,7 +29,7 @@ import java.util.Set;
 /**
  * PartialEditProductRequestBodySkusPreSaleFulfillmentType
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+
 public class PartialEditProductRequestBodySkusPreSaleFulfillmentType {
     public static final String SERIALIZED_NAME_HANDLING_DURATION_DAYS = "handling_duration_days";
     public static final String SERIALIZED_NAME_RELEASE_DATE = "release_date";

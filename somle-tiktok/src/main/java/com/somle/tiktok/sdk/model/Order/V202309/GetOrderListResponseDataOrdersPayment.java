@@ -30,7 +30,7 @@ import java.util.Set;
 /**
  * GetOrderListResponseDataOrdersPayment
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+ 
 public class GetOrderListResponseDataOrdersPayment {
     public static final String SERIALIZED_NAME_BUYER_SERVICE_FEE = "buyer_service_fee";
     public static final String SERIALIZED_NAME_CURRENCY = "currency";

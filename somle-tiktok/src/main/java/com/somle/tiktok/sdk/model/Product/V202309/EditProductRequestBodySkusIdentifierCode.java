@@ -29,7 +29,7 @@ import java.util.Set;
 /**
  * EditProductRequestBodySkusIdentifierCode
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+ 
 public class EditProductRequestBodySkusIdentifierCode {
     public static final String SERIALIZED_NAME_CODE = "code";
     public static final String SERIALIZED_NAME_TYPE = "type";

@@ -13,11 +13,6 @@
     <artifactId>somle-wayfair</artifactId>
 
     <dependencies>
-        <!--        <dependency>-->
-        <!--            <groupId>cn.iocoder.boot</groupId>-->
-        <!--            <artifactId>yudao-common</artifactId>-->
-        <!--        </dependency>-->
-
 
         <dependency>
             <groupId>cn.iocoder.boot</groupId>
@@ -43,12 +38,6 @@
             <groupId>org.mountcloud</groupId>
             <artifactId>graphql-client</artifactId>
         </dependency>
-
-        <!--        <dependency>-->
-        <!--            <groupId>org.springframework.boot</groupId>-->
-        <!--            <artifactId>spring-boot-starter-integration</artifactId>-->
-        <!--        </dependency>-->
-
     </dependencies>
 
 </project>

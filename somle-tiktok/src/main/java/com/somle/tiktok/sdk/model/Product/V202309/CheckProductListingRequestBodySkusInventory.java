@@ -29,7 +29,7 @@ import java.util.Set;
 /**
  * CheckProductListingRequestBodySkusInventory
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+
 public class CheckProductListingRequestBodySkusInventory {
     public static final String SERIALIZED_NAME_QUANTITY = "quantity";
     public static final String SERIALIZED_NAME_WAREHOUSE_ID = "warehouse_id";

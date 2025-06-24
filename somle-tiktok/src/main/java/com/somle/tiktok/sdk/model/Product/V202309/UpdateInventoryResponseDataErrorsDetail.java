@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * UpdateInventoryResponseDataErrorsDetail
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+ 
 public class UpdateInventoryResponseDataErrorsDetail {
     public static final String SERIALIZED_NAME_EXTRA_ERRORS = "extra_errors";
     public static final String SERIALIZED_NAME_SKU_ID = "sku_id";

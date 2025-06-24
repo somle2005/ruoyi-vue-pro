@@ -27,7 +27,7 @@ import java.util.*;
 /**
  * GetOrderListRequestBody
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+ 
 public class GetOrderListRequestBody {
     public static final String SERIALIZED_NAME_BUYER_USER_ID = "buyer_user_id";
     public static final String SERIALIZED_NAME_CREATE_TIME_GE = "create_time_ge";

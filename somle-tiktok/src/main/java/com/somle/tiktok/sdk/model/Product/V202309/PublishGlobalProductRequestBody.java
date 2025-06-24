@@ -26,7 +26,7 @@ import java.util.*;
 /**
  * PublishGlobalProductRequestBody
  */
-@javax.annotation.Generated(value = "org.openapitools.codegen.languages.JavaClientCodegen", date = "2025-05-12T06:25:14.052506Z[Etc/UTC]", comments = "Generator version: 7.6.0")
+ 
 public class PublishGlobalProductRequestBody {
     public static final String SERIALIZED_NAME_PUBLISH_TARGET = "publish_target";
     public static HashSet<String> openapiFields;
