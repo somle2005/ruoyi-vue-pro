@@ -25,21 +25,21 @@ public class OverstockOrderResVO {
         @Alias("ns2:warehouseName")
         List<Code> warehouseName;
 
-        @Alias("retailOrderNumber")
+        @Alias("ns2:retailOrderNumber")
         private String retailOrderNumber;
-        @Alias("retailChannelCode")
+        @Alias("ns2:retailChannelCode")
         private String retailChannelCode;
         @Alias("ns2:sofsCreatedDate")
         private LocalDateTime sofsCreatedDate;
         @Alias("ns2:orderDate")
         private LocalDateTime orderDate;
-        @Alias("orderId")
+        @Alias("ns2:orderId")
         private String orderId;
 
         @Alias("ns2:salesChannelName")
         private String salesChannelName;
 
-        @Alias("processedSalesOrderLine")
+        @Alias("ns2:processedSalesOrderLine")
         private List<ProcessedSalesOrderLinetInfo> processedSalesOrderLine;
 
         @Alias("ns2:branding")
@@ -48,10 +48,10 @@ public class OverstockOrderResVO {
         @Alias("ns2:shippingSpecifications")
         private List<ShippingSpecificationsInfo> shippingSpecifications;
 
-        @Alias("retailerOrderCode")
+        @Alias("ns2:retailerOrderCode")
         private String retailerOrderCode;
 
-        @Alias("actionRequired")
+        @Alias("ns2:actionRequired")
         private boolean actionRequired;
         @Alias("ns2:salesChannelOrderNumber")
         private String salesChannelOrderNumber;
@@ -60,7 +60,7 @@ public class OverstockOrderResVO {
         private String orderFulfillment;
 
 
-        @Alias("status")
+        @Alias("ns2:status")
         private String status;
 
         @Alias("ns2:shipToAddress")
@@ -103,7 +103,7 @@ public class OverstockOrderResVO {
         @Data
         public static class ProcessedSalesOrderLinetInfo {
 
-            @Alias("additionalShippingCost")
+            @Alias("ns2:additionalShippingCost")
             private String additionalShippingCost;
 
             @Alias("ns2:salesChannelLineNumber")
@@ -112,46 +112,46 @@ public class OverstockOrderResVO {
             @Alias("ns2:salesChannelUneld")
             private String salesChannelUneld;
 
-            @Alias("firstCostCurrencyCode")
+            @Alias("ns2:firstCostCurrencyCode")
             private String firstCostCurrencyCode;
 
-            @Alias("lineId")
+            @Alias("ns2:lineId")
             private String lineId;
 
             @Alias("ns2:quantity")
             private String quantity;
 
-            @Alias("ns2.partnerSKU")
+            @Alias("ns2:partnerSKU")
             private String partnerSKU;
 
-            @Alias("lineStatus")
+            @Alias("ns2:lineStatus")
             private String lineStatus;
 
-            @Alias("ns2.barcode")
+            @Alias("ns2:barcode")
             private String barcode;
 
-            @Alias("itemId")
+            @Alias("ns2:itemId")
             private String itemId;
 
-            @Alias("itemName")
+            @Alias("ns2:itemName")
             private String itemName;
 
-            @Alias("unitCostCurrencyCode")
+            @Alias("ns2:unitCostCurrencyCode")
             private String unitCostCurrencyCode;
 
-            @Alias("unitCost")
+            @Alias("ns2:unitCost")
             private String unitCost;
 
-            @Alias("additionalShippingCostCurrencyCode")
+            @Alias("ns2:additionalShippingCostCurrencyCode")
             private String additionalShippingCostCurrencyCode;
 
-            @Alias("firstCost")
+            @Alias("ns2:firstCost")
             private String firstCost;
 
-            @Alias("ns2.upc")
+            @Alias("ns2:upc")
             private String upc;
 
-            @Alias("ns2.itemPrice")
+            @Alias("ns2:itemPrice")
             private String itemPrice;
 
             @Alias("ns2:salesChannelSKU")
