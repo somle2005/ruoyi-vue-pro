@@ -9,10 +9,8 @@ import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnBaseRespVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnSaveReqVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.*;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.convert.SrmPurchaseReturnExportConvert;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
@@ -113,8 +111,9 @@ public class SrmPurchaseReturnController {
                                           HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<SrmPurchaseReturnBO> page = purchaseReturnService.getPurchaseReturnBOPage(pageReqVO);
-        // 导出 Excel
-        ExcelUtils.write(response, "采购退货.xls", "数据", SrmPurchaseReturnBaseRespVO.class, bindResult(page.getList()));
+        List<SrmPurchaseReturnBaseRespVO> list = bindResult(page.getList());
+        List<SrmPurchaseReturnExcelRespVO> excelList = SrmPurchaseReturnExportConvert.buildExcelList(list);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "采购退货.xls", "采购退货", SrmPurchaseReturnExcelRespVO.class, excelList);
     }
 
     //提交审核

@@ -23,6 +23,7 @@ public class SrmSupplierProductRespVO {
     @Schema(description = "供应商编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "29689")
     @ExcelProperty("供应商编号")
     private Long supplierId;
+
     @Schema(description = "供应商名称", example = "芋道")
     @ExcelProperty("供应商名称")
     private String supplierName;
@@ -30,6 +31,7 @@ public class SrmSupplierProductRespVO {
     @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "26097")
     @ExcelProperty("产品编号")
     private Long productId;
+
     @Schema(description = "产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "巧克力")
     @ExcelProperty("产品名称")
     private String productName;
@@ -50,7 +52,7 @@ public class SrmSupplierProductRespVO {
     @ExcelProperty("包装宽度")
     private Double packageWidth;
 
-    @Schema(description = "采购价格", example = "25304")
+    @Schema(description = "采购价格")
     @ExcelProperty("采购价格")
     private Double purchasePrice;
 

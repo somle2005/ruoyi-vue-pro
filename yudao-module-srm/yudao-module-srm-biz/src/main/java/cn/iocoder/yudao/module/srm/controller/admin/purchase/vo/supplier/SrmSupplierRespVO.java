@@ -93,6 +93,7 @@ public class SrmSupplierRespVO {
     private Long paymentTermsId;
 
     @Schema(description = "付款条款中文")
+    @ExcelProperty(value = "付款条款", index = 17)
     private String paymentTerms;
 
     @Schema(description = "付款条款")

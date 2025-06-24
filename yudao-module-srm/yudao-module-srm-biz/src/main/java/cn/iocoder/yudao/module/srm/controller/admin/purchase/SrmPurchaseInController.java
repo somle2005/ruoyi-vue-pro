@@ -11,6 +11,8 @@ import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.SrmPurchaseInBaseRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.SrmPurchaseInExcelRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.convert.SrmPurchaseInExportConvert;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.*;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
@@ -116,10 +118,9 @@ public class SrmPurchaseInController {
     public void exportPurchaseInExcel(@Valid SrmPurchaseInPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<SrmPurchaseInBO> page = purchaseInService.getPurchaseInBOPage(pageReqVO);
-        // 导出 Excel
-        ExcelUtils.write(response, "采购到货.xls", "数据", SrmPurchaseInBaseRespVO.class, bindList(page.getList()));
-//        ExcelUtils.write(response, "采购到货.xls", "数据", SrmPurchaseInBaseRespVO.class, bindList(page.getList())
-//                , Lists.newArrayList(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, TimeZoneEnum.UTC8_ZONE_ID)));
+        List<SrmPurchaseInBaseRespVO> list = bindList(page.getList());
+        List<SrmPurchaseInExcelRespVO> excelList = SrmPurchaseInExportConvert.buildExcelList(list);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "采购到货.xls", "采购到货", SrmPurchaseInExcelRespVO.class, excelList);
     }
 
     @PutMapping("/submitAudit")

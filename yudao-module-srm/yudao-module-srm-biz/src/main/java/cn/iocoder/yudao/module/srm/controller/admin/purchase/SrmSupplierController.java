@@ -8,9 +8,11 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupplierExcelRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupplierPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupplierRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupplierSaveReqVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.convert.SrmSupplierExportConvert;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -23,7 +25,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -97,13 +98,11 @@ public class SrmSupplierController {
     @Operation(summary = "导出供应商 Excel")
     @PreAuthorize("@ss.hasPermission('srm:supplier:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportSupplierExcel(@Valid SrmSupplierPageReqVO pageReqVO,
-                                    HttpServletResponse response) throws IOException {
+    public void exportSupplierExcel(@Valid SrmSupplierPageReqVO pageReqVO, HttpServletResponse response) throws Exception {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<SrmSupplierDO> list = supplierService.getSupplierPage(pageReqVO).getList();
-        // 导出 Excel
-        ExcelUtils.write(response, "供应商.xls", "数据", SrmSupplierRespVO.class,
-            BeanUtils.toBean(list, SrmSupplierRespVO.class));
+        CommonResult<PageResult<SrmSupplierRespVO>> supplierPage = this.getSupplierPage(pageReqVO);
+        List<SrmSupplierExcelRespVO> excelList = SrmSupplierExportConvert.buildExcelList(supplierPage.getData().getList());
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "供应商.xls", "供应商", SrmSupplierExcelRespVO.class, excelList);
     }
 
 }
