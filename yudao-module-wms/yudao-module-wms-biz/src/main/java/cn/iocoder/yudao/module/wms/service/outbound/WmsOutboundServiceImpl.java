@@ -538,7 +538,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         List<Long> purchaseOrderIds = StreamX.from(list).toList(WmsOutboundRespVO::getUpstreamId);
         List<SrmPurchaseInDTO> purchaseInList = srmPurchaseInApi.getPurchaseInList(purchaseOrderIds);
         //把purchaseInList当中的purchaseOrderCode组装到list当中
-        Map<Long, String> purchaseOrderCodeMap = StreamX.from(purchaseInList).toMap(SrmPurchaseInDTO::getId, SrmPurchaseInDTO::getOrderNo);
+        Map<Long, String> purchaseOrderCodeMap = StreamX.from(purchaseInList).toMap(SrmPurchaseInDTO::getId, SrmPurchaseInDTO::getCode);
         StreamX.from(list).forEach(outboundVO -> {
             Long upstreamId = outboundVO.getUpstreamId();
             if (purchaseOrderCodeMap.containsKey(upstreamId)) {
@@ -546,7 +546,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
             }
         });
         //把purchaseInList当中的purchaseOrderId组装到list当中
-        Map<Long, Long> purchaseOrderIdMap = StreamX.from(purchaseInList).toMap(SrmPurchaseInDTO::getId, SrmPurchaseInDTO::getOrderId);
+        Map<Long, Long> purchaseOrderIdMap = StreamX.from(purchaseInList).toMap(SrmPurchaseInDTO::getId, SrmPurchaseInDTO::getId);
         StreamX.from(list).forEach(outboundVO -> {
             Long upstreamId = outboundVO.getUpstreamId();
             if (purchaseOrderIdMap.containsKey(upstreamId)) {

@@ -133,7 +133,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         }
 
         // 从指定仓位出库：未指定出库的批次库存，但指定了仓位
-        List<WmsInboundItemDO> itemsList=inboundItemService.selectItemListHasAvailableQty(warehouseId,productId);
+        List<WmsInboundItemDO> itemsList = inboundItemService.selectItemListHasAvailableQty(warehouseId, productId, TRUE);
         if(CollectionUtils.isEmpty(itemsList)) {
             throw exception(INBOUND_ITEM_PRODUCT_NOT_EXISTS, productId);
         }
