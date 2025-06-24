@@ -15,6 +15,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductUnitApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductUnitDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.*;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestExcelRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestItemRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestRespVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
@@ -167,8 +168,35 @@ public class SrmPurchaseRequestController {
     public void exportPurchaseRequestExcel(@Valid SrmPurchaseRequestPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<SrmPurchaseRequestRespVO> list = bindList(srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO).getList());
+        // 转换为Excel导出VO
+        List<SrmPurchaseRequestExcelRespVO> excelList = buildExcelList(list);
         // 导出 Excel
-        ExcelUtils.write(response, "ERP采购申请单.xls", "数据", SrmPurchaseRequestRespVO.class, list);
+        ExcelUtils.write(response, "ERP采购申请单.xls", "SRM采购申请单", SrmPurchaseRequestExcelRespVO.class, excelList);
+    }
+
+    /**
+     * 构建导出Excel的VO列表（主表+子表扁平化）
+     */
+    private List<SrmPurchaseRequestExcelRespVO> buildExcelList(List<SrmPurchaseRequestRespVO> list) {
+        if (CollUtil.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        List<SrmPurchaseRequestExcelRespVO> result = new ArrayList<>();
+        for (SrmPurchaseRequestRespVO main : list) {
+            if (CollUtil.isEmpty(main.getItems())) {
+                // 没有明细也导出主表信息
+                result.add(BeanUtils.toBean(main, SrmPurchaseRequestExcelRespVO.class));
+            } else {
+                for (SrmPurchaseRequestItemRespVO item : main.getItems()) {
+                    // 先复制主表字段
+                    SrmPurchaseRequestExcelRespVO vo = BeanUtils.toBean(main, SrmPurchaseRequestExcelRespVO.class);
+                    // 再复制子表字段（会覆盖重复字段）
+                    BeanUtils.copyProperties(item, vo);
+                    result.add(vo);
+                }
+            }
+        }
+        return result;
     }
 
     private List<SrmPurchaseRequestRespVO> bindList(List<SrmPurchaseRequestBO> oldList) {
