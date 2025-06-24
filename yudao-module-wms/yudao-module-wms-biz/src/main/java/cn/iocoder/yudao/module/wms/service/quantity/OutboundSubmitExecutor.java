@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
@@ -18,9 +19,11 @@ import org.springframework.stereotype.Component;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static java.lang.Boolean.TRUE;
 
 /**
  * @author: LeeFJ
@@ -36,8 +39,8 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
     }
 
     @Override
-    protected Integer getExecuteQty(WmsOutboundItemRespVO item) {
-        return item.getPlanQty();
+    protected Integer getExecuteQty(WmsOutboundItemRespVO item, WmsInboundItemLogicDO batch) {
+        return Math.min(item.getPlanQty(), batch.getOutboundAvailableQty());
     }
 
     /**
@@ -46,8 +49,6 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
     @Override
     protected WmsStockFlowDirection updateStockWarehouseQty(WmsStockWarehouseDO stockWarehouseDO, WmsOutboundItemRespVO item, Integer quantity) {
 
-        // 可用量
-        // stockWarehouseDO.setAvailableQty(stockWarehouseDO.getAvailableQty() - quantity);
         // 可售量
         stockWarehouseDO.setSellableQty(stockWarehouseDO.getSellableQty() - quantity);
         if ((stockWarehouseDO.getAvailableQty() - quantity) < 0) {
@@ -68,7 +69,6 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
 
         Long actionId = IdUtil.getSnowflakeNextId();
         outboundRespVO.setLatestOutboundActionId(actionId);
-
 //        if (item.getInboundItemId() != null) {
 //            // 指定从批次库存出库：此时指定了出库的库存批次，但未指定仓位
 //            processInboundItemForInbound(outboundRespVO, item,actionId,companyId, deptId, warehouseId, binId, productId, quantity, outboundId, outboundItemId);
@@ -133,7 +133,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         }
 
         // 从指定仓位出库：未指定出库的批次库存，但指定了仓位
-        List<WmsInboundItemDO> itemsList=inboundItemService.selectItemListHasAvailableQty(warehouseId,productId);
+        List<WmsInboundItemDO> itemsList = inboundItemService.selectItemListHasAvailableQty(warehouseId, productId, companyId, deptId, TRUE);
         if(CollectionUtils.isEmpty(itemsList)) {
             throw exception(INBOUND_ITEM_PRODUCT_NOT_EXISTS, productId);
         }
@@ -155,9 +155,9 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
             Integer available = itemDO.getOutboundAvailableQty();
             Integer flowQty = 0;
             // 需要多次扣除
-            if (available > quantity) {
-                flowQty = quantity;
-                available = available - flowQty;
+            if (available < quantity) {
+                flowQty = available;
+                available = 0;
                 itemDO.setOutboundAvailableQty(available);
                 itemsToUpdate.add(itemDO);
                 //
@@ -178,7 +178,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setShelveClosedQty(itemDO.getShelveClosedQty());
 
                 itemFlowList.add(flowDO);
-
+                quantity = quantity - flowQty;
             } else if (available.equals(quantity)) {
                 // 刚好单次扣除
                 flowQty = available;
@@ -204,7 +204,6 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setShelveClosedQty(itemDO.getShelveClosedQty());
 
                 itemFlowList.add(flowDO);
-
                 break;
             } else { // 单次扣除
                 flowQty = quantity;
@@ -230,7 +229,6 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 flowDO.setShelveClosedQty(itemDO.getShelveClosedQty());
 
                 itemFlowList.add(flowDO);
-
                 break;
             }
         }
@@ -247,10 +245,10 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
      **/
     @Override
     protected WmsStockFlowDirection updateStockLogicQty(WmsStockLogicDO stockLogicDO, WmsOutboundItemRespVO item, Integer quantity) {
-        // 可用量
-        // stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty()-quantity);
         // 待出库量
-        stockLogicDO.setOutboundPendingQty(stockLogicDO.getOutboundPendingQty() + quantity);
+        stockLogicDO.setOutboundPendingQty(Math.min(stockLogicDO.getAvailableQty(), quantity));
+        // 可用量
+        stockLogicDO.setAvailableQty(Math.max(stockLogicDO.getAvailableQty() - quantity, 0));
 
         return WmsStockFlowDirection.OUT;
     }
@@ -302,5 +300,13 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         }
         outboundRespVO.setOutboundStatus(WmsOutboundStatus.NONE.getValue());
         outboundRespVO.setOutboundTime(LocalDateTime.now());
+    }
+
+    @Override
+    protected void validateData(WmsOutboundItemRespVO item, Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap) {
+        //如果可用库存总量小于计划出库数，则抛异常
+        if (deptIdCompanyIdMap.values().stream().mapToInt(WmsInboundItemLogicDO::getOutboundAvailableQty).sum() < item.getPlanQty()) {
+            throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
+        }
     }
 }

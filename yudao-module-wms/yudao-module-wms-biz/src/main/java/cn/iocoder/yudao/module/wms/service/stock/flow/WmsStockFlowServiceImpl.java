@@ -479,6 +479,10 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         for (WmsStockFlowRespVO binRespVO : binFlowList) {
             // 找到流水对应的仓位库存记录
             WmsStockBinDO stockBinDO = stockBinDOMap.get(binRespVO.getStockId());
+            //当入库单创建，货物尚未上架时，可能报空指针
+            if (stockBinDO == null) {
+                continue;
+            }
             // 通过仓位库存记录找到对应的仓位
             WmsWarehouseBinRespVO binVO = binVOMap.get(stockBinDO.getBinId());
             // 设置仓位
@@ -619,7 +623,7 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         List<Long> stockLogicIds = StreamX.from(logicFlowList).toList(WmsStockFlowRespVO::getStockId).stream().distinct().toList();
         // 查询到对应的逻辑库存记录
         List<WmsStockLogicDO> stockLogicDOList = stockLogicService.selectByIds(stockLogicIds);
-        Map<Long, WmsStockLogicDO> logicDOMap = StreamX.from(stockLogicDOList).toMap(WmsStockLogicDO::getId);
+        Map<Long, WmsStockLogicDO> logicDoMap = StreamX.from(stockLogicDOList).toMap(WmsStockLogicDO::getId);
         Set<Long> companyIds = StreamX.from(stockLogicDOList).toSet(WmsStockLogicDO::getCompanyId);
         List<Long> deptIds = StreamX.from(stockLogicDOList).toList(WmsStockLogicDO::getDeptId);
         // 查询到部门记录
@@ -629,7 +633,11 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         // 循环库位的动账流水
         for (WmsStockFlowRespVO logicRespVO : logicFlowList) {
             // 找到流水对应的逻辑库存记录
-            WmsStockLogicDO stockLogicDO = logicDOMap.get(logicRespVO.getStockId());
+            WmsStockLogicDO stockLogicDO = logicDoMap.get(logicRespVO.getStockId());
+            //当入库单创建，货物尚未上架时，可能报空指针
+            if (stockLogicDO == null) {
+                continue;
+            }
             // 通过逻辑库存记录找到对应的部门
             DeptSimpleRespVO deptVO = deptSimpleVOMap.get(stockLogicDO.getDeptId());
             // 设置部门

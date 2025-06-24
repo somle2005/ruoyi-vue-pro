@@ -280,8 +280,8 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
      * 按仓库id和商品id查询
      */
     @Override
-    public List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId, Boolean olderFirst) {
-        return inboundItemMapper.selectItemListHasAvailableQty(warehouseId, productId, olderFirst);
+    public List<WmsInboundItemDO> selectItemListHasAvailableQty(Long warehouseId, Long productId, Long companyId, Long deptId, Boolean olderFirst) {
+        return inboundItemMapper.selectItemListHasAvailableQty(warehouseId, productId, companyId, deptId, olderFirst);
     }
 
     /**

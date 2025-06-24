@@ -2,11 +2,7 @@ package cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item;
 
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableName;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.EqualsAndHashCode;
-import lombok.NoArgsConstructor;
-import lombok.ToString;
+import lombok.*;
 
 /**
  * 入库单详情 QueryDO
@@ -36,4 +32,9 @@ public class WmsInboundItemQueryDO extends WmsInboundItemDO {
      * 库龄
      */
     private Integer age;
+
+    /**
+     * 待出库数量
+     */
+    private Integer outboundPendingQty;
 }

@@ -523,12 +523,13 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      *
      * @param warehouseId 仓库id
      * @param productId   产品id
+     * @param companyId   公司id
      * @param olderFirst  是否按入库时间升序
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, boolean olderFirst) {
-        return inboundItemLogicQueryMapper.getInboundItemLogicList(warehouseId, productId, deptId, olderFirst);
+    public List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, boolean olderFirst) {
+        return inboundItemLogicQueryMapper.getInboundItemLogicList(warehouseId, productId, deptId, companyId, olderFirst);
     }
 
     /**

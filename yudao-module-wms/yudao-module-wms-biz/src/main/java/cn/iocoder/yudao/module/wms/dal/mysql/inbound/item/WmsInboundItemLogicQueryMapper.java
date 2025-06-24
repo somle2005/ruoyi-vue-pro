@@ -116,16 +116,18 @@ public interface WmsInboundItemLogicQueryMapper extends BaseMapperX<WmsInboundIt
      *
      * @param warehouseId 仓库编号
      * @param productId   产品编号
+     * @param companyId   公司编号
      * @param olderFirst  是否按入库时间升序
      * @return 入库批次列表
      */
-    default List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, boolean olderFirst) {
+    default List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, boolean olderFirst) {
         // 主表
         MPJLambdaWrapperX<WmsInboundItemLogicDO> wrapper = new MPJLambdaWrapperX();
         // 主表条件
         wrapper.eq(WmsInboundItemQueryDO::getProductId, productId)
             .in(WmsInboundItemQueryDO::getInboundStatus, WmsInboundStatus.ALL.getValue(), WmsInboundStatus.PART.getValue())
             .eqIfExists(WmsInboundItemQueryDO::getDeptId, deptId)
+            .eqIfExists(WmsInboundItemQueryDO::getCompanyId, companyId)
         ;
         // 查询主表字段
         wrapper.select(WmsInboundItemDO::getProductId);
@@ -142,7 +144,7 @@ public interface WmsInboundItemLogicQueryMapper extends BaseMapperX<WmsInboundIt
 
         wrapper.innerJoin(WmsStockBinDO.class, WmsStockBinDO::getWarehouseId, WmsInboundDO::getWarehouseId).
             eq(WmsStockBinDO::getProductId, productId).
-            gt(WmsStockBinDO::getSellableQty, 0).
+            ge(WmsStockBinDO::getSellableQty, 0).
             select(WmsStockBinDO::getBinId).
             select(WmsStockBinDO::getSellableQty);
 

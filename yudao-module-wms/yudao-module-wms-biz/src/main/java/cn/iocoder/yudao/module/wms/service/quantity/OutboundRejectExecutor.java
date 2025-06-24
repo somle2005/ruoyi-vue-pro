@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
@@ -61,7 +62,7 @@ public class OutboundRejectExecutor extends OutboundExecutor {
 
 
     @Override
-    protected Integer getExecuteQty(WmsOutboundItemRespVO item) {
+    protected Integer getExecuteQty(WmsOutboundItemRespVO item, WmsInboundItemLogicDO batch) {
         return item.getPlanQty();
     }
 
@@ -121,7 +122,7 @@ public class OutboundRejectExecutor extends OutboundExecutor {
     @Override
     protected WmsStockFlowDirection updateStockLogicQty(WmsStockLogicDO stockLogicDO, WmsOutboundItemRespVO item, Integer quantity) {
         // 可用量
-        // stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() + quantity);
+        stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() + quantity);
         // 待出库量
         stockLogicDO.setOutboundPendingQty(stockLogicDO.getOutboundPendingQty() - quantity);
 //        if (stockLogicDO.getOutboundPendingQty() < 0) {
@@ -164,6 +165,11 @@ public class OutboundRejectExecutor extends OutboundExecutor {
         }
         outboundRespVO.setOutboundStatus(WmsOutboundStatus.NONE.getValue());
         outboundRespVO.setOutboundTime(LocalDateTime.now());
+    }
+
+    @Override
+    protected void validateData(WmsOutboundItemRespVO item, Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap) {
+
     }
 
 }
