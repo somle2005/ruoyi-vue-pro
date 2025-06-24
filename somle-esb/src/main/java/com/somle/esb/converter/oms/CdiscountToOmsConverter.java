@@ -116,7 +116,10 @@ public class CdiscountToOmsConverter {
         List<OmsOrderSaveReqDTO> omsOrderSaveReqDTOs = new ArrayList<>();
         for (CdiscountOrderRespVO.Order order : orders) {
             OmsOrderSaveReqDTO omsOrderSaveReqDTO = new OmsOrderSaveReqDTO();
-            MapUtils.findAndThen(existOrderMap, order.getOrderId(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
+            MapUtils.findAndThen(existOrderMap, order.getOrderId(), omsOrderDTO -> {
+                omsOrderSaveReqDTO.setId(omsOrderDTO.getId());
+                omsOrderSaveReqDTO.setCode(omsOrderDTO.getCode());
+            });
             MapUtils.findAndThen(omsShopMap, cdiscountSellerRespVO.getSellerId().toString(), omsShopDTO -> omsOrderSaveReqDTO.setShopId(omsShopDTO.getId()));
             omsOrderSaveReqDTO.setPlatformCode(this.platform.toString());
             omsOrderSaveReqDTO.setExternalId(order.getOrderId());

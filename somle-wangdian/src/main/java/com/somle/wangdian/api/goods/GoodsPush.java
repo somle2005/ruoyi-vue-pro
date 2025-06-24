@@ -5,14 +5,14 @@ import java.util.HashMap;
 import java.util.Map;
 import com.alibaba.fastjson.JSON;
 
-import com.somle.wangdian.api.WdtClient;
+import com.somle.wangdian.service.WdtClient;
 
 public class GoodsPush {
 	
 	@SuppressWarnings("unchecked")
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		WdtClient client = new WdtClient("", "", "", "");
+		WdtClient client = new WdtClient("", "", "");
 
 		Map<String, Object>[] goods_list = new Map[1];
 		Map<String, Object>[] spec_list = new Map[2];

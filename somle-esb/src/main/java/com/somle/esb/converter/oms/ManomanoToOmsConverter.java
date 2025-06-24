@@ -117,7 +117,11 @@ public class ManomanoToOmsConverter {
         for (OrderQueryRepsVO.Order order : orders) {
             OmsOrderSaveReqDTO omsOrderSaveReqDTO = new OmsOrderSaveReqDTO();
 
-            MapUtils.findAndThen(existOrderMap, order.getSellerContractId().toString() + "#" + order.getOrderReference(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
+            MapUtils.findAndThen(existOrderMap, order.getSellerContractId().toString() + "#" + order.getOrderReference(),
+                omsOrderDTO -> {
+                omsOrderSaveReqDTO.setId(omsOrderDTO.getId());
+                omsOrderSaveReqDTO.setCode(omsOrderDTO.getCode());
+            });
             omsOrderSaveReqDTO.setPlatformCode(this.platform.toString());
             omsOrderSaveReqDTO.setExternalId(order.getSellerContractId().toString() + "#" + order.getOrderReference());
             omsOrderSaveReqDTO.setShopId(omsShopDTO.getId());

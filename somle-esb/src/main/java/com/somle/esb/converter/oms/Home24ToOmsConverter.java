@@ -89,7 +89,10 @@ public class Home24ToOmsConverter {
 
         for (Home24OrderResp.Order order : orders) {
             OmsOrderSaveReqDTO omsOrderSaveReqDTO = new OmsOrderSaveReqDTO();
-            MapUtils.findAndThen(existOrderMap, order.getCommercialId(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
+            MapUtils.findAndThen(existOrderMap, order.getCommercialId(), omsOrderDTO -> {
+                omsOrderSaveReqDTO.setId(omsOrderDTO.getId());
+                omsOrderSaveReqDTO.setCode(omsOrderDTO.getCode());
+            });
             omsOrderSaveReqDTO.setPlatformCode(this.platform.toString());
             omsOrderSaveReqDTO.setExternalId(order.getCommercialId());
             omsOrderSaveReqDTO.setShopId(omsShopDO.getId());

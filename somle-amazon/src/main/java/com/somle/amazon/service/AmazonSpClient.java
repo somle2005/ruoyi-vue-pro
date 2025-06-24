@@ -315,6 +315,19 @@ public class AmazonSpClient {
     }
 
     @SneakyThrows
+    public void getInvoicesDocument(String invoicesDocumentId) {
+        String documentUrl = getEndPoint() + "/tax/invoices/2024-06-19/documents/" + invoicesDocumentId;
+        var request = RequestX.builder()
+            .requestMethod(RequestX.Method.GET)
+            .url(documentUrl)
+            .headers(generateHeaders(auth))
+            .build();
+        var response = WebUtils.sendRequest(request);
+        String bodyString = response.body().string();
+        System.out.println(bodyString);
+    }
+
+    @SneakyThrows
     public String waitAndGetReportDocumentString(String reportId) {
         // Check report status and get document ID
         String status = null;

@@ -57,6 +57,9 @@
         <module>somle-lazada</module>
         <module>somle-tiktok</module>
         <module>somle-mediamarkt</module>
+        <module>somle-xiaoohongshu</module>
+        <module>somle-doudian</module>
+        <module>somle-overstock</module>
     </modules>
 
     <name>${project.artifactId}</name>
@@ -77,8 +80,6 @@
         <spring.boot.version>3.4.1</spring.boot.version>
         <mapstruct.version>1.6.3</mapstruct.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <graphql.java.tools.version>11.0.0</graphql.java.tools.version>
-        <graphql.client.version>1.2</graphql.client.version>
     </properties>
 
     <dependencyManagement>

@@ -7,13 +7,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.alibaba.fastjson.JSON;
-import com.somle.wangdian.api.WdtClient;
+import com.somle.wangdian.service.WdtClient;
 
 public class StockSyncByPD {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		WdtClient client = new WdtClient("", "", "", "");
+		WdtClient client = new WdtClient("", "", "");
 		
 		List<Map<String, Object>> goods_list = new ArrayList<Map<String, Object>>();
 		

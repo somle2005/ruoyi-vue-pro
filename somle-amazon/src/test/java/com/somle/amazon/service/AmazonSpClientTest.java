@@ -144,5 +144,10 @@ class AmazonSpClientTest extends SomleBaseSpringTest {
         log.info(listing.toString());
     }
 
+    @Test
+    void getInvoicesDocument() {
+        client.getInvoicesDocument("INV-ES-167778821-2024-663");
+    }
+
 
 }

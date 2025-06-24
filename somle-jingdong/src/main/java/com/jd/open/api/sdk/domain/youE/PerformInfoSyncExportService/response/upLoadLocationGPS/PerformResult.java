@@ -1,0 +1,40 @@
+package com.jd.open.api.sdk.domain.youE.PerformInfoSyncExportService.response.upLoadLocationGPS;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+
+public class PerformResult implements Serializable {
+   private String msg;
+   private boolean data;
+   private Integer resultCode;
+
+   @JsonProperty("msg")
+   public void setMsg(String msg) {
+      this.msg = msg;
+   }
+
+   @JsonProperty("msg")
+   public String getMsg() {
+      return this.msg;
+   }
+
+   @JsonProperty("data")
+   public void setData(boolean data) {
+      this.data = data;
+   }
+
+   @JsonProperty("data")
+   public boolean getData() {
+      return this.data;
+   }
+
+   @JsonProperty("resultCode")
+   public void setResultCode(Integer resultCode) {
+      this.resultCode = resultCode;
+   }
+
+   @JsonProperty("resultCode")
+   public Integer getResultCode() {
+      return this.resultCode;
+   }
+}

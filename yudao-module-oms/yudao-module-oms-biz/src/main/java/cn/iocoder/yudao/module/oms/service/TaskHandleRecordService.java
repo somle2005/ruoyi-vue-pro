@@ -17,7 +17,10 @@ import cn.iocoder.yudao.framework.common.pojo.PageParam;
  */
 public interface TaskHandleRecordService {
 
-
+    /**
+     * 创建任务信息
+     * @param taskTag  任务标识  handleParams  处理参数
+     */
     void createTask(String taskTag, List<String> handleParams);
 
     List<TaskHandleRecordDO> getHandleRecordByTaskTag(String taskTag);

@@ -22,7 +22,6 @@ import com.somle.tiktok.sdk.model.Product.V202309.SearchProductsResponseDataProd
 import lombok.Data;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
-import lombok.var;
 
 import java.io.IOException;
 import java.util.ArrayList;

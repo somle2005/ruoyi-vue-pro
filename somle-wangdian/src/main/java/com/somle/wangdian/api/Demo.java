@@ -1,5 +1,7 @@
 package com.somle.wangdian.api;
 
+import com.somle.wangdian.service.WdtClient;
+
 import java.io.IOException;
 import java.io.StringReader;
 import java.util.HashMap;
@@ -10,7 +12,7 @@ public class Demo {
 
 	public static void main(String[] args) {
         //sid appkey secret url
-		WdtClient client = new WdtClient("", "", "", "");
+		WdtClient client = new WdtClient("", "", "");
 
 
 		Map<String, String> params = new HashMap<String, String>();

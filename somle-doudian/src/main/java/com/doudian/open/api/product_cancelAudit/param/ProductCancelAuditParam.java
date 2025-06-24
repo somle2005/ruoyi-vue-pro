@@ -1,0 +1,32 @@
+package com.doudian.open.api.product_cancelAudit.param;
+
+import com.doudian.open.gson.annotations.SerializedName;
+import com.doudian.open.utils.JsonUtil;
+import com.doudian.open.annotation.OpField;
+
+//auto generated, do not edit
+
+public class ProductCancelAuditParam {
+
+
+	@SerializedName("product_id")
+	@OpField(required = true , desc = "商品ID", example= "3598620824355089373")
+	private Long productId;
+
+
+	@Override
+	public String toString(){
+		return JsonUtil.toJson(this);
+	}
+
+	
+	public void setProductId(Long productId){
+		this.productId = productId;
+	}
+
+	
+	public Long getProductId(){
+		return this.productId;
+	}
+
+}

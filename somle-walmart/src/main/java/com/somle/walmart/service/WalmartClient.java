@@ -50,7 +50,7 @@ public abstract class WalmartClient {
 
     public WalmartClient(WalmartToken token) {
         this.token = token;
-        this.accessToken = getAccessToken();
+//        this.accessToken = getAccessToken();
     }
 
     /**

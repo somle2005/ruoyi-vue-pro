@@ -80,7 +80,10 @@ public class WayfairToOmsConverter {
         List<OmsOrderSaveReqDTO> omsOrderSaveReqDTOs = new ArrayList<>();
         for (WayfairOrderRepsVO.DropshipPurchaseOrder order : orders) {
             OmsOrderSaveReqDTO omsOrderSaveReqDTO = new OmsOrderSaveReqDTO();
-            MapUtils.findAndThen(existOrderMap, order.getOrderId().toString() + "#" + order.getPoNumber(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
+            MapUtils.findAndThen(existOrderMap, order.getOrderId().toString() + "#" + order.getPoNumber(), omsOrderDTO -> {
+                omsOrderSaveReqDTO.setId(omsOrderDTO.getId());
+                omsOrderSaveReqDTO.setCode(omsOrderDTO.getCode());
+            });
             MapUtils.findAndThen(existShopMap, wayfairToken.getClientId(), omsShopDTO -> omsOrderSaveReqDTO.setShopId(omsShopDTO.getId()));
             omsOrderSaveReqDTO.setPlatformCode(this.platform.toString());
             omsOrderSaveReqDTO.setExternalId(order.getOrderId().toString() + "#" + order.getPoNumber());

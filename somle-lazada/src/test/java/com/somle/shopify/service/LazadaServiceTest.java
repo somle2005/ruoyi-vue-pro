@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.test.core.ut.SomleBaseDbUnitTest;
 import com.somle.lazada.sdk.api.LazopClient;
 import com.somle.lazada.sdk.api.LazopRequest;
 import com.somle.lazada.sdk.api.LazopResponse;
+import com.somle.lazada.service.LazadaService;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;

@@ -7,13 +7,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Properties;
 
-import com.somle.wangdian.api.WdtClient;
+import com.somle.wangdian.service.WdtClient;
 
 public class TradeQuery {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		WdtClient client = new WdtClient("", "", "", "");
+		WdtClient client = new WdtClient("", "", "");
 		
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("start_time", "2024-10-23 12:00:00");
@@ -34,7 +34,7 @@ public class TradeQuery {
 	}
 
 	public static void between(LocalDateTime startTime, LocalDateTime endTime) {
-		WdtClient client = new WdtClient("", "", "", "");
+		WdtClient client = new WdtClient("", "", "");
 
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("start_time", startTime.toString());

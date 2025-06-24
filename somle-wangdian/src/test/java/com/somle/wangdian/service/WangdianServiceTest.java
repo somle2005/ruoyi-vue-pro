@@ -33,9 +33,32 @@ class WangdianServiceTest extends SomleBaseDbUnitTest {
             .pageNo(0)
             .build();
 
-        var result = service.client.execute("trade_query.php", reqVO);
+        String result = String.valueOf(service.clients.get(0).execute("trade_query.php", reqVO));
 
         log.info(result.toString());
+    }
+
+    @Test
+    @SneakyThrows
+    public void test2() {
+       service.clients.get(0).getShopInfo();
+    }
+    @Test
+    @SneakyThrows
+    public void test3() {
+        service.clients.get(0).getAllProduct();
+    }
+
+    @Test
+    @SneakyThrows
+    public void test4() {
+//        LocalDateTime startTime = LocalDateTime.of(2024,11,7,8,0,0);
+//
+//        LocalDateTime endTime = LocalDateTime.of(2024,11,7,9,0,0);
+        LocalDateTime startTime = LocalDateTime.of(2024,11,7,5,0,0);
+
+        LocalDateTime endTime = LocalDateTime.of(2024,11,8,5,0,0);
+        service.clients.get(0).getAllOrder(startTime, endTime);
     }
 
 

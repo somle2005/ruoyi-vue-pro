@@ -23,6 +23,8 @@ public class WalmartDSVTaskProductionJob implements JobHandler {
 
     @Resource
     private WalmartService walmartService;
+
+    private final String  TASK_TAG = "DSV_SHOP_PRODUCT";
     @Override
     public String execute(String param) throws Exception {
         // 设置租户为默认租户
@@ -40,7 +42,7 @@ public class WalmartDSVTaskProductionJob implements JobHandler {
         List<WalmartAllProductsRepsVO.ItemResponseDTO> products = walmartClient.map(client -> client.getAllProducts(vo))
                 .orElseGet(() -> List.of());
         List<String> skus = products.stream().map(WalmartAllProductsRepsVO.ItemResponseDTO::getSku).distinct().toList();
-        taskHandlerRecordApi.createTask("DSV_SHOP_PRODUCT", skus);
+        taskHandlerRecordApi.createTask(TASK_TAG, skus);
         return "create task success!";
     }
 }

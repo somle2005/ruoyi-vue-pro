@@ -121,7 +121,10 @@ public class RakutenToOmsConverter {
 
         for (RakutenOrderRepsVO.OrderModel order : orders) {
             OmsOrderSaveReqDTO omsOrderSaveReqDTO = new OmsOrderSaveReqDTO();
-            MapUtils.findAndThen(existOrderMap, order.getOrderNumber(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
+            MapUtils.findAndThen(existOrderMap, order.getOrderNumber(), omsOrderDTO -> {
+                omsOrderSaveReqDTO.setId(omsOrderDTO.getId());
+                omsOrderSaveReqDTO.setCode(omsOrderDTO.getCode());
+            });
             omsOrderSaveReqDTO.setPlatformCode(this.platform.toString());
             omsOrderSaveReqDTO.setExternalId(order.getOrderNumber());
             omsOrderSaveReqDTO.setShopId(omsShopDTO.getId());

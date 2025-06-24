@@ -157,7 +157,7 @@ public class WalmartItemDetailResp {
         private Pallet pallet;
         private String publishedGTIN;
         private String palletSizeType;
-        private Double tradeItemNetWeight;
+//        private Double tradeItemNetWeight;
         private String isDEAReported;
         private String orderablePackWeightFormat;
         private Integer storeMinimumLifeRemainingToReceive;

@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.Rollback;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -32,6 +33,7 @@ class AmazonSpServiceTest extends SomleBaseSpringTest {
 //    }
 
     @Test
+    @Rollback(false)
     void refreshToken() {
         spService.refreshAuths();
     }
@@ -61,6 +63,11 @@ class AmazonSpServiceTest extends SomleBaseSpringTest {
                 .toList();
             log.info("{}", client.getProducts(marketplaceIds));
         });
+    }
+    @Test
+    void getOrders() {
+        AmazonSpClient amazonSpClient = spService.clients.get(2);
+        amazonSpClient.getInvoicesDocument("INV-ES-167778821-2024-663");
     }
 
 

@@ -214,8 +214,31 @@
             <artifactId>somle-mediamarkt</artifactId>
             <version>${revision}</version>
         </dependency>
-
-
+        <dependency>
+            <groupId>com.somle</groupId>
+            <artifactId>somle-jingdong</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.somle</groupId>
+            <artifactId>somle-xiaohongshu</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.somle</groupId>
+            <artifactId>somle-wangdian</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.somle</groupId>
+            <artifactId>somle-doudian</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.somle</groupId>
+            <artifactId>somle-overstock</artifactId>
+            <version>${revision}</version>
+        </dependency>
     </dependencies>
 
 

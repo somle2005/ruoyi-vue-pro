@@ -1,0 +1,19 @@
+package com.jd.open.api.sdk.response.seller;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jd.open.api.sdk.domain.seller.VenderShopCategoryJosService.response.findSubShopCategoriesByParentCid.JosResult;
+import com.jd.open.api.sdk.response.AbstractResponse;
+
+public class VenderShopcategoryFindSubShopCategoriesByParentCidResponse extends AbstractResponse {
+   private JosResult shopCategoryResult;
+
+   @JsonProperty("shopCategoryResult")
+   public void setShopCategoryResult(JosResult shopCategoryResult) {
+      this.shopCategoryResult = shopCategoryResult;
+   }
+
+   @JsonProperty("shopCategoryResult")
+   public JosResult getShopCategoryResult() {
+      return this.shopCategoryResult;
+   }
+}

@@ -1,0 +1,65 @@
+package com.jd.open.api.sdk.request.hudong;
+
+import com.jd.open.api.sdk.internal.util.JsonUtil;
+import com.jd.open.api.sdk.request.AbstractRequest;
+import com.jd.open.api.sdk.request.JdRequest;
+import com.jd.open.api.sdk.response.hudong.MarketToolCouponApiServiceCouponWriteOuterServiceCloseCouponResponse;
+import java.io.IOException;
+import java.util.Map;
+import java.util.TreeMap;
+
+public class MarketToolCouponApiServiceCouponWriteOuterServiceCloseCouponRequest extends AbstractRequest implements JdRequest<MarketToolCouponApiServiceCouponWriteOuterServiceCloseCouponResponse> {
+   private String couponId;
+   private String appName;
+   private String ip;
+   private String appId;
+
+   public void setCouponId(String couponId) {
+      this.couponId = couponId;
+   }
+
+   public String getCouponId() {
+      return this.couponId;
+   }
+
+   public void setAppName(String appName) {
+      this.appName = appName;
+   }
+
+   public String getAppName() {
+      return this.appName;
+   }
+
+   public void setIp(String ip) {
+      this.ip = ip;
+   }
+
+   public String getIp() {
+      return this.ip;
+   }
+
+   public void setAppId(String appId) {
+      this.appId = appId;
+   }
+
+   public String getAppId() {
+      return this.appId;
+   }
+
+   public String getApiMethod() {
+      return "jingdong.market.tool.coupon.api.service.CouponWriteOuterService.closeCoupon";
+   }
+
+   public String getAppJsonParams() throws IOException {
+      Map<String, Object> pmap = new TreeMap();
+      pmap.put("couponId", this.couponId);
+      pmap.put("appName", this.appName);
+      pmap.put("ip", this.ip);
+      pmap.put("appId", this.appId);
+      return JsonUtil.toJson(pmap);
+   }
+
+   public Class<MarketToolCouponApiServiceCouponWriteOuterServiceCloseCouponResponse> getResponseClass() {
+      return MarketToolCouponApiServiceCouponWriteOuterServiceCloseCouponResponse.class;
+   }
+}

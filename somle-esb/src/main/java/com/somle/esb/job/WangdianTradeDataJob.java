@@ -25,11 +25,11 @@ public class WangdianTradeDataJob extends WangdianDataJob{
                 .build();
 
             StreamX.iterate(
-                wangdianService.client.execute("trade_query.php", reqVO),
+                wangdianService.clients.get(0).execute("trade_query.php", reqVO),
                 response -> !response.getInteger("total_count").equals(0),
                 respoonse ->{
                     reqVO.setPageNo(reqVO.getPageNo() + 1);
-                    return wangdianService.client.execute("trade_query.php", reqVO);
+                    return wangdianService.clients.get(0).execute("trade_query.php", reqVO);
                 }
             ).forEach(page ->{
                 var data = OssData.builder()

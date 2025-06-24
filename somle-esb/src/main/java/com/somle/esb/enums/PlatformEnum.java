@@ -25,6 +25,8 @@ public enum PlatformEnum {
     DSV(true, null),
     HOME24(true, null),
     MEDIAMARKT(true, null),
+    XIAOHONGSHU(true, null),
+    DOUDIAN(true, null),
     SHOPEE(true, "https://www.shopee.com.my/");
 
 

@@ -92,10 +92,103 @@
         <!--   graphql语言相关依赖     -->
         <graphql.java.tools.version>11.0.0</graphql.java.tools.version>
         <graphql.client.version>1.2</graphql.client.version>
+        <!--   somle-tiktok相关依赖     -->
+        <jsr305.version>3.0.2</jsr305.version>
+        <okhttp-version>4.11.0</okhttp-version>
+        <gson-fire-version>1.9.0</gson-fire-version>
+        <commons-lang3-version>3.14.0</commons-lang3-version>
+        <jakarta-annotation-version>1.3.5</jakarta-annotation-version>
+        <jackson-databind-nullable-version>0.2.6</jackson-databind-nullable-version>
+        <jsr311-api-version>1.1.1</jsr311-api-version>
+        <javax.ws.rs-api-version>2.1.1</javax.ws.rs-api-version>
+        <!-- somle-wayfair相关依赖       -->
+        <graphql.java.tools.version>11.0.0</graphql.java.tools.version>
+        <graphql.client.version>1.2</graphql.client.version>
+        <!-- somle-xiaohongshu相关依赖       -->
+        <commons-collections-version>3.2.2</commons-collections-version>
+        <!-- somle-jingdong相关依赖       -->
+        <jackson-databind-version>2.14.2</jackson-databind-version>
+        <jackson-core-version>2.14.2</jackson-core-version>
+
     </properties>
 
     <dependencyManagement>
         <dependencies>
+            <!-- somle-jingdong相关依赖  -->
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-databind</artifactId>
+                <version>${jackson-databind-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.core</groupId>
+                <artifactId>jackson-core</artifactId>
+                <version>${jackson-core-version}</version>
+            </dependency>
+            <!-- somle-xiaohongshu相关依赖  -->
+            <dependency>
+                <groupId>commons-collections</groupId>
+                <artifactId>commons-collections</artifactId>
+                <version>${commons-collections-version}</version>
+            </dependency>
+
+            <!--    somle-wayfair相关依赖-->
+            <dependency>
+                <groupId>com.graphql-java-kickstart</groupId>
+                <artifactId>graphql-java-tools</artifactId>
+                <version>${graphql.java.tools.version}</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.mountcloud</groupId>
+                <artifactId>graphql-client</artifactId>
+                <version>${graphql.client.version}</version>
+            </dependency>
+
+
+            <!--   somle-tiktok相关依赖     -->
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>javax.ws.rs-api</artifactId>
+                <version>${javax.ws.rs-api-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>javax.ws.rs</groupId>
+                <artifactId>jsr311-api</artifactId>
+                <version>${jsr311-api-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.openapitools</groupId>
+                <artifactId>jackson-databind-nullable</artifactId>
+                <version>${jackson-databind-nullable-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>jakarta.annotation</groupId>
+                <artifactId>jakarta.annotation-api</artifactId>
+                <version>${jakarta-annotation-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.apache.commons</groupId>
+                <artifactId>commons-lang3</artifactId>
+                <version>${commons-lang3-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.code.findbugs</groupId>
+                <artifactId>jsr305</artifactId>
+                <version>${jsr305.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.squareup.okhttp3</groupId>
+                <artifactId>logging-interceptor</artifactId>
+                <version>${okhttp-version}</version>
+            </dependency>
+            <dependency>
+                <groupId>io.gsonfire</groupId>
+                <artifactId>gson-fire</artifactId>
+                <version>${gson-fire-version}</version>
+            </dependency>
+
+
             <!--索迈相关-->
 
             <!--            <dependency>-->

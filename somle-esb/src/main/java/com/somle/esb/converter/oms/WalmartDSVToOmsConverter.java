@@ -121,7 +121,12 @@ public class WalmartDSVToOmsConverter {
         List<OmsOrderSaveReqDTO> omsOrderSaveReqDTOs = new ArrayList<>();
         for (WalmartOrderResponse.Order order : orders) {
             OmsOrderSaveReqDTO omsOrderSaveReqDTO = new OmsOrderSaveReqDTO();
-            MapUtils.findAndThen(existOrderMap, order.getPurchaseOrderId() + "#" + order.getCustomerOrderId(), omsOrderDTO -> omsOrderSaveReqDTO.setId(omsOrderDTO.getId()));
+
+            MapUtils.findAndThen(existOrderMap, order.getPurchaseOrderId() + "#" + order.getCustomerOrderId(), omsOrderDTO -> {
+                omsOrderSaveReqDTO.setId(omsOrderDTO.getId());
+                omsOrderSaveReqDTO.setCode(omsOrderDTO.getCode());
+            });
+
             MapUtils.findAndThen(omsShopMap, walmartToken.getClientId(), omsShopDTO -> omsOrderSaveReqDTO.setShopId(omsShopDTO.getId()));
             omsOrderSaveReqDTO.setPlatformCode(this.platform.toString());
             omsOrderSaveReqDTO.setExternalId(order.getPurchaseOrderId() + "#" + order.getCustomerOrderId());

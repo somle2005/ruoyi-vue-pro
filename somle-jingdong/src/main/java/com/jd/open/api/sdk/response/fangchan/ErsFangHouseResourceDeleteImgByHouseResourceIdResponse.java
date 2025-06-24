@@ -1,0 +1,19 @@
+package com.jd.open.api.sdk.response.fangchan;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.jd.open.api.sdk.domain.fangchan.ImgSoaService.response.deleteImgByHouseResourceId.Result;
+import com.jd.open.api.sdk.response.AbstractResponse;
+
+public class ErsFangHouseResourceDeleteImgByHouseResourceIdResponse extends AbstractResponse {
+   private Result deletebyexternalidResult;
+
+   @JsonProperty("deletebyexternalid_result")
+   public void setDeletebyexternalidResult(Result deletebyexternalidResult) {
+      this.deletebyexternalidResult = deletebyexternalidResult;
+   }
+
+   @JsonProperty("deletebyexternalid_result")
+   public Result getDeletebyexternalidResult() {
+      return this.deletebyexternalidResult;
+   }
+}

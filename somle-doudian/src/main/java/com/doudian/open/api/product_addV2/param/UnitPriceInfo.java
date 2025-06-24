@@ -1,0 +1,46 @@
+package com.doudian.open.api.product_addV2.param;
+
+import com.doudian.open.gson.annotations.SerializedName;
+import com.doudian.open.utils.JsonUtil;
+import com.doudian.open.annotation.OpField;
+
+//auto generated, do not edit
+
+public class UnitPriceInfo {
+
+
+	@SerializedName("process_charge")
+	@OpField(required = true , desc = "如果传了unit_price_info字段，请请写死传0。内部不会消费，只是用于标识", example= "0")
+	private Long processCharge;
+
+	@SerializedName("price_rule_type")
+	@OpField(required = true , desc = "1表示投资金2表示首饰金", example= "1")
+	private Integer priceRuleType;
+
+
+	@Override
+	public String toString(){
+		return JsonUtil.toJson(this);
+	}
+
+	
+	public void setProcessCharge(Long processCharge){
+		this.processCharge = processCharge;
+	}
+
+	
+	public Long getProcessCharge(){
+		return this.processCharge;
+	}
+
+	
+	public void setPriceRuleType(Integer priceRuleType){
+		this.priceRuleType = priceRuleType;
+	}
+
+	
+	public Integer getPriceRuleType(){
+		return this.priceRuleType;
+	}
+
+}

@@ -1,6 +1,6 @@
 package com.somle.wangdian.api.trade;
 
-import com.somle.wangdian.api.WdtClient;
+import com.somle.wangdian.service.WdtClient;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -12,7 +12,7 @@ public class VipApiTradeQuery {
 
 	public static void main(String[] args) {
 		// TODO Auto-generated method stub
-		WdtClient client = new WdtClient("", "", "", "");
+		WdtClient client = new WdtClient("", "", "");
 		
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("start_time", "2024-10-24 10:00:00");

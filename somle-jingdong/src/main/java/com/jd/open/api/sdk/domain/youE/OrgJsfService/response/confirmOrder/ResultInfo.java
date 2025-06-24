@@ -1,0 +1,41 @@
+package com.jd.open.api.sdk.domain.youE.OrgJsfService.response.confirmOrder;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import java.io.Serializable;
+import java.util.List;
+
+public class ResultInfo implements Serializable {
+   private int resultCode;
+   private String errMsg;
+   private List<String[]> result;
+
+   @JsonProperty("resultCode")
+   public void setResultCode(int resultCode) {
+      this.resultCode = resultCode;
+   }
+
+   @JsonProperty("resultCode")
+   public int getResultCode() {
+      return this.resultCode;
+   }
+
+   @JsonProperty("errMsg")
+   public void setErrMsg(String errMsg) {
+      this.errMsg = errMsg;
+   }
+
+   @JsonProperty("errMsg")
+   public String getErrMsg() {
+      return this.errMsg;
+   }
+
+   @JsonProperty("result")
+   public void setResult(List<String[]> result) {
+      this.result = result;
+   }
+
+   @JsonProperty("result")
+   public List<String[]> getResult() {
+      return this.result;
+   }
+}

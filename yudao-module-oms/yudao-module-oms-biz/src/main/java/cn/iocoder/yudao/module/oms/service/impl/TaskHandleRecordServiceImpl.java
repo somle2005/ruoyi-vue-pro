@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.oms.service.impl;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.iocoder.yudao.module.oms.api.enums.TaskHandleStatusEnum;
 import cn.iocoder.yudao.module.oms.controller.admin.taskreissuance.vo.TaskHandleRecordPageReqVO;
 import cn.iocoder.yudao.module.oms.controller.admin.taskreissuance.vo.TaskHandleRecordSaveReqVO;
 import cn.iocoder.yudao.module.oms.dal.dataobject.TaskHandleRecordDO;
@@ -13,8 +14,10 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 
 
@@ -76,27 +79,30 @@ public class TaskHandleRecordServiceImpl implements TaskHandleRecordService {
     @Transactional
     @Override
     public void createTask(String taskTag, List<String> handleParams) {
-        List<TaskHandleRecordDO> taskHandleRecordDOS = handleRecordMapper.selectPage(TaskHandleRecordPageReqVO.builder().taskTag(taskTag).build()).getList();
-
+        List<TaskHandleRecordDO> taskHandleRecordDOS = handleRecordMapper.selectList(TaskHandleRecordDO::getTaskTag, taskTag);
+        //如果是在一天之内建立任务，则跳过不建立
         if (CollUtil.isNotEmpty(taskHandleRecordDOS)) {
             TaskHandleRecordDO taskHandleRecordDO = taskHandleRecordDOS.get(0);
             if (taskHandleRecordDO.getCreateTime().isAfter(LocalDateTime.now().minusDays(1))) {
                 return;
             }
         }
+        //把之前所有的任务都删除，再重新建立新任务
         handleRecordMapper.deleteByIds(taskHandleRecordDOS.stream().map(TaskHandleRecordDO::getId).toList());
         List<TaskHandleRecordDO> taskHandleRecordDOList = handleParams.stream().map(handleParam -> TaskHandleRecordDO.builder()
-                .taskTag(taskTag)
-                .handleParam(handleParam)
-                .handleStatus(0)
-                .handleTimes(0)
-                .build()).toList();
+            .taskTag(taskTag)
+            .handleParam(handleParam)
+            .handleStatus(TaskHandleStatusEnum.PENDING.getType())
+            .handleResult(TaskHandleStatusEnum.PENDING.getName())
+            .handleTimes(0)
+            .build()).toList();
         handleRecordMapper.insertBatch(taskHandleRecordDOList);
     }
 
 
     public List<TaskHandleRecordDO> getHandleRecordByTaskTag(String taskTag) {
-        TaskHandleRecordPageReqVO vo = TaskHandleRecordPageReqVO.builder().taskTag(taskTag).handleStatus(0).build();
+        TaskHandleRecordPageReqVO vo = TaskHandleRecordPageReqVO.builder().taskTag(taskTag).handleStatus(TaskHandleStatusEnum.PENDING.getType()).build();
+        vo.setPageSize(100);
         return handleRecordMapper.selectPage(vo).getList();
     }
 

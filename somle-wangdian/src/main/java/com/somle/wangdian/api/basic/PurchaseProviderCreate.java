@@ -4,12 +4,12 @@ import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
-import com.somle.wangdian.api.WdtClient;
+import com.somle.wangdian.service.WdtClient;
 
 public class PurchaseProviderCreate {
 	public static void main(String[] args) {
         //sid appkey secret url
-		WdtClient client = new WdtClient("", "", "", "");
+		WdtClient client = new WdtClient("", "", "");
 		
 		Map<String, String> params = new HashMap<String, String>();
 		params.put("provider_no", "ghs123");
