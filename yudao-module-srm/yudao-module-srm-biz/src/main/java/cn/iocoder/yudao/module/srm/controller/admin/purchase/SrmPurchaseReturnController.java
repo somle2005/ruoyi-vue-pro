@@ -203,48 +203,30 @@ public class SrmPurchaseReturnController {
                 SrmPurchaseReturnBaseRespVO.Item.class,
                 item -> {
                     // 2.1.1 设置仓库信息
-                    MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), warehouse -> {
-                        item.setWarehouseName(warehouse.getName());
-                    });
+                    MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), warehouse -> item.setWarehouseName(warehouse.getName()));
                     // 2.1.2 设置申请人信息
-                    MapUtils.findAndThen(userMap, item.getApplicantId(), user -> {
-                        item.setApplicantName(user.getNickname());
-                    });
+                    MapUtils.findAndThen(userMap, item.getApplicantId(), user -> item.setApplicantName(user.getNickname()));
                     // 2.1.3 设置申请部门信息
-                    MapUtils.findAndThen(deptMap, item.getApplicationDeptId(), dept -> {
-                        item.setApplicationDeptName(dept.getName());
-                    });
+                    MapUtils.findAndThen(deptMap, item.getApplicationDeptId(), dept -> item.setApplicationDeptName(dept.getName()));
                     // 2.1.4 设置创建人信息
-                    MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> {
-                        item.setCreator(user.getNickname());
-                    });
+                    MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> item.setCreator(user.getNickname()));
                     // 2.1.5 设置更新人信息
-                    MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> {
-                        item.setUpdater(user.getNickname());
-                    });
+                    MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> item.setUpdater(user.getNickname()));
                 }
             );
             purchaseReturn.setItems(items);
 
             // 2.2 设置供应商信息
-            MapUtils.findAndThen(supplierMap, purchaseReturn.getSupplierId(), supplier -> {
-                purchaseReturn.setSupplierName(supplier.getName());
-            });
+            MapUtils.findAndThen(supplierMap, purchaseReturn.getSupplierId(), supplier -> purchaseReturn.setSupplierName(supplier.getName()));
 
             // 2.3 设置审核人信息
-            MapUtils.findAndThen(userMap, purchaseReturn.getAuditorId(), user -> {
-                purchaseReturn.setAuditorName(user.getNickname());
-            });
+            MapUtils.findAndThen(userMap, purchaseReturn.getAuditorId(), user -> purchaseReturn.setAuditorName(user.getNickname()));
 
             // 2.4 设置创建人信息
-            MapUtils.findAndThen(userMap, safeParseLong(purchaseReturn.getCreator()), user -> {
-                purchaseReturn.setCreator(user.getNickname());
-            });
+            MapUtils.findAndThen(userMap, safeParseLong(purchaseReturn.getCreator()), user -> purchaseReturn.setCreator(user.getNickname()));
 
             // 2.5 设置更新人信息
-            MapUtils.findAndThen(userMap, safeParseLong(purchaseReturn.getUpdater()), user -> {
-                purchaseReturn.setUpdater(user.getNickname());
-            });
+            MapUtils.findAndThen(userMap, safeParseLong(purchaseReturn.getUpdater()), user -> purchaseReturn.setUpdater(user.getNickname()));
         });
     }
 }

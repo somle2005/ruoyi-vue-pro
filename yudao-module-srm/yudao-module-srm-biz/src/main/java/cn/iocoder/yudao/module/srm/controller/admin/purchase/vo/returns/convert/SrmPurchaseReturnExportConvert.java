@@ -24,7 +24,6 @@ public class SrmPurchaseReturnExportConvert {
                 vo.setUpdater(main.getUpdater());
                 vo.setUpdateTime(main.getUpdateTime());
                 vo.setRemark(main.getRemark());
-                vo.setFileUrl(main.getFileUrl());
                 vo.setAuditStatus(main.getAuditStatus());
                 vo.setAuditorName(main.getAuditorName());
                 vo.setAuditTime(main.getAuditTime());
@@ -55,7 +54,6 @@ public class SrmPurchaseReturnExportConvert {
                     vo.setUpdater(main.getUpdater());
                     vo.setUpdateTime(main.getUpdateTime());
                     vo.setRemark(main.getRemark());
-                    vo.setFileUrl(main.getFileUrl());
                     vo.setAuditStatus(main.getAuditStatus());
                     vo.setAuditorName(main.getAuditorName());
                     vo.setAuditTime(main.getAuditTime());

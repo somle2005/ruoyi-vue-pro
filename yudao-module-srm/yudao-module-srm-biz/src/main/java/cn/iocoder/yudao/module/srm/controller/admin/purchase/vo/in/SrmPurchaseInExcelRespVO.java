@@ -29,10 +29,6 @@ public class SrmPurchaseInExcelRespVO {
     @ExcelMergeGroup
     private LocalDateTime inTime;
 
-    @ExcelProperty("收货仓库")
-    @ExcelMergeGroup
-    private String warehouseName;
-
     @ExcelProperty("审核人名称")
     @ExcelMergeGroup
     private String auditor;
@@ -102,7 +98,7 @@ public class SrmPurchaseInExcelRespVO {
     @ExcelProperty("仓库名称")
     private String itemWarehouseName;
 
-    @ExcelProperty(value = "入库状态", converter = DictConvert.class)
+    @ExcelProperty(value = "行入库状态", converter = DictConvert.class)
     @DictFormat(SrmDictTypeConstants.STORAGE_STATUS)
     private Integer itemInboundStatus;
 
@@ -116,6 +112,6 @@ public class SrmPurchaseInExcelRespVO {
     @ExcelProperty("申请部门名称")
     private String applicationDeptName;
 
-    @ExcelProperty("商品行备注")
+    @ExcelProperty("行备注")
     private String itemRemark;
 } 

@@ -45,10 +45,6 @@ public class SrmPurchaseReturnExcelRespVO {
     @ExcelMergeGroup
     private String remark;
 
-    @ExcelProperty("附件地址")
-    @ExcelMergeGroup
-    private String fileUrl;
-
     @ExcelProperty(value = "审批状态", converter = DictConvert.class)
     @DictFormat(SrmDictTypeConstants.AUDIT_STATUS)
     @ExcelMergeGroup
