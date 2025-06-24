@@ -251,13 +251,13 @@ public class EccangService {
     public List<EccangWarehouse> getWarehouseList() {
         List<EccangWarehouse> warehouseList = new ArrayList<>();
         //易仓仓库列表为分页接口，不传递时默认每页100条
-        int currentPage = 1;
+        int currentPage = 0;
         int currentPageSize = 100;
         JSONObject params = JsonUtilsX.newObject();
         params.put("page_size", currentPageSize);
         EccangPage eccangPage = null;
         do {
-            params.put("page", currentPage++);
+            params.put("page", ++currentPage);
             eccangPage = getPage(params, "getWarehouseList");
             List<EccangWarehouse> data = eccangPage.getData(EccangWarehouse.class);
             warehouseList.addAll(data);
