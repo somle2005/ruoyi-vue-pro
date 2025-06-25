@@ -153,7 +153,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
         List<WmsItemFlowDO> itemFlowList = new ArrayList<>();
         for (WmsInboundItemDO itemDO : itemsList) {
             Integer available = itemDO.getOutboundAvailableQty();
-            Integer flowQty = 0;
+            Integer flowQty;
             // 需要多次扣除
             if (available < quantity) {
                 flowQty = available;
@@ -183,7 +183,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
                 // 刚好单次扣除
                 flowQty = available;
                 available = 0;
-                quantity = 0;
+//                quantity = 0;
                 itemDO.setOutboundAvailableQty(available);
                 itemsToUpdate.add(itemDO);
                 //
@@ -246,7 +246,7 @@ public class OutboundSubmitExecutor extends OutboundExecutor {
     @Override
     protected WmsStockFlowDirection updateStockLogicQty(WmsStockLogicDO stockLogicDO, WmsOutboundItemRespVO item, Integer quantity) {
         // 待出库量
-        stockLogicDO.setOutboundPendingQty(Math.min(stockLogicDO.getAvailableQty(), quantity));
+        stockLogicDO.setOutboundPendingQty(stockLogicDO.getOutboundPendingQty() + quantity);
         // 可用量
         stockLogicDO.setAvailableQty(Math.max(stockLogicDO.getAvailableQty() - quantity, 0));
 

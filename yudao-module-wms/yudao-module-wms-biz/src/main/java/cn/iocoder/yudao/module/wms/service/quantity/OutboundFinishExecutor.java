@@ -63,7 +63,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
         Integer actualQty = item.getActualQty();
 
         // 可用量
-        stockWarehouseDO.setAvailableQty(stockWarehouseDO.getAvailableQty() - quantity);
+        stockWarehouseDO.setAvailableQty(stockWarehouseDO.getAvailableQty() - actualQty);
         if(stockWarehouseDO.getAvailableQty()<0) {
             throw exception(STOCK_WAREHOUSE_NOT_ENOUGH);
         }
