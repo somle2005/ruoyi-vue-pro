@@ -17,4 +17,8 @@ public interface WmsConstants {
      */
     String WMS_OUTBOUND_STATUS = "wms_outbound_status";
 
+    /**
+     * wms 入库状态
+     */
+    String WMS_INBOUND_STATUS = "wms_inbound_status";
 }

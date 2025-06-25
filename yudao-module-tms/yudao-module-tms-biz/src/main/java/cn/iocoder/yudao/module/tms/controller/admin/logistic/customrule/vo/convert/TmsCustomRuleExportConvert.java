@@ -53,8 +53,10 @@ public class TmsCustomRuleExportConvert {
                         vo.setProductName(main.getProduct().getName());
                         vo.setProductCode(main.getProduct().getCode());
                     }
-                    // 复制子表字段
-                    BeanUtils.copyProperties(item, vo);
+                    // 手动设置子表特有字段，避免覆盖主表字段
+                    vo.setCategoryItemId(item.getId());
+                    vo.setHscode(item.getHscode());
+                    vo.setTaxRate(item.getTaxRate());
                     result.add(vo);
                 }
             }

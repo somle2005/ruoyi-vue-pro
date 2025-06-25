@@ -17,16 +17,16 @@ public class TmsFirstMileRequestExportConvert {
         List<TmsFirstMileRequestExcelRespVO> result = new ArrayList<>();
         for (TmsFirstMileRequestRespVO main : list) {
             if (main.getItems() == null || main.getItems().isEmpty()) {
-                // 没有明细也导出主表信息
+                // 没有子表数据，只导出主表信息
                 TmsFirstMileRequestExcelRespVO vo = BeanUtils.toBean(main, TmsFirstMileRequestExcelRespVO.class);
                 result.add(vo);
             } else {
+                // 有子表数据，每个子表项都包含完整的主表信息
                 for (TmsFirstMileRequestItemRespVO item : main.getItems()) {
                     // 先复制主表字段
                     TmsFirstMileRequestExcelRespVO vo = BeanUtils.toBean(main, TmsFirstMileRequestExcelRespVO.class);
-                    // 复制子表字段
-                    BeanUtils.copyProperties(item, vo);
-                    // 手动设置需要特殊处理的字段
+                    // 手动设置子表特有字段，避免覆盖主表字段
+                    vo.setItemId(item.getId());
                     vo.setProductName(item.getProduct() != null ? item.getProduct().getName() : null);
                     vo.setProductCode(item.getProduct() != null ? item.getProduct().getCode() : null);
                     vo.setFbaBarCode(item.getFbaBarCode());

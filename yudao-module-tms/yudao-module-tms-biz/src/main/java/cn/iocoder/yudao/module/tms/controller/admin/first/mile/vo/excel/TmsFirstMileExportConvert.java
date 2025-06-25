@@ -74,7 +74,6 @@ public class TmsFirstMileExportConvert {
                     // 子表字段
                     vo.setItemId(item.getId());
                     vo.setRequestCode(item.getRequestCode());
-                    vo.setRequestItemId(item.getRequestItemId());
                     vo.setQty(item.getQty());
                     vo.setBoxQty(item.getBoxQty());
                     vo.setCompanyName(item.getCompanyName());

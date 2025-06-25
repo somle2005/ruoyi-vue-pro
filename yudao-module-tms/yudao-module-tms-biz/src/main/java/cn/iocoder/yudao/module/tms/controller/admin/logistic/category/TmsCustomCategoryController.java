@@ -14,9 +14,11 @@ import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.item.vo.TmsCustomCategoryItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.item.vo.TmsCustomCategoryItemSimpleRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.TmsCustomCategoryExcelRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.TmsCustomCategoryPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.TmsCustomCategoryRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.TmsCustomCategorySaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.vo.convert.TmsCustomCategoryExportConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.TmsCustomCategoryDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.item.TmsCustomCategoryItemDO;
 import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
@@ -111,9 +113,11 @@ public class TmsCustomCategoryController {
     public void exportCustomRuleCategoryExcel(@Valid TmsCustomCategoryPageReqVO pageReqVO,
                                               HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<TmsCustomCategoryDO> list = customRuleCategoryService.getCustomRuleCategoryPage(pageReqVO).getList();
+        PageResult<TmsCustomCategoryBO> pageResult = customRuleCategoryService.getCustomRuleCategoryPageBO(pageReqVO);
+        List<TmsCustomCategoryRespVO> voList = BindingResult(pageResult.getList());
+        List<TmsCustomCategoryExcelRespVO> excelList = TmsCustomCategoryExportConvert.buildExcelList(voList);
         // 导出 Excel
-        ExcelUtils.write(response, "海关分类.xls", "数据", TmsCustomCategoryRespVO.class, BeanUtils.toBean(BindingResult(list), TmsCustomCategoryRespVO.class));
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "海关分类.xls", "海关分类", TmsCustomCategoryExcelRespVO.class, excelList);
     }
 
     // ==================== 子表（海关分类子表） ====================
