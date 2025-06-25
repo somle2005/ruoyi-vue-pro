@@ -4,18 +4,15 @@ import cn.iocoder.yudao.framework.excel.core.aop.ExcelMergeGroup;
 import com.alibaba.excel.write.handler.RowWriteHandler;
 import com.alibaba.excel.write.metadata.holder.WriteSheetHolder;
 import com.alibaba.excel.write.metadata.holder.WriteTableHolder;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.ss.util.CellRangeAddress;
 
 import java.lang.reflect.Field;
 import java.util.*;
 
 /**
- * 通用合并 + 居中处理器，基于 @ExcelMergeGroup 注解自动合并并居中，支持唯一标识字段限制合并范围
- *
- * @author :wdy
+ * 通用合并 + 样式处理器，基于 @ExcelMergeGroup 注解自动合并单元格，
+ * 支持唯一标识字段分组控制合并范围，合并后保留原样式并居中显示
  */
 public class CellMergeStrategy implements RowWriteHandler {
 
@@ -46,7 +43,6 @@ public class CellMergeStrategy implements RowWriteHandler {
             }
         }
 
-        // 初始化每列的起始行
         mergeColumnIndexList.forEach(i -> mergeStartRowMap.put(i, 1));
     }
 
@@ -59,7 +55,6 @@ public class CellMergeStrategy implements RowWriteHandler {
         int rowIndex = row.getRowNum();
 
         if (rowIndex > 1 && lastRow != null) {
-            // 判断是否属于同一个唯一标识组
             boolean sameGroup = isSameGroup(row, lastRow);
 
             for (int colIndex : mergeColumnIndexList) {
@@ -70,13 +65,25 @@ public class CellMergeStrategy implements RowWriteHandler {
                     int start = mergeStartRowMap.get(colIndex);
                     int end = rowIndex - 1;
                     if (end > start) {
-                        sheet.addMergedRegionUnsafe(new CellRangeAddress(start, end, colIndex, colIndex));
+                        CellRangeAddress region = new CellRangeAddress(start, end, colIndex, colIndex);
+                        sheet.addMergedRegionUnsafe(region);
+                        Cell originCell = sheet.getRow(start).getCell(colIndex);
+                        CellStyle baseStyle = (originCell != null && originCell.getCellStyle() != null)
+                            ? originCell.getCellStyle()
+                            : sheet.getWorkbook().createCellStyle();
+                        setRegionStyle(sheet, region, baseStyle);
                     }
                     mergeStartRowMap.put(colIndex, rowIndex);
                 } else if (rowIndex == size) {
                     int start = mergeStartRowMap.get(colIndex);
                     if (rowIndex > start) {
-                        sheet.addMergedRegionUnsafe(new CellRangeAddress(start, rowIndex, colIndex, colIndex));
+                        CellRangeAddress region = new CellRangeAddress(start, rowIndex, colIndex, colIndex);
+                        sheet.addMergedRegionUnsafe(region);
+                        Cell originCell = sheet.getRow(start).getCell(colIndex);
+                        CellStyle baseStyle = (originCell != null && originCell.getCellStyle() != null)
+                            ? originCell.getCellStyle()
+                            : sheet.getWorkbook().createCellStyle();
+                        setRegionStyle(sheet, region, baseStyle);
                     }
                 }
             }
@@ -85,9 +92,6 @@ public class CellMergeStrategy implements RowWriteHandler {
         lastRow = row;
     }
 
-    /**
-     * 判断两行是否属于同一唯一标识组（即相同唯一列值）
-     */
     private boolean isSameGroup(Row currentRow, Row lastRow) {
         for (int colIndex : uniqueColumnIndexList) {
             String curr = getCellValue(currentRow.getCell(colIndex));
@@ -107,5 +111,25 @@ public class CellMergeStrategy implements RowWriteHandler {
             case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
             default -> "";
         };
+    }
+
+    private CellStyle createCenterStyle(Sheet sheet, CellStyle originalStyle) {
+        Workbook workbook = sheet.getWorkbook();
+        CellStyle newStyle = workbook.createCellStyle();
+        newStyle.cloneStyleFrom(originalStyle); // 保留字体、颜色、边框等
+        newStyle.setVerticalAlignment(VerticalAlignment.CENTER);
+        return newStyle;
+    }
+
+
+    private void setRegionStyle(Sheet sheet, CellRangeAddress region, CellStyle originalStyle) {
+        CellStyle centerStyle = createCenterStyle(sheet, originalStyle);
+        for (int rowIdx = region.getFirstRow(); rowIdx <= region.getLastRow(); rowIdx++) {
+            Row row = sheet.getRow(rowIdx);
+            if (row == null) row = sheet.createRow(rowIdx);
+            Cell cell = row.getCell(region.getFirstColumn());
+            if (cell == null) cell = row.createCell(region.getFirstColumn());
+            cell.setCellStyle(centerStyle);
+        }
     }
 }

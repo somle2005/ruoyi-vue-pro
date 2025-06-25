@@ -126,8 +126,8 @@ public class TmsFirstMileItemRespVO extends BaseVO {
     @ExcelProperty("总毛重（kg）")
     private BigDecimal totalPackageWeight;
 
-    @Schema(description = "总体积（m³）")
-    @ExcelProperty("总体积（m³）")
+    @Schema(description = "总体积（mm³）")
+    @ExcelProperty("总体积（mm³）")
     private BigDecimal totalVolume;
 
     @Schema(description = "销售公司ID")

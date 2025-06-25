@@ -21,6 +21,18 @@ public class TmsFirstMileExcelRespVO {
     @ExcelMergeGroup
     private LocalDateTime createTime;
 
+    @ExcelProperty("更新时间")
+    @ExcelMergeGroup
+    private LocalDateTime updateTime;
+
+    @ExcelProperty("创建人")
+    @ExcelMergeGroup
+    private String creator;
+
+    @ExcelProperty("更新人")
+    @ExcelMergeGroup
+    private String updater;
+
     @ExcelProperty("单据日期")
     @ExcelMergeGroup
     private LocalDateTime billTime;
@@ -122,6 +134,15 @@ public class TmsFirstMileExcelRespVO {
     @ExcelProperty("申请单编码")
     private String requestCode;
 
+    @ExcelProperty("产品名称")
+    private String productName;
+
+    @ExcelProperty("产品编码")
+    private String productCode;
+
+    @ExcelProperty("FBA条码")
+    private String fbaBarCode;
+
     @ExcelProperty("件数")
     private Integer qty;
 
@@ -149,6 +170,21 @@ public class TmsFirstMileExcelRespVO {
     @ExcelProperty("发出仓名称")
     private String fromWarehouseName;
 
+    @ExcelProperty("包装长（mm）")
+    private BigDecimal packageLength;
+
+    @ExcelProperty("包装宽（mm）")
+    private BigDecimal packageWidth;
+
+    @ExcelProperty("包装高（mm）")
+    private BigDecimal packageHeight;
+
+    @ExcelProperty("毛重（kg）")
+    private BigDecimal packageWeight;
+
+    @ExcelProperty("净重（kg）")
+    private BigDecimal weight;
+
     @ExcelProperty("总包装长（mm）")
     private BigDecimal totalPackageLength;
 
@@ -161,7 +197,7 @@ public class TmsFirstMileExcelRespVO {
     @ExcelProperty("总毛重（kg）")
     private BigDecimal totalItemPackageWeight;
 
-    @ExcelProperty("总体积（m³）")
+    @ExcelProperty("总体积（mm³）")
     private BigDecimal totalItemVolume;
 
     @ExcelProperty("销售公司名称")
