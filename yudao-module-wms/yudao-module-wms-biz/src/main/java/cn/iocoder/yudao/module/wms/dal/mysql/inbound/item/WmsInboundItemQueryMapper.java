@@ -55,8 +55,8 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         //连接逻辑库存
         wrapper.innerJoin(WmsStockLogicDO.class, on -> on
             .eq(WmsStockLogicDO::getWarehouseId, WmsInboundDO::getWarehouseId)
-            .eq(WmsStockLogicDO::getCompanyId, WmsInboundDO::getCompanyId)
-//            .eq(WmsStockLogicDO::getDeptId, WmsInboundDO::getDeptId)
+            .eq(WmsStockLogicDO::getCompanyId, WmsInboundItemDO::getCompanyId)
+            .eq(WmsStockLogicDO::getDeptId, WmsInboundItemDO::getDeptId)
             .eq(WmsStockLogicDO::getProductId, WmsPickupItemDO::getProductId));
         // 连接产品视图
         if(reqVO.getProductCode()!=null) {
