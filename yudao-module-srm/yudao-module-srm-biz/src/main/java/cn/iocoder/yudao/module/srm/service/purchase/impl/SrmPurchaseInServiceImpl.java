@@ -138,6 +138,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         validatePurchaseOrderItemQty(vo.getItems());
         // 1.2 校验入库项的有效性
         List<SrmPurchaseInItemDO> purchaseInItems = validatePurchaseInItemsAndCopyProperty(vo.getItems());
+        // 1.2.1 校验所有orderItemId的到货项qty总和不能超过采购订单项qty
+        this.validateOrderItemTotalArriveQty(vo.getItems(), null);
         // 1.3 校验币种一致性
         validateOrderItemsCurrency(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
         // 1.4 校验结算账户
@@ -287,6 +289,8 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         vo.setArriveTime(vo.getArriveTime() == null ? LocalDateTime.now() : vo.getArriveTime());
         // 1.1 校验存在
         SrmPurchaseInDO purchaseIn = validatePurchaseInExists(vo.getId());
+        // 1.1.1 校验所有orderItemId的到货项qty总和不能超过采购订单项qty
+        this.validateOrderItemTotalArriveQty(vo.getItems(), vo.getId());
         // 1.2 校验采购到货审核状态可以修改
         updateStatusCheck(purchaseIn);
         // 1.3 校验币种一致性
@@ -1050,5 +1054,46 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     @Override
     public List<Long> listAllPurchaseInIds() {
         return purchaseInMapper.selectAllIds();
+    }
+
+    /**
+     * 校验所有orderItemId的到货项qty总和不能超过采购订单项qty
+     *
+     * @param voItems     本次到货项
+     * @param currentInId 当前到货单ID，create时为null，update时为当前单据ID
+     */
+    private void validateOrderItemTotalArriveQty(List<SrmPurchaseInSaveReqVO.Item> voItems, Long currentInId) {
+        if (CollUtil.isEmpty(voItems)) {
+            return;
+        }
+        // 1. 收集所有 orderItemId
+        Set<Long> orderItemIds = voItems.stream().map(SrmPurchaseInSaveReqVO.Item::getOrderItemId).collect(Collectors.toSet());
+        // 2. 查询这些 orderItemId 的采购订单明细
+        Map<Long, SrmPurchaseOrderItemDO> orderItemMap = convertMap(purchaseOrderService.getPurchaseOrderItemList(orderItemIds), SrmPurchaseOrderItemDO::getId);
+        // 3. 查询这些 orderItemId 关联的所有到货项（不包含本次单据的明细）
+        List<SrmPurchaseInItemDO> existInItems = purchaseInItemMapper.selectListByOrderItemIds(orderItemIds.stream().toList());
+        if (currentInId != null) {
+            // 排除本次单据的明细（update场景）
+            existInItems = existInItems.stream().filter(i -> !i.getArriveId().equals(currentInId)).toList();
+        }
+        // 4. 汇总所有到货项的qty
+        Map<Long, BigDecimal> orderItemIdToArriveQty = new HashMap<>();
+        for (SrmPurchaseInItemDO item : existInItems) {
+            orderItemIdToArriveQty.merge(item.getOrderItemId(), item.getQty(), BigDecimal::add);
+        }
+        // 加上本次单据的明细
+        for (SrmPurchaseInSaveReqVO.Item voItem : voItems) {
+            orderItemIdToArriveQty.merge(voItem.getOrderItemId(), voItem.getQty(), BigDecimal::add);
+        }
+        // 5. 校验
+        for (Long orderItemId : orderItemIds) {
+            BigDecimal totalArriveQty = orderItemIdToArriveQty.getOrDefault(orderItemId, BigDecimal.ZERO);
+            SrmPurchaseOrderItemDO orderItem = orderItemMap.get(orderItemId);
+            if (orderItem == null) continue;
+            BigDecimal orderQty = orderItem.getQty();
+            if (totalArriveQty.compareTo(orderQty) > 0) {
+                throw exception(PURCHASE_IN_ITEM_TOTAL_QTY_EXCEED, orderItem.getId(), orderItem.getProductName(), totalArriveQty, orderQty);
+            }
+        }
     }
 }
