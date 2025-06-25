@@ -17,6 +17,7 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeExcelRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
@@ -32,9 +33,11 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstM
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockListRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
+import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
+import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.wms.api.inbound.item.WmsInboundItemApi;
 import cn.iocoder.yudao.module.wms.api.inbound.item.dto.WmsInboundItemBinDTO;
@@ -81,6 +84,7 @@ public class TmsFirstMileController {
     private final DeptApi deptApi;
     private final WmsInboundItemApi wmsInboundItemApi;
     private final TmsFirstMileService tmsFirstMileService;
+    private final TmsFeeService tmsFeeService;
 
     @PostMapping("/create")
     @Operation(summary = "创建头程单")
@@ -136,17 +140,16 @@ public class TmsFirstMileController {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TmsFirstMileRespVO> list = getFirstMilePage(pageReqVO).getCheckedData().getList();
         List<TmsFirstMileExcelRespVO> excelList = TmsFirstMileExportConvert.buildExcelList(list);
-        List<TmsFeeExcelRespVO> feeList = TmsFeeExportConvert.buildExcelList(list);
+        Map<Long, List<TmsFeeDO>> feeMap = tmsFeeService.getFeeMap(null, BillType.TMS_FIRST_MILE);
+        List<TmsFeeExcelRespVO> feeList = TmsFeeExportConvert.buildExcelList(list, feeMap);
 
         response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode("头程单.xls", StandardCharsets.UTF_8));
         response.setContentType("application/vnd.ms-excel;charset=UTF-8");
 
         try (var writer = EasyExcel.write(response.getOutputStream()).autoCloseStream(false).build()) {
             ExcelWriterSheetBuilder sheet1 = ExcelUtils.buildExcelWriterSheetBuilder(0, "头程单明细", TmsFirstMileExcelRespVO.class, excelList);
-            writer.write(excelList, sheet1.build());
-
             ExcelWriterSheetBuilder sheet2 = ExcelUtils.buildExcelWriterSheetBuilder(1, "费用明细", TmsFeeExcelRespVO.class, feeList);
-            writer.write(feeList, sheet2.build());
+            writer.write(excelList, sheet1.build()).write(feeList, sheet2.build());
         }
     }
 

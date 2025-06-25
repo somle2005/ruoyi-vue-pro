@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.controller.admin.fee.vo;
 
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
+import cn.iocoder.yudao.framework.excel.core.aop.ExcelMergeGroup;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelProperty;
@@ -10,25 +11,25 @@ import java.math.BigDecimal;
 
 @Data
 public class TmsFeeExcelRespVO {
-    @ExcelProperty("主键ID")
-    private Long id;
-
-    @ExcelProperty("原单类型")
-    private Integer upstreamType;
-
-    @ExcelProperty("原单ID")
-    private Long upstreamId;
+    @ExcelProperty("头程单编码")
+    @ExcelMergeGroup(unique = true)
+    private String no;
 
     @ExcelProperty(value = "费用类型", converter = DictConvert.class)
     @DictFormat(TmsDictTypeConstants.TMS_FEE_TYPE)
+    @ExcelMergeGroup
     private Integer costType;
 
     @ExcelProperty("金额")
+    @ExcelMergeGroup
     private BigDecimal amount;
 
-    @ExcelProperty("币种")
+    @ExcelProperty(value = "币种", converter = DictConvert.class)
+    @ExcelMergeGroup
+    @DictFormat(TmsDictTypeConstants.CURRENCY_CODE)
     private Integer currencyType;
 
-    @ExcelProperty("备注")
+    @ExcelProperty("费用备注")
+    @ExcelMergeGroup
     private String remark;
 } 

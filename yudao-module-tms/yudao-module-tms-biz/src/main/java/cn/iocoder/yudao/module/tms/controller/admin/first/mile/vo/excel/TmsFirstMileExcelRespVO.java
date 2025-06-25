@@ -13,7 +13,6 @@ import java.time.LocalDateTime;
 @Data
 public class TmsFirstMileExcelRespVO {
     // ========== 主表字段 ==========
-
     @ExcelProperty("编码")
     @ExcelMergeGroup(unique = true)
     private String code;
@@ -68,7 +67,7 @@ public class TmsFirstMileExcelRespVO {
     @ExcelMergeGroup
     private LocalDateTime arrivePlanTime;
 
-    @ExcelProperty("总货柜体积（m³）")
+    @ExcelProperty("总货柜体积（mm³）")
     @ExcelMergeGroup
     private BigDecimal totalVolume;
 
@@ -117,14 +116,11 @@ public class TmsFirstMileExcelRespVO {
     private String transitCompanyShortName;
 
     // ========== 子表字段 ==========
-    @ExcelProperty("明细主键ID")
+    @ExcelProperty("明细行编号")
     private Long itemId;
 
-    @ExcelProperty("申请单编号")
+    @ExcelProperty("申请单编码")
     private String requestCode;
-
-    @ExcelProperty("申请项ID")
-    private Long requestItemId;
 
     @ExcelProperty("件数")
     private Integer qty;

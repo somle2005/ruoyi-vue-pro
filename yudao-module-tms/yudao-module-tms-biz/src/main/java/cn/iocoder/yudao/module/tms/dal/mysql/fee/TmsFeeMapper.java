@@ -7,6 +7,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeePageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -89,6 +90,12 @@ public interface TmsFeeMapper extends BaseMapperX<TmsFeeDO> {
     default int deleteBySourceIdAndSourceType(Long sourceId, Integer sourceType) {
         return delete(new MPJLambdaWrapperX<TmsFeeDO>()
             .eq(TmsFeeDO::getUpstreamId, sourceId)
+            .eq(TmsFeeDO::getUpstreamType, sourceType));
+    }
+
+    default List<TmsFeeDO> selectListBySourceIdsAndType(Collection<Long> sourceIds, Integer sourceType) {
+        return selectList(new MPJLambdaWrapperX<TmsFeeDO>()
+            .inIfPresent(TmsFeeDO::getUpstreamId, sourceIds)
             .eq(TmsFeeDO::getUpstreamType, sourceType));
     }
 

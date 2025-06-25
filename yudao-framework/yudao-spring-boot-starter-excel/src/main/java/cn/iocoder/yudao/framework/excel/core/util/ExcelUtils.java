@@ -28,7 +28,7 @@ import java.util.TimeZone;
  * @author 芋道源码
  */
 public class ExcelUtils {
-
+    static ZoneId userZoneId = ServletUtils.getTimeZoneId().orElse(TimeZone.getDefault().toZoneId());
     /**
      * 将列表以 Excel 响应给前端
      *
@@ -44,12 +44,14 @@ public class ExcelUtils {
                                  String filename,
                                  String sheetName,
                                  Class<T> head, List<T> data) throws IOException {
+
         // 输出 Excel
         EasyExcel.write(response.getOutputStream(), head)
             .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
             .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
             .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
             .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
+            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
             .sheet(sheetName).doWrite(data);
         // 设置 header 和 contentType。写在最后的原因是，避免报错时，响应 contentType 已经被修改了
         response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
@@ -59,12 +61,15 @@ public class ExcelUtils {
     public static <T> List<T> read(MultipartFile file, Class<T> head) throws IOException {
         return EasyExcel.read(file.getInputStream(), head, null)
             .autoCloseStream(false)  // 不要自动关闭，交给 Servlet 自己处理
+            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
             .doReadAllSync();
     }
 
     public static <T> List<T> read(MultipartFile file, Class<T> head, List<Converter<?>> converters) throws IOException {
         ExcelReaderBuilder builder = EasyExcel.read(file.getInputStream(), head, null)
+            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
             .autoCloseStream(false);// 不要自动关闭，交给 Servlet 自己处理
+
         if (CollUtil.isNotEmpty(converters)) {
             converters.forEach(builder::registerConverter);
         }
@@ -123,14 +128,14 @@ public class ExcelUtils {
                                                                            Class<T> head,
                                                                            List<T> data) {
         ZoneId userZoneId = ServletUtils.getTimeZoneId().orElse(TimeZone.getDefault().toZoneId());
-        // 输出 Excel
-        ExcelWriterSheetBuilder builder = EasyExcel.writerSheet(sheetNo, sheetName)
+
+        return EasyExcel.writerSheet(sheetNo, sheetName)
+            .head(head)
             .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
             .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
             .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
             .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
             .registerWriteHandler(new CellMergeStrategy(head, data.size()));
-        return builder;
     }
 
 }

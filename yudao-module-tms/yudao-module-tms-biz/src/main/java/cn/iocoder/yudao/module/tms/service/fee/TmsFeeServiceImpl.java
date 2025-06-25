@@ -16,6 +16,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -144,5 +145,16 @@ public class TmsFeeServiceImpl implements TmsFeeService {
     @Override
     public Integer deleteFeeListBySourceIdAndSourceType(Long sourceId, Integer sourceType) {
         return feeMapper.deleteBySourceIdAndSourceType(sourceId, sourceType);
+    }
+
+    @Override
+    public Map<Long, List<TmsFeeDO>> getFeeMap(List<Long> sourceIds, BillType sourceType) {
+        // 查询所有费用明细，如果 sourceIds 为 null，则查询所有指定 sourceType 的数据
+        List<TmsFeeDO> feeList = feeMapper.selectListBySourceIdsAndType(sourceIds, sourceType.getValue());
+        if (CollUtil.isEmpty(feeList)) {
+            return Collections.emptyMap();
+        }
+        // 按照 sourceId 分组
+        return CollectionUtils.convertMultiMap(feeList, TmsFeeDO::getUpstreamId);
     }
 }
