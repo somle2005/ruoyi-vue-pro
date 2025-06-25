@@ -59,7 +59,7 @@ public interface WmsErrorCodeConstants {
     ErrorCode INBOUND_ITEM_BE_REFERRED = new ErrorCode(2_001_005_004, "入库单详情被引用");
     ErrorCode INBOUND_ITEM_CAN_NOT_EDIT = new ErrorCode(2_001_005_005, "入库单详情不允许编辑");
     ErrorCode INBOUND_ITEM_CAN_NOT_DELETE = new ErrorCode(2_001_005_006, "入库单详情不允许删除");
-    ErrorCode INBOUND_ITEM_OUTBOUND_AVAILABLE_QTY_NOT_ENOUGH = new ErrorCode(2_001_005_007, "入库入库批次库存不足");
+    ErrorCode INBOUND_ITEM_OUTBOUND_AVAILABLE_QTY_NOT_ENOUGH = new ErrorCode(2_001_005_007, "入库批次库存不足");
     ErrorCode INBOUND_ITEM_INBOUND_ID_DUPLICATE = new ErrorCode(2_001_005_008, "入库单ID不允许重复");
     ErrorCode INBOUND_ITEM_EXISTS = new ErrorCode(2_001_005_009, "入库单详情已存在");
     ErrorCode INBOUND_ITEM_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_005_010, "入库单详情不符合审批条件");
@@ -90,6 +90,7 @@ public interface WmsErrorCodeConstants {
     ErrorCode STOCK_WAREHOUSE_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_008_006, "仓库库存不符合审批条件");
     ErrorCode STOCK_WAREHOUSE_NOT_ENOUGH = new ErrorCode(2_001_008_007, "仓库库存不足");
     ErrorCode STOCK_WAREHOUSE_EXISTS = new ErrorCode(2_001_008_008, "仓库库存已存在");
+    ErrorCode STOCK_WAREHOUSE_ITEM_NOT_ENOUGH = new ErrorCode(2_001_014_015, "产品{}库存不足无法提交");
 
     // ========== WMS_STOCK_BIN 仓位库存表 2_001_009_000 ==========
     ErrorCode STOCK_BIN_NOT_EXISTS = new ErrorCode(2_001_009_001, "仓位库存不存在");

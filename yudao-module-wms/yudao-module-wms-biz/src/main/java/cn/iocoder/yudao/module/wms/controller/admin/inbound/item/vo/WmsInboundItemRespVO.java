@@ -168,4 +168,8 @@ public class WmsInboundItemRespVO {
     @ExcelProperty("上架的货位清单")
     private Integer stockType;
 
+    @Schema(description = "待出库数量", example = "{}")
+    @ExcelProperty("待出库数量")
+    private Integer outboundPendingQty;
+
 }

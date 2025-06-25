@@ -14,6 +14,10 @@ import org.springframework.messaging.Message;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.messaging.MessagingException;
 
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+
 import static cn.hutool.extra.spring.SpringUtil.getActiveProfile;
 
 @Slf4j
@@ -81,10 +85,10 @@ public class IntegrationConfig {
         Throwable cause = throwable.getCause();
         return (cause == null) ? throwable : findRootCause(cause);
     }
-
     /**
      * 构造钉钉 Markdown 格式告警内容
      */
+
     private String formatErrorMarkdown(String title, Throwable rootCause, Object headers, Object payload, String type, String env) {
         return StrUtil.format(
             """
@@ -95,17 +99,21 @@ public class IntegrationConfig {
                 **📦 异常类型**：`{}`
                 
                 **💥 异常摘要**：
-                ```
+                ```text
                 {}: {}
                 ```
+                
                 **🧾 请求头**：
-                > {}
+                ```json
+                {}
+                ```
                 
                 **📄 请求体**：
-                > {}
+                ```text
+                {}
+                ```
                 
                 **🕒 时间**：{}
-                
                 """,
             title,
             env,
@@ -113,7 +121,7 @@ public class IntegrationConfig {
             rootCause.getClass().getName(), StrUtil.nullToDefault(rootCause.getMessage(), "无异常信息"),
             headers,
             payload,
-            cn.hutool.core.date.DateUtil.now()
+            ZonedDateTime.now(ZoneId.of("Asia/Shanghai")).format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss Z"))
         );
     }
 

@@ -31,10 +31,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.time.LocalDateTime;
 import java.time.Year;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -75,9 +72,9 @@ public class EccangService {
 
     public String concatenateParams(JSONObject postData) {
         String postDataStr = postData.entrySet().stream()
-            .map(e -> e.getKey() + "=" + e.getValue().asText())
-            .reduce((e1, e2) -> e1 + "&" + e2)
-            .orElse("") + token.getUserToken();
+                .map(e -> e.getKey() + "=" + e.getValue().asText())
+                .reduce((e1, e2) -> e1 + "&" + e2)
+                .orElse("") + token.getUserToken();
         return postDataStr;
     }
 
@@ -110,10 +107,10 @@ public class EccangService {
         EccangResponse responseFinal = CoreUtils.retry(ctx -> {
             var requestBody = requestBody(payload, endpoint);
             var request = RequestX.builder()
-                .requestMethod(RequestX.Method.POST)
-                .url(url)
-                .payload(requestBody)
-                .build();
+                    .requestMethod(RequestX.Method.POST)
+                    .url(url)
+                    .payload(requestBody)
+                    .build();
             // 获取当前重试次数
             int retryCount = ctx.getRetryCount();
             // 记录每次重试的日志
@@ -181,17 +178,17 @@ public class EccangService {
             payload.put("page_size", pageSize);
         }
         return Stream.iterate(
-            getPage(payload, endpoint), Objects::nonNull,
-            bizContent -> {
-                if (bizContent.hasNext()) {
-                    log.debug("have next,endpoint:{}当前进度：{}/{}", endpoint, (bizContent.getPage() - 1) * pageSize + bizContent.getData().size(), bizContent.getTotal());
-                    payload.put("page", bizContent.getPage() + 1);
-                    return getPage(payload, endpoint);
-                } else {
-                    log.debug("no next page");
-                    return null;
+                getPage(payload, endpoint), Objects::nonNull,
+                bizContent -> {
+                    if (bizContent.hasNext()) {
+                        log.debug("have next,endpoint:{}当前进度：{}/{}", endpoint, (bizContent.getPage() - 1) * pageSize + bizContent.getData().size(), bizContent.getTotal());
+                        payload.put("page", bizContent.getPage() + 1);
+                        return getPage(payload, endpoint);
+                    } else {
+                        log.debug("no next page");
+                        return null;
+                    }
                 }
-            }
         );
     }
 
@@ -229,10 +226,10 @@ public class EccangService {
 
     public List<String> getPlatforms() {
         return List.of(
-            "amazon", "autonomous", "bestbuy", "cdiscount", "coupong", "dsv", "ebay",
-            "eono", "esm", "home24", "homedepot", "manomano", "mediamarkt", "newegg",
-            "onbuy", "otto", "overstock", "rakuten", "shopify", "shopline", "staples",
-            "walmart", "b2c", "yahoo", "wayfairnew", "wayfair", "allegro"
+                "amazon", "autonomous", "bestbuy", "cdiscount", "coupong", "dsv", "ebay",
+                "eono", "esm", "home24", "homedepot", "manomano", "mediamarkt", "newegg",
+                "onbuy", "otto", "overstock", "rakuten", "shopify", "shopline", "staples",
+                "walmart", "b2c", "yahoo", "wayfairnew", "wayfair", "allegro"
         );
     }
 
@@ -252,9 +249,20 @@ public class EccangService {
     }
 
     public List<EccangWarehouse> getWarehouseList() {
-
+        List<EccangWarehouse> warehouseList = new ArrayList<>();
+        //易仓仓库列表为分页接口，不传递时默认每页100条
+        int currentPage = 0;
+        int currentPageSize = 100;
         JSONObject params = JsonUtilsX.newObject();
-        return getPage(params, "getWarehouseList").getData(EccangWarehouse.class);
+        params.put("page_size", currentPageSize);
+        EccangPage eccangPage = null;
+        do {
+            params.put("page", ++currentPage);
+            eccangPage = getPage(params, "getWarehouseList");
+            List<EccangWarehouse> data = eccangPage.getData(EccangWarehouse.class);
+            warehouseList.addAll(data);
+        } while ((currentPage * currentPageSize) < eccangPage.getTotal());
+        return warehouseList;
     }
 
     @Scheduled(cron = "0 0 * * * *") // Executes every hour
@@ -263,32 +271,32 @@ public class EccangService {
         LocalDateTime endTime = LocalDateTime.now();
         LocalDateTime startTime = endTime.minusHours(3);
         var vo = EccangOrderVO.builder()
-            .condition(EccangOrderVO.Condition.builder()
-                .platformPaidDateStart(startTime)
-                .platformPaidDateEnd(endTime)
-                .build())
-            .build();
+                .condition(EccangOrderVO.Condition.builder()
+                        .platformPaidDateStart(startTime)
+                        .platformPaidDateEnd(endTime)
+                        .build())
+                .build();
         getOrderUnarchive(vo)
-            .forEach(order -> {
-                eccangSaleOutputChannel.send(MessageBuilder.withPayload(order).build());
-            });
+                .forEach(order -> {
+                    eccangSaleOutputChannel.send(MessageBuilder.withPayload(order).build());
+                });
     }
 
     public Stream<EccangOrder> getOrderUnarchive(EccangOrderVO vo) {
         return getOrderUnarchivePages(vo)
-            .map(n -> n.getData(EccangOrder.class))
-            .flatMap(n -> n.stream());
+                .map(n -> n.getData(EccangOrder.class))
+                .flatMap(n -> n.stream());
     }
 
     public Stream<EccangOrder> getOrderPlusArchiveSince(EccangOrderVO vo, Integer startYear) {
         int currentYear = Year.now().getValue();
 
         return IntStream.rangeClosed(startYear, currentYear).boxed()
-            .flatMap(year ->
-                getOrderPlusArchivePages(vo, year)
-                    .map(n -> n.getData(EccangOrder.class))
-                    .flatMap(n -> n.stream())
-            );
+                .flatMap(year ->
+                        getOrderPlusArchivePages(vo, year)
+                                .map(n -> n.getData(EccangOrder.class))
+                                .flatMap(n -> n.stream())
+                );
     }
 
     public Stream<EccangPage> getOrderPlusArchivePages(EccangOrderVO orderParams, Integer year) {
@@ -323,8 +331,8 @@ public class EccangService {
     public EccangProduct getProduct(String sku) {
         //需要返回箱规信息
         EccangProduct product = EccangProduct.builder()
-            .productSku(sku).getProductBox(1)
-            .build();
+                .productSku(sku).getProductBox(1)
+                .build();
         // String response = post("getWmsProductList", product, String.class).get(0);
         // log.debug(response);
         // return JsonUtilsSomle.parseObject(response, EccangProduct.class);
@@ -341,7 +349,7 @@ public class EccangService {
     public EccangResponse modifySkuRelation(String platformSku, String account, List<EccangModifySkuRelationReqVO.PCR> pcrList) {
 
         EccangModifySkuRelationReqVO vo = EccangModifySkuRelationReqVO.builder().data(
-            List.of(EccangModifySkuRelationReqVO.ModifyData.builder().userAccount(List.of(account)).platformSku(platformSku).pcr(pcrList).build())
+                List.of(EccangModifySkuRelationReqVO.ModifyData.builder().userAccount(List.of(account)).platformSku(platformSku).pcr(pcrList).build())
         ).build();
 
         return getResponse(vo, "modifySkuRelation");
@@ -353,8 +361,8 @@ public class EccangService {
      **/
     public List<EccangSkuRelationRespVO> getSkuRelation(String platformSku) {
         EccangSkuRelationReqVO vo = EccangSkuRelationReqVO.builder().page(1).pageSize(100)
-            .condition(EccangSkuRelationReqVO.Condition.builder().platformSku(platformSku).build())
-            .build();
+                .condition(EccangSkuRelationReqVO.Condition.builder().platformSku(platformSku).build())
+                .build();
         return post("getSkuRelation", vo, EccangSkuRelationRespVO.class);
     }
 

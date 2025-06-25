@@ -33,7 +33,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.WmsInboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemLogicQueryMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemMapper;
-import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsInboundItemFlowMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.flow.WmsItemFlowMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.flow.WmsStockFlowMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
@@ -79,7 +79,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
 
     @Resource
     @Lazy
-    private WmsInboundItemFlowMapper inboundItemFlowMapper;
+    private WmsItemFlowMapper inboundItemFlowMapper;
 
     @Resource
     @Lazy
@@ -523,12 +523,13 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      *
      * @param warehouseId 仓库id
      * @param productId   产品id
+     * @param companyId   公司id
      * @param olderFirst  是否按入库时间升序
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, boolean olderFirst) {
-        return inboundItemLogicQueryMapper.getInboundItemLogicList(warehouseId, productId, olderFirst);
+    public List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, boolean olderFirst) {
+        return inboundItemLogicQueryMapper.getInboundItemLogicList(warehouseId, productId, deptId, companyId, olderFirst);
     }
 
     /**
@@ -658,8 +659,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
     }
 
     @Override
-    public WmsInboundDO getByWarehouseIdAndProductId(Long warehouseId, Long productId) {
-        return inboundMapper.getByWarehouseIdAndProductId(warehouseId, productId);
+    public WmsInboundDO getByDetails(Long warehouseId, Long productId, Long companyId, Long deptId) {
+        return inboundMapper.getByDetails(warehouseId, productId, companyId, deptId);
     }
 
 //    /**
