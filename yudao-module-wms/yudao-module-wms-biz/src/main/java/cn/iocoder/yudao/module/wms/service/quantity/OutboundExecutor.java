@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.wms.service.quantity;
 
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
@@ -88,43 +89,49 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
     @Transactional(rollbackFor = Exception.class)
     public void execute(OutboundContext context) {
 
-        WmsOutboundRespVO outboundRespVO=outboundService.getOutboundWithItemList(context.getOutboundId());
+        WmsOutboundRespVO outboundRespVO = outboundService.getOutboundWithItemList(context.getOutboundId());
         Long warehouseId = outboundRespVO.getWarehouseId();
 
-        List<WmsOutboundItemRespVO> itemList=outboundRespVO.getItemList();
+        List<WmsOutboundItemRespVO> itemList = outboundRespVO.getItemList();
         for (WmsOutboundItemRespVO item : itemList) {
             Long productId = item.getProductId();
-            Long companyId = item.getCompanyId();
-            if (companyId == null) {
-                companyId = outboundRespVO.getCompanyId();
-            }
-            Long deptId = item.getDeptId();
-            if (deptId == null) {
-                deptId = outboundRespVO.getDeptId();
-            }
+            Long companyId = item.getCompanyId() != null ? item.getCompanyId() : outboundRespVO.getCompanyId();
+            Long deptId = item.getDeptId() != null ? item.getDeptId() : outboundRespVO.getDeptId();
 
-            Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap = new HashMap<>();
+            Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap = retrieveDeptIdCompanyIdMap(
+                warehouseId, productId, companyId, deptId, item.getBinId()
+            );
 
-            // 如果未指定归属，则按入库批次的先进先出进行处理
-            deptIdCompanyIdMap = retrieveDeptIdCompanyIdMap(warehouseId, productId, companyId, deptId);
-            // 如果没有可出库的批次，则返回
             if (deptIdCompanyIdMap.isEmpty()) {
                 throw exception(INBOUND_ITEM_OUTBOUND_AVAILABLE_QTY_NOT_ENOUGH);
             }
-            //检查计划库量是否超出库存量
+
+            // 校验数据有效性（如库存是否足够）
             this.validateData(item, deptIdCompanyIdMap);
-            deptIdCompanyIdMap.forEach((key, value) -> {
-                //需要变更的库存数量
-                Integer quantity = getExecuteQty(item, value);
-                this.outboundSingleItem(outboundRespVO, item, value.getCompanyId(), value.getDeptId(), warehouseId, item.getBinId(), productId, quantity, outboundRespVO.getId(), item.getId());
-                //todo 从item当中扣减quantity
-//                item.setPlanQty(item.getPlanQty() - quantity);
-            });
+            //用于临时操纵数据
+            WmsOutboundItemRespVO itemClone = BeanUtils.toBean(item, WmsOutboundItemRespVO.class);
+
+            // 批次处理
+            for (Map.Entry<String, WmsInboundItemLogicDO> entry : deptIdCompanyIdMap.entrySet()) {
+                if (itemClone.getPlanQty() <= 0) {
+                    break;
+                }
+
+                WmsInboundItemLogicDO batch = entry.getValue();
+                Integer quantity = getExecuteQty(itemClone, batch);
+
+                this.outboundSingleItem(outboundRespVO, item, batch.getCompanyId(), batch.getDeptId(),
+                    warehouseId, item.getBinId(), productId, quantity, outboundRespVO.getId(), item.getId()
+                );
+
+                itemClone.setPlanQty(itemClone.getPlanQty() - quantity);
+            }
 
             updateOutbound(outboundRespVO);
-            // 完成最终的出库
-            outboundService.finishOutbound(outboundRespVO);
         }
+
+        // 完成最终的出库
+        outboundService.finishOutbound(outboundRespVO);
 
     }
 
@@ -241,22 +248,25 @@ public abstract class OutboundExecutor extends QuantityExecutor<OutboundContext>
 
     }
 
-    private Map<String, WmsInboundItemLogicDO> retrieveDeptIdCompanyIdMap(Long warehouseId, Long productId, Long companyId, Long deptId) {
+    /**
+     * 获取批次库存
+     */
+    private Map<String, WmsInboundItemLogicDO> retrieveDeptIdCompanyIdMap(Long warehouseId, Long productId, Long companyId, Long deptId, Long binId) {
         //获取批次列表，然后根据可售数量判断取多个批次的库存
-        List<WmsInboundItemLogicDO> inboundItemLogicList = inboundService.getInboundItemLogicList(warehouseId, productId, deptId, companyId, true);
+        List<WmsInboundItemLogicDO> inboundItemLogicList = inboundService.getInboundItemLogicList(warehouseId, productId, deptId, companyId, binId, true);
         if (inboundItemLogicList == null) {
             throw exception(STOCK_LOGIC_NOT_EXISTS);
         }
         Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap = new HashMap<>();
         for (WmsInboundItemLogicDO inboundItemLogic : inboundItemLogicList) {
-            String key = makeStockKey(inboundItemLogic.getCompanyId(), inboundItemLogic.getDeptId());
+            String key = makeStockKey(inboundItemLogic);
             deptIdCompanyIdMap.put(key, inboundItemLogic);
         }
         return deptIdCompanyIdMap;
     }
 
-    private String makeStockKey(Long companyId, Long deptId) {
-        return companyId + "-" + deptId;
+    private String makeStockKey(WmsInboundItemLogicDO inboundItemLogicDo) {
+        return inboundItemLogicDo.getCompanyId() + "-" + inboundItemLogicDo.getDeptId() + "-" + inboundItemLogicDo.getId();
     }
 
 }
