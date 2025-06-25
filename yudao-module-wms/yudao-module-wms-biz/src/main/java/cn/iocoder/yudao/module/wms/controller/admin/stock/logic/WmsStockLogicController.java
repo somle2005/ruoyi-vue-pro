@@ -27,10 +27,14 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
+/**
+ * @author jisencai
+ */
 @Tag(name = "逻辑库存")
 @RestController
 @RequestMapping("/wms/stock-logic")
@@ -129,6 +133,8 @@ public class WmsStockLogicController {
             .mapping(WmsStockLogicRespVO::getCreator, WmsStockLogicRespVO::setCreatorName)
             .mapping(WmsStockLogicRespVO::getUpdater, WmsStockLogicRespVO::setUpdaterName)
             .fill();
+        //过滤空数据
+        voPageResult.getList().removeIf(e -> Objects.equals(e.getAvailableQty(), 0) && Objects.equals(e.getOutboundPendingQty(), 0) && Objects.equals(e.getShelvePendingQty(), 0));
         // 返回
         return success(voPageResult);
     }

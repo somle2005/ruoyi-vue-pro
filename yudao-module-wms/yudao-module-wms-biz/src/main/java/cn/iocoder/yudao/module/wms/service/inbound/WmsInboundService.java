@@ -34,9 +34,9 @@ public interface WmsInboundService {
      *
      * @param updateReqVO 更新信息
      */
-    WmsInboundDO updateInbound(WmsInboundSaveReqVO updateReqVO);
+    void updateInbound(WmsInboundSaveReqVO updateReqVO);
 
-    WmsInboundDO updateInboundAuditStatus(Long id, Integer status);
+    void updateInboundAuditStatus(Long id, Integer status);
 
     /**
      * 删除入库单
@@ -163,7 +163,7 @@ public interface WmsInboundService {
      * @param companyId   公司编号
      * @param olderFirst  是否按入库时间升序
      */
-    List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, boolean olderFirst);
+    List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, Long binId, boolean olderFirst);
 
     /**
      * 创建盘点入库单

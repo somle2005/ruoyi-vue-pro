@@ -170,7 +170,7 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public WmsInboundDO updateInbound(WmsInboundSaveReqVO updateReqVO) {
+    public void updateInbound(WmsInboundSaveReqVO updateReqVO) {
         // 校验存在
         WmsInboundDO exists = validateInboundExists(updateReqVO.getId());
         // 判断是否允许编辑
@@ -231,15 +231,13 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         WmsInboundDO inbound = BeanUtils.toBean(updateReqVO, WmsInboundDO.class);
         inboundMapper.updateById(inbound);
         // 返回
-        return inbound;
     }
 
     @Override
-    public WmsInboundDO updateInboundAuditStatus(Long id, Integer status) {
+    public void updateInboundAuditStatus(Long id, Integer status) {
         WmsInboundDO inboundDO = validateInboundExists(id);
         inboundDO.setAuditStatus(status);
         inboundMapper.updateById(inboundDO);
-        return inboundDO;
     }
 
     /**
@@ -528,8 +526,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, boolean olderFirst) {
-        return inboundItemLogicQueryMapper.getInboundItemLogicList(warehouseId, productId, deptId, companyId, olderFirst);
+    public List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, Long binId, boolean olderFirst) {
+        return inboundItemLogicQueryMapper.getInboundItemLogicList(warehouseId, productId, deptId, companyId, binId, olderFirst);
     }
 
     /**

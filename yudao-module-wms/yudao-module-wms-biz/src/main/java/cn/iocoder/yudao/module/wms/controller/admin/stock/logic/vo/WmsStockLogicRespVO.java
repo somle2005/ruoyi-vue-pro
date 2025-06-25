@@ -31,70 +31,70 @@ public class WmsStockLogicRespVO {
     @ExcelProperty("仓库ID")
     private Long warehouseId;
 
-    @Schema(description = "仓库", example = "")
+    @Schema(description = "仓库")
     private WmsWarehouseSimpleRespVO warehouse;
 
     @Schema(description = "产品ID", example = "1919")
     @ExcelProperty("产品ID")
     private Long productId;
 
-    @Schema(description = "产品", example = "")
+    @Schema(description = "产品")
     private WmsProductRespSimpleVO product;
 
     @Schema(description = "创建时间", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
 
-    @Schema(description = "库存财务主体公司ID", example = "")
+    @Schema(description = "库存财务主体公司ID")
     @ExcelProperty("库存财务主体公司ID")
     private Long companyId;
 
-    @Schema(description = "财务公司", example = "")
+    @Schema(description = "财务公司")
     @ExcelProperty("财务公司")
     private FmsCompanySimpleRespVO company;
 
-    @Schema(description = "库存归属部门ID", example = "")
+    @Schema(description = "库存归属部门ID")
     @ExcelProperty("库存归属部门ID")
     private Long deptId;
 
-    @Schema(description = "部门", example = "")
+    @Schema(description = "部门")
     @ExcelProperty("部门")
     private DeptSimpleRespVO dept;
 
-    @Schema(description = "创建者", example = "")
+    @Schema(description = "创建者")
     @ExcelProperty("创建者")
     private String creator;
 
-    @Schema(description = "创建者名称", example = "")
+    @Schema(description = "创建者名称")
     @ExcelProperty("创建者名称")
     private String creatorName;
 
-    @Schema(description = "更新者", example = "")
+    @Schema(description = "更新者")
     @ExcelProperty("更新者")
     private String updater;
 
-    @Schema(description = "更新者名称", example = "")
+    @Schema(description = "更新者名称")
     @ExcelProperty("更新者名称")
     private String updaterName;
 
-    @Schema(description = "更新时间", example = "")
+    @Schema(description = "更新时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
 
-    @Schema(description = "租户编号", example = "")
+    @Schema(description = "租户编号")
     @ExcelProperty("租户编号")
     private Long tenantId;
 
-    @Schema(description = "可用库存", example = "")
+    @Schema(description = "可用库存")
     @ExcelProperty("可用库存")
     private Integer availableQty;
 
-    @Schema(description = "待出库库存", example = "")
+    @Schema(description = "待出库库存")
     @ExcelProperty("待出库库存")
     private Integer outboundPendingQty;
 
-    @Schema(description = "待上架数量，上架是指从拣货区上架到货架", example = "")
+    @Schema(description = "待上架数量，上架是指从拣货区上架到货架")
     @ExcelProperty("待上架数量")
-    private Integer shelvingPendingQty;
+    private Integer shelvePendingQty;
 }

@@ -82,9 +82,9 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
             wrapper.orderByDesc(WmsInboundDO::getInboundTime);
         }
 
-        List<WmsInboundItemBinQueryDO> wmsInboundItemBinQueryDOS = selectList(wrapper);
+        List<WmsInboundItemBinQueryDO> wmsInboundItemBinQueryDos = selectList(wrapper);
 
-        return StreamX.from(wmsInboundItemBinQueryDOS).groupBy(WmsInboundItemBinQueryDO::getProductId);
+        return StreamX.from(wmsInboundItemBinQueryDos).groupBy(WmsInboundItemBinQueryDO::getProductId);
     }
 
     /**
@@ -115,11 +115,9 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
 //        wrapper.innerJoin(WmsStockBinDO.class, WmsStockBinDO::getBinId, WmsPickupItemDO::getBinId,WmsStockBinDO::getProductId,WmsPickupItemDO::getPickupId)
 //            .gt(WmsStockBinDO::getAvailableQty,0);
 
-        wrapper.innerJoin(WmsStockBinDO.class,on->{
-            return on.eq(WmsStockBinDO::getProductId,WmsPickupItemDO::getProductId)
-                .eq(WmsStockBinDO::getBinId,WmsPickupItemDO::getBinId)
-                .gt(WmsStockBinDO::getAvailableQty,0);
-        });
+        wrapper.innerJoin(WmsStockBinDO.class, on -> on.eq(WmsStockBinDO::getProductId, WmsPickupItemDO::getProductId)
+            .eq(WmsStockBinDO::getBinId, WmsPickupItemDO::getBinId)
+            .ge(WmsStockBinDO::getAvailableQty, 0));
 
         // 连接产品视图
         if(reqVO.getProductCode()!=null) {

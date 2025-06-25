@@ -35,7 +35,7 @@ public interface WmsStockLogicMapper extends BaseMapperX<WmsStockLogicDO> {
         wrapper.betweenIfPresent(WmsStockLogicDO::getAvailableQty, reqVO.getAvailableQty());
         wrapper.betweenIfPresent(WmsStockLogicDO::getOutboundPendingQty, reqVO.getOutboundPendingQty());
         wrapper.betweenIfPresent(WmsStockLogicDO::getShelvePendingQty, reqVO.getShelvingPendingQty());
-        wrapper.ne(WmsStockLogicDO::getAvailableQty, 0);
+//        wrapper.ne(WmsStockLogicDO::getAvailableQty, 0);
         return selectPage(reqVO, wrapper);
     }
 

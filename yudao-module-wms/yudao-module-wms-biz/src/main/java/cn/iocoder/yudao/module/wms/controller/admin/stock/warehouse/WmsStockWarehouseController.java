@@ -30,6 +30,9 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.STOCK_WAREHOUSE_NOT_EXISTS;
 
+/**
+ * @author jisencai
+ */
 @Tag(name = "仓库库存")
 @RestController
 @RequestMapping("/wms/stock-warehouse")

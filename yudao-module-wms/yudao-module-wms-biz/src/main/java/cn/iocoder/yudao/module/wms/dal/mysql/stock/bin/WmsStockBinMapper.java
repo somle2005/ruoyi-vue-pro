@@ -54,8 +54,8 @@ public interface WmsStockBinMapper extends BaseMapperX<WmsStockBinDO> {
         wrapper.betweenIfPresent(WmsStockBinDO::getAvailableQty,reqVO.getAvailableQty());
         wrapper.betweenIfPresent(WmsStockBinDO::getOutboundPendingQty,reqVO.getOutboundPendingQty());
         wrapper.betweenIfPresent(WmsStockBinDO::getSellableQty,reqVO.getSellableQty());
-        //筛除可用数量为0的数据
-        wrapper.ne(WmsStockBinDO::getAvailableQty,0);
+//        //筛除可用数量为0的数据
+//        wrapper.ne(WmsStockBinDO::getAvailableQty,0);
 
         return selectPage(reqVO, wrapper);
 

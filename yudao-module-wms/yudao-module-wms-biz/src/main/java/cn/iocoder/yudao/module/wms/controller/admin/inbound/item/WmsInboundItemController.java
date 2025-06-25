@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -161,6 +162,9 @@ public class WmsInboundItemController {
         inboundItemService.assembleInboundItems(voPageResult.getList());
 
         InboundExecutor.setShelveAvailableQty(voPageResult.getList());
+
+        //过滤空数据
+        voPageResult.getList().removeIf(e -> Objects.equals(e.getOutboundAvailableQty(), 0) && Objects.equals(e.getOutboundPendingQty(), 0));
         // 返回
         return success(voPageResult);
     }
@@ -211,10 +215,11 @@ public class WmsInboundItemController {
         inboundItemService.assembleCompany(voPageResult.getList());
         inboundItemService.assembleWarehouseBin(voPageResult.getList());
         inboundItemService.assembleStockWarehouse(voPageResult.getList());
-        // 填充入库单信息
         inboundItemService.assembleInbound(voPageResult.getList());
-        //
         InboundExecutor.setShelveAvailableQty(voPageResult.getList());
+
+        //过滤空数据
+        voPageResult.getList().removeIf(e -> (Objects.equals(e.getBinAvailableQty(), 0) && Objects.equals(e.getBinOutboundPendingQty(), 0)) || Objects.equals(e.getOutboundAvailableQty(), 0));
         // 返回
         return success(voPageResult);
     }
@@ -227,16 +232,15 @@ public class WmsInboundItemController {
     public void exportInboundItemExcelBin(@Valid @RequestBody WmsInboundItemPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<WmsInboundItemBinRespVO> voList = this.getInboundItemBinPage(pageReqVO).getData().getList();
-        Integer lineNumber=0;
+        int lineNumber = 0;
         for (WmsInboundItemBinRespVO wmsInboundItemBinRespVO : voList) {
             wmsInboundItemBinRespVO.setLineNumber(lineNumber++);
         }
         Map<Integer, WmsInboundItemBinRespVO> distinctMap = StreamX.from(voList).toMap(WmsInboundItemBinRespVO::getLineNumber);
 
 
-
-        List<WmsInboundItemBinExcelVO> inboundItemBinVOS = BeanUtils.toBean(voList, WmsInboundItemBinExcelVO.class);
-        for (WmsInboundItemBinExcelVO inboundItemBinVO : inboundItemBinVOS) {
+        List<WmsInboundItemBinExcelVO> inboundItemBinVos = BeanUtils.toBean(voList, WmsInboundItemBinExcelVO.class);
+        for (WmsInboundItemBinExcelVO inboundItemBinVO : inboundItemBinVos) {
             WmsInboundItemBinRespVO itemRespVO = distinctMap.get(inboundItemBinVO.getLineNumber());
             if (itemRespVO == null) {
                 continue;
@@ -247,6 +251,7 @@ public class WmsInboundItemController {
             inboundItemBinVO.setProductCode(itemRespVO.getProduct().getCode());
 
             WmsStockType stockType = WmsStockType.parse(itemRespVO.getStockType());
+            assert stockType != null;
             inboundItemBinVO.setStockTypeLabel(stockType.getLabel());
 
             if(itemRespVO.getInboundCompany()!=null) {
@@ -260,7 +265,7 @@ public class WmsInboundItemController {
         }
 
         // 导出 Excel
-        ExcelUtils.write(response, "批次库存仓位详情.xls", "数据", WmsInboundItemBinExcelVO.class, inboundItemBinVOS);
+        ExcelUtils.write(response, "批次库存仓位详情.xls", "数据", WmsInboundItemBinExcelVO.class, inboundItemBinVos);
     }
 
 
@@ -302,24 +307,24 @@ public class WmsInboundItemController {
         PageResult<WmsInboundItemQueryDO> doPageResult = inboundItemService.getInboundItemPage(pageReqVO);
         List<WmsInboundItemQueryDO> distinct = StreamX.from(doPageResult.getList()).distinct(WmsInboundItemQueryDO::getId);
         Map<Long, WmsInboundItemQueryDO> distinctMap = StreamX.from(distinct).toMap(WmsInboundItemQueryDO::getId);
-        List<WmsInboundItemRespVO> inboundItemVOS = BeanUtils.toBean(distinct, WmsInboundItemRespVO.class);
+        List<WmsInboundItemRespVO> inboundItemVos = BeanUtils.toBean(distinct, WmsInboundItemRespVO.class);
         // 装配
-        inboundItemService.assembleDept(inboundItemVOS);
-        inboundItemService.assembleInbound(inboundItemVOS);
-        inboundItemService.assembleProducts(inboundItemVOS);
-        inboundItemVOS.forEach(item -> {
+        inboundItemService.assembleDept(inboundItemVos);
+        inboundItemService.assembleInbound(inboundItemVos);
+        inboundItemService.assembleProducts(inboundItemVos);
+        inboundItemVos.forEach(item -> {
             if (item.getInbound() != null) {
                 item.setWarehouseId(item.getInbound().getWarehouseId());
             }
         });
-        inboundItemService.assembleWarehouse(inboundItemVOS);
-        inboundItemService.assembleCompany(inboundItemVOS);
+        inboundItemService.assembleWarehouse(inboundItemVos);
+        inboundItemService.assembleCompany(inboundItemVos);
         // 转换
         List<WmsInboundItemExportVO> exVOList = BeanUtils.toBean(distinct, WmsInboundItemExportVO.class);
         String inboundCode = null;
         // 扁平化
         Map<Long, WmsInboundItemExportVO> exportMap = StreamX.from(exVOList).toMap(WmsInboundItemExportVO::getId);
-        for (WmsInboundItemRespVO itemRespVO : inboundItemVOS) {
+        for (WmsInboundItemRespVO itemRespVO : inboundItemVos) {
             WmsInboundItemExportVO exportVO = exportMap.get(itemRespVO.getId());
             if (exportVO == null) {
                 continue;
@@ -338,6 +343,7 @@ public class WmsInboundItemController {
                 exportVO.setDeptName(itemRespVO.getDept().getName());
             }
             WmsInboundStatus inboundStatus = WmsInboundStatus.parse(itemRespVO.getInboundStatus());
+            assert inboundStatus != null;
             exportVO.setInboundStatusName(inboundStatus.getLabel());
             WmsInboundItemQueryDO queryDO = distinctMap.get(itemRespVO.getId());
             if (queryDO != null) {
