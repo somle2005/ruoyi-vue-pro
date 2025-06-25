@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.wms.dal.mysql.inbound.item;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.item.vo.WmsInboundItemListForTmsReqVO;
@@ -11,6 +12,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemQueryDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import org.apache.ibatis.annotations.Mapper;
@@ -36,6 +38,7 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.selectAll(WmsInboundItemDO.class);
         wrapper.select(WmsInboundDO::getWarehouseId);
 //        wrapper.select(WmsPickupItemDO::getBinId);
+        wrapper.select(WmsStockLogicDO::getOutboundPendingQty);
         wrapper.select(AGE_COL_EXPR);
 
         //
@@ -43,13 +46,18 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper.innerJoin(WmsInboundDO.class,WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId)
             .likeIfExists(WmsInboundDO::getCode, reqVO.getInboundNo())
             .eqIfExists(WmsInboundDO::getWarehouseId, reqVO.getWarehouseId())
-            //.eqIfExists(WmsInboundDO::getDeptId, reqVO.getDeptId())
-            //.eqIfExists(WmsInboundDO::getCompanyId, reqVO.getCompanyId())
+            .eqIfExists(WmsInboundDO::getDeptId, reqVO.getDeptId())
+            .eqIfExists(WmsInboundDO::getCompanyId, reqVO.getCompanyId())
          ;
 
         wrapper.leftJoin(WmsPickupItemDO.class, WmsPickupItemDO::getInboundItemId, WmsInboundItemQueryDO::getId)
             .eqIfExists(WmsPickupItemDO::getBinId, reqVO.getBinId());
-
+        //连接逻辑库存
+        wrapper.innerJoin(WmsStockLogicDO.class, on -> on
+            .eq(WmsStockLogicDO::getWarehouseId, WmsInboundDO::getWarehouseId)
+            .eq(WmsStockLogicDO::getCompanyId, WmsInboundDO::getCompanyId)
+//            .eq(WmsStockLogicDO::getDeptId, WmsInboundDO::getDeptId)
+            .eq(WmsStockLogicDO::getProductId, WmsPickupItemDO::getProductId));
         // 连接产品视图
         if(reqVO.getProductCode()!=null) {
             wrapper.innerJoin(WmsProductDO.class, WmsProductDO::getId, WmsStockWarehouseDO::getProductId)
@@ -124,5 +132,16 @@ public interface WmsInboundItemQueryMapper extends BaseMapperX<WmsInboundItemQue
         wrapper1.leftJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId)
             .eq(WmsInboundDO::getWarehouseId, listForTmsReqVO.getWarehouseId());
         return selectList(wrapper1);
+    }
+
+    default List<WmsInboundItemDO> selectByWarehouseIdAndProductId(Long warehouseId, Long productId) {
+        MPJLambdaWrapperX<WmsInboundItemQueryDO> wrapper = new MPJLambdaWrapperX<>();
+        wrapper.eq(WmsInboundItemDO::getProductId, productId)
+            .selectAll(WmsInboundItemDO.class);
+        wrapper.innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId)
+            .eq(WmsInboundDO::getWarehouseId, warehouseId);
+        wrapper.orderByAsc(WmsInboundItemDO::getCreateTime);
+        List<WmsInboundItemQueryDO> rtnList = selectList(wrapper);
+        return BeanUtils.toBean(rtnList, WmsInboundItemDO.class);
     }
 }

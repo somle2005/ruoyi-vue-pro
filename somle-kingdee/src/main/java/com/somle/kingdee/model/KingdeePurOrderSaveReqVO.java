@@ -28,218 +28,190 @@ public class KingdeePurOrderSaveReqVO {
      */
     @NotBlank(message = "单据日期不能为空")
     private String billDate;
-
     /**
      * 单据ID，新增不填，更新时必填
      */
     private String id;
-
     /**
      * 商品分录
      * 必填
      */
     @NotEmpty(message = "商品分录不能为空")
-    @Valid
-    private List<MaterialEntity> materialEntity;
-
+    private List<@Valid MaterialEntity> materialEntity;
     /**
      * 供应商ID
      * 必填
      */
     @NotBlank(message = "供应商ID不能为空")
     private String supplierId;
-
     /**
      * 供应商编码
      * 必填
      */
     @NotBlank(message = "供应商编码不能为空")
     private String supplierNumber;
-
     /**
      * 销售费用分摊规则；1: 按价税合计分摊（默认）； 2:按数量分摊
      */
     private String allocateRule;
-
     /**
      * 上传的附件url
      */
     private List<Attachments> attachmentsUrl;
-
     /**
      * 整单折扣额
      */
     private String billDisAmount;
-
     /**
      * 整单折扣率%
      */
     private String billDisRate;
-
     /**
      * 单据编码
      */
     private String billNo;
-
     /**
      * 供应商发货地址-详细地址
      */
     private String contactAddress;
-
     /**
      * 供应商发货地址-市ID
      */
     private String contactCityId;
-
     /**
      * 供应商发货地址-国家ID
      */
     private String contactCountryId;
-
     /**
      * 供应商发货地址-区ID
      */
     private String contactDistrictId;
-
     /**
      * 供应商发货地址-联系人
      */
     private String contactLinkman;
-
     /**
      * 供应商发货地址-联系方式
      */
     private String contactPhone;
-
     /**
      * 供应商发货地址-省ID
      */
     private String contactProvinceId;
-
     /**
      * 采购费用
      */
     private String costFee;
-
     /**
      * 采购费用明细
      */
     private CostFeeEntity costFeeEntity;
-
     /**
      * 币别
      */
     private String currencyId;
-
     /**
      * 自定义字段
      */
     private Map<String, String> customField;
-
     /**
      * 收货地址-详细地址
      */
     private String dispatcherAddress;
-
     /**
      * 收货地址-市ID
      */
     private String dispatcherCityId;
-
     /**
      * 收货地址国家id
      */
     private String dispatcherCountryId;
-
     /**
      * 收货地址-区ID
      */
     private String dispatcherDistrictId;
-
     /**
      * 收货地址人
      */
     private String dispatcherLinkman;
-
     /**
      * 收货地址联系电话
      */
     private String dispatcherPhone;
-
     /**
      * 收货地址-省ID
      */
     private String dispatcherProvinceId;
-
     /**
      * 结算日期
      */
     private String dueDate;
-
     /**
      * 业务员
      */
     private String empId;
-
     /**
      * 业务员编码
      */
     private String empNumber;
-
     /**
      * 是否忽略告警信息
      */
     private Boolean ignoreWarn;
-
     /**
      * 操作类型，审核audit、提交submit
      */
     private String operationKey;
-
     /**
      * 外部单号
      */
     private String outsidePkId;
-
     /**
      * 付款账户
      */
     private List<PaymentEntry> paymentEntry;
-
     /**
      * 收货地址
      */
     private String receviceDelivery;
-
     /**
      * 单据备注
      */
     private String remark;
-
     /**
      * 是否从反算单价
      */
     private Boolean reverseConditionCalculate;
-
     /**
      * 结算期限id
      */
     private String settingTermId;
-
     /**
      * 结算供应商
      */
     private String settleSupplierId;
-
     /**
      * 本次应付账款
      */
     private Double totalAmount;
-
     /**
      * 本次付款
      */
     private Double totalInsAmount;
+
+    /**
+     * 自定义字段为引用辅助资料、引用基础资料时，提交单据保存接口，自定义字段名需要增加【_id】后缀，自定义字段值为：对应辅助资料或基础资料的id
+     * <p>
+     * <a href="https://open.jdy.com/#/files/api/detail?id=76567ff2a06311edaa4b3d71bf0fce53&noside=true">...</a>
+     */
+    public void setCustomField(KingdeeCustomField customField, String value) {
+        //5：基础资料，6：引用基础资料属性
+        if (customField.getFieldType() == 5 || customField.getFieldType() == 6) {
+            this.customField.put(customField.getNumber() + "_id", value);
+        } else {
+            this.customField.put(customField.getNumber(), value);
+        }
+    }
 
     @Data
     @Builder

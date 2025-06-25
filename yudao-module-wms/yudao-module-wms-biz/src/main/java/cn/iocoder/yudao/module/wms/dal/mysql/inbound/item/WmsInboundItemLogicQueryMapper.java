@@ -12,7 +12,7 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
 import org.apache.ibatis.annotations.Mapper;
 
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,12 +37,12 @@ public interface WmsInboundItemLogicQueryMapper extends BaseMapperX<WmsInboundIt
 
     /**
      * 按入库顺序获得第一个入库批次
-     * @param warehouseId
-     * @param productId
+     * @param warehouseId 仓库ID
+     * @param productId 产品ID
      * @param olderFirst 是否按入库时间升序
      **/
     default WmsInboundItemLogicDO getInboundItemLogic(Long warehouseId, Long productId, boolean olderFirst) {
-        Map<Long, List<WmsInboundItemLogicDO>> map = selectInboundItemLogicGroupedMap(warehouseId, Arrays.asList(productId), olderFirst);
+        Map<Long, List<WmsInboundItemLogicDO>> map = selectInboundItemLogicGroupedMap(warehouseId, Collections.singletonList(productId), olderFirst);
         if (map.isEmpty()) {
             return null;
         } else {
@@ -56,8 +56,8 @@ public interface WmsInboundItemLogicQueryMapper extends BaseMapperX<WmsInboundIt
 
     /**
      * 按入库顺序获得第一个入库批次
-     * @param warehouseId
-     * @param productIds
+     * @param warehouseId 仓库ID
+     * @param productIds 产品ID列表
      * @param olderFirst 是否按入库时间升序
      **/
     default Map<Long, WmsInboundItemLogicDO> selectInboundItemLogicMap(Long warehouseId, List<Long> productIds, boolean olderFirst) {
@@ -75,8 +75,8 @@ public interface WmsInboundItemLogicQueryMapper extends BaseMapperX<WmsInboundIt
 
     /**
      * 按入库顺序获得第一个入库批次
-     * @param warehouseId
-     * @param productIds
+     * @param warehouseId 仓库ID
+     * @param productIds 产品ID列表
      * @param olderFirst 是否按入库时间升序
      **/
     default Map<Long, List<WmsInboundItemLogicDO>> selectInboundItemLogicGroupedMap(Long warehouseId, List<Long> productIds, boolean olderFirst) {
@@ -116,20 +116,24 @@ public interface WmsInboundItemLogicQueryMapper extends BaseMapperX<WmsInboundIt
      *
      * @param warehouseId 仓库编号
      * @param productId   产品编号
+     * @param companyId   公司编号
      * @param olderFirst  是否按入库时间升序
      * @return 入库批次列表
      */
-    default List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, boolean olderFirst) {
+    default List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, boolean olderFirst) {
         // 主表
         MPJLambdaWrapperX<WmsInboundItemLogicDO> wrapper = new MPJLambdaWrapperX();
         // 主表条件
         wrapper.eq(WmsInboundItemQueryDO::getProductId, productId)
             .in(WmsInboundItemQueryDO::getInboundStatus, WmsInboundStatus.ALL.getValue(), WmsInboundStatus.PART.getValue())
+            .eqIfExists(WmsInboundItemQueryDO::getDeptId, deptId)
+            .eqIfExists(WmsInboundItemQueryDO::getCompanyId, companyId)
         ;
         // 查询主表字段
         wrapper.select(WmsInboundItemDO::getProductId);
         wrapper.select(WmsInboundItemDO::getCompanyId);
         wrapper.select(WmsInboundItemDO::getDeptId);
+        wrapper.select(WmsInboundItemDO::getOutboundAvailableQty);
         // 查询子表字段
         wrapper.innerJoin(WmsInboundDO.class, WmsInboundDO::getId, WmsInboundItemQueryDO::getInboundId).
             select(WmsInboundDO::getId).
@@ -140,6 +144,7 @@ public interface WmsInboundItemLogicQueryMapper extends BaseMapperX<WmsInboundIt
 
         wrapper.innerJoin(WmsStockBinDO.class, WmsStockBinDO::getWarehouseId, WmsInboundDO::getWarehouseId).
             eq(WmsStockBinDO::getProductId, productId).
+            ge(WmsStockBinDO::getSellableQty, 0).
             select(WmsStockBinDO::getBinId).
             select(WmsStockBinDO::getSellableQty);
 

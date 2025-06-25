@@ -3,19 +3,25 @@ package cn.iocoder.yudao.module.srm.api.purchase;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderDTO;
 import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseOrderItemDTO;
+import cn.iocoder.yudao.module.srm.api.supplier.SrmSupplierApi;
+import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierDTO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
+import cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.time.format.DateTimeFormatter;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
+
+import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 
 /**
  * 采购订单 API 实现类
@@ -27,48 +33,84 @@ public class SrmPurchaseOrderApiImpl implements SrmPurchaseOrderApi {
     @Autowired
     @Lazy
     private SrmPurchaseOrderService purchaseOrderService;
+    @Autowired
+    @Lazy
+    private SrmSupplierApi supplierApi;
+
 
     @Override
-    public List<SrmPurchaseOrderDTO> getPurchaseOrderList(List<Long> ids) {
-        // 1. 获取采购订单列表
-        Collection<SrmPurchaseOrderDO> orders = purchaseOrderService.getPurchaseOrderList(ids);
-        if (orders.isEmpty()) {
-            return List.of();
+    public List<SrmPurchaseOrderDTO> validatePurchaseOrderIds(Set<Long> ids) {
+        // 1. 获取所有采购订单
+        List<SrmPurchaseOrderDO> list = purchaseOrderService.getPurchaseOrderList(ids).stream().toList();
+        // 2. 检查是否存在不存在的采购订单
+        Map<Long, SrmPurchaseOrderDO> orderMap = convertMap(list, SrmPurchaseOrderDO::getId);
+        List<Long> notExistIds = ids.stream()
+            .filter(id -> !orderMap.containsKey(id))
+            .collect(Collectors.toList());
+        if (!notExistIds.isEmpty()) {
+            throw exception(SrmErrorCodeConstants.PURCHASE_ORDER_NOT_EXISTS, notExistIds);
         }
-
-        // 2. 获取订单明细列表
-        Map<Long, List<SrmPurchaseOrderItemDO>> orderItemMap = purchaseOrderService.getPurchaseOrderItemListByOrderIds(
-                        orders.stream().map(SrmPurchaseOrderDO::getId).collect(Collectors.toList()))
-                .stream().collect(Collectors.groupingBy(SrmPurchaseOrderItemDO::getOrderId));
-
-        // 3. 转换为 DTO 对象
-        return orders.stream().map(order -> {
-            SrmPurchaseOrderDTO dto = BeanUtils.toBean(order, SrmPurchaseOrderDTO.class);
-            // 设置订单明细
-            List<SrmPurchaseOrderItemDO> orderItems = orderItemMap.getOrDefault(order.getId(), List.of());
-            dto.setItems(orderItems.stream().map(this::convertOrderItem).collect(Collectors.toList()));
-            return dto;
-        }).collect(Collectors.toList());
+        // 3. 转换为 DTO 并返回
+        Map<Long, List<SrmPurchaseOrderItemDO>> map = purchaseOrderService.getPurchaseOrderItemListByOrderIds(ids).stream().collect(Collectors.groupingBy(SrmPurchaseOrderItemDO::getOrderId));
+        List<SrmPurchaseOrderDTO> dtoList = BeanUtils.toBean(list, SrmPurchaseOrderDTO.class,
+            order -> order.setItems(BeanUtils.toBean(map.get(order.getId()), SrmPurchaseOrderItemDTO.class))
+        );
+        //3.1 构造供应商name
+        Map<Long, SrmSupplierDTO> supplierMap = supplierApi.getSupplierMap(list.stream().map(SrmPurchaseOrderDO::getSupplierId).collect(Collectors.toSet()));
+        dtoList.forEach(order -> {
+            order.setSupplierName(supplierMap.get(order.getSupplierId()).getName());
+        });
+        return dtoList;
     }
 
     /**
-     * 转换订单明细
+     * 获取所有采购订单ID
      *
-     * @param item 订单明细 DO
-     * @return 订单明细 DTO
+     * @return 采购订单ID列表
      */
-    private SrmPurchaseOrderItemDTO convertOrderItem(SrmPurchaseOrderItemDO item) {
-        if (item == null) {
-            return null;
-        }
-        SrmPurchaseOrderItemDTO dto = BeanUtils.toBean(item, SrmPurchaseOrderItemDTO.class);
-        // 特殊字段映射
-        dto.setMaterialId(item.getProductId());
-//        dto.setMaterialCode(item.getProductCode());
-        dto.setMaterialName(item.getProductName());
-        dto.setUnit(item.getProductUnitName());
-        // 将 LocalDateTime 转换为 yyyy-MM-dd 格式的字符串
-        dto.setDeliveryDate(item.getDeliveryTime() != null ? item.getDeliveryTime().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : null);
-        return dto;
+    @Override
+    public List<Long> listPurchaseOrderIds() {
+        return purchaseOrderService.listPurchaseOrderIds();
     }
-} 
+
+    /**
+     * 根据采购订单code集合获取订单ID
+     *
+     * @param codes 采购订单code集合
+     * @return 采购订单ID列表
+     */
+    @Override
+    public List<Long> listPurchaseOrderIdsByCodes(@NotEmpty(message = "采购订单code不能为空") List<String> codes) {
+        return purchaseOrderService.listPurchaseOrderIdsByCodes(codes);
+    }
+
+    /**
+     * 根据采购订单code获取采购订单
+     *
+     * @param code 采购订单code
+     * @return 采购订单DTO
+     */
+    @Override
+    public SrmPurchaseOrderDTO getPurchaseOrderByCode(@NotEmpty(message = "采购订单code不能为空") String code) {
+        // 1. 根据code获取采购订单
+        SrmPurchaseOrderDO orderDO = purchaseOrderService.getPurchaseOrderByCode(code);
+        if (orderDO == null) {
+            throw exception(SrmErrorCodeConstants.PURCHASE_ORDER_NOT_EXISTS, code);
+        }
+
+        // 2. 获取采购订单项列表
+        List<SrmPurchaseOrderItemDO> orderItems = purchaseOrderService.getPurchaseOrderItemListByOrderId(orderDO.getId());
+
+        // 3. 转换为DTO
+        SrmPurchaseOrderDTO orderDTO = BeanUtils.toBean(orderDO, SrmPurchaseOrderDTO.class);
+        orderDTO.setItems(BeanUtils.toBean(orderItems, SrmPurchaseOrderItemDTO.class));
+
+        // 4. 设置供应商名称
+        SrmSupplierDTO supplierDTO = supplierApi.getSupplier(orderDO.getSupplierId());
+        if (supplierDTO != null) {
+            orderDTO.setSupplierName(supplierDTO.getName());
+        }
+
+        return orderDTO;
+    }
+}

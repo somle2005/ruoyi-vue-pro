@@ -21,7 +21,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode SUPPLIER_NAME_DUPLICATE = new ErrorCode(1_030_100_001, "供应商名称({})已存在");
     ErrorCode PURCHASE_RETURN_IN_SUPPLIER_NOT_SAME = new ErrorCode(1002013001, "退货项对应的入库单供应商不一致，基准供应商为【{}】，入库单【{}】的供应商为【{}】");
     // ========== ERP 采购订单（1-030-101-000） ==========
-    ErrorCode PURCHASE_ORDER_NOT_EXISTS = new ErrorCode(1_030_101_000, "采购订单不存在");
+    ErrorCode PURCHASE_ORDER_NOT_EXISTS = new ErrorCode(1_030_101_000, "采购订单编号:()不存在");
     ErrorCode PURCHASE_ORDER_DELETE_FAIL_APPROVE = new ErrorCode(1_030_101_001, "采购订单({})已审核，无法删除");
     ErrorCode PURCHASE_ORDER_PROCESS_FAIL = new ErrorCode(1_030_101_002, "反审核失败，只有已审核的采购订单才能反审核");
     ErrorCode PURCHASE_ORDER_APPROVE_FAIL = new ErrorCode(1_030_101_003, "审核失败，只有未审核的采购订单才能审核");

@@ -13,11 +13,13 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
-import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseInApi;
+import cn.iocoder.yudao.module.srm.api.purchase.dto.SrmPurchaseInDTO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
+import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundValidateReqDTO;
 import cn.iocoder.yudao.module.wms.config.OutboundStateMachineConfigure;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalHistoryRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
@@ -33,12 +35,13 @@ import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSim
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.item.WmsOutboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.WmsOutboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.item.WmsOutboundItemMapper;
-import cn.iocoder.yudao.module.wms.dal.mysql.pickup.item.WmsPickupItemMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.bin.WmsStockBinMapper;
+import cn.iocoder.yudao.module.wms.dal.mysql.stock.warehouse.WmsStockWarehouseMapper;
 import cn.iocoder.yudao.module.wms.dal.redis.lock.WmsLockRedisDAO;
 import cn.iocoder.yudao.module.wms.dal.redis.no.WmsNoRedisDAO;
 import cn.iocoder.yudao.module.wms.enums.WmsConstants;
@@ -46,7 +49,6 @@ import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundType;
 import cn.iocoder.yudao.module.wms.service.approval.history.WmsApprovalHistoryService;
-import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.outbound.item.WmsOutboundItemService;
 import cn.iocoder.yudao.module.wms.service.stock.bin.WmsStockBinService;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
@@ -82,15 +84,18 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     private WmsOutboundItemService outboundItemService;
 
     @Resource
+    @Lazy
     private WmsNoRedisDAO noRedisDAO;
 
     @Resource
+    @Lazy
     protected WmsLockRedisDAO lockRedisDAO;
 
     @Resource
     private WmsOutboundMapper outboundMapper;
 
     @Resource
+    @Lazy
     private WmsStockBinMapper stockBinMapper;
 
     @Resource
@@ -106,25 +111,26 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     private WmsWarehouseService warehouseService;
 
     @Resource
+    @Lazy
     private DeptApi deptApi;
 
     @Resource
+    @Lazy
     private FmsCompanyApi companyApi;
 
     @Resource
-    private SrmPurchaseReturnApi srmPurchaseReturnApi;
+    @Lazy
+    private SrmPurchaseInApi srmPurchaseInApi;
 
     @Resource
     @Lazy
-    private WmsInboundService inboundService;
+    private WmsStockWarehouseMapper wmsStockWarehouseMapper;
 
     @Resource
     private ErpProductApi productApi;
 
     @Resource
-    private WmsPickupItemMapper pickupItemMapper;
-
-    @Resource
+    @Lazy
     private WmsApprovalHistoryService approvalHistoryService;
 
     @Resource(name = OutboundStateMachineConfigure.STATE_MACHINE_NAME)
@@ -177,7 +183,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         Set<Long> warehouseIdSetOfBin = StreamX.from(wmsWarehouseBinDOList).toSet(WmsWarehouseBinDO::getWarehouseId);
         // 校验仓库
         if (warehouseIdSetOfBin.size() != 1) {
-            throw exception(OUTBOUND_WAREHOUSE_ERROR);
+            throw exception(WAREHOUSE_BIN_NOT_EXISTS);
         }
 //        outboundDO.setUpstreamType(outboundDO.getType());
         if (outboundDO.getUpstreamType() != null && outboundDO.getUpstreamType().equals(SRM_PURCHASE_RETURN.getValue())) {
@@ -256,6 +262,11 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         wmsOutboundService.approve(WmsOutboundAuditStatus.Event.FINISH, approvalReqVO);
     }
 
+    @Override
+    public void assembleUpstreamType(List<WmsOutboundRespVO> list) {
+        list.forEach(o -> o.setUpstreamType(o.getUpstreamType() == null ? o.getType() : o.getUpstreamType()));
+    }
+
 
     /**
      * @sign : E1DA4E6302BF0EFA
@@ -332,6 +343,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         WmsOutboundDO outbound = validateOutboundExists(id);
         // 判断是否允许删除
         WmsOutboundAuditStatus auditStatus = WmsOutboundAuditStatus.parse(outbound.getAuditStatus());
+        assert auditStatus != null;
         if (!auditStatus.matchAny(WmsOutboundAuditStatus.DRAFT, WmsOutboundAuditStatus.REJECT)) {
             throw exception(OUTBOUND_CAN_NOT_EDIT);
         }
@@ -489,5 +501,59 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         ctx.setExtra(WmsConstants.APPROVAL_REQ_VO_KEY, approvalReqVO);
         // 触发事件
         outboundStateMachine.fireEvent(event, ctx);
+    }
+
+    /**
+     * 验证出库单数据，外部模块校验用
+     *
+     * @param validateReqDTOList 入参
+     * @return 结果
+     */
+    @Override
+    public boolean validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList) {
+        if (validateReqDTOList.isEmpty()) {
+            throw exception(OUTBOUND_ITEM_NOT_EXISTS);
+        }
+        //根据产品id检验数量谁否充分
+        for (WmsOutboundValidateReqDTO validateReqDTO : validateReqDTOList) {
+            List<WmsStockWarehouseDO> stockWarehouseDOList = wmsStockWarehouseMapper.getByProductIds(null, Collections.singletonList(validateReqDTO.getProductId()));
+            if (stockWarehouseDOList == null || stockWarehouseDOList.isEmpty()) {
+                throw exception(PRODUCT_NOT_EXISTS, validateReqDTO.getProductName());
+            }
+            for (WmsStockWarehouseDO stockWarehouseDO : stockWarehouseDOList) {
+                if (stockWarehouseDO.getSellableQty() < validateReqDTO.getQuantity()) {
+                    throw exception(STOCK_WAREHOUSE_ITEM_NOT_ENOUGH, validateReqDTO.getProductName());
+                }
+            }
+        }
+        return true;
+    }
+
+    @Override
+    public void assemblePurchaseOrder(List<WmsOutboundRespVO> list) {
+        if (CollectionUtils.isEmpty(list)) {
+            return;
+        }
+        // 获取上游单据编号
+        List<Long> purchaseOrderIds = StreamX.from(list).toList(WmsOutboundRespVO::getUpstreamId);
+        List<SrmPurchaseInDTO> purchaseInList = srmPurchaseInApi.getPurchaseInList(purchaseOrderIds);
+        //把purchaseInList当中的purchaseOrderCode组装到list当中
+        Map<Long, String> purchaseOrderCodeMap = StreamX.from(purchaseInList).toMap(SrmPurchaseInDTO::getId, SrmPurchaseInDTO::getCode);
+        StreamX.from(list).forEach(outboundVO -> {
+            Long upstreamId = outboundVO.getUpstreamId();
+            if (purchaseOrderCodeMap.containsKey(upstreamId)) {
+                outboundVO.setPurchaseOrderCode(Long.valueOf(purchaseOrderCodeMap.get(upstreamId)));
+            }
+        });
+        //把purchaseInList当中的purchaseOrderId组装到list当中
+        Map<Long, Long> purchaseOrderIdMap = StreamX.from(purchaseInList).toMap(SrmPurchaseInDTO::getId, SrmPurchaseInDTO::getId);
+        StreamX.from(list).forEach(outboundVO -> {
+            Long upstreamId = outboundVO.getUpstreamId();
+            if (purchaseOrderIdMap.containsKey(upstreamId)) {
+                outboundVO.setPurchaseOrderId(purchaseOrderIdMap.get(upstreamId));
+            }
+        });
+
+
     }
 }

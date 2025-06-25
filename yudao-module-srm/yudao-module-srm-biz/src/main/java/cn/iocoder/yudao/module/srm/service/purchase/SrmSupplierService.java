@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.srm.service.purchase;
 
+import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupplierPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupplierRespVO;
@@ -90,7 +91,7 @@ public interface SrmSupplierService {
      * @param status 状态
      * @return 供应商列表
      */
-    List<SrmSupplierDO> getSupplierListByStatus(Integer status);
+    List<SrmSupplierDO> getSupplierListByStatus(CommonStatusEnum status);
 
     //装配供应商付款条款
     void assemblePaymentTerms(List<SrmSupplierRespVO> supplierList);
