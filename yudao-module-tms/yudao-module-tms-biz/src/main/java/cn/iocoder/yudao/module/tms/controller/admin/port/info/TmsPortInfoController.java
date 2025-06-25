@@ -106,8 +106,7 @@ public class TmsPortInfoController {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TmsPortInfoDO> list = portInfoService.getPortInfoPage(pageReqVO).getList();
         // 导出 Excel
-        ExcelUtils.write(response, "TMS港口信息.xls", "数据", TmsPortInfoRespVO.class,
-            BeanUtils.toBean(list, TmsPortInfoRespVO.class));
+        ExcelUtils.write(response, "TMS港口信息.xls", "数据", TmsPortInfoRespVO.class, BeanUtils.toBean(list, TmsPortInfoRespVO.class));
     }
 
     @GetMapping("/list-simple")

@@ -113,8 +113,7 @@ public class TmsCustomCategoryController {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TmsCustomCategoryDO> list = customRuleCategoryService.getCustomRuleCategoryPage(pageReqVO).getList();
         // 导出 Excel
-        ExcelUtils.write(response, "海关分类.xls", "数据", TmsCustomCategoryRespVO.class,
-            BeanUtils.toBean(BindingResult(list), TmsCustomCategoryRespVO.class));
+        ExcelUtils.write(response, "海关分类.xls", "数据", TmsCustomCategoryRespVO.class, BeanUtils.toBean(BindingResult(list), TmsCustomCategoryRespVO.class));
     }
 
     // ==================== 子表（海关分类子表） ====================

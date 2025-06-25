@@ -32,4 +32,7 @@ public interface TmsDictTypeConstants {
 
     //货柜类型
     String TMS_LOGISTIC_TYPE = "tms_cabinet_type";
+
+    //产品材质
+    String ERP_PRODUCT_MATERIAL = "erp_product_material";
 }

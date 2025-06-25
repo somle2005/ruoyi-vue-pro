@@ -13,6 +13,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.customrule.vo.*;
+import cn.iocoder.yudao.module.tms.controller.admin.logistic.customrule.vo.convert.TmsCustomRuleExportConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.customrule.TmsCustomRuleDO;
 import cn.iocoder.yudao.module.tms.service.logistic.customrule.TmsCustomRuleService;
 import cn.iocoder.yudao.module.tms.service.logistic.customrule.bo.TmsCustomRuleBO;
@@ -107,8 +108,9 @@ public class TmsCustomRuleController {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<TmsCustomRuleBO> page = customRuleService.getCustomRuleBOPage(pageReqVO);
         List<TmsCustomRuleRespVO> voList = bindBOList(page.getList());
+        List<TmsCustomRuleExcelRespVO> excelList = TmsCustomRuleExportConvert.buildExcelList(voList);
         // 导出 Excel
-        ExcelUtils.write(response, "ERP 海关规则.xls", "数据", TmsCustomRuleRespVO.class, voList);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "ERP 海关规则.xls", "ERP 海关规则", TmsCustomRuleExcelRespVO.class, excelList);
     }
 
     @PostMapping("/list-by-country-product")

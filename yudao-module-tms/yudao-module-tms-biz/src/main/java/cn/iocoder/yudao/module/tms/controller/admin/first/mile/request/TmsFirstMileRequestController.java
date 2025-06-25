@@ -21,6 +21,7 @@ import cn.iocoder.yudao.module.system.enums.common.CountryEnum;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.convert.TmsFirstMileRequestExportConvert;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.request.TmsFirstMileRequestProductStockRespVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
@@ -129,8 +130,9 @@ public class TmsFirstMileRequestController {
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
         // 转换为响应对象列表
         List<TmsFirstMileRequestRespVO> list = bindListResult(pageBO.getList());
+        List<TmsFirstMileRequestExcelRespVO> excelList = TmsFirstMileRequestExportConvert.buildExcelList(list);
         // 导出 Excel文件
-        ExcelUtils.write(response, "头程申请单.xls", "数据", TmsFirstMileRequestRespVO.class, list);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "头程申请单.xls", "头程申请单", TmsFirstMileRequestExcelRespVO.class, excelList);
     }
 
     @PostMapping("/import-excel")
