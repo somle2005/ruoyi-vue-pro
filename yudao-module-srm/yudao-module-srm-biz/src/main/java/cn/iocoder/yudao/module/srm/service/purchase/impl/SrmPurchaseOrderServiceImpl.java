@@ -877,7 +877,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 校验订单状态是否已审核 未审核 -> e
         //        ThrowUtil.ifThrow(!Objects.equals(orderDO.getAuditStatus(), SrmAuditStatus.APPROVED.getCode()), PURCHASE_ORDER_NOT_AUDIT, orderDO.getId());
         //1 从OSS拿到模板word
-        org.springframework.core.io.Resource resource = getResourceByFilePath(reqVO);
+        org.springframework.core.io.Resource resource = this.getResourceByFilePath(reqVO);
         try (XWPFTemplate xwpfTemplate = templateService.buildXWPDFTemplate(resource)) {
             //2 模板word渲染数据
             List<SrmPurchaseOrderItemDO> itemDOS = purchaseOrderItemMapper.selectListByOrderId(orderDO.getId());
