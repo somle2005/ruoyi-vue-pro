@@ -19,7 +19,6 @@ public class SystemUserConfigSaveReqVO {
     private String configKey;
 
     @Schema(description = "配置值", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "配置值不能为空")
     private String configValue;
 
     @Schema(description = "作用域（1前端 2后端）", hidden = true)
