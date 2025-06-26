@@ -61,10 +61,11 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
             reqVO = new SrmPurchaseInPageReqVO();
         }
         MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapper = new MPJLambdaWrapperX<SrmPurchaseInItemDO>()
-            .selectAll(SrmPurchaseInItemDO.class)
-            .orderByDesc(SrmPurchaseInItemDO::getCreateTime);
+            .selectAll(SrmPurchaseInItemDO.class);
 
-        return masterPageQuery(wrapper, reqVO);
+        masterPageQuery(wrapper, reqVO);
+        wrapper.orderByDesc(SrmPurchaseInItemDO::getCreateTime); // 按时间降序排序
+        return wrapper;
     }
 
     default MPJLambdaWrapperX<SrmPurchaseInItemDO> slavePageQuery(MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapperX, SrmPurchaseInPageReqVO reqVO) {
@@ -95,7 +96,6 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 .eqIfPresent(SrmPurchaseInDO::getInboundStatus, mainQuery.getInboundStatus())
                 // ========== 时间范围 ==========
                 .betweenIfPresent(SrmPurchaseInDO::getCreateTime, mainQuery.getCreateTime())
-
             ;
         }
         return wrapperX;
@@ -108,11 +108,11 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
         MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapper = buildWrapper(reqVO)
             // ========== 关联主表 ==========
             .leftJoin(SrmPurchaseInDO.class, SrmPurchaseInDO::getId, SrmPurchaseInItemDO::getArriveId)
-            .selectAll(SrmPurchaseInDO.class)
-            .orderByDesc(SrmPurchaseInDO::getCreateTime);
+            .selectAll(SrmPurchaseInDO.class);
 
-
-        return slavePageQuery(wrapper, reqVO);
+        slavePageQuery(wrapper, reqVO);
+        wrapper.orderByDesc(SrmPurchaseInDO::getCreateTime);
+        return wrapper;
     }
 
     //page

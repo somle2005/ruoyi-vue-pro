@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurch
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnSaveReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.ret.SrmPurchaseReturnSummaryBO;
 import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnBO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -152,5 +153,13 @@ public interface SrmPurchaseReturnService {
      * 获取所有采购退货单ID
      */
     List<Long> listAllPurchaseReturnIds();
+
+    /**
+     * 获得采购退货汇总
+     *
+     * @param reqVO 分页查询
+     * @return 采购退货汇总
+     */
+    SrmPurchaseReturnSummaryBO getPurchaseReturnSummary(SrmPurchaseReturnPageReqVO reqVO);
 
 }

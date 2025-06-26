@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.pojo.PageResultSummary;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
@@ -16,6 +17,7 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItem
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.ret.SrmPurchaseReturnSummaryBO;
 import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
@@ -98,9 +100,14 @@ public class SrmPurchaseReturnController {
     @PostMapping("/page")
     @Operation(summary = "获得采购退货分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:query')")
-    public CommonResult<PageResult<SrmPurchaseReturnBaseRespVO>> getPurchaseReturnPage(@RequestBody(required = false) SrmPurchaseReturnPageReqVO pageReqVO) {
+    public CommonResult<PageResultSummary<SrmPurchaseReturnBaseRespVO, SrmPurchaseReturnSummaryRespVO>> getPurchaseReturnPage(@RequestBody(required = false) SrmPurchaseReturnPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new SrmPurchaseReturnPageReqVO();
+        }
         PageResult<SrmPurchaseReturnBO> pageResult = purchaseReturnService.getPurchaseReturnBOPage(pageReqVO);
-        return success(new PageResult<>(bindResult(pageResult.getList()), pageResult.getTotal()));
+        List<SrmPurchaseReturnBaseRespVO> respList = bindResult(pageResult.getList());
+        SrmPurchaseReturnSummaryBO summaryBO = purchaseReturnService.getPurchaseReturnSummary(pageReqVO);
+        return success(new PageResultSummary<>(respList, pageResult.getTotal(), BeanUtils.toBean(summaryBO, SrmPurchaseReturnSummaryRespVO.class)));
     }
 
     @GetMapping("/export-excel")
