@@ -9,6 +9,7 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestItemsBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestSummaryBO;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.Collection;
@@ -27,8 +28,20 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
 
     //buildWrapper
     default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> buildWrapper(SrmPurchaseRequestPageReqVO req) {
-        return new MPJLambdaWrapperX<SrmPurchaseRequestItemsDO>()
+        MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseRequestItemsDO>()
             .selectAll(SrmPurchaseRequestItemsDO.class)
+            .inIfPresent(SrmPurchaseRequestItemsDO::getProductId, req.getProductIds())
+            .likeIfPresent(SrmPurchaseRequestItemsDO::getProductCode, req.getProductCode())
+            .likeIfPresent(SrmPurchaseRequestItemsDO::getProductName, req.getProductName())
+            .likeIfPresent(SrmPurchaseRequestItemsDO::getProductUnitName, req.getProductUnitName())
+            .orderByDesc(SrmPurchaseRequestItemsDO::getCreateTime);// 按时间降序排序
+
+        return masterPageQuery(wrapperX, req);
+    }
+
+    //masterPageQuery
+    default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> masterPageQuery(MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX, SrmPurchaseRequestPageReqVO req) {
+        return wrapperX
             .inIfPresent(SrmPurchaseRequestItemsDO::getProductId, req.getProductIds())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductCode, req.getProductCode())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductName, req.getProductName())
@@ -39,9 +52,15 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
 
     //BO wrapper
     default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> buildBOWrapper(SrmPurchaseRequestPageReqVO req) {
-        return buildWrapper(req)
+        MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX = buildWrapper(req)
             .leftJoin(SrmPurchaseRequestDO.class, SrmPurchaseRequestDO::getId, SrmPurchaseRequestItemsDO::getRequestId)
-            .selectAll(SrmPurchaseRequestDO.class)
+            .selectAll(SrmPurchaseRequestDO.class);
+        return slavePageQuery(wrapperX, req);
+    }
+
+    //slavePageQuery
+    default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> slavePageQuery(MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX, SrmPurchaseRequestPageReqVO req) {
+        return wrapperX
             .likeIfPresent(SrmPurchaseRequestDO::getCode, req.getCode())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicantId, req.getApplicantId())
             .inIfPresent(SrmPurchaseRequestDO::getApplicationDeptId, req.getApplicationDeptIds())
@@ -109,4 +128,21 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
     }
 
 
+    //汇总统计
+    default SrmPurchaseRequestSummaryBO selectSrmPurchaseRequestSummaryBO(SrmPurchaseRequestPageReqVO req) {
+        MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseRequestItemsDO>()
+            // 汇总所有字段
+            .selectSum(SrmPurchaseRequestItemsDO::getQty, SrmPurchaseRequestSummaryBO::getSumQty)
+            .selectSum(SrmPurchaseRequestItemsDO::getApprovedQty, SrmPurchaseRequestSummaryBO::getSumApprovedQty)
+            .selectSum(SrmPurchaseRequestItemsDO::getGrossTotalPrice, SrmPurchaseRequestSummaryBO::getSumGrossTotalPrice)
+            .selectSum(SrmPurchaseRequestItemsDO::getGrossPrice, SrmPurchaseRequestSummaryBO::getSumGrossPrice)
+            .selectSum(SrmPurchaseRequestItemsDO::getTax, SrmPurchaseRequestSummaryBO::getSumTax)
+            .selectSum(SrmPurchaseRequestItemsDO::getOrderClosedQty, SrmPurchaseRequestSummaryBO::getSumOrderClosedQty)
+            .selectSum(SrmPurchaseRequestItemsDO::getReferenceUnitPrice, SrmPurchaseRequestSummaryBO::getSumReferenceUnitPrice)
+            .selectSum(SrmPurchaseRequestItemsDO::getInboundClosedQty, SrmPurchaseRequestSummaryBO::getSumInboundClosedQty);
+
+        this.masterPageQuery(wrapperX, req);
+        this.slavePageQuery(wrapperX, req);
+        return selectJoinOne(SrmPurchaseRequestSummaryBO.class, wrapperX);
+    }
 }

@@ -4,6 +4,7 @@ import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundImportReqDTO;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundValidateReqDTO;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotEmpty;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.List;
@@ -42,5 +43,5 @@ public interface WmsOutboundApi {
     /**
      * 校验货物可出库数量
      */
-    Boolean validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList);
+    void validateOutboundData(@Valid @NotEmpty(message = "校验数据至少1个") List<WmsOutboundValidateReqDTO> validateReqDTOList);
 }
