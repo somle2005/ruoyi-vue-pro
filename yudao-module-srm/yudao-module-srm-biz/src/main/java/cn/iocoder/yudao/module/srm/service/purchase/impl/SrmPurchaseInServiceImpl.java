@@ -39,6 +39,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInItemBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInSummaryBO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
@@ -1095,5 +1096,10 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
                 throw exception(PURCHASE_IN_ITEM_TOTAL_QTY_EXCEED, orderItem.getId(), orderItem.getProductName(), totalArriveQty, orderQty);
             }
         }
+    }
+
+    @Override
+    public SrmPurchaseInSummaryBO getPurchaseInSummary(SrmPurchaseInPageReqVO reqVO) {
+        return purchaseInItemMapper.selectSrmPurchaseInSummaryBO(reqVO);
     }
 }
