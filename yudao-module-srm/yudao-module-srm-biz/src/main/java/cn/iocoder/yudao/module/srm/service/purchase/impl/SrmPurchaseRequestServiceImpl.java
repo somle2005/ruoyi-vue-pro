@@ -32,6 +32,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestItemsBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestSummaryBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
@@ -581,5 +582,10 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     @Override
     public String getMaxSerialNumber() {
         return noRedisDAO.getMaxSerial(PURCHASE_REQUEST_NO_PREFIX, PURCHASE_REQUEST_NO_OUT_OF_BOUNDS);
+    }
+
+    @Override
+    public SrmPurchaseRequestSummaryBO selectSrmPurchaseRequestSummaryBO(SrmPurchaseRequestPageReqVO req) {
+        return erpPurchaseRequestItemsMapper.selectSrmPurchaseRequestSummaryBO(req);
     }
 }

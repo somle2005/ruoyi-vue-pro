@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.pojo.PageResultSummary;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
@@ -18,6 +19,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.*;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestExcelRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestItemRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestSummaryRespVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
@@ -156,9 +158,11 @@ public class SrmPurchaseRequestController {
     @PostMapping("/page")
     @Operation(summary = "获得ERP采购申请单分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-request:query')")
-    public CommonResult<PageResult<SrmPurchaseRequestRespVO>> getPurchaseRequestPage(@RequestBody(required = false) SrmPurchaseRequestPageReqVO pageReqVO) {
+    public CommonResult<PageResultSummary<SrmPurchaseRequestRespVO, SrmPurchaseRequestSummaryRespVO>> getPurchaseRequestPage(@RequestBody(required = false) SrmPurchaseRequestPageReqVO pageReqVO) {
         PageResult<SrmPurchaseRequestBO> pageResult = srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO);
-        return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
+        List<SrmPurchaseRequestRespVO> respVOS = bindList(pageResult.getList());
+        SrmPurchaseRequestSummaryRespVO summaryRespVO = BeanUtils.toBean(srmPurchaseRequestService.selectSrmPurchaseRequestSummaryBO(pageReqVO), SrmPurchaseRequestSummaryRespVO.class);
+        return success(new PageResultSummary<>(respVOS, pageResult.getTotal(), summaryRespVO));
     }
 
     @GetMapping("/export-excel")

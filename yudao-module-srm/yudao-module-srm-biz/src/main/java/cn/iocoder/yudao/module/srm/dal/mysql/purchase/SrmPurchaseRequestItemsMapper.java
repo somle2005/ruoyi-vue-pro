@@ -130,6 +130,9 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
 
     //汇总统计
     default SrmPurchaseRequestSummaryBO selectSrmPurchaseRequestSummaryBO(SrmPurchaseRequestPageReqVO req) {
+        if (req == null) {
+            req = new SrmPurchaseRequestPageReqVO();
+        }
         MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseRequestItemsDO>()
             // 汇总所有字段
             .selectSum(SrmPurchaseRequestItemsDO::getQty, SrmPurchaseRequestSummaryBO::getSumQty)
