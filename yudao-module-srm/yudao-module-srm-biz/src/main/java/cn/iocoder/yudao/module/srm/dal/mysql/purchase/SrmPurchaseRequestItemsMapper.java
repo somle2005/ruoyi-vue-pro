@@ -28,6 +28,9 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
 
     //buildWrapper
     default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> buildWrapper(SrmPurchaseRequestPageReqVO req) {
+        if (req == null) {
+            req = new SrmPurchaseRequestPageReqVO();
+        }
         MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseRequestItemsDO>()
             .selectAll(SrmPurchaseRequestItemsDO.class)
             .inIfPresent(SrmPurchaseRequestItemsDO::getProductId, req.getProductIds())
@@ -41,6 +44,9 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
 
     //masterPageQuery
     default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> masterPageQuery(MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX, SrmPurchaseRequestPageReqVO req) {
+        if (req == null) {
+            req = new SrmPurchaseRequestPageReqVO();
+        }
         return wrapperX
             .inIfPresent(SrmPurchaseRequestItemsDO::getProductId, req.getProductIds())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductCode, req.getProductCode())
@@ -52,6 +58,9 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
 
     //BO wrapper
     default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> buildBOWrapper(SrmPurchaseRequestPageReqVO req) {
+        if (req == null) {
+            req = new SrmPurchaseRequestPageReqVO();
+        }
         MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX = buildWrapper(req)
             .leftJoin(SrmPurchaseRequestDO.class, SrmPurchaseRequestDO::getId, SrmPurchaseRequestItemsDO::getRequestId)
             .selectAll(SrmPurchaseRequestDO.class);
@@ -60,6 +69,9 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
 
     //slavePageQuery
     default MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> slavePageQuery(MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX, SrmPurchaseRequestPageReqVO req) {
+        if (req == null) {
+            req = new SrmPurchaseRequestPageReqVO();
+        }
         return wrapperX
             .likeIfPresent(SrmPurchaseRequestDO::getCode, req.getCode())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicantId, req.getApplicantId())

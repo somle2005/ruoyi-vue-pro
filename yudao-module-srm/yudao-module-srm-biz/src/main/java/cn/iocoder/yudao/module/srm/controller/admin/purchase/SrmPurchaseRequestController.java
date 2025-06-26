@@ -159,6 +159,9 @@ public class SrmPurchaseRequestController {
     @Operation(summary = "获得ERP采购申请单分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-request:query')")
     public CommonResult<PageResultSummary<SrmPurchaseRequestRespVO, SrmPurchaseRequestSummaryRespVO>> getPurchaseRequestPage(@RequestBody(required = false) SrmPurchaseRequestPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new SrmPurchaseRequestPageReqVO();
+        }
         PageResult<SrmPurchaseRequestBO> pageResult = srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO);
         List<SrmPurchaseRequestRespVO> respVOS = bindList(pageResult.getList());
         SrmPurchaseRequestSummaryRespVO summaryRespVO = BeanUtils.toBean(srmPurchaseRequestService.selectSrmPurchaseRequestSummaryBO(pageReqVO), SrmPurchaseRequestSummaryRespVO.class);
