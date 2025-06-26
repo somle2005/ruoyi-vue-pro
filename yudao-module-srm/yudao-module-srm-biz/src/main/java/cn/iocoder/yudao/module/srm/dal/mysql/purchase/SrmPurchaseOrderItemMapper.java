@@ -7,6 +7,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.SrmPur
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderSummaryBO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -21,9 +22,11 @@ import java.util.List;
 @Mapper
 public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrderItemDO> {
 
-    default MPJLambdaWrapperX<SrmPurchaseOrderItemDO> buildWrapper(SrmPurchaseOrderPageReqVO reqVO) {
-        return new MPJLambdaWrapperX<SrmPurchaseOrderItemDO>()
-            .selectAll(SrmPurchaseOrderItemDO.class)
+    default MPJLambdaWrapperX<SrmPurchaseOrderItemDO> masterPageQuery(MPJLambdaWrapperX<SrmPurchaseOrderItemDO> wrapperX, SrmPurchaseOrderPageReqVO reqVO) {
+        if (reqVO == null) {
+            reqVO = new SrmPurchaseOrderPageReqVO();
+        }
+        return wrapperX
             .inIfPresent(SrmPurchaseOrderItemDO::getProductId, reqVO.getProductIds()) // 产品ID
             .likeIfPresent(SrmPurchaseOrderItemDO::getProductCode, reqVO.getProductCode()) // 产品SKU
             .likeIfPresent(SrmPurchaseOrderItemDO::getProductName, reqVO.getProductName()) // 产品名称
@@ -33,18 +36,25 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .eqIfPresent(SrmPurchaseOrderItemDO::getFbaCode, reqVO.getFbaCode()) // X码
             .likeIfPresent(SrmPurchaseOrderItemDO::getContainerRate, reqVO.getContainerRate()) // 箱率
             .likeIfPresent(SrmPurchaseOrderItemDO::getPurchaseApplyCode, reqVO.getPurchaseApplyCode()) // 原单单号
-            .orderByDesc(SrmPurchaseOrderItemDO::getCreateTime) // 按时间降序排序
             ;
     }
 
-
-    default MPJLambdaWrapperX<SrmPurchaseOrderItemDO> buildBOWrapper(SrmPurchaseOrderPageReqVO reqVO) {
+    default MPJLambdaWrapperX<SrmPurchaseOrderItemDO> buildWrapper(SrmPurchaseOrderPageReqVO reqVO) {
         if (reqVO == null) {
             reqVO = new SrmPurchaseOrderPageReqVO();
         }
-        return buildWrapper(reqVO)
-            .leftJoin(SrmPurchaseOrderDO.class, SrmPurchaseOrderDO::getId, SrmPurchaseOrderItemDO::getOrderId) // 采购订单ID关联
-            .selectAll(SrmPurchaseOrderDO.class)
+        MPJLambdaWrapperX<SrmPurchaseOrderItemDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseOrderItemDO>()
+            .selectAll(SrmPurchaseOrderItemDO.class)
+            .orderByDesc(SrmPurchaseOrderItemDO::getCreateTime) // 按时间降序排序
+            ;
+        return masterPageQuery(wrapperX, reqVO);
+    }
+
+    default MPJLambdaWrapperX<SrmPurchaseOrderItemDO> slavePageQuery(MPJLambdaWrapperX<SrmPurchaseOrderItemDO> wrapperX, SrmPurchaseOrderPageReqVO reqVO) {
+        if (reqVO == null) {
+            reqVO = new SrmPurchaseOrderPageReqVO();
+        }
+        return wrapperX
             .likeIfPresent(SrmPurchaseOrderDO::getCode, reqVO.getCode()) // 采购单编号
             .betweenIfPresent(SrmPurchaseOrderDO::getBillTime, reqVO.getBillTime()) // 单据日期
             .eqIfPresent(SrmPurchaseOrderDO::getSupplierId, reqVO.getSupplierId()) // 供应商ID
@@ -75,8 +85,20 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
             .likeIfPresent(SrmPurchaseOrderDO::getPaymentTerms, reqVO.getPaymentTerms()) // 付款条款
             .eqIfPresent(SrmPurchaseOrderDO::getOrderStatus, reqVO.getOrderStatus()) // 订单状态
             .eqIfPresent(SrmPurchaseOrderDO::getCreator, reqVO.getCreator())
+            ;
+    }
+
+
+    default MPJLambdaWrapperX<SrmPurchaseOrderItemDO> buildBOWrapper(SrmPurchaseOrderPageReqVO reqVO) {
+        if (reqVO == null) {
+            reqVO = new SrmPurchaseOrderPageReqVO();
+        }
+        MPJLambdaWrapperX<SrmPurchaseOrderItemDO> wrapperX = buildWrapper(reqVO)
+            .leftJoin(SrmPurchaseOrderDO.class, SrmPurchaseOrderDO::getId, SrmPurchaseOrderItemDO::getOrderId) // 采购订单ID关联
+            .selectAll(SrmPurchaseOrderDO.class)
             .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
             ;
+        return slavePageQuery(wrapperX, reqVO);
     }
 
     //获得ErpPurchaseOrderItemBO分页查询
@@ -135,10 +157,32 @@ public interface SrmPurchaseOrderItemMapper extends BaseMapperX<SrmPurchaseOrder
         return selectList(SrmPurchaseOrderItemDO::getPurchaseApplyItemId, applyIds);
     }
 
-    //    //BO
-    //    default MPJLambdaWrapper<SrmPurchaseOrderItemDO> getBOWrapper() {
-    //        return getDOWrapper()
-    //            .leftJoin(SrmPurchaseOrderDO.class, SrmPurchaseOrderDO::getId, SrmPurchaseOrderItemDO::getOrderId)
-    //            .selectAsClass(SrmPurchaseOrderDO.class, SrmPurchaseOrderItemBO.class);
-    //    }
+    //汇总统计
+    default SrmPurchaseOrderSummaryBO selectSrmPurchaseOrderSummaryBO(SrmPurchaseOrderPageReqVO req) {
+        if (req == null) {
+            req = new SrmPurchaseOrderPageReqVO();
+        }
+        MPJLambdaWrapperX<SrmPurchaseOrderItemDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseOrderItemDO>()
+            // 汇总所有字段
+            .selectSum(SrmPurchaseOrderItemDO::getGrossPrice, SrmPurchaseOrderSummaryBO::getSumGrossPrice)
+            .selectSum(SrmPurchaseOrderItemDO::getQty, SrmPurchaseOrderSummaryBO::getSumQty)
+            .selectSum(SrmPurchaseOrderItemDO::getTotalPrice, SrmPurchaseOrderSummaryBO::getSumTotalPrice)
+            .selectSum(SrmPurchaseOrderItemDO::getTax, SrmPurchaseOrderSummaryBO::getSumTax)
+            .selectSum(SrmPurchaseOrderItemDO::getGrossTotalPrice, SrmPurchaseOrderSummaryBO::getSumGrossTotalPrice)
+            .selectSum(SrmPurchaseOrderItemDO::getTotalProductPrice, SrmPurchaseOrderSummaryBO::getSumTotalProductPrice)
+            .selectSum(SrmPurchaseOrderItemDO::getTotalGrossPrice, SrmPurchaseOrderSummaryBO::getSumTotalGrossPrice)
+            .selectSum(SrmPurchaseOrderItemDO::getInboundClosedQty, SrmPurchaseOrderSummaryBO::getSumInboundClosedQty)
+            .selectSum(SrmPurchaseOrderItemDO::getReturnCount, SrmPurchaseOrderSummaryBO::getSumReturnCount)
+            .selectSum(SrmPurchaseOrderItemDO::getPayPrice, SrmPurchaseOrderSummaryBO::getSumPayPrice)
+            .selectSum(SrmPurchaseOrderItemDO::getDiscountPrice, SrmPurchaseOrderSummaryBO::getSumDiscountPrice)
+            .selectSum(SrmPurchaseOrderItemDO::getDepositPrice, SrmPurchaseOrderSummaryBO::getSumDepositPrice)
+            .selectSum(SrmPurchaseOrderItemDO::getTotalInspectionPassCount, SrmPurchaseOrderSummaryBO::getSumTotalInspectionPassCount)
+            .selectSum(SrmPurchaseOrderItemDO::getTotalCompletionPassCount, SrmPurchaseOrderSummaryBO::getSumTotalCompletionPassCount)
+            .leftJoin(SrmPurchaseOrderDO.class, SrmPurchaseOrderDO::getId, SrmPurchaseOrderItemDO::getOrderId);
+
+        this.masterPageQuery(wrapperX, req);
+        this.slavePageQuery(wrapperX, req);
+        return selectJoinOne(SrmPurchaseOrderSummaryBO.class, wrapperX);
+    }
+
 }

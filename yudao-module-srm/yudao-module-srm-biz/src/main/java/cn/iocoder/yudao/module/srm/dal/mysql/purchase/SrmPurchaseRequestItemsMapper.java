@@ -33,10 +33,6 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
         }
         MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseRequestItemsDO>()
             .selectAll(SrmPurchaseRequestItemsDO.class)
-            .inIfPresent(SrmPurchaseRequestItemsDO::getProductId, req.getProductIds())
-            .likeIfPresent(SrmPurchaseRequestItemsDO::getProductCode, req.getProductCode())
-            .likeIfPresent(SrmPurchaseRequestItemsDO::getProductName, req.getProductName())
-            .likeIfPresent(SrmPurchaseRequestItemsDO::getProductUnitName, req.getProductUnitName())
             .orderByDesc(SrmPurchaseRequestItemsDO::getCreateTime);// 按时间降序排序
 
         return masterPageQuery(wrapperX, req);
@@ -52,7 +48,6 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductCode, req.getProductCode())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductName, req.getProductName())
             .likeIfPresent(SrmPurchaseRequestItemsDO::getProductUnitName, req.getProductUnitName())
-            .orderByDesc(SrmPurchaseRequestItemsDO::getCreateTime) // 按时间降序排序
             ;
     }
 
@@ -63,7 +58,9 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
         }
         MPJLambdaWrapperX<SrmPurchaseRequestItemsDO> wrapperX = buildWrapper(req)
             .leftJoin(SrmPurchaseRequestDO.class, SrmPurchaseRequestDO::getId, SrmPurchaseRequestItemsDO::getRequestId)
-            .selectAll(SrmPurchaseRequestDO.class);
+            .selectAll(SrmPurchaseRequestDO.class)
+            .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
+            ;
         return slavePageQuery(wrapperX, req);
     }
 
@@ -88,7 +85,6 @@ public interface SrmPurchaseRequestItemsMapper extends BaseMapperX<SrmPurchaseRe
             .likeIfPresent(SrmPurchaseRequestDO::getDelivery, req.getDelivery())
             .likeIfPresent(SrmPurchaseRequestDO::getAuditAdvice, req.getAuditAdvice())
             .eqIfPresent(SrmPurchaseRequestDO::getInboundStatus, req.getInboundStatus())
-            .orderByDesc(SrmPurchaseOrderDO::getCreateTime) // 按时间降序排序
             ;
     }
 

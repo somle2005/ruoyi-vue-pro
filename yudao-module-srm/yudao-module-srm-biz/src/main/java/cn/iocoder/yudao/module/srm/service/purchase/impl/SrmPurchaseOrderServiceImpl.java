@@ -42,6 +42,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderSummaryBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderWordBO;
 import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
@@ -983,5 +984,10 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     @Override
     public SrmPurchaseOrderDO getPurchaseOrderByCode(String code) {
         return purchaseOrderMapper.selectByNo(code);
+    }
+
+    @Override
+    public SrmPurchaseOrderSummaryBO getPurchaseOrderSummary(SrmPurchaseOrderPageReqVO reqVO) {
+        return purchaseOrderItemMapper.selectSrmPurchaseOrderSummaryBO(reqVO);
     }
 }
