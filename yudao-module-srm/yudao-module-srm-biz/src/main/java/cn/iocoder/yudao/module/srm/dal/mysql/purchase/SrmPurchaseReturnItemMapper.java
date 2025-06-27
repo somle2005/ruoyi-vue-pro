@@ -154,9 +154,7 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .selectSum(SrmPurchaseReturnItemDO::getTotalPrice, SrmPurchaseReturnSummaryBO::getSumTotalPrice)
             .selectSum(SrmPurchaseReturnItemDO::getTax, SrmPurchaseReturnSummaryBO::getSumTax)
             .selectSum(SrmPurchaseReturnItemDO::getOutboundQty, SrmPurchaseReturnSummaryBO::getSumOutboundQty)
-            .selectSum(SrmPurchaseReturnItemDO::getActualQty, SrmPurchaseReturnSummaryBO::getSumActualQty)
-            .leftJoin(SrmPurchaseReturnDO.class, SrmPurchaseReturnDO::getId, SrmPurchaseReturnItemDO::getReturnId);
-
+            .selectSum(SrmPurchaseReturnItemDO::getActualQty, SrmPurchaseReturnSummaryBO::getSumActualQty);
         this.masterPageQuery(wrapperX, req);
         this.slavePageQuery(wrapperX, req);
         return selectJoinOne(SrmPurchaseReturnSummaryBO.class, wrapperX);

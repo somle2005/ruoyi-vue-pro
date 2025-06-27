@@ -188,9 +188,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
             .selectSum(SrmPurchaseInItemDO::getTotalPrice, SrmPurchaseInSummaryBO::getSumTotalPrice)
             .selectSum(SrmPurchaseInItemDO::getTax, SrmPurchaseInSummaryBO::getSumTax)
             .selectSum(SrmPurchaseInItemDO::getGrossTotalPrice, SrmPurchaseInSummaryBO::getSumGrossTotalPrice)
-            .selectSum(SrmPurchaseInItemDO::getPayPrice, SrmPurchaseInSummaryBO::getSumPayPrice)
-            .leftJoin(SrmPurchaseInDO.class, SrmPurchaseInDO::getId, SrmPurchaseInItemDO::getArriveId);
-
+            .selectSum(SrmPurchaseInItemDO::getPayPrice, SrmPurchaseInSummaryBO::getSumPayPrice);
         this.masterPageQuery(wrapperX, req);
         this.slavePageQuery(wrapperX, req);
         return selectJoinOne(SrmPurchaseInSummaryBO.class, wrapperX);
