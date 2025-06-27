@@ -6,16 +6,15 @@ import cn.hutool.core.date.LocalDateTimeUtil;
 import cn.hutool.core.lang.Assert;
 import cn.hutool.core.util.StrUtil;
 import cn.iocoder.yudao.framework.common.enums.DateIntervalEnum;
+import cn.iocoder.yudao.framework.common.enums.TimeZoneEnum;
+import cn.iocoder.yudao.framework.common.util.servlet.ServletUtils;
 
 import java.sql.Timestamp;
 import java.time.*;
 import java.time.format.DateTimeParseException;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * 时间工具类，用于 {@link LocalDateTime}
@@ -441,5 +440,21 @@ public class LocalDateTimeUtils {
 
     public static void isValidDateRange(LocalDateTime startTime, LocalDateTime endTime) {
         LocalDateTimeUtils.isValidDateRange(startTime, endTime, null);
+    }
+
+    /**
+     * 根据用户指定时间转换
+     * @param fromDate
+     * @return
+     */
+    public static LocalDateTime transferByUserTimeZone(LocalDateTime fromDate) {
+        ZoneId toZoneId = TimeZone.getDefault().toZoneId();
+        Optional<ZoneId> zoneIdOptional = ServletUtils.getTimeZoneId();
+        if (zoneIdOptional.isPresent()) {
+            toZoneId = zoneIdOptional.get();
+        }
+        return fromDate.atZone(TimeZoneEnum.UTC_ZONE_ID)
+            .withZoneSameInstant(toZoneId)
+            .toLocalDateTime();
     }
 }
