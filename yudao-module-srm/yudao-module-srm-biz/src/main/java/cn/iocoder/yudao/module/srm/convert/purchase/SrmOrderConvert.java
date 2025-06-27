@@ -16,6 +16,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderItemWordBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderWordBO;
+import cn.iocoder.yudao.module.srm.tool.TmsLocalDateTimeZoneConvertUtils;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
 
@@ -70,18 +71,17 @@ public interface SrmOrderConvert {
      */
     default SrmPurchaseOrderWordBO bindDataFormOrderItemDO(List<SrmPurchaseOrderItemDO> itemDOS, SrmPurchaseOrderDO orderDO,
                                                            SrmPurchaseOrderGenerateContractReqVO vo, Map<Long, FmsCompanyDTO> dtoMap, SrmSupplierDO srmSupplierDO) {
-        //        Set<Long> productIds = itemDOS.stream().map(SrmPurchaseOrderItemDO::getProductId).collect(Collectors.toSet());
-        //        Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
-        //收集产品的单位map getProductUnitMap
-        //        Map<Long, ErpProductUnitDTO> unitMap = erpProductUnitApi.getProductUnitMap(productMap.values().stream().map(ErpProductDTO::getUnitId).collect(Collectors.toSet()));
         AtomicInteger index = new AtomicInteger(1);
         //单位名称
         //不含税总额
         //总金额
         //数量*含税单价
         return BeanUtils.toBean(orderDO, SrmPurchaseOrderWordBO.class, peek -> {
+            //转换orderDO带角色时区的时间
+            TmsLocalDateTimeZoneConvertUtils.convertLocalDateTimeFields(orderDO);
             BeanUtils.copyProperties(vo, peek);
             //signingDateFormat 日期格式化
+            //LocalDateTimeUtils.transferByUserTimeZone
             peek.setSigningDateFormat(DateUtil.format(peek.getSigningDate(), NORM_DATE_PATTERN));
             peek.setProducts(BeanUtils.toBean(itemDOS, SrmPurchaseOrderItemWordBO.class, item -> {
                 item.setIndex(index.getAndIncrement());
