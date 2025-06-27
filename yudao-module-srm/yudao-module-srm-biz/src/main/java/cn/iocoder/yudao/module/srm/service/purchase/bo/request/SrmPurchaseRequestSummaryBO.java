@@ -47,4 +47,9 @@ public class SrmPurchaseRequestSummaryBO {
      */
     private BigDecimal sumInboundClosedQty;
 
+    /**
+     * 未订购数量（sumOrderClosedQty - sumInboundClosedQty）
+     */
+    private BigDecimal sumUnOrderCount;
+
 }

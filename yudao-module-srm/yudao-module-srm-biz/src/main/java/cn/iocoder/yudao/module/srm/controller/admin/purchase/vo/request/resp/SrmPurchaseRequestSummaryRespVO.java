@@ -24,4 +24,7 @@ public class SrmPurchaseRequestSummaryRespVO {
     private Integer sumOrderClosedQty;
     @Schema(description = "入库数量")
     private BigDecimal sumInboundClosedQty;
+    //未订购数量
+    @Schema(description = "未订购数量")
+    private BigDecimal sumUnOrderCount;
 } 

@@ -47,6 +47,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -586,6 +587,14 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
 
     @Override
     public SrmPurchaseRequestSummaryBO selectSrmPurchaseRequestSummaryBO(SrmPurchaseRequestPageReqVO req) {
-        return erpPurchaseRequestItemsMapper.selectSrmPurchaseRequestSummaryBO(req);
+        SrmPurchaseRequestSummaryBO summaryBO = erpPurchaseRequestItemsMapper.selectSrmPurchaseRequestSummaryBO(req);
+        if (summaryBO != null) {
+            Integer sumOrderClosedQty = summaryBO.getSumOrderClosedQty();
+            BigDecimal sumInboundClosedQty = summaryBO.getSumInboundClosedQty();
+            int orderClosed = sumOrderClosedQty == null ? 0 : sumOrderClosedQty;
+            int inboundClosed = sumInboundClosedQty == null ? 0 : sumInboundClosedQty.intValue();
+            summaryBO.setSumUnOrderCount(BigDecimal.valueOf(orderClosed - inboundClosed));
+        }
+        return summaryBO;
     }
 }

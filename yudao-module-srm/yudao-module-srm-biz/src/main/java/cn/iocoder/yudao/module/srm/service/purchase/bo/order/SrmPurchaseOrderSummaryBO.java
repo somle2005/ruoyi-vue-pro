@@ -67,4 +67,9 @@ public class SrmPurchaseOrderSummaryBO {
      * 完工通过数量
      */
     private Integer sumTotalCompletionPassCount;
+
+    /**
+     * 汇总待入库数量
+     */
+    //sumWaitInCount = sumQty - sumInboundClosedQty
 } 
