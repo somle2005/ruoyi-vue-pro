@@ -98,8 +98,7 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
     }
 
     default MPJLambdaWrapperX<SrmPurchaseReturnItemDO> buildBOWrapper(SrmPurchaseReturnPageReqVO vo) {
-        MPJLambdaWrapperX<SrmPurchaseReturnItemDO> wrapperX = buildWrapper(vo)
-            .leftJoin(SrmPurchaseReturnDO.class, SrmPurchaseReturnDO::getId, SrmPurchaseReturnItemDO::getReturnId);
+        MPJLambdaWrapperX<SrmPurchaseReturnItemDO> wrapperX = buildWrapper(vo).leftJoin(SrmPurchaseReturnDO.class, SrmPurchaseReturnDO::getId, SrmPurchaseReturnItemDO::getReturnId);
         slavePageQuery(wrapperX, vo);
         wrapperX.orderByDesc(SrmPurchaseReturnDO::getCreateTime);
         return wrapperX;
@@ -151,12 +150,27 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
         MPJLambdaWrapperX<SrmPurchaseReturnItemDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseReturnItemDO>()
             // 汇总所有字段
             .selectSum(SrmPurchaseReturnItemDO::getQty, SrmPurchaseReturnSummaryBO::getSumQty)
-            .selectSum(SrmPurchaseReturnItemDO::getTotalPrice, SrmPurchaseReturnSummaryBO::getSumTotalPrice)
+            .selectSum(SrmPurchaseReturnItemDO::getTotalPrice, SrmPurchaseReturnSummaryBO::getSumTotalPriceItem)
             .selectSum(SrmPurchaseReturnItemDO::getTax, SrmPurchaseReturnSummaryBO::getSumTax)
             .selectSum(SrmPurchaseReturnItemDO::getOutboundQty, SrmPurchaseReturnSummaryBO::getSumOutboundQty)
-            .selectSum(SrmPurchaseReturnItemDO::getActualQty, SrmPurchaseReturnSummaryBO::getSumActualQty);
+            .selectSum(SrmPurchaseReturnItemDO::getActualQty, SrmPurchaseReturnSummaryBO::getSumActualQty)
+            .selectSum(SrmPurchaseReturnItemDO::getGrossPrice, SrmPurchaseReturnSummaryBO::getSumGrossPrice);
         this.masterPageQuery(wrapperX, req);
+        wrapperX.leftJoin(SrmPurchaseReturnDO.class, SrmPurchaseReturnDO::getId, SrmPurchaseReturnItemDO::getReturnId);
         this.slavePageQuery(wrapperX, req);
+        //master query
+        //grossTotalPrice
+        wrapperX
+            .selectSum(SrmPurchaseReturnDO::getGrossTotalPrice, SrmPurchaseReturnSummaryBO::getSumGrossTotalPrice)
+            .selectSum(SrmPurchaseReturnDO::getTotalPrice, SrmPurchaseReturnSummaryBO::getSumTotalPriceMaster)
+            .selectSum(SrmPurchaseReturnDO::getTotalWeight, SrmPurchaseReturnSummaryBO::getSumTotalWeight)
+            .selectSum(SrmPurchaseReturnDO::getTotalVolume, SrmPurchaseReturnSummaryBO::getSumTotalVolume)
+            .selectSum(SrmPurchaseReturnDO::getRefundPrice, SrmPurchaseReturnSummaryBO::getSumRefundPrice)
+            .selectSum(SrmPurchaseReturnDO::getTotalProductPrice, SrmPurchaseReturnSummaryBO::getSumTotalProductPrice)
+            .selectSum(SrmPurchaseReturnDO::getTotalGrossPrice, SrmPurchaseReturnSummaryBO::getSumTotalGrossPrice)
+            .selectSum(SrmPurchaseReturnDO::getDiscountPrice, SrmPurchaseReturnSummaryBO::getSumDiscountPrice)
+            .selectSum(SrmPurchaseReturnDO::getOtherPrice, SrmPurchaseReturnSummaryBO::getSumOtherPrice)
+        ;
         return selectJoinOne(SrmPurchaseReturnSummaryBO.class, wrapperX);
     }
 }

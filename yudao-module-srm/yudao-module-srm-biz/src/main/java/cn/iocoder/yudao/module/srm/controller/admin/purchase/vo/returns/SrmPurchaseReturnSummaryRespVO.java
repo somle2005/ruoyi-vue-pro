@@ -10,8 +10,12 @@ import java.math.BigDecimal;
 public class SrmPurchaseReturnSummaryRespVO {
     @Schema(description = "数量")
     private BigDecimal sumQty;
-    @Schema(description = "总价")
-    private BigDecimal sumTotalPrice;
+
+    @Schema(description = "子项总价")
+    private BigDecimal sumTotalPriceItem;
+
+    @Schema(description = "主表总价")
+    private BigDecimal sumTotalPriceMaster;
     @Schema(description = "税额")
     private BigDecimal sumTax;
     @Schema(description = "出库数量")

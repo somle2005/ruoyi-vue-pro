@@ -16,9 +16,13 @@ public class SrmPurchaseReturnSummaryBO {
      */
     private BigDecimal sumQty;
     /**
-     * 总价
+     * 子项总价
      */
-    private BigDecimal sumTotalPrice;
+    private BigDecimal sumTotalPriceItem;
+    /**
+     * 主表总价
+     */
+    private BigDecimal sumTotalPriceMaster;
     /**
      * 税额
      */
@@ -40,41 +44,40 @@ public class SrmPurchaseReturnSummaryBO {
     /**
      * 价税合计
      */
-    private BigDecimal grossTotalPrice;
+    private BigDecimal sumGrossTotalPrice;
 
-    private BigDecimal totalPrice;
 
     /**
      * 总毛重，单位：kg
      */
-    private BigDecimal totalWeight;
+    private BigDecimal sumTotalWeight;
     /**
      * 总体积,毫米，单位：mm³
      */
-    private BigDecimal totalVolume;
+    private BigDecimal sumTotalVolume;
 
     /**
      * 已退款金额，单位：元
      * <p>
      */
-    private BigDecimal refundPrice;
+    private BigDecimal sumRefundPrice;
     /**
      * 合计产品价格，单位：元
      */
-    private BigDecimal totalProductPrice;
+    private BigDecimal sumTotalProductPrice;
     /**
      * 合计税额，单位：元
      */
-    private BigDecimal totalGrossPrice;
+    private BigDecimal sumTotalGrossPrice;
 
     /**
      * 优惠金额，单位：元
      * <p>
      * discountPrice = (totalProductPrice + totalGrossPrice) * discountPercent
      */
-    private BigDecimal discountPrice;
+    private BigDecimal sumDiscountPrice;
     /**
      * 其它金额，单位：元
      */
-    private BigDecimal otherPrice;
+    private BigDecimal sumOtherPrice;
 } 
