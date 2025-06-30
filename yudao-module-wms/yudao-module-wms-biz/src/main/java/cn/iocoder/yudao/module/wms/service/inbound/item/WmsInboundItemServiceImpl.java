@@ -143,7 +143,11 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         }
         // 更新
         WmsInboundItemDO inboundItem = BeanUtils.toBean(updateReqVO, WmsInboundItemDO.class);
-        inboundItemMapper.updateById(inboundItem);
+        try {
+            inboundItemMapper.updateInboundItem(inboundItem);
+        } catch (Exception e) {
+            throw exception(INBOUND_ITEM_UPDATE_ERROR, e);
+        }
         // 返回
         return inboundItem;
     }
@@ -163,12 +167,11 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     /**
      * @sign : 1E3323E02C6F15FA
      */
-    private WmsInboundItemDO validateInboundItemExists(Long id) {
+    private void validateInboundItemExists(Long id) {
         WmsInboundItemDO inboundItem = inboundItemMapper.selectById(id);
         if (inboundItem == null) {
             throw exception(INBOUND_ITEM_NOT_EXISTS);
         }
-        return inboundItem;
     }
 
     /**

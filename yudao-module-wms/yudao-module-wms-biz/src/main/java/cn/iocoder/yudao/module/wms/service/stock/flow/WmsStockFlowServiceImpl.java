@@ -32,6 +32,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehous
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.exchange.WmsExchangeDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.WmsPickupDO;
@@ -211,31 +212,6 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
     }
 
     /**
-     * 创建仓库库存变化流水(原方法)
-     */
-//    @Override
-//    public void createForStockWarehouse(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockWarehouseDO stockWarehouseDO, Integer quantity, Long reasonId, Long reasonItemId) {
-//        createFor(reason, WmsStockType.WAREHOUSE, direction, stockWarehouseDO.getId(), stockWarehouseDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
-//            // 在制量
-//            stockFlowDO.setMakePendingQty(stockWarehouseDO.getMakePendingQty());
-//            // 在途量
-//            stockFlowDO.setTransitQty(stockWarehouseDO.getTransitQty());
-//            // 退货在途量
-//            stockFlowDO.setReturnTransitQty(stockWarehouseDO.getReturnTransitQty());
-//            // 可售量，未被单据占用的良品数量
-//            stockFlowDO.setSellableQty(stockWarehouseDO.getSellableQty());
-//            // 可用量，在库的良品数量
-//            stockFlowDO.setAvailableQty(stockWarehouseDO.getAvailableQty());
-//            // 待上架数量
-//            stockFlowDO.setShelvingPendingQty(stockWarehouseDO.getShelvingPendingQty() + quantity);
-//            // 不良品数量
-//            stockFlowDO.setDefectiveQty(stockWarehouseDO.getDefectiveQty());
-//            // 待出库量
-//            stockFlowDO.setOutboundPendingQty(stockWarehouseDO.getOutboundPendingQty());
-//        });
-//    }
-
-    /**
      * 创建仓库库存变化流水(新方法)
      */
     @Override
@@ -259,31 +235,6 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
             stockFlowDO.setOutboundPendingQty(stockWarehouseDO.getOutboundPendingQty());
         });
     }
-
-//    /**
-//     * 创建逻辑库存变化流水(原方法)
-//     */
-//    @Override
-//    public void createForStockLogic(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockLogicDO stockLogicDO, Integer quantity, Long reasonId, Long reasonItemId) {
-//        createFor(reason, WmsStockType.LOGIC, direction, stockLogicDO.getId(), stockLogicDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
-//            // 采购计划量
-//            // stockFlowDO.setPurchasePlanQty(stockLogicDO.getPurchasePlanQty());
-//            // 采购在途量
-//            // stockFlowDO.setPurchaseTransitQty(stockLogicDO.getPurchaseTransitQty());
-//            // 退货在途量
-//            // stockFlowDO.setReturnTransitQty(stockLogicDO.getReturnTransitQty());
-//            // 可售量，未被单据占用的良品数量
-//            // stockFlowDO.setSellableQty(stockLogicDO.getSellableQty());
-//            // 可用量，在库的良品数量
-//            stockFlowDO.setAvailableQty(stockLogicDO.getAvailableQty());
-//            // 待上架数量
-//            stockFlowDO.setShelvingPendingQty(stockLogicDO.getShelvePendingQty() + quantity);
-//            // 不良品数量
-//            // stockFlowDO.setDefectiveQty(stockLogicDO.getItemQty());
-//            // 待出库量
-//            stockFlowDO.setOutboundPendingQty(stockLogicDO.getOutboundPendingQty());
-//        });
-//    }
 
     /**
      * 创建逻辑库存变化流水(新方法)
@@ -310,32 +261,12 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         });
     }
 
-//    /**
-//     * 创建仓位库存变化流水(原方法)
-//     */
-//    @Override
-//    public void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId, Long inboundItemFlowId) {
-//        createFor(reason, WmsStockType.BIN, direction, stockBinDO.getId(), stockBinDO.getWarehouseId(), productId, quantity, reasonId, reasonItemId, stockFlowDO -> {
-//            // 采购计划量
-//            // stockFlowDO.setPurchasePlanQty(stockLogicDO.getPurchasePlanQty());
-//            // 采购在途量
-//            // stockFlowDO.setPurchaseTransitQty(stockLogicDO.getPurchaseTransitQty());
-//            // 退货在途量
-//            // stockFlowDO.setReturnTransitQty(stockLogicDO.getReturnTransitQty());
-//            // 可售量，未被单据占用的良品数量
-//            stockFlowDO.setSellableQty(stockBinDO.getSellableQty());
-//            // 可用量，在库的良品数量
-//            stockFlowDO.setAvailableQty(stockBinDO.getAvailableQty());
-//            // 待上架数量
-//            // stockFlowDO.setShelvingPendingQty(stockBinDO.getShelvingPendingQty() + quantity);
-//            // 不良品数量
-//            // stockFlowDO.setDefectiveQty(stockLogicDO.getItemQty());
-//            // 待出库量
-//            stockFlowDO.setOutboundPendingQty(stockBinDO.getOutboundPendingQty());
-//            // 库存批次的流水ID
-//            stockFlowDO.setInboundItemFlowId(inboundItemFlowId);
-//        });
-//    }
+    @Override
+    public void createForInboundItem(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsInboundItemDO inboundItemDO, Integer quantity, Long reasonId, Long reasonItemId, Integer beforeQty, Integer afterQty, Long inboundId, Long warehouseId) {
+        createFor(reason, WmsStockType.INBOUNDITEM, direction, inboundItemDO.getId(), warehouseId, productId, quantity, reasonId, reasonItemId, null, beforeQty, afterQty, inboundId, stockFlowDO -> {
+            stockFlowDO.setSellableQty(inboundItemDO.getOutboundAvailableQty());
+        });
+    }
 
     /**
      * 创建仓位库存变化流水(新方法)
@@ -362,45 +293,8 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         });
     }
 
-//    /**
-//     * 创建仓库库存变化流水(原方法)
-//     */
-//    public void createFor(WmsStockReason reason, WmsStockType stockType, WmsStockFlowDirection direction, Long stockId, Long warehouseId, Long productId, Integer quantity, Long reasonId, Long reasonItemId, Consumer<WmsStockFlowDO> consumer) {
-//        // 校验本方法在事务中
-//        JdbcUtils.requireTransaction();
-//        // 获取上一个流水
-//        WmsStockFlowDO lastStockFlowDO = this.getLastFlow(warehouseId, stockType.getValue(), stockId);
-//        // 创建本次流水
-//        WmsStockFlowDO stockFlowDO = new WmsStockFlowDO();
-//        stockFlowDO.setWarehouseId(warehouseId);
-//        stockFlowDO.setProductId(productId);
-//        stockFlowDO.setStockType(stockType.getValue());
-//        stockFlowDO.setStockId(stockId);
-//        stockFlowDO.setReason(reason.getValue());
-//        stockFlowDO.setReasonBillId(reasonId);
-//        stockFlowDO.setDirection(direction.getValue());
-//        stockFlowDO.setReasonItemId(reasonItemId);
-//        if (lastStockFlowDO != null) {
-//            stockFlowDO.setPrevFlowId(lastStockFlowDO.getId());
-//        } else {
-//            stockFlowDO.setPrevFlowId(0L);
-//        }
-//        // 变更量
-//        stockFlowDO.setDeltaQty(quantity);
-//        consumer.accept(stockFlowDO);
-//        //
-//        stockFlowDO.setFlowTime(new Timestamp(System.currentTimeMillis()));
-//        // 保存
-//        stockFlowMapper.insert(stockFlowDO);
-//        // 关联前项流水
-//        if (lastStockFlowDO != null) {
-//            lastStockFlowDO.setNextFlowId(stockFlowDO.getId());
-//            this.updateStockFlow(BeanUtils.toBean(lastStockFlowDO, WmsStockFlowSaveReqVO.class));
-//        }
-//    }
-
     /**
-     * 创建仓库库存变化流水(新方法)
+     * 创建库存变化流水日志(新方法)
      */
     public void createFor(WmsStockReason reason, WmsStockType stockType, WmsStockFlowDirection direction, Long stockId, Long warehouseId, Long productId, Integer quantity, Long reasonId, Long reasonItemId, Long binId, Integer beforeQty, Integer afterQty, Long inboundId, Consumer<WmsStockFlowDO> consumer) {
         // 校验本方法在事务中
@@ -604,6 +498,12 @@ public class WmsStockFlowServiceImpl implements WmsStockFlowService {
         Map<Long, WmsExchangeRespVO> exchangeMap = StreamX.from(exchangeDOList).toMap(WmsExchangeDO::getId, elem -> BeanUtils.toBean(elem, WmsExchangeRespVO.class));
         StreamX.from(stockCheckFlowList).assemble(exchangeMap, WmsStockFlowRespVO::getReasonBillId, WmsStockFlowRespVO::setExchange);
     }
+
+    @Override
+    public WmsStockFlowRespVO selectByInboundIdAndStockType(Long inboundId, Integer stockType, Integer reason, Long reasonBillId) {
+        return BeanUtils.toBean(stockFlowMapper.selectByInboundIdAndStockType(inboundId, stockType, reason, reasonBillId), WmsStockFlowRespVO.class);
+    }
+
 
     @Override
     public void assembleStockWarehouse(List<WmsStockFlowRespVO> list) {

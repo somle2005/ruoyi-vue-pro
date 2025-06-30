@@ -8,10 +8,14 @@ import cn.iocoder.yudao.module.wms.controller.admin.stock.logic.vo.WmsStockLogic
 import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import jakarta.validation.constraints.NotNull;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+
+import static com.baomidou.mybatisplus.core.toolkit.Wrappers.lambdaUpdate;
 
 /**
  * 逻辑库存 Mapper
@@ -94,5 +98,44 @@ public interface WmsStockLogicMapper extends BaseMapperX<WmsStockLogicDO> {
             //默认先进先出
             .orderByAsc(WmsStockLogicDO::getCreateTime);
         return selectList(wrapper);
+    }
+
+    /**
+     * 更新逻辑库存
+     * 数据校验
+     *
+     * @param stockLogicDO 逻辑库存
+     */
+    @Transactional(rollbackFor = Exception.class)
+    default void updateStockLogic(WmsStockLogicDO stockLogicDO) {
+        LambdaUpdateWrapper<WmsStockLogicDO> wrapper = lambdaUpdate(WmsStockLogicDO.class)
+            .eq(WmsStockLogicDO::getId, stockLogicDO.getId());
+
+        if (isValidQuantity(stockLogicDO.getAvailableQty())) {
+            wrapper.set(WmsStockLogicDO::getAvailableQty, stockLogicDO.getAvailableQty());
+        }
+
+        if (isValidQuantity(stockLogicDO.getShelvePendingQty())) {
+            wrapper.set(WmsStockLogicDO::getShelvePendingQty, stockLogicDO.getShelvePendingQty());
+        }
+
+        if (isValidQuantity(stockLogicDO.getOutboundPendingQty())) {
+            wrapper.set(WmsStockLogicDO::getOutboundPendingQty, stockLogicDO.getOutboundPendingQty());
+        }
+
+        //后续如果有其他字段需要更新，可以在这里添加。。。
+
+        if (wrapper.getSqlSet() == null) {
+            // 保证SQL语法正确
+            wrapper.setSql("1=1");
+        }
+
+        this.update(wrapper);
+
+    }
+
+    private boolean isValidQuantity(Integer qty) {
+        // 检查数量是否为 null 或不小于 0
+        return qty != null && qty >= 0;
     }
 }

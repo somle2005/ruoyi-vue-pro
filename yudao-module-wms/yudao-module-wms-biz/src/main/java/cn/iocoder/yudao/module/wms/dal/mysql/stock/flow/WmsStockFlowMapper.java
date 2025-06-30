@@ -70,8 +70,15 @@ public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
     /**
      * 按 product_id 查询 WmsStockFlowDO 清单
      */
-    default List<WmsStockFlowDO> selectByProductId(Long productId) {
-        return selectList(new LambdaQueryWrapperX<WmsStockFlowDO>().eq(WmsStockFlowDO::getProductId, productId));
+    default WmsStockFlowDO selectByInboundIdAndStockType(Long inboundId, Integer stockType, Integer reason, Long reasonBillId) {
+        return selectOne(new LambdaQueryWrapperX<WmsStockFlowDO>()
+            .eq(WmsStockFlowDO::getInboundId, inboundId)
+            .eq(WmsStockFlowDO::getStockType, stockType)
+            .eq(WmsStockFlowDO::getReason, reason)
+            .eq(WmsStockFlowDO::getReasonBillId, reasonBillId)
+            .orderByDesc(WmsStockFlowDO::getCreateTime)
+            .last("limit 1")
+        );
     }
 
     /**
@@ -106,5 +113,12 @@ public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
 
     default List<WmsStockFlowDO> selectStockFlow(Long stockType, Long stockId) {
         return selectList(new LambdaQueryWrapperX<WmsStockFlowDO>().eq(WmsStockFlowDO::getStockType, stockType).eq(WmsStockFlowDO::getStockId, stockId));
+    }
+
+    /**
+     * 按 inboundId 查询 WmsStockFlowDO 清单
+     */
+    default List<WmsStockFlowDO> selectByInboundId(Long inboundId) {
+        return selectList(new LambdaQueryWrapperX<WmsStockFlowDO>().eq(WmsStockFlowDO::getInboundId, inboundId));
     }
 }

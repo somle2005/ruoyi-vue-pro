@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowSaveReqVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.flow.WmsStockFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
@@ -64,21 +65,6 @@ public interface WmsStockFlowService {
      */
     WmsStockFlowDO getLastFlow(Long warehouseId, Integer stockType, Long stockId);
 
-//    /**
-//     * 创建仓库库存变化流水
-//     */
-//    void createForStockWarehouse(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockWarehouseDO stockWarehouseDO, Integer quantity, Long reasonId, Long reasonItemId);
-
-//    /**
-//     * 创建逻辑库存变化流水
-//     */
-//    void createForStockLogic(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockLogicDO stockLogicDO, Integer quantity, Long reasonId, Long reasonItemId);
-
-//    /**
-//     * 创建仓位库存变化流水
-//     */
-//    void createForStockBin(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockBinDO stockBinDO, Integer quantity, Long reasonId, Long reasonItemId, Long inboundItemFlowId);
-
     List<WmsStockFlowDO> selectStockFlow(Long stockType, Long stockId);
 
     void assembleProducts(List<WmsStockFlowRespVO> list);
@@ -113,6 +99,17 @@ public interface WmsStockFlowService {
     void assembleBinStock(List<WmsStockFlowRespVO> list);
 
     void assembleExchange(List<WmsStockFlowRespVO> list);
+
+    /**
+     * 按入库单编号和库存类型查询库存流水
+     *
+     * @param inboundId   入库单编号
+     * @param stockType   库存类型
+     * @param reason      原因
+     * @param reasonBilId 原因单据编号
+     * @return 库存流水
+     */
+    WmsStockFlowRespVO selectByInboundIdAndStockType(Long inboundId, Integer stockType, Integer reason, Long reasonBilId);
 
     /**
      * 创建仓库库存变化流水
@@ -161,5 +158,21 @@ public interface WmsStockFlowService {
      * @param inboundId    入库单编号
      */
     void createForStockLogic(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsStockLogicDO stockLogicDO, Integer quantity, Long reasonId, Long reasonItemId, Integer beforeQty, Integer afterQty, Long inboundId);
+
+    /**
+     * 创建逻辑库存变化流水
+     *
+     * @param reason        操作类型
+     * @param direction     方向
+     * @param productId     产品id
+     * @param inboundItemDO 批次库存
+     * @param quantity      数量
+     * @param reasonId      单据编号
+     * @param reasonItemId  明细行编号
+     * @param beforeQty     变更前数量
+     * @param afterQty      变更后数量
+     * @param inboundId     入库单编号
+     */
+    void createForInboundItem(WmsStockReason reason, WmsStockFlowDirection direction, Long productId, WmsInboundItemDO inboundItemDO, Integer quantity, Long reasonId, Long reasonItemId, Integer beforeQty, Integer afterQty, Long inboundId, Long warehouseId);
 
 }

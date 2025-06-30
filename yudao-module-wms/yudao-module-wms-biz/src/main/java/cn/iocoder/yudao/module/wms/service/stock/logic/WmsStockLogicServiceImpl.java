@@ -196,7 +196,11 @@ public class WmsStockLogicServiceImpl implements WmsStockLogicService {
         if (stockLogicDO.getId() == null) {
             stockLogicMapper.insert(stockLogicDO);
         } else {
-            stockLogicMapper.updateById(stockLogicDO);
+            try {
+                stockLogicMapper.updateStockLogic(stockLogicDO);
+            } catch (Exception e) {
+                throw exception(STOCK_LOGIC_DATA_UPDATE_ERROR, e);
+            }
         }
     }
 

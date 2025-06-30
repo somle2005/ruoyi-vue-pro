@@ -16,11 +16,15 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.product.WmsProductDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundStatus;
+import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+
+import static com.baomidou.mybatisplus.core.toolkit.Wrappers.lambdaUpdate;
 
 /**
  * 仓位库存 Mapper
@@ -171,5 +175,43 @@ public interface WmsStockBinMapper extends BaseMapperX<WmsStockBinDO> {
         // 返回结果
         return selectList(wrapper);
 
+    }
+
+    /**
+     * 更新仓位库存
+     * 进行数据校验
+     *
+     * @param stockBinDO 仓位库存对象
+     */
+    @Transactional(rollbackFor = Exception.class)
+    default void updateStockBin(WmsStockBinDO stockBinDO) {
+        LambdaUpdateWrapper<WmsStockBinDO> wrapper = lambdaUpdate(WmsStockBinDO.class)
+            .eq(WmsStockBinDO::getId, stockBinDO.getId());
+
+        if (isValidQuantity(stockBinDO.getAvailableQty())) {
+            wrapper.set(WmsStockBinDO::getAvailableQty, stockBinDO.getAvailableQty());
+        }
+
+        if (isValidQuantity(stockBinDO.getSellableQty())) {
+            wrapper.set(WmsStockBinDO::getSellableQty, stockBinDO.getSellableQty());
+        }
+
+        if (isValidQuantity(stockBinDO.getOutboundPendingQty())) {
+            wrapper.set(WmsStockBinDO::getOutboundPendingQty, stockBinDO.getOutboundPendingQty());
+        }
+
+        //后续如果有其他字段需要更新，可以在这里添加。。。
+
+        if (wrapper.getSqlSet() == null) {
+            // 保证SQL语法正确
+            wrapper.setSql("1=1");
+        }
+
+        this.update(wrapper);
+    }
+
+    private boolean isValidQuantity(Integer qty) {
+        // 检查数量是否为 null 或不小于 0
+        return qty != null && qty >= 0;
     }
 }

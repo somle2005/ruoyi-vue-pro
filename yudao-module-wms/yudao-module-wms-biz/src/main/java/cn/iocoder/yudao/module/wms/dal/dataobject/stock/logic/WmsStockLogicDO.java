@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.*;
 
 /**
@@ -62,4 +63,10 @@ public class WmsStockLogicDO extends BaseDO {
      * 待上架数量，上架是指从拣货区上架到货架
      */
     private Integer shelvePendingQty;
+
+    /**
+     * 版本校验
+     */
+    @Version
+    private Integer version;
 }

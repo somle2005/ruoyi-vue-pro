@@ -64,6 +64,7 @@ public interface WmsErrorCodeConstants {
     ErrorCode INBOUND_ITEM_EXISTS = new ErrorCode(2_001_005_009, "入库单详情已存在");
     ErrorCode INBOUND_ITEM_APPROVAL_CONDITION_IS_NOT_MATCH = new ErrorCode(2_001_005_010, "入库单详情不符合审批条件");
     ErrorCode INBOUND_ITEM_PRODUCT_NOT_EXISTS = new ErrorCode(2_001_005_011, "产品 {} 不存在");
+    ErrorCode INBOUND_ITEM_UPDATE_ERROR = new ErrorCode(2_001_005_012, "入库单详情更新失败，可能是数据已被修改，请刷新后重试");
 
     // ========== WMS_INBOUND_FLOW 入库单库存详情扣减表 2_001_006_000 ==========
     ErrorCode INBOUND_ITEM_FLOW_NOT_EXISTS = new ErrorCode(2_001_006_001, "批次可用库存流水不存在");
@@ -91,6 +92,7 @@ public interface WmsErrorCodeConstants {
     ErrorCode STOCK_WAREHOUSE_NOT_ENOUGH = new ErrorCode(2_001_008_007, "仓库库存不足");
     ErrorCode STOCK_WAREHOUSE_EXISTS = new ErrorCode(2_001_008_008, "仓库库存已存在");
     ErrorCode STOCK_WAREHOUSE_ITEM_NOT_ENOUGH = new ErrorCode(2_001_014_015, "产品{}库存不足无法提交");
+    ErrorCode STOCK_WAREHOUSE_PRODUCT_NOT_UPDATED = new ErrorCode(2_001_008_009, "更新仓库库存失败，可能是数据已被修改，请刷新后重试");
 
     // ========== WMS_STOCK_BIN 仓位库存表 2_001_009_000 ==========
     ErrorCode STOCK_BIN_NOT_EXISTS = new ErrorCode(2_001_009_001, "仓位库存不存在");
@@ -104,6 +106,7 @@ public interface WmsErrorCodeConstants {
     ErrorCode STOCK_BIN_SELLABLE_QTY_NOT_ENOUGH = new ErrorCode(2_001_009_008, "{} 仓位的产品 {} 可售库存不足");
     ErrorCode STOCK_BIN_PRODUCT_NOT_EXISTS = new ErrorCode(2_001_009_010, "{} 的仓位库存不存在");
     ErrorCode STOCK_BIN_PRODUCT_NOT_ENOUGH = new ErrorCode(2_001_009_011, "{} 的仓位库存不足");
+    ErrorCode STOCL_BIN_DATA_UPDATE_ERROR = new ErrorCode(2_001_009_012, "仓位库存表详情更新失败，可能是数据已被修改，请刷新后重试");
 
     // ========== WMS_STOCK_LOGIC 逻辑库存表 2_001_010_000 ==========
     ErrorCode STOCK_LOGIC_NOT_EXISTS = new ErrorCode(2_001_010_001, "逻辑库存不存在");
@@ -115,6 +118,7 @@ public interface WmsErrorCodeConstants {
     ErrorCode STOCK_LOGIC_WAREHOUSE_ID_COMPANY_ID_DEPT_ID_PRODUCT_ID_DUPLICATE = new ErrorCode(2_001_010_007, "仓库ID,库存财务主体公司ID,库存归属部门ID,产品ID已存在");
     ErrorCode STOCK_LOGIC_NOT_ENOUGH = new ErrorCode(2_001_010_008, "逻辑库存不足");
     ErrorCode STOCK_LOGIC_EXISTS = new ErrorCode(2_001_010_009, "逻辑库存已存在");
+    ErrorCode STOCK_LOGIC_DATA_UPDATE_ERROR = new ErrorCode(2_001_005_012, "逻辑库存表详情更新失败，可能是数据已被修改，请刷新后重试");
 
     // ========== WMS_STOCK_FLOW 库存流水表 2_001_011_000 ==========
     ErrorCode STOCK_FLOW_NOT_EXISTS = new ErrorCode(2_001_011_001, "库存流水不存在");

@@ -1,27 +1,22 @@
 package cn.iocoder.yudao.module.wms.service.quantity;
 
-import cn.hutool.core.util.IdUtil;
-import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.mybatis.core.util.JdbcUtils;
-import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.stock.flow.vo.WmsStockFlowRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
-import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.flow.WmsItemFlowDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.logic.WmsStockLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockFlowDirection;
 import cn.iocoder.yudao.module.wms.enums.stock.WmsStockReason;
-import cn.iocoder.yudao.module.wms.service.inbound.item.flow.WmsItemFlowService;
-import jakarta.annotation.Resource;
-import org.springframework.context.annotation.Lazy;
+import cn.iocoder.yudao.module.wms.enums.stock.WmsStockType;
+import cn.iocoder.yudao.module.wms.service.stock.flow.WmsStockFlowService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -37,30 +32,35 @@ import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 @Component
 public class OutboundFinishExecutor extends OutboundExecutor {
 
-    @Resource
-    @Lazy
-    private WmsItemFlowService itemFlowService;
+    @Autowired
+    private WmsStockFlowService wmsStockFlowService;
 
     public OutboundFinishExecutor() {
         super(WmsStockReason.OUTBOUND_FINISH);
     }
 
     @Override
-    protected Integer getExecuteQty(WmsOutboundItemRespVO item, WmsInboundItemLogicDO batch) {
+    protected Integer getExecuteQty(WmsOutboundItemRespVO itemClone, WmsInboundItemDO batch) {
         // 取消原先的计划入库量，加上本次的实际入库量
-        return item.getActualQty() - item.getPlanQty();
+        Integer quantity = itemClone.getActualQty() - itemClone.getPlanQty();
+        Integer deltaQty = Math.min(batch.getOutboundAvailableQty(), itemClone.getActualQty());
+        //扣减本批次的出库变化数量
+        itemClone.setPlanQty(itemClone.getPlanQty() - deltaQty);
+        itemClone.setActualQty(itemClone.getActualQty() - deltaQty);
+        return quantity;
     }
 
     /**
      * 更新仓库库存
      */
     @Override
-    protected WmsStockFlowDirection updateStockWarehouseQty(WmsStockWarehouseDO stockWarehouseDO, WmsOutboundItemRespVO item, Integer quantity) {
+    protected WmsStockFlowDirection updateStockWarehouseQty(WmsStockWarehouseDO stockWarehouseDO, WmsOutboundItemRespVO item, Integer quantity, WmsInboundItemDO batch) {
 
         // 校验本方法在事务中
         JdbcUtils.requireTransaction();
 
-        Integer actualQty = item.getActualQty();
+        WmsStockFlowRespVO flow = wmsStockFlowService.selectByInboundIdAndStockType(batch.getInboundId(), WmsStockType.WAREHOUSE.getValue(), WmsStockReason.OUTBOUND_SUBMIT.getValue(), item.getOutboundId());
+        Integer actualQty = flow.getDeltaQty();
 
         // 可用量
         stockWarehouseDO.setAvailableQty(stockWarehouseDO.getAvailableQty() - actualQty);
@@ -85,43 +85,16 @@ public class OutboundFinishExecutor extends OutboundExecutor {
      * 更新入库单库存
      */
     @Override
-    protected List<WmsItemFlowDO> processInboundItem(WmsOutboundRespVO outboundRespVO, WmsOutboundItemRespVO item, Long companyId, Long deptId, Long warehouseId, Long binId, Long productId, Integer quantity, Long outboundId, Long outboundItemId) {
-
-        List<WmsItemFlowDO> flowDOList = itemFlowService.selectByActionId(outboundRespVO.getLatestOutboundActionId());
-
-        Long actionId= IdUtil.getSnowflakeNextId();
-        outboundRespVO.setLatestOutboundActionId(actionId);
-
-        List<Long> inboundItemIds = StreamX.from(flowDOList).toList(WmsItemFlowDO::getInboundItemId);
-        List<WmsInboundItemDO> inboundItemsList=inboundItemService.selectByIds(inboundItemIds);
-        List<WmsItemFlowDO> itemFlowList = new ArrayList<>();
-        Map<Long,WmsInboundItemDO> map=StreamX.from(inboundItemsList).toMap(WmsInboundItemDO::getId);
-        for (WmsItemFlowDO flowDO : flowDOList) {
-            WmsInboundItemDO inboundItemDO = map.get(flowDO.getInboundItemId());
-            // 记录流水
-            WmsItemFlowDO newFlowDO = new WmsItemFlowDO();
-            newFlowDO.setOutboundActionId(actionId);
-            newFlowDO.setInboundId(inboundItemDO.getInboundId());
-            newFlowDO.setInboundItemId(inboundItemDO.getId());
-            newFlowDO.setProductId(inboundItemDO.getProductId());
-
-            newFlowDO.setBillType(BillType.WMS_OUTBOUND.getValue());
-            newFlowDO.setBillId(outboundRespVO.getId());
-            newFlowDO.setBillItemId(item.getId());
-
-            newFlowDO.setDirection(WmsStockFlowDirection.parseByQty(quantity).getValue());
-            newFlowDO.setOutboundAvailableDeltaQty(Math.abs(quantity));
-            newFlowDO.setOutboundAvailableQty(inboundItemDO.getOutboundAvailableQty());
-            newFlowDO.setActualQty(inboundItemDO.getActualQty());
-            newFlowDO.setShelveClosedQty(inboundItemDO.getShelveClosedQty());
-
-            itemFlowList.add(newFlowDO);
-
+    protected WmsStockFlowDirection updateInboundItemQty(WmsOutboundRespVO outboundRespVO, WmsOutboundItemRespVO item, Long companyId, Long deptId, Long warehouseId, Long binId, Long productId, Integer quantity, Long outboundId, Long outboundItemId, WmsInboundItemDO batch) {
+        WmsStockFlowRespVO flow = wmsStockFlowService.selectByInboundIdAndStockType(batch.getInboundId(), WmsStockType.BIN.getValue(), WmsStockReason.OUTBOUND_SUBMIT.getValue(), outboundRespVO.getId());
+        Integer actualQty = flow.getDeltaQty();
+        //出库可用量
+        batch.setOutboundAvailableQty(batch.getOutboundAvailableQty() - actualQty);
+        if (batch.getOutboundAvailableQty() < 0) {
+            throw exception(INBOUND_ITEM_OUTBOUND_AVAILABLE_QTY_NOT_ENOUGH);
         }
-        // 保存详情与流水
-        inboundItemService.saveItems(inboundItemsList, itemFlowList);
 
-        return itemFlowList;
+        return WmsStockFlowDirection.OUT;
 
     }
 
@@ -129,10 +102,12 @@ public class OutboundFinishExecutor extends OutboundExecutor {
      * 更新逻辑库存
      **/
     @Override
-    protected WmsStockFlowDirection updateStockLogicQty(WmsStockLogicDO stockLogicDO, WmsOutboundItemRespVO item, Integer quantity) {
-        Integer actualQty = item.getActualQty();
+    protected WmsStockFlowDirection updateStockLogicQty(WmsOutboundRespVO outboundRespVO, WmsStockLogicDO stockLogicDO, WmsOutboundItemRespVO item, Integer quantity, WmsInboundItemDO batch) {
+        WmsStockFlowRespVO flow = wmsStockFlowService.selectByInboundIdAndStockType(batch.getInboundId(), WmsStockType.LOGIC.getValue(), WmsStockReason.OUTBOUND_SUBMIT.getValue(), outboundRespVO.getId());
+        Integer actualQty = flow.getDeltaQty();
+
         // 可用量
-        stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() - quantity);
+        stockLogicDO.setAvailableQty(stockLogicDO.getAvailableQty() - actualQty);
         if (stockLogicDO.getAvailableQty() < 0) {
             throw exception(STOCK_LOGIC_NOT_ENOUGH);
         }
@@ -148,8 +123,9 @@ public class OutboundFinishExecutor extends OutboundExecutor {
      * 更新库存货位
      **/
     @Override
-    protected  WmsStockFlowDirection updateSingleStockBinQty(WmsStockBinDO stockBinDO, WmsOutboundItemRespVO item, Integer quantity) {
-        Integer actualQty = item.getActualQty();
+    protected WmsStockFlowDirection updateSingleStockBinQty(WmsStockBinDO stockBinDO, WmsOutboundItemRespVO item, Integer quantity, WmsInboundItemDO batch) {
+        WmsStockFlowRespVO flow = wmsStockFlowService.selectByInboundIdAndStockType(batch.getInboundId(), WmsStockType.BIN.getValue(), WmsStockReason.OUTBOUND_SUBMIT.getValue(), item.getOutboundId());
+        Integer actualQty = flow.getDeltaQty();
         // 可用库存
         stockBinDO.setAvailableQty(stockBinDO.getAvailableQty() - actualQty);
         if(stockBinDO.getAvailableQty()<0) {
@@ -182,7 +158,7 @@ public class OutboundFinishExecutor extends OutboundExecutor {
     }
 
     @Override
-    protected void validateData(WmsOutboundItemRespVO item, Map<String, WmsInboundItemLogicDO> deptIdCompanyIdMap) {
+    protected void validateData(WmsOutboundItemRespVO item, Map<String, WmsInboundItemDO> deptIdCompanyIdMap) {
     }
 
 

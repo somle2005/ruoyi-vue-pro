@@ -1,11 +1,11 @@
 package cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin;
 
-import lombok.*;
-import java.util.*;
-import java.time.LocalDateTime;
-import java.time.LocalDateTime;
-import com.baomidou.mybatisplus.annotation.*;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
+import lombok.*;
 
 /**
  * 仓位库存 DO
@@ -58,4 +58,10 @@ public class WmsStockBinDO extends BaseDO {
      * 可售量，未被单据占用的良品数量
      */
     private Integer sellableQty;
+
+    /**
+     * 版本校验
+     */
+    @Version
+    private Integer version;
 }

@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundPageReq
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
 import jakarta.validation.Valid;
@@ -163,7 +164,7 @@ public interface WmsInboundService {
      * @param companyId   公司编号
      * @param olderFirst  是否按入库时间升序
      */
-    List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, Long binId, boolean olderFirst);
+    List<WmsInboundItemDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, Long binId, boolean olderFirst);
 
     /**
      * 创建盘点入库单

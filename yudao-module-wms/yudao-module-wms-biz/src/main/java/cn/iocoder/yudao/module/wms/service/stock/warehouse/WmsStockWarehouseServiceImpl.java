@@ -36,8 +36,7 @@ import java.util.List;
 import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.STOCK_WAREHOUSE_NOT_EXISTS;
-import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.STOCK_WAREHOUSE_WAREHOUSE_ID_PRODUCT_ID_DUPLICATE;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 /**
  * 仓库库存 Service 实现类
@@ -194,6 +193,7 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insertOrUpdate(WmsStockWarehouseDO stockWarehouseDO) {
         if (stockWarehouseDO == null) {
             throw exception(STOCK_WAREHOUSE_NOT_EXISTS);
@@ -233,7 +233,11 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
         if (stockWarehouseDO.getId() == null) {
             stockWarehouseMapper.insert(stockWarehouseDO);
         } else {
-            stockWarehouseMapper.updateById(stockWarehouseDO);
+            try {
+                stockWarehouseMapper.updateStockWarehouse(stockWarehouseDO);
+            } catch (Exception e) {
+                throw exception(STOCK_WAREHOUSE_PRODUCT_NOT_UPDATED, e);
+            }
         }
     }
 

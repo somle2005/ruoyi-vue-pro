@@ -44,8 +44,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.STOCK_BIN_BIN_ID_PRODUCT_ID_DUPLICATE;
-import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.STOCK_BIN_NOT_EXISTS;
+import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
 /**
  * 仓位库存 Service 实现类
@@ -205,6 +204,7 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void insertOrUpdate(WmsStockBinDO stockBinDO) {
         if (stockBinDO == null) {
             throw exception(STOCK_BIN_NOT_EXISTS);
@@ -224,7 +224,11 @@ public class WmsStockBinServiceImpl implements WmsStockBinService {
         if (stockBinDO.getId() == null) {
             stockBinMapper.insert(stockBinDO);
         } else {
-            stockBinMapper.updateById(stockBinDO);
+            try {
+                stockBinMapper.updateStockBin(stockBinDO);
+            } catch (Exception e) {
+                throw exception(STOCL_BIN_DATA_UPDATE_ERROR, e);
+            }
         }
     }
 

@@ -526,8 +526,8 @@ public class WmsInboundServiceImpl implements WmsInboundService {
      */
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public List<WmsInboundItemLogicDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, Long binId, boolean olderFirst) {
-        return inboundItemLogicQueryMapper.getInboundItemLogicList(warehouseId, productId, deptId, companyId, binId, olderFirst);
+    public List<WmsInboundItemDO> getInboundItemLogicList(Long warehouseId, Long productId, Long deptId, Long companyId, Long binId, boolean olderFirst) {
+        return inboundItemMapper.getInboundItemLogicList(warehouseId, productId, deptId, companyId, binId, olderFirst);
     }
 
     /**

@@ -164,7 +164,7 @@ public class WmsInboundItemController {
         InboundExecutor.setShelveAvailableQty(voPageResult.getList());
 
         //过滤空数据
-        voPageResult.getList().removeIf(e -> Objects.equals(e.getOutboundAvailableQty(), 0) && Objects.equals(e.getOutboundPendingQty(), 0));
+        voPageResult.getList().removeIf(e -> Objects.equals(e.getOutboundAvailableQty(), 0));
         // 返回
         return success(voPageResult);
     }
@@ -207,7 +207,6 @@ public class WmsInboundItemController {
         PageResult<WmsInboundItemBinQueryDO> doPageResult = inboundItemService.getInboundItemBinPage(pageReqVO,false);
         // 转换
         PageResult<WmsInboundItemBinRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsInboundItemBinRespVO.class);
-
         // 装配
         inboundItemService.assembleDept(voPageResult.getList());
         inboundItemService.assembleProducts(voPageResult.getList());
@@ -217,7 +216,6 @@ public class WmsInboundItemController {
         inboundItemService.assembleStockWarehouse(voPageResult.getList());
         inboundItemService.assembleInbound(voPageResult.getList());
         InboundExecutor.setShelveAvailableQty(voPageResult.getList());
-
         //过滤空数据
         voPageResult.getList().removeIf(e -> (Objects.equals(e.getBinAvailableQty(), 0) && Objects.equals(e.getBinOutboundPendingQty(), 0)) || Objects.equals(e.getOutboundAvailableQty(), 0));
         // 返回
