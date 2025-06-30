@@ -27,6 +27,7 @@ public enum PlatformEnum {
     MEDIAMARKT(true, null),
     XIAOHONGSHU(true, null),
     DOUDIAN(true, null),
+    OVERSTOCK(true, null),
     SHOPEE(true, "https://www.shopee.com.my/");
 
 
