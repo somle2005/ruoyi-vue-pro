@@ -10,6 +10,7 @@ import com.alibaba.fastjson.JSON;
 import com.somle.lingxing.model.LingXingAccount;
 import com.somle.lingxing.model.reps.LingXingGetProductReps;
 import com.somle.lingxing.model.reps.LingXingInventoryReps;
+import com.somle.lingxing.model.req.LingXingBatchCreateProductReq;
 import com.somle.lingxing.model.req.LingXingGetProductReq;
 import com.somle.lingxing.model.req.LingXingInventoryReq;
 import com.somle.lingxing.util.LingXingUtil;
@@ -106,6 +107,15 @@ public class LingXingClient {
             page++;
         }
         return products;
+    }
+    /***
+     * 批量创建产品
+     */
+    @SneakyThrows
+    public void batchCreateProduct(List<LingXingBatchCreateProductReq.ProductData> productDataList) {
+        Map<String, Object> resultMap = LingXingUtil.getAuthCode(account.getAppKey(), account.getAppSecret(), JsonUtilsX.toJsonString(productDataList));
+        String authCode = resultMap.get("authcode").toString();
+        String reqTime  = resultMap.get("reqTime").toString();
     }
 
 
