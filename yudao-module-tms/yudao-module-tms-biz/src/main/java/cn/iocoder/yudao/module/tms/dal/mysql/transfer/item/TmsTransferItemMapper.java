@@ -52,7 +52,9 @@ public interface TmsTransferItemMapper extends BaseMapperX<TmsTransferItemDO> {
             .eqIfPresent(TmsTransferItemDO::getStockCompanyId, vo.getItemQueryVo().getStockCompanyId())
             .eqIfPresent(TmsTransferItemDO::getRemark, vo.getItemQueryVo().getRemark())
             .eqIfPresent(TmsTransferItemDO::getOutboundClosedQty, vo.getItemQueryVo().getOutboundClosedQty())
-            .eqIfPresent(TmsTransferItemDO::getInboundClosedQty, vo.getItemQueryVo().getInboundClosedQty());
+            .eqIfPresent(TmsTransferItemDO::getInboundClosedQty, vo.getItemQueryVo().getInboundClosedQty())
+            .inIfPresent(TmsTransferItemDO::getDeptId, vo.getItemQueryVo().getDeptIds())
+            ;
     }
 
     default MPJLambdaWrapperX<TmsTransferItemDO> buildBOWrapper(TmsTransferPageReqVO vo) {
