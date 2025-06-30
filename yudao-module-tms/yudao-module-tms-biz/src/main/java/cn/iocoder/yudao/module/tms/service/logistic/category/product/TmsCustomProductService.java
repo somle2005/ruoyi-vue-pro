@@ -7,6 +7,8 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.product.TmsC
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * 海关产品分类表 Service 接口
@@ -22,6 +24,14 @@ public interface TmsCustomProductService {
      * @return 编号
      */
     Long createCustomProduct(@Valid TmsCustomProductSaveReqVO createReqVO);
+
+    /**
+     * 批量校验海关产品分类表是否存在
+     *
+     * @param productIds 产品ids
+     * @return 产品id：
+     */
+    Map<Long, TmsCustomProductDO> validHasProductId(Set<Long> productIds);
 
     /**
      * 更新海关产品分类表

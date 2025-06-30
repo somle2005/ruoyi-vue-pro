@@ -7,6 +7,9 @@ import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.product.vo
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.product.TmsCustomProductDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.Collection;
+import java.util.List;
+
 /**
  * 海关产品分类表 Mapper
  *
@@ -32,5 +35,9 @@ public interface TmsCustomProductMapper extends BaseMapperX<TmsCustomProductDO> 
      */
     default TmsCustomProductDO getCustomProductByProductId(Long productId) {
         return selectOne(TmsCustomProductDO::getProductId, productId);
+    }
+
+    default List<TmsCustomProductDO> selectListByProductIds(Collection<Long> productIds) {
+        return selectList(TmsCustomProductDO::getProductId, productIds);
     }
 }
