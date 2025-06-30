@@ -13,7 +13,7 @@ public interface ErpErrorCodeConstants {
     ErrorCode AOP_ENHANCED_EXCEPTION = new ErrorCode(100001, "AOP增强异常");
 
     // ========== ERP 产品 1-030-500-000 ==========
-    ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(1_030_500_000, "产品不存在");
+    ErrorCode PRODUCT_NOT_EXISTS = new ErrorCode(1_030_500_000, "产品编号({})不存在");
     ErrorCode PRODUCT_NOT_ENABLE = new ErrorCode(1_030_500_001, "产品({})未启用");
     ErrorCode PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_500_002, "产品编码已存在");
     ErrorCode DEPT_LEVEL_NOT_MATCH = new ErrorCode(1_030_500_003, "部门等级不符合要求");

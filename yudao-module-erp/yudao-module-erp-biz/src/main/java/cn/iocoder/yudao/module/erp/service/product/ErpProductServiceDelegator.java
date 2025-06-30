@@ -114,6 +114,18 @@ public class ErpProductServiceDelegator implements ErpProductService {
     }
 
     @Override
+    public ErpProductDO getProductDO(Long id) {
+        ErpProductService service = getDefaultService();
+        return service.getProductDO(id);
+    }
+
+    @Override
+    public List<ErpProductDO> selectListByStatus(Boolean status) {
+        ErpProductService service = getDefaultService();
+        return service.selectListByStatus(status);
+    }
+
+    @Override
     public List<ErpProductRespVO> getProductVOListByStatus(Boolean status) {
         ErpProductService service = getDefaultService();
         return service.getProductVOListByStatus(status);
@@ -154,6 +166,12 @@ public class ErpProductServiceDelegator implements ErpProductService {
     @Override
     public Map<Long, ErpProductRespVO> getProductVOMap(Collection<Long> ids) {
         return ErpProductService.super.getProductVOMap(ids);
+    }
+
+    @Override
+    public PageResult<ErpProductDO> getProductPage(ErpProductPageReqVO pageReqVO) {
+        ErpProductService service = getDefaultService();
+        return service.getProductPage(pageReqVO);
     }
 
     @Override
