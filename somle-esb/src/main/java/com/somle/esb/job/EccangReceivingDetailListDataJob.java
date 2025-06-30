@@ -18,13 +18,6 @@ public class EccangReceivingDetailListDataJob extends EccangDataJob {
         setDate(param);
 
         eccangService.getWarehouseList().forEach(eccangWarehouse -> {
-            //过滤掉仓库编码前缀是AMAZON或者Amazon的第三方仓库
-            String[] warehouseCodeArr = eccangWarehouse.getWarehouseCode().split("_");
-            String warehouseCodePrefix = warehouseCodeArr[0];
-            if (warehouseCodePrefix.equals("AMAZON") || warehouseCodePrefix.equals("Amazon")) {
-                return;
-            }
-
             var vo = EccangReceivingDetailReqVO.builder()
                 .dateFor(beforeYesterdayFirstSecond)
                 .dateTo(beforeYesterdayLastSecond)
