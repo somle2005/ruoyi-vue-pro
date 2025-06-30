@@ -18,4 +18,34 @@ public class SrmPurchaseReturnSummaryRespVO {
     private BigDecimal sumOutboundQty;
     @Schema(description = "实际入库数量")
     private BigDecimal sumActualQty;
+    @Schema(description = "含税单价汇总")
+    private BigDecimal sumGrossPrice;
+
+    // ====== 主表（单据）汇总 ======
+    @Schema(description = "退货单价税合计，单位：元")
+    private BigDecimal sumGrossTotalPrice;
+
+    @Schema(description = "退货单最终合计价格，单位：元")
+    private BigDecimal sumTotalPriceMain;
+
+    @Schema(description = "退货单总毛重，单位：kg")
+    private BigDecimal sumTotalWeight;
+
+    @Schema(description = "退货单总体积，单位：mm³")
+    private BigDecimal sumTotalVolume;
+
+    @Schema(description = "退货单已退款金额，单位：元")
+    private BigDecimal sumRefundPrice;
+
+    @Schema(description = "退货单合计产品价格，单位：元")
+    private BigDecimal sumTotalProductPrice;
+
+    @Schema(description = "退货单合计税额，单位：元")
+    private BigDecimal sumTotalGrossPrice;
+
+    @Schema(description = "退货单优惠金额，单位：元")
+    private BigDecimal sumDiscountPrice;
+
+    @Schema(description = "退货单其它金额，单位：元")
+    private BigDecimal sumOtherPrice;
 } 
