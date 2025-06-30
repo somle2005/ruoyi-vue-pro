@@ -182,14 +182,22 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
             req = new SrmPurchaseInPageReqVO();
         }
         MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseInItemDO>()
-            // 汇总所有字段
+            //slave
             .selectSum(SrmPurchaseInItemDO::getQty, SrmPurchaseInSummaryBO::getSumQty)
             .selectSum(SrmPurchaseInItemDO::getActualQty, SrmPurchaseInSummaryBO::getSumActualQty)
             .selectSum(SrmPurchaseInItemDO::getTotalPrice, SrmPurchaseInSummaryBO::getSumTotalPrice)
             .selectSum(SrmPurchaseInItemDO::getTax, SrmPurchaseInSummaryBO::getSumTax)
             .selectSum(SrmPurchaseInItemDO::getGrossTotalPrice, SrmPurchaseInSummaryBO::getSumGrossTotalPrice)
-            .selectSum(SrmPurchaseInItemDO::getPayPrice, SrmPurchaseInSummaryBO::getSumPayPrice);
+            .selectSum(SrmPurchaseInItemDO::getPayPrice, SrmPurchaseInSummaryBO::getSumPayPrice)
+            .selectSum(SrmPurchaseInItemDO::getGrossPrice, SrmPurchaseInSummaryBO::getSumGrossPrice)
+            //master
+            .selectSum(SrmPurchaseInDO::getTotalWeight, SrmPurchaseInSummaryBO::getSumTotalWeight)
+            .selectSum(SrmPurchaseInDO::getTotalVolume, SrmPurchaseInSummaryBO::getSumTotalVolume)
+            .selectSum(SrmPurchaseInDO::getDiscountPrice, SrmPurchaseInSummaryBO::getSumDiscountPrice)
+            .selectSum(SrmPurchaseInDO::getOtherPrice, SrmPurchaseInSummaryBO::getSumOtherPrice)
+            .selectSum(SrmPurchaseInDO::getPaymentPrice, SrmPurchaseInSummaryBO::getSumPaymentPrice);
         this.masterPageQuery(wrapperX, req);
+        wrapperX.leftJoin(SrmPurchaseInDO.class, SrmPurchaseInDO::getId, SrmPurchaseInItemDO::getArriveId);
         this.slavePageQuery(wrapperX, req);
         return selectJoinOne(SrmPurchaseInSummaryBO.class, wrapperX);
     }

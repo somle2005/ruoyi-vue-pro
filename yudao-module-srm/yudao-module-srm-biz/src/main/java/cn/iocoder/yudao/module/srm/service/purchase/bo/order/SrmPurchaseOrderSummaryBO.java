@@ -70,6 +70,7 @@ public class SrmPurchaseOrderSummaryBO {
 
     /**
      * 汇总待入库数量
+     * 动态计算：sumQty - sumInboundClosedQty
      */
-    //sumWaitInCount = sumQty - sumInboundClosedQty
+    private BigDecimal sumWaitInCount;
 } 

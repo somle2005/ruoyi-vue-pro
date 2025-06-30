@@ -49,4 +49,7 @@ public class SrmPurchaseOrderSummaryRespVO {
 
     @Schema(description = "完工通过数量")
     private Integer sumTotalCompletionPassCount;
+
+    @Schema(description = "待入库数量")
+    private BigDecimal sumWaitInCount;
 } 

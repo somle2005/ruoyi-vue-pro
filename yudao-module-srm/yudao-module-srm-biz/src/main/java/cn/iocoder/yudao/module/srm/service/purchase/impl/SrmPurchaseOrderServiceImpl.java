@@ -988,6 +988,13 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
 
     @Override
     public SrmPurchaseOrderSummaryBO getPurchaseOrderSummary(SrmPurchaseOrderPageReqVO reqVO) {
-        return purchaseOrderItemMapper.selectSrmPurchaseOrderSummaryBO(reqVO);
+        SrmPurchaseOrderSummaryBO summaryBO = purchaseOrderItemMapper.selectSrmPurchaseOrderSummaryBO(reqVO);
+        // 动态计算待入库数量：下单数量 - 入库数量
+        if (summaryBO != null) {
+            BigDecimal sumQty = summaryBO.getSumQty() != null ? summaryBO.getSumQty() : BigDecimal.ZERO;
+            BigDecimal sumInboundClosedQty = summaryBO.getSumInboundClosedQty() != null ? summaryBO.getSumInboundClosedQty() : BigDecimal.ZERO;
+            summaryBO.setSumWaitInCount(sumQty.subtract(sumInboundClosedQty));
+        }
+        return summaryBO;
     }
 }

@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.srm.service.purchase.bo.in;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
@@ -32,7 +33,39 @@ public class SrmPurchaseInSummaryBO {
      */
     private BigDecimal sumGrossTotalPrice;
     /**
+     * 含税单价
+     */
+    private BigDecimal sumGrossPrice;
+    /**
      * 已付款金额
      */
     private BigDecimal sumPayPrice;
+
+    /**
+     * 产品价格
+     */
+    private BigDecimal sumProductPrice;
+
+    //master
+
+    @Schema(description = "总毛重kg")
+    private BigDecimal sumTotalWeight;
+
+    @Schema(description = "总体积mm³")
+    private BigDecimal sumTotalVolume;
+
+    /**
+     * 优惠金额
+     */
+    private BigDecimal sumDiscountPrice;
+
+    /**
+     * 其它金额
+     */
+    private BigDecimal sumOtherPrice;
+    /**
+     * 已支付金额
+     */
+    private BigDecimal sumPaymentPrice;
+
 } 
