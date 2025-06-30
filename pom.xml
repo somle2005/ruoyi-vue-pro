@@ -60,6 +60,7 @@
         <module>somle-xiaohongshu</module>
         <module>somle-doudian</module>
         <module>somle-overstock</module>
+        <module>somle-lingxing</module>
     </modules>
 
     <name>${project.artifactId}</name>
