@@ -215,9 +215,8 @@ public class WmsInboundItemController {
         inboundItemService.assembleWarehouseBin(voPageResult.getList());
         inboundItemService.assembleStockWarehouse(voPageResult.getList());
         inboundItemService.assembleInbound(voPageResult.getList());
-        InboundExecutor.setShelveAvailableQty(voPageResult.getList());
-        //过滤空数据
-        voPageResult.getList().removeIf(e -> (Objects.equals(e.getBinAvailableQty(), 0) && Objects.equals(e.getBinOutboundPendingQty(), 0)) || Objects.equals(e.getOutboundAvailableQty(), 0));
+        inboundItemService.processData(voPageResult.getList(), pageReqVO);
+
         // 返回
         return success(voPageResult);
     }

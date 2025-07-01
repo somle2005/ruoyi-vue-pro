@@ -126,6 +126,8 @@ public class WmsStockWarehouseController {
     public CommonResult<PageResult<WmsStockWarehouseProductRespVO>> getStockGroupedWarehousePage(@Valid @RequestBody WmsStockWarehousePageReqVO pageReqVO) {
         // 查询数据
         PageResult<WmsStockWarehouseProductRespVO> doPageResult = stockWarehouseService.getStockGroupedWarehousePage(pageReqVO);
+        //封装
+        stockWarehouseService.assembleVolumn(doPageResult.getList());
         // // 转换
         // PageResult<WmsStockWarehouseRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsStockWarehouseRespVO.class);
         // 

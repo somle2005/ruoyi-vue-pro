@@ -42,10 +42,6 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
     private WmsWarehouseService warehouseService;
 
     @Resource
-    @Lazy
-    private WmsWarehouseBinService binService;
-
-    @Resource
     private WmsWarehouseBinMapper warehouseBinMapper;
 
     /**
@@ -81,7 +77,7 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
      * @sign : 7061C64B648E5252
      */
     @Override
-    public WmsWarehouseBinDO updateWarehouseBin(WmsWarehouseBinSaveReqVO updateReqVO) {
+    public void updateWarehouseBin(WmsWarehouseBinSaveReqVO updateReqVO) {
         // 校验存在
         WmsWarehouseBinDO exists = validateWarehouseBinExists(updateReqVO.getId());
         if (!Objects.equals(updateReqVO.getId(), exists.getId()) && Objects.equals(updateReqVO.getCode(), exists.getCode())) {
@@ -105,7 +101,6 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
         WmsWarehouseBinDO warehouseBin = BeanUtils.toBean(updateReqVO, WmsWarehouseBinDO.class);
         warehouseBinMapper.updateById(warehouseBin);
         // 返回
-        return warehouseBin;
     }
 
     /**
@@ -186,5 +181,11 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
         return warehouseBinMapper.getSimpleListForExchange(pageReqVO);
     }
 
+    @Override
+    public void batchUpdateWarehouseBin(List<WmsWarehouseBinSaveReqVO> updateReqVoList) {
+        for (WmsWarehouseBinSaveReqVO updateReqVO : updateReqVoList) {
+            this.updateWarehouseBin(updateReqVO);
+        }
+    }
 
 }

@@ -33,7 +33,7 @@ public interface WmsInboundItemService {
      *
      * @param updateReqVO 更新信息
      */
-    WmsInboundItemDO updateInboundItem(@Valid WmsInboundItemSaveReqVO updateReqVO);
+    void updateInboundItem(@Valid WmsInboundItemSaveReqVO updateReqVO);
 
     /**
      * 删除入库单详情
@@ -183,4 +183,12 @@ public interface WmsInboundItemService {
      * 装配入库单详情的入库单
      */
     void assembleInboundItems(List<WmsInboundItemRespVO> list);
+
+    /**
+     * 处理入库单详情数据
+     *
+     * @param list      入库单详情列表
+     * @param pageReqVO 分页查询条件
+     */
+    void processData(List<WmsInboundItemBinRespVO> list, WmsInboundItemPageReqVO pageReqVO);
 }

@@ -8,7 +8,8 @@ import lombok.Data;
 
 /**
  * 简化的 ProductRespVO
- **/
+ *
+ * @author jisencai*/
 @Schema(description = "管理后台 - ERP 产品 Response VO")
 @Data
 @ExcelIgnoreUnannotated
@@ -48,7 +49,11 @@ public class WmsProductRespSimpleVO extends BaseDO {
     @ExcelProperty("主图")
     private String primaryImageUrl;
 
-    @Schema(description = "可用数量", example = "")
+    @Schema(description = "可用数量")
     @ExcelProperty("可用数量")
     private Integer availableQty;
+
+    @Schema(description = "英文名称")
+    @ExcelProperty("英文名称")
+    private String englishName;
 }

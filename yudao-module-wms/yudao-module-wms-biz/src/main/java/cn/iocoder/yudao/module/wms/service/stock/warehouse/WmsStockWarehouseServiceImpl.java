@@ -30,6 +30,7 @@ import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -243,20 +244,20 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
 
     @Override
     public void assembleProducts(List<WmsStockWarehouseRespVO> list) {
-        Map<Long, ErpProductDTO> productDTOMap = productApi.getProductMap(StreamX.from(list).map(WmsStockWarehouseRespVO::getProductId).toList());
-        Map<Long, WmsProductRespSimpleVO> productVOMap = new HashMap<>();
-        for (ErpProductDTO productDTO : productDTOMap.values()) {
+        Map<Long, ErpProductDTO> productMap = productApi.getProductMap(StreamX.from(list).map(WmsStockWarehouseRespVO::getProductId).toList());
+        Map<Long, WmsProductRespSimpleVO> productVoMap = new HashMap<>();
+        for (ErpProductDTO productDTO : productMap.values()) {
             WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
-            productVOMap.put(productDTO.getId(), productVO);
+            productVoMap.put(productDTO.getId(), productVO);
         }
-        StreamX.from(list).assemble(productVOMap, WmsStockWarehouseRespVO::getProductId, WmsStockWarehouseRespVO::setProduct);
+        StreamX.from(list).assemble(productVoMap, WmsStockWarehouseRespVO::getProductId, WmsStockWarehouseRespVO::setProduct);
     }
 
     @Override
     public void assembleWarehouse(List<WmsStockWarehouseRespVO> list) {
-        Map<Long, WmsWarehouseDO> warehouseDOMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsStockWarehouseRespVO::getWarehouseId));
-        Map<Long, WmsWarehouseSimpleRespVO> warehouseVOMap = StreamX.from(warehouseDOMap.values()).toMap(WmsWarehouseDO::getId, v -> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
-        StreamX.from(list).assemble(warehouseVOMap, WmsStockWarehouseRespVO::getWarehouseId, WmsStockWarehouseRespVO::setWarehouse);
+        Map<Long, WmsWarehouseDO> warehouseDoMap = warehouseService.getWarehouseMap(StreamX.from(list).toSet(WmsStockWarehouseRespVO::getWarehouseId));
+        Map<Long, WmsWarehouseSimpleRespVO> warehouseVoMap = StreamX.from(warehouseDoMap.values()).toMap(WmsWarehouseDO::getId, v -> BeanUtils.toBean(v, WmsWarehouseSimpleRespVO.class));
+        StreamX.from(list).assemble(warehouseVoMap, WmsStockWarehouseRespVO::getWarehouseId, WmsStockWarehouseRespVO::setWarehouse);
     }
 
     @Override
@@ -267,10 +268,40 @@ public class WmsStockWarehouseServiceImpl implements WmsStockWarehouseService {
     @Override
     public void assembleStockBin(List<WmsStockWarehouseRespVO> list) {
         List<WmsWarehouseProductVO> warehouseProductList = StreamX.from(list).toList(v -> BeanUtils.toBean(v, WmsWarehouseProductVO.class));
-        Map<String, List<WmsStockBinRespVO>> StockBinVOMap = stockBinService.selectStockBinGroup(warehouseProductList, true);
-        StreamX.from(list).assemble(StockBinVOMap, e -> {
+        Map<String, List<WmsStockBinRespVO>> StockBinVoMap = stockBinService.selectStockBinGroup(warehouseProductList, true);
+        StreamX.from(list).assemble(StockBinVoMap, e -> {
             return getWarehouseProductKey(e.getWarehouseId(), e.getProductId());
         }, WmsStockWarehouseRespVO::setStockBinList);
+    }
+
+    @Override
+    public void assembleVolumn(List<WmsStockWarehouseProductRespVO> list) {
+        Map<Long, ErpProductDTO> productMap = productApi.getProductMap(StreamX.from(list).map(WmsStockWarehouseProductRespVO::getId).toList());
+        Map<String, Long> productVolumeMap = new HashMap<>();
+
+        StreamX.from(list).forEach(item -> {
+            StreamX<WmsStockWarehouseRespVO> stockStream = StreamX.from(item.getStockWarehouseList());
+
+            stockStream.forEach(stockWarehouse -> {
+                String key = makeKey(stockWarehouse.getWarehouseId(), item.getId());
+                ErpProductDTO productDTO = productMap.get(item.getId());
+                if (productDTO == null) {
+                    return;
+                }
+                //计算体积参数
+                Long volume = ((long) productDTO.getLength() * productDTO.getWidth() * productDTO.getHeight());
+                Long grossVolume = stockWarehouse.getAvailableQty() != null ? volume * stockWarehouse.getAvailableQty() : 0;
+
+                productVolumeMap.putIfAbsent(key, grossVolume);
+            });
+
+            stockStream.assemble(productVolumeMap, e -> makeKey(e.getWarehouseId(), e.getProductId()),
+                (e, volume) -> e.setGrossVolume(BigDecimal.valueOf(volume)));
+        });
+    }
+
+    private String makeKey(Long warehouseId, Long productId) {
+        return warehouseId + "_" + productId;
     }
 
     @Override

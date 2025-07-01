@@ -250,4 +250,8 @@ public class WmsProductDO extends TenantBaseDO {
      * 包装宽度（mm）
      */
     private Integer packageWidth;
+    /**
+     * 英文名
+     */
+    private String englishName;
 }

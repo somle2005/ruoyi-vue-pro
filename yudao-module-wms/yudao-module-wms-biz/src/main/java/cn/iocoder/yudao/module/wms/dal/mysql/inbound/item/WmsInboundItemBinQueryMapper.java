@@ -163,11 +163,6 @@ public interface WmsInboundItemBinQueryMapper extends BaseMapperX<WmsInboundItem
 
         return selectPage(reqVO, wrapper);
 
-
-
     }
-
-
-
 
 }

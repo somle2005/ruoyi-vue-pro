@@ -9,14 +9,18 @@ import java.util.Arrays;
 
 /**
  * 分区类型
- **/
+ *
+ * @author jisencai*/
 @RequiredArgsConstructor
 @Getter
 public enum WmsWarehouseZonePartitionType implements ArrayValuable<Integer>, DictEnum {
 
 
     PICK (1, "标准品"),
-    STORE(2, "不良品");
+    STORE(2, "不良品"),
+    RETURN(3, "退货区"),
+    TEMP_STORAGE(4, "暂存区"),
+    ;
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(WmsWarehouseZonePartitionType::getValue).toArray(Integer[]::new);
 

@@ -32,6 +32,7 @@ public interface WmsStockFlowMapper extends BaseMapperX<WmsStockFlowDO> {
         wrapper.eqIfPresent(WmsStockFlowDO::getWarehouseId, reqVO.getWarehouseId());
         wrapper.eqIfPresent(WmsStockFlowDO::getDirection, reqVO.getDirection());
         wrapper.eqIfPresent(WmsStockFlowDO::getProductId, reqVO.getProductId());
+        wrapper.eqIfPresent(WmsStockFlowDO::getDirection, reqVO.getDirection());
         // if(reqVO.getZoneId()!=null) {
         // wrapper.innerJoin(WmsWarehouseBinDO.class, WmsWarehouseBinDO::getId, WmsStockBinDO::getBinId)
         // .eqIfExists(WmsWarehouseBinDO::getZoneId, reqVO.getZoneId());

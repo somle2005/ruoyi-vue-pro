@@ -38,6 +38,9 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.WAREHOUSE_BIN_NOT_EXISTS;
 
+/**
+ * @author jisencai
+ */
 @Tag(name = "库位")
 @RestController
 @RequestMapping("/wms/warehouse-bin")
@@ -68,6 +71,14 @@ public class WmsWarehouseBinController {
     @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:update')")
     public CommonResult<Boolean> updateWarehouseBin(@Valid @RequestBody WmsWarehouseBinSaveReqVO updateReqVO) {
         warehouseBinService.updateWarehouseBin(updateReqVO);
+        return success(true);
+    }
+
+    @PutMapping("/batch/update")
+    @Operation(summary = "批量更新库位")
+    @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:update')")
+    public CommonResult<Boolean> updateWarehouseBin(@Valid @RequestBody List<WmsWarehouseBinSaveReqVO> updateReqVoList) {
+        warehouseBinService.batchUpdateWarehouseBin(updateReqVoList);
         return success(true);
     }
 

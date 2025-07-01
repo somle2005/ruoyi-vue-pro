@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
+ * @author jisencai
  * @table-fields : outbound_available_qty,inbound_status,company_id,create_time,plan_qty,shelve_closed_qty,upstream_id,remark,inbound_dept_id,latest_flow_id,inbound_id,inbound_company_id,actual_qty,product_id,dept_id
  */
 @Schema(description = "管理后台 - 入库单详情分页 Request VO")
@@ -42,42 +43,45 @@ public class WmsInboundItemPageReqVO extends PageParam {
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;
 
-    @Schema(description = "WMS入库状态 ; WmsInboundStatus : 0-未入库 , 1-部分入库 , 2-已入库", example = "")
+    @Schema(description = "WMS入库状态 ; WmsInboundStatus : 0-未入库 , 1-部分入库 , 2-已入库")
     private Integer inboundStatus;
 
-    @Schema(description = "实际入库量", example = "")
+    @Schema(description = "实际入库量")
     private Integer[] actualQty;
 
-    @Schema(description = "批次剩余库存，出库后的剩余库存量", example = "")
+    @Schema(description = "批次剩余库存，出库后的剩余库存量")
     private Integer[] outboundAvailableQty;
 
-    @Schema(description = "计划入库量", example = "")
+    @Schema(description = "计划入库量")
     private Integer[] planQty;
 
-    @Schema(description = "已上架量，已经拣货到仓位的库存量", example = "")
+    @Schema(description = "已上架量，已经拣货到仓位的库存量")
     private Integer[] shelveClosedQty;
 
-    @Schema(description = "最新的流水ID", example = "", hidden = true)
+    @Schema(description = "最新的流水ID", hidden = true)
     private Long latestFlowId;
 
-    @Schema(description = "库龄", example = "")
+    @Schema(description = "库龄")
     private Integer[] age;
 
-    @Schema(description = "库存归属部门ID,由用户指定", example = "")
+    @Schema(description = "库存归属部门ID,由用户指定")
     private Long deptId;
 
-    @Schema(description = "库存财务公司ID,由用户指定", example = "")
+    @Schema(description = "库存财务公司ID,由用户指定")
     private Long companyId;
 
-    @Schema(description = "备注", example = "")
+    @Schema(description = "备注")
     private String remark;
 
-    @Schema(description = "来源明细行ID", example = "")
+    @Schema(description = "来源明细行ID")
     private Long upstreamId;
 
-    @Schema(description = "入库的财务公司ID", example = "")
+    @Schema(description = "入库的财务公司ID")
     private Long inboundCompanyId;
 
-    @Schema(description = "入库的归属部门ID,由用户指定", example = "")
+    @Schema(description = "入库的归属部门ID,由用户指定")
     private Long inboundDeptId;
+
+    @Schema(description = "库存类型")
+    private Integer stockType;
 }

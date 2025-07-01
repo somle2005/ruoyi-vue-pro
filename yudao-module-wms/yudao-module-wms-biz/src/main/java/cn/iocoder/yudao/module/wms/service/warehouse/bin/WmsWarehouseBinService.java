@@ -29,7 +29,7 @@ public interface WmsWarehouseBinService {
      *
      * @param updateReqVO 更新信息
      */
-    WmsWarehouseBinDO updateWarehouseBin(@Valid WmsWarehouseBinSaveReqVO updateReqVO);
+    void updateWarehouseBin(@Valid WmsWarehouseBinSaveReqVO updateReqVO);
 
     /**
      * 删除库位
@@ -83,4 +83,11 @@ public interface WmsWarehouseBinService {
      * 获得转换单库位精简列表
      **/
     List<WmsWarehouseBinDO> getSimpleListForExchange(WmsWarehouseBinPageReqVO pageReqVO);
+
+    /**
+     * 批量更新库位
+     *
+     * @param updateReqVoList 更新信息列表
+     */
+    void batchUpdateWarehouseBin(List<WmsWarehouseBinSaveReqVO> updateReqVoList);
 }

@@ -27,7 +27,8 @@ public interface WmsWarehouseZoneMapper extends BaseMapperX<WmsWarehouseZoneDO> 
 				.eqIfPresent(WmsWarehouseZoneDO::getStatus, reqVO.getStatus())
 				.eqIfPresent(WmsWarehouseZoneDO::getPriority, reqVO.getPriority())
 				.betweenIfPresent(WmsWarehouseZoneDO::getCreateTime, reqVO.getCreateTime())
-				.orderByDesc(WmsWarehouseZoneDO::getId));
+            .orderByDesc(WmsWarehouseZoneDO::getPriority))
+            ;
     }
 
     /**

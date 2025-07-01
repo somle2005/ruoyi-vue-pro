@@ -59,6 +59,7 @@ public class WmsWarehouseZoneServiceImpl implements WmsWarehouseZoneService {
                 throw exception(WAREHOUSE_NOT_EXISTS);
             }
         }
+        createReqVO.setPriority(createReqVO.getPriority() == null ? 0 : createReqVO.getPriority());
         // 插入
         WmsWarehouseZoneDO warehouseZone = BeanUtils.toBean(createReqVO, WmsWarehouseZoneDO.class);
         warehouseZoneMapper.insert(warehouseZone);
@@ -134,6 +135,7 @@ public class WmsWarehouseZoneServiceImpl implements WmsWarehouseZoneService {
     /**
      * 按 warehouseId 查询 WmsWarehouseZoneDO
      */
+    @Override
     public List<WmsWarehouseZoneDO> selectByWarehouseId(Long warehouseId, int limit) {
         return warehouseZoneMapper.selectByWarehouseId(warehouseId, limit);
     }

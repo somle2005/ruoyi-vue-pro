@@ -91,4 +91,6 @@ public interface WmsStockWarehouseService {
     List<WmsStockWarehouseDO> selectSellableQtyList(WmsWarehouseQueryDTO wmsWarehouseQueryDTO);
 
     void quickUpdateStockWarehouse(WmsStockWarehouseSaveReqVO bean);
+
+    void assembleVolumn(List<WmsStockWarehouseProductRespVO> list);
 }
