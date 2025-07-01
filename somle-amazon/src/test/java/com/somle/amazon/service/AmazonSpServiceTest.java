@@ -3,6 +3,8 @@ package com.somle.amazon.service;
 import cn.iocoder.yudao.framework.test.core.ut.SomleBaseSpringTest;
 import com.somle.amazon.controller.vo.AmazonSpMarketplaceParticipationVO;
 import com.somle.amazon.controller.vo.AmazonSpMarketplaceVO;
+import com.somle.amazon.controller.vo.AmazonSpReportReqVO;
+import com.somle.amazon.controller.vo.AmazonSpReportRespVO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
@@ -10,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.Rollback;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -70,5 +73,34 @@ class AmazonSpServiceTest extends SomleBaseSpringTest {
         amazonSpClient.getInvoicesDocument("INV-ES-167778821-2024-663");
     }
 
+    @Test
+    void getReports(){
+        AmazonSpClient amazonSpClient = spService.clients.get(1);
+        var vo = AmazonSpReportReqVO.builder()
+            .reportTypes(List.of("GET_DATE_RANGE_FINANCIAL_HOLDS_DATA"))
+//            .processingStatuses(List.of(AmazonSpReportReqVO.ProcessingStatuses.DONE))
+            .createdSince(LocalDateTime.of(2025, 6, 1, 0, 0))
+            .createdUntil(LocalDateTime.of(2025, 6, 15, 23, 59))
+            .pageSize(20)
+            .build();
+        List<AmazonSpReportRespVO> amazonSpReportRespVOS = amazonSpClient.listReports(vo);
+        log.info("{}", amazonSpReportRespVOS);
+        amazonSpClient.waitAndGetReportDocumentString("1242727020265");
+    }
+
+    @Test
+    void getReport() {
+       spService.clients.forEach(client -> {
+           var vo = AmazonSpReportReqVO.builder()
+               .reportTypes(List.of("GET_DATE_RANGE_FINANCIAL_HOLDS_DATA"))
+//            .processingStatuses(List.of(AmazonSpReportReqVO.ProcessingStatuses.DONE))
+               .createdSince(LocalDateTime.of(2025, 5, 1, 0, 0))
+               .createdUntil(LocalDateTime.of(2025, 6, 30, 23, 59))
+               .pageSize(20)
+               .build();
+           List<AmazonSpReportRespVO> amazonSpReportRespVOS = client.listReports(vo);
+           log.info("{}", amazonSpReportRespVOS);
+       });
+    }
 
 }

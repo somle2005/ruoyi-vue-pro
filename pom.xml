@@ -61,6 +61,7 @@
         <module>somle-doudian</module>
         <module>somle-overstock</module>
         <module>somle-lingxing</module>
+        <module>somle-gigacloud</module>
     </modules>
 
     <name>${project.artifactId}</name>

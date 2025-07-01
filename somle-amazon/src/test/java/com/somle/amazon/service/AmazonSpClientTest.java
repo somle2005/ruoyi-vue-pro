@@ -133,7 +133,7 @@ class AmazonSpClientTest extends SomleBaseSpringTest {
 //                .pageSize(100)
 //                .build();
 //        var report = client.getReports(vo).get(0);
-        log.info(client.waitAndGetReportDocumentString("970685020124"));
+        log.info(client.waitAndGetReportDocumentString("1055367020269"));
     }
 
     @Test
