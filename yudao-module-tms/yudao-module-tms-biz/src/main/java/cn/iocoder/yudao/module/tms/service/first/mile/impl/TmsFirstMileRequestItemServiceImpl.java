@@ -3,12 +3,14 @@ package cn.iocoder.yudao.module.tms.service.first.mile.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.module.tms.api.first.mile.request.TmsFistMileRequestItemDTO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemSummaryBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import jakarta.annotation.Resource;
@@ -150,5 +152,10 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
             firstMileRequestItemDO.setOrderStatus(orderStatus).setOrderClosedQty(closeQty);
         }
         firstMileRequestItemMapper.updateById(firstMileRequestItemDO);
+    }
+
+    @Override
+    public TmsFirstMileRequestItemSummaryBO getSummary(TmsFirstMileRequestItemPageReqVO reqVO) {
+        return firstMileRequestItemMapper.selectTmsFirstMileRequestItemSummaryBO(reqVO);
     }
 }

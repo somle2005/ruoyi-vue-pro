@@ -1,6 +1,8 @@
 package cn.iocoder.yudao.module.tms.service.first.mile.request;
 
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemSummaryBO;
 
 import java.util.List;
 
@@ -67,4 +69,9 @@ public interface TmsFirstMileRequestItemService {
      * @param closeQty 最终的已订购数量
      */
     void updateFirstMileRequestItemStatus(Long id, Integer openStatus, Integer orderStatus, Integer closeQty);
+
+    /**
+     * 汇总统计明细
+     */
+    TmsFirstMileRequestItemSummaryBO getSummary(TmsFirstMileRequestItemPageReqVO reqVO);
 }

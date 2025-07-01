@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.pojo.PageResultSummary;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
@@ -20,12 +21,15 @@ import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.system.enums.common.CountryEnum;
 import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemSummaryVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.*;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.convert.TmsFirstMileRequestExportConvert;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMileSaveReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.request.TmsFirstMileRequestProductStockRespVO;
+import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
+import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import cn.iocoder.yudao.module.wms.api.stock.logic.WmsStockLogicApi;
 import cn.iocoder.yudao.module.wms.api.stock.logic.dto.WmsStockLogicDTO;
@@ -59,6 +63,7 @@ import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 @RequiredArgsConstructor(onConstructor = @__(@Autowired))
 public class TmsFirstMileRequestController {
 
+    private final TmsFirstMileRequestItemService firstMileRequestItemService;
     private final TmsFirstMileRequestService firstMileRequestService;
     private final ErpProductApi erpProductApi;
     private final WmsWarehouseApi wmsWarehouseApi;
@@ -110,14 +115,14 @@ public class TmsFirstMileRequestController {
     @PostMapping("/page")
     @Operation(summary = "获得头程申请单分页")
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:query')")
-    public CommonResult<PageResult<TmsFirstMileRequestRespVO>> getFirstMileRequestPage(@Validated @RequestBody(required = false) TmsFirstMileRequestPageReqVO pageReqVO) {
+    public CommonResult<PageResultSummary<TmsFirstMileRequestRespVO, TmsFirstMileRequestItemSummaryVO>> getFirstMileRequestPage(@Validated @RequestBody(required = false) TmsFirstMileRequestPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new TmsFirstMileRequestPageReqVO();
+        }
         PageResult<TmsFirstMileRequestBO> pageBO = firstMileRequestService.getFirstMileRequestBOPage(pageReqVO);
         List<TmsFirstMileRequestRespVO> respVOList = bindListResult(pageBO.getList());
-        // 创建结果对象
-        PageResult<TmsFirstMileRequestRespVO> pageResultRespVO = new PageResult<>();
-        pageResultRespVO.setTotal(pageBO.getTotal());
-        pageResultRespVO.setList(respVOList);
-        return success(pageResultRespVO);
+        TmsFirstMileRequestItemSummaryVO summaryVO = TmsFirstMileConvert.convertSummaryBOToVO(firstMileRequestService.getSummary(pageReqVO));
+        return success(new PageResultSummary<>(respVOList, pageBO.getTotal(), summaryVO));
     }
 
     @GetMapping("/export-excel")
@@ -190,16 +195,16 @@ public class TmsFirstMileRequestController {
     @PreAuthorize("@ss.hasPermission('tms:first-mile-request:query')")
     public CommonResult<TmsFirstMileRequestProductStockRespVO> getProductStock(@Validated @RequestBody TmsFirstMileRequestProductStockReqVO reqVO) {
         Map<Long, WmsStockLogicDTO> stockMap = wmsStockLogicApi.selectByDeptIdAndProductIdAndCountryIdMap(reqVO.getDeptId(), reqVO.getProductIds(), reqVO.getCountry());
-        
+
         // 转换为 ProductStock 列表
         List<TmsFirstMileRequestProductStockRespVO.ProductStock> productStocks = stockMap.entrySet().stream()
-                .map(entry -> {
-                    TmsFirstMileRequestProductStockRespVO.ProductStock stock = new TmsFirstMileRequestProductStockRespVO.ProductStock();
-                    stock.setProductId(entry.getKey());
-                    stock.setAvailableQty(entry.getValue().getAvailableQty());
-                    return stock;
-                })
-                .collect(Collectors.toList());
+            .map(entry -> {
+                TmsFirstMileRequestProductStockRespVO.ProductStock stock = new TmsFirstMileRequestProductStockRespVO.ProductStock();
+                stock.setProductId(entry.getKey());
+                stock.setAvailableQty(entry.getValue().getAvailableQty());
+                return stock;
+            })
+            .collect(Collectors.toList());
 
         // 构建返回对象
         TmsFirstMileRequestProductStockRespVO respVO = new TmsFirstMileRequestProductStockRespVO();
@@ -231,7 +236,7 @@ public class TmsFirstMileRequestController {
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
         Map<Long, WmsWarehouseDTO> warehouseMap = wmsWarehouseApi.getWarehouseMap(warehouseIds);
         Map<Long, FmsCompanyDTO> dtoMap = fmsCompanyApi.getCompanyMap(firstMileRequestBOList.stream()
-                .flatMap(bo -> bo.getItems().stream().map(TmsFirstMileRequestItemDO::getSalesCompanyId)).collect(Collectors.toSet()));
+            .flatMap(bo -> bo.getItems().stream().map(TmsFirstMileRequestItemDO::getSalesCompanyId)).collect(Collectors.toSet()));
         //获取产品库存 wmsWarehouseApi
         //公司MAP
         Map<Long, WmsStockLogicDTO> wmsStockLogicDTOMap = wmsStockLogicApi.selectByDeptIdAndProductIdAndCountryIdMap(firstMileRequestBOList.get(0).getRequestDeptId(), productIds, CountryEnum.CHINA.getCountryCode());
