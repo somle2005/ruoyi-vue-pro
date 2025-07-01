@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.pojo.PageResultSummary;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
@@ -22,6 +23,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.common.vo.TmsProductRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeExcelRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.item.vo.TmsFirstMileItemSummaryVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.excel.TmsFeeExportConvert;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.excel.TmsFirstMileExcelRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.excel.TmsFirstMileExportConvert;
@@ -33,6 +35,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstM
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockListRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.resp.TmsFirstMileStockRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.vessel.tracking.vo.TmsVesselTrackingRespVO;
+import cn.iocoder.yudao.module.tms.convert.first.mile.TmsFirstMileConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
@@ -127,9 +130,13 @@ public class TmsFirstMileController {
     @PostMapping("/page")
     @Operation(summary = "获得头程单分页")
     @PreAuthorize("@ss.hasPermission('tms:first-mile:query')")
-    public CommonResult<PageResult<TmsFirstMileRespVO>> getFirstMilePage(@Valid @RequestBody(required = false) TmsFirstMilePageReqVO pageReqVO) {
+    public CommonResult<PageResultSummary<TmsFirstMileRespVO, TmsFirstMileItemSummaryVO>> getFirstMilePage(@Valid @RequestBody(required = false) TmsFirstMilePageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new TmsFirstMilePageReqVO();
+        }
         PageResult<TmsFirstMileBO> pageResult = firstMileService.getFirstMileBOPage(pageReqVO);
-        return success(new PageResult<>(bindResult(pageResult.getList()), pageResult.getTotal()));
+        TmsFirstMileItemSummaryVO summaryVO = TmsFirstMileConvert.convertItemSummaryBOToVO(firstMileService.getSummary(pageReqVO));
+        return success(new PageResultSummary<>(bindResult(pageResult.getList()), pageResult.getTotal(), summaryVO));
     }
 
     @GetMapping("/export-excel")

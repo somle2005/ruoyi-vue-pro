@@ -12,6 +12,7 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemSummaryBO;
 import jakarta.validation.constraints.Size;
 
 import java.util.List;
@@ -160,4 +161,9 @@ public interface TmsFirstMileService {
      * @return 申请单(主表)的MAP
      */
     Map<Long, TmsFirstMileRequestDO> getRequestMap(Set<Long> requestItemIds);
+
+    /**
+     * 头程单明细分页条件下的汇总统计
+     */
+    TmsFirstMileItemSummaryBO getSummary(TmsFirstMilePageReqVO reqVO);
 }

@@ -49,6 +49,7 @@ import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemSummaryBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
@@ -1002,6 +1003,11 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         // 3. 执行更新
         firstMileItemMapper.updateById(updateObj);
+    }
+
+    @Override
+    public TmsFirstMileItemSummaryBO getSummary(TmsFirstMilePageReqVO reqVO) {
+        return firstMileItemMapper.selectTmsFirstMileItemSummaryBO(reqVO);
     }
 
 }

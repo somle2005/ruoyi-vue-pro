@@ -10,6 +10,7 @@ import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.TmsFirstMileDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.item.TmsFirstMileItemDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.vessel.tracking.TmsVesselTrackingDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemSummaryBO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
@@ -160,5 +161,24 @@ public interface TmsFirstMileItemMapper extends BaseMapperX<TmsFirstMileItemDO> 
 
     default List<TmsFirstMileItemDO> selectListByRequestItemId(Long id) {
         return selectList(TmsFirstMileItemDO::getRequestItemId, id);
+    }
+
+    //汇总
+    default TmsFirstMileItemSummaryBO selectTmsFirstMileItemSummaryBO(TmsFirstMilePageReqVO req) {
+        if (req == null) {
+            req = new TmsFirstMilePageReqVO();
+        }
+        MPJLambdaWrapperX<TmsFirstMileItemDO> wrapperX = new MPJLambdaWrapperX<TmsFirstMileItemDO>()
+            .selectSum(TmsFirstMileItemDO::getQty, TmsFirstMileItemSummaryBO::getSumQty)
+            .selectSum(TmsFirstMileItemDO::getBoxQty, TmsFirstMileItemSummaryBO::getSumBoxQty)
+            .selectSum(TmsFirstMileItemDO::getPackageLength, TmsFirstMileItemSummaryBO::getSumPackageLength)
+            .selectSum(TmsFirstMileItemDO::getPackageWidth, TmsFirstMileItemSummaryBO::getSumPackageWidth)
+            .selectSum(TmsFirstMileItemDO::getPackageHeight, TmsFirstMileItemSummaryBO::getSumPackageHeight)
+            .selectSum(TmsFirstMileItemDO::getPackageWeight, TmsFirstMileItemSummaryBO::getSumPackageWeight)
+            .selectSum(TmsFirstMileItemDO::getWeight, TmsFirstMileItemSummaryBO::getSumWeight)
+            .selectSum(TmsFirstMileItemDO::getOutboundClosedQty, TmsFirstMileItemSummaryBO::getSumOutboundClosedQty)
+            .selectSum(TmsFirstMileItemDO::getOutboundPlanQty, TmsFirstMileItemSummaryBO::getSumOutboundPlanQty)
+            .selectSum(TmsFirstMileItemDO::getInboundClosedQty, TmsFirstMileItemSummaryBO::getSumInboundClosedQty);
+        return selectJoinOne(TmsFirstMileItemSummaryBO.class, wrapperX);
     }
 }
