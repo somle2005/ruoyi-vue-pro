@@ -26,6 +26,7 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
@@ -286,7 +287,7 @@ public class ErpProductServiceImpl implements ErpProductService {
 
     @Override
     @Cacheable(cacheNames = PRODUCT_LIST, key = "#status")
-    public List<ErpProductDO> selectListByStatus(@NotNull Boolean status) {
+    public List<ErpProductDO> selectListByStatus(@Valid @NotNull Boolean status) {
         return productMapper.selectListByStatus(status);
     }
 

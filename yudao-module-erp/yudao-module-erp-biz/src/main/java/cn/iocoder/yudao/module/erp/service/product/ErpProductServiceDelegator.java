@@ -21,6 +21,8 @@ import cn.iocoder.yudao.module.erp.service.product.speakerstand.ErpProductSpeake
 import cn.iocoder.yudao.module.erp.service.product.tabletoptvstand.ErpProductTableTopTVStandServiceImpl;
 import cn.iocoder.yudao.module.erp.service.product.tvstandwithmount.ErpProductTVStandWithMountServiceImpl;
 import cn.iocoder.yudao.module.erp.service.product.wallmountedtvmount.ErpProductWallMountedTVMountServiceImpl;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 
@@ -120,7 +122,7 @@ public class ErpProductServiceDelegator implements ErpProductService {
     }
 
     @Override
-    public List<ErpProductDO> selectListByStatus(Boolean status) {
+    public List<ErpProductDO> selectListByStatus(@Valid @NotNull Boolean status) {
         ErpProductService service = getDefaultService();
         return service.selectListByStatus(status);
     }

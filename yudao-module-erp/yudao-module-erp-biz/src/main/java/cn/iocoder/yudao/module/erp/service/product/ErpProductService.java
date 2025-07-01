@@ -70,7 +70,7 @@ public interface ErpProductService {
     /**
      * 根据状态获得产品集合
      */
-    List<ErpProductDO> selectListByStatus(@Valid Boolean status);
+    List<ErpProductDO> selectListByStatus(@Valid @NotNull Boolean status);
 
     /**
      * 获得指定状态的产品 VO 列表

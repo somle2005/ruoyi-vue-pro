@@ -74,6 +74,9 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
     }
 
     default PageResult<TmsFirstMileRequestItemItemBO> selectPageBO(TmsFirstMileRequestPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new TmsFirstMileRequestPageReqVO();
+        }
         MPJLambdaWrapper<TmsFirstMileRequestItemDO> wrapper = buildBOWrapper(pageReqVO).selectAssociation(TmsFirstMileRequestDO.class, TmsFirstMileRequestItemItemBO::getTmsFirstMileRequestDO);
         wrapper.leftJoin(TmsFirstMileRequestDO.class, TmsFirstMileRequestDO::getId, TmsFirstMileRequestItemDO::getRequestId);
         return selectJoinPage(pageReqVO, TmsFirstMileRequestItemItemBO.class, wrapper);
