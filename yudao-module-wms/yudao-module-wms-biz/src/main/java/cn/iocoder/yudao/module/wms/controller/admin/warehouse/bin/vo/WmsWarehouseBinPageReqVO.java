@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
+ * @author jisencai
  * @table-fields : zone_id,code,create_time,picking_order,name,status,warehouse_id
  */
 @Schema(description = "管理后台 - 库位分页 Request VO")
@@ -44,4 +45,26 @@ public class WmsWarehouseBinPageReqVO extends PageParam {
 
     @Schema(description = "分区类型 ; WarehouseAreaPartitionType : 1-标准品 , 2-不良品", example = "1")
     private Integer partitionType;
+
+    @Schema(description = "货架")
+    private String shelf;
+
+    @Schema(description = "巷道")
+    private String aisle;
+
+    @Schema(description = "层数")
+    private Integer layer;
+
+    @Schema(description = "类型 1标准 2超长")
+    private Integer type;
+
+    @Schema(description = "长度mm")
+    private Integer length;
+
+    @Schema(description = "宽度mm")
+    private Integer width;
+
+    @Schema(description = "高度mm")
+    private Integer height;
+
 }

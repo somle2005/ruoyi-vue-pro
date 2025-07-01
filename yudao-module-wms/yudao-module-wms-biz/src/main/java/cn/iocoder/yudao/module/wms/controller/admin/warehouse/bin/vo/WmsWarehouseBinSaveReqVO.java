@@ -1,12 +1,14 @@
 package cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import jakarta.validation.constraints.*;
 import cn.iocoder.yudao.framework.common.validation.InEnum;
 import cn.iocoder.yudao.module.wms.enums.common.WmsValidStatus;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
+ * @author jisencai
  * @table-fields : zone_id,code,picking_order,name,id,status,warehouse_id
  */
 @Schema(description = "管理后台 - 库位新增/修改 Request VO")
@@ -39,4 +41,26 @@ public class WmsWarehouseBinSaveReqVO {
     @NotNull(message = "状态不能为空")
     @InEnum(WmsValidStatus.class)
     private Integer status;
+
+    @Schema(description = "货架")
+    private String shelf;
+
+    @Schema(description = "巷道")
+    private String aisle;
+
+    @Schema(description = "层数")
+    private Integer layer;
+
+    @Schema(description = "类型 1标准 2超长")
+    @NotNull(message = "类型不能为空")
+    private Integer type;
+
+    @Schema(description = "长度mm")
+    private Integer length;
+
+    @Schema(description = "宽度mm")
+    private Integer width;
+
+    @Schema(description = "高度mm")
+    private Integer height;
 }

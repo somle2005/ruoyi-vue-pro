@@ -118,6 +118,11 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
         warehouseBinMapper.deleteById(id);
     }
 
+    @Override
+    public void deleteAllWarehouseBin() {
+        warehouseBinMapper.deleteAll();
+    }
+
     /**
      * @sign : B03B72B6D2D098BC
      */

@@ -98,4 +98,9 @@ public interface WmsWarehouseBinMapper extends BaseMapperX<WmsWarehouseBinDO> {
             .eq(WmsWarehouseZoneDO::getPartitionType, pageReqVO.getPartitionType());
         return selectList(wrapper);
     }
+
+    default void deleteAll() {
+        // 删除所有数据
+        delete(new LambdaQueryWrapperX<>());
+    }
 }

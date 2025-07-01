@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 /**
+ * @author jisencai
  * @table-fields : tenant_id,zone_id,creator,update_time,code,create_time,picking_order,name,id,status,updater,warehouse_id
  */
 @Schema(description = "管理后台 - 库位 Response VO")
@@ -41,5 +42,33 @@ public class WmsWarehouseBinSimpleRespVO {
     @Schema(description = "库区")
     @ExcelProperty("库区")
     private WmsWarehouseZoneSimpleRespVO zone;
+
+    @Schema(description = "货架")
+    @ExcelProperty("货架")
+    private String shelf;
+
+    @Schema(description = "巷道")
+    @ExcelProperty("巷道")
+    private String aisle;
+
+    @Schema(description = "层数")
+    @ExcelProperty("层数")
+    private Integer layer;
+
+    @Schema(description = "类型 1标准 2超长")
+    @ExcelProperty("类型")
+    private Integer type;
+
+    @Schema(description = "长度mm")
+    @ExcelProperty("长度mm")
+    private Integer length;
+
+    @Schema(description = "宽度mm")
+    @ExcelProperty("宽度mm")
+    private Integer width;
+
+    @Schema(description = "高度mm")
+    @ExcelProperty("高度mm")
+    private Integer height;
 
 }

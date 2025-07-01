@@ -12,7 +12,9 @@ import java.time.LocalDateTime;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
+
 /**
+ * @author jisencai
  * @table-fields : tenant_id,zone_id,creator,update_time,code,create_time,picking_order,name,id,status,updater,warehouse_id
  */
 @Schema(description = "管理后台 - 库位 Response VO")
@@ -60,20 +62,20 @@ public class WmsWarehouseBinRespVO {
     @ExcelProperty("更新人姓名")
     private String updaterName;
 
-    @Schema(description = "创建者", example = "")
+    @Schema(description = "创建者")
     @ExcelProperty("创建者")
     private String creator;
 
-    @Schema(description = "租户编号", example = "")
+    @Schema(description = "租户编号")
     @ExcelProperty("租户编号")
     private Long tenantId;
 
-    @Schema(description = "更新时间", example = "")
+    @Schema(description = "更新时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
 
-    @Schema(description = "更新者", example = "")
+    @Schema(description = "更新者")
     @ExcelProperty("更新者")
     private String updater;
 
@@ -82,4 +84,25 @@ public class WmsWarehouseBinRespVO {
 
     @Schema(description = "仓库")
     private WmsWarehouseZoneSimpleRespVO zone;
+
+    @Schema(description = "货架")
+    private String shelf;
+
+    @Schema(description = "巷道")
+    private String aisle;
+
+    @Schema(description = "层数")
+    private Integer layer;
+
+    @Schema(description = "类型 1标准 2超长")
+    private Integer type;
+
+    @Schema(description = "长度mm")
+    private Integer length;
+
+    @Schema(description = "宽度mm")
+    private Integer width;
+
+    @Schema(description = "高度mm")
+    private Integer height;
 }

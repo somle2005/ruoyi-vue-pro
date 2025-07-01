@@ -1,11 +1,10 @@
 package cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin;
 
-import lombok.*;
-import java.util.*;
-import java.time.LocalDateTime;
-import java.time.LocalDateTime;
-import com.baomidou.mybatisplus.annotation.*;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
+import com.baomidou.mybatisplus.annotation.KeySequence;
+import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.TableName;
+import lombok.*;
 
 /**
  * 库位 DO
@@ -58,4 +57,39 @@ public class WmsWarehouseBinDO extends BaseDO {
      * 状态，WMS通用的对象有效状态 ; ValidStatus : 0-不可用 , 1-可用
      */
     private Integer status;
+
+    /**
+     * 货架
+     */
+    private String shelf;
+
+    /**
+     * 巷道
+     */
+    private String aisle;
+
+    /**
+     * 层数
+     */
+    private Integer layer;
+
+    /**
+     * 类型 1标准 2超长
+     */
+    private Integer type;
+
+    /**
+     * 长度mm
+     */
+    private Integer length;
+
+    /**
+     * 宽度mm
+     */
+    private Integer width;
+
+    /**
+     * 高度mm
+     */
+    private Integer height;
 }

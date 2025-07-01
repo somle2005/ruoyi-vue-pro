@@ -39,6 +39,11 @@ public interface WmsWarehouseBinService {
     void deleteWarehouseBin(Long id);
 
     /**
+     * 删除全部库位
+     */
+    void deleteAllWarehouseBin();
+
+    /**
      * 获得库位
      *
      * @param id 编号

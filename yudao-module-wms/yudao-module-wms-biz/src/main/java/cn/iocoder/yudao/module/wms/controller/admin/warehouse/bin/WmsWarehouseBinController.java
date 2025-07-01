@@ -8,10 +8,7 @@ import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
-import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinPageReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinSaveReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.WmsWarehouseBinSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin.vo.*;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.zone.vo.WmsWarehouseZoneSimpleRespVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
@@ -26,17 +23,24 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.List;
 
-import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.*;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.WAREHOUSE_BIN_NOT_EXISTS;
+import static java.lang.Boolean.TRUE;
 
 /**
  * @author jisencai
@@ -45,6 +49,7 @@ import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.WAREHOUSE_
 @RestController
 @RequestMapping("/wms/warehouse-bin")
 @Validated
+@Slf4j
 public class WmsWarehouseBinController {
 
     @Resource
@@ -166,6 +171,48 @@ public class WmsWarehouseBinController {
         List<WmsWarehouseBinDO> list = warehouseBinService.getWarehouseBinPage(pageReqVO).getList();
         // 导出 Excel
         ExcelUtils.write(response, "库位.xls", "数据", WmsWarehouseBinRespVO.class, BeanUtils.toBean(list, WmsWarehouseBinRespVO.class));
+    }
+
+    @GetMapping("/download/template")
+    @Operation(summary = "下载模版 库位表")
+    @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:export')")
+    @ApiAccessLog(operateType = OTHER)
+    public ResponseEntity<byte[]> downloadExcelTemplate() throws IOException {
+        ClassPathResource resource = new ClassPathResource("templates/warehouse-bin-import.xlsx");
+        byte[] fileContent;
+        try (InputStream inputStream = resource.getInputStream()) {
+            fileContent = inputStream.readAllBytes();
+        }
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.parseMediaType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+        // 设置文件名
+        String fileName = "库位导入模板.xlsx";
+        headers.set(HttpHeaders.CONTENT_DISPOSITION,
+            "attachment; filename=\"" + fileName + "\"");
+
+        return ResponseEntity.ok()
+            .headers(headers)
+            .body(fileContent);
+    }
+
+    @PostMapping("/import-excel")
+    @Operation(summary = "导入库位")
+    @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:export')")
+    @ApiAccessLog(operateType = IMPORT)
+    public CommonResult<Boolean> importWarehouseBinExcel(@Valid WmsWarehouseBinImportVO importReqVO) throws Exception {
+        // 读取数据
+        List<WmsWarehouseBinImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsWarehouseBinImportExcelVO.class);
+
+        //判断是否全量覆盖
+        boolean overwrite = importReqVO.getOverwrite() == null ? TRUE : importReqVO.getOverwrite();
+        if (overwrite) {
+            warehouseBinService.deleteAllWarehouseBin();
+        }
+        for (WmsWarehouseBinImportExcelVO impVO : impVOList) {
+            warehouseBinService.createWarehouseBin(BeanUtils.toBean(impVO, WmsWarehouseBinSaveReqVO.class));
+        }
+
+        return success(true);
     }
 
     @GetMapping("/exchange/simple-list")
