@@ -53,7 +53,7 @@ public class SrmPurchaseRequestPageReqVO extends PageParam {
 
     //supplierId 供应商编号
     @Schema(description = "供应商编号")
-    private String supplierId;
+    private Long supplierId;
 
     @Schema(description = "审核状态")
     private Integer auditStatus;
