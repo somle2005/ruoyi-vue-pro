@@ -4,11 +4,15 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.pojo.PageResultSummary;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderBaseRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderExcelRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderSummaryRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.convert.SrmPurchaseOrderExportConvert;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.*;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
@@ -16,6 +20,7 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderSummaryBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -111,12 +116,15 @@ public class SrmPurchaseOrderController {
     @PostMapping("/page")
     @Operation(summary = "获得采购订单分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-order:query')")
-    public CommonResult<PageResult<SrmPurchaseOrderBaseRespVO>> getPurchaseOrderPage(@Valid @RequestBody(required = false) SrmPurchaseOrderPageReqVO pageReqVO) {
+    public CommonResult<PageResultSummary<SrmPurchaseOrderBaseRespVO, SrmPurchaseOrderSummaryRespVO>> getPurchaseOrderPage(@RequestBody(required = false) SrmPurchaseOrderPageReqVO pageReqVO) {
         if (pageReqVO == null) {
             pageReqVO = new SrmPurchaseOrderPageReqVO();
         }
         PageResult<SrmPurchaseOrderBO> pageResult = purchaseOrderService.getPurchaseOrderPageBO(pageReqVO);
-        return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
+        List<SrmPurchaseOrderBaseRespVO> respVOS = bindList(pageResult.getList());
+        //
+        SrmPurchaseOrderSummaryBO summaryBO = purchaseOrderService.getPurchaseOrderSummary(pageReqVO);
+        return success(new PageResultSummary<>(respVOS, pageResult.getTotal(), BeanUtils.toBean(summaryBO, SrmPurchaseOrderSummaryRespVO.class)));
     }
 
     //get获得最大流水号
@@ -133,9 +141,11 @@ public class SrmPurchaseOrderController {
     @ApiAccessLog(operateType = EXPORT)
     public void exportPurchaseOrderExcel(@Valid SrmPurchaseOrderPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<SrmPurchaseOrderBaseRespVO> bindList = bindList(purchaseOrderService.getPurchaseOrderBOList(pageReqVO));
+        // 获取主表+子表数据
+        List<SrmPurchaseOrderBaseRespVO> list = bindList(purchaseOrderService.getPurchaseOrderBOList(pageReqVO));
+        List<SrmPurchaseOrderExcelRespVO> excelList = SrmPurchaseOrderExportConvert.buildExcelList(list);
         // 导出 Excel
-        ExcelUtils.write(response, "采购订单.xls", "数据", SrmPurchaseOrderBaseRespVO.class, bindList);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "采购订单.xls", "采购订单", SrmPurchaseOrderExcelRespVO.class, excelList);
     }
 
     @PostMapping("/submitAudit")

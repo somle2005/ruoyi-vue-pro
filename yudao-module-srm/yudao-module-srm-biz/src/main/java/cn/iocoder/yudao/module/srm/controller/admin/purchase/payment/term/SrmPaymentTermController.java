@@ -7,10 +7,8 @@ import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.payment.term.vo.SrmPaymentTermPageReqVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.payment.term.vo.SrmPaymentTermRespVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.payment.term.vo.SrmPaymentTermSaveReqVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.payment.term.vo.SrmPaymentTermSimpleRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.payment.term.vo.*;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.payment.term.vo.convert.SrmPaymentTermExportConvert;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.payment.term.SrmPaymentTermDO;
 import cn.iocoder.yudao.module.srm.service.purchase.payment.term.SrmPaymentTermService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -24,7 +22,6 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
@@ -85,13 +82,11 @@ public class SrmPaymentTermController {
     @Operation(summary = "导出付款条款 Excel")
     @PreAuthorize("@ss.hasPermission('srm:payment-term:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportPaymentTermExcel(@Valid SrmPaymentTermPageReqVO pageReqVO,
-                                       HttpServletResponse response) throws IOException {
+    public void exportPaymentTermExcel(@Valid SrmPaymentTermPageReqVO pageReqVO, HttpServletResponse response) throws Exception {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-        List<SrmPaymentTermDO> list = paymentTermService.getPaymentTermPage(pageReqVO).getList();
-        // 导出 Excel
-        ExcelUtils.write(response, "付款条款.xls", "数据", SrmPaymentTermRespVO.class,
-            BeanUtils.toBean(list, SrmPaymentTermRespVO.class));
+        List<SrmPaymentTermRespVO> list = getPaymentTermPage(pageReqVO).getCheckedData().getList();
+        List<SrmPaymentTermExcelRespVO> excelList = SrmPaymentTermExportConvert.buildExcelList(list);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "付款条款.xls", "付款条款", SrmPaymentTermExcelRespVO.class, excelList);
     }
 
     @PostMapping("/import-excel")

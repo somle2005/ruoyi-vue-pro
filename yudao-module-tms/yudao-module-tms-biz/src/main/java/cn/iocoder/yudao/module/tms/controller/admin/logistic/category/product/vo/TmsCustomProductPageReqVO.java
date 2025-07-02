@@ -8,6 +8,7 @@ import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
@@ -18,7 +19,7 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 public class TmsCustomProductPageReqVO extends PageParam {
 
     @Schema(description = "产品id")
-    private Long productId;
+    private Set<Long> productIds;
 
     @Schema(description = "海关分类id")
     private Long customCategoryId;

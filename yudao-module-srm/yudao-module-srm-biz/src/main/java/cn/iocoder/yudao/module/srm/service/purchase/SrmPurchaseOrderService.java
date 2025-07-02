@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.req.*;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderSummaryBO;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -243,4 +244,12 @@ public interface SrmPurchaseOrderService {
      * @return 采购订单
      */
     SrmPurchaseOrderDO getPurchaseOrderByCode(String code);
+
+    /**
+     * 获得采购订单汇总
+     *
+     * @param reqVO 分页查询
+     * @return 采购订单汇总
+     */
+    SrmPurchaseOrderSummaryBO getPurchaseOrderSummary(SrmPurchaseOrderPageReqVO reqVO);
 }

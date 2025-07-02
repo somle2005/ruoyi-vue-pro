@@ -8,9 +8,9 @@ public interface TmsDictTypeConstants {
     String PRODUCT_MATERIAL = "erp_product_material";
 
     //TMS费用类型
-    String TMS_FEE_TYPE = "fee_type";
+    String TMS_FEE_TYPE = "tms_fee_type";
 
-    //开关状态
+    //开关状态`
     String OFF_STATUS = "srm_off_status";
 
     //订购状态
@@ -32,4 +32,7 @@ public interface TmsDictTypeConstants {
 
     //货柜类型
     String TMS_LOGISTIC_TYPE = "tms_cabinet_type";
+
+    //产品材质
+    String ERP_PRODUCT_MATERIAL = "erp_product_material";
 }

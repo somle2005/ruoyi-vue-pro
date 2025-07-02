@@ -11,11 +11,6 @@ import cn.iocoder.yudao.framework.web.core.handler.GlobalExceptionHandler;
 import cn.iocoder.yudao.framework.web.core.handler.GlobalResponseBodyHandler;
 import cn.iocoder.yudao.framework.web.core.util.WebFrameworkUtils;
 import cn.iocoder.yudao.module.infra.api.logger.ApiErrorLogApi;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.MapperFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
@@ -45,8 +40,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @AutoConfiguration
@@ -78,7 +73,7 @@ public class YudaoWebAutoConfiguration implements WebMvcConfigurer {
                 ((MappingJackson2HttpMessageConverter) converter).getObjectMapper().registerModule(simpleModule);
             }
         });
-        log.info("当前HttpMessageConverter：{}", converters);
+        log.info("当前HttpMessageConverter：{}", converters.stream().map(converter -> converter.getClass().getName()).collect(Collectors.joining(", ")));
     }
 
 

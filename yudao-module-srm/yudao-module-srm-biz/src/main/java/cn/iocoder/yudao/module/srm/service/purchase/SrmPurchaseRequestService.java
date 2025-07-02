@@ -5,6 +5,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.*;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestSummaryBO;
 import jakarta.validation.Valid;
 
 import java.util.Collection;
@@ -151,4 +152,12 @@ public interface SrmPurchaseRequestService {
      * @return 最新的采购申请单编号
      */
     String getMaxSerialNumber();
+
+    /**
+     * 采购申请单明细汇总统计
+     *
+     * @param req 查询参数
+     * @return 汇总结果
+     */
+    SrmPurchaseRequestSummaryBO selectSrmPurchaseRequestSummaryBO(SrmPurchaseRequestPageReqVO req);
 }

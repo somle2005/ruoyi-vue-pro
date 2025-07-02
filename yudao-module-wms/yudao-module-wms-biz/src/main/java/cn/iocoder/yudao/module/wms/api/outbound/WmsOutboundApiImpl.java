@@ -147,8 +147,8 @@ public class WmsOutboundApiImpl implements WmsOutboundApi {
     }
 
     @Override
-    public Boolean validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList) {
-        return outboundService.validateOutboundData(validateReqDTOList);
+    public void validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList) {
+        outboundService.validateOutboundData(validateReqDTOList);
     }
 
 }

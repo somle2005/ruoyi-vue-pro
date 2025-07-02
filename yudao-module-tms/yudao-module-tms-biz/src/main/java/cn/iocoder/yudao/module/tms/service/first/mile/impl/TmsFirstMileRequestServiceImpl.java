@@ -30,6 +30,7 @@ import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemSummaryBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
@@ -516,5 +517,13 @@ public class TmsFirstMileRequestServiceImpl implements TmsFirstMileRequestServic
     public Map<Long, TmsFirstMileRequestItemDO> getFirstMileRequestItemListMap(List<Long> requestIds) {
         List<TmsFirstMileRequestItemDO> requestItemDOList = firstMileRequestItemMapper.selectListByRequestIds(requestIds);
         return requestItemDOList.stream().collect(Collectors.toMap(TmsFirstMileRequestItemDO::getId, Function.identity()));
+    }
+
+    @Override
+    public TmsFirstMileRequestItemSummaryBO getSummary(TmsFirstMileRequestPageReqVO reqVO) {
+        if (reqVO == null) {
+            return null;
+        }
+        return firstMileRequestItemService.getSummary(reqVO.getItem());
     }
 }

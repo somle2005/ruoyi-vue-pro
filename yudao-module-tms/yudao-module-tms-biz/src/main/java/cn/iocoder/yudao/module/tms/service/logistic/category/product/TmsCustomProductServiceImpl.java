@@ -21,16 +21,14 @@ import org.springframework.messaging.support.MessageBuilder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.CUSTOM_PRODUCT_EXISTS;
-import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.CUSTOM_PRODUCT_NOT_EXISTS;
 import static cn.iocoder.yudao.module.tms.dal.redis.TmsRedisKeyConstants.TMS_CUSTOM_PRODUCT;
 import static cn.iocoder.yudao.module.tms.dal.redis.TmsRedisKeyConstants.TMS_CUSTOM_PRODUCT_LIST;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.CUSTOM_PRODUCT_EXISTS;
+import static cn.iocoder.yudao.module.tms.enums.TmsErrorCodeConstants.CUSTOM_PRODUCT_NOT_EXISTS;
 
 /**
  * 海关产品分类表 Service 实现类
@@ -78,6 +76,21 @@ public class TmsCustomProductServiceImpl implements TmsCustomProductService {
         }
     }
 
+    @Override
+    public Map<Long, TmsCustomProductDO> validHasProductId(Set<Long> productIds) {
+        List<TmsCustomProductDO> tmsCustomProductDOS = customProductMapper.selectListByProductIds(productIds);
+        Set<Long> existIds = tmsCustomProductDOS.stream()
+            .map(TmsCustomProductDO::getProductId)
+            .collect(Collectors.toSet());
+        Set<Long> notExistsIds = productIds.stream()
+            .filter(id -> !existIds.contains(id))
+            .collect(Collectors.toSet());
+        if (!notExistsIds.isEmpty()) {
+            throw exception(CUSTOM_PRODUCT_NOT_EXISTS, notExistsIds);
+        }
+        // 转换成 Map 返回
+        return tmsCustomProductDOS.stream().collect(Collectors.toMap(TmsCustomProductDO::getProductId, p -> p));
+    }
     /**
      * 校验产品+规则id 是否存在
      *
@@ -132,19 +145,19 @@ public class TmsCustomProductServiceImpl implements TmsCustomProductService {
     private TmsCustomProductDO validateCustomProductExists(Long id) {
         TmsCustomProductDO tmsCustomProductDO = customProductMapper.selectById(id);
         if (tmsCustomProductDO == null) {
-            throw exception(CUSTOM_PRODUCT_NOT_EXISTS);
+            throw exception(CUSTOM_PRODUCT_NOT_EXISTS, id);
         }
         return tmsCustomProductDO;
     }
 
     @Override
-    @Cacheable(value = TMS_CUSTOM_PRODUCT, key = "#id", unless = "#result == null")
+    @Cacheable(value = TMS_CUSTOM_PRODUCT, key = "#id")
     public TmsCustomProductDO getCustomProduct(Long id) {
         return customProductMapper.selectById(id);
     }
 
     @Override
-    @Cacheable(value = TMS_CUSTOM_PRODUCT_LIST, key = "#pageReqVO", unless = "#result == null")
+    @Cacheable(value = TMS_CUSTOM_PRODUCT_LIST, key = "#pageReqVO")
     public PageResult<TmsCustomProductDO> getCustomProductPage(TmsCustomProductPageReqVO pageReqVO) {
         //打印URL
         return customProductMapper.selectPage(pageReqVO);

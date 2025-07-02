@@ -9,6 +9,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
@@ -101,7 +102,7 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
         private Long warehouseId;
 
         @Schema(description = "产品编号")
-        private Long productId;
+        private Set<Long> productIds;
 
         @Schema(description = "产品单位单位")
         private Long productUnitId;
@@ -137,7 +138,7 @@ public class SrmPurchaseReturnPageReqVO extends PageParam {
         private Long applicantId;
 
         @Schema(description = "申请部门id")
-        private Long applicationDeptId;
+        private Set<Long> applicationDeptIds;
 
         @Schema(description = "报关品名")
         private String declaredType;

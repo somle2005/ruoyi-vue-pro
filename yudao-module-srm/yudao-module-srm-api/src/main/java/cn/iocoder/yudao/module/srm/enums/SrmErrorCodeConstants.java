@@ -78,6 +78,7 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_IN_NO_OUT_OF_BOUNDS = new ErrorCode(1_030_102_020, "采购到货单号编码大于999999,生成失败");
     ErrorCode PURCHASE_IN_ITEM_CURRENCY_NOT_MATCH = new ErrorCode(1_030_102_021, "采购订单项编号[{}]的币种[{}]与基准币种[{}]不一致");
     ErrorCode PURCHASE_IN_ITEM_COMPANY_NOT_MATCH = new ErrorCode(1_030_102_022, "到货订单编号({})存在多个供应商公司");
+    ErrorCode PURCHASE_IN_ITEM_TOTAL_QTY_EXCEED = new ErrorCode(1_030_102_023, "采购订单项({})的产品({})累加到货数量({})不能超过采购订单数量({})");
 
     // ========== ERP 采购退货（1-030-103-000） ==========
     ErrorCode PURCHASE_RETURN_NOT_EXISTS = new ErrorCode(1_030_103_000, "采购退货单({})不存在");

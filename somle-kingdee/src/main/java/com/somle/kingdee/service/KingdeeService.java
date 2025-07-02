@@ -188,6 +188,7 @@ public class KingdeeService {
                 return isSupplierNameMatch(purchaseOrderDTO.getSupplierName(), client);
             })
             .map(client -> client.unAuditPurOrder(purCode))
+            .flatMap(List::stream)
             .collect(Collectors.toList());
     }
 

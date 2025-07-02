@@ -9,5 +9,5 @@ import java.lang.annotation.*;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 public @interface SyncLog {
-    String value() default ""; // 可选描述
+    String value() default "";
 }

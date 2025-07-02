@@ -24,6 +24,7 @@ import cn.iocoder.yudao.module.srm.enums.status.SrmOutboundStatus;
 import cn.iocoder.yudao.module.srm.enums.status.SrmReturnStatus;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.ret.SrmPurchaseReturnSummaryBO;
 import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnBO;
 import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnItemBO;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
@@ -774,5 +775,10 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
     @Override
     public List<Long> listAllPurchaseReturnIds() {
         return purchaseReturnMapper.selectAllIds();
+    }
+
+    @Override
+    public SrmPurchaseReturnSummaryBO getPurchaseReturnSummary(SrmPurchaseReturnPageReqVO reqVO) {
+        return purchaseReturnItemMapper.selectSrmPurchaseReturnSummaryBO(reqVO);
     }
 }

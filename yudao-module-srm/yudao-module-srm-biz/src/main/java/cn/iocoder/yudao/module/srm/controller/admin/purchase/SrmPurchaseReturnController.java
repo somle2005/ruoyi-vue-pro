@@ -5,19 +5,19 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.pojo.PageResultSummary;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnAuditReqVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnBaseRespVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnSaveReqVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.*;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.convert.SrmPurchaseReturnExportConvert;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseReturnService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.ret.SrmPurchaseReturnSummaryBO;
 import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
@@ -100,9 +100,14 @@ public class SrmPurchaseReturnController {
     @PostMapping("/page")
     @Operation(summary = "获得采购退货分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-return:query')")
-    public CommonResult<PageResult<SrmPurchaseReturnBaseRespVO>> getPurchaseReturnPage(@Valid @RequestBody(required = false) SrmPurchaseReturnPageReqVO pageReqVO) {
+    public CommonResult<PageResultSummary<SrmPurchaseReturnBaseRespVO, SrmPurchaseReturnSummaryRespVO>> getPurchaseReturnPage(@RequestBody(required = false) SrmPurchaseReturnPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new SrmPurchaseReturnPageReqVO();
+        }
         PageResult<SrmPurchaseReturnBO> pageResult = purchaseReturnService.getPurchaseReturnBOPage(pageReqVO);
-        return success(new PageResult<>(bindResult(pageResult.getList()), pageResult.getTotal()));
+        List<SrmPurchaseReturnBaseRespVO> respList = bindResult(pageResult.getList());
+        SrmPurchaseReturnSummaryBO summaryBO = purchaseReturnService.getPurchaseReturnSummary(pageReqVO);
+        return success(new PageResultSummary<>(respList, pageResult.getTotal(), BeanUtils.toBean(summaryBO, SrmPurchaseReturnSummaryRespVO.class)));
     }
 
     @GetMapping("/export-excel")
@@ -113,8 +118,9 @@ public class SrmPurchaseReturnController {
                                           HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<SrmPurchaseReturnBO> page = purchaseReturnService.getPurchaseReturnBOPage(pageReqVO);
-        // 导出 Excel
-        ExcelUtils.write(response, "采购退货.xls", "数据", SrmPurchaseReturnBaseRespVO.class, bindResult(page.getList()));
+        List<SrmPurchaseReturnBaseRespVO> list = bindResult(page.getList());
+        List<SrmPurchaseReturnExcelRespVO> excelList = SrmPurchaseReturnExportConvert.buildExcelList(list);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "采购退货.xls", "采购退货", SrmPurchaseReturnExcelRespVO.class, excelList);
     }
 
     //提交审核
@@ -204,48 +210,30 @@ public class SrmPurchaseReturnController {
                 SrmPurchaseReturnBaseRespVO.Item.class,
                 item -> {
                     // 2.1.1 设置仓库信息
-                    MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), warehouse -> {
-                        item.setWarehouseName(warehouse.getName());
-                    });
+                    MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), warehouse -> item.setWarehouseName(warehouse.getName()));
                     // 2.1.2 设置申请人信息
-                    MapUtils.findAndThen(userMap, item.getApplicantId(), user -> {
-                        item.setApplicantName(user.getNickname());
-                    });
+                    MapUtils.findAndThen(userMap, item.getApplicantId(), user -> item.setApplicantName(user.getNickname()));
                     // 2.1.3 设置申请部门信息
-                    MapUtils.findAndThen(deptMap, item.getApplicationDeptId(), dept -> {
-                        item.setApplicationDeptName(dept.getName());
-                    });
+                    MapUtils.findAndThen(deptMap, item.getApplicationDeptId(), dept -> item.setApplicationDeptName(dept.getName()));
                     // 2.1.4 设置创建人信息
-                    MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> {
-                        item.setCreator(user.getNickname());
-                    });
+                    MapUtils.findAndThen(userMap, safeParseLong(item.getCreator()), user -> item.setCreator(user.getNickname()));
                     // 2.1.5 设置更新人信息
-                    MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> {
-                        item.setUpdater(user.getNickname());
-                    });
+                    MapUtils.findAndThen(userMap, safeParseLong(item.getUpdater()), user -> item.setUpdater(user.getNickname()));
                 }
             );
             purchaseReturn.setItems(items);
 
             // 2.2 设置供应商信息
-            MapUtils.findAndThen(supplierMap, purchaseReturn.getSupplierId(), supplier -> {
-                purchaseReturn.setSupplierName(supplier.getName());
-            });
+            MapUtils.findAndThen(supplierMap, purchaseReturn.getSupplierId(), supplier -> purchaseReturn.setSupplierName(supplier.getName()));
 
             // 2.3 设置审核人信息
-            MapUtils.findAndThen(userMap, purchaseReturn.getAuditorId(), user -> {
-                purchaseReturn.setAuditorName(user.getNickname());
-            });
+            MapUtils.findAndThen(userMap, purchaseReturn.getAuditorId(), user -> purchaseReturn.setAuditorName(user.getNickname()));
 
             // 2.4 设置创建人信息
-            MapUtils.findAndThen(userMap, safeParseLong(purchaseReturn.getCreator()), user -> {
-                purchaseReturn.setCreator(user.getNickname());
-            });
+            MapUtils.findAndThen(userMap, safeParseLong(purchaseReturn.getCreator()), user -> purchaseReturn.setCreator(user.getNickname()));
 
             // 2.5 设置更新人信息
-            MapUtils.findAndThen(userMap, safeParseLong(purchaseReturn.getUpdater()), user -> {
-                purchaseReturn.setUpdater(user.getNickname());
-            });
+            MapUtils.findAndThen(userMap, safeParseLong(purchaseReturn.getUpdater()), user -> purchaseReturn.setUpdater(user.getNickname()));
         });
     }
 }

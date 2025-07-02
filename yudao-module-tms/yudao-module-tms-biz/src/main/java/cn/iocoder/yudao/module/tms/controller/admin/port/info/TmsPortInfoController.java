@@ -9,10 +9,8 @@ import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
-import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.TmsPortInfoPageReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.TmsPortInfoRespVO;
-import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.TmsPortInfoSaveReqVO;
-import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.TmsPortInfoSimpleRespVO;
+import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.*;
+import cn.iocoder.yudao.module.tms.controller.admin.port.info.vo.convert.TmsPortInfoExportConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.port.info.TmsPortInfoDO;
 import cn.iocoder.yudao.module.tms.service.port.info.TmsPortInfoService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -105,9 +103,14 @@ public class TmsPortInfoController {
         throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TmsPortInfoDO> list = portInfoService.getPortInfoPage(pageReqVO).getList();
+        List<TmsPortInfoRespVO> vos = BeanUtils.toBean(list, TmsPortInfoRespVO.class);
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(vos)
+            .mapping(TmsPortInfoRespVO::getCreator, TmsPortInfoRespVO::setCreatorName)
+            .mapping(TmsPortInfoRespVO::getUpdater, TmsPortInfoRespVO::setUpdaterName).fill();
+        List<TmsPortInfoExcelRespVO> excelList = TmsPortInfoExportConvert.buildExcelList(vos);
         // 导出 Excel
-        ExcelUtils.write(response, "TMS港口信息.xls", "数据", TmsPortInfoRespVO.class,
-            BeanUtils.toBean(list, TmsPortInfoRespVO.class));
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "TMS港口信息.xls", "TMS港口信息", TmsPortInfoExcelRespVO.class, excelList);
     }
 
     @GetMapping("/list-simple")

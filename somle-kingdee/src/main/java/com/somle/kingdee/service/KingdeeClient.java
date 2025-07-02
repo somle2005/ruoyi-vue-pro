@@ -552,7 +552,7 @@ public class KingdeeClient {
      * @param purCode 采购订单编号
      * @return KingdeeResponse 最后一次操作的响应结果
      */
-    public KingdeeResponse unAuditPurOrder(String purCode) {
+    public List<KingdeeResponse> unAuditPurOrder(String purCode) {
         log.debug("反审核并删除采购订单，订单code：{}", purCode);
         // 1. 获取采购订单详情
         KingdeePurOrderDetail purOrderDetail = this.getPurOrderDetail(purCode);
@@ -560,25 +560,32 @@ public class KingdeeClient {
             throw exception(KingDeeErrorCodeConstants.PURCHASE_ORDER_NOT_EXIST, purCode);
         }
 
-        //1.1  TODO 查询金蝶是否存在采购订单
-        // 2. 执行反审核操作
-        List<String> orderIds = Collections.singletonList(purOrderDetail.getId());
-        KingdeeResponse unAuditResponse = commonOperate(KingdeeEntityType.PUR_BILL_ORDER, KingdeeOperateType.UNAUDIT, orderIds);
-        if (!unAuditResponse.getErrcode().equals("0")) {
-            log.error("反审核采购订单失败：{}", unAuditResponse.getDescription());
-            return unAuditResponse;
-        }
+        //1.1 检查当前系统的审核状态,是反审核就执行
+        KingdeePurOrderDetail kingdeePurOrderDetail = this.getPurOrderDetail(purCode);
+        List<KingdeeResponse> responses = new ArrayList<>();
+        if (kingdeePurOrderDetail != null) {
+            // 2. 执行反审核操作
+            List<String> orderIds = Collections.singletonList(purOrderDetail.getId());
+            KingdeeResponse kingdeeResponse = commonOperate(KingdeeEntityType.PUR_BILL_ORDER, KingdeeOperateType.UNAUDIT, orderIds);
+            if (!kingdeeResponse.getErrcode().equals("0")) {
+                log.error("反审核采购订单失败：{}", kingdeeResponse.getDescription());
+                return Collections.singletonList(kingdeeResponse);
+            }
+            responses.add(kingdeeResponse);
 
-        // 3. 执行删除操作
-        log.debug("开始删除采购订单，订单ID：{}", purOrderDetail.getId());
-        KingdeeResponse deleteResponse = commonOperate(KingdeeEntityType.PUR_BILL_ORDER, KingdeeOperateType.DELETE, orderIds);
-        if (!deleteResponse.getErrcode().equals("0")) {
-            log.error("删除采购订单失败：{}", deleteResponse.getDescription());
+            // 3. 执行删除操作
+            log.debug("开始删除采购订单，订单ID：{}", purOrderDetail.getId());
+            KingdeeResponse deleteResponse = commonOperate(KingdeeEntityType.PUR_BILL_ORDER, KingdeeOperateType.DELETE, orderIds);
+            if (!deleteResponse.getErrcode().equals("0")) {
+                log.error("删除采购订单失败：{}", deleteResponse.getDescription());
+            } else {
+                log.info("采购订单反审核并删除成功，订单编号：{}", purCode);
+            }
+            responses.add(deleteResponse);
         } else {
-            log.info("采购订单反审核并删除成功，订单编号：{}", purCode);
+            responses.add(new KingdeeResponse(null, "订单不存在", null));
         }
-
-        return deleteResponse;
+        return responses;
     }
 
     /**

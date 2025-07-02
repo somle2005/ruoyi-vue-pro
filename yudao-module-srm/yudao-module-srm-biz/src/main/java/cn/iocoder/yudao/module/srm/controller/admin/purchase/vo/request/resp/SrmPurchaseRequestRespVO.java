@@ -1,7 +1,9 @@
 package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp;
 
+import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.framework.mybatis.core.vo.BaseVO;
+import cn.iocoder.yudao.module.srm.enums.SrmDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.annotation.write.style.ContentStyle;
@@ -41,8 +43,8 @@ public class SrmPurchaseRequestRespVO extends BaseVO {
     @ExcelProperty("单据日期")
     private LocalDateTime billTime;
     // ========== 审核信息 ==========
-    @Schema(description = "审核者id")
-    @ExcelProperty("审核者id")
+    @Schema(description = "审核者")
+    @ExcelProperty("审核者")
     private String auditor;
 
     @Schema(description = "审核者id")
@@ -75,15 +77,17 @@ public class SrmPurchaseRequestRespVO extends BaseVO {
     // ========== 状态 ==========
     @Schema(description = "审核状态（待审核，审核通过，审核未通过）")
     @ExcelProperty(value = "审核状态", converter = DictConvert.class)
-//    @DictFormat(DictTypeConstants.AUDIT_STATUS)
+    @DictFormat(SrmDictTypeConstants.AUDIT_STATUS)
     private Integer auditStatus;
 
     @Schema(description = "关闭状态（已关闭，已开启）")
-    @ExcelProperty("关闭状态")
+    @ExcelProperty(value = "关闭状态", converter = DictConvert.class)
+    @DictFormat(SrmDictTypeConstants.OFF_STATUS)
     private Integer offStatus;
 
     @Schema(description = "订购状态（部分订购，全部订购）")
-    @ExcelProperty("订购状态")
+    @ExcelProperty(value = "订购状态", converter = DictConvert.class)
+    @DictFormat(SrmDictTypeConstants.ORDER_STATUS)
     private Integer orderStatus;
 
     //收获地址
@@ -93,7 +97,6 @@ public class SrmPurchaseRequestRespVO extends BaseVO {
 
     //supplierId
     @Schema(description = "供应商id")
-    @ExcelProperty("供应商id")
     private Long supplierId;
     //supplierName
     @Schema(description = "供应商名称")
@@ -112,23 +115,20 @@ public class SrmPurchaseRequestRespVO extends BaseVO {
 
     @Schema(description = "定金金额，单位：元")
     @DecimalMin(value = "0.00", message = "定金金额不能小于0")
+    @ExcelProperty("定金金额")
     private BigDecimal depositPrice;
 
     @Schema(description = "优惠率，百分比")
+    @ExcelProperty("优惠率")
     private BigDecimal discountPercent;
 
     @Schema(description = "附件地址")
     private String fileUrl;
 
     @Schema(description = "备注")
+    @ExcelProperty("备注")
     private String remark;
 
     @Schema(description = "版本号")
     private Integer version;
-//    /**
-//     * 采购单ID
-//     *
-//     * @link {SrmPurchaseOrderDO}
-//     */
-//    private Long purchaseOrderId;
 }

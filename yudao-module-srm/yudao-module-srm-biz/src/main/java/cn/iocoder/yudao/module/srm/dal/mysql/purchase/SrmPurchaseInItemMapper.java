@@ -7,6 +7,7 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.SrmPurcha
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInItemBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInSummaryBO;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import de.danielbechler.util.Collections;
 import org.apache.ibatis.annotations.Mapper;
@@ -23,19 +24,16 @@ import java.util.Set;
 @Mapper
 public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO> {
 
-    default MPJLambdaWrapperX<SrmPurchaseInItemDO> buildWrapper(SrmPurchaseInPageReqVO reqVO) {
+    default MPJLambdaWrapperX<SrmPurchaseInItemDO> masterPageQuery(MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapperX, SrmPurchaseInPageReqVO reqVO) {
         if (reqVO == null) {
             reqVO = new SrmPurchaseInPageReqVO();
         }
-        MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapper = new MPJLambdaWrapperX<SrmPurchaseInItemDO>()
-            .selectAll(SrmPurchaseInItemDO.class);
-
         // 处理明细表查询条件
         if (reqVO.getItemQuery() != null) {
             SrmPurchaseInPageReqVO.ItemQuery itemQuery = reqVO.getItemQuery();
-            wrapper
+            wrapperX
                 // ========== 产品信息 ==========
-                .eqIfPresent(SrmPurchaseInItemDO::getProductId, itemQuery.getProductId())
+                .inIfPresent(SrmPurchaseInItemDO::getProductId, itemQuery.getProductIds())
                 .eqIfPresent(SrmPurchaseInItemDO::getProductUnitId, itemQuery.getProductUnitId())
                 .likeIfPresent(SrmPurchaseInItemDO::getProductName, itemQuery.getProductName())
                 .likeIfPresent(SrmPurchaseInItemDO::getDeclaredType, itemQuery.getDeclaredType())
@@ -49,30 +47,35 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 .likeIfPresent(SrmPurchaseInItemDO::getSource, itemQuery.getSource())
                 // ========== 申请人信息 ==========
                 .eqIfPresent(SrmPurchaseInItemDO::getApplicantId, itemQuery.getApplicantId())
-                .eqIfPresent(SrmPurchaseInItemDO::getApplicationDeptId, itemQuery.getApplicationDeptId())
+                .inIfPresent(SrmPurchaseInItemDO::getApplicationDeptId, itemQuery.getApplicationDeptIds())
                 // ========== 状态信息 ==========
                 .eqIfPresent(SrmPurchaseInItemDO::getInboundStatus, itemQuery.getInboundStatus())
                 .eqIfPresent(SrmPurchaseInItemDO::getPayStatus, itemQuery.getPayStatus())
-                .orderByDesc(SrmPurchaseInItemDO::getCreateTime) // 按时间降序排序
             ;
         }
-
-        return wrapper.orderByDesc(SrmPurchaseInItemDO::getCreateTime);
+        return wrapperX;
     }
 
-    default MPJLambdaWrapperX<SrmPurchaseInItemDO> buildBOWrapper(SrmPurchaseInPageReqVO reqVO) {
+    default MPJLambdaWrapperX<SrmPurchaseInItemDO> buildWrapper(SrmPurchaseInPageReqVO reqVO) {
         if (reqVO == null) {
             reqVO = new SrmPurchaseInPageReqVO();
         }
-        MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapper = buildWrapper(reqVO)
-            // ========== 关联主表 ==========
-            .leftJoin(SrmPurchaseInDO.class, SrmPurchaseInDO::getId, SrmPurchaseInItemDO::getArriveId)
-            .selectAll(SrmPurchaseInDO.class);
+        MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapper = new MPJLambdaWrapperX<SrmPurchaseInItemDO>()
+            .selectAll(SrmPurchaseInItemDO.class);
 
+        masterPageQuery(wrapper, reqVO);
+        wrapper.orderByDesc(SrmPurchaseInItemDO::getCreateTime); // 按时间降序排序
+        return wrapper;
+    }
+
+    default MPJLambdaWrapperX<SrmPurchaseInItemDO> slavePageQuery(MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapperX, SrmPurchaseInPageReqVO reqVO) {
+        if (reqVO == null) {
+            reqVO = new SrmPurchaseInPageReqVO();
+        }
         // 处理主表查询条件
         if (reqVO.getMainQuery() != null) {
             SrmPurchaseInPageReqVO.MainQuery mainQuery = reqVO.getMainQuery();
-            wrapper
+            wrapperX
                 // ========== 基础信息 ==========
                 .eqIfPresent(SrmPurchaseInDO::getId, mainQuery.getId())
                 .likeIfPresent(SrmPurchaseInDO::getCode, mainQuery.getCode())
@@ -93,10 +96,22 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
                 .eqIfPresent(SrmPurchaseInDO::getInboundStatus, mainQuery.getInboundStatus())
                 // ========== 时间范围 ==========
                 .betweenIfPresent(SrmPurchaseInDO::getCreateTime, mainQuery.getCreateTime())
-                .orderByDesc(SrmPurchaseInDO::getCreateTime)
             ;
         }
+        return wrapperX;
+    }
 
+    default MPJLambdaWrapperX<SrmPurchaseInItemDO> buildBOWrapper(SrmPurchaseInPageReqVO reqVO) {
+        if (reqVO == null) {
+            reqVO = new SrmPurchaseInPageReqVO();
+        }
+        MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapper = buildWrapper(reqVO)
+            // ========== 关联主表 ==========
+            .leftJoin(SrmPurchaseInDO.class, SrmPurchaseInDO::getId, SrmPurchaseInItemDO::getArriveId)
+            .selectAll(SrmPurchaseInDO.class);
+
+        slavePageQuery(wrapper, reqVO);
+        wrapper.orderByDesc(SrmPurchaseInDO::getCreateTime);
         return wrapper;
     }
 
@@ -128,6 +143,7 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
         wrapper.eq(SrmPurchaseInDO::getId, inIds);
         return selectJoinOne(SrmPurchaseInItemBO.class, wrapper);
     }
+
     default List<SrmPurchaseInItemDO> selectListByInId(Long inId) {
         return selectList(SrmPurchaseInItemDO::getArriveId, inId);
     }
@@ -158,5 +174,31 @@ public interface SrmPurchaseInItemMapper extends BaseMapperX<SrmPurchaseInItemDO
     //根据oderItemId找对应的入库项 list
     default List<SrmPurchaseInItemDO> selectListByOrderItemId(Long orderItemId) {
         return selectList(SrmPurchaseInItemDO::getOrderItemId, orderItemId);
+    }
+
+    //汇总统计
+    default SrmPurchaseInSummaryBO selectSrmPurchaseInSummaryBO(SrmPurchaseInPageReqVO req) {
+        if (req == null) {
+            req = new SrmPurchaseInPageReqVO();
+        }
+        MPJLambdaWrapperX<SrmPurchaseInItemDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseInItemDO>()
+            //slave
+            .selectSum(SrmPurchaseInItemDO::getQty, SrmPurchaseInSummaryBO::getSumQty)
+            .selectSum(SrmPurchaseInItemDO::getActualQty, SrmPurchaseInSummaryBO::getSumActualQty)
+            .selectSum(SrmPurchaseInItemDO::getTotalPrice, SrmPurchaseInSummaryBO::getSumTotalPrice)
+            .selectSum(SrmPurchaseInItemDO::getTax, SrmPurchaseInSummaryBO::getSumTax)
+            .selectSum(SrmPurchaseInItemDO::getGrossTotalPrice, SrmPurchaseInSummaryBO::getSumGrossTotalPrice)
+            .selectSum(SrmPurchaseInItemDO::getPayPrice, SrmPurchaseInSummaryBO::getSumPayPrice)
+            .selectSum(SrmPurchaseInItemDO::getGrossPrice, SrmPurchaseInSummaryBO::getSumGrossPrice)
+            //master
+            .selectSum(SrmPurchaseInDO::getTotalWeight, SrmPurchaseInSummaryBO::getSumTotalWeight)
+            .selectSum(SrmPurchaseInDO::getTotalVolume, SrmPurchaseInSummaryBO::getSumTotalVolume)
+            .selectSum(SrmPurchaseInDO::getDiscountPrice, SrmPurchaseInSummaryBO::getSumDiscountPrice)
+            .selectSum(SrmPurchaseInDO::getOtherPrice, SrmPurchaseInSummaryBO::getSumOtherPrice)
+            .selectSum(SrmPurchaseInDO::getPaymentPrice, SrmPurchaseInSummaryBO::getSumPaymentPrice);
+        this.masterPageQuery(wrapperX, req);
+        wrapperX.leftJoin(SrmPurchaseInDO.class, SrmPurchaseInDO::getId, SrmPurchaseInItemDO::getArriveId);
+        this.slavePageQuery(wrapperX, req);
+        return selectJoinOne(SrmPurchaseInSummaryBO.class, wrapperX);
     }
 }

@@ -44,7 +44,7 @@ public interface TmsTransferItemMapper extends BaseMapperX<TmsTransferItemDO> {
             .betweenIfPresent(TmsTransferItemDO::getUpdateTime, vo.getMainQueryVo().getUpdateTime())
             .eqIfPresent(TmsTransferItemDO::getUpdater, vo.getItemQueryVo().getUpdater())
             .eqIfPresent(TmsTransferItemDO::getCreator, vo.getItemQueryVo().getCreator())
-            .eqIfPresent(TmsTransferItemDO::getProductId, vo.getItemQueryVo().getProductId())
+            .inIfPresent(TmsTransferItemDO::getProductId, vo.getItemQueryVo().getProductIds())
             .eqIfPresent(TmsTransferItemDO::getQty, vo.getItemQueryVo().getQty())
             .eqIfPresent(TmsTransferItemDO::getBoxQty, vo.getItemQueryVo().getBoxQty())
             .eqIfPresent(TmsTransferItemDO::getPackageWeight, vo.getItemQueryVo().getPackageWeight())
@@ -52,7 +52,9 @@ public interface TmsTransferItemMapper extends BaseMapperX<TmsTransferItemDO> {
             .eqIfPresent(TmsTransferItemDO::getStockCompanyId, vo.getItemQueryVo().getStockCompanyId())
             .eqIfPresent(TmsTransferItemDO::getRemark, vo.getItemQueryVo().getRemark())
             .eqIfPresent(TmsTransferItemDO::getOutboundClosedQty, vo.getItemQueryVo().getOutboundClosedQty())
-            .eqIfPresent(TmsTransferItemDO::getInboundClosedQty, vo.getItemQueryVo().getInboundClosedQty());
+            .eqIfPresent(TmsTransferItemDO::getInboundClosedQty, vo.getItemQueryVo().getInboundClosedQty())
+            .inIfPresent(TmsTransferItemDO::getDeptId, vo.getItemQueryVo().getDeptIds())
+            ;
     }
 
     default MPJLambdaWrapperX<TmsTransferItemDO> buildBOWrapper(TmsTransferPageReqVO vo) {

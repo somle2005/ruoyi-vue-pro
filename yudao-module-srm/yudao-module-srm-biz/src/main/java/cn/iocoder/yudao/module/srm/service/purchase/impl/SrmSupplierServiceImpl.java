@@ -3,6 +3,7 @@ package cn.iocoder.yudao.module.srm.service.purchase.impl;
 import cn.iocoder.yudao.framework.common.enums.CommonStatusEnum;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.payment.term.vo.SrmPaymentTermRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupplierPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.SrmSupplierRespVO;
@@ -16,20 +17,22 @@ import cn.iocoder.yudao.module.srm.service.purchase.payment.term.SrmPaymentTermS
 import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.integration.support.MessageBuilder;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
+import static cn.iocoder.yudao.module.srm.dal.redis.SrmRedisKeyConstants.SUPPLIER;
+import static cn.iocoder.yudao.module.srm.dal.redis.SrmRedisKeyConstants.SUPPLIER_LIST;
 import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.srm.tool.TmsStreamXTool.assemble;
 import static java.util.Collections.emptyList;
@@ -52,6 +55,7 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     private SrmPaymentTermService srmPaymentTermService;
 
     @Override
+    @CacheEvict(cacheNames = SUPPLIER_LIST, allEntries = true)
     public Long createSupplier(SrmSupplierSaveReqVO createReqVO) {
         SrmSupplierDO supplier = BeanUtils.toBean(createReqVO, SrmSupplierDO.class);
         // 校验供应商名称是否重复
@@ -65,6 +69,10 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     }
 
     @Override
+    @Caching(evict = {
+        @CacheEvict(cacheNames = SUPPLIER_LIST, allEntries = true),
+        @CacheEvict(cacheNames = SUPPLIER, key = "#updateReqVO.id")
+    })
     public void updateSupplier(SrmSupplierSaveReqVO updateReqVO) {
         // 校验存在
         validateSupplierExists(updateReqVO.getId());
@@ -78,6 +86,10 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     }
 
     @Override
+    @Caching(evict = {
+        @CacheEvict(cacheNames = SUPPLIER_LIST, allEntries = true),
+        @CacheEvict(cacheNames = SUPPLIER, key = "#id")
+    })
     public void deleteSupplier(Long id) {
         // 校验存在
         validateSupplierExists(id);
@@ -92,13 +104,15 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
     }
 
     @Override
+    @Cacheable(cacheNames = SUPPLIER, key = "#id")
     public SrmSupplierDO getSupplier(Long id) {
         return supplierMapper.selectById(id);
     }
 
     @Override
     public SrmSupplierDO validateSupplier(Long id) {
-        SrmSupplierDO supplier = supplierMapper.selectById(id);
+        SrmSupplierService srmSupplierService = SpringUtils.getBean(SrmSupplierService.class);
+        SrmSupplierDO supplier = srmSupplierService.getSupplier(id);
         if (supplier == null) {
             throw exception(SUPPLIER_NOT_EXISTS);
         }
@@ -110,19 +124,25 @@ public class SrmSupplierServiceImpl implements SrmSupplierService {
 
     @Override
     public List<SrmSupplierDO> getSupplierList(Collection<Long> ids) {
-        //ids是空集合
         if (CollectionUtils.isEmpty(ids)) {
             return emptyList();
         }
-        return supplierMapper.selectBatchIds(ids);
+        SrmSupplierService srmSupplierService = SpringUtils.getBean(SrmSupplierService.class);
+        // 逐个走缓存
+        return ids.stream()
+            .map(srmSupplierService::getSupplier)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toList());
     }
 
     @Override
+    @Cacheable(cacheNames = SUPPLIER_LIST, key = "'PAGE:'+#pageReqVO")
     public PageResult<SrmSupplierDO> getSupplierPage(SrmSupplierPageReqVO pageReqVO) {
         return supplierMapper.selectPage(pageReqVO);
     }
 
     @Override
+    @Cacheable(cacheNames = SUPPLIER_LIST, key = "'STATUS:'+#status.name()")
     public List<SrmSupplierDO> getSupplierListByStatus(CommonStatusEnum status) {
         return supplierMapper.selectListByStatus(status.getStatus());
     }

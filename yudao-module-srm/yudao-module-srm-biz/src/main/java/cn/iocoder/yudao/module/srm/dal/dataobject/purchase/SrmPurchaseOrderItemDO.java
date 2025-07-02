@@ -198,6 +198,9 @@ public class SrmPurchaseOrderItemDO extends TenantBaseDO {
      */
     private String declaredTypeEn;
 
+    /**
+     * 产品编码
+     */
     private String productCode;
     /**
      * 产品名称

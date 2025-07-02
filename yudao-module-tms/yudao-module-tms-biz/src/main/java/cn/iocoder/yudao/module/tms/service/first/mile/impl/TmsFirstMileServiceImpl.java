@@ -5,6 +5,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.common.exception.ErrorCode;
+import cn.iocoder.yudao.framework.common.exception.ServiceException;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.framework.common.util.json.JsonUtils;
@@ -48,6 +49,7 @@ import cn.iocoder.yudao.module.tms.enums.status.TmsAuditStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileBO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileItemSummaryBO;
 import cn.iocoder.yudao.module.tms.service.fee.TmsFeeService;
 import cn.iocoder.yudao.module.tms.service.first.mile.TmsFirstMileService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
@@ -528,6 +530,22 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             TmsFirstMileAuditReqVO auditReqVO = TmsFirstMileAuditReqVO.builder().id(firstMileDO.getId()).build();
             auditStateMachine.fireEvent(TmsAuditStatus.DRAFT, TmsEventEnum.SUBMIT_FOR_REVIEW, auditReqVO);
         }
+        //发起wms 库存校验
+        try {
+            // 1. 批量查所有明细
+            List<Long> firstMileIds = requestDOList.stream().map(TmsFirstMileDO::getId).toList();
+            TmsFirstMileService tmsFirstMileService = SpringUtils.getBean(TmsFirstMileService.class);
+            List<TmsFirstMileItemDO> allItems = firstMileIds.stream()
+                .flatMap(id -> tmsFirstMileService.getFirstMileItemListByFirstMileId(id).stream())
+                .toList();
+            // 2. 批量查所有产品
+            List<Long> productIds = allItems.stream().map(TmsFirstMileItemDO::getProductId).distinct().toList();
+            Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(productIds);
+            // 3. 转换并校验
+            wmsOutboundApi.validateOutboundData(TmsFirstMileConvert.convertOutboundValidateReqDTOList(allItems, productMap));
+        } catch (ServiceException e) {
+            throw exception(FIRST_MILE_PROCESS_FAIL_WMS_OUTBOUND_EXISTS, e.getMessage());
+        }
     }
 
     @Override
@@ -985,6 +1003,11 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
 
         // 3. 执行更新
         firstMileItemMapper.updateById(updateObj);
+    }
+
+    @Override
+    public TmsFirstMileItemSummaryBO getSummary(TmsFirstMilePageReqVO reqVO) {
+        return firstMileItemMapper.selectTmsFirstMileItemSummaryBO(reqVO);
     }
 
 }
