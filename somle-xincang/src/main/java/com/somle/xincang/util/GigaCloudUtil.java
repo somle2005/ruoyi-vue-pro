@@ -1,4 +1,4 @@
-package com.somle.gigacloud.util;
+package com.somle.xincang.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;

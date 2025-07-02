@@ -62,6 +62,7 @@
         <module>somle-overstock</module>
         <module>somle-lingxing</module>
         <module>somle-gigacloud</module>
+        <module>somle-xincang</module>
     </modules>
 
     <name>${project.artifactId}</name>
