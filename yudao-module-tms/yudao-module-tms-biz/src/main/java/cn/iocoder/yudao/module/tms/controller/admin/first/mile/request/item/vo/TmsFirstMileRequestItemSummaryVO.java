@@ -36,4 +36,7 @@ public class TmsFirstMileRequestItemSummaryVO {
     /** 基础重量汇总 */
     @Schema(description = "基础重量汇总")
     private BigDecimal sumWeight;
+
+    @Schema(description = "总体积")
+    private BigDecimal sumVolume;
 } 
