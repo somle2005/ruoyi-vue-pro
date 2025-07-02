@@ -4,7 +4,9 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.Version;
 import lombok.*;
+import org.apache.poi.hpsf.Decimal;
 
 /**
  * ERP 供应商产品 DO
@@ -63,4 +65,19 @@ public class SrmSupplierProductDO extends BaseDO {
      */
     private Integer purchasePriceCurrencyCode;
 
+    /**
+     * 上次采购价格
+     */
+    private Decimal lastPurchasePrice;
+    /**
+     * 税率
+     */
+    private Decimal taxRate;
+    /**
+     * 默认供应商
+     */
+    private Boolean defaultSupplier;
+
+    @Version
+    private Integer version;
 }

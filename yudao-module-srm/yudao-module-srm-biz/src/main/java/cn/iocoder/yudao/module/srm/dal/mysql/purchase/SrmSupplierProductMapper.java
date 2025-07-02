@@ -7,6 +7,8 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProdu
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import org.apache.ibatis.annotations.Mapper;
 
+import java.util.List;
+
 /**
  * ERP 供应商产品 Mapper
  *
@@ -32,5 +34,17 @@ public interface SrmSupplierProductMapper extends BaseMapperX<SrmSupplierProduct
 
     default SrmSupplierProductDO selectByCode(String code) {
         return selectOne(SrmSupplierProductDO::getCode, code);
+    }
+
+    default SrmSupplierProductDO selectBySupplierIdAndProductId(Long supplierId, Long productId) {
+        return selectOne(new LambdaQueryWrapperX<SrmSupplierProductDO>()
+            .eq(SrmSupplierProductDO::getSupplierId, supplierId)
+            .eq(SrmSupplierProductDO::getProductId, productId));
+    }
+
+    default List<SrmSupplierProductDO> selectListBySupplierIdAndProductId(Long supplierId, Long productId) {
+        return selectList(new LambdaQueryWrapperX<SrmSupplierProductDO>()
+            .eq(SrmSupplierProductDO::getSupplierId, supplierId)
+            .eq(SrmSupplierProductDO::getProductId, productId));
     }
 }

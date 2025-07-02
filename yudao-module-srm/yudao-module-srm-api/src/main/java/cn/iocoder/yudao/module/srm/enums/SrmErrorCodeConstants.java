@@ -20,6 +20,9 @@ public interface SrmErrorCodeConstants {
     ErrorCode SUPPLIER_PRODUCT_CODE_DUPLICATE = new ErrorCode(1_030_500_000, "供应商产品编码已存在");
     ErrorCode SUPPLIER_NAME_DUPLICATE = new ErrorCode(1_030_100_001, "供应商名称({})已存在");
     ErrorCode PURCHASE_RETURN_IN_SUPPLIER_NOT_SAME = new ErrorCode(1002013001, "退货项对应的入库单供应商不一致，基准供应商为【{}】，入库单【{}】的供应商为【{}】");
+    ErrorCode SUPPLIER_MODIFY_FAIL = new ErrorCode(1_030_100_002, "供应商修改失败，当前数据可能被修改，请重试");
+
+
     // ========== ERP 采购订单（1-030-101-000） ==========
     ErrorCode PURCHASE_ORDER_NOT_EXISTS = new ErrorCode(1_030_101_000, "采购订单编号:()不存在");
     ErrorCode PURCHASE_ORDER_DELETE_FAIL_APPROVE = new ErrorCode(1_030_101_001, "采购订单({})已审核，无法删除");
@@ -54,6 +57,8 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_ORDER_UPDATE_FAIL_OFF = new ErrorCode(1_030_101_025, "采购订单({})非开启状态，无法修改");
     ErrorCode PURCHASE_IN_ITEM_QTY_EXCEED = new ErrorCode(1_030_102_001, "采购订单项({})的产品({})剩余可到货量({}) < 输入到货量({})");
     ErrorCode PURCHASE_ORDER_MERGE_IN_FAIL = new ErrorCode(1_030_101_026, "({})合并失败,错误:{}");
+    ErrorCode PURCHASE_ORDER_UPDATE_FAIL = new ErrorCode(1_030_101_027, "更新失败，采购单{}已被修改，请重试");
+    ErrorCode PURCHASE_ORDER_UPDATE_FAIL_ITEM = new ErrorCode(1_030_101_028, "更新失败,采购订单项编号({})被修改，请重试");
 
     // ========== ERP 采购到货（1-030-102-000） ==========
     ErrorCode PURCHASE_IN_NOT_EXISTS = new ErrorCode(1_030_102_000, "采购到货单不存在");
@@ -79,6 +84,8 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_IN_ITEM_CURRENCY_NOT_MATCH = new ErrorCode(1_030_102_021, "采购订单项编号[{}]的币种[{}]与基准币种[{}]不一致");
     ErrorCode PURCHASE_IN_ITEM_COMPANY_NOT_MATCH = new ErrorCode(1_030_102_022, "到货订单编号({})存在多个供应商公司");
     ErrorCode PURCHASE_IN_ITEM_TOTAL_QTY_EXCEED = new ErrorCode(1_030_102_023, "采购订单项({})的产品({})累加到货数量({})不能超过采购订单数量({})");
+    ErrorCode PURCHASE_IN_UPDATE_FAIL = new ErrorCode(1_030_102_024, "更新失败，采购到货单({})已被修改，请重试");
+    ErrorCode PURCHASE_IN_ITEM_UPDATE_FAIL = new ErrorCode(1_030_102_025, "更新失败，采购到货项编号({})已被修改，请重试");
 
     // ========== ERP 采购退货（1-030-103-000） ==========
     ErrorCode PURCHASE_RETURN_NOT_EXISTS = new ErrorCode(1_030_103_000, "采购退货单({})不存在");
@@ -97,8 +104,9 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_RETURN_WMS_OUTBOUND_NOT_CAN_ABANDON = new ErrorCode(1_030_103_012, "反审核失败，退货单已生成出库单({}),非草稿状态,无法撤销");
     ErrorCode PURCHASE_RETURN_PROCESS_FAIL_WMS_OUTBOUND_EXISTS = new ErrorCode(1_030_103_013, "创建出库单失败，原因:{}");
     ErrorCode PURCHASE_RETURN_QTY_EXCEED_IN_QTY = new ErrorCode(1_030_103_015, "退货数量({})超过入库数量({})");
-    //PURCHASE_RETURN_WAREHOUSE_NOT_EXISTS
     ErrorCode PURCHASE_RETURN_PROCESS_FAIL_WAREHOUSE_ID_DONT_EXISTS = new ErrorCode(1_030_103_014, "创建出库单需要退货明细中仓库ID不为空");
+    ErrorCode PURCHASE_RETURN_UPDATE_FAIL = new ErrorCode(1_030_103_016, "更新失败，采购退货单({})已被修改，请重试");
+    ErrorCode PURCHASE_RETURN_ITEM_UPDATE_FAIL = new ErrorCode(1_030_103_017, "更新失败，采购退货项编号({})已被修改，请重试");
 
     // ========== ERP 采购申请单 1-030-603-000 ==========
     ErrorCode PURCHASE_REQUEST_NOT_EXISTS = new ErrorCode(1_030_603_100, "采购申请单不存在");
@@ -127,17 +135,15 @@ public interface SrmErrorCodeConstants {
     ErrorCode PURCHASE_REQUEST_ITEM_CLOSED = new ErrorCode(1_030_603_141, "订单项编号({})已关闭,采购项无法修改");
     ErrorCode PURCHASE_REQUEST_ITEM_MANUAL_CLOSED = new ErrorCode(1_030_603_142, "id({})已手动关闭,采购项无法修改");
     ErrorCode PURCHASE_REQUEST_ITEM_ORDERED = new ErrorCode(1_030_603_143, "申请项编号({})存在对应的采购订单项，无法反审核");
-    //采购子项不存在
     ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS_BY_ID = new ErrorCode(1_030_603_143, "采购请求ID=({})没有子项");
-    //当前状态不能触发事件
-    //状态机错误回调
     ErrorCode PURCHASE_REQUEST_NOT_EXISTS_BY_EVENT = new ErrorCode(1_030_603_144, "{}无法在({})状态下触发({})事件");
     ErrorCode PURCHASE_REQUEST_MERGE_FAIL = new ErrorCode(1_030_603_145, "采购申请单({})未审核，无法合并");
     ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS_BY_OPEN = new ErrorCode(1_030_603_146, "采购申请项编号({})不处于开启状态");
-    //存在对应订单，无法手动关闭
     ErrorCode PURCHASE_REQUEST_ITEM_NOT_EXISTS_BY_MANUAL_CLOSE = new ErrorCode(1_030_603_147, "申请单存在关联订单,无法手动关闭状态");
     ErrorCode PURCHASE_REQUEST_NO_EXISTS_BY_NO = new ErrorCode(1_030_603_148, "采购申请单号({})已存在");
     ErrorCode PURCHASE_REQUEST_MERGE_FAIL_REASON = new ErrorCode(1_030_603_149, "采购申请单合并失败，原因:{}");
+    ErrorCode PURCHASE_REQUEST_ITEM_UPDATE_FAIL = new ErrorCode(1_030_603_150, "采购申请项编号({})已被修改，请刷新重试");
+    ErrorCode PURCHASE_REQUEST_ITEM_UPDATE_FAIL_BY_ID = new ErrorCode(1_030_603_151, "采购申请项编号({})已被修改，请刷新重试");
 
     // ========== ERP 采购入库单 1-030-605-300 ==========
     // ========== ERP 采购退货单 1-030-606-300 ==========

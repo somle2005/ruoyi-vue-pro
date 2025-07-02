@@ -294,7 +294,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
         // 2 更新
         // 2.2 更新主表
         SrmPurchaseRequestDO updateObj = BeanUtils.toBean(vo, SrmPurchaseRequestDO.class);
-        srmPurchaseRequestMapper.updateById(updateObj);
+        ThrowUtil.ifSqlThrow(srmPurchaseRequestMapper.updateById(updateObj), PURCHASE_REQUEST_ITEM_UPDATE_FAIL_BY_ID, updateObj.getCode());
         // 2.3 更新子表
         updatePurchaseRequestItemList(vo.getId(), itemsDOList);
     }
@@ -335,7 +335,7 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
             initSlaveStatus(diffList.get(0));
         }
         if (CollUtil.isNotEmpty(diffList.get(1))) {
-            erpPurchaseRequestItemsMapper.updateBatch(diffList.get(1));
+            diffList.get(1).forEach(itemDO -> ThrowUtil.ifSqlThrow(erpPurchaseRequestItemsMapper.updateById(itemDO), PURCHASE_REQUEST_ITEM_UPDATE_FAIL, itemDO.getId()));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {
             //触发关闭状态

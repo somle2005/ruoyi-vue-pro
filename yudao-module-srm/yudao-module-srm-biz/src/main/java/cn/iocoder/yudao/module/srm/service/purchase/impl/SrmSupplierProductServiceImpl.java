@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductSaveReqVO;
@@ -23,11 +24,11 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_UPDATE_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.PRODUCT_CODE_DUPLICATE;
 import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.PRODUCT_UNIT_NAME_DUPLICATE;
+import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_MODIFY_FAIL;
 import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_PRODUCT_NOT_EXISTS;
 
 /**
@@ -46,9 +47,36 @@ public class SrmSupplierProductServiceImpl implements SrmSupplierProductService 
     //    private final ErpProductService productService;
     private final SrmSupplierService supplierService;
 
+    /**
+     * 保证同一供应商+产品下只有一个defaultSupplier为true
+     *
+     * @param supplierId 供应商ID
+     * @param productId  产品ID
+     * @param selfId     排除自身ID（新增时可为null）
+     * @param needSet    是否需要设置（如当前操作defaultSupplier为true时）
+     */
+    private void ensureUniqueDefaultSupplier(Long supplierId, Long productId, Long selfId, boolean needSet) {
+        if (!needSet) return;
+        List<SrmSupplierProductDO> list = supplierProductMapper.selectListBySupplierIdAndProductId(supplierId, productId);
+        for (SrmSupplierProductDO item : list) {
+            if ((!item.getId().equals(selfId)) && Boolean.TRUE.equals(item.getDefaultSupplier())) {
+                item.setDefaultSupplier(false);
+                supplierProductMapper.updateById(item);
+            }
+        }
+    }
+
     @Override
+    @Idempotent
     public Long createSupplierProduct(SrmSupplierProductSaveReqVO createReqVO) {
+        // 新增逻辑：如果当前供应商+产品组合首次创建且 defaultSupplier 为 null，则设置为 true
+        List<SrmSupplierProductDO> existList = supplierProductMapper.selectListBySupplierIdAndProductId(createReqVO.getSupplierId(), createReqVO.getProductId());
+        if ((existList == null || existList.isEmpty()) && createReqVO.getDefaultSupplier() == null) {
+            createReqVO.setDefaultSupplier(true);
+        }
         validateSupplierProductCodeUnique(null, createReqVO.getCode());
+        // 公共逻辑
+        ensureUniqueDefaultSupplier(createReqVO.getSupplierId(), createReqVO.getProductId(), null, Boolean.TRUE.equals(createReqVO.getDefaultSupplier()));
         // 插入
         SrmSupplierProductDO supplierProduct = BeanUtils.toBean(createReqVO, SrmSupplierProductDO.class);
         supplierProductMapper.insert(supplierProduct);
@@ -62,12 +90,11 @@ public class SrmSupplierProductServiceImpl implements SrmSupplierProductService 
         validateSupplierProductCodeUnique(id, updateReqVO.getCode());
         // 校验存在
         validateSupplierProductExists(id);
+        // 公共逻辑
+        ensureUniqueDefaultSupplier(updateReqVO.getSupplierId(), updateReqVO.getProductId(), id, Boolean.TRUE.equals(updateReqVO.getDefaultSupplier()));
         // 更新
         SrmSupplierProductDO updateObj = BeanUtils.toBean(updateReqVO, SrmSupplierProductDO.class);
-        ThrowUtil.ifSqlThrow(supplierProductMapper.updateById(updateObj), DB_UPDATE_ERROR);
-        //同步数据-暂停
-        //        var dtos = customRuleMapper.selectProductAllInfoListBySupplierId(id);
-        //        erpCustomRuleChannel.send(MessageBuilder.withPayload(dtos).build());
+        ThrowUtil.ifSqlThrow(supplierProductMapper.updateById(updateObj), SUPPLIER_MODIFY_FAIL);
     }
 
     @Override

@@ -347,6 +347,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         checkReturnQtyNotExceedInQty(vo.getItems());
         // 1.8 校验单号
         SrmPurchaseReturnDO oldReturn = validatePurchaseReturnExists(vo.getId());
+        String oldCode = vo.getCode();
         if (vo.getCode() != null && !vo.getCode().equals(oldReturn.getCode())) {
             voSetNo(vo);
         }
@@ -355,7 +356,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         SrmPurchaseReturnDO updateObj = BeanUtils.toBean(vo, SrmPurchaseReturnDO.class);
         calculateTotalPrice(updateObj, purchaseReturnItems);
         calculateTotalVolumeAndWeight(updateObj, purchaseReturnItems);
-        purchaseReturnMapper.updateById(updateObj);
+        ThrowUtil.ifSqlThrow(purchaseReturnMapper.updateById(updateObj), PURCHASE_RETURN_UPDATE_FAIL, oldCode);
         // 2.2 更新退货项
         updatePurchaseReturnItemList(vo.getId(), purchaseReturnItems);
     }
@@ -464,6 +465,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         }
         if (CollUtil.isNotEmpty(diffList.get(1))) {
             purchaseReturnItemMapper.updateBatch(diffList.get(1));
+            diffList.get(1).forEach(o -> ThrowUtil.ifSqlThrow(purchaseReturnItemMapper.deleteByReturnId(o.getId()), PURCHASE_RETURN_ITEM_UPDATE_FAIL));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {
             purchaseReturnItemMapper.deleteByIds(convertList(diffList.get(2), SrmPurchaseReturnItemDO::getId));

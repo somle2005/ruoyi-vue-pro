@@ -77,7 +77,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
+import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_BATCH_INSERT_ERROR;
+import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_INSERT_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO.PURCHASE_ORDER_NO_PREFIX;
@@ -304,7 +305,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 1.3.1 设置no
         String oldNo = purchaseOrder.getCode();
         if (!oldNo.equals(vo.getCode())) {
-            voSetNo(vo);
+            this.voSetNo(vo);
         }
         // 1.4 校验订单项的有效性
         List<SrmPurchaseOrderItemDO> purchaseOrderItems = validatePurchaseOrderItems(vo.getItems());
@@ -316,7 +317,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 2.1 更新订单
         SrmPurchaseOrderDO updateObj = BeanUtils.toBean(vo, SrmPurchaseOrderDO.class);
         calculateTotalPrice(updateObj, purchaseOrderItems);//计算item合计。
-        purchaseOrderMapper.updateById(updateObj);
+        ThrowUtil.ifSqlThrow(purchaseOrderMapper.updateById(updateObj), PURCHASE_ORDER_UPDATE_FAIL, vo.getCode());
         // 2.2 更新订单项
         updatePurchaseOrderItemList(vo.getId(), purchaseOrderItems);
         vo.getItems().sort(Comparator.comparing(SrmPurchaseOrderSaveReqVO.Item::getId, Comparator.nullsFirst(Long::compareTo)));
@@ -337,7 +338,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         List<SrmPurchaseOrderItemDO> itemDOS = validatePurchaseOrderItemExists(itemIds);
         itemDOS.forEach(itemDO -> BeanUtils.copyProperties(itemMap.get(itemDO.getId()), itemDO));
         //更新
-        ThrowUtil.ifThrow(purchaseOrderItemMapper.updateBatch(itemDOS), DB_UPDATE_ERROR);
+        itemDOS.forEach(itemDO -> ThrowUtil.ifSqlThrow(purchaseOrderItemMapper.updateById(itemDO), PURCHASE_ORDER_UPDATE_FAIL_ITEM, itemDO.getId()));
     }
 
     private void voSetNo(SrmPurchaseOrderSaveReqVO vo) {
@@ -443,7 +444,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             // 批量查询所有需要的采购订单项（purchase order items）
             updatePurchaseRequestItem(diffList.get(1));
             //跟旧数据对比，申请数量差异，则发采购事件调整
-            purchaseOrderItemMapper.updateBatch(diffList.get(1));
+            diffList.get(1).forEach(orderItemDO -> ThrowUtil.ifSqlThrow(purchaseOrderItemMapper.updateById(orderItemDO), PURCHASE_ORDER_UPDATE_FAIL_ITEM, orderItemDO.getId()));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {
             // 遍历并处理订单项
@@ -510,7 +511,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         });
         // 2. 更新采购订单
         BigDecimal totalInboundCount = getSumValue(inCountMap.values(), value -> value, BigDecimal::add, BigDecimal.ZERO);
-        purchaseOrderMapper.updateById(new SrmPurchaseOrderDO().setId(itemId).setTotalInboundCount(totalInboundCount));
+        ThrowUtil.ifSqlThrow(purchaseOrderMapper.updateById(new SrmPurchaseOrderDO().setId(itemId).setTotalInboundCount(totalInboundCount)), PURCHASE_ORDER_UPDATE_FAIL_ITEM, itemId);
     }
 
     @Override

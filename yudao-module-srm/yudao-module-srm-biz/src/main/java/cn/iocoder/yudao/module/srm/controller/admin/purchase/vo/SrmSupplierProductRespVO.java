@@ -1,9 +1,11 @@
 package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo;
 
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import org.apache.poi.hpsf.Decimal;
 
 import java.time.LocalDateTime;
 
@@ -21,7 +23,7 @@ public class SrmSupplierProductRespVO {
     private String code;
 
     @Schema(description = "供应商编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "29689")
-    @ExcelProperty("供应商编号")
+    @ExcelIgnore
     private Long supplierId;
 
     @Schema(description = "供应商名称", example = "芋道")
@@ -29,7 +31,7 @@ public class SrmSupplierProductRespVO {
     private String supplierName;
 
     @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "26097")
-    @ExcelProperty("产品编号")
+    @ExcelIgnore
     private Long productId;
 
     @Schema(description = "产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "巧克力")
@@ -64,4 +66,18 @@ public class SrmSupplierProductRespVO {
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
 
+    @Schema(description = "上次采购价格")
+    @ExcelProperty("上次采购价格")
+    private Decimal lastPurchasePrice;
+
+    @Schema(description = "税率")
+    @ExcelProperty("税率")
+    private Decimal taxRate;
+
+    @Schema(description = "是否默认供应商")
+    @ExcelProperty("是否默认供应商")
+    private Boolean defaultSupplier;
+
+    @Schema(description = "版本号", requiredMode = Schema.RequiredMode.REQUIRED)
+    private Integer version;
 }

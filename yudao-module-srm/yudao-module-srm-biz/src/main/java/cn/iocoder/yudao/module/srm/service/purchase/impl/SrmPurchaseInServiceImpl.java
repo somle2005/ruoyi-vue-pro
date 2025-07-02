@@ -301,6 +301,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 1.5 校验关联的采购订单项是否属于同一个供应商和采购公司
         validateOrderItemsSupplierAndCompany(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
         // 1.6 校验编号
+        String oldCode = vo.getCode();
         if (vo.getCode() != null && !vo.getCode().equals(purchaseIn.getCode())) {
             validateAndUpdateCode(vo.getCode(), purchaseIn.getCode());
         }
@@ -310,7 +311,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 2.1 更新入库
         SrmPurchaseInDO updateObj = BeanUtils.toBean(vo, SrmPurchaseInDO.class);
         calculateTotalPrice(updateObj, purchaseInItems);//合计
-        purchaseInMapper.updateById(updateObj);
+        ThrowUtil.ifSqlThrow(purchaseInMapper.updateById(updateObj), PURCHASE_IN_UPDATE_FAIL, oldCode);
         // 2.2 更新入库项
         updatePurchaseInItemList(vo.getId(), purchaseInItems);
         // 2.3 如果vo和旧item不同,则校验订单项到货数量是否超过采购订单的采购项入库数量
@@ -519,7 +520,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             syncOrderItemExecutionStatus(diffList.get(0));
         }
         if (CollUtil.isNotEmpty(diffList.get(1))) {
-            purchaseInItemMapper.updateBatch(diffList.get(1));
+            diffList.get(1).forEach(o -> ThrowUtil.ifSqlThrow(purchaseInItemMapper.updateById(o), PURCHASE_IN_ITEM_UPDATE_FAIL));
             syncOrderItemExecutionStatus(diffList.get(1));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {

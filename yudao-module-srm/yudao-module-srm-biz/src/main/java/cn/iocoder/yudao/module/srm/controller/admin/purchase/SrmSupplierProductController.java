@@ -7,12 +7,12 @@ import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
-import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductSaveReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierProductService;
+import cn.iocoder.yudao.module.system.api.utils.Validation;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -38,20 +38,17 @@ public class SrmSupplierProductController {
     @Resource
     private SrmSupplierProductService supplierProductService;
 
-
-
     @PostMapping("/create")
     @Operation(summary = "创建ERP 供应商产品")
-    @Idempotent
     @PreAuthorize("@ss.hasPermission('srm:supplier-product:create')")
-    public CommonResult<Long> createSupplierProduct(@Valid @RequestBody SrmSupplierProductSaveReqVO createReqVO) {
+    public CommonResult<Long> createSupplierProduct(@Validated(Validation.OnCreate.class) @RequestBody SrmSupplierProductSaveReqVO createReqVO) {
         return success(supplierProductService.createSupplierProduct(createReqVO));
     }
 
     @PutMapping("/update")
     @Operation(summary = "更新ERP 供应商产品")
     @PreAuthorize("@ss.hasPermission('srm:supplier-product:update')")
-    public CommonResult<Boolean> updateSupplierProduct(@Valid @RequestBody SrmSupplierProductSaveReqVO updateReqVO) {
+    public CommonResult<Boolean> updateSupplierProduct(@Validated(Validation.OnUpdate.class) @RequestBody SrmSupplierProductSaveReqVO updateReqVO) {
         supplierProductService.updateSupplierProduct(updateReqVO);
         return success(true);
     }
