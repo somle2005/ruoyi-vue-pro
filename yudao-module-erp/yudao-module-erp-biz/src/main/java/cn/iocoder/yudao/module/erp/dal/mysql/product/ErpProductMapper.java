@@ -40,6 +40,7 @@ public interface ErpProductMapper extends BaseMapperX<ErpProductDO> {
             .likeIfExists(ErpProductDO::getWeight, reqVO.getWeight())
             .eqIfExists(ErpProductDO::getCreator, reqVO.getCreator())
             .eqIfExists(ErpProductDO::getUpdater, reqVO.getUpdater())
+            .likeIfExists(ErpProductDO::getName, reqVO.getName())
             .orderByDesc(ErpProductDO::getId);
         return selectPage(reqVO, orderByDesc);
     }

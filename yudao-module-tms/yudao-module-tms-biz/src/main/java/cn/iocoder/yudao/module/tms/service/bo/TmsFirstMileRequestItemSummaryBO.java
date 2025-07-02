@@ -20,4 +20,6 @@ public class TmsFirstMileRequestItemSummaryBO {
     private BigDecimal sumPackageWeight;
     // 基础重量汇总
     private BigDecimal sumWeight;
+    //动态计算总体积
+    private BigDecimal sumVolume;
 } 

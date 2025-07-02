@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.test.core.ut.BaseDbUnitTest;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFirstMileRequestPageReqVO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemSummaryBO;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
@@ -24,5 +25,11 @@ class TmsFirstMileRequestItemMapperTest extends BaseDbUnitTest {
         for (TmsFirstMileRequestItemItemBO tmsFirstMileRequestItemBO : result.getList()) {
             log.info("{}", tmsFirstMileRequestItemBO);
         }
+    }
+
+    @Test
+    void selectTmsFirstMileRequestItemSummaryBO() {
+        TmsFirstMileRequestItemSummaryBO summaryBO = tmsFirstMileRequestItemMapper.selectTmsFirstMileRequestItemSummaryBO(new TmsFirstMileRequestItemPageReqVO());
+        log.info("{}", summaryBO);
     }
 }

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -156,6 +157,19 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
 
     @Override
     public TmsFirstMileRequestItemSummaryBO getSummary(TmsFirstMileRequestItemPageReqVO reqVO) {
-        return firstMileRequestItemMapper.selectTmsFirstMileRequestItemSummaryBO(reqVO);
+        //动态计算总体积 sumVolume 长宽高 乘
+        TmsFirstMileRequestItemSummaryBO summaryBO = firstMileRequestItemMapper.selectTmsFirstMileRequestItemSummaryBO(reqVO);
+
+        // 根据BO里面的数据动态计算总体积
+        if (summaryBO != null) {
+            // 使用汇总数据计算总体积：总长 * 总宽 * 总高
+            if (summaryBO.getSumPackageLength() != null && summaryBO.getSumPackageWidth() != null && summaryBO.getSumPackageHeight() != null) {
+                BigDecimal totalVolume = summaryBO.getSumPackageLength()
+                    .multiply(summaryBO.getSumPackageWidth())
+                    .multiply(summaryBO.getSumPackageHeight());
+                summaryBO.setSumVolume(totalVolume);
+            }
+        }
+        return summaryBO;
     }
 }
