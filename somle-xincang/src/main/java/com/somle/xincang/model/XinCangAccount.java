@@ -13,12 +13,12 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "gigacloud_account")
-public class GigaCloudAccount {
+@Table(name = "xincang_account")
+public class XinCangAccount {
     @Id
     private Long id;
-    private String userName;
-    private String password;
+    private String appKey;
+    private String secret;
     private String token;
 
 }
