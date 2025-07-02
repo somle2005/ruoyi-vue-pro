@@ -29,6 +29,7 @@
         <module>yudao-module-wms</module>
         <module>yudao-module-ai</module>
         <module>yudao-module-oms</module>
+        <module>yudao-module-cms</module>
 
 
         <!--        <module>somle-framework</module>-->

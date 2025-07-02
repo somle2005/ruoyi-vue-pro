@@ -1,4 +1,4 @@
-package com.somle.staples.service;
+package com.somle.shopify.service;
 
 import com.somle.shopify.repository.ShopifyTokenRepository;
 import jakarta.annotation.PostConstruct;

@@ -1,4 +1,4 @@
-package com.somle.staples.service;
+package com.somle.lazada.service;
 
 import com.somle.lazada.model.LazadaAccount;
 import com.somle.lazada.model.reps.LazadaRefreshTokenResp;
