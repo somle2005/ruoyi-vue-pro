@@ -123,6 +123,7 @@ public class TmsFirstMileConvert {
         vo.setSumPackageHeight(bo.getSumPackageHeight());
         vo.setSumPackageWeight(bo.getSumPackageWeight());
         vo.setSumWeight(bo.getSumWeight());
+        vo.setSumVolume(bo.getSumVolume());
         return vo;
     }
 
