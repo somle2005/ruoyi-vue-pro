@@ -9,6 +9,8 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.vo.TmsFir
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemItemBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemSummaryBO;
+import com.github.yulichang.wrapper.MPJLambdaWrapper;
 import org.apache.ibatis.annotations.Mapper;
 
 import java.util.ArrayList;
@@ -27,9 +29,10 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
         if (vo == null) {
             vo = new TmsFirstMileRequestItemPageReqVO();
         }
-        return new MPJLambdaWrapperX<TmsFirstMileRequestItemDO>().eqIfPresent(TmsFirstMileRequestItemDO::getId,
-                vo.getId()).betweenIfPresent(TmsFirstMileRequestItemDO::getCreateTime, vo.getCreateTime())
-            .eqIfPresent(TmsFirstMileRequestItemDO::getProductId, vo.getProductId())
+        return new MPJLambdaWrapperX<TmsFirstMileRequestItemDO>()
+            .eqIfPresent(TmsFirstMileRequestItemDO::getId, vo.getId())
+            .betweenIfPresent(TmsFirstMileRequestItemDO::getCreateTime, vo.getCreateTime())
+            .inIfPresent(TmsFirstMileRequestItemDO::getProductId, vo.getProductIds())
             .likeIfPresent(TmsFirstMileRequestItemDO::getFbaBarCode, vo.getFbaBarCode())
             .eqIfPresent(TmsFirstMileRequestItemDO::getQty, vo.getQty())
             .betweenIfPresent(TmsFirstMileRequestItemDO::getPackageLength, vo.getPackageLength())
@@ -46,13 +49,12 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
 
     //buildBOWrapper(vo)
     default MPJLambdaWrapperX<TmsFirstMileRequestItemDO> buildBOWrapper(TmsFirstMileRequestPageReqVO vo) {
-        return buildWrapper(vo.getItem()).leftJoin(TmsFirstMileRequestDO.class, TmsFirstMileRequestDO::getId,
-                TmsFirstMileRequestItemDO::getRequestId)
+        return buildWrapper(vo.getItem())
             .betweenIfPresent(TmsFirstMileRequestDO::getCreateTime, vo.getCreateTime())
             .eqIfPresent(TmsFirstMileRequestDO::getId, vo.getId())
             .likeIfPresent(TmsFirstMileRequestDO::getCode, vo.getCode())
             .eqIfPresent(TmsFirstMileRequestDO::getRequesterId, vo.getRequesterId())
-            .eqIfPresent(TmsFirstMileRequestDO::getRequestDeptId, vo.getRequestDeptId())
+            .inIfPresent(TmsFirstMileRequestDO::getRequestDeptId, vo.getRequestDeptIds())
             .eqIfPresent(TmsFirstMileRequestDO::getToWarehouseId, vo.getToWarehouseId())
             .eqIfPresent(TmsFirstMileRequestDO::getAuditStatus, vo.getAuditStatus())
             .eqIfPresent(TmsFirstMileRequestDO::getOrderStatus, vo.getOrderStatus())
@@ -72,9 +74,12 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
     }
 
     default PageResult<TmsFirstMileRequestItemItemBO> selectPageBO(TmsFirstMileRequestPageReqVO pageReqVO) {
-        return selectJoinPage(pageReqVO, TmsFirstMileRequestItemItemBO.class,
-            buildBOWrapper(pageReqVO).selectAssociation(TmsFirstMileRequestDO.class,
-                TmsFirstMileRequestItemItemBO::getTmsFirstMileRequestDO));
+        if (pageReqVO == null) {
+            pageReqVO = new TmsFirstMileRequestPageReqVO();
+        }
+        MPJLambdaWrapper<TmsFirstMileRequestItemDO> wrapper = buildBOWrapper(pageReqVO).selectAssociation(TmsFirstMileRequestDO.class, TmsFirstMileRequestItemItemBO::getTmsFirstMileRequestDO);
+        wrapper.leftJoin(TmsFirstMileRequestDO.class, TmsFirstMileRequestDO::getId, TmsFirstMileRequestItemDO::getRequestId);
+        return selectJoinPage(pageReqVO, TmsFirstMileRequestItemItemBO.class, wrapper);
     }
 
     /**
@@ -82,13 +87,29 @@ public interface TmsFirstMileRequestItemMapper extends BaseMapperX<TmsFirstMileR
      * @return 头程申请单明细
      */
     default TmsFirstMileRequestItemItemBO selectBOById(Long id) {
-        return selectJoinOne(TmsFirstMileRequestItemItemBO.class,
-            buildBOWrapper(new TmsFirstMileRequestPageReqVO().setId(id)));
+        MPJLambdaWrapperX<TmsFirstMileRequestItemDO> wrapperX = buildBOWrapper(new TmsFirstMileRequestPageReqVO().setId(id));
+        wrapperX.leftJoin(TmsFirstMileRequestDO.class, TmsFirstMileRequestDO::getId, TmsFirstMileRequestItemDO::getRequestId);
+        return selectJoinOne(TmsFirstMileRequestItemItemBO.class, wrapperX);
     }
 
     default void deleteByRequestId(Long requestId) {
-        LambdaQueryWrapperX<TmsFirstMileRequestItemDO> wrapperX =
-            new LambdaQueryWrapperX<TmsFirstMileRequestItemDO>().eq(TmsFirstMileRequestItemDO::getRequestId, requestId);
+        LambdaQueryWrapperX<TmsFirstMileRequestItemDO> wrapperX = new LambdaQueryWrapperX<TmsFirstMileRequestItemDO>().eq(TmsFirstMileRequestItemDO::getRequestId, requestId);
         delete(wrapperX);
+    }
+
+    //汇总
+    default TmsFirstMileRequestItemSummaryBO selectTmsFirstMileRequestItemSummaryBO(TmsFirstMileRequestItemPageReqVO req) {
+        if (req == null) {
+            req = new TmsFirstMileRequestItemPageReqVO();
+        }
+        MPJLambdaWrapperX<TmsFirstMileRequestItemDO> wrapperX = new MPJLambdaWrapperX<TmsFirstMileRequestItemDO>()
+            .selectSum(TmsFirstMileRequestItemDO::getQty, TmsFirstMileRequestItemSummaryBO::getSumQty)
+            .selectSum(TmsFirstMileRequestItemDO::getOrderClosedQty, TmsFirstMileRequestItemSummaryBO::getSumOrderClosedQty)
+            .selectSum(TmsFirstMileRequestItemDO::getPackageLength, TmsFirstMileRequestItemSummaryBO::getSumPackageLength)
+            .selectSum(TmsFirstMileRequestItemDO::getPackageWidth, TmsFirstMileRequestItemSummaryBO::getSumPackageWidth)
+            .selectSum(TmsFirstMileRequestItemDO::getPackageHeight, TmsFirstMileRequestItemSummaryBO::getSumPackageHeight)
+            .selectSum(TmsFirstMileRequestItemDO::getPackageWeight, TmsFirstMileRequestItemSummaryBO::getSumPackageWeight)
+            .selectSum(TmsFirstMileRequestItemDO::getWeight, TmsFirstMileRequestItemSummaryBO::getSumWeight);
+        return selectJoinOne(TmsFirstMileRequestItemSummaryBO.class, wrapperX);
     }
 }

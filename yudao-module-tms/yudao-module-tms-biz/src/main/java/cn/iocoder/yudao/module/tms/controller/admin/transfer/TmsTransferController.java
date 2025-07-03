@@ -8,6 +8,7 @@ import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.tms.controller.admin.transfer.vo.*;
+import cn.iocoder.yudao.module.tms.controller.admin.transfer.vo.convert.TmsTransferExportConvert;
 import cn.iocoder.yudao.module.tms.service.transfer.TmsTransferService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -83,8 +84,10 @@ public class TmsTransferController {
     public void exportTransferExcel(TmsTransferPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TmsTransferRespVO> respVOList = transferService.getTmsTransferRespVOPage(pageReqVO).getList();
+        // 转换为Excel数据
+        List<TmsTransferExcelRespVO> excelList = TmsTransferExportConvert.buildExcelList(respVOList);
         // 导出 Excel
-        ExcelUtils.write(response, "调拨单.xls", "数据", TmsTransferRespVO.class, respVOList);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "调拨单.xls", "数据", TmsTransferExcelRespVO.class, excelList);
     }
 
     @PostMapping("/import-excel")

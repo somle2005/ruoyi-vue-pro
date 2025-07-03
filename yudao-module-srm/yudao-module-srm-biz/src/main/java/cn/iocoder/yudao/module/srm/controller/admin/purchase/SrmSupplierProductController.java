@@ -98,8 +98,7 @@ public class SrmSupplierProductController {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<SrmSupplierProductRespVO> list = supplierProductService.buildSupplierProductVOPageResult(supplierProductService.getSupplierProductPage(pageReqVO)).getList();
         // 导出 Excel
-        ExcelUtils.write(response, "ERP 供应商产品.xls", "数据", SrmSupplierProductRespVO.class,
-                        BeanUtils.toBean(list, SrmSupplierProductRespVO.class));
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "ERP 供应商产品.xls", "数据", SrmSupplierProductRespVO.class, BeanUtils.toBean(list, SrmSupplierProductRespVO.class));
     }
 
 

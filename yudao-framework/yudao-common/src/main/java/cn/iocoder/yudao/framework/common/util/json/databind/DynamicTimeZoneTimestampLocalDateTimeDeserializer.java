@@ -2,6 +2,7 @@ package cn.iocoder.yudao.framework.common.util.json.databind;
 
 import cn.iocoder.yudao.framework.common.enums.TimeZoneEnum;
 import cn.iocoder.yudao.framework.common.enums.WebCommonEnum;
+import cn.iocoder.yudao.framework.common.util.servlet.ServletUtils;
 import com.fasterxml.jackson.core.JacksonException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -15,6 +16,7 @@ import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
 
 
@@ -32,12 +34,9 @@ public class DynamicTimeZoneTimestampLocalDateTimeDeserializer extends JsonDeser
     @Override
     public LocalDateTime deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException, JacksonException {
         ZoneId formZoneId = TimeZone.getDefault().toZoneId();
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        if (Objects.nonNull(requestAttributes)) {
-            Object object = requestAttributes.getAttribute(WebCommonEnum.HTTP_HEADER_TIME_ZONE, RequestAttributes.SCOPE_REQUEST);
-            if (Objects.nonNull(object) && object instanceof String) {
-                formZoneId = ZoneId.of((String) object);
-            }
+        Optional<ZoneId> zoneIdOptional = ServletUtils.getTimeZoneId();
+        if (zoneIdOptional.isPresent()) {
+            formZoneId = zoneIdOptional.get();
         }
 
 //        字符串转换为LocalDateTime

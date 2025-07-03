@@ -32,6 +32,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestItemsBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestSummaryBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
@@ -46,6 +47,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -581,5 +583,18 @@ public class SrmPurchaseRequestServiceImpl implements SrmPurchaseRequestService 
     @Override
     public String getMaxSerialNumber() {
         return noRedisDAO.getMaxSerial(PURCHASE_REQUEST_NO_PREFIX, PURCHASE_REQUEST_NO_OUT_OF_BOUNDS);
+    }
+
+    @Override
+    public SrmPurchaseRequestSummaryBO selectSrmPurchaseRequestSummaryBO(SrmPurchaseRequestPageReqVO req) {
+        SrmPurchaseRequestSummaryBO summaryBO = erpPurchaseRequestItemsMapper.selectSrmPurchaseRequestSummaryBO(req);
+        if (summaryBO != null) {
+            Integer sumOrderClosedQty = summaryBO.getSumOrderClosedQty();
+            BigDecimal sumInboundClosedQty = summaryBO.getSumInboundClosedQty();
+            int orderClosed = sumOrderClosedQty == null ? 0 : sumOrderClosedQty;
+            int inboundClosed = sumInboundClosedQty == null ? 0 : sumInboundClosedQty.intValue();
+            summaryBO.setSumUnOrderCount(BigDecimal.valueOf(orderClosed - inboundClosed));
+        }
+        return summaryBO;
     }
 }

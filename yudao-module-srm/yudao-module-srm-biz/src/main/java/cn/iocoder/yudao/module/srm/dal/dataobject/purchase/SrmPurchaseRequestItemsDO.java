@@ -43,6 +43,9 @@ public class SrmPurchaseRequestItemsDO extends TenantBaseDO {
      */
     private String declaredType;
 
+    /**
+     * 报关品名英文
+     */
     private String declaredTypeEn;
     /**
      * 产品sku

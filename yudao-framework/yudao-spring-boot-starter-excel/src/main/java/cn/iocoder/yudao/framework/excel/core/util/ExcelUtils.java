@@ -1,7 +1,10 @@
 package cn.iocoder.yudao.framework.excel.core.util;
 
 import cn.hutool.core.collection.CollUtil;
+import cn.iocoder.yudao.framework.common.enums.TimeZoneEnum;
+import cn.iocoder.yudao.framework.common.util.servlet.ServletUtils;
 import cn.iocoder.yudao.framework.excel.core.convert.DynamicTimeZoneLocalDateTimeConvert;
+import cn.iocoder.yudao.framework.excel.core.handler.CellMergeStrategy;
 import cn.iocoder.yudao.framework.excel.core.handler.SelectSheetWriteHandler;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.converters.Converter;
@@ -17,6 +20,7 @@ import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Excel 工具类
@@ -24,7 +28,7 @@ import java.util.List;
  * @author 芋道源码
  */
 public class ExcelUtils {
-
+    static ZoneId userZoneId = ServletUtils.getTimeZoneId().orElse(TimeZone.getDefault().toZoneId());
     /**
      * 将列表以 Excel 响应给前端
      *
@@ -40,13 +44,15 @@ public class ExcelUtils {
                                  String filename,
                                  String sheetName,
                                  Class<T> head, List<T> data) throws IOException {
+
         // 输出 Excel
         EasyExcel.write(response.getOutputStream(), head)
-                .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
-                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
-                .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
-                .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
-                .sheet(sheetName).doWrite(data);
+            .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
+            .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
+            .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
+            .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
+            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
+            .sheet(sheetName).doWrite(data);
         // 设置 header 和 contentType。写在最后的原因是，避免报错时，响应 contentType 已经被修改了
         response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
         response.setContentType("application/vnd.ms-excel;charset=UTF-8");
@@ -54,13 +60,16 @@ public class ExcelUtils {
 
     public static <T> List<T> read(MultipartFile file, Class<T> head) throws IOException {
         return EasyExcel.read(file.getInputStream(), head, null)
-                .autoCloseStream(false)  // 不要自动关闭，交给 Servlet 自己处理
-                .doReadAllSync();
+            .autoCloseStream(false)  // 不要自动关闭，交给 Servlet 自己处理
+            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
+            .doReadAllSync();
     }
 
     public static <T> List<T> read(MultipartFile file, Class<T> head, List<Converter<?>> converters) throws IOException {
         ExcelReaderBuilder builder = EasyExcel.read(file.getInputStream(), head, null)
-                .autoCloseStream(false);// 不要自动关闭，交给 Servlet 自己处理
+            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
+            .autoCloseStream(false);// 不要自动关闭，交给 Servlet 自己处理
+
         if (CollUtil.isNotEmpty(converters)) {
             converters.forEach(builder::registerConverter);
         }
@@ -76,11 +85,11 @@ public class ExcelUtils {
                                  List<Converter<?>> converters) throws IOException {
         // 输出 Excel
         ExcelWriterSheetBuilder builder = EasyExcel.write(response.getOutputStream(), head)
-                .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
-                .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
-                .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
-                .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
-                .sheet(sheetName);
+            .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
+            .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
+            .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
+            .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
+            .sheet(sheetName);
         if (CollUtil.isNotEmpty(converters)) {
             converters.forEach(builder::registerConverter);
         }
@@ -90,5 +99,43 @@ public class ExcelUtils {
         response.setContentType("application/vnd.ms-excel;charset=UTF-8");
     }
 
+    /**
+     * 通过RequestAttributes获取用户时区
+     */
+    public static <T> void writeWithRequestAttributesTimeZone(HttpServletResponse response,
+                                                              String filename,
+                                                              String sheetName,
+                                                              Class<T> head,
+                                                              List<T> data) throws IOException {
+        ZoneId userZoneId = ServletUtils.getTimeZoneId().orElse(TimeZone.getDefault().toZoneId());
+        // 输出 Excel
+        ExcelWriterSheetBuilder builder = EasyExcel.write(response.getOutputStream(), head)
+            .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
+            .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
+            .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
+            .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
+            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
+            .registerWriteHandler(new CellMergeStrategy(head, data.size()))
+            .sheet(sheetName);
+        builder.doWrite(data);
+        // 设置 header 和 contentType。写在最后的原因是，避免报错时，响应 contentType 已经被修改了
+        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
+        response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+    }
+
+    public static <T> ExcelWriterSheetBuilder buildExcelWriterSheetBuilder(Integer sheetNo,
+                                                                           String sheetName,
+                                                                           Class<T> head,
+                                                                           List<T> data) {
+        ZoneId userZoneId = ServletUtils.getTimeZoneId().orElse(TimeZone.getDefault().toZoneId());
+
+        return EasyExcel.writerSheet(sheetNo, sheetName)
+            .head(head)
+            .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
+            .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
+            .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
+            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
+            .registerWriteHandler(new CellMergeStrategy(head, data.size()));
+    }
 
 }

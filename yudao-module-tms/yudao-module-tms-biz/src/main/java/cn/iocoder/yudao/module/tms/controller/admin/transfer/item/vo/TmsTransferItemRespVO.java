@@ -16,6 +16,9 @@ import java.time.LocalDateTime;
 @ExcelIgnoreUnannotated
 public class TmsTransferItemRespVO {
 
+    @Schema(description = "编号")
+    private Long id;
+
     @Schema(description = "乐观锁")
     @ExcelProperty("乐观锁")
     private Integer revision;

@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.tms.controller.admin.first.mile.vo.req.TmsFirstMi
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestBO;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemSummaryBO;
 import jakarta.validation.Valid;
 
 import java.util.List;
@@ -138,4 +139,9 @@ public interface TmsFirstMileRequestService {
      * @return map
      */
     Map<Long, TmsFirstMileRequestItemDO> getFirstMileRequestItemListMap(List<Long> requestIds);
+
+    /**
+     * 头程申请明细分页条件下的汇总统计
+     */
+    TmsFirstMileRequestItemSummaryBO getSummary(TmsFirstMileRequestPageReqVO reqVO);
 }

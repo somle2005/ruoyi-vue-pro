@@ -2,17 +2,19 @@ package cn.iocoder.yudao.module.srm.controller.admin.purchase;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
-import cn.iocoder.yudao.framework.common.enums.TimeZoneEnum;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.pojo.PageResultSummary;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
-import cn.iocoder.yudao.framework.excel.core.convert.DynamicTimeZoneLocalDateTimeConvert;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.SrmPurchaseInBaseRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.SrmPurchaseInExcelRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.SrmPurchaseInSummaryRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.convert.SrmPurchaseInExportConvert;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.in.req.*;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseInItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
@@ -22,6 +24,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseInService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInBO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInSummaryBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -29,7 +32,6 @@ import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
-import com.google.common.collect.Lists;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -107,9 +109,14 @@ public class SrmPurchaseInController {
     @PostMapping("/page")
     @Operation(summary = "获得采购到货分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-in:query')")
-    public CommonResult<PageResult<SrmPurchaseInBaseRespVO>> getPurchaseInPage(@Valid @RequestBody(required = false) SrmPurchaseInPageReqVO pageReqVO) {
+    public CommonResult<PageResultSummary<SrmPurchaseInBaseRespVO, SrmPurchaseInSummaryRespVO>> getPurchaseInPage(@RequestBody(required = false) SrmPurchaseInPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new SrmPurchaseInPageReqVO();
+        }
         PageResult<SrmPurchaseInBO> pageResult = purchaseInService.getPurchaseInBOPage(pageReqVO);
-        return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
+        List<SrmPurchaseInBaseRespVO> respList = bindList(pageResult.getList());
+        SrmPurchaseInSummaryBO summaryBO = purchaseInService.getPurchaseInSummary(pageReqVO);
+        return success(new PageResultSummary<>(respList, pageResult.getTotal(), BeanUtils.toBean(summaryBO, SrmPurchaseInSummaryRespVO.class)));
     }
 
     @GetMapping("/export-excel")
@@ -119,10 +126,9 @@ public class SrmPurchaseInController {
     public void exportPurchaseInExcel(@Valid SrmPurchaseInPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<SrmPurchaseInBO> page = purchaseInService.getPurchaseInBOPage(pageReqVO);
-        // 导出 Excel
-        ExcelUtils.write(response, "采购到货.xls", "数据", SrmPurchaseInBaseRespVO.class, bindList(page.getList()));
-//        ExcelUtils.write(response, "采购到货.xls", "数据", SrmPurchaseInBaseRespVO.class, bindList(page.getList())
-//                , Lists.newArrayList(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, TimeZoneEnum.UTC8_ZONE_ID)));
+        List<SrmPurchaseInBaseRespVO> list = bindList(page.getList());
+        List<SrmPurchaseInExcelRespVO> excelList = SrmPurchaseInExportConvert.buildExcelList(list);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "采购到货.xls", "采购到货", SrmPurchaseInExcelRespVO.class, excelList);
     }
 
     @PutMapping("/submitAudit")

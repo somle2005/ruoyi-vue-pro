@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProduc
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import org.springframework.validation.annotation.Validated;
 
 import java.util.Collection;
 import java.util.List;
@@ -20,6 +21,7 @@ import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.
  *
  * @author 芋道源码
  */
+@Validated
 public interface ErpProductService {
 
     /**
@@ -59,6 +61,16 @@ public interface ErpProductService {
      * @return 产品
      */
     ErpProductRespVO getProduct(Long id);
+
+    /**
+     * 获得产品 DO
+     */
+    ErpProductDO getProductDO(Long id);
+
+    /**
+     * 根据状态获得产品集合
+     */
+    List<ErpProductDO> selectListByStatus(@Valid @NotNull Boolean status);
 
     /**
      * 获得指定状态的产品 VO 列表
@@ -110,6 +122,14 @@ public interface ErpProductService {
     default Map<Long, ErpProductRespVO> getProductVOMap(Collection<Long> ids) {
         return convertMap(getProductVOList(ids), ErpProductRespVO::getId);
     }
+
+    /**
+     * 获得产品DO分页
+     *
+     * @param pageReqVO vo
+     * @return PageResult ErpProductDO
+     */
+    PageResult<ErpProductDO> getProductPage(ErpProductPageReqVO pageReqVO);
 
     /**
      * 获得产品 VO 分页

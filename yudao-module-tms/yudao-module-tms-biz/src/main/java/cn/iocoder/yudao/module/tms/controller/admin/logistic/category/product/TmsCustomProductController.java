@@ -13,9 +13,11 @@ import cn.iocoder.yudao.module.system.api.dict.DictDataApi;
 import cn.iocoder.yudao.module.system.api.dict.dto.DictDataRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.product.vo.TmsCustomProductExcelRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.product.vo.TmsCustomProductPageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.product.vo.TmsCustomProductRespVO;
 import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.product.vo.TmsCustomProductSaveReqVO;
+import cn.iocoder.yudao.module.tms.controller.admin.logistic.category.product.vo.convert.TmsCustomProductExportConvert;
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.TmsCustomCategoryDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.logistic.category.product.TmsCustomProductDO;
 import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
@@ -118,8 +120,9 @@ public class TmsCustomProductController {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<TmsCustomProductDO> list = customProductService.getCustomProductPage(pageReqVO).getList();
         List<TmsCustomProductRespVO> vos = bingResult(list);
+        List<TmsCustomProductExcelRespVO> excelList = TmsCustomProductExportConvert.buildExcelList(vos);
         // 导出 Excel
-        ExcelUtils.write(response, "海关产品分类表.xls", "数据", TmsCustomProductRespVO.class, vos);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "海关产品分类表.xls", "海关产品分类表", TmsCustomProductExcelRespVO.class, excelList);
     }
 
     private List<TmsCustomProductRespVO> bingResult(List<TmsCustomProductDO> oldList) {

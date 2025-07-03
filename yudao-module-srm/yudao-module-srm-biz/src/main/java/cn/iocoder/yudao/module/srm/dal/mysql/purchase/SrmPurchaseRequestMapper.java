@@ -18,7 +18,7 @@ public interface SrmPurchaseRequestMapper extends BaseMapperX<SrmPurchaseRequest
     default MPJLambdaWrapperX<SrmPurchaseRequestDO> queryWrapper(SrmPurchaseRequestPageReqVO reqVO) {
         return new MPJLambdaWrapperX<SrmPurchaseRequestDO>().selectAll(SrmPurchaseRequestDO.class).eqIfPresent(SrmPurchaseRequestDO::getCode, reqVO.getCode())
             .eqIfPresent(SrmPurchaseRequestDO::getApplicantId, reqVO.getApplicantId())
-            .eqIfPresent(SrmPurchaseRequestDO::getApplicationDeptId, reqVO.getApplicationDeptId())
+            .inIfPresent(SrmPurchaseRequestDO::getApplicationDeptId, reqVO.getApplicationDeptIds())
             //supplierId 供应商编号
             .eqIfPresent(SrmPurchaseRequestDO::getSupplierId, reqVO.getSupplierId())
             .betweenIfPresent(SrmPurchaseRequestDO::getBillTime, reqVO.getBillTime())

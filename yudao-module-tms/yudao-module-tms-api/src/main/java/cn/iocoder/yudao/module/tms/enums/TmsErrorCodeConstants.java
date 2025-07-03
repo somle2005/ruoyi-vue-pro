@@ -17,7 +17,7 @@ public interface TmsErrorCodeConstants {
     ErrorCode NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE = new ErrorCode(1_030_604_003, "海关规则中，产品编码+国家代码({})不能重复");
 
     // ========== 海关产品分类 1-030-607-000 ==========
-    ErrorCode CUSTOM_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_607_001, "海关产品分类表不存在");
+    ErrorCode CUSTOM_PRODUCT_NOT_EXISTS = new ErrorCode(1_030_607_001, "海关产品分类编号({})不存在");
     ErrorCode CUSTOM_PRODUCT_EXISTS = new ErrorCode(1_030_607_002, "产品已存在关联，添加失败");
 
     // ========== 海关分类 1-030-609-000 ==========

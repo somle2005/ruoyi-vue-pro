@@ -8,6 +8,7 @@ import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpSyncProductDTO;
@@ -25,6 +26,8 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -41,7 +44,6 @@ import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
-import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
 import static cn.iocoder.yudao.module.erp.dal.redis.ErpRedisKeyConstants.PRODUCT;
 import static cn.iocoder.yudao.module.erp.dal.redis.ErpRedisKeyConstants.PRODUCT_LIST;
@@ -136,7 +138,7 @@ public class ErpProductServiceImpl implements ErpProductService {
     @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
         @CacheEvict(cacheNames = PRODUCT_LIST, allEntries = true),
-        @CacheEvict(cacheNames = PRODUCT, key = "#updateReqVO.id") //返回是null，暂时删除
+        @CacheEvict(cacheNames = PRODUCT, key = "#updateReqVO.id")
     })
     public void updateProduct(ErpProductSaveReqVO updateReqVO) {
         Long productId = updateReqVO.getId();
@@ -208,18 +210,20 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
-    @Cacheable(cacheNames = PRODUCT_LIST, key = "#ids", unless = "#result == null")
     public List<ErpProductDO> validProductList(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        List<ErpProductDO> list = productMapper.selectBatchIds(ids);
-        Map<Long, ErpProductDO> productMap = convertMap(list, ErpProductDO::getId);
+        //
+        ErpProductService service = SpringUtils.getBean(ErpProductService.class);
+        List<ErpProductDO> list = new ArrayList<>(ids.size());
         for (Long id : ids) {
-            ErpProductDO product = productMap.get(id);
-            ThrowUtil.ifEmptyThrow(product, PRODUCT_NOT_EXISTS);
+            ErpProductDO product = service.getProductDO(id);
+            if (product == null) {
+                throw exception(PRODUCT_NOT_EXISTS, id);
+            }
             //校验产品是否是启用状态
-            ThrowUtil.ifThrow(!product.getStatus(), PRODUCT_NOT_ENABLE, product.getName());
+            ThrowUtil.ifThrow(!product.getStatus(), PRODUCT_NOT_ENABLE, product.getCode());
         }
         return list;
     }
@@ -259,9 +263,9 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
-    @Cacheable(cacheNames = PRODUCT, key = "#id", unless = "#result == null")
     public ErpProductRespVO getProduct(Long id) {
-        ErpProductDO erpProductDO = productMapper.selectById(id);
+        ErpProductService service = SpringUtils.getBean(ErpProductService.class);
+        ErpProductDO erpProductDO = service.getProductDO(id);
         ErpProductRespVO productRespVO = BeanUtils.toBean(erpProductDO, ErpProductRespVO.class);
         if (StrUtil.isNotBlank(erpProductDO.getGuidePrices())) {
             productRespVO.setGuidePriceList(JSONUtil.toList(erpProductDO.getGuidePrices(), GuidePriceJson.class));
@@ -275,43 +279,64 @@ public class ErpProductServiceImpl implements ErpProductService {
         return productRespVO;
     }
 
+    @Cacheable(cacheNames = PRODUCT, key = "#id")
     @Override
-    @Cacheable(cacheNames = PRODUCT_LIST, key = "'VO'+#status", unless = "#result == null")
+    public ErpProductDO getProductDO(Long id) {
+        return productMapper.selectById(id);
+    }
+
+    @Override
+    @Cacheable(cacheNames = PRODUCT_LIST, key = "#status")
+    public List<ErpProductDO> selectListByStatus(@Valid @NotNull Boolean status) {
+        return productMapper.selectListByStatus(status);
+    }
+
+
+    @Override
     public List<ErpProductRespVO> getProductVOListByStatus(Boolean status) {
-        List<ErpProductDO> list = productMapper.selectListByStatus(status);
+        ErpProductService service = SpringUtils.getBean(ErpProductService.class);
+        List<ErpProductDO> list = service.selectListByStatus(status);
         return buildProductVOList(list);
     }
 
     @Override
-    @Cacheable(cacheNames = PRODUCT_LIST, key = "'DTO'+#status", unless = "#result == null")
     public List<ErpProductRespDTO> getProductDTOListByStatus(Boolean status) {
         List<ErpProductDO> erpProductDOs = productMapper.selectListByStatus(status);
         return buildProductDTOList(erpProductDOs);
     }
 
     @Override
-    @Cacheable(cacheNames = PRODUCT_LIST, key = "'VO'+#ids", unless = "#result == null")
     public List<ErpProductRespVO> getProductVOList(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        List<ErpProductDO> list = productMapper.selectByIds(ids);
+        ErpProductService service = SpringUtils.getBean(ErpProductService.class);
+        List<ErpProductDO> list = service.listProducts(ids);
         return buildProductVOList(list);
     }
 
     @Override
-    @Cacheable(cacheNames = PRODUCT_LIST, key = "#ids", unless = "#result == null")
     public List<ErpProductDO> listProducts(Collection<Long> ids) {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        return productMapper.selectBatchIds(ids);
+        ArrayList<ErpProductDO> list = new ArrayList<>(ids.size()) {
+        };
+        ErpProductService service = SpringUtils.getBean(ErpProductService.class);
+        list.addAll(ids.stream().map(service::getProductDO).toList());
+        return list;
     }
 
     @Override
-    @Cacheable(cacheNames = PRODUCT_LIST, key = "'VO'+#pageReqVO", unless = "#result == null")
+    @Cacheable(cacheNames = PRODUCT_LIST, key = "#pageReqVO")
+    public PageResult<ErpProductDO> getProductPage(ErpProductPageReqVO pageReqVO) {
+        return productMapper.selectPage(pageReqVO);
+    }
+
+    @Override
     public PageResult<ErpProductRespVO> getProductVOPage(ErpProductPageReqVO pageReqVO) {
-        PageResult<ErpProductDO> pageResult = productMapper.selectPage(pageReqVO);
+        ErpProductService service = SpringUtils.getBean(ErpProductService.class);
+        PageResult<ErpProductDO> pageResult = service.getProductPage(pageReqVO);
         return new PageResult<>(buildProductVOList(pageResult.getList()), pageResult.getTotal());
     }
 

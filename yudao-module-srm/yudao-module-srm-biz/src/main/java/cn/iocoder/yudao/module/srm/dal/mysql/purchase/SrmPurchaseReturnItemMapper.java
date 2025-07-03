@@ -6,6 +6,7 @@ import cn.iocoder.yudao.framework.mybatis.core.query.MPJLambdaWrapperX;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.returns.SrmPurchaseReturnPageReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseReturnItemDO;
+import cn.iocoder.yudao.module.srm.service.purchase.bo.ret.SrmPurchaseReturnSummaryBO;
 import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnItemBO;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.github.yulichang.wrapper.MPJLambdaWrapper;
@@ -23,18 +24,18 @@ import java.util.List;
 @Mapper
 public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseReturnItemDO> {
 
-    default MPJLambdaWrapperX<SrmPurchaseReturnItemDO> buildWrapper(SrmPurchaseReturnPageReqVO vo) {
+    default MPJLambdaWrapperX<SrmPurchaseReturnItemDO> masterPageQuery(MPJLambdaWrapperX<SrmPurchaseReturnItemDO> wrapperX, SrmPurchaseReturnPageReqVO vo) {
         if (vo == null) {
             vo = new SrmPurchaseReturnPageReqVO();
         }
         if (vo.getItemQuery() == null) {
             vo.setItemQuery(new SrmPurchaseReturnPageReqVO.ItemQuery());
         }
-        return new MPJLambdaWrapperX<SrmPurchaseReturnItemDO>().selectAll(SrmPurchaseReturnItemDO.class)
+        return wrapperX
             .eqIfPresent(SrmPurchaseReturnItemDO::getArriveItemId, vo.getItemQuery().getArriveItemId()) // 入库项id
             .likeIfPresent(SrmPurchaseReturnItemDO::getArriveCode, vo.getItemQuery().getArriveCode()) // 入库单code
             .eqIfPresent(SrmPurchaseReturnItemDO::getWarehouseId, vo.getItemQuery().getWarehouseId()) // 仓库编号
-            .eqIfPresent(SrmPurchaseReturnItemDO::getProductId, vo.getItemQuery().getProductId()) // 产品编号
+            .inIfPresent(SrmPurchaseReturnItemDO::getProductId, vo.getItemQuery().getProductIds()) // 产品编号
             .eqIfPresent(SrmPurchaseReturnItemDO::getProductUnitId, vo.getItemQuery().getProductUnitId()) // 产品单位单位
             .eqIfPresent(SrmPurchaseReturnItemDO::getProductPrice, vo.getItemQuery().getProductPrice()) // 产品单位单价
             .likeIfPresent(SrmPurchaseReturnItemDO::getProductUnitName, vo.getItemQuery().getProductUnitName()) // 产品单位名称
@@ -46,24 +47,33 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .likeIfPresent(SrmPurchaseReturnItemDO::getRemark, vo.getItemQuery().getRemark()) // 备注
             .likeIfPresent(SrmPurchaseReturnItemDO::getContainerRate, vo.getItemQuery().getContainerRate()) // 箱率
             .eqIfPresent(SrmPurchaseReturnItemDO::getApplicantId, vo.getItemQuery().getApplicantId()) // 申请人id
-            .eqIfPresent(SrmPurchaseReturnItemDO::getApplicationDeptId, vo.getItemQuery().getApplicationDeptId()) // 申请部门id
+            .inIfPresent(SrmPurchaseReturnItemDO::getApplicationDeptId, vo.getItemQuery().getApplicationDeptIds()) // 申请部门id
             .likeIfPresent(SrmPurchaseReturnItemDO::getDeclaredType, vo.getItemQuery().getDeclaredType()) // 报关品名
             .likeIfPresent(SrmPurchaseReturnItemDO::getDeclaredTypeEn, vo.getItemQuery().getDeclaredTypeEn()) // 报关品名英文
             .likeIfPresent(SrmPurchaseReturnItemDO::getProductCode, vo.getItemQuery().getProductCode()) // 产品sku
             .likeIfPresent(SrmPurchaseReturnItemDO::getProductName, vo.getItemQuery().getProductName()) // 产品名称
             .eqIfPresent(SrmPurchaseReturnItemDO::getOutboundStatus, vo.getItemQuery().getOutboundStatus())
-            .orderByDesc(SrmPurchaseReturnItemDO::getCreateTime)
             ;
     }
 
-    default MPJLambdaWrapperX<SrmPurchaseReturnItemDO> buildBOWrapper(SrmPurchaseReturnPageReqVO vo) {
+    default MPJLambdaWrapperX<SrmPurchaseReturnItemDO> buildWrapper(SrmPurchaseReturnPageReqVO vo) {
+        if (vo == null) {
+            vo = new SrmPurchaseReturnPageReqVO();
+        }
+        MPJLambdaWrapperX<SrmPurchaseReturnItemDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseReturnItemDO>().selectAll(SrmPurchaseReturnItemDO.class);
+        masterPageQuery(wrapperX, vo);
+        wrapperX.orderByDesc(SrmPurchaseReturnItemDO::getCreateTime);
+        return wrapperX;
+    }
+
+    default MPJLambdaWrapperX<SrmPurchaseReturnItemDO> slavePageQuery(MPJLambdaWrapperX<SrmPurchaseReturnItemDO> wrapperX, SrmPurchaseReturnPageReqVO vo) {
         if (vo == null) {
             vo = new SrmPurchaseReturnPageReqVO();
         }
         if (vo.getMainQuery() == null) {
             vo.setMainQuery(new SrmPurchaseReturnPageReqVO.MainQuery());
         }
-        return buildWrapper(vo).leftJoin(SrmPurchaseReturnDO.class, SrmPurchaseReturnDO::getId, SrmPurchaseReturnItemDO::getReturnId)
+        return wrapperX
             // 主表查询条件
             .likeIfPresent(SrmPurchaseReturnDO::getCode, vo.getMainQuery().getCode()) // 退货单编号
             .eqIfPresent(SrmPurchaseReturnDO::getAuditStatus, vo.getMainQuery().getAuditStatus()) // 审核状态
@@ -84,8 +94,14 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
             .eqIfPresent(SrmPurchaseReturnItemDO::getId, vo.getMainQuery().getId()) //ID
             .eqIfPresent(SrmPurchaseReturnItemDO::getCreator, vo.getMainQuery().getCreator()) // 创建人
             .eqIfPresent(SrmPurchaseReturnItemDO::getOutboundStatus, vo.getMainQuery().getOutboundStatus())
-            .orderByDesc(SrmPurchaseReturnItemDO::getCreateTime)
             ;
+    }
+
+    default MPJLambdaWrapperX<SrmPurchaseReturnItemDO> buildBOWrapper(SrmPurchaseReturnPageReqVO vo) {
+        MPJLambdaWrapperX<SrmPurchaseReturnItemDO> wrapperX = buildWrapper(vo).leftJoin(SrmPurchaseReturnDO.class, SrmPurchaseReturnDO::getId, SrmPurchaseReturnItemDO::getReturnId);
+        slavePageQuery(wrapperX, vo);
+        wrapperX.orderByDesc(SrmPurchaseReturnDO::getCreateTime);
+        return wrapperX;
     }
 
     default PageResult<SrmPurchaseReturnItemBO> selectBOPage(SrmPurchaseReturnPageReqVO vo) {
@@ -124,5 +140,37 @@ public interface SrmPurchaseReturnItemMapper extends BaseMapperX<SrmPurchaseRetu
     //入库项id存在对应的采购退货项
     default boolean existsByInItemId(Long arriveItemId) {
         return selectCount(new LambdaQueryWrapper<SrmPurchaseReturnItemDO>().eq(SrmPurchaseReturnItemDO::getArriveItemId, arriveItemId)) > 0;
+    }
+
+    //汇总统计
+    default SrmPurchaseReturnSummaryBO selectSrmPurchaseReturnSummaryBO(SrmPurchaseReturnPageReqVO req) {
+        if (req == null) {
+            req = new SrmPurchaseReturnPageReqVO();
+        }
+        MPJLambdaWrapperX<SrmPurchaseReturnItemDO> wrapperX = new MPJLambdaWrapperX<SrmPurchaseReturnItemDO>()
+            // 汇总所有字段
+            .selectSum(SrmPurchaseReturnItemDO::getQty, SrmPurchaseReturnSummaryBO::getSumQty)
+            .selectSum(SrmPurchaseReturnItemDO::getTotalPrice, SrmPurchaseReturnSummaryBO::getSumTotalPriceItem)
+            .selectSum(SrmPurchaseReturnItemDO::getTax, SrmPurchaseReturnSummaryBO::getSumTax)
+            .selectSum(SrmPurchaseReturnItemDO::getOutboundQty, SrmPurchaseReturnSummaryBO::getSumOutboundQty)
+            .selectSum(SrmPurchaseReturnItemDO::getActualQty, SrmPurchaseReturnSummaryBO::getSumActualQty)
+            .selectSum(SrmPurchaseReturnItemDO::getGrossPrice, SrmPurchaseReturnSummaryBO::getSumGrossPrice);
+        this.masterPageQuery(wrapperX, req);
+        wrapperX.leftJoin(SrmPurchaseReturnDO.class, SrmPurchaseReturnDO::getId, SrmPurchaseReturnItemDO::getReturnId);
+        this.slavePageQuery(wrapperX, req);
+        //master query
+        //grossTotalPrice
+        wrapperX
+            .selectSum(SrmPurchaseReturnDO::getGrossTotalPrice, SrmPurchaseReturnSummaryBO::getSumGrossTotalPrice)
+            .selectSum(SrmPurchaseReturnDO::getTotalPrice, SrmPurchaseReturnSummaryBO::getSumTotalPriceMaster)
+            .selectSum(SrmPurchaseReturnDO::getTotalWeight, SrmPurchaseReturnSummaryBO::getSumTotalWeight)
+            .selectSum(SrmPurchaseReturnDO::getTotalVolume, SrmPurchaseReturnSummaryBO::getSumTotalVolume)
+            .selectSum(SrmPurchaseReturnDO::getRefundPrice, SrmPurchaseReturnSummaryBO::getSumRefundPrice)
+            .selectSum(SrmPurchaseReturnDO::getTotalProductPrice, SrmPurchaseReturnSummaryBO::getSumTotalProductPrice)
+            .selectSum(SrmPurchaseReturnDO::getTotalGrossPrice, SrmPurchaseReturnSummaryBO::getSumTotalGrossPrice)
+            .selectSum(SrmPurchaseReturnDO::getDiscountPrice, SrmPurchaseReturnSummaryBO::getSumDiscountPrice)
+            .selectSum(SrmPurchaseReturnDO::getOtherPrice, SrmPurchaseReturnSummaryBO::getSumOtherPrice)
+        ;
+        return selectJoinOne(SrmPurchaseReturnSummaryBO.class, wrapperX);
     }
 }

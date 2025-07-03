@@ -5,6 +5,7 @@ import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.framework.common.pojo.PageResultSummary;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.object.ObjectUtils;
@@ -15,8 +16,10 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductUnitApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductUnitDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.req.*;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestExcelRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestItemRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.SrmPurchaseRequestSummaryRespVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
@@ -155,9 +158,14 @@ public class SrmPurchaseRequestController {
     @PostMapping("/page")
     @Operation(summary = "获得ERP采购申请单分页")
     @PreAuthorize("@ss.hasPermission('srm:purchase-request:query')")
-    public CommonResult<PageResult<SrmPurchaseRequestRespVO>> getPurchaseRequestPage(@RequestBody(required = false) @Validated SrmPurchaseRequestPageReqVO pageReqVO) {
+    public CommonResult<PageResultSummary<SrmPurchaseRequestRespVO, SrmPurchaseRequestSummaryRespVO>> getPurchaseRequestPage(@RequestBody(required = false) SrmPurchaseRequestPageReqVO pageReqVO) {
+        if (pageReqVO == null) {
+            pageReqVO = new SrmPurchaseRequestPageReqVO();
+        }
         PageResult<SrmPurchaseRequestBO> pageResult = srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO);
-        return success(new PageResult<>(bindList(pageResult.getList()), pageResult.getTotal()));
+        List<SrmPurchaseRequestRespVO> respVOS = bindList(pageResult.getList());
+        SrmPurchaseRequestSummaryRespVO summaryRespVO = BeanUtils.toBean(srmPurchaseRequestService.selectSrmPurchaseRequestSummaryBO(pageReqVO), SrmPurchaseRequestSummaryRespVO.class);
+        return success(new PageResultSummary<>(respVOS, pageResult.getTotal(), summaryRespVO));
     }
 
     @GetMapping("/export-excel")
@@ -167,8 +175,54 @@ public class SrmPurchaseRequestController {
     public void exportPurchaseRequestExcel(@Valid SrmPurchaseRequestPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<SrmPurchaseRequestRespVO> list = bindList(srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO).getList());
+        List<SrmPurchaseRequestExcelRespVO> excelList = buildExcelList(list);
         // 导出 Excel
-        ExcelUtils.write(response, "ERP采购申请单.xls", "数据", SrmPurchaseRequestRespVO.class, list);
+        ExcelUtils.writeWithRequestAttributesTimeZone(response, "ERP采购申请单.xls", "SRM采购申请单", SrmPurchaseRequestExcelRespVO.class, excelList);
+    }
+
+    /**
+     * 构建导出Excel的VO列表（主表+子表扁平化）
+     */
+    private List<SrmPurchaseRequestExcelRespVO> buildExcelList(List<SrmPurchaseRequestRespVO> list) {
+        if (CollUtil.isEmpty(list)) {
+            return Collections.emptyList();
+        }
+        List<SrmPurchaseRequestExcelRespVO> result = new ArrayList<>();
+        for (SrmPurchaseRequestRespVO main : list) {
+            if (CollUtil.isEmpty(main.getItems())) {
+                // 没有明细也导出主表信息
+                result.add(BeanUtils.toBean(main, SrmPurchaseRequestExcelRespVO.class));
+            } else {
+                for (SrmPurchaseRequestItemRespVO item : main.getItems()) {
+                    // 先复制主表字段
+                    SrmPurchaseRequestExcelRespVO vo = BeanUtils.toBean(main, SrmPurchaseRequestExcelRespVO.class);
+                    // 手动设置子表特有字段，避免覆盖主表字段
+                    vo.setId(item.getId());
+                    vo.setDeclaredType(item.getDeclaredType());
+                    vo.setDeclaredTypeEn(item.getDeclaredTypeEn());
+                    vo.setProductCode(item.getProductCode());
+                    vo.setProductName(item.getProductName());
+                    vo.setProductUnitName(item.getProductUnitName());
+                    vo.setWarehouseName(item.getWarehouseName());
+                    vo.setQty(item.getQty());
+                    vo.setReferenceUnitPrice(item.getReferenceUnitPrice());
+                    vo.setGrossPrice(item.getGrossPrice());
+                    vo.setGrossTotalPrice(item.getGrossTotalPrice());
+                    vo.setTax(item.getTax());
+                    vo.setTaxRate(item.getTaxRate());
+                    vo.setApprovedQty(item.getApprovedQty());
+                    vo.setUnOrderCount(item.getUnOrderCount());
+                    vo.setOrderClosedQty(item.getOrderClosedQty());
+                    vo.setInboundClosedQty(item.getInboundClosedQty());
+                    vo.setExpectArrivalDate(item.getExpectArrivalDate());
+                    // 设置子表状态字段到专门的字段
+                    vo.setLineOffStatus(item.getOffStatus());
+                    vo.setLineOrderStatus(item.getOrderStatus());
+                    result.add(vo);
+                }
+            }
+        }
+        return result;
     }
 
     private List<SrmPurchaseRequestRespVO> bindList(List<SrmPurchaseRequestBO> oldList) {
@@ -184,7 +238,7 @@ public class SrmPurchaseRequestController {
 
         Set<Long> userIds = Stream.concat(oldList.stream().flatMap(purchaseRequest -> Stream.of(purchaseRequest.getApplicantId(),//申请人
                 purchaseRequest.getAuditorId(),//审核者
-                        safeParseLong(purchaseRequest.getCreator()), safeParseLong(purchaseRequest.getUpdater()))), items.stream()
+                safeParseLong(purchaseRequest.getCreator()), safeParseLong(purchaseRequest.getUpdater()))), items.stream()
                 .flatMap(purchaseRequestItem -> Stream.of(safeParseLong(purchaseRequestItem.getCreator()), safeParseLong(purchaseRequestItem.getUpdater()))))
             .distinct().filter(Objects::nonNull).collect(Collectors.toSet());
         //1.3.1 获取所有用户

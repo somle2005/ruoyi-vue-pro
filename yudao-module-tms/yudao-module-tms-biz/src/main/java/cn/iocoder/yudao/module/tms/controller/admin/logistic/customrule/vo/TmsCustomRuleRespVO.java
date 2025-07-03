@@ -1,7 +1,10 @@
 package cn.iocoder.yudao.module.tms.controller.admin.logistic.customrule.vo;
 
 
+import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
+import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.tms.enums.TmsDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fhs.core.trans.vo.VO;
@@ -24,7 +27,8 @@ public class TmsCustomRuleRespVO implements VO {
     private Long id;
 
     @Schema(description = "国家编码", requiredMode = Schema.RequiredMode.REQUIRED)
-    @ExcelProperty("国家编码")
+    @ExcelProperty(value = "国家编码", converter = DictConvert.class)
+    @DictFormat(TmsDictTypeConstants.COUNTRY_CODE)
     private Integer countryCode;
 
     @Schema(description = "产品id")

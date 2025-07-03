@@ -14,4 +14,13 @@ public interface SrmRedisKeyConstants {
      * VALUE 数据格式：编号自增
      */
     String NO = "erp:seq_no:";
+
+    /**
+     * 单个供应商的缓存
+     */
+    String SUPPLIER = "srm:supplier:single:";
+    /**
+     * 供应商集合/分页的缓存
+     */
+    String SUPPLIER_LIST = "srm:supplier:list:";
 }

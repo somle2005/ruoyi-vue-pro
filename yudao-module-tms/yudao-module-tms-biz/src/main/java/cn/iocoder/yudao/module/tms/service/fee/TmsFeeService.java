@@ -1,6 +1,7 @@
 package cn.iocoder.yudao.module.tms.service.fee;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeePageReqVO;
 import cn.iocoder.yudao.module.tms.controller.admin.fee.vo.TmsFeeSaveReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.fee.TmsFeeDO;
@@ -8,6 +9,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 出运订单费用明细 Service 接口
@@ -58,6 +60,16 @@ public interface TmsFeeService {
      * @return 出运订单费用明细
      */
     List<TmsFeeDO> getFee(Long sourceId, Integer sourceType);
+
+
+    /**
+     * 获得出运订单费用明细Map,查询所有费用明细，如果 sourceIds 为 null，则查询所有指定 sourceType 的数据
+     *
+     * @param sourceIds  原单ID列表
+     * @param sourceType 源类型
+     * @return 出运订单费用明细Map，key为原单ID，value为费用明细列表
+     */
+    Map<Long, List<TmsFeeDO>> getFeeMap(List<Long> sourceIds, BillType sourceType);
 
     /**
      * 获得出运订单费用明细分页

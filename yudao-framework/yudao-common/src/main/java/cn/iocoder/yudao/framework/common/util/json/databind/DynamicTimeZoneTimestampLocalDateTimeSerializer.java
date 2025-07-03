@@ -2,6 +2,7 @@ package cn.iocoder.yudao.framework.common.util.json.databind;
 
 import cn.iocoder.yudao.framework.common.enums.TimeZoneEnum;
 import cn.iocoder.yudao.framework.common.enums.WebCommonEnum;
+import cn.iocoder.yudao.framework.common.util.servlet.ServletUtils;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
@@ -12,6 +13,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.TimeZone;
 
 public class DynamicTimeZoneTimestampLocalDateTimeSerializer extends JsonSerializer<LocalDateTime> {
@@ -26,15 +28,6 @@ public class DynamicTimeZoneTimestampLocalDateTimeSerializer extends JsonSeriali
     }
     @Override
     public void serialize(LocalDateTime localDateTime, JsonGenerator jsonGenerator, SerializerProvider serializerProvider) throws IOException {
-        RequestAttributes requestAttributes = RequestContextHolder.getRequestAttributes();
-        ZoneId toZoneId = TimeZone.getDefault().toZoneId();
-        if (Objects.nonNull(requestAttributes)) {
-            Object object = requestAttributes.getAttribute(WebCommonEnum.HTTP_HEADER_TIME_ZONE, RequestAttributes.SCOPE_REQUEST);
-            if (Objects.nonNull(object) && object instanceof String) {
-                toZoneId = ZoneId.of((String) object);
-            }
-        }
-
         long epochMilli = localDateTime
                 .atZone(TimeZoneEnum.UTC_ZONE_ID)
                 .toInstant()

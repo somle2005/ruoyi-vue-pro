@@ -3,12 +3,14 @@ package cn.iocoder.yudao.module.tms.service.first.mile.impl;
 import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.module.tms.api.first.mile.request.TmsFistMileRequestItemDTO;
+import cn.iocoder.yudao.module.tms.controller.admin.first.mile.request.item.vo.TmsFirstMileRequestItemPageReqVO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.TmsFirstMileRequestDO;
 import cn.iocoder.yudao.module.tms.dal.dataobject.first.mile.request.item.TmsFirstMileRequestItemDO;
 import cn.iocoder.yudao.module.tms.dal.mysql.first.mile.request.item.TmsFirstMileRequestItemMapper;
 import cn.iocoder.yudao.module.tms.enums.TmsEventEnum;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOffStatus;
 import cn.iocoder.yudao.module.tms.enums.status.TmsOrderStatus;
+import cn.iocoder.yudao.module.tms.service.bo.TmsFirstMileRequestItemSummaryBO;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestItemService;
 import cn.iocoder.yudao.module.tms.service.first.mile.request.TmsFirstMileRequestService;
 import jakarta.annotation.Resource;
@@ -18,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
@@ -150,5 +153,23 @@ public class TmsFirstMileRequestItemServiceImpl implements TmsFirstMileRequestIt
             firstMileRequestItemDO.setOrderStatus(orderStatus).setOrderClosedQty(closeQty);
         }
         firstMileRequestItemMapper.updateById(firstMileRequestItemDO);
+    }
+
+    @Override
+    public TmsFirstMileRequestItemSummaryBO getSummary(TmsFirstMileRequestItemPageReqVO reqVO) {
+        //动态计算总体积 sumVolume 长宽高 乘
+        TmsFirstMileRequestItemSummaryBO summaryBO = firstMileRequestItemMapper.selectTmsFirstMileRequestItemSummaryBO(reqVO);
+
+        // 根据BO里面的数据动态计算总体积
+        if (summaryBO != null) {
+            // 使用汇总数据计算总体积：总长 * 总宽 * 总高
+            if (summaryBO.getSumPackageLength() != null && summaryBO.getSumPackageWidth() != null && summaryBO.getSumPackageHeight() != null) {
+                BigDecimal totalVolume = summaryBO.getSumPackageLength()
+                    .multiply(summaryBO.getSumPackageWidth())
+                    .multiply(summaryBO.getSumPackageHeight());
+                summaryBO.setSumVolume(totalVolume);
+            }
+        }
+        return summaryBO;
     }
 }
