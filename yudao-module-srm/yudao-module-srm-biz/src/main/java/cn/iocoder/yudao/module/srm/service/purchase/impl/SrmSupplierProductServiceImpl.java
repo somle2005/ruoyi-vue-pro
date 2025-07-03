@@ -29,6 +29,7 @@ import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
@@ -268,6 +269,28 @@ public class SrmSupplierProductServiceImpl implements SrmSupplierProductService 
             .filter(SrmSupplierProductDO::getDefaultSupplier)
             .findFirst()
             .orElse(null);
+    }
+
+    private SrmSupplierProductDO getDefaultSupplierProductByProductId(Long productId) {
+        List<SrmSupplierProductDO> list = supplierProductMapper.selectListDefaultByProductId(productId);
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+        return list.get(0);
+    }
+
+    @Override
+    public Map<Long, SrmSupplierProductDO> getDefaultSupplierProductByProductIds(Set<Long> productIds) {
+        Map<Long, SrmSupplierProductDO> result = new java.util.HashMap<>();
+        if (productIds == null || productIds.isEmpty()) {
+            return result;
+        }
+        List<SrmSupplierProductDO> all = supplierProductMapper.selectListDefaultByProductIds(productIds);
+        all.stream()
+            .collect(java.util.stream.Collectors.groupingBy(SrmSupplierProductDO::getProductId))
+            .forEach((productId, list) -> result.put(productId, list.get(0)));
+        productIds.forEach(pid -> result.computeIfAbsent(pid, k -> null));
+        return result;
     }
 
 }

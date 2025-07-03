@@ -11,6 +11,8 @@ import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * ERP 供应商产品 Service 接口
@@ -75,4 +77,12 @@ public interface SrmSupplierProductService {
      * @return 默认供应商产品DO，若无则返回null
      */
     SrmSupplierProductDO getDefaultSupplierProduct(Long supplierId, Long productId);
+
+    /**
+     * 根据产品ID集合获取每个产品的默认供应商产品（如有多条默认，取第一条）
+     *
+     * @param productIds 产品ID集合
+     * @return key为产品ID，value为默认供应商产品DO，若无则为null
+     */
+    Map<Long, SrmSupplierProductDO> getDefaultSupplierProductByProductIds(Set<Long> productIds);
 }

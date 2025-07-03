@@ -23,7 +23,9 @@ import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp.Srm
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseRequestItemsDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
+import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierProductService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
@@ -31,7 +33,6 @@ import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
-import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWarehouseDTO;
 import io.swagger.v3.oas.annotations.Operation;
@@ -73,7 +74,7 @@ public class SrmPurchaseRequestController {
     private final DeptApi deptApi;
     private final SrmSupplierService srmSupplierService;
     private final ErpProductUnitApi erpProductUnitApi;
-    private final WmsInboundApi wmsInboundApi;
+    private final SrmSupplierProductService supplierProductService;
 
     @PostMapping("/create")
     @Operation(summary = "创建ERP采购申请单")
@@ -234,8 +235,9 @@ public class SrmPurchaseRequestController {
         Map<Long, List<SrmPurchaseRequestItemsDO>> purchaseRequestItemMap = convertMultiMap(items, SrmPurchaseRequestItemsDO::getRequestId);
         // 1.2 产品信息
         Map<Long, ErpProductDTO> productMap = erpProductApi.getProductMap(convertSet(items, SrmPurchaseRequestItemsDO::getProductId));
+        // 1.2.1 默认供应商信息
+        Map<Long, SrmSupplierProductDO> defaultSupplierProductMap = supplierProductService.getDefaultSupplierProductByProductIds(convertSet(items, SrmPurchaseRequestItemsDO::getProductId));
         //1.3 获取用户信息
-
         Set<Long> userIds = Stream.concat(oldList.stream().flatMap(purchaseRequest -> Stream.of(purchaseRequest.getApplicantId(),//申请人
                 purchaseRequest.getAuditorId(),//审核者
                 safeParseLong(purchaseRequest.getCreator()), safeParseLong(purchaseRequest.getUpdater()))), items.stream()
@@ -248,7 +250,10 @@ public class SrmPurchaseRequestController {
         //1.4 部门信息
         Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(convertSet(oldList, SrmPurchaseRequestDO::getApplicationDeptId));
         //1.5 供应商信息
-        Map<Long, SrmSupplierDO> supplierMap = srmSupplierService.getSupplierMap(convertSet(oldList, SrmPurchaseRequestDO::getSupplierId));
+        //defaultSupplierProductMap SrmSupplierProductDO ids
+        Set<Long> supplierIds = defaultSupplierProductMap.values().stream().map(SrmSupplierProductDO::getSupplierId).collect(Collectors.toSet());
+        supplierIds.addAll(convertSet(oldList, SrmPurchaseRequestDO::getSupplierId));
+        Map<Long, SrmSupplierDO> supplierMap = srmSupplierService.getSupplierMap(supplierIds);
         //1.6 收集单位id map，从product里面
         Map<Long, ErpProductUnitDTO> unitMap = erpProductUnitApi.getProductUnitMap(productMap.values().stream().map(ErpProductDTO::getUnitId).collect(Collectors.toSet()));
         //1.7 获取产品可售库存Map
@@ -269,7 +274,15 @@ public class SrmPurchaseRequestController {
             purchaseRequest.setItems(BeanUtils.toBean(purchaseRequestItemMap.get(purchaseRequest.getId()), SrmPurchaseRequestItemRespVO.class, item -> {
                 MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName()).setProductCode(product.getCode())
                     .setProductUnitName(unitMap.get(product.getUnitId()).getName()).setProductUnitId(unitMap.get(product.getUnitId()).getId())
-                    .setCode(product.getCode()));
+                    .setCode(product.getCode())
+                );
+                //默认供应商信息
+                MapUtils.findAndThen(defaultSupplierProductMap, item.getProductId(), supplierProductDO -> {
+                    item.setDefaultSupplierId(supplierProductDO.getSupplierId());
+                    if (supplierProductDO.getSupplierId() != null) {
+                        item.setDefaultSupplierName(supplierMap.get(supplierProductDO.getSupplierId()).getName());
+                    }
+                });
                 //产品仓库填充
                 MapUtils.findAndThen(warehouseMap, item.getWarehouseId(), erpWarehouseDO -> item.setWarehouseName(erpWarehouseDO.getName()));
                 //产品创建者、更新者填充
