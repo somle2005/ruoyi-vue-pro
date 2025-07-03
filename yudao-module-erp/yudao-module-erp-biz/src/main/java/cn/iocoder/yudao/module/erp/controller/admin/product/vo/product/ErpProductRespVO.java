@@ -1,7 +1,9 @@
 package cn.iocoder.yudao.module.erp.controller.admin.product.vo.product;
 
+import cn.iocoder.yudao.framework.excel.core.convert.SingleImageConverter;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.GuidePriceJson;
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,62 +17,67 @@ import java.util.List;
 @ExcelIgnoreUnannotated
 public class ErpProductRespVO extends BaseDO {
 
-    @Schema(description = "产品编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "731")
+    @Schema(description = "产品编号")
     @ExcelProperty("产品编号")
+    @ExcelIgnore
     private Long id;
 
-    @Schema(description = "产品名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "张三")
+    @Schema(description = "产品名称")
     @ExcelProperty("产品名称")
     private String name;
 
-    @Schema(description = "产品分类编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "30796")
+    @Schema(description = "产品分类编号")
     @ExcelProperty("产品分类编号")
+    @ExcelIgnore
     private Long categoryId;
 
-    @Schema(description = "产品分类名称", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "产品分类名称")
     @ExcelProperty("产品分类名称")
     private String categoryName;
 
-    @Schema(description = "部门id", requiredMode = Schema.RequiredMode.REQUIRED, example = "8369")
+    @Schema(description = "部门id")
     @ExcelProperty("部门id")
+    @ExcelIgnore
     private Long deptId;
 
-    @Schema(description = "部门名称", requiredMode = Schema.RequiredMode.REQUIRED, example = "研发部")
+    @Schema(description = "部门名称")
     @ExcelProperty("部门名称")
     private String deptName;
 
-    @Schema(description = "SKU（编码）", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "SKU（编码）")
     @ExcelProperty("SKU（编码）")
     private String code;
 
-    @Schema(description = "单位编号", requiredMode = Schema.RequiredMode.REQUIRED, example = "30975")
+    @Schema(description = "单位编号")
     @ExcelProperty("单位编号")
+    @ExcelIgnore
     private Long unitId;
 
     @Schema(description = "单位名称")
     @ExcelProperty("单位名称")
     private String unitName;
 
-    @Schema(description = "品牌", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "品牌")
     @ExcelProperty("品牌")
     private String brand;
 
-    @Schema(description = "材料（中文）", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "材料（中文）")
     @ExcelProperty("材料（中文）")
     private String material;
 
     @Schema(description = "产品材质-关联海关分类")
+    @ExcelIgnore
     private Long customCategoryId;
 
-    @Schema(description = "产品状态（1启用，0禁用）", requiredMode = Schema.RequiredMode.REQUIRED, example = "1")
-    @ExcelProperty("产品状态（1启用，0禁用）")
+    @Schema(description = "产品状态（1启用，0禁用）")
+    @ExcelProperty(value = "产品状态（1启用，0禁用）")
     private Boolean status;
 
-    @Schema(description = "备注", example = "你说的对")
+    @Schema(description = "备注")
     @ExcelProperty("备注")
     private String remark;
 
-    @Schema(description = "基础重量（kg）", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "基础重量（kg）")
     @ExcelProperty("基础重量（kg）")
     private BigDecimal weight;
 
@@ -78,7 +85,7 @@ public class ErpProductRespVO extends BaseDO {
     @ExcelProperty("系列")
     private String series;
 
-    @Schema(description = "颜色", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "颜色")
     @ExcelProperty("颜色")
     private String color;
 
@@ -86,7 +93,7 @@ public class ErpProductRespVO extends BaseDO {
     @ExcelProperty("型号")
     private String model;
 
-    @Schema(description = "流水号", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "流水号")
     @ExcelProperty("流水号")
     private Integer serial;
 
@@ -94,70 +101,75 @@ public class ErpProductRespVO extends BaseDO {
     @ExcelProperty("生产编号")
     private String productionNo;
 
-    @Schema(description = "基础宽度（mm）", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "基础宽度（mm）")
     @ExcelProperty("基础宽度（mm）")
     private Integer width;
 
-    @Schema(description = "基础长度（mm）", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "基础长度（mm）")
     @ExcelProperty("基础长度（mm）")
     private Integer length;
 
-    @Schema(description = "基础高度（mm）", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "基础高度（mm）")
     @ExcelProperty("基础高度（mm）")
     private Integer height;
 
-    @Schema(description = "主图", example = "https://www.iocoder.cn")
-    @ExcelProperty("主图")
+    @Schema(description = "主图")
+    @ExcelProperty(value = "主图", converter = SingleImageConverter.class)
     private String primaryImageUrl;
 
-    @Schema(description = "副图", requiredMode = Schema.RequiredMode.REQUIRED, example = "[https://www.iocoder.cn]")
+    @Schema(description = "副图")
+//    @ExcelProperty(value = "副图" ,converter = ExcelImageListConverter.class)
     private List<String> secondaryImageUrlList;
 
-    @Schema(description = "指导价，json格式", example = "19540")
+    @Schema(description = "指导价，json格式")
     @ExcelProperty("指导价，json格式")
     private List<GuidePriceJson> guidePriceList;
 
-    @Schema(description = "专利类型", example = "19540")
+    @Schema(description = "专利类型")
     @ExcelProperty("专利类型")
     private Integer patentType;
 
-    @Schema(description = "专利国别代码", example = "19540")
+    @Schema(description = "专利国别代码")
     @ExcelProperty("专利国别代码")
     private List<Integer> patentCountryCodeList;
 
-    @Schema(description = "PO产品经理id", example = "28770")
+    @Schema(description = "PO产品经理id")
     @ExcelProperty("PO产品经理id")
+    @ExcelIgnore
     private Long productOwnerId;
 
-    @Schema(description = "PO产品经理名称", example = "王五")
+    @Schema(description = "PO产品经理名称")
     @ExcelProperty("PO产品经理名称")
     private String productOwnerName;
 
-    @Schema(description = "ID工业设计id", example = "27774")
+    @Schema(description = "ID工业设计id")
     @ExcelProperty("ID工业设计id")
+    @ExcelIgnore
     private Long industrialDesignerId;
 
-    @Schema(description = "ID工业设计名称", example = "王五")
+    @Schema(description = "ID工业设计名称")
     @ExcelProperty("ID工业设计名称")
     private String industrialDesignerName;
 
-    @Schema(description = "RD研发工程师id", example = "10321")
+    @Schema(description = "RD研发工程师id")
     @ExcelProperty("RD研发工程师id")
+    @ExcelIgnore
     private Long researchDeveloperId;
 
-    @Schema(description = "RD研发工程师名称", example = "王五")
+    @Schema(description = "RD研发工程师名称")
     @ExcelProperty("RD研发工程师名称")
     private String researchDeveloperName;
 
-    @Schema(description = "维护工程师id", example = "22163")
+    @Schema(description = "维护工程师id")
     @ExcelProperty("维护工程师id")
+    @ExcelIgnore
     private Long maintenanceEngineerId;
 
-    @Schema(description = "维护工程师名称", example = "王五")
+    @Schema(description = "维护工程师名称")
     @ExcelProperty("维护工程师名称")
     private String maintenanceEngineerName;
 
-    @Schema(description = "设计说明", example = "你猜")
+    @Schema(description = "设计说明")
     @ExcelProperty("设计说明")
     private String description;
 
@@ -177,11 +189,11 @@ public class ErpProductRespVO extends BaseDO {
     @ExcelProperty("VESA孔距最小长度")
     private Integer vesaLengthMin;
 
-    @Schema(description = "电视尺寸最小值", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "电视尺寸最小值")
     @ExcelProperty("电视尺寸最小值")
     private Integer tvSizeMin;
 
-    @Schema(description = "电视尺寸最大值", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "电视尺寸最大值")
     @ExcelProperty("电视尺寸最大值")
     private Integer tvSizeMax;
 
@@ -241,11 +253,11 @@ public class ErpProductRespVO extends BaseDO {
     @ExcelProperty("兼容方式")
     private String compatibilityMode;
 
-    @Schema(description = "脚轮", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "脚轮")
     @ExcelProperty("脚轮")
     private Boolean casters;
 
-    @Schema(description = "电子集成模块", requiredMode = Schema.RequiredMode.REQUIRED)
+    @Schema(description = "电子集成模块")
     @ExcelProperty("电子集成模块")
     private Boolean electronicIntegrationModules;
 
@@ -253,20 +265,19 @@ public class ErpProductRespVO extends BaseDO {
     @ExcelProperty("功能配件")
     private String functionalAccessories;
 
-    @Schema(description = "包装长度（整数，没有小数点，单位mm）", example = "500")
+    @Schema(description = "包装长度（整数，没有小数点，单位mm）")
     @ExcelProperty("包装长度")
     private Integer packageLength;
 
-    @Schema(description = "包装宽度（整数，没有小数点，单位mm）", example = "300")
+    @Schema(description = "包装宽度（整数，没有小数点，单位mm）")
     @ExcelProperty("包装宽度")
     private Integer packageWidth;
 
-    @Schema(description = "包装高度（整数，没有小数点，单位mm）", example = "200")
+    @Schema(description = "包装高度（整数，没有小数点，单位mm）")
     @ExcelProperty("包装高度")
     private Integer packageHeight;
 
-    @Schema(description = "包装重量（保留至小数点后两位，单位kg）", example = "12.50")
+    @Schema(description = "包装重量（保留至小数点后两位，单位kg）")
     @ExcelProperty("包装重量")
     private BigDecimal packageWeight;
-
 }
