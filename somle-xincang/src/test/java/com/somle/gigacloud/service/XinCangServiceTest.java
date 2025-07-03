@@ -52,7 +52,7 @@ class XinCangServiceTest extends SomleBaseDbUnitTest {
 
         xinCangService.clients.forEach(
             client -> {
-                client.getAllProducts();
+                client.getOrderList();
             }
         );
     }

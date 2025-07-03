@@ -1,4 +1,4 @@
-package com.somle.xincang.model.reps;
+package com.somle.xincang.model.resp;
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
