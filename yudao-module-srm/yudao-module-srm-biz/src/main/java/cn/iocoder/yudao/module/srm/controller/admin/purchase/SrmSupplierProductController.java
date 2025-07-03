@@ -7,9 +7,7 @@ import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductPageReqVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductRespVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductSaveReqVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product.*;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierProductService;
 import cn.iocoder.yudao.module.system.api.utils.Validation;
@@ -19,11 +17,13 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
@@ -71,6 +71,38 @@ public class SrmSupplierProductController {
         return success(BeanUtils.toBean(supplierProduct, SrmSupplierProductRespVO.class));
     }
 
+    //根据产品+供应商ID，来拿到默认的供应商产品-上一次成交价格 
+
+    @GetMapping("/get-default-last-price")
+    @Operation(summary = "根据产品+供应商ID获取默认供应商产品的上一次成交价格")
+    @PreAuthorize("@ss.hasPermission('srm:supplier-product:query')")
+    public CommonResult<BigDecimal> getDefaultSupplierProductLastPrice(
+        @RequestParam("supplierId") @NotNull(message = "供应商ID不能为空") Long supplierId,
+        @RequestParam("productId") @NotNull(message = "产品ID不能为空") Long productId) {
+        SrmSupplierProductDO supplierProduct = supplierProductService.getDefaultSupplierProduct(supplierId, productId);
+        return success(supplierProduct != null ? supplierProduct.getLastPurchasePrice() : null);
+    }
+
+    @PostMapping("/batch-default-last-price")
+    @Operation(summary = "批量获取产品+供应商的上一次成交价，返回列表")
+    public CommonResult<SrmSupplierProductBatchLastPriceRespVO> batchGetDefaultLastPrice(@Validated @RequestBody List<SrmSupplierProductDefaultLastPriceQueryVO> queryList) {
+        SrmSupplierProductBatchLastPriceRespVO respVO = new SrmSupplierProductBatchLastPriceRespVO();
+        List<SrmSupplierProductBatchLastPriceRespVO.Item> items = new java.util.ArrayList<>();
+        if (queryList != null) {
+            for (SrmSupplierProductDefaultLastPriceQueryVO query : queryList) {
+                SrmSupplierProductDO supplierProduct = supplierProductService.getDefaultSupplierProduct(query.getSupplierId(), query.getProductId());
+                SrmSupplierProductBatchLastPriceRespVO.Item item = new SrmSupplierProductBatchLastPriceRespVO.Item();
+                item.setProductId(query.getProductId());
+                item.setSupplierId(query.getSupplierId());
+                item.setLastPrice(supplierProduct != null ? supplierProduct.getLastPurchasePrice() : null);
+                items.add(item);
+            }
+        }
+        respVO.setItems(items);
+        return success(respVO);
+    }
+
+
     @GetMapping("/page")
     @Operation(summary = "获得ERP 供应商产品分页")
     @PreAuthorize("@ss.hasPermission('srm:supplier-product:query')")
@@ -97,7 +129,5 @@ public class SrmSupplierProductController {
         // 导出 Excel
         ExcelUtils.writeWithRequestAttributesTimeZone(response, "ERP 供应商产品.xls", "数据", SrmSupplierProductRespVO.class, BeanUtils.toBean(list, SrmSupplierProductRespVO.class));
     }
-
-
 
 }

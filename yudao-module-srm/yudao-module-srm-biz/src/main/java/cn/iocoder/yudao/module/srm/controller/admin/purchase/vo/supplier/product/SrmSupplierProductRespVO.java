@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo;
+package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product;
 
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;

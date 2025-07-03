@@ -3,7 +3,7 @@ package cn.iocoder.yudao.module.srm.dal.mysql.purchase;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductPageReqVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product.SrmSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import org.apache.ibatis.annotations.Mapper;
 

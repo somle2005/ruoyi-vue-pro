@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo;
+package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product;
 
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;

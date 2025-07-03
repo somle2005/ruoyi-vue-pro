@@ -8,9 +8,9 @@ import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
 import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierProductDTO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductPageReqVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductRespVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductSaveReqVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product.SrmSupplierProductPageReqVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product.SrmSupplierProductRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product.SrmSupplierProductSaveReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
@@ -255,6 +255,19 @@ public class SrmSupplierProductServiceImpl implements SrmSupplierProductService 
         //TODO: only return when product is of that status
         List<SrmSupplierProductDO> list = supplierProductMapper.selectList();
         return BeanUtils.toBean(list, SrmSupplierProductRespVO.class);
+    }
+
+    @Override
+    public SrmSupplierProductDO getDefaultSupplierProduct(Long supplierId, Long productId) {
+        List<SrmSupplierProductDO> list = supplierProductMapper.selectListBySupplierIdAndProductId(supplierId, productId);
+        if (list == null || list.isEmpty()) {
+            return null;
+        }
+        // 过滤默认供应商
+        return list.stream()
+            .filter(SrmSupplierProductDO::getDefaultSupplier)
+            .findFirst()
+            .orElse(null);
     }
 
 }
