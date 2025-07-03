@@ -15,12 +15,12 @@ public class CmsMediaResourceSaveReqVO {
     private Long id;
 
     @Schema(description = "应用编码", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "应用编码不能为空")
-    private String appCode;
+    @NotNull(message = "应用编码不能为空")
+    private Integer appCode;
 
     @Schema(description = "模块编码", requiredMode = Schema.RequiredMode.REQUIRED)
-    @NotEmpty(message = "模块编码不能为空")
-    private String moduleCode;
+    @NotNull(message = "模块编码不能为空")
+    private Integer moduleCode;
 
     @Schema(description = "资源标题", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotEmpty(message = "资源标题不能为空")

@@ -19,11 +19,11 @@ public class CmsMediaResourceRespVO {
 
     @Schema(description = "应用编码", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("应用编码")
-    private String appCode;
+    private Integer appCode;
 
     @Schema(description = "模块编码", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("模块编码")
-    private String moduleCode;
+    private Integer moduleCode;
 
     @Schema(description = "资源标题", requiredMode = Schema.RequiredMode.REQUIRED)
     @ExcelProperty("资源标题")

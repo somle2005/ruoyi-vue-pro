@@ -18,10 +18,10 @@ import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_
 public class CmsMediaResourcePageReqVO extends PageParam {
 
     @Schema(description = "应用编码")
-    private String appCode;
+    private Integer appCode;
 
     @Schema(description = "模块编码")
-    private String moduleCode;
+    private Integer moduleCode;
 
     @Schema(description = "资源标题")
     private String title;

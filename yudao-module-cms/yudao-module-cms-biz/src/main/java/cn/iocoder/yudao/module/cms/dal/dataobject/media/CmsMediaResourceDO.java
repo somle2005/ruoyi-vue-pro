@@ -34,11 +34,11 @@ public class CmsMediaResourceDO extends BaseDO {
     /**
      * 应用编码
      */
-    private String appCode;
+    private Integer appCode;
     /**
      * 模块编码
      */
-    private String moduleCode;
+    private Integer moduleCode;
     /**
      * 资源标题
      */

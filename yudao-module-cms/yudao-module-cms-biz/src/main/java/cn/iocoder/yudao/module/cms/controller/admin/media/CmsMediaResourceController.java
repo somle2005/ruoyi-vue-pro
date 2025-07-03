@@ -74,7 +74,7 @@ public class CmsMediaResourceController {
     @PostMapping("/page")
     @Operation(summary = "获得文件分页 公共查询接口")
     @PermitAll
-    public CommonResult<PageResult<CmsMediaResourceRespVO>> getMediaResourcePage(@Valid CmsMediaResourcePageReqVO pageReqVO) {
+    public CommonResult<PageResult<CmsMediaResourceRespVO>> getMediaResourcePage(@Valid @RequestBody CmsMediaResourcePageReqVO pageReqVO) {
         PageResult<CmsMediaResourceDO> pageResult = mediaResourceService.getMediaResourcePage(pageReqVO);
         return success(BeanUtils.toBean(pageResult, CmsMediaResourceRespVO.class));
     }
