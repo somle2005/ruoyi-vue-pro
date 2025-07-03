@@ -2,6 +2,7 @@ package com.somle.staples.service;
 
 import cn.iocoder.yudao.framework.test.core.ut.SomleBaseDbUnitTest;
 import com.somle.shopify.repository.ShopifyTokenRepository;
+import com.somle.shopify.service.ShopifyClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;

@@ -13,7 +13,7 @@ import com.somle.esb.enums.PlatformEnum;
 import com.somle.shopify.model.reps.ShopifyOrderRepsVO;
 import com.somle.shopify.model.reps.ShopifyShopProductRepsVO;
 import com.somle.shopify.model.reps.ShopifyShopRepsVO;
-import com.somle.staples.service.ShopifyClient;
+import com.somle.shopify.service.ShopifyClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;

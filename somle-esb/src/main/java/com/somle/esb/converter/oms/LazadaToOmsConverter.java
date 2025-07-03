@@ -15,7 +15,7 @@ import com.somle.lazada.model.reps.LazadaOrderItemResp;
 import com.somle.lazada.model.reps.LazadaOrderResp;
 import com.somle.lazada.model.reps.LazadaProductResp;
 import com.somle.lazada.model.reps.LazadaSellerResp;
-import com.somle.staples.service.LazadaClient;
+import com.somle.lazada.service.LazadaClient;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
