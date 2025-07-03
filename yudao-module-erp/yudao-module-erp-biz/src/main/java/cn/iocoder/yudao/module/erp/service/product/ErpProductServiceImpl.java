@@ -7,6 +7,7 @@ import cn.hutool.json.JSONUtil;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
+import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
@@ -28,6 +29,7 @@ import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
@@ -38,6 +40,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -45,8 +48,7 @@ import java.util.stream.Stream;
 import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertSet;
-import static cn.iocoder.yudao.module.erp.dal.redis.ErpRedisKeyConstants.PRODUCT;
-import static cn.iocoder.yudao.module.erp.dal.redis.ErpRedisKeyConstants.PRODUCT_LIST;
+import static cn.iocoder.yudao.module.erp.dal.redis.ErpRedisKeyConstants.*;
 import static cn.iocoder.yudao.module.erp.enums.ErpErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.USER_NOT_EXISTS;
 
@@ -56,6 +58,7 @@ import static cn.iocoder.yudao.module.system.enums.ErrorCodeConstants.USER_NOT_E
  * @author 芋道源码
  */
 
+@Slf4j
 @Service
 @Validated
 public class ErpProductServiceImpl implements ErpProductService {
@@ -494,5 +497,36 @@ public class ErpProductServiceImpl implements ErpProductService {
         Integer level = deptApi.getDeptLevel(deptId);
         //判断登记是否符合要求
         ThrowUtil.ifThrow(!levels.contains(level), DEPT_LEVEL_NOT_MATCH);
+    }
+
+    @Override
+    public void preloadProductImages(Set<String> imgUrls) {
+        if (CollUtil.isEmpty(imgUrls)) {
+            return;
+        }
+        ErpProductService productService = SpringUtils.getBean(ErpProductService.class);
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        for (String url : imgUrls) {
+            future = CompletableFuture.runAsync(() -> {
+                try {
+                    productService.getProductImageThumbnail(url);
+                } catch (Exception e) {
+                    // 记录日志，避免异常影响其他任务
+                    log.warn("预加载商品图片失败，url: {}", url, e);
+                }
+            }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor());
+        }
+        // 等待所有任务完成
+        future.join();
+    }
+
+    /**
+     * 二级缓存，基于 url 获取图片缩略图 byte数组
+     */
+    @Override
+    @Cacheable(cacheNames = PRODUCT_IMG_THUMBNAIL, key = "#url")
+    public byte[] getProductImageThumbnail(String url) {
+        //TODO 待实现,基于 url 获取图片缩略图 byte数组
+        return new byte[0];
     }
 }

@@ -118,7 +118,7 @@ public class ErpProductRespVO extends BaseDO {
     private String primaryImageUrl;
 
     @Schema(description = "副图")
-//    @ExcelProperty(value = "副图" ,converter = ExcelImageListConverter.class)
+//    @ExcelProperty(value = "副图" ,converter = ListImageConverter.class)
     private List<String> secondaryImageUrlList;
 
     @Schema(description = "指导价，json格式")

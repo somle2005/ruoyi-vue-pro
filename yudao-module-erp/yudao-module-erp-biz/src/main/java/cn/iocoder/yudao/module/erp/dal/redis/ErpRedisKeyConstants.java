@@ -20,6 +20,10 @@ public interface ErpRedisKeyConstants {
      */
     String PRODUCT = "erp:product:";
     /**
+     * 单个产品的img(压缩) 二进制流缓存
+     */
+    String PRODUCT_IMG_THUMBNAIL = "erp:product:img_thumbnail";
+    /**
      * 产品的集合+分页的缓存
      */
     String PRODUCT_LIST = "erp:product_list:";

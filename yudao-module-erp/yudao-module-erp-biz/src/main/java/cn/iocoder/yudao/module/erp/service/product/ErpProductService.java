@@ -13,6 +13,7 @@ import org.springframework.validation.annotation.Validated;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 
@@ -155,4 +156,13 @@ public interface ErpProductService {
      */
     Long getProductCountByUnitId(Long unitId);
 
+    /**
+     * 基于图片 URL 数组，预加载图片
+     */
+    void preloadProductImages(Set<String> imgUrls);
+
+    /**
+     * 使用二级缓存，基于 url 获取图片缩略图 byte数组
+     */
+    byte[] getProductImageThumbnail(String url);
 }

@@ -24,6 +24,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
@@ -114,8 +117,26 @@ public class ErpProductController {
     public void exportProductExcel(@Valid ErpProductPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<ErpProductRespVO> pageResult = productService.getProductVOPage(pageReqVO);
+
+        Set<String> imgUrls = pageResult.getList().stream()
+            .flatMap(item -> {
+                // 主图
+                Stream<String> primary = Stream.ofNullable(item.getPrimaryImageUrl());
+                // 副图
+                Stream<String> secondary = item.getSecondaryImageUrlList() == null
+                    ? Stream.empty()
+                    : item.getSecondaryImageUrlList().stream();
+                return Stream.concat(primary, secondary);
+            })
+            .filter(img -> img != null && !img.isEmpty())
+            .collect(Collectors.toSet());
+        //主动预热caffeine ，主图+子图
+        productService.preloadProductImages(imgUrls);
+        //收集主表 附表
+
         // 导出 Excel
         ExcelUtils.write(response, "产品.xls", "数据", ErpProductRespVO.class, pageResult.getList());
+
     }
 
 }
