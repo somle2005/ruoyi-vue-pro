@@ -49,7 +49,7 @@ public class SrmSupplierProductController {
     @Operation(summary = "更新ERP 供应商产品")
     @PreAuthorize("@ss.hasPermission('srm:supplier-product:update')")
     public CommonResult<Boolean> updateSupplierProduct(@Validated(Validation.OnUpdate.class) @RequestBody SrmSupplierProductSaveReqVO updateReqVO) {
-        supplierProductService.updateSupplierProduct(updateReqVO);
+        supplierProductService.saveOrUpdateSupplierProduct(updateReqVO);
         return success(true);
     }
 

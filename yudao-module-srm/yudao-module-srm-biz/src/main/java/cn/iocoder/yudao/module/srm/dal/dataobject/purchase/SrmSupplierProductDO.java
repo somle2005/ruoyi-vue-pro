@@ -6,7 +6,8 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import com.baomidou.mybatisplus.annotation.Version;
 import lombok.*;
-import org.apache.poi.hpsf.Decimal;
+
+import java.math.BigDecimal;
 
 /**
  * ERP 供应商产品 DO
@@ -68,11 +69,11 @@ public class SrmSupplierProductDO extends BaseDO {
     /**
      * 上次采购价格
      */
-    private Decimal lastPurchasePrice;
+    private BigDecimal lastPurchasePrice;
     /**
      * 税率
      */
-    private Decimal taxRate;
+    private BigDecimal taxRate;
     /**
      * 默认供应商
      */

@@ -5,7 +5,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Pattern;
 import lombok.Data;
-import org.apache.poi.hpsf.Decimal;
+
+import java.math.BigDecimal;
 
 @Schema(description = "管理后台 - ERP 供应商产品新增/修改 Request VO")
 @Data
@@ -51,10 +52,10 @@ public class SrmSupplierProductSaveReqVO {
     private Integer purchasePriceCurrencyCode;
 
     @Schema(description = "上次采购价格")
-    private Decimal lastPurchasePrice;
+    private BigDecimal lastPurchasePrice;
 
     @Schema(description = "税率")
-    private Decimal taxRate;
+    private BigDecimal taxRate;
 
     @Schema(description = "是否默认供应商")
     private Boolean defaultSupplier;

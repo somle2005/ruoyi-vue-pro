@@ -5,9 +5,9 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.ToString;
-import org.apache.poi.hpsf.Decimal;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
@@ -50,10 +50,10 @@ public class SrmSupplierProductPageReqVO extends PageParam {
     private LocalDateTime[] createTime;
 
     @Schema(description = "上次采购价格")
-    private Decimal lastPurchasePrice;
+    private BigDecimal lastPurchasePrice;
 
     @Schema(description = "税率")
-    private Decimal taxRate;
+    private BigDecimal taxRate;
 
     @Schema(description = "是否默认供应商")
     private Boolean defaultSupplier;

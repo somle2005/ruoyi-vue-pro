@@ -1,9 +1,12 @@
 package cn.iocoder.yudao.module.srm.service.purchase;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
+import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierProductDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductSaveReqVO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import jakarta.validation.Valid;
 
@@ -29,7 +32,13 @@ public interface SrmSupplierProductService {
      *
      * @param updateReqVO 更新信息
      */
-    void updateSupplierProduct(@Valid SrmSupplierProductSaveReqVO updateReqVO);
+    void saveOrUpdateSupplierProduct(@Valid SrmSupplierProductSaveReqVO updateReqVO);
+
+    //更新供应商产品DTO
+    void saveOrUpdateSupplierProduct(SrmSupplierProductDTO dto);
+
+
+    void updateSupplierProductPrice(Long supplierId, SrmPurchaseOrderItemDO orderItem, SrmPurchaseOrderDO srmPurchaseOrderDO);
 
     /**
      * 删除ERP 供应商产品

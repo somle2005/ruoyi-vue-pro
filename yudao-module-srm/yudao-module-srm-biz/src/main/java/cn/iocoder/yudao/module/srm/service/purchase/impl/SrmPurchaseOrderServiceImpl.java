@@ -14,6 +14,7 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.srm.aspect.AsyncUpdateTrigger;
 import cn.iocoder.yudao.module.srm.config.machine.SrmOrderInCountContext;
 import cn.iocoder.yudao.module.srm.config.machine.SrmPayCountContext;
 import cn.iocoder.yudao.module.srm.config.machine.SrmQuantityOrderedCountContext;
@@ -733,6 +734,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         extra = "{{#code}}",
         success = "{{#vo.reviewed ? (#vo.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购订单【{{#code}}】")
     @Transactional(rollbackFor = Exception.class)
+    @AsyncUpdateTrigger
     public void reviewPurchaseOrder(SrmPurchaseOrderAuditReqVO vo) {
         // 查询采购订单信息
         SrmPurchaseOrderDO orderDO = purchaseOrderMapper.selectById(vo.getOrderIds().get(0));

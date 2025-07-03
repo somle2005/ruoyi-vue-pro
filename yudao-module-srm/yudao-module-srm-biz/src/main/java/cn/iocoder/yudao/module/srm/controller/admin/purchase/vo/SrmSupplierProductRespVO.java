@@ -5,8 +5,8 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
-import org.apache.poi.hpsf.Decimal;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Schema(description = "管理后台 - ERP 供应商产品 Response VO")
@@ -68,11 +68,11 @@ public class SrmSupplierProductRespVO {
 
     @Schema(description = "上次采购价格")
     @ExcelProperty("上次采购价格")
-    private Decimal lastPurchasePrice;
+    private BigDecimal lastPurchasePrice;
 
     @Schema(description = "税率")
     @ExcelProperty("税率")
-    private Decimal taxRate;
+    private BigDecimal taxRate;
 
     @Schema(description = "是否默认供应商")
     @ExcelProperty("是否默认供应商")

@@ -5,10 +5,14 @@ import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierProductDTO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductSaveReqVO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import cn.iocoder.yudao.module.srm.dal.mysql.purchase.SrmSupplierProductMapper;
@@ -16,10 +20,12 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierProductService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import jakarta.annotation.Resource;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.messaging.MessageChannel;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
 
+import java.math.BigDecimal;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -39,6 +45,7 @@ import static cn.iocoder.yudao.module.srm.enums.SrmErrorCodeConstants.SUPPLIER_P
 @Service
 @Validated
 @RequiredArgsConstructor
+@Slf4j
 public class SrmSupplierProductServiceImpl implements SrmSupplierProductService {
 
     @Resource
@@ -85,7 +92,7 @@ public class SrmSupplierProductServiceImpl implements SrmSupplierProductService 
     }
 
     @Override
-    public void updateSupplierProduct(SrmSupplierProductSaveReqVO updateReqVO) {
+    public void saveOrUpdateSupplierProduct(SrmSupplierProductSaveReqVO updateReqVO) {
         Long id = updateReqVO.getId();
         validateSupplierProductCodeUnique(id, updateReqVO.getCode());
         // 校验存在
@@ -95,6 +102,92 @@ public class SrmSupplierProductServiceImpl implements SrmSupplierProductService 
         // 更新
         SrmSupplierProductDO updateObj = BeanUtils.toBean(updateReqVO, SrmSupplierProductDO.class);
         ThrowUtil.ifSqlThrow(supplierProductMapper.updateById(updateObj), SUPPLIER_MODIFY_FAIL);
+    }
+
+    @Override
+    public void saveOrUpdateSupplierProduct(SrmSupplierProductDTO dto) {
+        // 根据供应商ID和产品ID查询供应商产品
+        SrmSupplierProductDO existingProduct = supplierProductMapper.selectBySupplierIdAndProductId(dto.getSupplierId(), dto.getProductId());
+        if (existingProduct != null) {
+            // 如果存在，则更新
+            SrmSupplierProductDO updateObj = BeanUtils.toBean(dto, SrmSupplierProductDO.class);
+            updateObj.setId(existingProduct.getId());
+            updateObj.setVersion(existingProduct.getVersion());
+
+            // 如果没有设置上次采购价格，则将当前采购价格设为上次采购价格
+            if (updateObj.getLastPurchasePrice() == null && existingProduct.getPurchasePrice() != null && existingProduct.getPurchasePrice() > 0) {
+                updateObj.setLastPurchasePrice(BigDecimal.valueOf(existingProduct.getPurchasePrice()));
+            }
+
+            // 保持其他字段不变（如果DTO中没有设置）
+            if (updateObj.getCode() == null) {
+                updateObj.setCode(existingProduct.getCode());
+            }
+            if (updateObj.getDefaultSupplier() == null) {
+                updateObj.setDefaultSupplier(existingProduct.getDefaultSupplier());
+            }
+            if (updateObj.getPurchasePriceCurrencyCode() == null) {
+                updateObj.setPurchasePriceCurrencyCode(existingProduct.getPurchasePriceCurrencyCode());
+            }
+
+            supplierProductMapper.updateById(updateObj);
+        } else {
+            // 如果不存在，则创建新的供应商产品记录
+            SrmSupplierProductDO newProduct = BeanUtils.toBean(dto, SrmSupplierProductDO.class);
+            // 设置默认值
+            if (newProduct.getDefaultSupplier() == null) {
+                newProduct.setDefaultSupplier(true); // 如果是首次创建，设为默认供应商
+            }
+            supplierProductMapper.insert(newProduct);
+        }
+    }
+
+    @Override
+    public void updateSupplierProductPrice(Long supplierId, SrmPurchaseOrderItemDO orderItem, SrmPurchaseOrderDO srmPurchaseOrderDO) {
+        try {
+            // 参数校验
+            if (supplierId == null) {
+                log.debug("供应商ID为空，跳过更新供应商产品价格");
+                return;
+            }
+            if (orderItem.getProductId() == null) {
+                log.debug("产品ID为空，跳过更新供应商产品价格 - 供应商ID: {}", supplierId);
+                return;
+            }
+
+            // 构建更新DTO
+            SrmSupplierProductDTO dto = new SrmSupplierProductDTO();
+            dto.setSupplierId(supplierId);
+            dto.setProductId(orderItem.getProductId());
+
+            // 更新采购价格 - 使用含税单价作为最新采购价格
+            if (orderItem.getGrossPrice() != null && orderItem.getGrossPrice().compareTo(BigDecimal.ZERO) > 0) {
+                dto.setLastPurchasePrice(orderItem.getGrossPrice());
+            } else if (orderItem.getProductPrice() != null && orderItem.getProductPrice().compareTo(BigDecimal.ZERO) > 0) {
+                // 如果没有含税单价，使用产品单价
+                dto.setLastPurchasePrice(orderItem.getProductPrice());
+            } else {
+                log.warn("采购订单明细行没有有效价格信息，跳过更新 - 供应商ID: {}, 产品ID: {}, 含税单价: {}, 产品单价: {}", supplierId, orderItem.getProductId(), orderItem.getGrossPrice(), orderItem.getProductPrice());
+                return;
+            }
+
+            // 更新税率
+            if (orderItem.getTaxRate() != null && orderItem.getTaxRate().compareTo(BigDecimal.ZERO) >= 0) {
+                dto.setTaxRate(orderItem.getTaxRate());
+            }
+
+            // 更新货币代码 - 使用订单主表的货币代码
+            dto.setPurchasePriceCurrencyCode(srmPurchaseOrderDO.getCurrencyId().intValue());
+            SrmSupplierProductService supplierProductService = SpringUtils.getBean(SrmSupplierProductService.class);
+            supplierProductService.saveOrUpdateSupplierProduct(dto);
+
+            log.info("已更新供应商产品价格 - 供应商ID: {}, 产品ID: {}, 新`上一次价格`: {}",
+                supplierId, orderItem.getProductId(), dto.getLastPurchasePrice());
+
+        } catch (Exception e) {
+            log.error("更新供应商产品价格失败 - 供应商ID: {}, 产品ID: {}",
+                supplierId, orderItem.getProductId(), e);
+        }
     }
 
     @Override
