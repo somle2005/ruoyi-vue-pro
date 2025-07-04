@@ -555,7 +555,7 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     private byte[] getProductImageThumbnail(String productImageURL) {
-        String SIZE_URL = "?x-oss-process=image/resize,w_100";
+        String SIZE_URL = "?x-oss-process=image/resize,w_150";
         String url = productImageURL + SIZE_URL;
 
         RequestX request = RequestX.builder()

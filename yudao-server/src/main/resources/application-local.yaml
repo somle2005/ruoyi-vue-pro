@@ -15,6 +15,8 @@ srm:
 --- #################### 数据库相关配置 ####################
 
 spring:
+  jackson:
+    default-property-inclusion: non_null
   autoconfigure:
     exclude:
       - de.codecentric.boot.admin.server.config.AdminServerAutoConfiguration # 禁用 Spring Boot Admin 的 Server 的自动配置
@@ -70,7 +72,7 @@ spring:
     redis:
       host: 192.168.10.151 # 地址
       port: 6379 # 端口
-      database: 3 # 数据库索引
+      database: 2 # 数据库索引
       password: uniplore # 密码，建议生产环境开启
 
 --- #################### 定时任务相关配置 ####################

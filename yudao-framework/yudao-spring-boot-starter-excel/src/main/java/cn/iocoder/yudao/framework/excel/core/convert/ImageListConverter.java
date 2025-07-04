@@ -35,10 +35,10 @@ public class ImageListConverter implements Converter<List<byte[]>> {
                                                GlobalConfiguration globalConfiguration) {
         WriteCellData<String> writeCellData = new WriteCellData<>();
         writeCellData.setType(CellDataTypeEnum.STRING);
+        writeCellData.setStringValue(" "); // 防止NPE
 
         if (value == null || value.isEmpty()) {
             log.debug("convertToExcelData[value is empty] 跳过图片转换");
-            writeCellData.setStringValue("");
             return writeCellData;
         }
 
@@ -58,4 +58,5 @@ public class ImageListConverter implements Converter<List<byte[]>> {
         writeCellData.setImageDataList(imageDataList);
         return writeCellData;
     }
+
 }

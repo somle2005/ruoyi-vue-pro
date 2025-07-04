@@ -23,7 +23,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
@@ -113,11 +115,12 @@ public class ErpProductController {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<ErpProductRespVO> pageResult = productService.getProductVOPage(pageReqVO);
         //是否渲染图片
-        if (hasImg) {
+        if (hasImg != null && hasImg) {
             //主动预热caffeine ，主图+子图
             productService.preloadProductImages(pageResult.getList().stream().map(ErpProductRespVO::getId).collect(Collectors.toSet()));
             //
             pageResult.getList().forEach(item -> item.setPrimaryImage(productService.getProductImgById(item.getId()).getImg()));
+            pageResult.getList().forEach(item -> item.setSecondaryImageList(Optional.ofNullable(productService.getProductImgById(item.getId()).getImg2()).stream().flatMap(Arrays::stream).toList()));
         }
         // 导出 Excel
         ExcelUtils.write(response, "产品.xls", "数据", ErpProductRespVO.class, pageResult.getList());

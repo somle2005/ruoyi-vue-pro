@@ -114,13 +114,6 @@ public class ErpProductRespVO extends BaseDO {
     @ExcelProperty("基础高度（mm）")
     private Integer height;
 
-    @Schema(description = "主图链接")
-    @ExcelProperty(value = "主图链接")
-    private String primaryImageUrl;
-
-    @Schema(description = "副图")
-    private List<String> secondaryImageUrlList;
-
     @Schema(hidden = true)
     @ExcelProperty(value = "主图", converter = ByteArrayImageConverter.class)
     private byte[] primaryImage;
@@ -128,6 +121,12 @@ public class ErpProductRespVO extends BaseDO {
     @Schema(hidden = true)
     @ExcelProperty(value = "副图", converter = ImageListConverter.class)
     private List<byte[]> secondaryImageList;
+
+    @Schema(description = "主图链接")
+    private String primaryImageUrl;
+
+    @Schema(description = "副图")
+    private List<String> secondaryImageUrlList;
 
     @Schema(description = "指导价，json格式")
     @ExcelProperty("指导价，json格式")
