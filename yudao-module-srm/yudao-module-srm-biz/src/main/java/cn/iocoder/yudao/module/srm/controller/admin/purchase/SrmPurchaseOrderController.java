@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderBaseRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderExcelRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderSummaryRespVO;
@@ -62,6 +63,7 @@ public class SrmPurchaseOrderController {
     private final WmsWarehouseApi wmsWarehouseApi;
     private final AdminUserApi adminUserApi;
     private final DeptApi deptApi;
+    private final ErpProductApi erpProductApi;
     @Autowired
     @Lazy
     SrmPurchaseOrderService purchaseOrderService;
@@ -139,11 +141,23 @@ public class SrmPurchaseOrderController {
     @Operation(summary = "导出采购订单 Excel")
     @PreAuthorize("@ss.hasPermission('srm:purchase-order:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportPurchaseOrderExcel(@Valid SrmPurchaseOrderPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+    public void exportPurchaseOrderExcel(@Valid SrmPurchaseOrderPageReqVO pageReqVO, HttpServletResponse response, Boolean hasImg) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         // 获取主表+子表数据
         List<SrmPurchaseOrderBaseRespVO> list = bindList(purchaseOrderService.getPurchaseOrderBOList(pageReqVO));
         List<SrmPurchaseOrderExcelRespVO> excelList = SrmPurchaseOrderExportConvert.buildExcelList(list);
+        //是否渲染图片
+        if (hasImg != null && hasImg) {
+            //探测预热
+            Set<Long> collect = excelList.stream().map(SrmPurchaseOrderExcelRespVO::getProductId).collect(Collectors.toSet());
+            erpProductApi.preloadProductImages(collect);
+            //构建Excel数据
+            excelList.forEach(excelVO -> {
+                excelVO.setPrimaryImage(erpProductApi.getProductImageDTOListByProductId(excelVO.getProductId()).getImg());
+                //附图
+                excelVO.setSecondaryImageList(Arrays.asList(erpProductApi.getProductImageDTOListByProductId(excelVO.getProductId()).getImg2()));
+            });
+        }
         // 导出 Excel
         ExcelUtils.writeWithRequestAttributesTimeZone(response, "采购订单.xls", "采购订单", SrmPurchaseOrderExcelRespVO.class, excelList);
     }

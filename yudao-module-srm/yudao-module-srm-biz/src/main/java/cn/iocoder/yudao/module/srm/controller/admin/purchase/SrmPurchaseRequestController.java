@@ -173,12 +173,24 @@ public class SrmPurchaseRequestController {
     @Operation(summary = "导出ERP采购申请单 Excel")
     @PreAuthorize("@ss.hasPermission('srm:purchase-request:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportPurchaseRequestExcel(@Valid SrmPurchaseRequestPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+    public void exportPurchaseRequestExcel(@Valid SrmPurchaseRequestPageReqVO pageReqVO, HttpServletResponse response, Boolean hasImg) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<SrmPurchaseRequestRespVO> list = bindList(srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO).getList());
         List<SrmPurchaseRequestExcelRespVO> excelList = buildExcelList(list);
+        //是否渲染图片
+        if (hasImg != null && hasImg) {
+            //探测预热
+            Set<Long> collect = excelList.stream().map(SrmPurchaseRequestExcelRespVO::getProductId).collect(Collectors.toSet());
+            erpProductApi.preloadProductImages(collect);
+            //构建Excel数据
+            excelList.forEach(excelVO -> {
+                excelVO.setPrimaryImage(erpProductApi.getProductImageDTOListByProductId(excelVO.getProductId()).getImg());
+                //附图
+                excelVO.setSecondaryImageList(Arrays.asList(erpProductApi.getProductImageDTOListByProductId(excelVO.getProductId()).getImg2()));
+            });
+        }
         // 导出 Excel
-        ExcelUtils.writeWithRequestAttributesTimeZone(response, "ERP采购申请单.xls", "SRM采购申请单", SrmPurchaseRequestExcelRespVO.class, excelList);
+        ExcelUtils.write(response, "ERP采购申请单.xls", "SRM采购申请单", SrmPurchaseRequestExcelRespVO.class, excelList);
     }
 
     /**

@@ -158,7 +158,7 @@ public interface ErpProductService {
     Long getProductCountByUnitId(Long unitId);
 
     /**
-     * 基于图片 URL 数组，预加载图片
+     * 基于产品ID数组，预加载图片
      */
     void preloadProductImages(Set<Long> productIds);
 

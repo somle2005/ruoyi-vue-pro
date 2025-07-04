@@ -3,14 +3,17 @@ package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.request.resp;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.aop.ExcelMergeGroup;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.framework.excel.core.convert.ImageListConverter;
 import cn.iocoder.yudao.module.srm.enums.SrmDictTypeConstants;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.converters.bytearray.ByteArrayImageConverter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * @author: wdy
@@ -96,6 +99,17 @@ public class SrmPurchaseRequestExcelRespVO {
     @Schema(description = "订单项编号")
     @ExcelProperty("订单项编号")
     private Long id;
+
+    @Schema(description = "产品编号")
+    private Long productId;
+
+    @Schema(hidden = true)
+    @ExcelProperty(value = "主图", converter = ByteArrayImageConverter.class)
+    private byte[] primaryImage;
+
+    @Schema(hidden = true)
+    @ExcelProperty(value = "副图", converter = ImageListConverter.class)
+    private List<byte[]> secondaryImageList;
 
     @ExcelProperty("产品名称")
     private String productName;

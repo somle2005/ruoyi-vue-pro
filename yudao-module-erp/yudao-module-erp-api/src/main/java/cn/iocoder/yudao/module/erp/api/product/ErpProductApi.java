@@ -3,12 +3,10 @@ package cn.iocoder.yudao.module.erp.api.product;
 
 import cn.iocoder.yudao.framework.common.util.collection.CollectionUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductImageRespDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 
@@ -97,4 +95,14 @@ public interface ErpProductApi {
      * @return 产品 DTO Map
      */
     Map<Long, ErpProductRespDTO> getProductDTOMap(Collection<Long> ids);
+
+    /**
+     * 通过产品ID，获得产品图片BO的DTO
+     */
+    ErpProductImageRespDTO getProductImageDTOListByProductId(Long productId);
+
+    /**
+     * 主动探测预热产品图片缓存
+     */
+    void preloadProductImages(Set<Long> productIds);
 }
