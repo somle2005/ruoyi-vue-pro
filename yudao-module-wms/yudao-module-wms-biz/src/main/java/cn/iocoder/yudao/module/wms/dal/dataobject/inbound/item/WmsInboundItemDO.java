@@ -95,4 +95,14 @@ public class WmsInboundItemDO extends BaseDO {
     @Version
     private Integer version;
 
+    /**
+     * 箱率
+     */
+    private String containerRate;
+
+    /**
+     * 箱数
+     */
+    private Integer boxQty;
+
 }

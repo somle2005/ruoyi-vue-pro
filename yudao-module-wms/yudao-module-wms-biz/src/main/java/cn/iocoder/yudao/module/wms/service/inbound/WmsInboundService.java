@@ -190,6 +190,16 @@ public interface WmsInboundService {
      */
     WmsInboundDO getByDetails(Long warehouseId, Long productId, Long companyId, Long deptId);
 
+    /**
+     * 根据仓库ID，商品ID和库位号查询入库单
+     */
+    void assembleInboundItems(List<WmsInboundRespVO> list);
+
+    /**
+     * 装配汇总信息
+     **/
+    void assembleSummary(List<WmsInboundRespVO> list);
+
 //    /**
 //     * 根据产品ID，库位ID和仓库ID查询
 //     */

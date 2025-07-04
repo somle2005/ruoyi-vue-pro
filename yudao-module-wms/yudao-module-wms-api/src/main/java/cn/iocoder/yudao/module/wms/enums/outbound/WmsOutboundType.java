@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import java.util.Arrays;
 
 /**
+ * @author jisencai
  * 出库单类型
  **/
 @RequiredArgsConstructor
@@ -21,6 +22,9 @@ public enum WmsOutboundType implements ArrayValuable<Integer>, DictEnum {
     FIRST_MILE(4, "头程单出库"),
     TRANSFER(5, "调拨出库"),
     EXCHANGE(6, "换货出库"),
+
+    DEFECT(7, "不良品出库"),
+    REFUND(8, "退货出库"),
 
     DEFAULT(0, "默认出库");
 

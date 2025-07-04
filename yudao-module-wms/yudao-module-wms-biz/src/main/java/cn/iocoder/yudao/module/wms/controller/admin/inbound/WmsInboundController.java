@@ -151,6 +151,8 @@ public class WmsInboundController {
         inboundService.assembleWarehouse(voPageResult.getList());
         inboundService.assembleCompany(voPageResult.getList());
         inboundService.assembleApprovalHistory(voPageResult.getList());
+        inboundService.assembleInboundItems(voPageResult.getList());
+        inboundService.assembleSummary(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
 			.mapping(WmsInboundRespVO::getCreator, WmsInboundRespVO::setCreatorName)

@@ -222,10 +222,12 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         WmsInboundAuditStatus auditStatus = WmsInboundAuditStatus.parse(inboundDO.getAuditStatus());
         WmsInboundStatus inboundStatus = WmsInboundStatus.parse(inboundDO.getInboundStatus());
         // 除了审批中的情况，其它情况不允许修改实际入库量
+        assert auditStatus != null;
         if (!auditStatus.matchAny(WmsInboundAuditStatus.AUDITING)) {
             throw exception(INBOUND_CAN_NOT_EDIT);
         }
         // 除了未入库的情况，其它情况不允许修改实际入库量
+        assert inboundStatus != null;
         if (!inboundStatus.matchAny(WmsInboundStatus.NONE)) {
             throw exception(INBOUND_CAN_NOT_EDIT);
         }
@@ -470,11 +472,6 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
     }
 
     @Override
-    public void assembleInboundItems(List<WmsInboundItemRespVO> list) {
-        //todo
-    }
-
-    @Override
     public void processData(List<WmsInboundItemBinRespVO> list, WmsInboundItemPageReqVO pageReqVO) {
         InboundExecutor.setShelveAvailableQty(list);
         //过滤空数据
@@ -483,12 +480,6 @@ public class WmsInboundItemServiceImpl implements WmsInboundItemService {
         if (pageReqVO.getStockType() != null) {
             list.removeIf(x -> x.getStockType() == null || !x.getStockType().equals(pageReqVO.getStockType()));
         }
-    }
-
-    @Override
-    public void assembleStockLogic(List<WmsInboundItemRespVO> list) {
-        //todo
-
     }
 
     @Override

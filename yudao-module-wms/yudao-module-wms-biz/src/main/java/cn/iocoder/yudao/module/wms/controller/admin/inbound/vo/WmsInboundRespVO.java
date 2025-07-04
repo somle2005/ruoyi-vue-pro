@@ -145,4 +145,13 @@ public class WmsInboundRespVO {
     @Schema(description = "特别说明，创建方专用")
     @ExcelProperty("特别说明，创建方专用")
     private String remark;
+
+    @Schema(description = "计划出库总数")
+    private Integer planTotalQty;
+
+    @Schema(description = "实际出库总数")
+    private Integer actualTotalQty;
+
+    @Schema(description = "已上架总数")
+    private Integer shelveClosedTotalQty;
 }

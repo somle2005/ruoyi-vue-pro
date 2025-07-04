@@ -132,6 +132,9 @@ public class WmsOutboundController {
         outboundService.assembleApprovalHistory(voPageResult.getList());
         outboundService.assembleUpstreamType(voPageResult.getList());
         outboundService.assemblePurchaseOrder(voPageResult.getList());
+        outboundService.assembleOutboundItems(voPageResult.getList());
+        //outboundItemService.assembleBoxInfo(outboundVO);
+        outboundService.assembleSummary(voPageResult.getList());
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
 			.mapping(WmsOutboundRespVO::getCreator, WmsOutboundRespVO::setCreatorName)

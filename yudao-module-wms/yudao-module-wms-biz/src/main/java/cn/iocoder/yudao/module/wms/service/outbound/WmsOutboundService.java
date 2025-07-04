@@ -60,7 +60,7 @@ public interface WmsOutboundService {
 
     void approve(WmsOutboundAuditStatus.Event event, WmsApprovalReqVO approvalReqVO);
 
-    WmsOutboundDO updateOutboundAuditStatus(Long id, Integer status);
+    void updateOutboundAuditStatus(Long id, Integer status);
 
     WmsOutboundRespVO getOutboundWithItemList(Long id);
 
@@ -80,7 +80,7 @@ public interface WmsOutboundService {
 
     void assembleApprovalHistory(List<WmsOutboundRespVO> list);
 
-    WmsOutboundDO createForStockCheck(WmsOutboundSaveReqVO outboundSaveReqVO);
+    void createForStockCheck(WmsOutboundSaveReqVO outboundSaveReqVO);
 
     List<WmsOutboundDO> getOutboundList(Integer upstreamType, Long upstreamId);
 
@@ -92,7 +92,22 @@ public interface WmsOutboundService {
 
     void assembleUpstreamType(List<WmsOutboundRespVO> list);
 
-    boolean validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList);
+    void validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList);
 
     void assemblePurchaseOrder(List<WmsOutboundRespVO> list);
+
+    /**
+     * 装配箱信息
+     **/
+    void assembleBoxInfo(List<WmsOutboundRespVO> list);
+
+    /**
+     * 装配汇总信息
+     **/
+    void assembleSummary(List<WmsOutboundRespVO> list);
+
+    /**
+     * 装配出库单详情
+     */
+    void assembleOutboundItems(List<WmsOutboundRespVO> list);
 }

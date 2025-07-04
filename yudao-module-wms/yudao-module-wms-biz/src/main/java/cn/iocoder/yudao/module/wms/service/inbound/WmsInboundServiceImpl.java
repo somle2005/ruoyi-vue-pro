@@ -661,6 +661,41 @@ public class WmsInboundServiceImpl implements WmsInboundService {
         return inboundMapper.getByDetails(warehouseId, productId, companyId, deptId);
     }
 
+    /**
+     * 获取入库单的入库项列表
+     *
+     * @param list 入库单列表
+     */
+    @Override
+    public void assembleInboundItems(List<WmsInboundRespVO> list) {
+        list.forEach(inbound -> {
+            ;
+            List<WmsInboundItemDO> itemList = inboundItemService.selectByInboundId(inbound.getId());
+            if (CollectionUtils.isEmpty(itemList)) {
+                return;
+            }
+            inbound.setItemList(BeanUtils.toBean(itemList, WmsInboundItemRespVO.class));
+            inboundItemService.assembleProducts(inbound.getItemList());
+        });
+    }
+
+    /**
+     * 装配出库单汇总信息
+     *
+     * @param list 出库单列表
+     */
+    @Override
+    public void assembleSummary(List<WmsInboundRespVO> list) {
+        list.forEach(inboundVO -> {
+            List<WmsInboundItemRespVO> itemList = inboundVO.getItemList();
+            if (itemList != null) {
+                inboundVO.setPlanTotalQty(itemList.stream().mapToInt(WmsInboundItemRespVO::getPlanQty).sum());
+                inboundVO.setActualTotalQty(itemList.stream().mapToInt(WmsInboundItemRespVO::getActualQty).sum());
+                inboundVO.setShelveClosedTotalQty(itemList.stream().mapToInt(WmsInboundItemRespVO::getShelveClosedQty).sum());
+            }
+        });
+    }
+
 //    /**
 //     * 按 productId、locationId、warehouseId 查询 WmsItemFlowDO
 //     *

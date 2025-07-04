@@ -19,6 +19,7 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
+ * @author jisencai
  * @table-fields : tenant_id,outbound_available_qty,creator,inbound_status,company_id,create_time,plan_qty,shelve_closed_qty,upstream_id,remark,inbound_dept_id,latest_flow_id,updater,inbound_id,inbound_company_id,update_time,actual_qty,product_id,id,dept_id
  */
 @Schema(description = "管理后台 - 入库单详情 Response VO")
@@ -33,8 +34,6 @@ public class WmsInboundItemRespVO {
     @Schema(description = "仓库ID", example = "23620")
     @ExcelProperty("仓库ID")
     private Long warehouseId;
-
-
 
     @Schema(description = "入库单ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "29327")
     @ExcelProperty("入库单ID")
@@ -56,100 +55,100 @@ public class WmsInboundItemRespVO {
     @ExcelProperty("更新人姓名")
     private String updaterName;
 
-    @Schema(description = "创建者", example = "")
+    @Schema(description = "创建者")
     @ExcelProperty("创建者")
     private String creator;
 
-    @Schema(description = "租户编号", example = "")
+    @Schema(description = "租户编号")
     @ExcelProperty("租户编号")
     private Long tenantId;
 
-    @Schema(description = "更新时间", example = "")
+    @Schema(description = "更新时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
 
-    @Schema(description = "更新者", example = "")
+    @Schema(description = "更新者")
     @ExcelProperty("更新者")
     private String updater;
 
-    @Schema(description = "产品", example = "")
+    @Schema(description = "产品")
     @ExcelProperty("产品")
     private WmsProductRespSimpleVO product;
 
-    @Schema(description = "WMS入库状态 ; WmsInboundStatus : 0-未入库 , 1-部分入库 , 2-已入库", example = "")
+    @Schema(description = "WMS入库状态 ; WmsInboundStatus : 0-未入库 , 1-部分入库 , 2-已入库")
     @ExcelProperty("WMS入库状态")
     private Integer inboundStatus;
 
-    @Schema(description = "入库单", example = "")
+    @Schema(description = "入库单")
     @ExcelProperty("入库单")
     private WmsInboundSimpleRespVO inbound;
 
-    @Schema(description = "实际入库量", example = "")
+    @Schema(description = "实际入库量")
     @ExcelProperty("实际入库量")
     private Integer actualQty;
 
-    @Schema(description = "库龄", example = "")
+    @Schema(description = "库龄")
     @ExcelProperty("库龄")
     private Integer age;
 
-    @Schema(description = "批次剩余库存，出库后的剩余库存量", example = "")
+    @Schema(description = "批次剩余库存，出库后的剩余库存量")
     @ExcelProperty("批次剩余库存")
     private Integer outboundAvailableQty;
 
-    @Schema(description = "计划入库量", example = "")
+    @Schema(description = "计划入库量")
     @ExcelProperty("计划入库量")
     private Integer planQty;
 
-    @Schema(description = "已上架量，已经拣货到仓位的库存量", example = "")
+    @Schema(description = "已上架量，已经拣货到仓位的库存量")
     @ExcelProperty("已上架量")
     private Integer shelveClosedQty;
 
-    @Schema(description = "可上架量", example = "")
+    @Schema(description = "可上架量")
     private Integer shelveAvailableQty;
 
-    @Schema(description = "最新的流水ID", example = "")
+    @Schema(description = "最新的流水ID")
     @ExcelProperty("最新的流水ID")
     private Long latestFlowId;
 
-    @Schema(description = "仓库", example = "")
+    @Schema(description = "仓库")
     private WmsWarehouseSimpleRespVO warehouse;
 
 
-    @Schema(description = "库存归属部门ID,由用户指定", example = "")
+    @Schema(description = "库存归属部门ID,由用户指定")
     @ExcelProperty("库存归属部门ID")
     private Long deptId;
 
-    @Schema(description = "部门", example = "")
+    @Schema(description = "部门")
     private DeptSimpleRespVO dept;
 
-    @Schema(description = "库存财务公司ID,由用户指定", example = "")
+    @Schema(description = "库存财务公司ID,由用户指定")
     @ExcelProperty("库存财务公司ID")
     private Long companyId;
 
-    @Schema(description = "备注", example = "")
+    @Schema(description = "备注")
     @ExcelProperty("备注")
     private String remark;
 
-    @Schema(description = "财务公司", example = "")
+    @Schema(description = "财务公司")
     private FmsCompanySimpleRespVO company;
 
-    @Schema(description = "来源明细行ID", example = "")
+    @Schema(description = "来源明细行ID")
     @ExcelProperty("来源明细行ID")
     private Long upstreamId;
 
-    @Schema(description = "入库的财务公司ID", example = "")
+    @Schema(description = "入库的财务公司ID")
     @ExcelProperty("入库的财务公司ID")
     private Long inboundCompanyId;
 
-    @Schema(description = "入库的归属部门ID,由用户指定", example = "")
+    @Schema(description = "入库的归属部门ID,由用户指定")
     @ExcelProperty("入库的归属部门ID,由用户指定")
     private Long inboundDeptId;
 
-    @Schema(description = "入库部门", example = "")
+    @Schema(description = "入库部门")
     private DeptSimpleRespVO inboundDept;
 
-    @Schema(description = "入库财务公司", example = "")
+    @Schema(description = "入库财务公司")
     private FmsCompanySimpleRespVO inboundCompany;
 
     @Schema(description = "当前仓库库存", example = "{}")
@@ -160,10 +159,6 @@ public class WmsInboundItemRespVO {
     @ExcelProperty("上架的货位清单")
     private List<WmsWarehouseBinSimpleRespVO> warehouseBinList;
 
-
-
-
-
     @Schema(description = "上架的货位清单", example = "{}")
     @ExcelProperty("上架的货位清单")
     private Integer stockType;
@@ -171,5 +166,13 @@ public class WmsInboundItemRespVO {
     @Schema(description = "待出库数量", example = "{}")
     @ExcelProperty("待出库数量")
     private Integer outboundPendingQty;
+
+    @Schema(description = "箱率")
+    @ExcelProperty("箱率")
+    private String containerRate;
+
+    @Schema(description = "箱数")
+    @ExcelProperty("箱数")
+    private Integer boxQty;
 
 }

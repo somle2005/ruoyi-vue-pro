@@ -1,5 +1,6 @@
 package cn.iocoder.yudao.module.wms.service.outbound;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.cola.statemachine.StateMachine;
 import cn.iocoder.yudao.framework.cola.statemachine.builder.TransitionContext;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
@@ -314,6 +315,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         WmsOutboundDO exists = validateOutboundExists(updateReqVO.getId());
         // 判断是否允许编辑
         WmsOutboundAuditStatus auditStatus = WmsOutboundAuditStatus.parse(exists.getAuditStatus());
+        assert auditStatus != null;
         if (!auditStatus.matchAny(WmsOutboundAuditStatus.DRAFT, WmsOutboundAuditStatus.REJECT)) {
             throw exception(OUTBOUND_CAN_NOT_EDIT);
         }
@@ -362,11 +364,10 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     }
 
     @Override
-    public WmsOutboundDO updateOutboundAuditStatus(Long id, Integer status) {
+    public void updateOutboundAuditStatus(Long id, Integer status) {
         WmsOutboundDO inboundDO = validateOutboundExists(id);
         inboundDO.setAuditStatus(status);
         outboundMapper.updateById(inboundDO);
-        return inboundDO;
     }
 
     /**
@@ -447,7 +448,8 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     }
 
     @Override
-    public WmsOutboundDO createForStockCheck(WmsOutboundSaveReqVO outboundSaveReqVO) {
+    @Transactional(rollbackFor = Exception.class)
+    public void createForStockCheck(WmsOutboundSaveReqVO outboundSaveReqVO) {
         outboundSaveReqVO.setType(WmsOutboundType.STOCKCHECK.getValue());
         // 
         WmsOutboundDO outbound = this.createOutbound(outboundSaveReqVO);
@@ -460,15 +462,14 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         // 拉取明细
         List<WmsOutboundItemDO> outboundItemDOS = outboundItemService.selectByOutboundId(outbound.getId());
         // 设置实际出库量
-        StreamX.from(outboundItemDOS).assemble(outboundSaveReqVO.getItemList(), itm -> itm.getProductId() + "-" + itm.getBinId(), itm -> itm.getProductId() + "-" + itm.getBinId(), (a, b) -> {
-            a.setActualQty(b.getActualQty());
-        });
+        StreamX.from(outboundItemDOS).assemble(outboundSaveReqVO.getItemList(), itm -> itm.getProductId() + "-" + itm.getBinId(),
+            itm -> itm.getProductId() + "-" + itm.getBinId(), (a, b) -> a.setActualQty(b.getActualQty()));
         // 保存实际入库量
         outboundItemService.updateActualQuantity(BeanUtils.toBean(outboundItemDOS, WmsOutboundItemSaveReqVO.class));
         // 完成收货
         this.approve(WmsOutboundAuditStatus.Event.FINISH, approvalReqVO);
         // 
-        return this.getOutbound(outbound.getId());
+        this.getOutbound(outbound.getId());
     }
 
     @Override
@@ -526,9 +527,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
         WmsOutboundDO outbound = validateOutboundExists(approvalReqVO.getBillId());
         // 锁在外，事务在锁内
         WmsOutboundServiceImpl proxy = SpringUtils.getBeanByExactType(WmsOutboundServiceImpl.class);
-        lockRedisDAO.lockByWarehouse(outbound.getWarehouseId(), () -> {
-            proxy.fireEvent(event, approvalReqVO, outbound);
-        });
+        lockRedisDAO.lockByWarehouse(outbound.getWarehouseId(), () -> proxy.fireEvent(event, approvalReqVO, outbound));
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -543,10 +542,9 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
      * 验证出库单数据，外部模块校验用
      *
      * @param validateReqDTOList 入参
-     * @return 结果
      */
     @Override
-    public boolean validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList) {
+    public void validateOutboundData(List<WmsOutboundValidateReqDTO> validateReqDTOList) {
         if (validateReqDTOList.isEmpty()) {
             throw exception(OUTBOUND_ITEM_NOT_EXISTS);
         }
@@ -562,7 +560,6 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
                 }
             }
         }
-        return true;
     }
 
     @Override
@@ -592,4 +589,63 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
 
 
     }
+
+    /**
+     * 装配上游单据信息
+     *
+     * @param list 出库单
+     */
+    @Override
+    public void assembleBoxInfo(List<WmsOutboundRespVO> list) {
+//        if(outboundRespVO.getUpstreamType()==null){
+//            return;
+//        }
+//        if(outboundRespVO.getUpstreamType().equals(TMS_FIRST_MILE.getValue())){
+//
+//        }
+//        for(WmsOutboundItemRespVO vo:itemList){
+//            vo.getUpstreamId()
+//        }
+        //查询上游单据中的boxQty和containerRate数据
+
+        //遍历详情列表，根据上有单据类型，获取对应的boxQty和containerRate数据
+        //封装
+    }
+
+    /**
+     * 装配出库单详情
+     *
+     * @param list 出库单列表
+     */
+    @Override
+    public void assembleOutboundItems(List<WmsOutboundRespVO> list) {
+        list.forEach(
+            outboundVO -> {
+                List<WmsOutboundItemDO> itemList = outboundItemService.selectByOutboundId(outboundVO.getId());
+                if (CollUtil.isEmpty(itemList)) {
+                    return;
+                }
+                List<WmsOutboundItemRespVO> targetList = BeanUtils.toBean(itemList, WmsOutboundItemRespVO.class);
+                outboundVO.setItemList(targetList);
+            }
+        );
+    }
+
+    /**
+     * 装配出库单汇总信息
+     *
+     * @param list 出库单列表
+     */
+    @Override
+    public void assembleSummary(List<WmsOutboundRespVO> list) {
+        list.forEach(outboundVO -> {
+            List<WmsOutboundItemRespVO> itemList = outboundVO.getItemList();
+            if (itemList != null) {
+                outboundVO.setPlanTotalQty(itemList.stream().mapToInt(WmsOutboundItemRespVO::getPlanQty).sum());
+                outboundVO.setActualTotalQty(itemList.stream().mapToInt(WmsOutboundItemRespVO::getActualQty).sum());
+            }
+        });
+    }
+
+
 }

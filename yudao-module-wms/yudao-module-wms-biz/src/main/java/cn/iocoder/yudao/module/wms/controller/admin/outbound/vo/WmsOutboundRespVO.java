@@ -147,4 +147,10 @@ public class WmsOutboundRespVO {
     @Schema(description = "采购订单编码")
     @ExcelProperty("采购订单编码")
     private Long purchaseOrderCode;
+
+    @Schema(description = "计划出库总数")
+    private Integer planTotalQty;
+
+    @Schema(description = "实际出库总数")
+    private Integer actualTotalQty;
 }

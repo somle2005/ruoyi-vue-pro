@@ -170,19 +170,9 @@ public interface WmsInboundItemService {
     List<WmsInboundItemQueryDO> getInboundItemListForTms(WmsInboundItemListForTmsReqVO listForTmsReqVO);
 
     /**
-     * 装配库存逻辑
-     */
-    void assembleStockLogic(List<WmsInboundItemRespVO> list);
-
-    /**
      * 根据仓库ID和产品ID查询入库单详情
      */
     List<WmsInboundItemDO> selectByWarehouseIdAndProductId(@NotNull(message = "调出仓库ID不能为空") Long warehouseId, Long productId);
-
-    /**
-     * 装配入库单详情的入库单
-     */
-    void assembleInboundItems(List<WmsInboundItemRespVO> list);
 
     /**
      * 处理入库单详情数据

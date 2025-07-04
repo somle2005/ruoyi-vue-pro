@@ -9,7 +9,8 @@ import java.util.Arrays;
 
 /**
  * 上游单据类型，外部类型数据追踪BillType枚举
- **/
+ *
+ * @author jisencai*/
 @RequiredArgsConstructor
 @Getter
 public enum UpstreamBillType implements ArrayValuable<Integer>, DictEnum {

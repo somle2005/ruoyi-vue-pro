@@ -97,14 +97,14 @@ public class WmsStockCheckBinController {
     // */
     // @PutMapping("/update")
     // @Operation(summary = "更新库位盘点")
-    // @PreAuthorize("@ss.hasPermission('wms:stockCheck-bin:update')")
+    // @PreAuthorize("@ss.hasPermission('wms:stock-check-bin:update')")
     // public CommonResult<Boolean> updateStockCheckBin(@Valid @RequestBody WmsStockCheckBinSaveReqVO updateReqVO) {
     // stockCheckBinService.updateStockCheckBin(updateReqVO);
     // return success(true);
     // }
     @PutMapping("/update-actual-quantity")
     @Operation(summary = "设置实际库存量")
-    @PreAuthorize("@ss.hasPermission('wms:stockCheck-bin:update')")
+    @PreAuthorize("@ss.hasPermission('wms:stock-check-bin:update')")
     public CommonResult<Boolean> updateActualQuantity(@Validated(ValidationGroup.update.class) @RequestBody List<WmsStockCheckBinSaveReqVO> updateReqVOList) {
         stockCheckBinService.updateActualQuantity(updateReqVOList);
         return success(true);
@@ -156,7 +156,7 @@ public class WmsStockCheckBinController {
     // 
     @GetMapping("/export-excel")
     @Operation(summary = "导出库位盘点 Excel")
-    @PreAuthorize("@ss.hasPermission('wms:stockCheck-bin:export')")
+    @PreAuthorize("@ss.hasPermission('wms:stock-check-bin:export')")
     @ApiAccessLog(operateType = EXPORT)
     public void exportStockCheckBinExcel(@Valid WmsStockCheckBinPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         WmsStockCheckDO stockCheck = stockCheckService.validateStockCheckExists(pageReqVO.getStockCheckId());
@@ -278,8 +278,8 @@ public class WmsStockCheckBinController {
 
         Map<String, WmsStockCheckBinExcelVO> imMap = StreamX.from(impVOList).toMap(e -> e.getBinId() + "-" + e.getProductId());
         // 转 DOList 去保存
-        List<WmsStockCheckBinDO> dosInDB = stockCheckBinService.selectByStockCheckId(stockCheck.getId());
-        for (WmsStockCheckBinDO stockCheckBinDO : dosInDB) {
+        List<WmsStockCheckBinDO> dosInBin = stockCheckBinService.selectByStockCheckId(stockCheck.getId());
+        for (WmsStockCheckBinDO stockCheckBinDO : dosInBin) {
             WmsStockCheckBinExcelVO stockCheckBinExcelVO = imMap.get(stockCheckBinDO.getBinId() + "-" + stockCheckBinDO.getProductId());
             if (stockCheckBinExcelVO != null) {
                 stockCheckBinDO.setActualQty(stockCheckBinExcelVO.getActualQty());
@@ -288,11 +288,11 @@ public class WmsStockCheckBinController {
             wmsWarehouseProductVOList.add(WmsWarehouseProductVO.builder().warehouseId(stockCheck.getWarehouseId()).productId(stockCheckBinDO.getProductId()).build());
         }
 
-        Map<String, WmsStockCheckBinDO> map = StreamX.from(dosInDB).toMap(e -> e.getBinId() + "-" + e.getProductId());
+        Map<String, WmsStockCheckBinDO> map = StreamX.from(dosInBin).toMap(e -> e.getBinId() + "-" + e.getProductId());
         for (WmsStockCheckBinExcelVO stockCheckBinExcelVO : impVOList) {
             WmsStockCheckBinDO stockCheckBinDO = map.get(stockCheckBinExcelVO.getBinId() + "-" + stockCheckBinExcelVO.getProductId());
             if (stockCheckBinDO == null) {
-                dosInDB.add(BeanUtils.toBean(stockCheckBinExcelVO, WmsStockCheckBinDO.class));
+                dosInBin.add(BeanUtils.toBean(stockCheckBinExcelVO, WmsStockCheckBinDO.class));
                 wmsWarehouseProductVOList.add(WmsWarehouseProductVO.builder().warehouseId(stockCheck.getWarehouseId()).productId(stockCheckBinExcelVO.getProductId()).build());
             }
         }
@@ -300,7 +300,7 @@ public class WmsStockCheckBinController {
         List<WmsStockBinRespVO> stockBinList = stockBinService.selectStockBinList(wmsWarehouseProductVOList, false);
         Map<String, WmsStockBinRespVO> stockBinMap = StreamX.from(stockBinList).toMap(e -> e.getBinId()+"-"+e.getProductId());
 
-        for (WmsStockCheckBinDO stockCheckBinDO : dosInDB) {
+        for (WmsStockCheckBinDO stockCheckBinDO : dosInBin) {
             WmsStockBinRespVO stockBinDO = stockBinMap.get(stockCheckBinDO.getBinId() + "-" + stockCheckBinDO.getProductId());
             if(stockBinDO==null) {
                 stockCheckBinDO.setExpectedQty(0);
@@ -309,11 +309,11 @@ public class WmsStockCheckBinController {
             }
         }
 
-        List<WmsStockCheckBinRespVO> stockCheckBinRespVOS = BeanUtils.toBean(dosInDB, WmsStockCheckBinRespVO.class);
-        stockCheckBinService.assembleProduct(stockCheckBinRespVOS);
-        stockCheckBinService.assembleBin(stockCheckBinRespVOS);
-        // stockCheckBinService.saveStockCheckBinList(stockCheck, dosInDB);
-        return success(stockCheckBinRespVOS);
+        List<WmsStockCheckBinRespVO> stockVoList = BeanUtils.toBean(dosInBin, WmsStockCheckBinRespVO.class);
+        stockCheckBinService.assembleProduct(stockVoList);
+        stockCheckBinService.assembleBin(stockVoList);
+        // stockCheckBinService.saveStockCheckBinList(stockCheck, dosInBin);
+        return success(stockVoList);
     }
 
     @GetMapping("/download-template")

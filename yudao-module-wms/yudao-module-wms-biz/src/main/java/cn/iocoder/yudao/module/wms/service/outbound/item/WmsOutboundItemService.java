@@ -7,6 +7,7 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutbound
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.item.vo.WmsOutboundItemSaveReqVO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.item.WmsOutboundItemDO;
 import jakarta.validation.Valid;
+
 import java.util.List;
 
 /**
@@ -83,4 +84,5 @@ public interface WmsOutboundItemService {
      * 装配公司
      **/
     void assembleCompany(List<WmsOutboundItemRespVO> voList);
+
 }

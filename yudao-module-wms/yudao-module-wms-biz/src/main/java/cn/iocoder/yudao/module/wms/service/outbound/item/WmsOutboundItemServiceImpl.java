@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.srm.api.purchase.SrmPurchaseReturnApi;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.wms.controller.admin.company.FmsCompanySimpleRespVO;
@@ -28,6 +29,7 @@ import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundStatus;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
 import jakarta.annotation.Resource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -68,6 +70,8 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
 
     @Resource
     private FmsCompanyApi companyApi;
+    @Autowired
+    private SrmPurchaseReturnApi srmPurchaseReturnApi;
 
     /**
      * @sign : 07E3106EC549C08B
@@ -145,13 +149,13 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
 
     @Override
     public void assembleProducts(List<WmsOutboundItemRespVO> itemList) {
-        Map<Long, ErpProductDTO> productDTOMap = productApi.getProductMap(StreamX.from(itemList).map(WmsOutboundItemRespVO::getProductId).toList());
-        Map<Long, WmsProductRespSimpleVO> productVOMap = new HashMap<>();
-        for (ErpProductDTO productDTO : productDTOMap.values()) {
+        Map<Long, ErpProductDTO> productMap = productApi.getProductMap(StreamX.from(itemList).map(WmsOutboundItemRespVO::getProductId).toList());
+        Map<Long, WmsProductRespSimpleVO> voMap = new HashMap<>();
+        for (ErpProductDTO productDTO : productMap.values()) {
             WmsProductRespSimpleVO productVO = BeanUtils.toBean(productDTO, WmsProductRespSimpleVO.class);
-            productVOMap.put(productDTO.getId(), productVO);
+            voMap.put(productDTO.getId(), productVO);
         }
-        StreamX.from(itemList).assemble(productVOMap, WmsOutboundItemRespVO::getProductId, WmsOutboundItemRespVO::setProduct);
+        StreamX.from(itemList).assemble(voMap, WmsOutboundItemRespVO::getProductId, WmsOutboundItemRespVO::setProduct);
     }
 
     //同意出库操作
@@ -226,19 +230,19 @@ public class WmsOutboundItemServiceImpl implements WmsOutboundItemService {
 
     @Override
     public void assembleDept(List<WmsOutboundItemRespVO> voList) {
-        Map<Long, DeptRespDTO> deptDTOMap = deptApi.getDeptMap(StreamX.from(voList).map(WmsOutboundItemRespVO::getDeptId).toList());
-        Map<Long, DeptSimpleRespVO> deptVOMap = new HashMap<>();
-        for (DeptRespDTO productDTO : deptDTOMap.values()) {
+        Map<Long, DeptRespDTO> deptMap = deptApi.getDeptMap(StreamX.from(voList).map(WmsOutboundItemRespVO::getDeptId).toList());
+        Map<Long, DeptSimpleRespVO> voMap = new HashMap<>();
+        for (DeptRespDTO productDTO : deptMap.values()) {
             DeptSimpleRespVO deptVO = BeanUtils.toBean(productDTO, DeptSimpleRespVO.class);
-            deptVOMap.put(productDTO.getId(), deptVO);
+            voMap.put(productDTO.getId(), deptVO);
         }
-        StreamX.from(voList).assemble(deptVOMap, WmsOutboundItemRespVO::getDeptId, WmsOutboundItemRespVO::setDept);
+        StreamX.from(voList).assemble(voMap, WmsOutboundItemRespVO::getDeptId, WmsOutboundItemRespVO::setDept);
     }
 
     @Override
     public void assembleCompany(List<WmsOutboundItemRespVO> voList) {
         Map<Long, FmsCompanyDTO> companyMap = companyApi.getCompanyMap(StreamX.from(voList).toSet(WmsOutboundItemRespVO::getCompanyId));
-        Map<Long, FmsCompanySimpleRespVO> companyVOMap = StreamX.from(companyMap.values()).toMap(FmsCompanyDTO::getId, v -> BeanUtils.toBean(v, FmsCompanySimpleRespVO.class));
-        StreamX.from(voList).assemble(companyVOMap, WmsOutboundItemRespVO::getCompanyId, WmsOutboundItemRespVO::setCompany);
+        Map<Long, FmsCompanySimpleRespVO> voMap = StreamX.from(companyMap.values()).toMap(FmsCompanyDTO::getId, v -> BeanUtils.toBean(v, FmsCompanySimpleRespVO.class));
+        StreamX.from(voList).assemble(voMap, WmsOutboundItemRespVO::getCompanyId, WmsOutboundItemRespVO::setCompany);
     }
 }

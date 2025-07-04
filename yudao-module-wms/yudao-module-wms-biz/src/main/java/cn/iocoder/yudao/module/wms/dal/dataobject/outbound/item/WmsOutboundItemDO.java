@@ -77,4 +77,14 @@ public class WmsOutboundItemDO extends BaseDO {
      * 来源明细行ID
      */
     private Long upstreamId;
+
+    /**
+     * 箱率
+     */
+    private String containerRate;
+
+    /**
+     * 箱数
+     */
+    private Integer boxQty;
 }
