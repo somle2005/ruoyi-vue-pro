@@ -6,8 +6,8 @@ import com.somle.xincang.api.XinCangOrderApi;
 import com.somle.xincang.api.XinCangProductApi;
 import com.somle.xincang.api.XinCangStockApi;
 import com.somle.xincang.model.XinCangAccount;
-import com.somle.xincang.model.req.XinCangOrderListReq;
-import com.somle.xincang.model.req.XingCangStockListReq;
+import com.somle.xincang.model.XinCangCommonResp;
+import com.somle.xincang.model.req.*;
 import com.somle.xincang.model.resp.*;
 import lombok.Data;
 import lombok.SneakyThrows;
@@ -113,8 +113,80 @@ public class XinCangClient {
         return orders;
     }
 
+    //新增临时产品
+    public XinCangCommonResp addProduct(XinCangAddProductReq req){
+        XinCangCommonResp xinCangCommonResp = xinCangProductApi.addProduct(account.getToken(), req);
+        if (xinCangCommonResp.getErrno() == 0) {
+            log.info("新增临时产品成功{}",req);
+        }
+        return xinCangCommonResp;
+    }
+
+    //更新临时产品
+    public XinCangCommonResp updateProduct(XinCangUpdateProductReq req){
+        XinCangCommonResp xinCangCommonResp = xinCangProductApi.updateProduct(account.getToken(), req);
+        if (xinCangCommonResp.getErrno() == 0) {
+            log.info("更新临时产品成功{}",req);
+        }
+        return xinCangCommonResp;
+    }
 
 
 
+
+    //删除临时产品 有问题
+    public XinCangCommonResp deleteProduct(String productNo){
+        XinCangCommonResp xinCangCommonResp = xinCangProductApi.deleteProduct(account.getToken(), productNo);
+        if (xinCangCommonResp.getErrno() == 0) {
+            log.info("删除临时产品成功{}",productNo);
+        }
+        return xinCangCommonResp;
+    }
+
+
+    //新增一票多件
+    public XinCangCommonResp addOrderMultiple(XinCangAddOrderMultipleReq req){
+        XinCangCommonResp xinCangCommonResp = xinCangOrderApi.addOrderMultiple(account.getToken(), req);
+        if (xinCangCommonResp.getErrno() == 0) {
+            log.info("新增一票多件成功{}",req);
+        }
+        return xinCangCommonResp;
+    }
+
+    //修改订单
+    public XinCangCommonResp updateOrder(XinCangUpdateOrderReq req){
+        XinCangCommonResp xinCangCommonResp = xinCangOrderApi.updateOrder(account.getToken(), req);
+        if (xinCangCommonResp.getErrno() == 0) {
+            log.info("修改订单成功{}",req);
+        }
+        return xinCangCommonResp;
+    }
+
+    //审核订单
+    public XinCangCommonResp approveOrders(String orderNos){
+        XinCangCommonResp xinCangCommonResp = xinCangOrderApi.approveOrders(account.getToken(), orderNos);
+        if (xinCangCommonResp.getErrno() == 0) {
+            log.info("审核订单成功{}",orderNos);
+        }
+        return xinCangCommonResp;
+    }
+
+    //拦截订单
+    public XinCangCommonResp interceptOrder(XinCangDoInterceptReq req){
+        XinCangCommonResp xinCangCommonResp = xinCangOrderApi.interceptOrder(account.getToken(), req);
+        if (xinCangCommonResp.getErrno() == 0) {
+            log.info("拦截订单成功{}",req);
+        }
+        return xinCangCommonResp;
+    }
+
+    //删除订单
+    public XinCangCommonResp deleteOrder(XinCangDeleteOrderReq req){
+        XinCangCommonResp xinCangCommonResp = xinCangOrderApi.deleteOrder(account.getToken(), req);
+        if (xinCangCommonResp.getErrno() == 0) {
+            log.info("删除订单成功{}",req);
+        }
+        return xinCangCommonResp;
+    }
 
 }
