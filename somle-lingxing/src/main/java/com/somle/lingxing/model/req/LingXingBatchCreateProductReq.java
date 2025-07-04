@@ -20,7 +20,6 @@ public class LingXingBatchCreateProductReq {
     private List<ProductData> data;
 
     @Data
-    @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
     @Builder
     public static class ProductData {
         private String sku;
@@ -45,14 +44,12 @@ public class LingXingBatchCreateProductReq {
         private Integer dangerousCargo;
 
         @Data
-        @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
         @Builder
         public static class OtherCode {
             private String otherCode;
         }
 
         @Data
-        @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
         @Builder
         public static class Fnsku {
             private String fnsku;

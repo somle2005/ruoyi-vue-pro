@@ -8,6 +8,7 @@ import cn.iocoder.yudao.framework.common.util.web.RequestX;
 import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import com.alibaba.fastjson.JSON;
 import com.somle.lingxing.model.LingXingAccount;
+import com.somle.lingxing.model.LingXingCommonResp;
 import com.somle.lingxing.model.reps.LingXingGetProductReps;
 import com.somle.lingxing.model.reps.LingXingInventoryReps;
 import com.somle.lingxing.model.reps.LingXingOutboundOrderDetailReps;
@@ -94,7 +95,10 @@ public class LingXingClient {
     public void batchCreateProduct(List<LingXingBatchCreateProductReq.ProductData> productDataList) {
         String endPoint = "/openapi/v1/product/batchCreate";
         String json = postMethod(endPoint, JsonUtilsX.toJsonString(productDataList),productDataList);
-        System.out.println(json);
+        LingXingCommonResp resp = JSONUtil.toBean(json, LingXingCommonResp.class);
+        if (resp.getCode().equals("200")) {
+            log.info("批量创建产品成功{}", productDataList);
+        }
     }
 
 
@@ -104,7 +108,22 @@ public class LingXingClient {
     public void updateProduct(LingXingBatchCreateProductReq.ProductData productData) {
         String endPoint = "/openapi/v1/product/update";
         String json = postMethod(endPoint, JsonUtilsX.toJsonString(productData),productData);
-        System.out.println(json);
+        LingXingCommonResp resp = JSONUtil.toBean(json, LingXingCommonResp.class);
+        if (resp.getCode().equals("200")) {
+            log.info("修改产品成功{}", productData);
+        }
+    }
+
+    /**
+     * 获取渠道信息
+     */
+    public void getChannelList(){
+       String endPoint = "/openapi/v1/logistics/channel/list";
+       JSONObject param = new JSONObject();
+       param.put("whCode", "LAX02");
+        String json = postMethod(endPoint, JsonUtilsX.toJsonString(param),param);
+        LingXingCommonResp resp = JSONUtil.toBean(json, LingXingCommonResp.class);
+        System.out.println(resp);
     }
 
     /**
@@ -112,8 +131,11 @@ public class LingXingClient {
      * */
     public void createWmsOutbound(LingXingCreateOutboundOrderReq req) {
         String endPoint = "/openapi/v1/outboundOrder/create";
-        String json = postMethod(endPoint, JsonUtilsX.toJsonString(req),req);
-        System.out.println(json);
+        String json = postMethod(endPoint, JsonUtilsX.toJsonString(req.getData()),req.getData());
+        LingXingCommonResp resp = JSONUtil.toBean(json, LingXingCommonResp.class);
+        if (resp.getCode().equals("200")) {
+            log.info("创建小包出库单成功{}", resp);
+        }
     }
 
 

@@ -1,23 +1,16 @@
 package com.somle.lingxing.model.req;
 
-import lombok.Data;
 import lombok.Builder;
-import com.fasterxml.jackson.databind.PropertyNamingStrategies;
-import com.fasterxml.jackson.databind.annotation.JsonNaming;
+import lombok.Data;
+
 import java.util.List;
 
-// 主请求类
 @Data
-@JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
 @Builder
 public class LingXingCreateOutboundOrderReq {
-    private String appKey;
     private List<OrderData> data;
-    private String reqTime;
-
     // 每个订单数据
     @Data
-    @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
     @Builder
     public static class OrderData {
         private Integer subOrderType;
@@ -46,7 +39,6 @@ public class LingXingCreateOutboundOrderReq {
 
     // 产品信息
     @Data
-    @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
     @Builder
     public static class Product {
         private Integer quantity;
@@ -60,7 +52,6 @@ public class LingXingCreateOutboundOrderReq {
 
     // 扩展信息
     @Data
-    @JsonNaming(PropertyNamingStrategies.UpperCamelCaseStrategy.class)
     @Builder
     public static class OrderExtensionInfoBO {
         private String platformOrderId;
