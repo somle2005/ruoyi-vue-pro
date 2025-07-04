@@ -5,6 +5,8 @@ import cn.iocoder.yudao.framework.excel.core.aop.ExcelMergeGroup;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
 import cn.iocoder.yudao.framework.excel.core.convert.ImageListConverter;
 import cn.iocoder.yudao.module.srm.enums.SrmDictTypeConstants;
+import cn.iocoder.yudao.module.srm.tool.PreLoadProductImg;
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.alibaba.excel.converters.bytearray.ByteArrayImageConverter;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -15,7 +17,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
-public class SrmPurchaseOrderExcelRespVO {
+public class SrmPurchaseOrderExcelRespVO implements PreLoadProductImg.ProductImgExportable {
     // ========== 主表字段 ==========
     @ExcelProperty("采购订单编号")
     @ExcelMergeGroup(unique = true)
@@ -146,6 +148,7 @@ public class SrmPurchaseOrderExcelRespVO {
     private String productName;
 
     @Schema(description = "产品编号")
+    @ExcelIgnore
     private Long productId;
 
     @Schema(hidden = true)
@@ -256,4 +259,18 @@ public class SrmPurchaseOrderExcelRespVO {
     @ExcelProperty("总完工单通过数量")
     private Integer totalCompletionPassCount;
 
+    @Override
+    public Long getProductId() {
+        return this.productId;
+    }
+
+    @Override
+    public void setPrimaryImage(byte[] img) {
+        this.primaryImage = img;
+    }
+
+    @Override
+    public void setSecondaryImageList(java.util.List<byte[]> imgList) {
+        this.secondaryImageList = imgList;
+    }
 } 
