@@ -15,8 +15,6 @@ srm:
 --- #################### 数据库相关配置 ####################
 
 spring:
-  jackson:
-    default-property-inclusion: non_null
   autoconfigure:
     exclude:
       - de.codecentric.boot.admin.server.config.AdminServerAutoConfiguration # 禁用 Spring Boot Admin 的 Server 的自动配置

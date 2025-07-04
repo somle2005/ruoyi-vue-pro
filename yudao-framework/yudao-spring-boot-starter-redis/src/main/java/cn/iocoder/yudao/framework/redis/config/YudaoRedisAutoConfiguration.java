@@ -2,6 +2,7 @@ package cn.iocoder.yudao.framework.redis.config;
 
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.util.ReflectUtil;
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
@@ -61,6 +62,7 @@ public class YudaoRedisAutoConfiguration {
         javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(formatter));
         javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(formatter));
         objectMapper.registerModules(javaTimeModule);
+        objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
         return json;
     }
 
