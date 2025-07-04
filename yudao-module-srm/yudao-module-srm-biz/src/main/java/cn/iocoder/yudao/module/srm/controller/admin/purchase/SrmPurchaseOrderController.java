@@ -22,6 +22,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderSummaryBO;
+import cn.iocoder.yudao.module.srm.tool.PreLoadProductImg;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -147,17 +148,7 @@ public class SrmPurchaseOrderController {
         List<SrmPurchaseOrderBaseRespVO> list = bindList(purchaseOrderService.getPurchaseOrderBOList(pageReqVO));
         List<SrmPurchaseOrderExcelRespVO> excelList = SrmPurchaseOrderExportConvert.buildExcelList(list);
         //是否渲染图片
-        if (hasImg != null && hasImg) {
-            //探测预热
-            Set<Long> collect = excelList.stream().map(SrmPurchaseOrderExcelRespVO::getProductId).collect(Collectors.toSet());
-            erpProductApi.preloadProductImages(collect);
-            //构建Excel数据
-            excelList.forEach(excelVO -> {
-                excelVO.setPrimaryImage(erpProductApi.getProductImageDTOListByProductId(excelVO.getProductId()).getImg());
-                //附图
-                excelVO.setSecondaryImageList(Arrays.asList(erpProductApi.getProductImageDTOListByProductId(excelVO.getProductId()).getImg2()));
-            });
-        }
+        PreLoadProductImg.preLoadProductImg(hasImg, excelList, erpProductApi);
         // 导出 Excel
         ExcelUtils.writeWithRequestAttributesTimeZone(response, "采购订单.xls", "采购订单", SrmPurchaseOrderExcelRespVO.class, excelList);
     }

@@ -28,6 +28,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseRequestService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierProductService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.request.SrmPurchaseRequestBO;
+import cn.iocoder.yudao.module.srm.tool.PreLoadProductImg;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -178,17 +179,7 @@ public class SrmPurchaseRequestController {
         List<SrmPurchaseRequestRespVO> list = bindList(srmPurchaseRequestService.getPurchaseRequestItemBOPage(pageReqVO).getList());
         List<SrmPurchaseRequestExcelRespVO> excelList = buildExcelList(list);
         //是否渲染图片
-        if (hasImg != null && hasImg) {
-            //探测预热
-            Set<Long> collect = excelList.stream().map(SrmPurchaseRequestExcelRespVO::getProductId).collect(Collectors.toSet());
-            erpProductApi.preloadProductImages(collect);
-            //构建Excel数据
-            excelList.forEach(excelVO -> {
-                excelVO.setPrimaryImage(erpProductApi.getProductImageDTOListByProductId(excelVO.getProductId()).getImg());
-                //附图
-                excelVO.setSecondaryImageList(Arrays.asList(erpProductApi.getProductImageDTOListByProductId(excelVO.getProductId()).getImg2()));
-            });
-        }
+        PreLoadProductImg.preLoadProductImg(hasImg, excelList, erpProductApi);
         // 导出 Excel
         ExcelUtils.write(response, "ERP采购申请单.xls", "SRM采购申请单", SrmPurchaseRequestExcelRespVO.class, excelList);
     }
@@ -211,6 +202,7 @@ public class SrmPurchaseRequestController {
                     SrmPurchaseRequestExcelRespVO vo = BeanUtils.toBean(main, SrmPurchaseRequestExcelRespVO.class);
                     // 手动设置子表特有字段，避免覆盖主表字段
                     vo.setId(item.getId());
+                    vo.setProductId(item.getProductId());
                     vo.setDeclaredType(item.getDeclaredType());
                     vo.setDeclaredTypeEn(item.getDeclaredTypeEn());
                     vo.setProductCode(item.getProductCode());
@@ -285,6 +277,7 @@ public class SrmPurchaseRequestController {
             MapUtils.findAndThen(supplierMap, purchaseRequest.getSupplierId(), supplier -> purchaseRequest.setSupplierName(supplier.getName()));
             purchaseRequest.setItems(BeanUtils.toBean(purchaseRequestItemMap.get(purchaseRequest.getId()), SrmPurchaseRequestItemRespVO.class, item -> {
                 MapUtils.findAndThen(productMap, item.getProductId(), product -> item.setProductName(product.getName()).setProductCode(product.getCode())
+                    .setProductId(product.getId())
                     .setProductUnitName(unitMap.get(product.getUnitId()).getName()).setProductUnitId(unitMap.get(product.getUnitId()).getId())
                     .setCode(product.getCode())
                 );

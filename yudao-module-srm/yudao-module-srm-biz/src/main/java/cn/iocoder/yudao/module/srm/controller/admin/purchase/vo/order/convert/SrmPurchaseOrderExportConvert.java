@@ -82,6 +82,7 @@ public class SrmPurchaseOrderExportConvert {
                     vo.setToPortName(main.getToPortName());
                     // 子表字段
                     vo.setItemId(item.getId());
+                    vo.setProductId(item.getProductId());
                     vo.setProductName(item.getProductName());
                     vo.setProductCode(item.getProductCode());
                     vo.setProductUnitName(item.getProductUnitName());
