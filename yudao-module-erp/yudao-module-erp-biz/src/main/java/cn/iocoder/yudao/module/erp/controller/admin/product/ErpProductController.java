@@ -24,9 +24,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
@@ -93,9 +91,6 @@ public class ErpProductController {
     @Operation(summary = "获得产品精简列表", description = "只包含被开启的产品，主要用于前端的下拉选项")
     public CommonResult<List<ErpProductSimpleRespVO>> getProductSimpleList() {
         List<ErpProductRespVO> list = productService.getProductVOListByStatus(true);
-//        pageReqVO.setPageSize(100);//返回100个结果
-//        PageResult<ErpProductRespVO> voPage = productService.getProductVOPage(pageReqVO);
-//        List<ErpProductRespVO> list = voPage.getList();
         return success(convertList(list, vo -> BeanUtils.toBean(vo, ErpProductSimpleRespVO.class)));
     }
 
@@ -114,26 +109,16 @@ public class ErpProductController {
     @Operation(summary = "导出产品 Excel")
     @PreAuthorize("@ss.hasPermission('erp:product:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportProductExcel(@Valid ErpProductPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+    public void exportProductExcel(@Valid ErpProductPageReqVO pageReqVO, HttpServletResponse response, Boolean hasImg) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         PageResult<ErpProductRespVO> pageResult = productService.getProductVOPage(pageReqVO);
-
-        Set<String> imgUrls = pageResult.getList().stream()
-            .flatMap(item -> {
-                // 主图
-                Stream<String> primary = Stream.ofNullable(item.getPrimaryImageUrl());
-                // 副图
-                Stream<String> secondary = item.getSecondaryImageUrlList() == null
-                    ? Stream.empty()
-                    : item.getSecondaryImageUrlList().stream();
-                return Stream.concat(primary, secondary);
-            })
-            .filter(img -> img != null && !img.isEmpty())
-            .collect(Collectors.toSet());
-        //主动预热caffeine ，主图+子图
-        productService.preloadProductImages(imgUrls);
-        //收集主表 附表
-
+        //是否渲染图片
+        if (hasImg) {
+            //主动预热caffeine ，主图+子图
+            productService.preloadProductImages(pageResult.getList().stream().map(ErpProductRespVO::getId).collect(Collectors.toSet()));
+            //
+            pageResult.getList().forEach(item -> item.setPrimaryImage(productService.getProductImgById(item.getId()).getImg()));
+        }
         // 导出 Excel
         ExcelUtils.write(response, "产品.xls", "数据", ErpProductRespVO.class, pageResult.getList());
 

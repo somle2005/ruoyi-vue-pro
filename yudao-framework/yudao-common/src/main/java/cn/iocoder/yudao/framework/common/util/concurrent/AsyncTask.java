@@ -102,7 +102,7 @@ public class AsyncTask {
         private int parallelism = -1;
 
         public AsyncTaskExecutor() {
-            this(4, 64, 60, 1024, -1, null);
+            this(Runtime.getRuntime().availableProcessors() + 1, 64, 60, 1024, -1, null);
         }
 
         /**

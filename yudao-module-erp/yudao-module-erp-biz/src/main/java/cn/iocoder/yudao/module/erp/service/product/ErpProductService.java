@@ -6,6 +6,7 @@ import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProduc
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
+import cn.iocoder.yudao.module.erp.service.product.bo.ErpImgProductBO;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.validation.annotation.Validated;
@@ -159,10 +160,10 @@ public interface ErpProductService {
     /**
      * 基于图片 URL 数组，预加载图片
      */
-    void preloadProductImages(Set<String> imgUrls);
+    void preloadProductImages(Set<Long> productIds);
 
     /**
-     * 使用二级缓存，基于 url 获取图片缩略图 byte数组
+     * 通过产品ID获得ErpImgProductBO
      */
-    byte[] getProductImageThumbnail(String url);
+    ErpImgProductBO getProductImgById(Long productId);
 }

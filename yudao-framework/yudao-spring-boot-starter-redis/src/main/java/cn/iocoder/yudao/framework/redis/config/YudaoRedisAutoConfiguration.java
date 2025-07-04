@@ -1,10 +1,15 @@
 package cn.iocoder.yudao.framework.redis.config;
 
+import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.util.ReflectUtil;
-import cn.iocoder.yudao.framework.common.util.json.databind.StringLocalDateTimeDeserializer;
-import cn.iocoder.yudao.framework.common.util.json.databind.StringLocalDateTimeSerializer;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
 import org.redisson.spring.starter.RedissonAutoConfigurationV2;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -12,7 +17,10 @@ import org.springframework.data.redis.connection.RedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.serializer.RedisSerializer;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 /**
  * Redis 配置类
@@ -44,8 +52,14 @@ public class YudaoRedisAutoConfiguration {
         ObjectMapper objectMapper = (ObjectMapper) ReflectUtil.getFieldValue(json, "mapper");
         //时间
         JavaTimeModule javaTimeModule = new JavaTimeModule();
-        javaTimeModule.addSerializer(LocalDateTime.class, StringLocalDateTimeSerializer.INSTANCE);
-        javaTimeModule.addDeserializer(LocalDateTime.class, StringLocalDateTimeDeserializer.INSTANCE);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(DatePattern.NORM_DATETIME_PATTERN); //不带时区的时间，因为默认就是0区，在MVC的时候统一转换
+
+        javaTimeModule.addDeserializer(LocalDateTime.class, new LocalDateTimeDeserializer(formatter));
+        javaTimeModule.addDeserializer(LocalDate.class, new LocalDateDeserializer(formatter));
+        javaTimeModule.addDeserializer(LocalTime.class, new LocalTimeDeserializer(formatter));
+        javaTimeModule.addSerializer(LocalDateTime.class, new LocalDateTimeSerializer(formatter));
+        javaTimeModule.addSerializer(LocalDate.class, new LocalDateSerializer(formatter));
+        javaTimeModule.addSerializer(LocalTime.class, new LocalTimeSerializer(formatter));
         objectMapper.registerModules(javaTimeModule);
         return json;
     }

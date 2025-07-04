@@ -28,23 +28,23 @@ public class SrmSupplierProductSaveReqVO {
     @NotNull(message = "产品编号不能为空")
     private Long productId;
 
-    @NotNull(message = "包装数量不能为空")
+    @NotNull(message = "包装高度不能为空")
     @Schema(description = "包装高度")
     private Double packageHeight;
 
-    @NotNull(message = "包装数量不能为空")
+    @NotNull(message = "包装长度不能为空")
     @Schema(description = "包装长度")
     private Double packageLength;
 
-    @NotNull(message = "包装数量不能为空")
+    @NotNull(message = "包装重量不能为空")
     @Schema(description = "包装重量")
     private Double packageWeight;
 
-    @NotNull(message = "包装数量不能为空")
+    @NotNull(message = "包装宽度不能为空")
     @Schema(description = "包装宽度")
     private Double packageWidth;
 
-    @Schema(description = "采购价格", example = "25304")
+    @Schema(description = "采购价格")
     private Double purchasePrice;
 
     @Schema(description = "采购货币代码")

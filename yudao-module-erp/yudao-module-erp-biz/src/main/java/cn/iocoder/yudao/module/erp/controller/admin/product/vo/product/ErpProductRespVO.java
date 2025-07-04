@@ -1,11 +1,12 @@
 package cn.iocoder.yudao.module.erp.controller.admin.product.vo.product;
 
-import cn.iocoder.yudao.framework.excel.core.convert.SingleImageConverter;
+import cn.iocoder.yudao.framework.excel.core.convert.ImageListConverter;
 import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.json.GuidePriceJson;
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.converters.bytearray.ByteArrayImageConverter;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
@@ -113,13 +114,20 @@ public class ErpProductRespVO extends BaseDO {
     @ExcelProperty("基础高度（mm）")
     private Integer height;
 
-    @Schema(description = "主图")
-    @ExcelProperty(value = "主图", converter = SingleImageConverter.class)
+    @Schema(description = "主图链接")
+    @ExcelProperty(value = "主图链接")
     private String primaryImageUrl;
 
     @Schema(description = "副图")
-//    @ExcelProperty(value = "副图" ,converter = ListImageConverter.class)
     private List<String> secondaryImageUrlList;
+
+    @Schema(hidden = true)
+    @ExcelProperty(value = "主图", converter = ByteArrayImageConverter.class)
+    private byte[] primaryImage;
+
+    @Schema(hidden = true)
+    @ExcelProperty(value = "副图", converter = ImageListConverter.class)
+    private List<byte[]> secondaryImageList;
 
     @Schema(description = "指导价，json格式")
     @ExcelProperty("指导价，json格式")

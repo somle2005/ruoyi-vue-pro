@@ -10,6 +10,8 @@ import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.concurrent.AsyncTask;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.common.util.spring.SpringUtils;
+import cn.iocoder.yudao.framework.common.util.web.RequestX;
+import cn.iocoder.yudao.framework.common.util.web.WebUtils;
 import cn.iocoder.yudao.framework.security.core.util.SecurityFrameworkUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpSyncProductDTO;
@@ -21,11 +23,15 @@ import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductCategoryDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductUnitDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
+import cn.iocoder.yudao.module.erp.service.product.bo.ErpImgProductBO;
 import cn.iocoder.yudao.module.erp.service.product.bo.ErpProductBO;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.system.api.user.dto.AdminUserRespDTO;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Resource;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -39,8 +45,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -92,7 +100,10 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
-    @CacheEvict(cacheNames = PRODUCT_LIST, allEntries = true)
+    @Caching(evict = {
+        @CacheEvict(cacheNames = PRODUCT_LIST, allEntries = true),
+        @CacheEvict(cacheNames = PRODUCT_IMG, key = "#createReqVO.id")
+    })
     @Transactional(rollbackFor = Exception.class)
     public Long createProduct(ErpProductSaveReqVO createReqVO) {
         //TODO 暂时编号不是系统自动生成，后续添加生成规则，流水号的递增由编号来判断，编号相同流水号便自增
@@ -141,7 +152,8 @@ public class ErpProductServiceImpl implements ErpProductService {
     @Transactional(rollbackFor = Exception.class)
     @Caching(evict = {
         @CacheEvict(cacheNames = PRODUCT_LIST, allEntries = true),
-        @CacheEvict(cacheNames = PRODUCT, key = "#updateReqVO.id")
+        @CacheEvict(cacheNames = PRODUCT, key = "#updateReqVO.id"),
+        @CacheEvict(cacheNames = PRODUCT_IMG, key = "#updateReqVO.id")
     })
     public void updateProduct(ErpProductSaveReqVO updateReqVO) {
         Long productId = updateReqVO.getId();
@@ -202,7 +214,8 @@ public class ErpProductServiceImpl implements ErpProductService {
     @Override
     @Caching(evict = {
         @CacheEvict(cacheNames = PRODUCT_LIST, allEntries = true),
-        @CacheEvict(cacheNames = PRODUCT, key = "#id")
+        @CacheEvict(cacheNames = PRODUCT, key = "#id"),
+        @CacheEvict(cacheNames = PRODUCT_IMG, key = "#id")
     })
     public void deleteProduct(Long id) {
         // 校验存在
@@ -500,33 +513,78 @@ public class ErpProductServiceImpl implements ErpProductService {
     }
 
     @Override
-    public void preloadProductImages(Set<String> imgUrls) {
-        if (CollUtil.isEmpty(imgUrls)) {
+    public void preloadProductImages(Set<Long> productIds) {
+        if (CollUtil.isEmpty(productIds)) {
             return;
         }
         ErpProductService productService = SpringUtils.getBean(ErpProductService.class);
-        CompletableFuture<Void> future = new CompletableFuture<>();
-        for (String url : imgUrls) {
-            future = CompletableFuture.runAsync(() -> {
+        List<CompletableFuture<Void>> futures = new ArrayList<>();
+        for (Long productId : productIds) {
+            CompletableFuture<Void> future = CompletableFuture.runAsync(() -> {
                 try {
-                    productService.getProductImageThumbnail(url);
+                    productService.getProductImgById(productId);
                 } catch (Exception e) {
-                    // 记录日志，避免异常影响其他任务
-                    log.warn("预加载商品图片失败，url: {}", url, e);
+                    log.warn("预加载商品图片失败，productId: {}", productId, e);
                 }
             }, AsyncTask.DEFAULT.getExecutor().getThreadPoolExecutor());
+            futures.add(future);
         }
-        // 等待所有任务完成
-        future.join();
+        CompletableFuture.allOf(futures.toArray(new CompletableFuture[0])).join();
     }
 
-    /**
-     * 二级缓存，基于 url 获取图片缩略图 byte数组
-     */
     @Override
-    @Cacheable(cacheNames = PRODUCT_IMG_THUMBNAIL, key = "#url")
-    public byte[] getProductImageThumbnail(String url) {
-        //TODO 待实现,基于 url 获取图片缩略图 byte数组
-        return new byte[0];
+    @Cacheable(cacheNames = PRODUCT_IMG, key = "#productId")
+    public ErpImgProductBO getProductImgById(Long productId) {
+        ErpProductService productService = SpringUtils.getBean(ErpProductService.class);
+        ErpProductDO productDO = productService.getProductDO(productId);
+        return BeanUtils.toBean(productDO, ErpImgProductBO.class, erpImgProductBO -> {
+            erpImgProductBO.setProductId(productDO.getId());
+            erpImgProductBO.setImg(this.getProductImageThumbnail(productDO.getPrimaryImageUrl()));
+            ObjectMapper objectMapper = new ObjectMapper();
+            String secondaryImageUrls = productDO.getSecondaryImageUrls();
+            if (StrUtil.isNotBlank(secondaryImageUrls)) {
+                try {
+                    List<String> imageUrls = objectMapper.readValue(secondaryImageUrls, new TypeReference<>() {
+                    });
+                    erpImgProductBO.setImg2(imageUrls.stream().map(this::getProductImageThumbnail).toArray(byte[][]::new));
+                } catch (JsonProcessingException e) {
+                    throw new RuntimeException("解析 secondaryImageUrls 失败，productId: " + productId, e);
+                }
+            }
+        });
     }
+
+    private byte[] getProductImageThumbnail(String productImageURL) {
+        String SIZE_URL = "?x-oss-process=image/resize,w_100";
+        String url = productImageURL + SIZE_URL;
+
+        RequestX request = RequestX.builder()
+            .url(url)
+            .requestMethod(RequestX.Method.GET)
+            .build();
+
+        AtomicReference<byte[]> resultRef = new AtomicReference<>();
+
+        WebUtils.sendRequest(request, (response, e) -> {
+            if (e != null) {
+                log.error("[getProductImageThumbnail] 请求异常，URL：{}", url, e);
+                return;
+            }
+
+            if (response != null && response.isSuccessful() && response.body() != null) {
+                try {
+                    byte[] rawBytes = response.body().bytes();
+                    resultRef.set(rawBytes);
+                } catch (IOException ex) {
+                    log.error("[getProductImageThumbnail] 读取响应流失败，URL：{}", url, ex);
+                }
+            } else {
+                log.error("[getProductImageThumbnail] 请求失败，URL：{}，状态码：{}", url, response != null ? response.code() : "null");
+            }
+        });
+
+        return resultRef.get() != null ? resultRef.get() : new byte[0];
+    }
+
+
 }
