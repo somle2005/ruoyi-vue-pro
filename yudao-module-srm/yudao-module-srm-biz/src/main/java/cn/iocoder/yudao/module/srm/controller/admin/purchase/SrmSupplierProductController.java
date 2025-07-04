@@ -95,6 +95,8 @@ public class SrmSupplierProductController {
                 item.setProductId(query.getProductId());
                 item.setSupplierId(query.getSupplierId());
                 item.setLastPrice(supplierProduct != null ? supplierProduct.getLastPurchasePrice() : null);
+                item.setTaxRate(supplierProduct != null ? supplierProduct.getTaxRate() : null);
+                item.setPurchasePriceCurrencyCode(supplierProduct != null ? supplierProduct.getPurchasePriceCurrencyCode() : null);
                 items.add(item);
             }
         }

@@ -19,7 +19,13 @@ public class SrmSupplierProductBatchLastPriceRespVO {
         private Long productId;
         @Schema(description = "供应商ID")
         private Long supplierId;
-        @Schema(description = "上一次成交价", example = "123.45")
+        @Schema(description = "上一次成交价")
         private BigDecimal lastPrice;
+
+        @Schema(description = "税率")
+        private BigDecimal taxRate;
+
+        @Schema(description = "采购货币代码")
+        private Integer purchasePriceCurrencyCode;
     }
 } 
