@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
+import lombok.experimental.Accessors;
 
 /**
  * @author jisencai
@@ -11,6 +12,7 @@ import lombok.Data;
 @Schema(description = "仓库信息 - 库位管理 Import VO")
 @Data
 @ExcelIgnoreUnannotated
+@Accessors(chain = false)
 public class WmsWarehouseBinImportExcelVO {
 
     @ExcelProperty("名称")

@@ -8,6 +8,9 @@ import lombok.Data;
 
 import java.io.Serializable;
 
+/**
+ * @author jisencai
+ */
 @Schema(description="分页参数")
 @Data
 public class PageParam implements Serializable {
@@ -17,7 +20,6 @@ public class PageParam implements Serializable {
 
     /**
      * 每页条数 - 不分页
-     *
      * 例如说，导出接口，可以设置 {@link #pageSize} 为 -1 不分页，查询所有数据。
      */
     public static final Integer PAGE_SIZE_NONE = -1;

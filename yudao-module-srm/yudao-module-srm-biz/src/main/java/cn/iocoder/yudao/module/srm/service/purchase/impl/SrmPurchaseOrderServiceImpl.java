@@ -504,7 +504,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                 return;
             }
             if (inCount.compareTo(item.getQty()) > 0) {
-                throw exception(PURCHASE_ORDER_ITEM_IN_FAIL_PRODUCT_EXCEED, erpProductApi.getProductDto(item.getProductId()).getName(), item.getQty());
+                throw exception(PURCHASE_ORDER_ITEM_IN_FAIL_PRODUCT_EXCEED, erpProductApi.getProductDTO(item.getProductId()).getName(), item.getQty());
             }
             purchaseOrderItemMapper.updateById(new SrmPurchaseOrderItemDO().setId(item.getId()).setInboundClosedQty(inCount));
         });
@@ -527,7 +527,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
                     return;
                 }
                 if (lastedReturnCount.compareTo(item.getInboundClosedQty()) > 0) {
-                    throw exception(PURCHASE_ORDER_ITEM_RETURN_FAIL_IN_EXCEED, item.getId(), erpProductApi.getProductDto(item.getProductId()).getName(), item.getInboundClosedQty());
+                    throw exception(PURCHASE_ORDER_ITEM_RETURN_FAIL_IN_EXCEED, item.getId(), erpProductApi.getProductDTO(item.getProductId()).getName(), item.getInboundClosedQty());
                 }
                 purchaseOrderItemMapper.updateById(new SrmPurchaseOrderItemDO().setId(item.getId()).setReturnCount(lastedReturnCount));
             }

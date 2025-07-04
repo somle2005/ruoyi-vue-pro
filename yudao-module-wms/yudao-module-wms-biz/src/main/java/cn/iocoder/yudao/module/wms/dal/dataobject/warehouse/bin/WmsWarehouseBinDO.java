@@ -4,6 +4,7 @@ import cn.iocoder.yudao.framework.mybatis.core.dataobject.BaseDO;
 import com.baomidou.mybatisplus.annotation.KeySequence;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
+import com.mzt.logapi.starter.annotation.DiffLogAllFields;
 import lombok.*;
 
 /**
@@ -20,6 +21,7 @@ import lombok.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@DiffLogAllFields
 public class WmsWarehouseBinDO extends BaseDO {
 
     /**

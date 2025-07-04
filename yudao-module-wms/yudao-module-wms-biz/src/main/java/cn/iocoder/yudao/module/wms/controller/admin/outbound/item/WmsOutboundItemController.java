@@ -41,6 +41,9 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 
+/**
+ * @author jisencai
+ */
 @Tag(name = "出库单详情")
 @RestController
 @RequestMapping("/wms/outbound-item")
@@ -168,6 +171,7 @@ public class WmsOutboundItemController {
             exportVO.setWarehouseName(warehouse.getName());
             exportVO.setOutboundCode(outboundDO.getCode());
             WmsOutboundStatus outboundStatus = WmsOutboundStatus.parse(itemRespVO.getOutboundStatus());
+            assert outboundStatus != null;
             exportVO.setOutboundStatusLabel(outboundStatus.getLabel());
             exportVO.setBinName(itemRespVO.getBin().getName());
             exportVO.setDeptName(itemRespVO.getDept().getName());
@@ -205,9 +209,7 @@ public class WmsOutboundItemController {
             throw exception(OUTBOUND_ITEM_WAREHOUSE_BIN_NOT_MATCH);
         }
         Map<String, WmsWarehouseBinDO> binMap = StreamX.from(binDOList).toMap(WmsWarehouseBinDO::getCode);
-        StreamX.from(impVOList).assemble(binMap, WmsOutboundItemImportExcelVO::getBinCode,(ex,bin)->{
-            ex.setBinId(bin.getId());
-        });
+        StreamX.from(impVOList).assemble(binMap, WmsOutboundItemImportExcelVO::getBinCode, (ex, bin) -> ex.setBinId(bin.getId()));
 
 
         List<WmsOutboundItemSaveReqVO> saveReqVOList = BeanUtils.toBean(impVOList, WmsOutboundItemSaveReqVO.class);

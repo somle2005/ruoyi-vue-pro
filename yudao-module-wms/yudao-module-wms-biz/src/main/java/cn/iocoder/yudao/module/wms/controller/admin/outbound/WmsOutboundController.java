@@ -11,9 +11,11 @@ import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.*;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.enums.outbound.WmsOutboundAuditStatus;
 import cn.iocoder.yudao.module.wms.service.outbound.WmsOutboundService;
 import cn.iocoder.yudao.module.wms.service.outbound.item.WmsOutboundItemService;
+import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -31,6 +33,11 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
+/**
+ * 出库单
+ *
+ * @author @author jisencai
+ */
 @Tag(name = "出库单")
 @RestController
 @RequestMapping("/wms/outbound")
@@ -43,6 +50,9 @@ public class WmsOutboundController {
 
     @Resource
     private WmsOutboundService outboundService;
+
+    @Resource
+    private WmsWarehouseService wmsWarehouseService;
 
     /**
      * @sign : 3E40A4073A9BDC00
@@ -153,8 +163,22 @@ public class WmsOutboundController {
     public void exportOutboundExcel(@Valid WmsOutboundPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<WmsOutboundDO> list = outboundService.getOutboundPage(pageReqVO).getList();
+        List<WmsOutboundRespVO> voList = BeanUtils.toBean(list, WmsOutboundRespVO.class);
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(voList)
+            .mapping(WmsOutboundRespVO::getCreator, WmsOutboundRespVO::setCreatorName)
+            .mapping(WmsOutboundRespVO::getUpdater, WmsOutboundRespVO::setUpdaterName)
+            .fill();
+        List<WmsOutboundExcelDownloadVO> excelDownloadVOList = BeanUtils.toBean(voList, WmsOutboundExcelDownloadVO.class);
+        excelDownloadVOList.forEach(item -> {
+            // 填充仓库名称
+            WmsWarehouseDO warehouse = wmsWarehouseService.getWarehouse(item.getWarehouseId());
+            if (warehouse != null) {
+                item.setWarehouseName(warehouse.getName());
+            }
+        });
         // 导出 Excel
-        ExcelUtils.write(response, "出库单.xls", "数据", WmsOutboundRespVO.class, BeanUtils.toBean(list, WmsOutboundRespVO.class));
+        ExcelUtils.write(response, "出库单.xls", "数据", WmsOutboundExcelDownloadVO.class, excelDownloadVOList);
     }
 
     @PutMapping("/submit")

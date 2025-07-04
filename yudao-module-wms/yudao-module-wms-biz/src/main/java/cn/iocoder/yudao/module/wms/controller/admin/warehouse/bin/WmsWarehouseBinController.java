@@ -2,7 +2,6 @@ package cn.iocoder.yudao.module.wms.controller.admin.warehouse.bin;
 
 import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
-import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.collection.StreamX;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
@@ -39,7 +38,9 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.*;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
+import static cn.iocoder.yudao.framework.common.pojo.PageParam.PAGE_SIZE_NONE;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.WAREHOUSE_BIN_NOT_EXISTS;
+import static com.fhs.common.constant.Constant.ONE;
 import static java.lang.Boolean.TRUE;
 
 /**
@@ -68,6 +69,7 @@ public class WmsWarehouseBinController {
     @Operation(summary = "创建库位")
     @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:create')")
     public CommonResult<Long> createWarehouseBin(@Valid @RequestBody WmsWarehouseBinSaveReqVO createReqVO) {
+        createReqVO.setCode(createReqVO.getName());
         return success(warehouseBinService.createWarehouseBin(createReqVO).getId());
     }
 
@@ -75,6 +77,7 @@ public class WmsWarehouseBinController {
     @Operation(summary = "更新库位")
     @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:update')")
     public CommonResult<Boolean> updateWarehouseBin(@Valid @RequestBody WmsWarehouseBinSaveReqVO updateReqVO) {
+        updateReqVO.setCode(updateReqVO.getName());
         warehouseBinService.updateWarehouseBin(updateReqVO);
         return success(true);
     }
@@ -83,6 +86,7 @@ public class WmsWarehouseBinController {
     @Operation(summary = "批量更新库位")
     @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:update')")
     public CommonResult<Boolean> updateWarehouseBin(@Valid @RequestBody List<WmsWarehouseBinSaveReqVO> updateReqVoList) {
+        updateReqVoList.forEach(reqVo -> reqVo.setCode(reqVo.getName()));
         warehouseBinService.batchUpdateWarehouseBin(updateReqVoList);
         return success(true);
     }
@@ -93,6 +97,14 @@ public class WmsWarehouseBinController {
     @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:delete')")
     public CommonResult<Boolean> deleteWarehouseBin(@RequestParam("id") Long id) {
         warehouseBinService.deleteWarehouseBin(id);
+        return success(true);
+    }
+
+    @PutMapping("/enable")
+    @Operation(summary = "启用/禁用库位")
+    @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:delete')")
+    public CommonResult<Boolean> enableWarehouseBin(@RequestBody List<Long> ids) {
+        warehouseBinService.enableWarehouseBin(ids);
         return success(true);
     }
 
@@ -145,14 +157,10 @@ public class WmsWarehouseBinController {
         PageResult<WmsWarehouseBinRespVO> voPageResult = BeanUtils.toBean(doPageResult, WmsWarehouseBinRespVO.class);
         // 装配仓库
         List<WmsWarehouseDO> warehouseDOList = warehouseService.selectByIds(StreamX.from(voPageResult.getList()).toList(WmsWarehouseBinRespVO::getWarehouseId));
-        StreamX.from(voPageResult.getList()).assemble(warehouseDOList, WmsWarehouseDO::getId, WmsWarehouseBinRespVO::getWarehouseId, (b,w)->{
-            b.setWarehouse(BeanUtils.toBean(w, WmsWarehouseSimpleRespVO.class));
-        });
+        StreamX.from(voPageResult.getList()).assemble(warehouseDOList, WmsWarehouseDO::getId, WmsWarehouseBinRespVO::getWarehouseId, (b, w) -> b.setWarehouse(BeanUtils.toBean(w, WmsWarehouseSimpleRespVO.class)));
         // 装配库区
         List<WmsWarehouseZoneDO> warehouseZoneDOList = warehouseZoneService.selectByIds(StreamX.from(voPageResult.getList()).toSet(WmsWarehouseBinRespVO::getZoneId));
-        StreamX.from(voPageResult.getList()).assemble(warehouseZoneDOList, WmsWarehouseZoneDO::getId, WmsWarehouseBinRespVO::getZoneId, (b,w)->{
-            b.setZone(BeanUtils.toBean(w, WmsWarehouseZoneSimpleRespVO.class));
-        });
+        StreamX.from(voPageResult.getList()).assemble(warehouseZoneDOList, WmsWarehouseZoneDO::getId, WmsWarehouseBinRespVO::getZoneId, (b, w) -> b.setZone(BeanUtils.toBean(w, WmsWarehouseZoneSimpleRespVO.class)));
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())
 			.mapping(WmsWarehouseBinRespVO::getCreator, WmsWarehouseBinRespVO::setCreatorName)
@@ -167,10 +175,16 @@ public class WmsWarehouseBinController {
     @PreAuthorize("@ss.hasPermission('wms:warehouse-bin:export')")
     @ApiAccessLog(operateType = EXPORT)
     public void exportWarehouseBinExcel(@Valid WmsWarehouseBinPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
-        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
+        pageReqVO.setPageSize(PAGE_SIZE_NONE);
         List<WmsWarehouseBinDO> list = warehouseBinService.getWarehouseBinPage(pageReqVO).getList();
+        List<WmsWarehouseBinRespVO> respList = BeanUtils.toBean(list, WmsWarehouseBinRespVO.class);
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(respList)
+            .mapping(WmsWarehouseBinRespVO::getCreator, WmsWarehouseBinRespVO::setCreatorName)
+            .mapping(WmsWarehouseBinRespVO::getUpdater, WmsWarehouseBinRespVO::setUpdaterName)
+            .fill();
         // 导出 Excel
-        ExcelUtils.write(response, "库位.xls", "数据", WmsWarehouseBinRespVO.class, BeanUtils.toBean(list, WmsWarehouseBinRespVO.class));
+        ExcelUtils.write(response, "库位.xls", "数据", WmsWarehouseBinRespVO.class, respList);
     }
 
     @GetMapping("/download/template")
@@ -203,15 +217,38 @@ public class WmsWarehouseBinController {
         // 读取数据
         List<WmsWarehouseBinImportExcelVO> impVOList = ExcelUtils.read(importReqVO.getFile(), WmsWarehouseBinImportExcelVO.class);
 
-        //判断是否全量覆盖
         boolean overwrite = importReqVO.getOverwrite() == null ? TRUE : importReqVO.getOverwrite();
         if (overwrite) {
-            warehouseBinService.deleteAllWarehouseBin();
-        }
-        for (WmsWarehouseBinImportExcelVO impVO : impVOList) {
-            warehouseBinService.createWarehouseBin(BeanUtils.toBean(impVO, WmsWarehouseBinSaveReqVO.class));
-        }
+            //替换掉已经存在的库位，其余的批量新增
+            WmsWarehouseBinPageReqVO pageReqVO = new WmsWarehouseBinPageReqVO();
+            pageReqVO.setPageSize(100);
+            pageReqVO.setPageNo(1);
+            List<WmsWarehouseBinDO> existWarehouseBinList = warehouseBinService.getSimpleList(pageReqVO);
+            List<WmsWarehouseBinImportExcelVO> toUpdateList = StreamX.from(impVOList)
+                .filter(vo -> existWarehouseBinList.stream().anyMatch(bin -> bin.getCode().equals(vo.getName())))
+                .toList();
+            List<WmsWarehouseBinImportExcelVO> toCreateList = StreamX.from(impVOList)
+                .filter(vo -> existWarehouseBinList.stream().noneMatch(bin -> bin.getCode().equals(vo.getName())))
+                .toList();
+            for (WmsWarehouseBinImportExcelVO vo : toUpdateList) {
+                WmsWarehouseBinSaveReqVO updateReqVO = BeanUtils.toBean(vo, WmsWarehouseBinSaveReqVO.class);
+                WmsWarehouseBinDO existingBin = existWarehouseBinList.stream()
+                    .filter(bin -> bin.getCode().equals(vo.getName()))
+                    .findFirst()
+                    .orElseThrow(() -> exception(WAREHOUSE_BIN_NOT_EXISTS));
+                updateReqVO.setCode(vo.getName());
+                updateReqVO.setStatus(ONE);
+                updateReqVO.setId(existingBin.getId());
+                warehouseBinService.updateWarehouseBin(updateReqVO);
+            }
+            for (WmsWarehouseBinImportExcelVO vo : toCreateList) {
+                WmsWarehouseBinSaveReqVO saveReqVO = BeanUtils.toBean(vo, WmsWarehouseBinSaveReqVO.class);
+                saveReqVO.setCode(vo.getName());
+                saveReqVO.setStatus(ONE);
+                warehouseBinService.createWarehouseBin(saveReqVO);
+            }
 
+        }
         return success(true);
     }
 

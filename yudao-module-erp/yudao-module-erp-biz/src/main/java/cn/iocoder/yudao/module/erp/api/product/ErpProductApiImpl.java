@@ -29,7 +29,7 @@ public class ErpProductApiImpl implements ErpProductApi {
     private final ErpProductService erpProductService;
 
     @Override
-    public ErpProductDTO getProductDto(Long id) {
+    public ErpProductDTO getProductDTO(Long id) {
         ErpProductDO productDO = erpProductMapper.selectById(id);
         if (productDO == null) {
             return null;

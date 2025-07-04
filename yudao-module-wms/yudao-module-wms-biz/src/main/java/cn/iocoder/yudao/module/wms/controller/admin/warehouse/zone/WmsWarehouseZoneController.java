@@ -35,6 +35,9 @@ import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionU
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.WAREHOUSE_ZONE_NOT_EXISTS;
 
+/**
+ * @author jisencai
+ */
 @Tag(name = "库区")
 @RestController
 @RequestMapping("/wms/warehouse-zone")
@@ -124,9 +127,7 @@ public class WmsWarehouseZoneController {
 
         // 装配仓库
         List<WmsWarehouseDO> warehouseDOList = warehouseService.selectByIds(StreamX.from(voPageResult.getList()).toList(WmsWarehouseZoneRespVO::getWarehouseId));
-        StreamX.from(voPageResult.getList()).assemble(warehouseDOList, WmsWarehouseDO::getId, WmsWarehouseZoneRespVO::getWarehouseId, (b,w)->{
-            b.setWarehouse(BeanUtils.toBean(w, WmsWarehouseSimpleRespVO.class));
-        });
+        StreamX.from(voPageResult.getList()).assemble(warehouseDOList, WmsWarehouseDO::getId, WmsWarehouseZoneRespVO::getWarehouseId, (b, w) -> b.setWarehouse(BeanUtils.toBean(w, WmsWarehouseSimpleRespVO.class)));
 
         // 人员姓名填充
         AdminUserApi.inst().prepareFill(voPageResult.getList())

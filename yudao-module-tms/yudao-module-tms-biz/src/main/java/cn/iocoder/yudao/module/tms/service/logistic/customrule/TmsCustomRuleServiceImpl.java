@@ -145,8 +145,10 @@ public class TmsCustomRuleServiceImpl implements TmsCustomRuleService {
         //检查规则下的产品是否存在海关分类
 //        ThrowUtil.ifThrow(customRuleMapper.selectById(id) == null,CUSTOM_RULE_CATEGORY_ITEM_NOT_EXISTS_BY_PRODUCT_ID);
         TmsCustomRuleDO ruleDO = customRuleMapper.selectById(id);
-        if (ruleDO == null) return null;
-        if (erpProductApi.getProductDto(ruleDO.getProductId()).getCustomCategoryId() == null) {
+        if (ruleDO == null) {
+            return null;
+        }
+        if (erpProductApi.getProductDTO(ruleDO.getProductId()).getCustomCategoryId() == null) {
             //不存在海关规则->原始table
             return BeanUtils.toBean(ruleDO, TmsCustomRuleBO.class);
         } else {
@@ -180,7 +182,7 @@ public class TmsCustomRuleServiceImpl implements TmsCustomRuleService {
             return;
         }
         // 如果 id 为空，说明不用比较是否为相同 id 的字典类型
-        String productCode = erpProductApi.getProductDto(productId).getCode();
+        String productCode = erpProductApi.getProductDTO(productId).getCode();
         String countryDesc = dictDataApi.getDictDataLabel(TmsDictTypeConstants.COUNTRY_CODE, countryCode);
         ThrowUtil.ifThrow(id == null, NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE, productCode + countryDesc);
         ThrowUtil.ifThrow(!tmsCustomRuleDO.getId().equals(id), NO_REPEAT_OF_COUNTRY_CODE_AND_PRODUCT_CODE, productCode + countryDesc);

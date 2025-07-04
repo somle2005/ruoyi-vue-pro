@@ -32,12 +32,14 @@ import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundPageR
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.outbound.vo.WmsOutboundSaveReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.warehouse.vo.WmsWarehouseSimpleRespVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.item.WmsInboundItemLogicDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.WmsOutboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.outbound.item.WmsOutboundItemDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.bin.WmsStockBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.stock.warehouse.WmsStockWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
+import cn.iocoder.yudao.module.wms.dal.mysql.inbound.item.WmsInboundItemLogicQueryMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.WmsOutboundMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.outbound.item.WmsOutboundItemMapper;
 import cn.iocoder.yudao.module.wms.dal.mysql.stock.bin.WmsStockBinMapper;
@@ -61,11 +63,15 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.system.enums.somle.BillType.SRM_PURCHASE_RETURN;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
 import static cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus.*;
+import static cn.iocoder.yudao.module.wms.enums.warehouse.WmsWarehouseOutboundMode.BIN_FIRST;
+import static cn.iocoder.yudao.module.wms.enums.warehouse.WmsWarehouseOutboundMode.FIFO;
+import static java.lang.Boolean.TRUE;
 
 /**
  * 出库单 Service 实现类
@@ -139,6 +145,10 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Autowired
     WmsOutboundService wmsOutboundService;
 
+    @Resource
+    @Lazy
+    private WmsInboundItemLogicQueryMapper inboundItemLogicQueryMapper;
+
     /**
      * @sign : A523E13094CD30CE
      */
@@ -201,7 +211,7 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
                 stockBinDO = map.get(itemDO.getProductId());
             }
             if (stockBinDO == null) {
-                ErpProductDTO productDto = productApi.getProductDto(itemDO.getProductId());
+                ErpProductDTO productDto = productApi.getProductDTO(itemDO.getProductId());
                 throw exception(STOCK_BIN_PRODUCT_NOT_EXISTS, productDto.getCode());
             }
             //建单时不做此项校验
@@ -219,23 +229,49 @@ public class WmsOutboundServiceImpl implements WmsOutboundService {
     @Transactional(rollbackFor = Exception.class)
     public WmsOutboundRespVO generateOutbound(WmsOutboundImportReqVO importReqVO) {
 
-        Map<Long, ErpProductRespDTO> productDTOMap = productApi.getProductDTOMap(StreamX.from(importReqVO.getItemList()).toList(WmsOutboundItemSaveReqVO::getProductId));
+        Map<Long, ErpProductRespDTO> productMap = productApi.getProductDTOMap(StreamX.from(importReqVO.getItemList()).toList(WmsOutboundItemSaveReqVO::getProductId));
         List<WmsOutboundItemSaveReqVO> itemList = BeanUtils.toBean(importReqVO.getItemList(), WmsOutboundItemSaveReqVO.class);
-        //查库位
-        for (WmsOutboundItemSaveReqVO item : itemList) {
-            //查询仓位库存表 规则1.根据后进先出筛选出最近入库批次 2.同一批次下，多个库位，根据自带优先级进行选择 3.该库位必须有足够货量
-            WmsStockBinDO stockBin = stockBinMapper.selectByProductId(item.getProductId(), item.getPlanQty(), importReqVO.getWarehouseId());
-            if (stockBin == null) {
-                throw exception(STOCK_BIN_PRODUCT_NOT_ENOUGH, productDTOMap.get(item.getProductId()).getName());
-            }
-            item.setBinId(stockBin.getBinId());
-        }
+        //匹配库位
+        calculateBinId(itemList, productMap, importReqVO);
         WmsOutboundSaveReqVO createReqVO = BeanUtils.toBean(importReqVO, WmsOutboundSaveReqVO.class);
         createReqVO.setItemList(itemList);
 //        createReqVO.setUpstreamCode(importReqVO.getUpstreamCode());
 //        createReqVO.setWarehouseId(importReqVO.getWarehouseId());
         WmsOutboundDO outboundDO = createOutbound(createReqVO);
         return BeanUtils.toBean(outboundDO, WmsOutboundRespVO.class);
+    }
+
+    /**
+     * 匹配库位
+     */
+    private void calculateBinId(List<WmsOutboundItemSaveReqVO> itemList, Map<Long, ErpProductRespDTO> productMap, WmsOutboundImportReqVO importReqVO) {
+        WmsWarehouseDO warehouseDO = warehouseService.getWarehouse(importReqVO.getWarehouseId());
+        Integer outboundMode = warehouseDO.getOutboundMode();
+        if (Objects.equals(outboundMode, FIFO.getValue())) {
+            //执行先进先出规则。规则1.该库位必须有足够货量 2.根据先进先出筛选出最近入库批次 3.同一批次下，多个库位，根据自带优先级进行选择
+            //获取批次
+            Map<Long, List<WmsInboundItemLogicDO>> batchMap = inboundItemLogicQueryMapper.selectInboundItemLogicGroupedMap(importReqVO.getWarehouseId(), itemList.stream().map(WmsOutboundItemSaveReqVO::getProductId).collect(Collectors.toList()), TRUE);
+            for (WmsOutboundItemSaveReqVO item : itemList) {
+                //筛选出数量足够的批次
+                List<WmsInboundItemLogicDO> filtedList = batchMap.get(item.getProductId()).stream().filter(x -> x.getSellableQty() >= item.getPlanQty()).toList();
+                if (CollectionUtils.isEmpty(filtedList)) {
+                    throw exception(WAREHOUSE_BIN_NOT_EXISTS, productMap.get(item.getProductId()).getName());
+                }
+                item.setBinId(filtedList.get(0).getBinId());
+            }
+            return;
+        }
+        if (Objects.equals(outboundMode, BIN_FIRST.getValue())) {
+            //执行库位优先规则 规则1.该库位必须有足够货量 2.根据库位自带优先级进行选择
+            for (WmsOutboundItemSaveReqVO item : itemList) {
+                WmsStockBinDO stockBin = stockBinMapper.selectByProductId(item.getProductId(), item.getPlanQty(), importReqVO.getWarehouseId());
+                if (stockBin == null) {
+                    throw exception(WAREHOUSE_BIN_NOT_EXISTS, productMap.get(item.getProductId()).getName());
+                }
+                item.setBinId(stockBin.getBinId());
+            }
+        }
+
     }
 
     /**

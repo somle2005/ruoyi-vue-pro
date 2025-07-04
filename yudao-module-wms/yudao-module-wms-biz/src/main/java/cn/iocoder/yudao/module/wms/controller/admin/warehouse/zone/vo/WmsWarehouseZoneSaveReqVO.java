@@ -1,18 +1,22 @@
 package cn.iocoder.yudao.module.wms.controller.admin.warehouse.zone.vo;
 
-import io.swagger.v3.oas.annotations.media.Schema;
-import lombok.*;
-import jakarta.validation.constraints.*;
 import cn.iocoder.yudao.framework.common.validation.InEnum;
-import cn.iocoder.yudao.module.wms.enums.warehouse.WmsWarehouseZoneStockType;
-import cn.iocoder.yudao.module.wms.enums.warehouse.WmsWarehouseZonePartitionType;
 import cn.iocoder.yudao.module.wms.enums.common.WmsValidStatus;
+import cn.iocoder.yudao.module.wms.enums.warehouse.WmsWarehouseZonePartitionType;
+import cn.iocoder.yudao.module.wms.enums.warehouse.WmsWarehouseZoneStockType;
+import com.mzt.logapi.starter.annotation.DiffLogAllFields;
+import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import lombok.Data;
 
 /**
+ *  @author jisencai
  * @table-fields : stock_type,code,name,id,priority,partition_type,status,warehouse_id
  */
 @Schema(description = "管理后台 - 库区新增/修改 Request VO")
 @Data
+@DiffLogAllFields
 public class WmsWarehouseZoneSaveReqVO {
 
     @Schema(description = "主键", requiredMode = Schema.RequiredMode.REQUIRED, example = "5926")

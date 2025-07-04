@@ -55,7 +55,7 @@ public class TmsCustomRuleApiImpl implements TmsCustomRuleApi {
             throw exception(CUSTOM_RULE_NOT_EXISTS, id);
         }
         //2.0 获得产品
-        ErpProductDTO productDto = erpProductApi.getProductDto(ruleBO.getProductId());
+        ErpProductDTO productDto = erpProductApi.getProductDTO(ruleBO.getProductId());
         return TmsCustomRuleConvert.INSTANCE.convert(ruleBO, productDto);
     }
 

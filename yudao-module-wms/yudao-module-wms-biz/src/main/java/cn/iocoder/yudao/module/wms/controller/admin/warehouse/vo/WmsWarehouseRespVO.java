@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
+ * @author jisencai
  * @table-fields : tenant_id,country,creator,code,contact_phone,create_time,city,contact_person,postcode,is_sync,updater,mode,external_storage_id,update_time,address_line2,province,address_line1,address_line3,name,id,status
  */
 @Schema(description = "管理后台 - 仓库 Response VO")
@@ -90,24 +91,33 @@ public class WmsWarehouseRespVO {
     @ExcelProperty("更新人姓名")
     private String updaterName;
 
-    @Schema(description = "创建者", example = "")
+    @Schema(description = "创建者")
     @ExcelProperty("创建者")
     private String creator;
 
-    @Schema(description = "更新者", example = "")
+    @Schema(description = "更新者")
     @ExcelProperty("更新者")
     private String updater;
 
-    @Schema(description = "更新时间", example = "")
+    @Schema(description = "更新时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
 
-    @Schema(description = "租户编号", example = "")
+    @Schema(description = "租户编号")
     @ExcelProperty("租户编号")
     private Long tenantId;
 
-    @Schema(description = "状态，WMS通用的对象有效状态 ; ValidStatus : 0-不可用 , 1-可用", example = "")
+    @Schema(description = "状态，WMS通用的对象有效状态 ; ValidStatus : 0-不可用 , 1-可用")
     @ExcelProperty("状态")
     private Integer status;
+
+    @Schema(description = "上架模式1标准模式2自动上架", example = "1")
+    @ExcelProperty("上架模式")
+    private Integer shelfMode;
+
+    @Schema(description = "出货模式1先进先出2库位优先", example = "1")
+    @ExcelProperty("出货模式")
+    private Integer outboundMode;
+
 }

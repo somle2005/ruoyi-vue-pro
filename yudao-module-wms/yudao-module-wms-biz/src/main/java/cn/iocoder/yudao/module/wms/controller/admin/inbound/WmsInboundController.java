@@ -9,50 +9,48 @@ import cn.iocoder.yudao.framework.common.validation.ValidationGroup;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.approval.history.vo.WmsApprovalReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundPageReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundRespVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSaveReqVO;
-import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.WmsInboundSimpleRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.inbound.vo.*;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
-import cn.iocoder.yudao.module.wms.service.approval.history.WmsApprovalHistoryService;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
-import cn.iocoder.yudao.module.wms.service.inbound.item.WmsInboundItemService;
+import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 
+/**
+ * 入库单
+ *
+ * @author jisencai
+ */
 @Tag(name = "入库单")
 @RestController
 @RequestMapping("/wms/inbound")
 @Validated
 public class WmsInboundController {
 
-    @Resource()
-    @Lazy()
-    private WmsInboundItemService inboundItemService;
-
     @Resource
     @Lazy
     private WmsInboundService inboundService;
 
-    @Autowired
-    private WmsApprovalHistoryService wmsApprovalHistoryService;
+    @Resource
+    @Lazy
+    private WmsWarehouseService wmsWarehouseService;
 
     /**
      * @sign : 9362CEB68950BDF7
@@ -133,7 +131,7 @@ public class WmsInboundController {
     @PreAuthorize("@ss.hasPermission('wms:inbound:query')")
     public CommonResult<WmsInboundRespVO> getInbound(@RequestParam("id") Long id) {
         WmsInboundRespVO inboundVO = inboundService.getInboundWithItemList(id);
-        inboundService.assembleApprovalHistory(Arrays.asList(inboundVO));
+        inboundService.assembleApprovalHistory(Collections.singletonList(inboundVO));
         // 返回
         return success(inboundVO);
     }
@@ -183,7 +181,23 @@ public class WmsInboundController {
     public void exportInboundExcel(@Valid WmsInboundPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         List<WmsInboundDO> list = inboundService.getInboundPage(pageReqVO).getList();
+        List<WmsInboundRespVO> voList = BeanUtils.toBean(list, WmsInboundRespVO.class);
+
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(voList)
+            .mapping(WmsInboundRespVO::getCreator, WmsInboundRespVO::setCreatorName)
+            .mapping(WmsInboundRespVO::getUpdater, WmsInboundRespVO::setUpdaterName)
+            .fill();
+
+        List<WmsInboundExcelDownloadVO> excelDownloadVOList = BeanUtils.toBean(voList, WmsInboundExcelDownloadVO.class);
+        excelDownloadVOList.forEach(item -> {
+            // 填充仓库名称
+            WmsWarehouseDO warehouse = wmsWarehouseService.getWarehouse(item.getWarehouseId());
+            if (warehouse != null) {
+                item.setWarehouseName(warehouse.getName());
+            }
+        });
         // 导出 Excel
-        ExcelUtils.write(response, "入库单.xls", "数据", WmsInboundRespVO.class, BeanUtils.toBean(list, WmsInboundRespVO.class));
+        ExcelUtils.write(response, "入库单.xls", "数据", WmsInboundExcelDownloadVO.class, excelDownloadVOList);
     }
 }

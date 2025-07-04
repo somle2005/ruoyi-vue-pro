@@ -13,11 +13,15 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.bin.WmsWarehouseBinDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.zone.WmsWarehouseZoneDO;
 import cn.iocoder.yudao.module.wms.dal.mysql.warehouse.WmsWarehouseMapper;
+import cn.iocoder.yudao.module.wms.enums.WmsLogRecordConstants;
 import cn.iocoder.yudao.module.wms.service.external.storage.WmsExternalStorageService;
 import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.warehouse.bin.WmsWarehouseBinService;
 import cn.iocoder.yudao.module.wms.service.warehouse.zone.WmsWarehouseZoneService;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -27,6 +31,7 @@ import java.util.*;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.wms.enums.WmsLogRecordConstants.*;
 
 /**
  * 仓库 Service 实现类
@@ -35,6 +40,7 @@ import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
  */
 @Service
 @Validated
+@Slf4j
 public class WmsWarehouseServiceImpl implements WmsWarehouseService {
 
     @Resource
@@ -60,6 +66,12 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
      * @sign : 6A1033E3C48B0B9A
      */
     @Override
+    @LogRecord(type = WMS_WAREHOUSE_REQUEST_TYPE,
+        subType = WMS_WAREHOUSE_REQUEST_CREATE_SUB_TYPE,
+        bizNo = "{{#id}}",
+        extra = "{{#createReqVO.code}}",
+        success = "创建了仓库【{{#createReqVO.code}}】")
+    @Transactional(rollbackFor = Exception.class)
     public WmsWarehouseDO createWarehouse(WmsWarehouseSaveReqVO createReqVO) {
         if (warehouseMapper.getByName(createReqVO.getName()) != null) {
             throw exception(WAREHOUSE_NAME_DUPLICATE);
@@ -77,6 +89,8 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
         // 插入
         WmsWarehouseDO warehouse = BeanUtils.toBean(createReqVO, WmsWarehouseDO.class);
         warehouseMapper.insert(warehouse);
+        //回填log记录
+        LogRecordContext.putVariable("id", warehouse.getId());
         // 返回
         return warehouse;
     }
@@ -85,7 +99,13 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
      * @sign : 38B6A9D0484E56C4
      */
     @Override
-    public WmsWarehouseDO updateWarehouse(WmsWarehouseSaveReqVO updateReqVO) {
+    @LogRecord(type = WMS_WAREHOUSE_REQUEST_TYPE,
+        subType = WMS_WAREHOUSE_REQUEST_UPDATE_SUB_TYPE,
+        bizNo = "{{#updateReqVO.id}}",
+        extra = "{{#updateReqVO.code}}",
+        success = "更新了仓库【{{#updateReqVO.code}}】: {_DIFF{#updateReqVO}}")
+    @Transactional(rollbackFor = Exception.class)
+    public WmsWarehouseDO updateWarehouse(@Validated WmsWarehouseSaveReqVO updateReqVO) {
         // 校验存在
         WmsWarehouseDO exists = validateWarehouseExists(updateReqVO.getId());
         if (!Objects.equals(updateReqVO.getId(), exists.getId()) && Objects.equals(updateReqVO.getName(), exists.getName())) {
@@ -112,6 +132,11 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
      * @sign : 0F9BF04D1552020A
      */
     @Override
+    @LogRecord(type = WMS_WAREHOUSE_REQUEST_TYPE,
+        subType = WmsLogRecordConstants.WMS_WAREHOUSE_REQUEST_DELETE_SUB_TYPE,
+        bizNo = "{{#id}}",
+        extra = "{{#code}}",
+        success = "删除了仓库【{{#code}}】")
     @Transactional(rollbackFor = Exception.class)
     public void deleteWarehouse(Long id) {
         // 校验存在
@@ -131,6 +156,8 @@ public class WmsWarehouseServiceImpl implements WmsWarehouseService {
         if (!CollectionUtils.isEmpty(inboundList)) {
             throw exception(WAREHOUSE_BE_REFERRED);
         }
+        //回填log记录
+        LogRecordContext.putVariable("code", warehouse.getCode());
         // 唯一索引去重
         warehouse.setName(warehouseMapper.flagUKeyAsLogicDelete(warehouse.getName()));
         warehouse.setCode(warehouseMapper.flagUKeyAsLogicDelete(warehouse.getCode()));

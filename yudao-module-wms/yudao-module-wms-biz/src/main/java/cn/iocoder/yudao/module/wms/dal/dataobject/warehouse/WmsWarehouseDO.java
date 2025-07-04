@@ -102,6 +102,17 @@ public class WmsWarehouseDO extends BaseDO {
      * 状态：0-不可用；1-可用
      */
     private Integer status;
+
+    /**
+     * 上架模式1标准模式2自动上架
+     */
+    private Integer shelfMode;
+
+    /**
+     * 出货模式1先进先出2库位优先
+     */
+    private Integer outboundMode;
+
     // private Boolean deleted;
     // 
     // public WmsWarehouseDO setDeleted(Boolean deleted) {

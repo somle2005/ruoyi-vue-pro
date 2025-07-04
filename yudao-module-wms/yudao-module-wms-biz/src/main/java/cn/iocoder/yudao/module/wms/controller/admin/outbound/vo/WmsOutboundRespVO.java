@@ -100,6 +100,12 @@ public class WmsOutboundRespVO {
     @ExcelProperty("出库动作ID")
     private Long latestOutboundActionId;
 
+    /**
+     * 仓库名称
+     */
+    @Schema(description = "仓库名称")
+    private String warehouseName;
+
     @Schema(description = "仓库")
     private WmsWarehouseSimpleRespVO warehouse;
 

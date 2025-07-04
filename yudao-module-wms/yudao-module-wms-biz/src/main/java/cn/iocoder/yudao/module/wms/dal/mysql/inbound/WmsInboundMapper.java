@@ -20,7 +20,7 @@ import java.util.List;
 @Mapper
 public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
 
-    static final String PRODUCT_EXISTS_SQL = "select 1 from wms_inbound_item pi where pi.inbound_id=wms_inbound.id and pi.product_id={0}";
+    String PRODUCT_EXISTS_SQL = "select 1 from wms_inbound_item pi where pi.inbound_id=wms_inbound.id and pi.product_id={0}";
 
     default PageResult<WmsInboundDO> selectPage(WmsInboundPageReqVO reqVO) {
 
@@ -39,6 +39,7 @@ public interface WmsInboundMapper extends BaseMapperX<WmsInboundDO> {
                 .eqIfPresent(WmsInboundDO::getInitAge, reqVO.getInitAge())
                 .betweenIfPresent(WmsInboundDO::getCreateTime, reqVO.getCreateTime())
                 .orderByDesc(WmsInboundDO::getId);
+
 
         if (reqVO.getProductId() != null) {
             query.exists(PRODUCT_EXISTS_SQL, reqVO.getProductId());

@@ -39,11 +39,6 @@ public interface WmsWarehouseBinService {
     void deleteWarehouseBin(Long id);
 
     /**
-     * 删除全部库位
-     */
-    void deleteAllWarehouseBin();
-
-    /**
      * 获得库位
      *
      * @param id 编号
@@ -95,4 +90,11 @@ public interface WmsWarehouseBinService {
      * @param updateReqVoList 更新信息列表
      */
     void batchUpdateWarehouseBin(List<WmsWarehouseBinSaveReqVO> updateReqVoList);
+
+    /**
+     * 启用/禁用库位
+     *
+     * @param ids 编号列表
+     */
+    void enableWarehouseBin(List<Long> ids);
 }

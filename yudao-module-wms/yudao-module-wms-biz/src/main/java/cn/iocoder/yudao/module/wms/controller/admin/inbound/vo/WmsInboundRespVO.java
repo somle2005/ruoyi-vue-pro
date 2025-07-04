@@ -16,6 +16,7 @@ import java.util.List;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
+ * @author jisencai
  * @table-fields : tenant_id,creator,code,inbound_status,company_id,create_time,inbound_time,arrival_actual_time,remark,audit_status,trace_no,type,updater,upstream_type,update_time,init_age,upstream_id,shipping_method,id,upstream_code,dept_id,arrival_plan_time,shelving_status,warehouse_id
  */
 @Schema(description = "管理后台 - 入库单 Response VO")
@@ -59,89 +60,89 @@ public class WmsInboundRespVO {
     @ExcelProperty("更新人姓名")
     private String updaterName;
 
-    @Schema(description = "创建者", example = "")
+    @Schema(description = "创建者")
     @ExcelProperty("创建者")
     private String creator;
 
-    @Schema(description = "租户编号", example = "")
+    @Schema(description = "租户编号")
     @ExcelProperty("租户编号")
     private Long tenantId;
 
-    @Schema(description = "更新时间", example = "")
+    @Schema(description = "更新时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @ExcelProperty("更新时间")
     private LocalDateTime updateTime;
 
-    @Schema(description = "更新者", example = "")
+    @Schema(description = "更新者")
     @ExcelProperty("更新者")
     private String updater;
 
-    @Schema(description = "详情清单", example = "")
+    @Schema(description = "详情清单")
     @ExcelProperty("详情清单")
     private List<WmsInboundItemRespVO> itemList;
 
-    @Schema(description = "WMS入库单审批状态 ; WmsInboundAuditStatus : 0-草稿 , 1-待入库 , 2-驳回 , 3-已入库 , 4-强制入库 , 5-作废", example = "")
+    @Schema(description = "WMS入库单审批状态 ; WmsInboundAuditStatus : 0-草稿 , 1-待入库 , 2-驳回 , 3-已入库 , 4-强制入库 , 5-作废")
     @ExcelProperty("WMS入库单审批状态")
     private Integer auditStatus;
 
-    @Schema(description = "WMS入库状态 ; WmsInboundStatus : 0-未入库 , 1-部分入库 , 2-已入库", example = "")
+    @Schema(description = "WMS入库状态 ; WmsInboundStatus : 0-未入库 , 1-部分入库 , 2-已入库")
     @ExcelProperty("WMS入库状态")
     private Integer inboundStatus;
 
-    @Schema(description = "库存财务公司ID", example = "")
+    @Schema(description = "库存财务公司ID")
     @ExcelProperty("库存财务公司ID")
     private Long companyId;
 
-    @Schema(description = "实际到货时间", example = "")
+    @Schema(description = "实际到货时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @ExcelProperty("实际到货时间")
     private LocalDateTime arrivalActualTime;
 
-    @Schema(description = "计划到货时间", example = "")
+    @Schema(description = "计划到货时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @ExcelProperty("计划到货时间")
     private LocalDateTime arrivalPlanTime;
 
-    @Schema(description = "入库时间", example = "")
+    @Schema(description = "入库时间")
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     @ExcelProperty("入库时间")
     private LocalDateTime inboundTime;
 
-    @Schema(description = "仓库", example = "")
+    @Schema(description = "仓库")
     private WmsWarehouseSimpleRespVO warehouse;
 
-    @Schema(description = "审批历史", example = "")
+    @Schema(description = "审批历史")
     List<WmsApprovalHistoryRespVO> approvalHistoryList;
 
-    @Schema(description = "库存归属部门ID", example = "")
+    @Schema(description = "库存归属部门ID")
     @ExcelProperty("库存归属部门ID")
     private Long deptId;
 
-    @Schema(description = "财务公司", example = "")
+    @Schema(description = "财务公司")
     @ExcelProperty("财务公司")
     private FmsCompanySimpleRespVO company;
 
-    @Schema(description = "单据号", example = "")
+    @Schema(description = "单据号")
     @ExcelProperty("单据号")
     private String code;
 
-    @Schema(description = "来源单据ID", example = "")
+    @Schema(description = "来源单据ID")
     @ExcelProperty("来源单据ID")
     private Long upstreamId;
 
-    @Schema(description = "来源单据编码", example = "")
+    @Schema(description = "来源单据编码")
     @ExcelProperty("来源单据编码")
     private String upstreamCode;
 
-    @Schema(description = "SYSTEM单据类型 ; BillType : 0-手工入库 , 1-采购入库 , 2-盘点入库", example = "")
+    @Schema(description = "SYSTEM单据类型 ; BillType : 0-手工入库 , 1-采购入库 , 2-盘点入库")
     @ExcelProperty("WMS来源单据类型")
     private Integer upstreamType;
 
-    @Schema(description = "WMS入库单上架状态 ; WmsInboundShelvingStatus : 1-未上架 , 2-部分上架 , 3-已上架", example = "")
+    @Schema(description = "WMS入库单上架状态 ; WmsInboundShelvingStatus : 1-未上架 , 2-部分上架 , 3-已上架")
     @ExcelProperty("WMS入库单上架状态")
     private Integer shelveStatus;
 
-    @Schema(description = "特别说明，创建方专用", example = "")
+    @Schema(description = "特别说明，创建方专用")
     @ExcelProperty("特别说明，创建方专用")
     private String remark;
 }

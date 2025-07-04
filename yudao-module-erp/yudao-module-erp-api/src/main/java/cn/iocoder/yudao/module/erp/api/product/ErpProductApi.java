@@ -12,9 +12,12 @@ import java.util.Map;
 
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.convertMap;
 
+/**
+ * @author jisencai
+ */
 public interface ErpProductApi {
     //getProductDto方法
-    ErpProductDTO getProductDto(Long id);
+    ErpProductDTO getProductDTO(Long id);
 
     /**
      * 获得所有产品DTO，根据ids，如果ids为null返回所有

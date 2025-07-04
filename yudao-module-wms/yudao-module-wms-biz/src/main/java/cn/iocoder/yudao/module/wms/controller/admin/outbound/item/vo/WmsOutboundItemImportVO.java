@@ -5,14 +5,17 @@ import com.alibaba.excel.annotation.ExcelProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
+ * @author jisencai
  * @table-fields : tenant_id,outbound_available_qty,creator,inbound_status,company_id,create_time,plan_qty,shelve_closed_qty,upstream_id,remark,latest_flow_id,updater,inbound_id,update_time,actual_qty,product_id,id,dept_id
  */
 @Schema(description = "管理后台 - 入库单详情 Import VO")
 @Data
 @ExcelIgnoreUnannotated
+@Accessors(chain = false)
 public class WmsOutboundItemImportVO {
 
 

@@ -4,6 +4,7 @@ import com.alibaba.excel.annotation.ExcelIgnoreUnannotated;
 import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
+import lombok.experimental.Accessors;
 import org.springframework.web.multipart.MultipartFile;
 
 /**
@@ -12,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 @Schema(description = "仓库信息 - 库位管理 Import VO")
 @Data
 @ExcelIgnoreUnannotated
+@Accessors(chain = false)
 public class WmsWarehouseBinImportVO {
     @Schema(description = "Excel 文件", requiredMode = Schema.RequiredMode.REQUIRED)
     @NotNull(message = "Excel 文件不能为空")

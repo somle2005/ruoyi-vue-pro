@@ -11,7 +11,10 @@ import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.zone.WmsWarehouseZon
 import cn.iocoder.yudao.module.wms.dal.mysql.warehouse.bin.WmsWarehouseBinMapper;
 import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import cn.iocoder.yudao.module.wms.service.warehouse.zone.WmsWarehouseZoneService;
+import com.mzt.logapi.context.LogRecordContext;
+import com.mzt.logapi.starter.annotation.LogRecord;
 import jakarta.annotation.Resource;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +26,9 @@ import java.util.Set;
 
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
+import static cn.iocoder.yudao.module.wms.enums.WmsLogRecordConstants.*;
+import static com.fhs.common.constant.Constant.ONE;
+import static com.fhs.common.constant.Constant.ZERO;
 
 /**
  * 库位 Service 实现类
@@ -31,6 +37,7 @@ import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.*;
  */
 @Service
 @Validated
+@Slf4j
 public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
 
     @Resource
@@ -48,6 +55,12 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
      * @sign : 7C7A5946A6985FD8
      */
     @Override
+    @LogRecord(type = WMS_WAREHOUSE_BIN_TYPE,
+        subType = WMS_WAREHOUSE_BIN_CREATE_SUB_TYPE,
+        bizNo = "{{#id}}",
+        extra = "{{#createReqVO.code}}",
+        success = "创建了库位【{{#createReqVO.code}}】")
+    @Transactional(rollbackFor = Exception.class)
     public WmsWarehouseBinDO createWarehouseBin(WmsWarehouseBinSaveReqVO createReqVO) {
         if (warehouseBinMapper.getByCode(createReqVO.getCode()) != null) {
             throw exception(WAREHOUSE_BIN_CODE_DUPLICATE);
@@ -69,6 +82,8 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
         // 插入
         WmsWarehouseBinDO warehouseBin = BeanUtils.toBean(createReqVO, WmsWarehouseBinDO.class);
         warehouseBinMapper.insert(warehouseBin);
+        //回填log记录
+        LogRecordContext.putVariable("id", warehouseBin.getId());
         // 返回
         return warehouseBin;
     }
@@ -77,6 +92,12 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
      * @sign : 7061C64B648E5252
      */
     @Override
+    @LogRecord(type = WMS_WAREHOUSE_BIN_TYPE,
+        subType = WMS_WAREHOUSE_BIN_UPDATE_SUB_TYPE,
+        bizNo = "{{#updateReqVO.id}}",
+        extra = "{{#updateReqVO.code}}",
+        success = "更新了库位 【{{#updateReqVO.code}}】: {_DIFF{#updateReqVO}}")
+    @Transactional(rollbackFor = Exception.class)
     public void updateWarehouseBin(WmsWarehouseBinSaveReqVO updateReqVO) {
         // 校验存在
         WmsWarehouseBinDO exists = validateWarehouseBinExists(updateReqVO.getId());
@@ -107,20 +128,22 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
      * @sign : 7C20460B6C4953A7
      */
     @Override
+    @LogRecord(type = WMS_WAREHOUSE_BIN_TYPE,
+        subType = WMS_WAREHOUSE_BIN_DELETE_SUB_TYPE,
+        bizNo = "{{#id}}",
+        extra = "{{#code}}",
+        success = "删除了库位 【{{#code}}】")
     @Transactional(rollbackFor = Exception.class)
     public void deleteWarehouseBin(Long id) {
         // 校验存在
         WmsWarehouseBinDO warehouseBin = validateWarehouseBinExists(id);
+        //回填log记录
+        LogRecordContext.putVariable("code", warehouseBin.getCode());
         // 唯一索引去重
         warehouseBin.setCode(warehouseBinMapper.flagUKeyAsLogicDelete(warehouseBin.getCode()));
         warehouseBinMapper.updateById(warehouseBin);
         // 删除
         warehouseBinMapper.deleteById(id);
-    }
-
-    @Override
-    public void deleteAllWarehouseBin() {
-        warehouseBinMapper.deleteAll();
     }
 
     /**
@@ -187,10 +210,51 @@ public class WmsWarehouseBinServiceImpl implements WmsWarehouseBinService {
     }
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void batchUpdateWarehouseBin(List<WmsWarehouseBinSaveReqVO> updateReqVoList) {
         for (WmsWarehouseBinSaveReqVO updateReqVO : updateReqVoList) {
             this.updateWarehouseBin(updateReqVO);
         }
     }
+
+    @Override
+    @Transactional(rollbackFor = Exception.class)
+    @LogRecord(type = WMS_WAREHOUSE_BIN_TYPE,
+        subType = WMS_WAREHOUSE_BIN_SIWTCH_SUB_TYPE,
+        bizNo = "{{#warehouseBin.ids}}",
+        extra = "{{#codes}}",
+        success = "开启了库位【{{#enableCodes}}】, 禁用了库位【{{#disableCodes}}】")
+    public void enableWarehouseBin(List<Long> ids) {
+        if (CollectionUtils.isEmpty(ids)) {
+            return;
+        }
+        // 校验存在
+        List<WmsWarehouseBinDO> warehouseBinList = warehouseBinMapper.selectByIds(ids);
+        if (CollectionUtils.isEmpty(warehouseBinList)) {
+            throw exception(WAREHOUSE_BIN_NOT_EXISTS);
+        }
+        StringBuilder enableCodes = new StringBuilder();
+        StringBuilder disableCodes = new StringBuilder();
+        // 更新状态
+        for (WmsWarehouseBinDO warehouseBin : warehouseBinList) {
+            if (warehouseBin.getStatus() == ZERO) {
+                //启用
+                warehouseBin.setStatus(ONE);
+                enableCodes.append(warehouseBin.getCode()).append(",");
+            }
+            if (warehouseBin.getStatus() == ONE) {
+                //禁用
+                warehouseBin.setStatus(ZERO);
+                disableCodes.append(warehouseBin.getCode()).append(",");
+            }
+        }
+        warehouseBinMapper.updateBatch(warehouseBinList);
+        //回填log记录
+        LogRecordContext.putVariable("codes", enableCodes.append(disableCodes));
+        LogRecordContext.putVariable("disableCodes", disableCodes);
+        LogRecordContext.putVariable("enableCodes", enableCodes);
+
+    }
+
 
 }
