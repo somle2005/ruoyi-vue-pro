@@ -398,8 +398,6 @@ public class TmsFirstMileServiceImpl implements TmsFirstMileService {
             Objects.equals(oldVO.getSalesCompanyId(), newVO.getSalesCompanyId()) &&
             Objects.equals(oldVO.getArrivePlanTime(), newVO.getArrivePlanTime()) &&
             Objects.equals(oldVO.getRemark(), newVO.getRemark()) &&
-            Objects.equals(oldVO.getExportCompanyId(), newVO.getExportCompanyId()) &&
-            Objects.equals(oldVO.getTransitCompanyId(), newVO.getTransitCompanyId()) &&
             Objects.equals(oldVO.getRevision(), newVO.getRevision());
     }
 
