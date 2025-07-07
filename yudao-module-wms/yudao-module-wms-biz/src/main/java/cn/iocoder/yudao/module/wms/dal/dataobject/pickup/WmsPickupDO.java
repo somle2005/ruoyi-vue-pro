@@ -52,4 +52,9 @@ public class WmsPickupDO extends BaseDO {
      * 来源单据类型
      */
     private Integer upstreamType;
+
+    /**
+     * 入库单号
+     */
+    private Long inboundId;
 }

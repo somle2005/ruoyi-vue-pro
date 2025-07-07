@@ -13,7 +13,8 @@ import java.util.Objects;
 
 /**
  * 入库单审批状态
- **/
+ *
+ * @author jisencai*/
 @RequiredArgsConstructor
 @Getter
 public enum WmsInboundAuditStatus implements ArrayValuable<Integer>, DictEnum {
@@ -25,7 +26,7 @@ public enum WmsInboundAuditStatus implements ArrayValuable<Integer>, DictEnum {
     /**
      * 1:待审批
      **/
-    AUDITING(1, "待入库"),
+    AUDITING(1, "待审批"),
     /**
      * 2:已驳回
      **/
@@ -42,6 +43,10 @@ public enum WmsInboundAuditStatus implements ArrayValuable<Integer>, DictEnum {
      * 5:已作废
      **/
     ABANDONED(5, "作废"),
+    /**
+     * 6:收货
+     **/
+    RECEIVE(6, "收货")
    ;
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(WmsInboundAuditStatus::getValue).toArray(Integer[]::new);
@@ -119,7 +124,7 @@ public enum WmsInboundAuditStatus implements ArrayValuable<Integer>, DictEnum {
     @Getter
     public enum Event {
 
-        SUBMIT("提交审核"),AGREE("通过审核"), REJECT("拒绝审核"),ABANDON("作废"),FORCE_FINISH("强制完成");
+        SUBMIT("提交审核"), AGREE("通过审核"), REJECT("拒绝审核"), ABANDON("作废"), FORCE_FINISH("强制完成"), RECEIVE("收货"), SHELVE("上架");
 
         private String label;
 

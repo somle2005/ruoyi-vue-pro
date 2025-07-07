@@ -81,6 +81,14 @@ public class WmsInboundController {
         return success(true);
     }
 
+    @PutMapping("/shelve")
+    @Operation(summary = "收货上架")
+    @PreAuthorize("@ss.hasPermission('wms:inbound:submit')")
+    public CommonResult<Boolean> shelve(@RequestBody WmsApprovalReqVO approvalReqVO) {
+        inboundService.approve(WmsInboundAuditStatus.Event.SHELVE, approvalReqVO);
+        return success(true);
+    }
+
     @PutMapping("/agree")
     @Operation(summary = "同意审批")
     @PreAuthorize("@ss.hasPermission('wms:inbound:agree')")

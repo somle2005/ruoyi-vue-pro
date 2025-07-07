@@ -31,5 +31,8 @@ public class WmsPickupSimpleRespVO {
     @ExcelProperty("创建时间")
     private LocalDateTime createTime;
 
+    @Schema(description = "入库单ID")
+    @ExcelProperty("入库单ID")
+    private Long inboundId;
 
 }

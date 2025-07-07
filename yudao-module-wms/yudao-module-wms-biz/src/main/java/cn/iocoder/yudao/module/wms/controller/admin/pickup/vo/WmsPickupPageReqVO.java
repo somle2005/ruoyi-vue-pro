@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
 
 /**
+ * @author jisencai
  * @table-fields : code,create_time,upstream_id,upstream_code,warehouse_id,upstream_type
  */
 @Schema(description = "管理后台 - 拣货单分页 Request VO")
@@ -27,15 +28,18 @@ public class WmsPickupPageReqVO extends PageParam {
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;
 
-    @Schema(description = "单据号", example = "")
+    @Schema(description = "单据号")
     private String code;
 
-    @Schema(description = "来源单据ID", example = "")
+    @Schema(description = "来源单据ID")
     private Long upstreamId;
 
-    @Schema(description = "来源单据编码", example = "")
+    @Schema(description = "来源单据编码")
     private String upstreamCode;
 
-    @Schema(description = "来源单据类型", example = "")
+    @Schema(description = "来源单据类型")
     private Integer upstreamType;
+
+    @Schema(description = "入库单ID")
+    private Long inboundId;
 }

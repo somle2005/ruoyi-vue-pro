@@ -15,7 +15,7 @@ import java.util.Arrays;
 public enum WmsWarehouseZoneStockType implements ArrayValuable<Integer>, DictEnum {
 
 
-    PICK (1, "拣货"),
+    PICK(1, "上架"),
     STORE(2, "存储");
 
     public static final Integer[] VALUES = Arrays.stream(values()).map(WmsWarehouseZoneStockType::getValue).toArray(Integer[]::new);

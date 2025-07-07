@@ -29,7 +29,7 @@ public class InboundSubmitTransitionHandler extends BaseInboundTransitionHandler
         if(CollectionUtils.isEmpty(inbound.getItemList())) {
             throw exception(INBOUND_ITEM_NOT_EXISTS);
         }
-        //更新在途数
+        //更新【仓库库存】在途数
         inboundExecutor.updateTransitQty(inbound);
         return super.when(context);
     }

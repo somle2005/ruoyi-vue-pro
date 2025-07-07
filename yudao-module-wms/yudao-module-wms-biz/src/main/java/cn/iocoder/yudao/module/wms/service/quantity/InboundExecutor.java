@@ -64,11 +64,11 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
             }
             if (companyId == null) {
                 // 入库单及明细行均未指定公司ID
-                List<WmsStockLogicDO> wmsStockLogicDOS = wmsStockLogicService.selectByWarehouseIdAndProductId(warehouseId, productId);
-                if (wmsStockLogicDOS.isEmpty()) {
+                List<WmsStockLogicDO> wmsStockLogicDoS = wmsStockLogicService.selectByWarehouseIdAndProductId(warehouseId, productId);
+                if (wmsStockLogicDoS.isEmpty()) {
                     log.error("inboundSingleItem Error, no stock logic found for warehouseId: {}, productId: {}", warehouseId, productId);
                 } else {
-                    companyId = wmsStockLogicDOS.get(0).getCompanyId();
+                    companyId = wmsStockLogicDoS.get(0).getCompanyId();
                 }
             }
             // 部门ID首先考虑明细行，明细行未指定时使用单据中的部门ID
@@ -77,11 +77,11 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
                 deptId=inboundRespVO.getDeptId();
             }
             if (deptId == null) {
-                List<WmsStockLogicDO> wmsStockLogicDOS = wmsStockLogicService.selectByWarehouseIdAndProductId(warehouseId, productId);
-                if (wmsStockLogicDOS.isEmpty()) {
+                List<WmsStockLogicDO> wmsStockLogicDoS = wmsStockLogicService.selectByWarehouseIdAndProductId(warehouseId, productId);
+                if (wmsStockLogicDoS.isEmpty()) {
                     log.error("inboundSingleItem Error, no stock logic found for warehouseId: {}, productId: {}", warehouseId, productId);
                 } else {
-                    deptId = wmsStockLogicDOS.get(0).getDeptId();
+                    deptId = wmsStockLogicDoS.get(0).getDeptId();
                 }
             }
             // 如果入库单及明细上未指定部门,默认按产品的部门ID
@@ -150,6 +150,13 @@ public class InboundExecutor extends QuantityExecutor<InboundContext> {
         } else {
             return WmsInboundStatus.ALL;
         }
+    }
+
+    private void processInboundItem(Long companyId, Long deptId, Long warehouseId, Long productId, Integer actualQuantity, Long inboundId, Long inboundItemId) {
+
+    }
+
+    private void processStockBinItem(Long companyId, Long deptId, Long warehouseId, Long productId, Integer actualQuantity, Long inboundId, Long inboundItemId) {
     }
 
     /**

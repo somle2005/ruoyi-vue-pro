@@ -1,29 +1,41 @@
 package cn.iocoder.yudao.module.wms.controller.admin.pickup;
 
+import cn.iocoder.yudao.framework.apilog.core.annotation.ApiAccessLog;
 import cn.iocoder.yudao.framework.common.pojo.CommonResult;
+import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
+import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.item.vo.WmsPickupItemRespVO;
+import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupExcelDownloadVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupPageReqVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupRespVO;
 import cn.iocoder.yudao.module.wms.controller.admin.pickup.vo.WmsPickupSaveReqVO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.WmsPickupDO;
 import cn.iocoder.yudao.module.wms.dal.dataobject.pickup.item.WmsPickupItemDO;
+import cn.iocoder.yudao.module.wms.dal.dataobject.warehouse.WmsWarehouseDO;
+import cn.iocoder.yudao.module.wms.service.inbound.WmsInboundService;
 import cn.iocoder.yudao.module.wms.service.pickup.WmsPickupService;
 import cn.iocoder.yudao.module.wms.service.pickup.item.WmsPickupItemService;
+import cn.iocoder.yudao.module.wms.service.warehouse.WmsWarehouseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.annotation.Resource;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
+import static cn.iocoder.yudao.framework.apilog.core.enums.OperateTypeEnum.EXPORT;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.pojo.CommonResult.success;
 import static cn.iocoder.yudao.module.wms.enums.WmsErrorCodeConstants.PICKUP_NOT_EXISTS;
@@ -40,6 +52,14 @@ public class WmsPickupController {
 
     @Resource
     private WmsPickupService pickupService;
+
+    @Resource
+    @Lazy
+    private WmsWarehouseService wmsWarehouseService;
+
+    @Resource
+    @Lazy
+    private WmsInboundService inboundService;
 
     /**
      * @sign : 50A2CF839F346ECB
@@ -121,14 +141,54 @@ public class WmsPickupController {
         // 返回
         return success(voPageResult);
     }
-    // @GetMapping("/export-excel")
-    // @Operation(summary = "导出拣货单 Excel")
-    // @PreAuthorize("@ss.hasPermission('wms:pickup:export')")
-    // @ApiAccessLog(operateType = EXPORT)
-    // public void exportPickupExcel(@Valid WmsPickupPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
-    // pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
-    // List<WmsPickupDO> list = pickupService.getPickupPage(pageReqVO).getList();
-    // // 导出 Excel
-    // ExcelUtils.write(response, "拣货单.xls", "数据", WmsPickupRespVO.class, BeanUtils.toBean(list, WmsPickupRespVO.class));
-    // }
+
+    @GetMapping("/export-excel")
+    @Operation(summary = "导出拣货单Page Excel")
+    @PreAuthorize("@ss.hasPermission('wms:pickup:export')")
+    @ApiAccessLog(operateType = EXPORT)
+    public void exportPickupPageExcel(@Valid WmsPickupPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+        pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
+        List<WmsPickupDO> list = pickupService.getPickupPage(pageReqVO).getList();
+        List<WmsPickupRespVO> voList = BeanUtils.toBean(list, WmsPickupRespVO.class);
+        // 人员姓名填充
+        AdminUserApi.inst().prepareFill(voList)
+            .mapping(WmsPickupRespVO::getCreator, WmsPickupRespVO::setCreatorName)
+            .mapping(WmsPickupRespVO::getUpdater, WmsPickupRespVO::setUpdaterName)
+            .fill();
+        List<WmsPickupExcelDownloadVO> excelDownloadVOList = BeanUtils.toBean(voList, WmsPickupExcelDownloadVO.class);
+        excelDownloadVOList.forEach(item -> {
+            // 填充仓库名称
+            WmsWarehouseDO warehouse = wmsWarehouseService.getWarehouse(item.getWarehouseId());
+            if (warehouse != null) {
+                item.setWarehouseName(warehouse.getName());
+            }
+        });
+        // 导出 Excel
+        ExcelUtils.write(response, "上架单.xls", "数据", WmsPickupExcelDownloadVO.class, BeanUtils.toBean(voList, WmsPickupExcelDownloadVO.class));
+    }
+
+    @GetMapping("/items/export-excel")
+    @Operation(summary = "导出拣货单明细 Excel")
+    @PreAuthorize("@ss.hasPermission('wms:pickup:export')")
+    @ApiAccessLog(operateType = EXPORT)
+    public void exportPickupItemsExcel(Long id, HttpServletResponse response) throws IOException {
+        List<WmsInboundDO> inboundDOList = inboundService.selectByIds(Collections.singletonList(id));
+        //todo
+//        List<WmsPickupRespVO> voList = BeanUtils.toBean(list, WmsPickupRespVO.class);
+//        // 人员姓名填充
+//        AdminUserApi.inst().prepareFill(voList)
+//            .mapping(WmsPickupRespVO::getCreator, WmsPickupRespVO::setCreatorName)
+//            .mapping(WmsPickupRespVO::getUpdater, WmsPickupRespVO::setUpdaterName)
+//            .fill();
+//        List<WmsPickupExcelDownloadVO> excelDownloadVOList = BeanUtils.toBean(voList, WmsPickupExcelDownloadVO.class);
+//        excelDownloadVOList.forEach(item -> {
+//            // 填充仓库名称
+//            WmsWarehouseDO warehouse = wmsWarehouseService.getWarehouse(item.getWarehouseId());
+//            if (warehouse != null) {
+//                item.setWarehouseName(warehouse.getName());
+//            }
+//        });
+//        // 导出 Excel
+//        ExcelUtils.write(response, "上架单.xls", "数据", WmsPickupExcelDownloadVO.class, BeanUtils.toBean(voList, WmsPickupExcelDownloadVO.class));
+    }
 }

@@ -7,6 +7,7 @@ import lombok.Data;
 import java.util.List;
 
 /**
+ * @author jisencai
  * @table-fields : code,upstream_id,id,upstream_code,warehouse_id,upstream_type
  */
 @Schema(description = "管理后台 - 拣货单新增/修改 Request VO")
@@ -19,22 +20,25 @@ public class WmsPickupSaveReqVO {
     @Schema(description = "仓库ID", requiredMode = Schema.RequiredMode.REQUIRED, example = "22380")
     private Long warehouseId;
 
-    @Schema(description = "详情清单", example = "")
+    @Schema(description = "详情清单")
     private List<WmsPickupItemSaveReqVO> itemList;
 
-    @Schema(description = "单据号", example = "")
+    @Schema(description = "单据号")
     private String code;
 
-    @Schema(description = "来源单据ID", example = "")
+    @Schema(description = "来源单据ID")
     private Long upstreamId;
 
-    @Schema(description = "来源单据编码", example = "")
+    @Schema(description = "来源单据编码")
     private String upstreamCode;
 
-    @Schema(description = "来源单据类型", example = "")
+    @Schema(description = "来源单据类型")
     private Integer upstreamType;
 
-    @Schema(description = "创建拣货单的原因,默认留空", example = "")
+    @Schema(description = "创建拣货单的原因,默认留空")
     private Integer cause;
+
+    @Schema(description = "入库单号")
+    private Long inboundId;
 
 }

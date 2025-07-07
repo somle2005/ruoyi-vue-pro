@@ -6,12 +6,7 @@ import cn.iocoder.yudao.framework.cola.statemachine.builder.StateMachineBuilderF
 import cn.iocoder.yudao.framework.cola.statemachine.builder.TransitionContext;
 import cn.iocoder.yudao.module.wms.dal.dataobject.inbound.WmsInboundDO;
 import cn.iocoder.yudao.module.wms.enums.inbound.WmsInboundAuditStatus;
-import cn.iocoder.yudao.module.wms.service.inbound.transition.InboundAbandonTransitionHandler;
-import cn.iocoder.yudao.module.wms.service.inbound.transition.InboundAgreeTransitionHandler;
-import cn.iocoder.yudao.module.wms.service.inbound.transition.InboundForceFinishTransitionHandler;
-import cn.iocoder.yudao.module.wms.service.inbound.transition.InboundRejectTransitionHandler;
-import cn.iocoder.yudao.module.wms.service.inbound.transition.InboundSubmitTransitionHandler;
-import cn.iocoder.yudao.module.wms.service.inbound.transition.InboundTransitionFailCallback;
+import cn.iocoder.yudao.module.wms.service.inbound.transition.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -49,6 +44,20 @@ public class InboundStateMachineConfigure {
             .on(WmsInboundAuditStatus.Event.SUBMIT)
             .handle(InboundSubmitTransitionHandler.class);
 
+        //收货
+        builder.externalTransitions()
+            .fromAmong(WmsInboundAuditStatus.AUDITING.getValue())
+            .to(WmsInboundAuditStatus.RECEIVE.getValue())
+            .on(WmsInboundAuditStatus.Event.RECEIVE)
+            .handle(InboundReceiveTransitionHandler.class);
+
+        //上架
+        builder.externalTransitions()
+            .fromAmong(WmsInboundAuditStatus.RECEIVE.getValue())
+            .to(WmsInboundAuditStatus.RECEIVE.getValue())
+            .on(WmsInboundAuditStatus.Event.SHELVE)
+            .handle(InboundShelveTransitionHandler.class);
+
         // 废弃
         builder.externalTransitions()
             .fromAmong(WmsInboundAuditStatus.DRAFT.getValue(),WmsInboundAuditStatus.REJECT.getValue(),WmsInboundAuditStatus.AUDITING.getValue())
@@ -58,14 +67,14 @@ public class InboundStateMachineConfigure {
 
         // 同意
         builder.externalTransitions()
-            .fromAmong(WmsInboundAuditStatus.AUDITING.getValue())
+            .fromAmong(WmsInboundAuditStatus.RECEIVE.getValue())
             .to(WmsInboundAuditStatus.PASS.getValue())
             .on(WmsInboundAuditStatus.Event.AGREE)
             .handle(InboundAgreeTransitionHandler.class);
 
         // 强制结束
         builder.externalTransitions()
-            .fromAmong(WmsInboundAuditStatus.AUDITING.getValue())
+            .fromAmong(WmsInboundAuditStatus.AUDITING.getValue(), WmsInboundAuditStatus.RECEIVE.getValue())
             .to(WmsInboundAuditStatus.FORCE_FINISHED.getValue())
             .on(WmsInboundAuditStatus.Event.FORCE_FINISH)
             .handle(InboundForceFinishTransitionHandler.class);
