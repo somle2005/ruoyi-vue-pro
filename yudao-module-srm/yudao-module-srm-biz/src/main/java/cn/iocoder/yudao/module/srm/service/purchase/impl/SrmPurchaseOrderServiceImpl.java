@@ -14,6 +14,7 @@ import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
 import cn.iocoder.yudao.module.fms.api.finance.FmsAccountApi;
 import cn.iocoder.yudao.module.fms.api.finance.FmsCompanyApi;
 import cn.iocoder.yudao.module.fms.api.finance.dto.FmsCompanyDTO;
+import cn.iocoder.yudao.module.srm.aspect.AsyncUpdateTrigger;
 import cn.iocoder.yudao.module.srm.config.machine.SrmOrderInCountContext;
 import cn.iocoder.yudao.module.srm.config.machine.SrmPayCountContext;
 import cn.iocoder.yudao.module.srm.config.machine.SrmQuantityOrderedCountContext;
@@ -44,6 +45,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderSummaryBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderWordBO;
+import cn.iocoder.yudao.module.srm.tool.AmountCalculateUtils;
 import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWareHouseUpdateReqDTO;
@@ -77,7 +79,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.*;
+import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_BATCH_INSERT_ERROR;
+import static cn.iocoder.yudao.framework.common.exception.enums.GlobalErrorCodeConstants.DB_INSERT_ERROR;
 import static cn.iocoder.yudao.framework.common.exception.util.ServiceExceptionUtil.exception;
 import static cn.iocoder.yudao.framework.common.util.collection.CollectionUtils.*;
 import static cn.iocoder.yudao.module.srm.dal.redis.no.SrmNoRedisDAO.PURCHASE_ORDER_NO_PREFIX;
@@ -304,7 +307,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 1.3.1 设置no
         String oldNo = purchaseOrder.getCode();
         if (!oldNo.equals(vo.getCode())) {
-            voSetNo(vo);
+            this.voSetNo(vo);
         }
         // 1.4 校验订单项的有效性
         List<SrmPurchaseOrderItemDO> purchaseOrderItems = validatePurchaseOrderItems(vo.getItems());
@@ -316,7 +319,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         // 2.1 更新订单
         SrmPurchaseOrderDO updateObj = BeanUtils.toBean(vo, SrmPurchaseOrderDO.class);
         calculateTotalPrice(updateObj, purchaseOrderItems);//计算item合计。
-        purchaseOrderMapper.updateById(updateObj);
+        ThrowUtil.ifSqlThrow(purchaseOrderMapper.updateById(updateObj), PURCHASE_ORDER_UPDATE_FAIL, vo.getCode());
         // 2.2 更新订单项
         updatePurchaseOrderItemList(vo.getId(), purchaseOrderItems);
         vo.getItems().sort(Comparator.comparing(SrmPurchaseOrderSaveReqVO.Item::getId, Comparator.nullsFirst(Long::compareTo)));
@@ -337,7 +340,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         List<SrmPurchaseOrderItemDO> itemDOS = validatePurchaseOrderItemExists(itemIds);
         itemDOS.forEach(itemDO -> BeanUtils.copyProperties(itemMap.get(itemDO.getId()), itemDO));
         //更新
-        ThrowUtil.ifThrow(purchaseOrderItemMapper.updateBatch(itemDOS), DB_UPDATE_ERROR);
+        itemDOS.forEach(itemDO -> ThrowUtil.ifSqlThrow(purchaseOrderItemMapper.updateById(itemDO), PURCHASE_ORDER_UPDATE_FAIL_ITEM, itemDO.getId()));
     }
 
     private void voSetNo(SrmPurchaseOrderSaveReqVO vo) {
@@ -358,19 +361,27 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     }
 
 
-    //计算采购订单的总价、税费、折扣价格,|计算总数量|计算总商品价格|计算总税费|计算折扣价格
-    private void calculateTotalPrice(SrmPurchaseOrderDO purchaseOrder, List<SrmPurchaseOrderItemDO> purchaseOrderItems) {
-        purchaseOrder.setTotalCount(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getQty, BigDecimal::add));
-        purchaseOrder.setTotalProductPrice(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseOrder.setTotalGrossPrice(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getTax, BigDecimal::add, BigDecimal.ZERO));
-        purchaseOrder.setTotalPrice(purchaseOrder.getTotalProductPrice().add(purchaseOrder.getTotalGrossPrice()));
-        // 计算优惠价格
-        if (purchaseOrder.getDiscountPercent() == null) {
-            purchaseOrder.setDiscountPercent(BigDecimal.ZERO);
-        }
-        purchaseOrder.setDiscountPrice(MoneyUtils.priceMultiplyPercent(purchaseOrder.getTotalPrice(), purchaseOrder.getDiscountPercent()));
-        purchaseOrder.setTotalPrice(purchaseOrder.getTotalPrice().subtract(purchaseOrder.getDiscountPrice()));
+    /**
+     * 计算采购订单的总价、税费、折扣价格等字段
+     * 包含：总数量、商品总价、税额、优惠金额、应付总价
+     */
+    private void calculateTotalPrice(SrmPurchaseOrderDO order, List<SrmPurchaseOrderItemDO> items) {
+        AmountCalculateUtils.Result result = AmountCalculateUtils.calculate(
+            items,
+            item -> ((SrmPurchaseOrderItemDO) item).getQty(),
+            item -> ((SrmPurchaseOrderItemDO) item).getTotalPrice(),
+            item -> ((SrmPurchaseOrderItemDO) item).getTax(),
+            order.getDiscountPercent(),
+            null // 采购订单没有otherPrice
+        );
+        order.setTotalCount(result.totalCount);
+        order.setTotalProductPrice(result.totalProductPrice);
+        order.setTotalGrossPrice(result.totalGrossPrice);
+        order.setDiscountPercent(result.discountPercent);
+        order.setDiscountPrice(result.discountPrice);
+        order.setTotalPrice(result.totalPrice);
     }
+
 
     //检查订单No的编号唯一
     private void validatePurchaseOrderExists(String No) {
@@ -443,7 +454,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
             // 批量查询所有需要的采购订单项（purchase order items）
             updatePurchaseRequestItem(diffList.get(1));
             //跟旧数据对比，申请数量差异，则发采购事件调整
-            purchaseOrderItemMapper.updateBatch(diffList.get(1));
+            diffList.get(1).forEach(orderItemDO -> ThrowUtil.ifSqlThrow(purchaseOrderItemMapper.updateById(orderItemDO), PURCHASE_ORDER_UPDATE_FAIL_ITEM, orderItemDO.getId()));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {
             // 遍历并处理订单项
@@ -510,7 +521,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         });
         // 2. 更新采购订单
         BigDecimal totalInboundCount = getSumValue(inCountMap.values(), value -> value, BigDecimal::add, BigDecimal.ZERO);
-        purchaseOrderMapper.updateById(new SrmPurchaseOrderDO().setId(itemId).setTotalInboundCount(totalInboundCount));
+        ThrowUtil.ifSqlThrow(purchaseOrderMapper.updateById(new SrmPurchaseOrderDO().setId(itemId).setTotalInboundCount(totalInboundCount)), PURCHASE_ORDER_UPDATE_FAIL_ITEM, itemId);
     }
 
     @Override
@@ -551,14 +562,14 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         String businessName = CollUtil.join(orders.stream().map(SrmPurchaseOrderDO::getCode).collect(Collectors.toList()), ",");
         LogRecordContext.putVariable("businessName", businessName);
 
-        // 1. 校验不处于已审批
+        // 1. 校验
         List<SrmPurchaseOrderDO> purchaseOrders = purchaseOrderMapper.selectByIds(ids);
         if (CollUtil.isEmpty(purchaseOrders)) {
             return;
         }
         purchaseOrders.forEach(orderDO -> {
-            //已审核 -> e
-            if (SrmAuditStatus.APPROVED.getCode().equals(orderDO.getAuditStatus())) {
+            // 非法状态，禁止删除
+            if (!SrmAuditStatus.DRAFT.getCode().equals(orderDO.getAuditStatus()) && !SrmAuditStatus.REJECTED.getCode().equals(orderDO.getAuditStatus())) {
                 throw exception(PURCHASE_ORDER_DELETE_FAIL_APPROVE, orderDO.getCode());
             }
             //存在对应的采购入库项->异常
@@ -732,6 +743,7 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         extra = "{{#code}}",
         success = "{{#vo.reviewed ? (#vo.pass ? '审核通过' : '审核不通过') : '反审核'}}了采购订单【{{#code}}】")
     @Transactional(rollbackFor = Exception.class)
+    @AsyncUpdateTrigger
     public void reviewPurchaseOrder(SrmPurchaseOrderAuditReqVO vo) {
         // 查询采购订单信息
         SrmPurchaseOrderDO orderDO = purchaseOrderMapper.selectById(vo.getOrderIds().get(0));

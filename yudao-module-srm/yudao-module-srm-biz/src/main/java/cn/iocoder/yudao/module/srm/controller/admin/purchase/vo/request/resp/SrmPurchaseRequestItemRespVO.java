@@ -118,6 +118,16 @@ public class SrmPurchaseRequestItemRespVO extends BaseVO {
     @ExcelProperty("供应商名称")
     private String supplierName;
 
+    //默认供应商ID
+    @Schema(description = "默认供应商ID")
+    @ExcelProperty("默认供应商ID")
+    private Long defaultSupplierId;
+
+    //默认供应商名称
+    @Schema(description = "默认供应商名称")
+    @ExcelProperty("默认供应商名称")
+    private String defaultSupplierName;
+
     @Schema(description = "收货地址")
     @ExcelProperty("收货地址")
     private String delivery;

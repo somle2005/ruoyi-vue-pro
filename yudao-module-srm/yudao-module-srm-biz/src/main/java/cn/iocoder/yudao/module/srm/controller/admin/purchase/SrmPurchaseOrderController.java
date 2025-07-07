@@ -9,6 +9,7 @@ import cn.iocoder.yudao.framework.common.util.collection.MapUtils;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.framework.excel.core.util.ExcelUtils;
 import cn.iocoder.yudao.framework.idempotent.core.annotation.Idempotent;
+import cn.iocoder.yudao.module.erp.api.product.ErpProductApi;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderBaseRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderExcelRespVO;
 import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order.SrmPurchaseOrderSummaryRespVO;
@@ -21,6 +22,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmPurchaseOrderService;
 import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderSummaryBO;
+import cn.iocoder.yudao.module.srm.tool.PreLoadProductImg;
 import cn.iocoder.yudao.module.system.api.dept.DeptApi;
 import cn.iocoder.yudao.module.system.api.dept.dto.DeptRespDTO;
 import cn.iocoder.yudao.module.system.api.user.AdminUserApi;
@@ -62,6 +64,7 @@ public class SrmPurchaseOrderController {
     private final WmsWarehouseApi wmsWarehouseApi;
     private final AdminUserApi adminUserApi;
     private final DeptApi deptApi;
+    private final ErpProductApi erpProductApi;
     @Autowired
     @Lazy
     SrmPurchaseOrderService purchaseOrderService;
@@ -139,11 +142,13 @@ public class SrmPurchaseOrderController {
     @Operation(summary = "导出采购订单 Excel")
     @PreAuthorize("@ss.hasPermission('srm:purchase-order:export')")
     @ApiAccessLog(operateType = EXPORT)
-    public void exportPurchaseOrderExcel(@Valid SrmPurchaseOrderPageReqVO pageReqVO, HttpServletResponse response) throws IOException {
+    public void exportPurchaseOrderExcel(@Valid SrmPurchaseOrderPageReqVO pageReqVO, HttpServletResponse response, Boolean hasImg) throws IOException {
         pageReqVO.setPageSize(PageParam.PAGE_SIZE_NONE);
         // 获取主表+子表数据
         List<SrmPurchaseOrderBaseRespVO> list = bindList(purchaseOrderService.getPurchaseOrderBOList(pageReqVO));
         List<SrmPurchaseOrderExcelRespVO> excelList = SrmPurchaseOrderExportConvert.buildExcelList(list);
+        //是否渲染图片
+        PreLoadProductImg.preLoadProductImg(hasImg, excelList, erpProductApi);
         // 导出 Excel
         ExcelUtils.writeWithRequestAttributesTimeZone(response, "采购订单.xls", "采购订单", SrmPurchaseOrderExcelRespVO.class, excelList);
     }

@@ -40,6 +40,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInItemBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.in.SrmPurchaseInSummaryBO;
+import cn.iocoder.yudao.module.srm.tool.AmountCalculateUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.inbound.WmsInboundApi;
 import cn.iocoder.yudao.module.wms.api.inbound.dto.WmsInboundDTO;
@@ -301,6 +302,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 1.5 校验关联的采购订单项是否属于同一个供应商和采购公司
         validateOrderItemsSupplierAndCompany(convertSet(vo.getItems(), SrmPurchaseInSaveReqVO.Item::getOrderItemId).stream().toList());
         // 1.6 校验编号
+        String oldCode = vo.getCode();
         if (vo.getCode() != null && !vo.getCode().equals(purchaseIn.getCode())) {
             validateAndUpdateCode(vo.getCode(), purchaseIn.getCode());
         }
@@ -310,7 +312,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
         // 2.1 更新入库
         SrmPurchaseInDO updateObj = BeanUtils.toBean(vo, SrmPurchaseInDO.class);
         calculateTotalPrice(updateObj, purchaseInItems);//合计
-        purchaseInMapper.updateById(updateObj);
+        ThrowUtil.ifSqlThrow(purchaseInMapper.updateById(updateObj), PURCHASE_IN_UPDATE_FAIL, oldCode);
         // 2.2 更新入库项
         updatePurchaseInItemList(vo.getId(), purchaseInItems);
         // 2.3 如果vo和旧item不同,则校验订单项到货数量是否超过采购订单的采购项入库数量
@@ -353,27 +355,28 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     private void calculateTotalPrice(SrmPurchaseInDO purchaseIn, List<SrmPurchaseInItemDO> purchaseInItems) {
-        // 1. 计算总数量、总价等
-        purchaseIn.setTotalCount(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getQty, BigDecimal::add));
-        purchaseIn.setTotalProductPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseIn.setTotalGrossPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTax, BigDecimal::add, BigDecimal.ZERO));
-        purchaseIn.setTotalPrice(purchaseIn.getTotalProductPrice().add(purchaseIn.getTotalGrossPrice()));
+        // 金额相关
+        AmountCalculateUtils.Result result = AmountCalculateUtils.calculate(
+            purchaseInItems,
+            item -> ((SrmPurchaseInItemDO) item).getQty(),
+            item -> ((SrmPurchaseInItemDO) item).getTotalPrice(),
+            item -> ((SrmPurchaseInItemDO) item).getTax(),
+            purchaseIn.getDiscountPercent(),
+            safe(purchaseIn.getOtherPrice())
+        );
+        purchaseIn.setTotalCount(result.totalCount);
+        purchaseIn.setTotalProductPrice(result.totalProductPrice);
+        purchaseIn.setTotalGrossPrice(result.totalGrossPrice);
+        purchaseIn.setDiscountPercent(result.discountPercent);
+        purchaseIn.setDiscountPrice(result.discountPrice);
+        purchaseIn.setTotalPrice(result.totalPrice);
 
-        // 2. 计算优惠价格
-        if (purchaseIn.getDiscountPercent() == null) {
-            purchaseIn.setDiscountPercent(BigDecimal.ZERO);
-        }
-        purchaseIn.setDiscountPrice(MoneyUtils.priceMultiplyPercent(purchaseIn.getTotalPrice(), purchaseIn.getDiscountPercent()));
-        purchaseIn.setTotalPrice(safe(purchaseIn.getTotalPrice()).subtract(safe(purchaseIn.getDiscountPrice())).add(safe(purchaseIn.getOtherPrice())));
-
-        // 3. 计算总重量和总体积
-        // 3.1 获取所有产品ID
+        // 体积重量相关
+        // 3.2 批量获取产品信息
         List<Long> productIds = convertList(purchaseInItems, SrmPurchaseInItemDO::getProductId);
         if (CollUtil.isEmpty(productIds)) {
             return;
         }
-
-        // 3.2 批量获取产品信息
         Map<Long, ErpProductDTO> productMap = convertMap(erpProductApi.listProductDTOs(productIds), ErpProductDTO::getId);
 
         // 3.3 计算总重量和总体积
@@ -519,7 +522,7 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
             syncOrderItemExecutionStatus(diffList.get(0));
         }
         if (CollUtil.isNotEmpty(diffList.get(1))) {
-            purchaseInItemMapper.updateBatch(diffList.get(1));
+            diffList.get(1).forEach(o -> ThrowUtil.ifSqlThrow(purchaseInItemMapper.updateById(o), PURCHASE_IN_ITEM_UPDATE_FAIL));
             syncOrderItemExecutionStatus(diffList.get(1));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {

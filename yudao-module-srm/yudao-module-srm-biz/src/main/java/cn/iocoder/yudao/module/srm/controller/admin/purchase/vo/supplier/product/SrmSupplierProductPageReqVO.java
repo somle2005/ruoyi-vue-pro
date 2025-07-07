@@ -1,4 +1,4 @@
-package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo;
+package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product;
 
 import cn.iocoder.yudao.framework.common.pojo.PageParam;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -7,6 +7,7 @@ import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 import static cn.iocoder.yudao.framework.common.util.date.DateUtils.FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND;
@@ -20,10 +21,10 @@ public class SrmSupplierProductPageReqVO extends PageParam {
     @Schema(description = "供应商产品编码")
     private String code;
 
-    @Schema(description = "供应商编号", example = "29689")
+    @Schema(description = "供应商编号")
     private Long supplierId;
 
-    @Schema(description = "产品编号", example = "26097")
+    @Schema(description = "产品编号")
     private Long productId;
 
     @Schema(description = "包装高度")
@@ -38,7 +39,7 @@ public class SrmSupplierProductPageReqVO extends PageParam {
     @Schema(description = "包装宽度")
     private Double packageWidth;
 
-    @Schema(description = "采购价格", example = "25304")
+    @Schema(description = "采购价格")
     private Double purchasePrice;
 
     @Schema(description = "采购货币代码")
@@ -48,4 +49,12 @@ public class SrmSupplierProductPageReqVO extends PageParam {
     @DateTimeFormat(pattern = FORMAT_YEAR_MONTH_DAY_HOUR_MINUTE_SECOND)
     private LocalDateTime[] createTime;
 
+    @Schema(description = "上次采购价格")
+    private BigDecimal lastPurchasePrice;
+
+    @Schema(description = "税率")
+    private BigDecimal taxRate;
+
+    @Schema(description = "是否默认供应商")
+    private Boolean defaultSupplier;
 }

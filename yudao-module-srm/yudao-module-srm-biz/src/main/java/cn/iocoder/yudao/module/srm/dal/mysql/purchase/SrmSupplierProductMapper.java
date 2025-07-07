@@ -3,9 +3,12 @@ package cn.iocoder.yudao.module.srm.dal.mysql.purchase;
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
 import cn.iocoder.yudao.framework.mybatis.core.mapper.BaseMapperX;
 import cn.iocoder.yudao.framework.mybatis.core.query.LambdaQueryWrapperX;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductPageReqVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product.SrmSupplierProductPageReqVO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import org.apache.ibatis.annotations.Mapper;
+
+import java.util.List;
+import java.util.Set;
 
 /**
  * ERP 供应商产品 Mapper
@@ -32,5 +35,32 @@ public interface SrmSupplierProductMapper extends BaseMapperX<SrmSupplierProduct
 
     default SrmSupplierProductDO selectByCode(String code) {
         return selectOne(SrmSupplierProductDO::getCode, code);
+    }
+
+    default SrmSupplierProductDO selectBySupplierIdAndProductId(Long supplierId, Long productId) {
+        return selectOne(new LambdaQueryWrapperX<SrmSupplierProductDO>()
+            .eq(SrmSupplierProductDO::getSupplierId, supplierId)
+            .eq(SrmSupplierProductDO::getProductId, productId));
+    }
+
+    default List<SrmSupplierProductDO> selectListBySupplierIdAndProductId(Long supplierId, Long productId) {
+        return selectList(new LambdaQueryWrapperX<SrmSupplierProductDO>()
+            .eq(SrmSupplierProductDO::getSupplierId, supplierId)
+            .eq(SrmSupplierProductDO::getProductId, productId));
+    }
+
+    default List<SrmSupplierProductDO> selectListDefaultByProductId(Long productId) {
+        return selectList(new LambdaQueryWrapperX<SrmSupplierProductDO>()
+            .eq(SrmSupplierProductDO::getProductId, productId)
+            .eq(SrmSupplierProductDO::getDefaultSupplier, true));
+    }
+
+    default List<SrmSupplierProductDO> selectListDefaultByProductIds(Set<Long> productIds) {
+        if (productIds == null || productIds.isEmpty()) {
+            return java.util.Collections.emptyList();
+        }
+        return selectList(new LambdaQueryWrapperX<SrmSupplierProductDO>()
+            .in(SrmSupplierProductDO::getProductId, productIds)
+            .eq(SrmSupplierProductDO::getDefaultSupplier, true));
     }
 }

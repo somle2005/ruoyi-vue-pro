@@ -3,15 +3,21 @@ package cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.order;
 import cn.iocoder.yudao.framework.excel.core.annotations.DictFormat;
 import cn.iocoder.yudao.framework.excel.core.aop.ExcelMergeGroup;
 import cn.iocoder.yudao.framework.excel.core.convert.DictConvert;
+import cn.iocoder.yudao.framework.excel.core.convert.ImageListConverter;
 import cn.iocoder.yudao.module.srm.enums.SrmDictTypeConstants;
+import cn.iocoder.yudao.module.srm.tool.PreLoadProductImg;
+import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
+import com.alibaba.excel.converters.bytearray.ByteArrayImageConverter;
+import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.Data;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
-public class SrmPurchaseOrderExcelRespVO {
+public class SrmPurchaseOrderExcelRespVO implements PreLoadProductImg.ProductImgExportable {
     // ========== 主表字段 ==========
     @ExcelProperty("采购订单编号")
     @ExcelMergeGroup(unique = true)
@@ -141,6 +147,18 @@ public class SrmPurchaseOrderExcelRespVO {
     @ExcelProperty("产品名称")
     private String productName;
 
+    @Schema(description = "产品编号")
+    @ExcelIgnore
+    private Long productId;
+
+    @Schema(hidden = true)
+    @ExcelProperty(value = "主图", converter = ByteArrayImageConverter.class)
+    private byte[] primaryImage;
+
+    @Schema(hidden = true)
+    @ExcelProperty(value = "副图", converter = ImageListConverter.class)
+    private List<byte[]> secondaryImageList;
+
     @ExcelProperty("产品sku")
     private String productCode;
 
@@ -241,4 +259,18 @@ public class SrmPurchaseOrderExcelRespVO {
     @ExcelProperty("总完工单通过数量")
     private Integer totalCompletionPassCount;
 
+    @Override
+    public Long getProductId() {
+        return this.productId;
+    }
+
+    @Override
+    public void setPrimaryImage(byte[] img) {
+        this.primaryImage = img;
+    }
+
+    @Override
+    public void setSecondaryImageList(java.util.List<byte[]> imgList) {
+        this.secondaryImageList = imgList;
+    }
 } 

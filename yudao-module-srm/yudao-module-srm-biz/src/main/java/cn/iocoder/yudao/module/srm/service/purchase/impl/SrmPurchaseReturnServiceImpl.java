@@ -27,6 +27,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.SrmSupplierService;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.ret.SrmPurchaseReturnSummaryBO;
 import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnBO;
 import cn.iocoder.yudao.module.srm.service.purchase.refund.SrmPurchaseReturnItemBO;
+import cn.iocoder.yudao.module.srm.tool.AmountCalculateUtils;
 import cn.iocoder.yudao.module.system.enums.somle.BillType;
 import cn.iocoder.yudao.module.wms.api.outbound.WmsOutboundApi;
 import cn.iocoder.yudao.module.wms.api.outbound.dto.WmsOutboundDTO;
@@ -347,6 +348,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         checkReturnQtyNotExceedInQty(vo.getItems());
         // 1.8 校验单号
         SrmPurchaseReturnDO oldReturn = validatePurchaseReturnExists(vo.getId());
+        String oldCode = vo.getCode();
         if (vo.getCode() != null && !vo.getCode().equals(oldReturn.getCode())) {
             voSetNo(vo);
         }
@@ -355,25 +357,31 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         SrmPurchaseReturnDO updateObj = BeanUtils.toBean(vo, SrmPurchaseReturnDO.class);
         calculateTotalPrice(updateObj, purchaseReturnItems);
         calculateTotalVolumeAndWeight(updateObj, purchaseReturnItems);
-        purchaseReturnMapper.updateById(updateObj);
+        ThrowUtil.ifSqlThrow(purchaseReturnMapper.updateById(updateObj), PURCHASE_RETURN_UPDATE_FAIL, oldCode);
         // 2.2 更新退货项
         updatePurchaseReturnItemList(vo.getId(), purchaseReturnItems);
     }
 
+    /**
+     * 计算采购退货单的数量、金额、税费、折扣和最终退款金额
+     */
     private void calculateTotalPrice(SrmPurchaseReturnDO purchaseReturn, List<SrmPurchaseReturnItemDO> purchaseReturnItems) {
-        // 1. 计算总数量、总价等
-        purchaseReturn.setTotalCount(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getQty, BigDecimal::add, BigDecimal.ZERO));
-        purchaseReturn.setTotalProductPrice(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseReturn.setTotalGrossPrice(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getTax, BigDecimal::add, BigDecimal.ZERO));
-        purchaseReturn.setTotalPrice(safe(purchaseReturn.getTotalProductPrice()).add(safe(purchaseReturn.getTotalGrossPrice())));
-
-        // 2. 计算优惠价格
-        if (purchaseReturn.getDiscountPercent() == null) {
-            purchaseReturn.setDiscountPercent(BigDecimal.ZERO);
-        }
-        purchaseReturn.setDiscountPrice(MoneyUtils.priceMultiplyPercent(purchaseReturn.getTotalPrice(), purchaseReturn.getDiscountPercent()));
-        purchaseReturn.setTotalPrice(safe(purchaseReturn.getTotalPrice()).subtract(safe(purchaseReturn.getDiscountPrice())).add(safe(purchaseReturn.getOtherPrice())));
+        AmountCalculateUtils.Result result = AmountCalculateUtils.calculate(
+            purchaseReturnItems,
+            item -> ((SrmPurchaseReturnItemDO) item).getQty(),
+            item -> ((SrmPurchaseReturnItemDO) item).getTotalPrice(),
+            item -> ((SrmPurchaseReturnItemDO) item).getTax(),
+            purchaseReturn.getDiscountPercent(),
+            safe(purchaseReturn.getOtherPrice())
+        );
+        purchaseReturn.setTotalCount(result.totalCount);
+        purchaseReturn.setTotalProductPrice(result.totalProductPrice);
+        purchaseReturn.setTotalGrossPrice(result.totalGrossPrice);
+        purchaseReturn.setDiscountPercent(result.discountPercent);
+        purchaseReturn.setDiscountPrice(result.discountPrice);
+        purchaseReturn.setTotalPrice(result.totalPrice);
     }
+
 
     @Override
     public void updatePurchaseReturnRefundPrice(Long id, BigDecimal refundPrice) {
@@ -464,6 +472,7 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         }
         if (CollUtil.isNotEmpty(diffList.get(1))) {
             purchaseReturnItemMapper.updateBatch(diffList.get(1));
+            diffList.get(1).forEach(o -> ThrowUtil.ifSqlThrow(purchaseReturnItemMapper.deleteByReturnId(o.getId()), PURCHASE_RETURN_ITEM_UPDATE_FAIL));
         }
         if (CollUtil.isNotEmpty(diffList.get(2))) {
             purchaseReturnItemMapper.deleteByIds(convertList(diffList.get(2), SrmPurchaseReturnItemDO::getId));

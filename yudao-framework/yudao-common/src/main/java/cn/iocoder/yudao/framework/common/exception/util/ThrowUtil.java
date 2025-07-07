@@ -55,9 +55,9 @@ public class ThrowUtil {
         }
     }
 
-    public static void ifSqlThrow(int i, ErrorCode dbUpdateError) {
+    public static void ifSqlThrow(int i, ErrorCode dbUpdateError, Object... params) {
         if (i <= 0) {
-            throw exception(dbUpdateError);
+            throw exception(dbUpdateError, params);
         }
     }
 

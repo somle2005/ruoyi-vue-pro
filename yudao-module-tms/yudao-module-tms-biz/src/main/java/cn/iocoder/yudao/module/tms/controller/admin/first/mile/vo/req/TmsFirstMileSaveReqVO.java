@@ -120,7 +120,7 @@ public class TmsFirstMileSaveReqVO {
 
     @Data
     public static class TmsVesselTrackingSaveReqVO2 extends TmsVesselTrackingSaveReqVO {
-        @Schema(description = "上游单据类型; 前端不填入，后端写死的")
+        @Schema(description = "上游单据类型", hidden = true)
         private final Integer upstreamType = BillType.TMS_FIRST_MILE.getValue();
 
         @Schema(description = "上游业务单ID，如调拨单ID(前端不填入)")
@@ -130,7 +130,7 @@ public class TmsFirstMileSaveReqVO {
 
     @Data
     public static class TmsFeeSaveReqVO2 extends TmsFeeSaveReqVO {
-        @Schema(description = "上游单据类型; 前端不填入，后端写死的")
+        @Schema(description = "上游单据类型", hidden = true)
         private final Integer upstreamType = BillType.TMS_FIRST_MILE.getValue();
 
         @Schema(description = "上游业务单ID，如调拨单ID(前端不填入)")

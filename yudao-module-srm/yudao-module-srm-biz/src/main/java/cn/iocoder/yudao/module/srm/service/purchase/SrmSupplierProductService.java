@@ -1,13 +1,18 @@
 package cn.iocoder.yudao.module.srm.service.purchase;
 
 import cn.iocoder.yudao.framework.common.pojo.PageResult;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductPageReqVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductRespVO;
-import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.SrmSupplierProductSaveReqVO;
+import cn.iocoder.yudao.module.srm.api.supplier.dto.SrmSupplierProductDTO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product.SrmSupplierProductPageReqVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product.SrmSupplierProductRespVO;
+import cn.iocoder.yudao.module.srm.controller.admin.purchase.vo.supplier.product.SrmSupplierProductSaveReqVO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderDO;
+import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmPurchaseOrderItemDO;
 import cn.iocoder.yudao.module.srm.dal.dataobject.purchase.SrmSupplierProductDO;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 /**
  * ERP 供应商产品 Service 接口
@@ -29,7 +34,13 @@ public interface SrmSupplierProductService {
      *
      * @param updateReqVO 更新信息
      */
-    void updateSupplierProduct(@Valid SrmSupplierProductSaveReqVO updateReqVO);
+    void saveOrUpdateSupplierProduct(@Valid SrmSupplierProductSaveReqVO updateReqVO);
+
+    //更新供应商产品DTO
+    void saveOrUpdateSupplierProduct(SrmSupplierProductDTO dto);
+
+
+    void updateSupplierProductPrice(Long supplierId, SrmPurchaseOrderItemDO orderItem, SrmPurchaseOrderDO srmPurchaseOrderDO);
 
     /**
      * 删除ERP 供应商产品
@@ -57,4 +68,21 @@ public interface SrmSupplierProductService {
     PageResult<SrmSupplierProductRespVO> buildSupplierProductVOPageResult(PageResult<SrmSupplierProductDO> pageResult);
 
     List<SrmSupplierProductRespVO> getSupplierProductVOListByStatus(Integer status);
+
+    /**
+     * 根据产品ID和供应商ID获取默认供应商产品（如有多条默认，取第一条）
+     *
+     * @param supplierId 供应商ID
+     * @param productId  产品ID
+     * @return 默认供应商产品DO，若无则返回null
+     */
+    SrmSupplierProductDO getDefaultSupplierProduct(Long supplierId, Long productId);
+
+    /**
+     * 根据产品ID集合获取每个产品的默认供应商产品（如有多条默认，取第一条）
+     *
+     * @param productIds 产品ID集合
+     * @return key为产品ID，value为默认供应商产品DO，若无则为null
+     */
+    Map<Long, SrmSupplierProductDO> getDefaultSupplierProductByProductIds(Set<Long> productIds);
 }

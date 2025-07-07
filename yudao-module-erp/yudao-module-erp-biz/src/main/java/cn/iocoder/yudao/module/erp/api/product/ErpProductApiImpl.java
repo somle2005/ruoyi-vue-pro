@@ -4,12 +4,14 @@ import cn.hutool.core.collection.CollUtil;
 import cn.iocoder.yudao.framework.common.exception.util.ThrowUtil;
 import cn.iocoder.yudao.framework.common.util.object.BeanUtils;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductDTO;
+import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductImageRespDTO;
 import cn.iocoder.yudao.module.erp.api.product.dto.ErpProductRespDTO;
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductRespVO;
 import cn.iocoder.yudao.module.erp.convert.product.ErpProductConvert;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.dal.mysql.product.ErpProductMapper;
 import cn.iocoder.yudao.module.erp.service.product.ErpProductService;
+import cn.iocoder.yudao.module.erp.service.product.bo.ErpImgProductBO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,7 +32,7 @@ public class ErpProductApiImpl implements ErpProductApi {
 
     @Override
     public ErpProductDTO getProductDto(Long id) {
-        ErpProductDO productDO = erpProductMapper.selectById(id);
+        ErpProductDO productDO = erpProductService.getProductDO(id);
         if (productDO == null) {
             return null;
         } else {
@@ -43,7 +45,7 @@ public class ErpProductApiImpl implements ErpProductApi {
     public List<ErpProductDTO> listProductDTOs(List<Long> ids) {
         List<ErpProductDO> dos;
         if (ids != null) {
-            dos = erpProductMapper.selectByIds(ids);
+            dos = erpProductService.listProducts(ids);
         } else {
             dos = erpProductMapper.selectList();
         }
@@ -55,7 +57,7 @@ public class ErpProductApiImpl implements ErpProductApi {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyMap();
         }
-        Map<Long, ErpProductDO> productMap = convertMap(erpProductMapper.selectByIds(ids), ErpProductDO::getId);
+        Map<Long, ErpProductDO> productMap = convertMap(erpProductService.listProducts(ids), ErpProductDO::getId);
         return ErpProductConvert.INSTANCE.convert(productMap);
 
     }
@@ -74,7 +76,7 @@ public class ErpProductApiImpl implements ErpProductApi {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        List<ErpProductDO> erpProductDOs = erpProductMapper.selectByIds(ids);
+        List<ErpProductDO> erpProductDOs = erpProductService.listProducts(ids);
         return ErpProductConvert.INSTANCE.convert(erpProductDOs);
     }
 
@@ -83,7 +85,7 @@ public class ErpProductApiImpl implements ErpProductApi {
         if (CollUtil.isEmpty(ids)) {
             return Collections.emptyList();
         }
-        List<ErpProductDTO> list = BeanUtils.toBean(erpProductMapper.selectByIds(ids), ErpProductDTO.class);
+        List<ErpProductDTO> list = BeanUtils.toBean(erpProductService.listProducts(ids), ErpProductDTO.class);
         Map<Long, ErpProductDTO> productMap = convertMap(list, ErpProductDTO::getId);
         for (Long id : ids) {
             ErpProductDTO product = productMap.get(id);
@@ -113,5 +115,16 @@ public class ErpProductApiImpl implements ErpProductApi {
                 ErpProductRespVO productVO = entry.getValue();
                 return BeanUtils.toBean(productVO, ErpProductRespDTO.class);
             }));
+    }
+
+    @Override
+    public ErpProductImageRespDTO getProductImageDTOListByProductId(Long productId) {
+        ErpImgProductBO productImgById = erpProductService.getProductImgById(productId);
+        return BeanUtils.toBean(productImgById, ErpProductImageRespDTO.class);
+    }
+
+    @Override
+    public void preloadProductImages(Set<Long> productIds) {
+        erpProductService.preloadProductImages(productIds);
     }
 }

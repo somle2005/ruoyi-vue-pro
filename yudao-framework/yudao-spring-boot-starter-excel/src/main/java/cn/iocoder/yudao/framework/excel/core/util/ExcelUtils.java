@@ -52,6 +52,7 @@ public class ExcelUtils {
             .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
             .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
             .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
+            .registerWriteHandler(new CellMergeStrategy(head, data.size())) //合并处理器,基于注解
             .sheet(sheetName).doWrite(data);
         // 设置 header 和 contentType。写在最后的原因是，避免报错时，响应 contentType 已经被修改了
         response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
@@ -107,20 +108,7 @@ public class ExcelUtils {
                                                               String sheetName,
                                                               Class<T> head,
                                                               List<T> data) throws IOException {
-        ZoneId userZoneId = ServletUtils.getTimeZoneId().orElse(TimeZone.getDefault().toZoneId());
-        // 输出 Excel
-        ExcelWriterSheetBuilder builder = EasyExcel.write(response.getOutputStream(), head)
-            .autoCloseStream(false) // 不要自动关闭，交给 Servlet 自己处理
-            .registerWriteHandler(new LongestMatchColumnWidthStyleStrategy()) // 基于 column 长度，自动适配。最大 255 宽度
-            .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
-            .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
-            .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
-            .registerWriteHandler(new CellMergeStrategy(head, data.size()))
-            .sheet(sheetName);
-        builder.doWrite(data);
-        // 设置 header 和 contentType。写在最后的原因是，避免报错时，响应 contentType 已经被修改了
-        response.addHeader("Content-Disposition", "attachment;filename=" + URLEncoder.encode(filename, StandardCharsets.UTF_8));
-        response.setContentType("application/vnd.ms-excel;charset=UTF-8");
+        ExcelUtils.write(response, filename, sheetName, head, data);
     }
 
     public static <T> ExcelWriterSheetBuilder buildExcelWriterSheetBuilder(Integer sheetNo,
@@ -135,7 +123,8 @@ public class ExcelUtils {
             .registerWriteHandler(new SelectSheetWriteHandler(head)) // 基于固定 sheet 实现下拉框
             .registerConverter(new LongStringConverter()) // 避免 Long 类型丢失精度
             .registerConverter(DynamicTimeZoneLocalDateTimeConvert.build(TimeZoneEnum.UTC_ZONE_ID, userZoneId))
-            .registerWriteHandler(new CellMergeStrategy(head, data.size()));
+            .registerWriteHandler(new CellMergeStrategy(head, data.size()))
+            ;
     }
 
 }

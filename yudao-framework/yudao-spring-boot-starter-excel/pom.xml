@@ -69,6 +69,12 @@
             <optional>true</optional> <!-- 设置为 optional，只有在 AreaConvert 的时候使用 -->
         </dependency>
 
+        <!--        &lt;!&ndash;处理图片缓存&ndash;&gt;-->
+        <!--        <dependency>-->
+        <!--            <groupId>com.github.ben-manes.caffeine</groupId>-->
+        <!--            <artifactId>caffeine</artifactId>-->
+        <!--        </dependency>-->
+
         <!-- Test 测试相关 -->
         <dependency>
             <groupId>cn.iocoder.boot</groupId>

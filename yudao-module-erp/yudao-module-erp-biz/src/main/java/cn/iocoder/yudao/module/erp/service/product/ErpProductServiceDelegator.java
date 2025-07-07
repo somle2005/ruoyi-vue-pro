@@ -8,6 +8,7 @@ import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProduc
 import cn.iocoder.yudao.module.erp.controller.admin.product.vo.product.ErpProductSaveReqVO;
 import cn.iocoder.yudao.module.erp.dal.dataobject.product.ErpProductDO;
 import cn.iocoder.yudao.module.erp.service.product.bedsidecabinet.ErpProductBedsideCabinetServiceImpl;
+import cn.iocoder.yudao.module.erp.service.product.bo.ErpImgProductBO;
 import cn.iocoder.yudao.module.erp.service.product.bookcase.ErpProductBookcaseServiceImpl;
 import cn.iocoder.yudao.module.erp.service.product.desktopstoragerack.ErpProductDesktopStorageRackServiceImpl;
 import cn.iocoder.yudao.module.erp.service.product.floatingshelf.ErpProductFloatingShelfServiceImpl;
@@ -29,6 +30,7 @@ import org.springframework.stereotype.Service;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 
 /**
@@ -193,5 +195,18 @@ public class ErpProductServiceDelegator implements ErpProductService {
         ErpProductService service = getDefaultService();
         return service.getProductCountByUnitId(unitId);
     }
+
+    @Override
+    public void preloadProductImages(Set<Long> productIds) {
+        ErpProductService service = getDefaultService();
+        service.preloadProductImages(productIds);
+    }
+
+    @Override
+    public ErpImgProductBO getProductImgById(Long productId) {
+        ErpProductService service = getDefaultService();
+        return service.getProductImgById(productId);
+    }
+
 
 }
