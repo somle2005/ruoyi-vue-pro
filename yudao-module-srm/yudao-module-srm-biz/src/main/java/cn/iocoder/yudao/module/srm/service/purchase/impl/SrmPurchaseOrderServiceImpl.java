@@ -70,6 +70,7 @@ import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -360,19 +361,43 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
     }
 
 
-    //计算采购订单的总价、税费、折扣价格,|计算总数量|计算总商品价格|计算总税费|计算折扣价格
-    private void calculateTotalPrice(SrmPurchaseOrderDO purchaseOrder, List<SrmPurchaseOrderItemDO> purchaseOrderItems) {
-        purchaseOrder.setTotalCount(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getQty, BigDecimal::add));
-        purchaseOrder.setTotalProductPrice(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseOrder.setTotalGrossPrice(getSumValue(purchaseOrderItems, SrmPurchaseOrderItemDO::getTax, BigDecimal::add, BigDecimal.ZERO));
-        purchaseOrder.setTotalPrice(purchaseOrder.getTotalProductPrice().add(purchaseOrder.getTotalGrossPrice()));
-        // 计算优惠价格
-        if (purchaseOrder.getDiscountPercent() == null) {
-            purchaseOrder.setDiscountPercent(BigDecimal.ZERO);
-        }
-        purchaseOrder.setDiscountPrice(MoneyUtils.priceMultiplyPercent(purchaseOrder.getTotalPrice(), purchaseOrder.getDiscountPercent()));
-        purchaseOrder.setTotalPrice(purchaseOrder.getTotalPrice().subtract(purchaseOrder.getDiscountPrice()));
+    /**
+     * 计算采购订单的总价、税费、折扣价格等字段
+     * 包含：总数量、商品总价、税额、优惠金额、应付总价
+     */
+    private void calculateTotalPrice(SrmPurchaseOrderDO order, List<SrmPurchaseOrderItemDO> items) {
+        // 1. 计算总采购数量（各行明细的数量求和）
+        BigDecimal totalCount = getSumValue(items, SrmPurchaseOrderItemDO::getQty, BigDecimal::add, BigDecimal.ZERO);
+
+        // 2. 计算总商品金额（未含税）：明细的 totalPrice 求和
+        BigDecimal totalProductPrice = getSumValue(items, SrmPurchaseOrderItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO);
+
+        // 3. 计算总税额（如为增值税、关税等）
+        BigDecimal totalGrossPrice = getSumValue(items, SrmPurchaseOrderItemDO::getTax, BigDecimal::add, BigDecimal.ZERO);
+
+        // 4. 获取或默认折扣率，防止 null 异常（默认 0）
+        BigDecimal discountPercent = order.getDiscountPercent() != null ? order.getDiscountPercent() : BigDecimal.ZERO;
+
+        // 5. 计算折扣金额：只对商品金额 totalProductPrice 计算折扣，不对税打折
+        BigDecimal discountPrice = totalProductPrice.multiply(discountPercent)
+            .setScale(2, RoundingMode.HALF_UP); // 四舍五入保留两位小数
+
+        // 6. 折后商品金额（净价）
+        BigDecimal netProductPrice = totalProductPrice.subtract(discountPrice);
+
+        // 7. 应付总金额 = 折后商品金额 + 税额
+        BigDecimal totalPrice = netProductPrice.add(totalGrossPrice)
+            .setScale(2, RoundingMode.HALF_UP); // 四舍五入保留两位小数
+
+        // 8. 回填字段到订单对象
+        order.setTotalCount(totalCount);                   // 合计数量
+        order.setTotalProductPrice(totalProductPrice);     // 合计商品价（未折扣）
+        order.setTotalGrossPrice(totalGrossPrice);         // 合计税额
+        order.setDiscountPercent(discountPercent);         // 折扣率
+        order.setDiscountPrice(discountPrice);             // 折扣金额
+        order.setTotalPrice(totalPrice);                   // 实际应付金额（商品折后价 + 税）
     }
+
 
     //检查订单No的编号唯一
     private void validatePurchaseOrderExists(String No) {

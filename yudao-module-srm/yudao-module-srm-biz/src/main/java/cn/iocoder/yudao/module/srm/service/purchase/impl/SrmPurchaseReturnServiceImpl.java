@@ -42,6 +42,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -361,20 +362,39 @@ public class SrmPurchaseReturnServiceImpl implements SrmPurchaseReturnService {
         updatePurchaseReturnItemList(vo.getId(), purchaseReturnItems);
     }
 
+    /**
+     * 计算采购退货单的数量、金额、税费、折扣和最终退款金额
+     */
     private void calculateTotalPrice(SrmPurchaseReturnDO purchaseReturn, List<SrmPurchaseReturnItemDO> purchaseReturnItems) {
-        // 1. 计算总数量、总价等
-        purchaseReturn.setTotalCount(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getQty, BigDecimal::add, BigDecimal.ZERO));
-        purchaseReturn.setTotalProductPrice(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseReturn.setTotalGrossPrice(getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getTax, BigDecimal::add, BigDecimal.ZERO));
-        purchaseReturn.setTotalPrice(safe(purchaseReturn.getTotalProductPrice()).add(safe(purchaseReturn.getTotalGrossPrice())));
+        // 1. 计算总数量、商品金额（不含税）、税额
+        BigDecimal totalCount = getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getQty, BigDecimal::add, BigDecimal.ZERO);
+        BigDecimal totalProductPrice = getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO);
+        BigDecimal totalGrossPrice = getSumValue(purchaseReturnItems, SrmPurchaseReturnItemDO::getTax, BigDecimal::add, BigDecimal.ZERO);
 
-        // 2. 计算优惠价格
-        if (purchaseReturn.getDiscountPercent() == null) {
-            purchaseReturn.setDiscountPercent(BigDecimal.ZERO);
-        }
-        purchaseReturn.setDiscountPrice(MoneyUtils.priceMultiplyPercent(purchaseReturn.getTotalPrice(), purchaseReturn.getDiscountPercent()));
-        purchaseReturn.setTotalPrice(safe(purchaseReturn.getTotalPrice()).subtract(safe(purchaseReturn.getDiscountPrice())).add(safe(purchaseReturn.getOtherPrice())));
+        // 2. 获取折扣率（如为 null，默认 0）
+        BigDecimal discountPercent = purchaseReturn.getDiscountPercent() != null ? purchaseReturn.getDiscountPercent() : BigDecimal.ZERO;
+
+        // 3. 计算折扣金额（只对商品金额打折）
+        BigDecimal discountPrice = MoneyUtils.priceMultiplyPercent(totalProductPrice, discountPercent)
+            .setScale(2, RoundingMode.HALF_UP);
+
+        // 4. 计算折后商品价
+        BigDecimal netProductPrice = totalProductPrice.subtract(discountPrice);
+
+        // 5. 加上税额和其他费用，得到最终应退金额
+        BigDecimal otherPrice = safe(purchaseReturn.getOtherPrice()); // 运费等补项
+        BigDecimal totalPrice = netProductPrice.add(totalGrossPrice).add(otherPrice)
+            .setScale(2, RoundingMode.HALF_UP);
+
+        // 6. 设置字段回 purchaseReturn
+        purchaseReturn.setTotalCount(totalCount);               // 退货数量
+        purchaseReturn.setTotalProductPrice(totalProductPrice); // 商品金额
+        purchaseReturn.setTotalGrossPrice(totalGrossPrice);     // 税额
+        purchaseReturn.setDiscountPercent(discountPercent);     // 折扣率
+        purchaseReturn.setDiscountPrice(discountPrice);         // 折扣金额
+        purchaseReturn.setTotalPrice(totalPrice);               // 最终应退金额
     }
+
 
     @Override
     public void updatePurchaseReturnRefundPrice(Long id, BigDecimal refundPrice) {

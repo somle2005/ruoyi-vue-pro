@@ -60,6 +60,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
@@ -354,18 +355,34 @@ public class SrmPurchaseInServiceImpl implements SrmPurchaseInService {
     }
 
     private void calculateTotalPrice(SrmPurchaseInDO purchaseIn, List<SrmPurchaseInItemDO> purchaseInItems) {
-        // 1. 计算总数量、总价等
-        purchaseIn.setTotalCount(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getQty, BigDecimal::add));
-        purchaseIn.setTotalProductPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO));
-        purchaseIn.setTotalGrossPrice(getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTax, BigDecimal::add, BigDecimal.ZERO));
-        purchaseIn.setTotalPrice(purchaseIn.getTotalProductPrice().add(purchaseIn.getTotalGrossPrice()));
+        // 1. 计算总数量、商品金额、税额（基础求和）
+        BigDecimal totalCount = getSumValue(purchaseInItems, SrmPurchaseInItemDO::getQty, BigDecimal::add, BigDecimal.ZERO);
+        BigDecimal totalProductPrice = getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO);
+        BigDecimal totalGrossPrice = getSumValue(purchaseInItems, SrmPurchaseInItemDO::getTax, BigDecimal::add, BigDecimal.ZERO);
 
-        // 2. 计算优惠价格
-        if (purchaseIn.getDiscountPercent() == null) {
-            purchaseIn.setDiscountPercent(BigDecimal.ZERO);
-        }
-        purchaseIn.setDiscountPrice(MoneyUtils.priceMultiplyPercent(purchaseIn.getTotalPrice(), purchaseIn.getDiscountPercent()));
-        purchaseIn.setTotalPrice(safe(purchaseIn.getTotalPrice()).subtract(safe(purchaseIn.getDiscountPrice())).add(safe(purchaseIn.getOtherPrice())));
+        // 2. 获取折扣率（默认 0）
+        BigDecimal discountPercent = purchaseIn.getDiscountPercent() != null ? purchaseIn.getDiscountPercent() : BigDecimal.ZERO;
+
+        // 3. 计算折扣金额（只针对商品价）
+        BigDecimal discountPrice = MoneyUtils.priceMultiplyPercent(totalProductPrice, discountPercent)
+            .setScale(2, RoundingMode.HALF_UP);
+
+        // 4. 计算折后商品价
+        BigDecimal netProductPrice = totalProductPrice.subtract(discountPrice);
+
+        // 5. 计算最终应付金额 = 折后商品价 + 税额 + 其他费用（如运费）
+        BigDecimal otherPrice = safe(purchaseIn.getOtherPrice()); // 防止 null
+        BigDecimal totalPrice = netProductPrice.add(totalGrossPrice).add(otherPrice)
+            .setScale(2, RoundingMode.HALF_UP);
+
+        // 6. 设置回 purchaseIn 对象
+        purchaseIn.setTotalCount(totalCount);               // 入库数量
+        purchaseIn.setTotalProductPrice(totalProductPrice); // 商品金额（未折扣）
+        purchaseIn.setTotalGrossPrice(totalGrossPrice);     // 税额
+        purchaseIn.setDiscountPercent(discountPercent);     // 折扣率
+        purchaseIn.setDiscountPrice(discountPrice);         // 折扣金额
+        purchaseIn.setTotalPrice(totalPrice);               // 应付金额
+
 
         // 3. 计算总重量和总体积
         // 3.1 获取所有产品ID
