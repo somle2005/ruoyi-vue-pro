@@ -45,6 +45,7 @@ import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderItemBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.SrmPurchaseOrderSummaryBO;
 import cn.iocoder.yudao.module.srm.service.purchase.bo.order.word.SrmPurchaseOrderWordBO;
+import cn.iocoder.yudao.module.srm.tool.AmountCalculateUtils;
 import cn.iocoder.yudao.module.srm.tool.TransactionUtils;
 import cn.iocoder.yudao.module.wms.api.warehouse.WmsWarehouseApi;
 import cn.iocoder.yudao.module.wms.api.warehouse.dto.WmsWareHouseUpdateReqDTO;
@@ -70,7 +71,6 @@ import org.springframework.validation.annotation.Validated;
 
 import java.io.*;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -366,36 +366,20 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
      * 包含：总数量、商品总价、税额、优惠金额、应付总价
      */
     private void calculateTotalPrice(SrmPurchaseOrderDO order, List<SrmPurchaseOrderItemDO> items) {
-        // 1. 计算总采购数量（各行明细的数量求和）
-        BigDecimal totalCount = getSumValue(items, SrmPurchaseOrderItemDO::getQty, BigDecimal::add, BigDecimal.ZERO);
-
-        // 2. 计算总商品金额（未含税）：明细的 totalPrice 求和
-        BigDecimal totalProductPrice = getSumValue(items, SrmPurchaseOrderItemDO::getTotalPrice, BigDecimal::add, BigDecimal.ZERO);
-
-        // 3. 计算总税额（如为增值税、关税等）
-        BigDecimal totalGrossPrice = getSumValue(items, SrmPurchaseOrderItemDO::getTax, BigDecimal::add, BigDecimal.ZERO);
-
-        // 4. 获取或默认折扣率，防止 null 异常（默认 0）
-        BigDecimal discountPercent = order.getDiscountPercent() != null ? order.getDiscountPercent() : BigDecimal.ZERO;
-
-        // 5. 计算折扣金额：只对商品金额 totalProductPrice 计算折扣，不对税打折
-        BigDecimal discountPrice = totalProductPrice.multiply(discountPercent)
-            .setScale(2, RoundingMode.HALF_UP); // 四舍五入保留两位小数
-
-        // 6. 折后商品金额（净价）
-        BigDecimal netProductPrice = totalProductPrice.subtract(discountPrice);
-
-        // 7. 应付总金额 = 折后商品金额 + 税额
-        BigDecimal totalPrice = netProductPrice.add(totalGrossPrice)
-            .setScale(2, RoundingMode.HALF_UP); // 四舍五入保留两位小数
-
-        // 8. 回填字段到订单对象
-        order.setTotalCount(totalCount);                   // 合计数量
-        order.setTotalProductPrice(totalProductPrice);     // 合计商品价（未折扣）
-        order.setTotalGrossPrice(totalGrossPrice);         // 合计税额
-        order.setDiscountPercent(discountPercent);         // 折扣率
-        order.setDiscountPrice(discountPrice);             // 折扣金额
-        order.setTotalPrice(totalPrice);                   // 实际应付金额（商品折后价 + 税）
+        AmountCalculateUtils.Result result = AmountCalculateUtils.calculate(
+            items,
+            item -> ((SrmPurchaseOrderItemDO) item).getQty(),
+            item -> ((SrmPurchaseOrderItemDO) item).getTotalPrice(),
+            item -> ((SrmPurchaseOrderItemDO) item).getTax(),
+            order.getDiscountPercent(),
+            null // 采购订单没有otherPrice
+        );
+        order.setTotalCount(result.totalCount);
+        order.setTotalProductPrice(result.totalProductPrice);
+        order.setTotalGrossPrice(result.totalGrossPrice);
+        order.setDiscountPercent(result.discountPercent);
+        order.setDiscountPrice(result.discountPrice);
+        order.setTotalPrice(result.totalPrice);
     }
 
 
