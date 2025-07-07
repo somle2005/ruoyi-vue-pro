@@ -9,14 +9,13 @@ import com.somle.eccang.api.wms.EccangWMSApi;
 import com.somle.eccang.model.EccangResponse;
 import com.somle.eccang.model.EccangWMSResponse;
 import com.somle.eccang.model.reps.wms.EccangWMSOrderListRespVO;
-import com.somle.eccang.model.req.wms.order.EccangWMSCancelOrderReqVO;
-import com.somle.eccang.model.req.wms.order.EccangWMSCheckAddressReqVO;
-import com.somle.eccang.model.req.wms.order.EccangWMSCreateOrderReqVO;
-import com.somle.eccang.model.req.wms.order.EccangWMSOrderListReqVo;
+import com.somle.eccang.model.req.wms.order.*;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
 
+@Slf4j
 public class EccangWMSOrderApi extends EccangWMSApi {
 
 
@@ -56,13 +55,34 @@ public class EccangWMSOrderApi extends EccangWMSApi {
     //创建订单
     public void createOrder(EccangWMSCreateOrderReqVO eccangWMSCreateOrderReqVO) {
         String endpoint = "createOrder";
-        getResponse(JsonUtilsX.toJSONObject(eccangWMSCreateOrderReqVO), endpoint);
+        EccangWMSResponse wmsResponse = getResponse(JsonUtilsX.toJSONObject(eccangWMSCreateOrderReqVO), endpoint);
+        if (wmsResponse.getAsk().equals("Success")) {
+            log.info("创建订单成功{}", eccangWMSCreateOrderReqVO);
+        } else {
+            log.error("创建订单失败{}",eccangWMSCreateOrderReqVO);
+        }
+    }
+
+    //修改订单
+    public void modifyOrder(EccangWMSModifyOrderReqVO eccangWMSModifyOrderReqVO) {
+        String endpoint = "modifyOrder";
+        EccangWMSResponse wmsResponse = getResponse(JsonUtilsX.toJSONObject(eccangWMSModifyOrderReqVO), endpoint);
+        if (wmsResponse.getAsk().equals("Success")) {
+            log.info("修改订单成功{}", eccangWMSModifyOrderReqVO);
+        } else {
+            log.error("修改订单失败{}",eccangWMSModifyOrderReqVO);
+        }
     }
 
 
     //取消订单
     public void cancelOrder(EccangWMSCancelOrderReqVO eccangWMSCancelOrderReqVO) {
         String endpoint = "cancelOrder";
-        getResponse(JsonUtilsX.toJSONObject(eccangWMSCancelOrderReqVO), endpoint);
+        EccangWMSResponse wmsResponse = getResponse(JsonUtilsX.toJSONObject(eccangWMSCancelOrderReqVO), endpoint);
+        if (wmsResponse.getAsk().equals("Success")) {
+            log.info("取消订单成功{}", eccangWMSCancelOrderReqVO);
+        } else {
+            log.error("取消订单失败{}",eccangWMSCancelOrderReqVO);
+        }
     }
 }

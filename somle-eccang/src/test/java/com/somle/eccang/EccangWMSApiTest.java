@@ -9,6 +9,7 @@ import com.somle.eccang.model.req.EccangProductInventoryReqVo;
 import com.somle.eccang.model.req.wms.order.EccangWMSCheckAddressReqVO;
 import com.somle.eccang.model.req.wms.order.EccangWMSOrderListReqVo;
 import com.somle.eccang.model.req.wms.product.EccangWMSProductListReqVo;
+import com.somle.eccang.model.req.wms.product.EccangWMSProductReqVo;
 import jakarta.annotation.Resource;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
@@ -69,4 +70,54 @@ public class EccangWMSApiTest extends SomleBaseDbUnitTest {
             .build();
         eccangWMSOrderApi.checkAddress(vo);
     }
+
+    @Test
+    public void test5() {
+        EccangWMSProductReqVo vo = EccangWMSProductReqVo.builder()
+            .productSku("Test-SKU")
+            .referenceNo("SKU-2021-05-05-01")
+            .productTitle("测试")
+            .productTitleEn("测试")
+            .productLength(10.0)
+            .productWeight(0.1)
+            .productWidth(10.0)
+            .productHeight(10.0)
+            .productDeclaredValue(0.1)
+            .productDeclaredName("测试")
+            .productDeclaredNameZh("测试")
+            .build();
+        eccangProductListApi.createProduct(vo);
+    }
+
+
+    @Test
+    public void test6() {
+        EccangWMSProductReqVo vo = EccangWMSProductReqVo.builder()
+            .productSku("Test-SKU")
+            .referenceNo("SKU-2021-05-05-01")
+            .productTitle("测试1111111111111111111111111")
+            .productTitleEn("测试")
+            .productLength(10.0)
+            .productWeight(0.1)
+            .productWidth(10.0)
+            .productHeight(10.0)
+            .productDeclaredValue(0.1)
+            .productDeclaredName("测试")
+            .productDeclaredNameZh("测试")
+            .build();
+        eccangProductListApi.modifyProduct(vo);
+    }
+
+//    @Test
+//    public void test7() {
+//        EccangWMSCreateOrderReqVO vo = EccangWMSCreateOrderReqVO.builder()
+//            .referenceNo(
+//                "123456"
+//            )
+//
+//            .orderDate("2021-05-05")
+//            .orderTime("2021-05-05 09:00:00")
+//            .orderTotalAmount(0.1)
+//            .orderTotalWeight
+//    }
 }

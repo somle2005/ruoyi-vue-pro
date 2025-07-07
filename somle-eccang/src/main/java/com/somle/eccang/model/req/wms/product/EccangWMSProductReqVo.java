@@ -4,10 +4,9 @@ import com.fasterxml.jackson.databind.PropertyNamingStrategies;
 import com.fasterxml.jackson.databind.annotation.JsonNaming;
 import lombok.Builder;
 import lombok.Data;
-import lombok.NoArgsConstructor;
 
-@Data
 @Builder
+@Data
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
 public class EccangWMSProductReqVo {
 
@@ -68,7 +67,7 @@ public class EccangWMSProductReqVo {
 
     // 嵌套对象：客户图片信息
     @Data
-    @NoArgsConstructor
+    @Builder
     @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy.class)
     public static class CustomerImg {
         private String fileType;           // 文件类型（如img）
