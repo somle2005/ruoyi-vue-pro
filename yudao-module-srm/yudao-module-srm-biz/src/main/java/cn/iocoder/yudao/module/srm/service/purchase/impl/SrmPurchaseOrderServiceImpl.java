@@ -553,14 +553,14 @@ public class SrmPurchaseOrderServiceImpl implements SrmPurchaseOrderService {
         String businessName = CollUtil.join(orders.stream().map(SrmPurchaseOrderDO::getCode).collect(Collectors.toList()), ",");
         LogRecordContext.putVariable("businessName", businessName);
 
-        // 1. 校验不处于已审批
+        // 1. 校验
         List<SrmPurchaseOrderDO> purchaseOrders = purchaseOrderMapper.selectByIds(ids);
         if (CollUtil.isEmpty(purchaseOrders)) {
             return;
         }
         purchaseOrders.forEach(orderDO -> {
-            //已审核 -> e
-            if (SrmAuditStatus.APPROVED.getCode().equals(orderDO.getAuditStatus())) {
+            // 非法状态，禁止删除
+            if (!SrmAuditStatus.DRAFT.getCode().equals(orderDO.getAuditStatus()) && !SrmAuditStatus.REJECTED.getCode().equals(orderDO.getAuditStatus())) {
                 throw exception(PURCHASE_ORDER_DELETE_FAIL_APPROVE, orderDO.getCode());
             }
             //存在对应的采购入库项->异常
