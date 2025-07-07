@@ -7,14 +7,18 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.somle.eccang.api.wms.EccangWMSApi;
 import com.somle.eccang.model.EccangResponse;
+import com.somle.eccang.model.EccangWMSResponse;
 import com.somle.eccang.model.reps.wms.EccangWMSProductListRespVO;
 import com.somle.eccang.model.req.wms.product.EccangWMSProductListReqVo;
 import com.somle.eccang.model.req.wms.product.EccangWMSProductReqVo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
 
+
+@Slf4j
 @Component
 public class EccangWMSProductApi extends EccangWMSApi {
 
@@ -44,13 +48,23 @@ public class EccangWMSProductApi extends EccangWMSApi {
     //创建产品
     public void createProduct(EccangWMSProductReqVo eccangWMSProductReqVo) {
         String endpoint = "createProduct";
-        getResponse(JsonUtilsX.toJSONObject(eccangWMSProductReqVo), endpoint);
+        EccangWMSResponse wmsResponse = getResponse(JsonUtilsX.toJSONObject(eccangWMSProductReqVo), endpoint);
+        if (wmsResponse.getAsk().equals("Success")) {
+            log.info("创建产品成功{}", eccangWMSProductReqVo);
+        } else {
+            log.error("创建产品失败{}",eccangWMSProductReqVo);
+        }
     }
 
     //修改产品
     public void modifyProduct(EccangWMSProductReqVo eccangWMSProductReqVo) {
         String endpoint = "modifyProduct";
-        getResponse(JsonUtilsX.toJSONObject(eccangWMSProductReqVo), endpoint);
+        EccangWMSResponse wmsResponse = getResponse(JsonUtilsX.toJSONObject(eccangWMSProductReqVo), endpoint);
+        if (wmsResponse.getAsk().equals("Success")) {
+            log.info("修改产品成功{}", eccangWMSProductReqVo);
+        } else {
+            log.error("修改产品失败{}",eccangWMSProductReqVo);
+        }
     }
 
 

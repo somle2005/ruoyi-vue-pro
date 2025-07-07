@@ -6,6 +6,7 @@ import com.somle.amazon.controller.vo.AmazonSpMarketplaceVO;
 import com.somle.amazon.controller.vo.AmazonSpReportReqVO;
 import com.somle.amazon.controller.vo.AmazonSpReportRespVO;
 import jakarta.annotation.Resource;
+import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -101,6 +102,22 @@ class AmazonSpServiceTest extends SomleBaseSpringTest {
            List<AmazonSpReportRespVO> amazonSpReportRespVOS = client.listReports(vo);
            log.info("{}", amazonSpReportRespVOS);
        });
+    }
+
+    @Test
+    @SneakyThrows
+    void getReport2() {
+        spService.clients.forEach(client -> {
+            var vo = AmazonSpReportReqVO.builder()
+                .reportTypes(List.of("GET_FBA_FULFILLMENT_INBOUND_NONCOMPLIANCE_DATA"))
+//            .processingStatuses(List.of(AmazonSpReportReqVO.ProcessingStatuses.DONE))
+                .createdSince(LocalDateTime.of(2025, 4, 10, 0, 0))
+                .createdUntil(LocalDateTime.of(2025, 7, 7, 23, 59))
+                .pageSize(20)
+                .build();
+
+            client.listReports(vo);
+        });
     }
 
 }

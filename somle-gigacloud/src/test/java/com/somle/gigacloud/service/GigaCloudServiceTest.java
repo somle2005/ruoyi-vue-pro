@@ -1,12 +1,14 @@
 package com.somle.gigacloud.service;
 
 import cn.iocoder.yudao.framework.test.core.ut.SomleBaseDbUnitTest;
+import com.somle.gigacloud.model.req.GigaCloudBatchInventoryQueryReq;
 import jakarta.annotation.Resource;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.Rollback;
 
 @Disabled
 @Slf4j
@@ -18,22 +20,29 @@ class GigaCloudServiceTest extends SomleBaseDbUnitTest {
 
     @Test
     @SneakyThrows
+    @Rollback(value = false)
     void test() {
         log.info("开始测试");
-        gigaCloudService.clients.forEach(client -> {
-            log.info("开始处理：{}", client.getAccount().getUserName());
-            client.getToken();
-        });
+        gigaCloudService.refreshAuths();
 
     }
 
     @Test
     @SneakyThrows
     void test2() {
-        String token = "eyJhbGciOiJIUzUxMiJ9.eyJsb2dpbl91c2VyX2tleSI6ImU3ODFkZmNiLTI3MmUtNDM3NC04MTJjLTg4NzdhYWE5NTI4ZiJ9.MQPTfYW8Q1gl-KlwuesuQvFcE0nj1VJyc1ZJ64-qV7tImAq-QI7pws23s8vvsPoJchB7LQR9GLWBajtRJqJZng";
-        String sk = "MIICdgIBADANBgkqhkiG9w";
-        String time = "2024-01-20 13:59:59";
-        String aa = token + time + sk;
+        gigaCloudService.clients.forEach(
+            client -> {
+                GigaCloudBatchInventoryQueryReq req = GigaCloudBatchInventoryQueryReq.builder()
+                    .country("2")
+                    .customerCode("D303")
+                    .pageNum(1)
+                    .pageSize(100)
+                    .showZeroData(false)
+                    .build();
+
+                client.getAllBatchInventoryQuery();
+            }
+        );
     }
 
 
